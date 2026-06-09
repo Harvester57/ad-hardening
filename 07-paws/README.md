@@ -15,3 +15,7 @@ This directory contains the physical isolation policies and operating system sec
 
 4. **[Hardware Virtualization and DMA Protection](enable-hardware-virtualization-and-dma-protection.md)**
    Enables hardware CPU virtualization, IOMMU/DMA protection at the firmware level, and TPM 2.0 to provide the necessary platform integrity foundation for Virtualization-Based Security (VBS).
+
+5. **[Disable Windows Platform Binary Table (WPBT)](disable-wpbt.md)**
+   Disables execution of binaries supplied by the Windows Platform Binary Table (WPBT) ACPI firmware table to mitigate boot-level security bypasses.
+

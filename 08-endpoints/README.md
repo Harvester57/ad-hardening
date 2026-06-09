@@ -47,3 +47,7 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 14. **[Hardware Virtualization and DMA Protection](enable-hardware-virtualization-and-dma-protection.md)**
     Enables CPU virtualization (VT-x/AMD-V) and IOMMU (VT-d/AMD-Vi) to provide the hardware-rooted platform integrity required for VBS and Kernel DMA protection.
+
+15. **[Disable Windows Platform Binary Table (WPBT)](disable-wpbt.md)**
+    Disables execution of binaries supplied by the Windows Platform Binary Table (WPBT) ACPI firmware table to mitigate boot-level security bypasses.
+
