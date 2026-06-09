@@ -20,6 +20,8 @@ Securing the firmware level ensures:
 2. **Native UEFI Boot**: Disabling the Compatibility Support Module (CSM) or Legacy BIOS options forces native UEFI mode, which is mandatory for activating UEFI Secure Boot and Virtualization-Based Security (VBS).
 3. **Restricted Boot Paths**: Restricting the boot order to the primary internal storage device prevents users or attackers from booting unauthorized operating systems or diagnostic tools from USB media or untrusted local networks.
 4. **BIOS Rollback Prevention**: Enforcing firmware update signature validation and blocking BIOS rollbacks mitigates the risk of downgrade attacks targeting known firmware vulnerabilities.
+5. **Virtualization-Based Security Foundation**: Enabling CPU Virtualization Extensions (Intel VT-x / AMD-V) and IOMMU (Intel VT-d / AMD-Vi) at the firmware level establishes the mandatory hardware isolation required by the Windows Hypervisor to run VBS, Credential Guard, and Kernel DMA Protection.
+6. **Platform Measurement Integrity**: Disabling Fast Boot forces the firmware to execute full hardware initialization, device checks, and complete TPM self-tests/PCR measurements at every boot, ensuring platform integrity and correct state validation.
 
 ---
 
@@ -43,12 +45,17 @@ UEFI parameters can be configured manually on individual systems or programmatic
 3. Locate the **Boot** or **System Configuration** tab:
    * Set the **Boot Mode** to **UEFI Only** or **Native UEFI**.
    * Set **CSM (Compatibility Support Module)** or **Legacy Support** to **Disabled**.
+   * Locate **Fast Boot** or **Quick Boot** and set it to **Disabled** (forcing complete POST diagnostics and full TPM initialization on every boot).
    * Locate the **Boot Order / Priority**:
      * Set the primary internal storage drive (Windows Boot Manager) as the first and only boot option.
      * Disable secondary boot sources (USB, CD/DVD, PXE Network Boot) or require the UEFI administrator password for boot override menus (typically accessed via F12).
-4. Locate the **Advanced** tab:
-   * Set **BIOS Flash Protection** or **Firmware Rollback Protection** to **Enabled**.
-5. Save settings and exit the utility.
+4. Navigate to the **Advanced**, **CPU Configuration**, or **Security Chip** section:
+   * Locate **Intel Virtualization Technology (VT-x)** or **AMD-V** and set it to **Enabled**.
+   * Locate **Intel VT for Directed I/O (VT-d)** or **AMD IOMMU** and set it to **Enabled** (required for IOMMU/Kernel DMA Protection).
+   * Locate **TPM 2.0 Device** (or **Security Chip / Intel PTT / AMD fTPM**) and set it to **Enabled** or **Active** (with SHA-256 PCR bank).
+5. Navigate to the **Advanced** or **Firmware Update** section:
+   * Locate the option for **BIOS Flash Protection** or **Firmware Rollback Protection** and set it to **Enabled** or **Block Downgrades**.
+6. Save settings and exit the utility.
 
 #### 2. Programmatic Configuration (Enterprise Deployment)
 Use OEM utilities to deploy the UEFI password and boot configuration:
@@ -58,12 +65,18 @@ cctk.exe --setuppwd=YourSecureEnterpriseBIOSPassword
 cctk.exe --bootorder=hdd
 cctk.exe --legacydevorder=
 cctk.exe --embuefipxe=disable
+cctk.exe --virtualization=enable
+cctk.exe --vt-d=enable
+cctk.exe --fastboot=disable
 ```
 * **HP Systems**: Use HP Client Management Script Library (CMSL) in PowerShell:
 ```powershell
 Set-HPBiosSettingValue -Setting "Set BIOS Administrator Password" -Value "YourSecureEnterpriseBIOSPassword"
 Set-HPBiosSettingValue -Setting "Configure Legacy Boot" -Value "Disable"
 Set-HPBiosSettingValue -Setting "Boot Order" -Value "Hard Drive"
+Set-HPBiosSettingValue -Setting "Virtualization Technology (VTx)" -Value "Enable"
+Set-HPBiosSettingValue -Setting "Virtualization Technology Directed I/O (VTd)" -Value "Enable"
+Set-HPBiosSettingValue -Setting "Fast Boot" -Value "Disable"
 ```
 
 ---

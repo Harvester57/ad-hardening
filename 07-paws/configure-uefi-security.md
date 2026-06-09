@@ -20,6 +20,8 @@ Securing the firmware level ensures:
 2. **Boot Integrity**: Disabling the Compatibility Support Module (CSM) or Legacy BIOS options forces native UEFI mode, which is a hard pre-requisite for UEFI Secure Boot and Virtualization-Based Security (VBS).
 3. **Execution Prevention**: Restricting the boot order to the primary internal OS drive prevents booting from unauthorized external media (USB flash drives, external SSDs, or local network PXE servers) containing diagnostics, password reset tools, or malicious secondary operating systems.
 4. **Downgrade Attack Mitigation**: Restricting firmware rollbacks prevents attackers from flashing older, vulnerable firmware versions that might contain known UEFI security bypasses.
+5. **Virtualization-Based Security Foundation**: Enabling CPU Virtualization Extensions (Intel VT-x / AMD-V) and IOMMU (Intel VT-d / AMD-Vi) at the firmware level establishes the mandatory hardware isolation required by the Windows Hypervisor to run VBS, Credential Guard, and Kernel DMA Protection.
+6. **Platform Measurement Integrity**: Disabling Fast Boot forces the firmware to execute full hardware initialization, device checks, and complete TPM self-tests/PCR measurements at every boot, ensuring platform integrity and correct state validation.
 
 ---
 
@@ -43,13 +45,18 @@ UEFI settings must be configured directly within the hardware platform firmware 
 3. Navigate to the **Boot** or **System Configuration** section:
    * Locate the **Boot Mode** setting and set it to **UEFI Only** or **Native UEFI**.
    * Locate **CSM (Compatibility Support Module)** or **Legacy Boot Support** and set it to **Disabled**.
+   * Locate **Fast Boot** or **Quick Boot** and set it to **Disabled** (forcing complete POST diagnostics and full TPM initialization on every boot).
    * Locate **Boot Order** (or **Boot Priority**):
      * Set the primary boot option to the internal system storage drive (typically containing the Windows Boot Manager partition).
      * Disable all other boot options (such as USB, SD Card, Optical Drive, and Network PXE Boot) or set them to disabled in the boot menu.
      * Enable the option to prompt for the UEFI administrator password if a user attempts to access the boot override menu (typically F12 or F8).
-4. Navigate to the **Advanced** or **Firmware Update** section:
+4. Navigate to the **Advanced**, **CPU Configuration**, or **Security Chip** section:
+   * Locate **Intel Virtualization Technology (VT-x)** or **AMD-V** and set it to **Enabled**.
+   * Locate **Intel VT for Directed I/O (VT-d)** or **AMD IOMMU** and set it to **Enabled** (required for IOMMU/Kernel DMA Protection).
+   * Locate **TPM 2.0 Device** (or **Security Chip / Intel PTT / AMD fTPM**) and set it to **Enabled** or **Active** (with SHA-256 PCR bank).
+5. Navigate to the **Advanced** or **Firmware Update** section:
    * Locate the option for **BIOS Flash Protection** or **Firmware Rollback Protection** and set it to **Enabled** or **Block Downgrades**.
-5. Save the configuration and restart the workstation.
+6. Save the configuration and restart the workstation.
 
 ---
 
