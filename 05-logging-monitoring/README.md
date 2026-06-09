@@ -2,7 +2,14 @@
 
 This directory contains configuration policies for security log auditing, PowerShell transcription, and host monitoring for detection systems in isolated networks.
 
-## Technical Hardening Controls
+1. **[Configure Advanced Security Audit Policies](configure-advanced-audit-policies.md)**
+   Enforces granular Windows security audit policies (including logons, Kerberos authentication operations, group memberships, policy changes, and process execution) to log critical threat telemetry.
 
-* **[Logging, Monitoring and SIEM Baseline](logging-siem.md)**
-  Detailed requirement to configure Advanced Security Audit Policies (logons, object access, directory service changes), enable process command-line auditing, configure PowerShell Script Block Logging and transcription, deploy Sysmon logs, and configure Winlogbeat/Wazuh forwarders for offline SIEM ingestion.
+2. **[Configure PowerShell and Command-Line Auditing](configure-powershell-and-command-line-auditing.md)**
+   Enforces process command-line argument auditing and verbose PowerShell logging (Script Block, Module, and Transcription logging) with a write-only, hardened transcript folder.
+
+3. **[Deploy and Harden Microsoft Sysmon](deploy-and-harden-sysmon.md)**
+   Deploys Sysmon with a hardened telemetry configuration and configures aggressive service recovery settings to auto-restart the service if stopped by adversaries.
+
+4. **[Configure Secure SIEM Log Shipping](configure-siem-log-shipping.md)**
+   Configures secured log shipping agents (Winlogbeat and Wazuh) utilizing TLS encryption, authenticated CA checks, local configuration file ACL protections, and buffer queue size limits to prevent local disk space exhaustion.
