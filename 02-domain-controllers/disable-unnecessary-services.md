@@ -94,6 +94,45 @@ These services are disabled by default. Administrators must ensure they are not 
 | `UevAgentService` | User Experience Virtualization Service | Synchronizes application settings; disabled by default. |
 | `WSearch` | Windows Search | Indexes search queries; disabled by default on Windows Server. |
 
+### Critical Services That Must Not Be Disabled (Do Not Disable)
+The following services are essential for system stability, network roles, administration, or virtualization integration, and must not be disabled.
+
+> [!WARNING]
+> Disabling any of the services listed below will severely degrade or completely break core system functionality, remote management access, or hypervisor integrations. Under no circumstances should these services be disabled.
+
+| Service Name | Display Name | Purpose & Impact of Disabling |
+| :--- | :--- | :--- |
+| `AppReadiness` | App Readiness | Gets apps ready for use the first time a user signs in. |
+| `HvHost` | HV Host Service | Hyper-V Host interface; required if running inside virtualized environments. |
+| `vmickvpexchange` | Hyper-V Data Exchange Service | Exchanges key-value pairs between VM and physical host. |
+| `vmicguestinterface` | Hyper-V Guest Service Interface | Guest interface control for Hyper-V integration. |
+| `vmicshutdown` | Hyper-V Guest Shutdown Service | Enables clean OS shutdown from hypervisor console. |
+| `vmicheartbeat` | Hyper-V Heartbeat Service | Monitored by hypervisor to check VM health status. |
+| `vmicvmsession` | Hyper-V PowerShell Direct Service | Allows remote PowerShell administration of VM directly from host. |
+| `vmicrdv` | Hyper-V Remote Desktop Virtualization Service | Integrates remote desktop session rendering with hypervisor. |
+| `vmictimesync` | Hyper-V Time Synchronization Service | Synchronizes virtual machine time with hypervisor clock. |
+| `vmicvss` | Hyper-V Volume Shadow Copy Requestor | Coordinates VSS backup actions with host hypervisor. |
+| `MSiSCSI` | Microsoft iSCSI Initiator Service | Connects to remote iSCSI targets; required for network storage. |
+| `smphost` | Microsoft Storage Spaces SMP | Storage management services provider. |
+| `SessionEnv` | Remote Desktop Configuration | Coordinates configuration and properties of RDP sessions. |
+| `TermService` | Remote Desktop Services | Enables remote logon using Remote Desktop Protocol (RDP). |
+| `UmRdpService` | Remote Desktop Services UserMode Port Redirector | Redirects client printers/drives inside RDP sessions. |
+| `RemoteRegistry` | Remote Registry | Allows remote registry modification; required for remote administrative tools. |
+| `SstpSvc` | Secure Socket Tunneling Protocol Service | Enables SSTP-based VPN connections. |
+| `SamSs` | Security Accounts Manager | Core security authority that manages local security account info. |
+| `LanmanServer` | Server | Enforces file/print sharing interfaces; required for AD replication and SYSVOL access. |
+| `SystemEventsBroker` | System Events Broker | Orchestrates background execution of system events. |
+| `TapiSrv` | Telephony | Manages telephony resources; do not disable. |
+| `Themes` | Themes | Provides desktop styling; required on Desktop Experience configurations. |
+| `tiledatamodelsvc` | Tile Data model server | Manages Start Menu tile layout database. |
+| `TimeBrokerSvc` | Time Broker | Manages background tasks triggered by time/timers. |
+| `TabletInputService` | Touch Keyboard and Handwriting Panel Service | Manages touch keyboard and drawing panels. |
+| `UsoSvc` | Update Orchestrator Service for Windows Update | Coordinates downloading and installation of Windows updates. |
+| `WerSvc` | Windows Error Reporting Service | Reports software faults and diagnostic data to Microsoft. |
+| `Wecsvc` | Windows Event Collector | Manages event subscriptions; required for log shipping/event collection. |
+| `WinRM` | Windows Remote Management (WS-Management) | Implements WS-Management protocol; required for remote PowerShell and management. |
+| `WinHttpAutoProxySvc` | WinHTTP Web Proxy Auto-Discovery Service | Handles WPAD proxy discovery. |
+
 ---
 
 ## Legacy Impact & Compatibility
