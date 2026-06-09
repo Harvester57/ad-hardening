@@ -41,3 +41,9 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 12. **[Enable BitLocker and Network Unlock](enable-bitlocker.md)**
     Enforces full disk encryption with TPM and enables secure Network Unlock capabilities for standard client workstations.
+
+13. **[UEFI Firmware Security Hardening](configure-uefi-security.md)**
+    Enforces password protection, disables Compatibility Support Module (CSM)/Legacy Boot, locks boot order, and configures secure firmware update policies.
+
+14. **[Hardware Virtualization and DMA Protection](enable-hardware-virtualization-and-dma-protection.md)**
+    Enables CPU virtualization (VT-x/AMD-V) and IOMMU (VT-d/AMD-Vi) to provide the hardware-rooted platform integrity required for VBS and Kernel DMA protection.
