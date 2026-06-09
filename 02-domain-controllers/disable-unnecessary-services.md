@@ -17,17 +17,88 @@
 ## Rationale
 Domain Controllers are the core authority within an Active Directory forest (Tier 0). Minimizing the running services on these critical systems reduces the overall attack surface and limits potential targets for local privilege escalation, remote exploit execution, or credential extraction.
 
-Unnecessary services, particularly those meant for client features or consumer hardware support, introduce vulnerabilities and complexity. For example:
-1. **Xbox Live Services**: Services such as Xbox Live Auth Manager (`XblAuthManager`) and Xbox Live Game Save (`XblGameSave`) are installed on Windows Server installations containing the Desktop Experience. These services provide gaming functions that are entirely irrelevant to server infrastructure and represent unnecessary exposure.
-2. **ActiveX Installer**: The ActiveX Installer service (`AxInstSV`) validates ActiveX controls. A Domain Controller should never browse websites or execute ActiveX controls, making this service a potential risk.
-3. **Consumer & Hardware Integration Services**: Services like Bluetooth Support (`bthserv`), Geolocation (`lfsvc`), Phone Service (`PhoneSvc`), Sensor Services (`SensorService`, `SensorDataService`, `SensrSvc`), and Windows Camera Frame Server (`FrameServer`) should never run on a Domain Controller.
+Disabling non-essential services aligns with the principle of least functionality. In accordance with the Microsoft security guidelines for system services, services can be categorized by whether they should be disabled, are OK to disable if unused, or are already disabled by default.
 
-Disabling these non-essential services aligns with the principle of least functionality.
+---
+
+## Technical Services Baselines
+
+The following tables list default services in Windows Server and their hardening recommendations.
+
+### Services That Should Be Disabled
+These services present an unnecessary security risk and should be disabled on all Domain Controllers.
+
+| Service Name | Display Name | Purpose & Security Implications |
+| :--- | :--- | :--- |
+| `XblAuthManager` | Xbox Live Auth Manager | Provides gaming authentication functions; irrelevant to server infrastructure. |
+| `XblGameSave` | Xbox Live Game Save | Provides gaming save functions; irrelevant to server infrastructure. |
+
+### Additional Services That Can Be Disabled (OK to Disable)
+These services are installed by default but are not required for Domain Controller functionality. They should be disabled to minimize the attack surface.
+
+| Service Name | Display Name | Purpose & Security Implications |
+| :--- | :--- | :--- |
+| `AxInstSV` | ActiveX Installer (AxInstSV) | Validates ActiveX controls. Domain Controllers should never run ActiveX controls. |
+| `bthserv` | Bluetooth Support Service | Supports Bluetooth devices; unnecessary on server systems. |
+| `CDPUserSvc` | CDPUserSvc | Connected Devices Platform User Service; syncs user activity data across devices. |
+| `PimIndexMaintenanceSvc` | Contact Data | Manages contact data indexing; unnecessary on directory servers. |
+| `dmwappushservice` | dmwappushsvc | WAP Push Message Routing Service; used for diagnostics and telemetry. |
+| `MapsBroker` | Downloaded Maps Manager | Enables access to downloaded maps; irrelevant to server roles. |
+| `lfsvc` | Geolocation Service | Monitors system location; represents a privacy and security risk. |
+| `SharedAccess` | Internet Connection Sharing (ICS) | Provides network address translation; represents a networking security risk. |
+| `lltdsvc` | Link-Layer Topology Discovery Mapper | Discovers network topology; unnecessary exposure of server network location. |
+| `wlidsvc` | Microsoft Account Sign-in Assistant | Enables user signing with Microsoft Accounts; unnecessary on directory servers. |
+| `NgcSvc` | Microsoft Passport | Part of Windows Hello for Business; not needed if Windows Hello is not deployed. |
+| `NgcCtnrSvc` | Microsoft Passport Container | Part of Windows Hello for Business container management. |
+| `NcbService` | Network Connection Broker | Broker for background network connections for modern apps. |
+| `PhoneSvc` | Phone Service | Manages telephony state; irrelevant to server infrastructure. |
+| `PrintNotify` | Printer Extensions and Notifications | Handles printer notification dialogs; unnecessary on servers. |
+| `PcaSvc` | Program Compatibility Assistant Service | Detects application compatibility issues; unnecessary on highly controlled DCs. |
+| `QWAVE` | Quality Windows Audio Video Experience | Multimedia streaming quality service; irrelevant to server systems. |
+| `RmSvc` | Radio Management Service | Controls radio transmitters (cellular, Wi-Fi); irrelevant to servers. |
+| `SensorDataService` | Sensor Data Service | Handles data from system sensors; irrelevant to servers. |
+| `SensrSvc` | Sensor Monitoring Service | Monitors system sensors; irrelevant to servers. |
+| `SensorService` | Sensor Service | Core sensor service; irrelevant to servers. |
+| `ShellHWDetection` | Shell Hardware Detection | Provides notifications for AutoPlay hardware events; can be disabled. |
+| `ScDeviceEnum` | Smart Card Device Enumeration Service | Detects smart cards; can be disabled if smart cards are not used for authentication. |
+| `SSDPSRV` | SSDP Discovery | Discovers UPnP devices; introduces broadcast name discovery vulnerabilities. |
+| `WiaRpc` | Still Image Acquisition Events | Still image capturing events; irrelevant to servers. |
+| `OneSyncSvc` | Sync Host | Synchronizes mail, contacts, calendar; irrelevant to servers. |
+| `upnphost` | UPnP Device Host | Allows hosting of UPnP devices; represents unnecessary network exposure. |
+| `UserDataSvc` | User Data Access | Manages user structured data; irrelevant to servers. |
+| `UnistoreSvc` | User Data Storage | Stores user data; irrelevant to servers. |
+| `WalletService` | WalletService | Used by Wallet application; irrelevant to servers. |
+| `Audiosrv` | Windows Audio | Manages system audio; servers do not require audio capabilities. |
+| `AudioEndpointBuilder` | Windows Audio Endpoint Builder | Manages audio endpoints; servers do not require audio capabilities. |
+| `FrameServer` | Windows Camera Frame Server | Enables access to system camera feeds; irrelevant to servers. |
+| `stisvc` | Windows Image Acquisition (WIA) | Image acquisition from scanners/cameras; irrelevant to servers. |
+| `wisvc` | Windows Insider Service | Handles Windows Insider settings; unnecessary on production servers. |
+| `icssvc` | Windows Mobile Hotspot Service | Shares internet connection as hotspot; introduces wireless routing security risk. |
+| `WpnService` | Windows Push Notifications System Service | System service for push notifications; irrelevant to servers. |
+| `WpnUserService` | Windows Push Notifications User Service | User service for push notifications; irrelevant to servers. |
+
+*Note: The Print Spooler (`Spooler`) service is also listed as OK to disable on non-print servers, but it is managed separately as a High-priority control for Domain Controllers.*
+
+### Default Services Already Disabled in Windows Server 2016+
+These services are disabled by default. Administrators must ensure they are not manually re-enabled without verification.
+
+| Service Name | Display Name | Purpose & Security Implications |
+| :--- | :--- | :--- |
+| `tzautoupdate` | Auto Time Zone Updater | Automatically sets the system time zone. |
+| `Browser` | Computer Browser | Maintains network host list; legacy and insecure. |
+| `AppVClient` | Microsoft App-V Client | Virtualizes applications; disabled by default unless deployed. |
+| `NetTcpPortSharing` | Net.Tcp Port Sharing Service | Shares net.tcp ports; disabled by default. |
+| `CscService` | Offline Files | Synchronizes offline files cache; disabled by default. |
+| `RemoteAccess` | Routing and Remote Access | Provides routing and VPN services; disabled by default. |
+| `SCardSvr` | Smart Card | Manages smart cards; disabled by default (must be enabled if smart cards are used). |
+| `UevAgentService` | User Experience Virtualization Service | Synchronizes application settings; disabled by default. |
+| `WSearch` | Windows Search | Indexes search queries; disabled by default on Windows Server. |
 
 ---
 
 ## Legacy Impact & Compatibility
 * **No Functional Impact**: Disabling the specified services has no operational impact on Active Directory Domain Services, replication, group policy processing, client authentication, or administrative management tools.
+* **Smart Cards**: If your domain relies on Smart Card authentication, the Smart Card Device Enumeration Service (`ScDeviceEnum`) and Smart Card (`SCardSvr`) services must remain enabled.
 * **Desktop Experience Feature Scope**: The specified services are primarily present on Windows Server installations with Desktop Experience. On Windows Server Core installations, most of these services are not installed by default, and attempts to stop or disable them will simply be skipped.
 
 ---
@@ -50,19 +121,7 @@ Because many of these services are not managed through standard GPO Administrati
    * **Value type**: `REG_DWORD`
    * **Value data**: `4`
 
-Apply this registry change for the following service names:
-* `XblAuthManager` (Xbox Live Auth Manager)
-* `XblGameSave` (Xbox Live Game Save)
-* `AxInstSV` (ActiveX Installer)
-* `bthserv` (Bluetooth Support Service)
-* `lfsvc` (Geolocation Service)
-* `MapsBroker` (Downloaded Maps Manager)
-* `PhoneSvc` (Phone Service)
-* `SensorService` (Sensor Service)
-* `SensorDataService` (Sensor Data Service)
-* `SensrSvc` (Sensor Monitoring Service)
-* `FrameServer` (Windows Camera Frame Server)
-* `icssvc` (Windows Mobile Hotspot Service)
+Apply this registry change for the service names listed in the tables above.
 
 ---
 
@@ -81,14 +140,42 @@ $services = @(
     "XblGameSave",
     "AxInstSV",
     "bthserv",
-    "lfsvc",
+    "CDPUserSvc",
+    "PimIndexMaintenanceSvc",
+    "dmwappushservice",
     "MapsBroker",
+    "lfsvc",
+    "SharedAccess",
+    "lltdsvc",
+    "wlidsvc",
+    "NgcSvc",
+    "NgcCtnrSvc",
+    "NcbService",
     "PhoneSvc",
-    "SensorService",
+    "PrintNotify",
+    "PcaSvc",
+    "QWAVE",
+    "RmSvc",
     "SensorDataService",
     "SensrSvc",
+    "SensorService",
+    "ShellHWDetection",
+    "ScDeviceEnum",
+    "SSDPSRV",
+    "WiaRpc",
+    "OneSyncSvc",
+    "upnphost",
+    "UserDataSvc",
+    "UnistoreSvc",
+    "WalletService",
+    "Audiosrv",
+    "AudioEndpointBuilder",
     "FrameServer",
-    "icssvc"
+    "stisvc",
+    "wisvc",
+    "icssvc",
+    "WpnService",
+    "WpnUserService"
 )
 
 foreach ($serviceName in $services) {
@@ -129,14 +216,42 @@ $services = @(
     "XblGameSave",
     "AxInstSV",
     "bthserv",
-    "lfsvc",
+    "CDPUserSvc",
+    "PimIndexMaintenanceSvc",
+    "dmwappushservice",
     "MapsBroker",
+    "lfsvc",
+    "SharedAccess",
+    "lltdsvc",
+    "wlidsvc",
+    "NgcSvc",
+    "NgcCtnrSvc",
+    "NcbService",
     "PhoneSvc",
-    "SensorService",
+    "PrintNotify",
+    "PcaSvc",
+    "QWAVE",
+    "RmSvc",
     "SensorDataService",
     "SensrSvc",
+    "SensorService",
+    "ShellHWDetection",
+    "ScDeviceEnum",
+    "SSDPSRV",
+    "WiaRpc",
+    "OneSyncSvc",
+    "upnphost",
+    "UserDataSvc",
+    "UnistoreSvc",
+    "WalletService",
+    "Audiosrv",
+    "AudioEndpointBuilder",
     "FrameServer",
-    "icssvc"
+    "stisvc",
+    "wisvc",
+    "icssvc",
+    "WpnService",
+    "WpnUserService"
 )
 
 $vulnerableCount = 0
