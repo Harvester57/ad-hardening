@@ -100,38 +100,38 @@ The following services are essential for system stability, network roles, admini
 > [!WARNING]
 > Disabling any of the services listed below will severely degrade or completely break core system functionality, remote management access, or hypervisor integrations. Under no circumstances should these services be disabled.
 
-| Service Name | Display Name | Purpose & Impact of Disabling |
+| Service Name | Display Name | Purpose & Impact of Disabling (Microsoft Rationale) |
 | :--- | :--- | :--- |
-| `AppReadiness` | App Readiness | Gets apps ready for use the first time a user signs in. |
-| `HvHost` | HV Host Service | Hyper-V Host interface; required if running inside virtualized environments. |
-| `vmickvpexchange` | Hyper-V Data Exchange Service | Exchanges key-value pairs between VM and physical host. |
-| `vmicguestinterface` | Hyper-V Guest Service Interface | Guest interface control for Hyper-V integration. |
-| `vmicshutdown` | Hyper-V Guest Shutdown Service | Enables clean OS shutdown from hypervisor console. |
-| `vmicheartbeat` | Hyper-V Heartbeat Service | Monitored by hypervisor to check VM health status. |
-| `vmicvmsession` | Hyper-V PowerShell Direct Service | Allows remote PowerShell administration of VM directly from host. |
-| `vmicrdv` | Hyper-V Remote Desktop Virtualization Service | Integrates remote desktop session rendering with hypervisor. |
-| `vmictimesync` | Hyper-V Time Synchronization Service | Synchronizes virtual machine time with hypervisor clock. |
-| `vmicvss` | Hyper-V Volume Shadow Copy Requestor | Coordinates VSS backup actions with host hypervisor. |
-| `MSiSCSI` | Microsoft iSCSI Initiator Service | Connects to remote iSCSI targets; required for network storage. |
-| `smphost` | Microsoft Storage Spaces SMP | Storage management services provider. |
-| `SessionEnv` | Remote Desktop Configuration | Coordinates configuration and properties of RDP sessions. |
-| `TermService` | Remote Desktop Services | Enables remote logon using Remote Desktop Protocol (RDP). |
-| `UmRdpService` | Remote Desktop Services UserMode Port Redirector | Redirects client printers/drives inside RDP sessions. |
-| `RemoteRegistry` | Remote Registry | Allows remote registry modification; required for remote administrative tools. |
-| `SstpSvc` | Secure Socket Tunneling Protocol Service | Enables SSTP-based VPN connections. |
-| `SamSs` | Security Accounts Manager | Core security authority that manages local security account info. |
-| `LanmanServer` | Server | Enforces file/print sharing interfaces; required for AD replication and SYSVOL access. |
-| `SystemEventsBroker` | System Events Broker | Orchestrates background execution of system events. |
-| `TapiSrv` | Telephony | Manages telephony resources; do not disable. |
-| `Themes` | Themes | Provides desktop styling; required on Desktop Experience configurations. |
-| `tiledatamodelsvc` | Tile Data model server | Manages Start Menu tile layout database. |
-| `TimeBrokerSvc` | Time Broker | Manages background tasks triggered by time/timers. |
-| `TabletInputService` | Touch Keyboard and Handwriting Panel Service | Manages touch keyboard and drawing panels. |
-| `UsoSvc` | Update Orchestrator Service for Windows Update | Coordinates downloading and installation of Windows updates. |
-| `WerSvc` | Windows Error Reporting Service | Reports software faults and diagnostic data to Microsoft. |
-| `Wecsvc` | Windows Event Collector | Manages event subscriptions; required for log shipping/event collection. |
-| `WinRM` | Windows Remote Management (WS-Management) | Implements WS-Management protocol; required for remote PowerShell and management. |
-| `WinHttpAutoProxySvc` | WinHTTP Web Proxy Auto-Discovery Service | Handles WPAD proxy discovery. |
+| `AppReadiness` | App Readiness | Gets apps ready for use the first time a user signs in. Essential for proper initialization of Desktop Experience. |
+| `HvHost` | HV Host Service | Performance enhancers for guest VMs. Not used today except for explicitly populated VMs, but Application Guard can also use it. |
+| `vmickvpexchange` | Hyper-V Data Exchange Service | Hyper-V integration driver. Performance enhancers for guest VMs. |
+| `vmicguestinterface` | Hyper-V Guest Service Interface | Hyper-V integration driver. Performance enhancers for guest VMs. |
+| `vmicshutdown` | Hyper-V Guest Shutdown Service | Hyper-V integration driver. Performance enhancers for guest VMs. |
+| `vmicheartbeat` | Hyper-V Heartbeat Service | Hyper-V integration driver. Performance enhancers for guest VMs. |
+| `vmicvmsession` | Hyper-V PowerShell Direct Service | Hyper-V integration driver. Performance enhancers for guest VMs. |
+| `vmicrdv` | Hyper-V Remote Desktop Virtualization Service | Hyper-V integration driver. Performance enhancers for guest VMs. |
+| `vmictimesync` | Hyper-V Time Synchronization Service | Hyper-V integration driver. Performance enhancers for guest VMs. |
+| `vmicvss` | Hyper-V Volume Shadow Copy Requestor | Hyper-V integration driver. Performance enhancers for guest VMs. |
+| `MSiSCSI` | Microsoft iSCSI Initiator Service | Microsoft diagnostic data indicates the system uses this service on both client and server, so there is no benefit to disabling it. |
+| `smphost` | Microsoft Storage Spaces SMP | Storage management service. Disabling impacts storage provisioning and storage spaces configuration. |
+| `SessionEnv` | Remote Desktop Configuration | Coordinates configuration and properties of RDP sessions; required for Remote Desktop Services. |
+| `TermService` | Remote Desktop Services | Required for remote management and administrative access via RDP. |
+| `UmRdpService` | Remote Desktop Services UserMode Port Redirector | Supports redirections (such as printers and drives) on the server side of the connection. |
+| `RemoteRegistry` | Remote Registry | Essential for remote server management, remote configuration auditing, and vulnerability scanning tools. |
+| `SstpSvc` | Secure Socket Tunneling Protocol Service | Disabling this service breaks Routing and Remote Access Service (RRAS). |
+| `SamSs` | Security Accounts Manager | Core security authority that manages local security account info; required for system startup and security enforcement. |
+| `LanmanServer` | Server | Needed for remote management, IPC$, and SMB file sharing (which is required for SYSVOL and GPO replication). |
+| `SystemEventsBroker` | System Events Broker | Despite this service's description implying it is only for WinRT apps, it is also needed for Task Scheduler, Broker Infrastructure Service, and other internal components. |
+| `TapiSrv` | Telephony | Disabling this service breaks Routing and Remote Access Service (RRAS). |
+| `Themes` | Themes | Cannot set accessibility themes when this service is disabled. |
+| `tiledatamodelsvc` | Tile Data model server | The Start menu breaks if you disable this service. |
+| `TimeBrokerSvc` | Time Broker | Despite this service's name implying it is only for WinRT apps, it is needed for Task Scheduler, Broker Infrastructure Service, and other internal components. |
+| `TabletInputService` | Touch Keyboard and Handwriting Panel Service | Do not disable if Desktop Experience is installed. |
+| `UsoSvc` | Update Orchestrator Service for Windows Update | Windows Update, including Windows Server Update Services (WSUS), depends on this service. |
+| `WerSvc` | Windows Error Reporting Service | Collects and sends data when a program crashes or stops responding, which both Microsoft and third-party Software Vendors use to diagnose crash-inducing bugs and security bugs. Also needed for Corporate Error Reporting. |
+| `Wecsvc` | Windows Event Collector | Collects ETW events, including security events, for manageability and diagnostics. A lot of features and third-party tools rely on it, including security audit tools. |
+| `WinRM` | Windows Remote Management (WS-Management) | Needed for remote management and administration via PowerShell Direct and Windows Admin Center. |
+| `WinHttpAutoProxySvc` | WinHTTP Web Proxy Auto-Discovery Service | Anything that uses the network stack can have a functional dependency on this service. Many organizations rely on this to configure their internal networks' HTTP proxy routing. Without it, internally-originating HTTP connections to the Internet will all fail. |
 
 ---
 
