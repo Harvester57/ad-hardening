@@ -4,6 +4,19 @@ This repository contains the Active Directory Hardening Guidebook. When implemen
 
 ---
 
+## Pre-Implementation Verification
+
+Before documenting or implementing a new hardening control, you must perform a search against existing technical controls to double-check if the settings, policy paths, registry keys, or security concepts are not already covered or mentioned elsewhere in the repository.
+
+To verify this:
+1. Search for the specific GPO policy path, policy name, or registry key/value.
+2. Search for related terms, protocols, or abbreviations (e.g., "NTLM", "Kerberos", "SMBv3").
+3. Inspect all subdirectories (`01-architecture`, `02-domain-controllers`, `03-identities-services`, etc.) for existing files addressing similar subjects.
+
+If the control is already covered or mentioned, modify or expand the existing documentation rather than creating a duplicate entry.
+
+---
+
 ## The Documentation Template
 
 All new technical hardening requirements must use the structure defined in **[TEMPLATE.md](TEMPLATE.md)**.
