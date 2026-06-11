@@ -30,3 +30,16 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to disable unnecessary system services (such as Xbox services and other non-essential services) on Domain Controllers to minimize the attack surface.
 * **[Enable Kerberos Armoring](enable-kerberos-armoring.md)**
   Requirement to enable Kerberos Armoring (FAST) on Domain Controllers and client endpoints to encrypt pre-authentication exchanges and protect credentials from offline brute-force attacks.
+* **[Restrict NTLM](restrict-ntlm.md)**
+  Requirement to audit and restrict NTLMv2 and domain-wide NTLM authentication to prevent credential relaying and force the transition to Kerberos.
+* **[Migrate SYSVOL Replication to DFSR](migrate-sysvol-replication-dfsr.md)**
+  Requirement to migrate SYSVOL folder replication from legacy FRS to secure DFSR to ensure replication integrity and disable deprecated services.
+* **[Harden adminSDHolder Permissions](harden-adminsdholder-permissions.md)**
+  Requirement to secure the adminSDHolder object's Access Control List to prevent privilege escalation backdoors on protected accounts.
+* **[Harden Microsoft DNS AD Container Permissions](harden-dns-container-permissions.md)**
+  Requirement to secure CN=MicrosoftDNS,CN=System container permissions and block DNS service DLL hijacking (ServerLevelPluginDll).
+* **[Harden Virtualization Hosts for Domain Controllers](harden-dc-virtualization-hosts.md)**
+  Requirement to treat virtualization hypervisors hosting Domain Controllers as Tier 0 systems, separating host hardware and enforcing VM encryption.
+* **[Enforce RDP Restricted Admin Mode](enforce-rdp-restricted-admin.md)**
+  Requirement to configure and require RDP Restricted Admin Mode on administrative clients and servers to protect credentials in host memory.
+

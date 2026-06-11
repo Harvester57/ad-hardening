@@ -23,3 +23,6 @@ This directory contains the Active Directory Administrative Tiering Model defini
 
 5. **[Default Domain and Domain Controllers Policies Management](default-policies-recommendations.md)**
    Provides structural guidelines to separate custom hardening policies into dedicated, modular GPOs rather than directly editing Default Domain/DC policies, protecting the forest baseline.
+
+6. **[Harden Active Directory Domain Trusts](harden-domain-trusts.md)**
+   Hardens trust relationships across forest and external boundaries by disabling SID History, enabling Quarantine (SID filtering), enforcing Selective Authentication, and blocking Kerberos TGT Delegation.

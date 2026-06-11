@@ -37,4 +37,16 @@ This directory contains security requirements and policies designed to protect a
 11. **[Enforce Accidental Deletion Protection on Organizational Units](prevent-accidental-deletion-ous.md)**
     Safeguards OUs from deletion errors or malicious administrative actions via the `ProtectedFromAccidentalDeletion` attribute.
 
+12. **[Configure Active Directory Authentication Silos](configure-authentication-silos.md)**
+    Enforces logical boundaries restricting where Tier 0 administrator and host accounts can authenticate, preventing credential theft.
+
+13. **[Clean Up adminCount Attribute Orphans](cleanup-admincount-orphans.md)**
+    Identifies and remediates orphan accounts with disabled security descriptor inheritance, resetting adminCount to 0 and re-enabling inheritance.
+
+14. **[Renew KDS Root Keys and gMSA Secrets](renew-kds-keys-gmsa-secrets.md)**
+    Enforces KDS root key rotation and triggers password regeneration for Group Managed Service Accounts to mitigate exfiltration backdoors.
+
+15. **[Harden Active Directory Certificate Services (ADCS)](harden-adcs-pki.md)**
+    Hardens ADCS templates to block ESC1 SAN enrollment bypasses, mandates manager approval, and secures CA Web Enrollment endpoints.
+
 
