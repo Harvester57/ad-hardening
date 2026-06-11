@@ -19,3 +19,6 @@ This directory contains the physical isolation policies and operating system sec
 5. **[Disable Windows Platform Binary Table (WPBT)](disable-wpbt.md)**
    Disables execution of binaries supplied by the Windows Platform Binary Table (WPBT) ACPI firmware table to mitigate boot-level security bypasses.
 
+6. **[Windows Defender Antivirus PAW Baseline and Exploit Guard](defender-antivirus.md)**
+   Configures Windows Defender Antivirus on PAWs, enabling real-time scanning, behavioral monitoring, preventing local exclusion modifications, enforcing all ASR rules in strict Block mode, activating Tamper Protection, and enabling AppContainer sandbox isolation.
+

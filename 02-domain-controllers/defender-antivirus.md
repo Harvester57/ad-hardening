@@ -1,8 +1,8 @@
-# Hardening Requirement: Windows Defender Antivirus Baseline and Exploit Guard
+# Hardening Requirement: Windows Defender Antivirus Domain Controller Baseline and Exploit Guard
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
 
 ---
 
@@ -21,19 +21,19 @@
 ---
 
 ## Rationale
-Windows Defender Antivirus is the primary endpoint protection suite on Windows platforms. To establish a robust defense-in-depth posture against modern endpoint threat vectors, the basic protection must be augmented with Exploit Guard, Tamper Protection, and process isolation.
+Domain Controllers are the most critical assets in an Active Directory environment, containing the Active Directory database (NTDS.dit) and credential material for the entire enterprise. Because Domain Controllers are Tier 0 assets, protective security agents running on them must be hardened to prevent credential access, lateral movement, and tampering.
 
-This control introduces three primary hardening mechanisms:
-1. **Attack Surface Reduction (ASR) Rules**: Restricts behaviors commonly exploited by malware. By blocking the execution of obfuscated scripts, restricting child process creation from Office/Adobe products, protecting the LSASS process from credential dumping, and limiting unsafe process execution from USB drives, ASR severely curtails the initial access and lateral movement capabilities of threat actors.
-2. **Tamper Protection**: Secures the Defender Antivirus services and registry keys. Without this control, an administrative account compromised via lateral movement could disable Defender or add exclusions to permit payload execution.
-3. **Sandbox Execution (AppContainer)**: Forces the Defender service (MsMpEng.exe) to run in a restricted AppContainer sandbox. Since antimalware engines parse untrusted, potentially malicious file structures, a zero-day vulnerability in the parsing engine could lead to system compromise. Sandbox execution mitigates this by containing any exploit inside the AppContainer, preventing privilege escalation.
+This control establishes a server-optimized defense posture:
+1. **Attack Surface Reduction (ASR) Rules**: Enforces key security boundaries on the OS. Specifically, blocking credential harvesting from LSASS (`9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2`) is paramount on Domain Controllers to prevent offline hash-cracking and token manipulation. In addition, blocking the abuse of exploited vulnerable signed drivers (`56a863a9-875e-4185-98a7-b942c6b2d340`) blocks kernel-mode exploits, while blocking persistence through WMI event subscriptions (`e1105574-81d5-4b0c-8a1e-8793133d82e9`) mitigates common server stealth mechanisms.
+2. **Tamper Protection**: Ensures that attackers cannot use compromised local SYSTEM/admin contexts (such as those obtained via exploit) to disable real-time protection or add exclusions to bypass Defender scanning.
+3. **Sandbox Execution (AppContainer)**: Sandboxes the core scanning service (`MsMpEng.exe`). If an attacker attempts to exploit a parsing vulnerability in the antimalware engine (e.g., using a malformed certificate file or replication data), the exploit is restricted to the AppContainer sandbox, mitigating privilege escalation to local system privileges.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **ASR Administrative Impact**: Enabling ASR rules can block legacy administrative scripts or third-party orchestration tools that rely on WMI/PSExec or execute obfuscated administrative wrappers. Extensive audit testing is recommended prior to broad enforcement.
-* **Office Application Rules**: Rules related to Microsoft Office (e.g., blocking child processes) apply only to endpoints where productivity suites are installed. They will have no impact on member servers without Office.
-* **Sandbox Boot Overhead**: Setting `MP_FORCE_USE_SANDBOX` requires a reboot to initialize the scanning process within the AppContainer sandbox. There is negligible performance overhead once initialized.
+* **ASR PSExec and WMI Rule**: Enforcing "Block process creations originating from PSExec and WMI commands" (`d1e49fe6-3b60-4270-a130-058b290d024a`) can disrupt enterprise remote administration, monitoring agents, and backup orchestrators. In environments utilizing such orchestrators, this rule should be set to **Audit** mode or configured with explicit process exclusions rather than hard Block mode.
+* **Office Application Rules**: Rules targeting Microsoft Office or Adobe applications are documented but will not affect Domain Controllers, as these applications must never be installed on Tier 0 systems.
+* **Reboot Requirement**: Activating Sandbox Execution via `MP_FORCE_USE_SANDBOX` requires a reboot of the Domain Controllers to take effect. This should be scheduled during standard maintenance windows.
 
 ---
 
@@ -42,7 +42,7 @@ This control introduces three primary hardening mechanisms:
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
+2. Create or edit the GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
 3. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus`
 4. Configure the following settings:
@@ -67,23 +67,13 @@ This control introduces three primary hardening mechanisms:
 10. Configure the setting:
     * **Policy**: `Configure Attack Surface Reduction rules`
     * **Setting**: `Enabled`
-    * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block):
-      * `56a863a9-875e-4185-98a7-b942c6b2d340` (Block abuse of exploited vulnerable signed drivers)
-      * `7674ba7d-e6d2-4350-9d58-7c1dbb33e758` (Block Adobe Reader from creating child processes)
-      * `d4f940ab-401b-4efc-aadc-ad5f3c50688a` (Block all Office applications from creating child processes)
-      * `9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2` (Block credential stealing from the Windows Local Security Authority subsystem)
-      * `be9ba2d9-53ea-4d1e-8a57-ab6b53dbb5c5` (Block executable content from email client and webmail)
-      * `01443614-cd74-433a-b99e-2ecdc7777d85` (Block executable files from running unless they meet a prevalence, age, or trusted list criterion)
-      * `5beb7efe-fd9a-4556-801d-275e5ffc04cc` (Block execution of potentially obfuscated scripts)
-      * `d3e03999-47ed-4e2a-8747-0d41b5906d20` (Block JavaScript or VBScript from launching downloaded executable content)
-      * `3b576869-74b4-40f2-aa33-a652e742e285` (Block Office applications from creating executable content)
-      * `75668c1f-73b5-4cf0-bb9c-a86f45a22650` (Block Office applications from injecting code into other processes)
-      * `261908b1-1602-4977-800c-d10d9d93d34f` (Block Office communication application from creating child processes)
-      * `e1105574-81d5-4b0c-8a1e-8793133d82e9` (Block persistence through WMI event subscription)
-      * `d1e49fe6-3b60-4270-a130-058b290d024a` (Block process creations originating from PSExec and WMI commands)
-      * `b2b3f03d-fd1f-4654-8491-64d549174092` (Block untrusted and unsigned processes that run from USB)
-      * `92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b` (Block Win32 API calls from Office macros)
-      * `c1db55ab-c21a-4637-bb3f-a125b2061d5d` (Use advanced protection against ransomware)
+    * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block) or `2` (Audit) as detailed:
+      * `56a863a9-875e-4185-98a7-b942c6b2d340` (Block abuse of exploited vulnerable signed drivers) -> `1` (Block)
+      * `9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2` (Block credential stealing from the Windows Local Security Authority subsystem) -> `1` (Block)
+      * `5beb7efe-fd9a-4556-801d-275e5ffc04cc` (Block execution of potentially obfuscated scripts) -> `1` (Block)
+      * `e1105574-81d5-4b0c-8a1e-8793133d82e9` (Block persistence through WMI event subscription) -> `1` (Block)
+      * `d1e49fe6-3b60-4270-a130-058b290d024a` (Block process creations originating from PSExec and WMI commands) -> `2` (Audit) (Recommended for DCs to prevent remote management disruptions; configure to `1` only if orchestration is fully migrated to WinRM)
+      * `c1db55ab-c21a-4637-bb3f-a125b2061d5d` (Use advanced protection against ransomware) -> `1` (Block)
 11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
 12. Configure the setting:
@@ -102,13 +92,13 @@ This control introduces three primary hardening mechanisms:
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to configure Windows Defender baseline protection, Attack Surface Reduction rules, Tamper Protection, and Sandbox execution.
+Run the following scripts locally on the Domain Controller to configure Windows Defender baseline, ASR rules, Tamper Protection, and Sandbox execution.
 
 ```powershell
-# Set-DefenderAdvancedBaseline.ps1
-# Description: Configures advanced Windows Defender Antivirus options, ASR rules, Tamper Protection, and Sandbox execution.
+# Set-DefenderDCBaseline.ps1
+# Description: Configures Windows Defender Antivirus options, ASR rules, Tamper Protection, and Sandbox execution on DCs.
 
-Write-Host "Applying Windows Defender Advanced Baseline..." -ForegroundColor Cyan
+Write-Host "Applying Windows Defender Domain Controller Baseline..." -ForegroundColor Cyan
 
 # 1. Core Defender settings
 if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
@@ -135,7 +125,7 @@ if (-not (Test-Path $ExclPath)) {
 }
 Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord
 
-# 3. Configure ASR Rules in Registry
+# 3. Configure Server-Compatible ASR Rules in Registry
 $AsrPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR"
 if (-not (Test-Path $AsrPath)) {
     New-Item -Path $AsrPath -Force | Out-Null
@@ -146,22 +136,12 @@ if (-not (Test-Path $AsrRulesPath)) {
 }
 
 $AsrRules = @{
-    "56a863a9-875e-4185-98a7-b942c6b2d340" = "1"
-    "7674ba7d-e6d2-4350-9d58-7c1dbb33e758" = "1"
-    "d4f940ab-401b-4efc-aadc-ad5f3c50688a" = "1"
-    "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2" = "1"
-    "be9ba2d9-53ea-4d1e-8a57-ab6b53dbb5c5" = "1"
-    "01443614-cd74-433a-b99e-2ecdc7777d85" = "1"
-    "5beb7efe-fd9a-4556-801d-275e5ffc04cc" = "1"
-    "d3e03999-47ed-4e2a-8747-0d41b5906d20" = "1"
-    "3b576869-74b4-40f2-aa33-a652e742e285" = "1"
-    "75668c1f-73b5-4cf0-bb9c-a86f45a22650" = "1"
-    "261908b1-1602-4977-800c-d10d9d93d34f" = "1"
-    "e1105574-81d5-4b0c-8a1e-8793133d82e9" = "1"
-    "d1e49fe6-3b60-4270-a130-058b290d024a" = "1"
-    "b2b3f03d-fd1f-4654-8491-64d549174092" = "1"
-    "92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b" = "1"
-    "c1db55ab-c21a-4637-bb3f-a125b2061d5d" = "1"
+    "56a863a9-875e-4185-98a7-b942c6b2d340" = "1" # Block vulnerable signed drivers
+    "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2" = "1" # Block LSASS credential theft
+    "5beb7efe-fd9a-4556-801d-275e5ffc04cc" = "1" # Block obfuscated scripts
+    "e1105574-81d5-4b0c-8a1e-8793133d82e9" = "1" # Block WMI persistence
+    "d1e49fe6-3b60-4270-a130-058b290d024a" = "2" # Audit PSExec and WMI process creation (Audit to prevent DC admin tool disruption)
+    "c1db55ab-c21a-4637-bb3f-a125b2061d5d" = "1" # Use advanced protection against ransomware
 }
 
 foreach ($RuleId in $AsrRules.Keys) {
@@ -175,8 +155,6 @@ $FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
     New-Item -Path $FeaturesPath -Force | Out-Null
 }
-# Setting TamperProtection value to 5 (Enabled)
-# Note: In production, modifying this key directly requires TrustedInstaller permissions.
 try {
     Set-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -Value 5 -Type DWord -ErrorAction Stop
     Write-Host "Tamper Protection enabled in registry." -ForegroundColor Green
@@ -192,15 +170,15 @@ if (-not (Test-Path $EnvPath)) {
 Set-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -Value "1" -Type String
 Write-Host "Sandbox Execution environment variable configured." -ForegroundColor Green
 
-Write-Host "Defender advanced baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan
+Write-Host "Defender Domain Controller baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan
 ```
 
-*To audit the Windows Defender advanced hardening status:*
+*To audit the local Domain Controller Windows Defender security status:*
 ```powershell
-# Get-DefenderAdvancedStatus.ps1
-# Description: Audits the registry and preferences for ASR, Tamper Protection, and Sandbox status.
+# Get-DefenderDCStatus.ps1
+# Description: Audits the registry and preferences for ASR, Tamper Protection, and Sandbox status on Domain Controllers.
 
-Write-Host "--- Auditing Windows Defender Advanced Hardening Status ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Domain Controller Windows Defender Hardening Status ---" -ForegroundColor Cyan
 
 # 1. Audit core preferences
 if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
@@ -232,32 +210,41 @@ $TamperVal = Get-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -Erro
 if ($TamperVal -and $TamperVal.TamperProtection -eq 5) {
     Write-Host "    - Tamper Protection: Enabled (TamperProtection = 5)" -ForegroundColor Green
 } else {
-    Write-Host "    - Tamper Protection: NOT ENABLED or Not Managed via local Registry (Value: $($TamperVal.TamperProtection))" -ForegroundColor Yellow
+    Write-Host "    - Tamper Protection: NOT ENABLED or Not Managed via Registry (Value: $($TamperVal.TamperProtection))" -ForegroundColor Yellow
 }
 
 # 4. Audit ASR Rules
 $AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
-$AsrRulesCount = 0
-$AsrBlockedCount = 0
+$ServerRules = @(
+    "56a863a9-875e-4185-98a7-b942c6b2d340" # Vulnerable drivers
+    "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2" # LSASS
+    "5beb7efe-fd9a-4556-801d-275e5ffc04cc" # Obfuscated scripts
+    "e1105574-81d5-4b0c-8a1e-8793133d82e9" # WMI persistence
+    "d1e49fe6-3b60-4270-a130-058b290d024a" # PSExec/WMI
+    "c1db55ab-c21a-4637-bb3f-a125b2061d5d" # Ransomware
+)
+
+$EnforcedCount = 0
+$AuditCount = 0
 
 if (Test-Path $AsrRulesPath) {
     $Rules = Get-Item -Path $AsrRulesPath
-    foreach ($ValName in $Rules.GetValueNames()) {
-        $AsrRulesCount++
-        $ValData = $Rules.GetValue($ValName)
+    foreach ($RuleId in $ServerRules) {
+        $ValData = $Rules.GetValue($RuleId)
         if ($ValData -eq "1" -or $ValData -eq 1) {
-            $AsrBlockedCount++
+            $EnforcedCount++
+        } elseif ($ValData -eq "2" -or $ValData -eq 2) {
+            $AuditCount++
         }
     }
 }
 
-$AsrColor = if ($AsrBlockedCount -eq 16) { "Green" } else { "Red" }
-Write-Host "    - Attack Surface Reduction: $AsrBlockedCount of 16 rules enforced in Block mode" -ForegroundColor $AsrColor
+$AsrColor = if ($EnforcedCount -eq 5 -and $AuditCount -eq 1) { "Green" } else { "Yellow" }
+Write-Host "    - Attack Surface Reduction: $EnforcedCount Block rules / $AuditCount Audit rules enforced (Required: 5 Block / 1 Audit)" -ForegroundColor $AsrColor
 ```
 
 ---
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10 Benchmark**: Section 18.9.47 (Exclusions restrictions), Section 18.9.30 (ASR Rules), Section 18.9.47.11 (Real-time protection)
-* **Microsoft Security Baselines**: Windows Defender Exploit Guard deployment guide
-* **ANSSI Active Directory Hardening Guide**: Recommendations regarding endpoint protective controls
+* **CIS Microsoft Windows Server Benchmark**: Section 18.9.47 (Exclusions restrictions), Section 18.9.30 (ASR Rules), Section 18.9.47.11 (Real-time protection)
+* **ANSSI Active Directory Hardening Guide**: Recommendations regarding protective controls on Domain Controllers

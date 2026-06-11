@@ -42,4 +42,7 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to treat virtualization hypervisors hosting Domain Controllers as Tier 0 systems, separating host hardware and enforcing VM encryption.
 * **[Enforce RDP Restricted Admin Mode](enforce-rdp-restricted-admin.md)**
   Requirement to configure and require RDP Restricted Admin Mode on administrative clients and servers to protect credentials in host memory.
+* **[Windows Defender Antivirus DC Baseline and Exploit Guard](defender-antivirus.md)**
+  Requirement to configure and harden Windows Defender Antivirus on Domain Controllers, enabling real-time scanning, preventing local exclusion modifications, enforcing server-compatible ASR rules (including LSASS protection), activating Tamper Protection, and sandboxing execution.
+
 

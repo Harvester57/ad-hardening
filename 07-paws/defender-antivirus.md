@@ -1,8 +1,8 @@
-# Hardening Requirement: Windows Defender Antivirus Baseline and Exploit Guard
+# Hardening Requirement: Windows Defender Antivirus PAW Baseline and Exploit Guard
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
@@ -21,19 +21,18 @@
 ---
 
 ## Rationale
-Windows Defender Antivirus is the primary endpoint protection suite on Windows platforms. To establish a robust defense-in-depth posture against modern endpoint threat vectors, the basic protection must be augmented with Exploit Guard, Tamper Protection, and process isolation.
+Privileged Access Workstations (PAWs) represent the highest security boundary on the endpoint layer, serving as isolated systems dedicated solely to Tier 0 directory administration. If a PAW is compromised, the entire AD forest is compromised. Therefore, the built-in antimalware and exploit prevention controls must be hardened to their absolute maximum threshold.
 
-This control introduces three primary hardening mechanisms:
-1. **Attack Surface Reduction (ASR) Rules**: Restricts behaviors commonly exploited by malware. By blocking the execution of obfuscated scripts, restricting child process creation from Office/Adobe products, protecting the LSASS process from credential dumping, and limiting unsafe process execution from USB drives, ASR severely curtails the initial access and lateral movement capabilities of threat actors.
-2. **Tamper Protection**: Secures the Defender Antivirus services and registry keys. Without this control, an administrative account compromised via lateral movement could disable Defender or add exclusions to permit payload execution.
-3. **Sandbox Execution (AppContainer)**: Forces the Defender service (MsMpEng.exe) to run in a restricted AppContainer sandbox. Since antimalware engines parse untrusted, potentially malicious file structures, a zero-day vulnerability in the parsing engine could lead to system compromise. Sandbox execution mitigates this by containing any exploit inside the AppContainer, preventing privilege escalation.
+This control introduces a highly restrictive protective barrier on PAWs:
+1. **Attack Surface Reduction (ASR) Rules**: ASR rules block activities commonly used by threat actors to perform remote execution, persistence, and credential theft. On PAWs, all rules are configured to strict Block mode. Crucially, rules blocking LSASS credential stealing (`9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2`) and WMI/PSExec child process creation (`d1e49fe6-3b60-4270-a130-058b290d024a`) are enforced. Since PAWs are reserved for administrative consoles and not daily use software, there is a lower threat of user-facing disruption.
+2. **Tamper Protection**: Restricts any software or unauthorized administrator from disabling real-time scanning, cloud components, behavior monitoring, or exclusions. This blocks malicious actors from trying to disable security controls if they gain command execution.
+3. **Sandbox Execution (AppContainer)**: Sandboxes the core scanning service (`MsMpEng.exe`). If an attacker attempts to exploit a parser flaw in the Defender engine itself using a specifically crafted malicious file, the exploit is restricted to the AppContainer sandbox, mitigating privilege escalation on Tier 0 assets.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **ASR Administrative Impact**: Enabling ASR rules can block legacy administrative scripts or third-party orchestration tools that rely on WMI/PSExec or execute obfuscated administrative wrappers. Extensive audit testing is recommended prior to broad enforcement.
-* **Office Application Rules**: Rules related to Microsoft Office (e.g., blocking child processes) apply only to endpoints where productivity suites are installed. They will have no impact on member servers without Office.
-* **Sandbox Boot Overhead**: Setting `MP_FORCE_USE_SANDBOX` requires a reboot to initialize the scanning process within the AppContainer sandbox. There is negligible performance overhead once initialized.
+* **Administrative Operations**: Enabling the WMI/PSExec block rule means administrative scripts must be run locally or orchestrated via secure WinRM endpoints. Traditional PSExec commands from remote management consoles will be blocked, enforcing proper tier-isolated remote administration.
+* **Execution Restrictions**: Since productivity suites (e.g., Office, Outlook) are strictly banned from PAWs, ASR rules targeting Microsoft Office applications are enforced as a defensive measure to prevent shadow installations or bypasses.
 
 ---
 
@@ -42,7 +41,7 @@ This control introduces three primary hardening mechanisms:
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
+2. Create or edit the GPO linked to the PAWs OU (e.g., `GPO_Hardening_PAW`).
 3. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus`
 4. Configure the following settings:
@@ -102,13 +101,13 @@ This control introduces three primary hardening mechanisms:
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to configure Windows Defender baseline protection, Attack Surface Reduction rules, Tamper Protection, and Sandbox execution.
+Run the following scripts locally on the PAW to configure Windows Defender baseline, ASR rules, Tamper Protection, and Sandbox execution.
 
 ```powershell
-# Set-DefenderAdvancedBaseline.ps1
-# Description: Configures advanced Windows Defender Antivirus options, ASR rules, Tamper Protection, and Sandbox execution.
+# Set-DefenderPawBaseline.ps1
+# Description: Configures Windows Defender Antivirus options, ASR rules, Tamper Protection, and Sandbox execution on PAWs.
 
-Write-Host "Applying Windows Defender Advanced Baseline..." -ForegroundColor Cyan
+Write-Host "Applying Windows Defender PAW Hardening Baseline..." -ForegroundColor Cyan
 
 # 1. Core Defender settings
 if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
@@ -175,8 +174,6 @@ $FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
     New-Item -Path $FeaturesPath -Force | Out-Null
 }
-# Setting TamperProtection value to 5 (Enabled)
-# Note: In production, modifying this key directly requires TrustedInstaller permissions.
 try {
     Set-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -Value 5 -Type DWord -ErrorAction Stop
     Write-Host "Tamper Protection enabled in registry." -ForegroundColor Green
@@ -192,15 +189,15 @@ if (-not (Test-Path $EnvPath)) {
 Set-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -Value "1" -Type String
 Write-Host "Sandbox Execution environment variable configured." -ForegroundColor Green
 
-Write-Host "Defender advanced baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan
+Write-Host "Defender PAW baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan
 ```
 
-*To audit the Windows Defender advanced hardening status:*
+*To audit the local PAW Windows Defender security status:*
 ```powershell
-# Get-DefenderAdvancedStatus.ps1
-# Description: Audits the registry and preferences for ASR, Tamper Protection, and Sandbox status.
+# Get-DefenderPawStatus.ps1
+# Description: Audits the registry and preferences for ASR, Tamper Protection, and Sandbox status on PAWs.
 
-Write-Host "--- Auditing Windows Defender Advanced Hardening Status ---" -ForegroundColor Cyan
+Write-Host "--- Auditing PAW Windows Defender Hardening Status ---" -ForegroundColor Cyan
 
 # 1. Audit core preferences
 if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
@@ -232,7 +229,7 @@ $TamperVal = Get-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -Erro
 if ($TamperVal -and $TamperVal.TamperProtection -eq 5) {
     Write-Host "    - Tamper Protection: Enabled (TamperProtection = 5)" -ForegroundColor Green
 } else {
-    Write-Host "    - Tamper Protection: NOT ENABLED or Not Managed via local Registry (Value: $($TamperVal.TamperProtection))" -ForegroundColor Yellow
+    Write-Host "    - Tamper Protection: NOT ENABLED or Not Managed via Registry (Value: $($TamperVal.TamperProtection))" -ForegroundColor Yellow
 }
 
 # 4. Audit ASR Rules
@@ -258,6 +255,5 @@ Write-Host "    - Attack Surface Reduction: $AsrBlockedCount of 16 rules enforce
 ---
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10 Benchmark**: Section 18.9.47 (Exclusions restrictions), Section 18.9.30 (ASR Rules), Section 18.9.47.11 (Real-time protection)
-* **Microsoft Security Baselines**: Windows Defender Exploit Guard deployment guide
-* **ANSSI Active Directory Hardening Guide**: Recommendations regarding endpoint protective controls
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.9.47 (Exclusions restrictions), Section 18.9.30 (ASR Rules), Section 18.9.47.11 (Real-time protection)
+* **ANSSI Active Directory Hardening Guide**: Recommendations regarding administrative workstation isolation and endpoint agent security

@@ -24,8 +24,8 @@ To prevent initial access and lateral movement, the following unitary technical 
 6. **[Restrict Local Administrators Group](restrict-local-admins.md)**
    Locks down local workstation administrative privileges, removing standard domain users and enforcing administrative segregation utilizing LAPS.
 
-7. **[Windows Defender Antivirus Offline Baseline](defender-antivirus.md)**
-   Configures Windows Defender Antivirus for offline operation, enabling real-time scanning, network inspection, behavioral monitoring, and preventing user modification of security exclusions.
+7. **[Windows Defender Antivirus Baseline and Exploit Guard](defender-antivirus.md)**
+   Configures Windows Defender Antivirus, enabling real-time scanning, behavioral monitoring, preventing local exclusion modifications, enforcing Attack Surface Reduction (ASR) rules, activating Tamper Protection, and enabling AppContainer sandbox isolation.
 
 8. **[WSUS Client Configuration](wsus-client-config.md)**
    Enforces update client registry baselines to ensure workstations pull OS patches and security signatures exclusively from the local, offline WSUS server.
