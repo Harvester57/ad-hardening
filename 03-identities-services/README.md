@@ -27,3 +27,5 @@ This directory contains security requirements and policies designed to protect a
 
 8. **[Enforce User and Service Account Kerberos Encryption (AES-Only)](enforce-user-aes-encryption.md)**
    Sets the msDS-SupportedEncryptionTypes attribute to AES-only to mitigate Kerberoasting and session hijacking.
+
+
