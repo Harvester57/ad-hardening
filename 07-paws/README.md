@@ -22,3 +22,13 @@ This directory contains the physical isolation policies and operating system sec
 6. **[Windows Defender Antivirus PAW Baseline and Exploit Guard](defender-antivirus.md)**
    Configures Windows Defender Antivirus on PAWs, enabling real-time scanning, behavioral monitoring, preventing local exclusion modifications, enforcing all ASR rules in strict Block mode, activating Tamper Protection, and enabling AppContainer sandbox isolation.
 
+7. **[Configure User Rights Assignments for PAWs](configure-user-rights-assignments.md)**
+   Restricts critical user rights assignments (URAs) such as debugging programs, token impersonation, and denying network/interactive logon permissions for standard accounts on PAWs.
+
+8. **[Enable VBS and Credential Guard for PAWs](enable-vbs-credential-guard.md)**
+   Configures Virtualization-Based Security (VBS), Credential Guard (with UEFI Lock), System Guard Secure Launch, and memory protections to shield LSASS from credential dumping attacks on PAWs.
+
+9. **[Harden DMA and Physical Security for PAWs](harden-dma-and-physical-security.md)**
+   Mitigates physical access threat vectors by disabling sleep standby states (S1-S3), disabling external DMA device enumeration under lock, enforcing a strict block-all device enumeration policy, and blocking legacy SBP-2 device classes.
+
+

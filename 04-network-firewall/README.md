@@ -28,3 +28,9 @@ This directory contains network security architectures, active directory port co
 8. **[Configure Firewall Logging and Operational Settings](configure-firewall-logging.md)**
    Enforces Windows Defender Firewall state, sets default inbound block policies, disables local rule merging on Domain Controllers, and configures detailed dropped packet logging to improve security visibility and forensic capabilities.
 
+9. **[Configure Hardened UNC Paths](configure-hardened-unc-paths.md)**
+   Enforces mutual authentication and SMB signing for GPO folder structures (SYSVOL/NETLOGON), restricts workstation guest logons, and requires outgoing LDAP client signing.
+
+10. **[Harden WinRM Service and Restrict RPC Clients](harden-winrm-service.md)**
+    Disables Basic and Digest authentication, forces encrypted WinRM communications, restricts WinRM credential caching, and blocks anonymous RPC connections.
+

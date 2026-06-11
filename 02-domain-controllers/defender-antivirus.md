@@ -24,14 +24,14 @@
 Domain Controllers are the most critical assets in an Active Directory environment, containing the Active Directory database (NTDS.dit) and credential material for the entire enterprise. Because Domain Controllers are Tier 0 assets, protective security agents running on them must be hardened to prevent credential access, lateral movement, and tampering.
 
 This control establishes a server-optimized defense posture:
-1. **Attack Surface Reduction (ASR) Rules**: Enforces key security boundaries on the OS. Specifically, blocking credential harvesting from LSASS (`9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2`) is paramount on Domain Controllers to prevent offline hash-cracking and token manipulation. In addition, blocking the abuse of exploited vulnerable signed drivers (`56a863a9-875e-4185-98a7-b942c6b2d340`) blocks kernel-mode exploits, while blocking persistence through WMI event subscriptions (`e1105574-81d5-4b0c-8a1e-8793133d82e9`) mitigates common server stealth mechanisms.
+1. **Attack Surface Reduction (ASR) Rules**: Enforces key security boundaries on the OS. Specifically, blocking credential harvesting from LSASS (`9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2`) is paramount on Domain Controllers to prevent offline hash-cracking and token manipulation. In addition, blocking the abuse of exploited vulnerable signed drivers (`56a863a9-875e-4185-98a7-b882c64b5ce5`) blocks kernel-mode exploits, while blocking persistence through WMI event subscriptions (`e6db77e5-3df2-4cf1-b95a-636979351e5b`) mitigates common server stealth mechanisms.
 2. **Tamper Protection**: Ensures that attackers cannot use compromised local SYSTEM/admin contexts (such as those obtained via exploit) to disable real-time protection or add exclusions to bypass Defender scanning.
 3. **Sandbox Execution (AppContainer)**: Sandboxes the core scanning service (`MsMpEng.exe`). If an attacker attempts to exploit a parsing vulnerability in the antimalware engine (e.g., using a malformed certificate file or replication data), the exploit is restricted to the AppContainer sandbox, mitigating privilege escalation to local system privileges.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **ASR PSExec and WMI Rule**: Enforcing "Block process creations originating from PSExec and WMI commands" (`d1e49fe6-3b60-4270-a130-058b290d024a`) can disrupt enterprise remote administration, monitoring agents, and backup orchestrators. In environments utilizing such orchestrators, this rule should be set to **Audit** mode or configured with explicit process exclusions rather than hard Block mode.
+* **ASR PSExec and WMI Rule**: Enforcing "Block process creations originating from PSExec and WMI commands" (`d1e49aac-8f56-4280-b9ba-993a6d77406c`) can disrupt enterprise remote administration, monitoring agents, and backup orchestrators. In environments utilizing such orchestrators, this rule should be set to **Audit** mode or configured with explicit process exclusions rather than hard Block mode.
 * **Office Application Rules**: Rules targeting Microsoft Office or Adobe applications are documented but will not affect Domain Controllers, as these applications must never be installed on Tier 0 systems.
 * **Reboot Requirement**: Activating Sandbox Execution via `MP_FORCE_USE_SANDBOX` requires a reboot of the Domain Controllers to take effect. This should be scheduled during standard maintenance windows.
 
@@ -57,23 +57,47 @@ This control establishes a server-optimized defense posture:
    * **Setting**: `Enabled`
    * **Policy**: `Scan all downloaded files and attachments`
    * **Setting**: `Enabled`
+   * **Policy**: `Turn on script scanning`
+   * **Setting**: `Enabled`
 7. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Exclusions`
 8. Configure the setting:
    * **Policy**: `Prevent users from configuring exclusions`
    * **Setting**: `Enabled`
 9. Navigate to:
-   `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
+   `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MAPS`
+10. Configure the following settings:
+    * **Policy**: `Join Microsoft MAPS`
+    * **Setting**: `Enabled` (Select `Advanced MAPS` in options)
+    * **Policy**: `Send file samples when further analysis is required`
+    * **Setting**: `Enabled` (Select `Send safe samples` in options)
+11. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
+12. Configure the setting:
+    * **Policy**: `Select cloud protection level`
+    * **Setting**: `Enabled` (Select `High blocking level` in options)
+13. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
+14. Configure the setting:
+    * **Policy**: `Scan removable drives`
+    * **Setting**: `Enabled`
+15. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Network Protection`
+16. Configure the setting:
+    * **Policy**: `Prevent users and apps from accessing dangerous websites`
+    * **Setting**: `Enabled` (Select `Block` in options)
+17. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
 10. Configure the setting:
     * **Policy**: `Configure Attack Surface Reduction rules`
     * **Setting**: `Enabled`
     * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block) or `2` (Audit) as detailed:
-      * `56a863a9-875e-4185-98a7-b942c6b2d340` (Block abuse of exploited vulnerable signed drivers) -> `1` (Block)
+      * `56a863a9-875e-4185-98a7-b882c64b5ce5` (Block abuse of exploited vulnerable signed drivers) -> `1` (Block)
       * `9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2` (Block credential stealing from the Windows Local Security Authority subsystem) -> `1` (Block)
       * `5beb7efe-fd9a-4556-801d-275e5ffc04cc` (Block execution of potentially obfuscated scripts) -> `1` (Block)
-      * `e1105574-81d5-4b0c-8a1e-8793133d82e9` (Block persistence through WMI event subscription) -> `1` (Block)
-      * `d1e49fe6-3b60-4270-a130-058b290d024a` (Block process creations originating from PSExec and WMI commands) -> `2` (Audit) (Recommended for DCs to prevent remote management disruptions; configure to `1` only if orchestration is fully migrated to WinRM)
-      * `c1db55ab-c21a-4637-bb3f-a125b2061d5d` (Use advanced protection against ransomware) -> `1` (Block)
+      * `e6db77e5-3df2-4cf1-b95a-636979351e5b` (Block persistence through WMI event subscription) -> `1` (Block)
+      * `d1e49aac-8f56-4280-b9ba-993a6d77406c` (Block process creations originating from PSExec and WMI commands) -> `2` (Audit) (Recommended for DCs to prevent remote management disruptions; configure to `1` only if orchestration is fully migrated to WinRM)
+      * `c1db55ab-c21a-4637-bb3f-a12568109d35` (Use advanced protection against ransomware) -> `1` (Block)
 11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
 12. Configure the setting:
@@ -106,7 +130,13 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Set-MpPreference -DisableRealtimeMonitoring $false
     Set-MpPreference -DisableBehaviorMonitoring $false
     Set-MpPreference -DisableIOAVProtection $false
-    Set-MpPreference -DisableBlockAtFirstSeen $true
+    Set-MpPreference -DisableBlockAtFirstSeen $false
+    Set-MpPreference -MAPSReporting 2
+    Set-MpPreference -SubmitSamplesConsent 1
+    Set-MpPreference -MpCloudBlockLevel 2
+    Set-MpPreference -DisableScriptScanning $false
+    Set-MpPreference -DisableRemovableDriveScanning $false
+    Set-MpPreference -EnableNetworkProtection 1
     Set-MpPreference -DisableExclusionRestriction $false
 } else {
     Write-Warning "Set-MpPreference cmdlet is not available."
@@ -136,12 +166,12 @@ if (-not (Test-Path $AsrRulesPath)) {
 }
 
 $AsrRules = @{
-    "56a863a9-875e-4185-98a7-b942c6b2d340" = "1" # Block vulnerable signed drivers
+    "56a863a9-875e-4185-98a7-b882c64b5ce5" = "1" # Block vulnerable signed drivers
     "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2" = "1" # Block LSASS credential theft
     "5beb7efe-fd9a-4556-801d-275e5ffc04cc" = "1" # Block obfuscated scripts
-    "e1105574-81d5-4b0c-8a1e-8793133d82e9" = "1" # Block WMI persistence
-    "d1e49fe6-3b60-4270-a130-058b290d024a" = "2" # Audit PSExec and WMI process creation (Audit to prevent DC admin tool disruption)
-    "c1db55ab-c21a-4637-bb3f-a125b2061d5d" = "1" # Use advanced protection against ransomware
+    "e6db77e5-3df2-4cf1-b95a-636979351e5b" = "1" # Block WMI persistence
+    "d1e49aac-8f56-4280-b9ba-993a6d77406c" = "2" # Audit PSExec and WMI process creation (Audit to prevent DC admin tool disruption)
+    "c1db55ab-c21a-4637-bb3f-a12568109d35" = "1" # Use advanced protection against ransomware
 }
 
 foreach ($RuleId in $AsrRules.Keys) {
@@ -187,10 +217,22 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     $RealtimeColor = if ($Pref.DisableRealtimeMonitoring -eq $false) { "Green" } else { "Red" }
     $BehaviorColor = if ($Pref.DisableBehaviorMonitoring -eq $false) { "Green" } else { "Red" }
     $ExclColor = if ($Pref.DisableLocalAdminConfiguration -eq 1 -or $Pref.DisableLocalAdminConfiguration -eq $true) { "Green" } else { "Red" }
+    $MapsColor = if ($Pref.MAPSReporting -eq 2) { "Green" } else { "Red" }
+    $SamplesColor = if ($Pref.SubmitSamplesConsent -eq 1) { "Green" } else { "Red" }
+    $CloudColor = if ($Pref.MpCloudBlockLevel -eq 2) { "Green" } else { "Red" }
+    $ScriptColor = if ($Pref.DisableScriptScanning -eq $false) { "Green" } else { "Red" }
+    $RemovableColor = if ($Pref.DisableRemovableDriveScanning -eq $false) { "Green" } else { "Red" }
+    $NetProtColor = if ($Pref.EnableNetworkProtection -eq 1) { "Green" } else { "Red" }
     
     Write-Host "    - Real-Time Monitoring Active: $(!$Pref.DisableRealtimeMonitoring) (Required: True)" -ForegroundColor $RealtimeColor
     Write-Host "    - Behavior Monitoring Active: $(!$Pref.DisableBehaviorMonitoring) (Required: True)" -ForegroundColor $BehaviorColor
     Write-Host "    - Exclusions Blocked: $($Pref.DisableLocalAdminConfiguration) (Required: True)" -ForegroundColor $ExclColor
+    Write-Host "    - MAPS Reporting (Advanced): $($Pref.MAPSReporting) (Required: 2)" -ForegroundColor $MapsColor
+    Write-Host "    - Submit Samples (Safe): $($Pref.SubmitSamplesConsent) (Required: 1)" -ForegroundColor $SamplesColor
+    Write-Host "    - Cloud Protection Level: $($Pref.MpCloudBlockLevel) (Required: 2)" -ForegroundColor $CloudColor
+    Write-Host "    - Script Scanning: $(!$Pref.DisableScriptScanning) (Required: True)" -ForegroundColor $ScriptColor
+    Write-Host "    - Removable Drive Scanning: $(!$Pref.DisableRemovableDriveScanning) (Required: True)" -ForegroundColor $RemovableColor
+    Write-Host "    - Network Protection: $($Pref.EnableNetworkProtection) (Required: 1)" -ForegroundColor $NetProtColor
 } else {
     Write-Warning "Get-MpPreference is not available."
 }
@@ -216,12 +258,12 @@ if ($TamperVal -and $TamperVal.TamperProtection -eq 5) {
 # 4. Audit ASR Rules
 $AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
 $ServerRules = @(
-    "56a863a9-875e-4185-98a7-b942c6b2d340" # Vulnerable drivers
+    "56a863a9-875e-4185-98a7-b882c64b5ce5" # Vulnerable drivers
     "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2" # LSASS
     "5beb7efe-fd9a-4556-801d-275e5ffc04cc" # Obfuscated scripts
-    "e1105574-81d5-4b0c-8a1e-8793133d82e9" # WMI persistence
-    "d1e49fe6-3b60-4270-a130-058b290d024a" # PSExec/WMI
-    "c1db55ab-c21a-4637-bb3f-a125b2061d5d" # Ransomware
+    "e6db77e5-3df2-4cf1-b95a-636979351e5b" # WMI persistence
+    "d1e49aac-8f56-4280-b9ba-993a6d77406c" # PSExec/WMI
+    "c1db55ab-c21a-4637-bb3f-a12568109d35" # Ransomware
 )
 
 $EnforcedCount = 0

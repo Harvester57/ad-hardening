@@ -6,8 +6,8 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 ## Technical Hardening Controls
 
-1. **[Disable Legacy Name Resolution](disable-legacy-name-resolution.md)**
-   Disables Link-Local Multicast Name Resolution (LLMNR), NetBIOS over TCP/IP, and mDNS to prevent local credential harvesting via spoofing and relay attacks.
+1. **[Harden Network and Name Resolution](harden-network-and-name-resolution.md)**
+   Disables Link-Local Multicast Name Resolution (LLMNR), NetBIOS over TCP/IP, and mDNS, and secures TCP/IP parameters to prevent local credential harvesting and protocol exploits.
 
 2. **[Configure User Account Control (UAC) Policies](configure-uac-policies.md)**
    Enforces maximum UAC security behavior, requiring credential entry on the secure desktop for administrators and automatically denying elevation prompts for standard users.
@@ -50,4 +50,17 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 15. **[Disable Windows Platform Binary Table (WPBT)](disable-wpbt.md)**
     Disables execution of binaries supplied by the Windows Platform Binary Table (WPBT) ACPI firmware table to mitigate boot-level security bypasses.
+
+16. **[Configure User Rights Assignments](configure-user-rights-assignments.md)**
+    Restricts critical user rights assignments (URAs) such as debugging programs, token impersonation, and local logon permissions on standard client endpoints.
+
+17. **[Harden DMA and Physical Security](harden-dma-and-physical-security.md)**
+    Mitigates physical access threat vectors by disabling standby sleep states (S1-S3), disabling external DMA device enumeration under lock, blocking legacy SBP-2 device classes, and denying write access to removable drives without BitLocker protection.
+
+18. **[Configure Account Policies](configure-account-policies.md)**
+    Enforces local and domain-wide account settings, including account lockout thresholds, lockout observation windows, smart card removal actions, and disabling reversible password encryption.
+
+19. **[Configure User Profile Restrictions](configure-user-profile-restrictions.md)**
+    Locks down user profile registry settings (HKCU) to disable toast notifications on the lock screen and block third-party application suggestions.
+
 

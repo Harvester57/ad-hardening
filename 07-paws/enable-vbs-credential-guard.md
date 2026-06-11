@@ -1,8 +1,8 @@
-# Hardening Requirement: Enable VBS and Credential Guard
+# Hardening Requirement: Enable VBS and Credential Guard for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
@@ -21,21 +21,18 @@
 ---
 
 ## Rationale
-Virtualization-Based Security (VBS) uses hardware virtualization features to create and isolate a secure region of memory from the normal operating system. 
+Privileged Access Workstations (PAWs) contain Tier 0 administrative tokens. A compromise of a PAW leads to a direct compromise of the Active Directory database (NTDS.dit) and full domain domain control. Mitigating credential dumping is the single most critical security objective for a PAW.
 
-Windows Defender **Credential Guard** runs inside this isolated VBS environment (known as the secure kernel). By moving NTLM password hashes, Kerberos Ticket Granting Tickets (TGTs), and other domain credentials into this virtualized container, Credential Guard ensures they are inaccessible to the standard operating system. 
-
-If VBS and Credential Guard are not enabled:
-1. **LSASS Access**: Attackers running with administrative rights on the workstation can query the LSASS process memory space and extract Active Directory authentication tokens using memory-dumping tools (e.g., Mimikatz).
-2. **Pass-the-Hash / Pass-the-Ticket**: Attackers can use the extracted hashes or Kerberos tickets to log on to other domain systems, leading to rapid lateral movement and domain compromise.
-
-Enforcing VBS and Credential Guard prevents in-memory credential harvesting, breaking the primary lateral movement escalation vector.
+1. **Virtualization-Based Security (VBS)**: VBS establishes an isolated, secure kernel space using hypervisor hardware virtualization. This secure kernel is separated from the host operating system, preventing root-level exploits from accessing virtualized memory blocks.
+2. **Credential Guard**: Running within the VBS secure kernel, Credential Guard stores credential secrets (NTLM hashes, Kerberos TGTs) inside an isolated memory container. By shifting these secrets outside the standard Local Security Authority (LSA) process memory space, it blocks credential-dumping utilities (like Mimikatz) from harvesting secrets from memory.
+3. **Secure Launch**: System Guard Secure Launch protects firmware boot integrity by using hardware-enforced boot measurements. It isolates the hypervisor startup from potential rootkits or boot-level malware.
+4. **UEFI Memory Attributes Table (MAT)**: Enforcing UEFI MAT ensures that the bootloader validates page permissions in firmware, preventing buffer overflow or execution redirection vulnerabilities in pre-boot configurations.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Virtualization Conflicts**: Third-party virtualization software (such as legacy versions of VMware Workstation or VirtualBox) that do not support nested virtualization or integration with Windows Hyper-V will fail to run when VBS is active.
-* **Hardware Requirements**: Systems must support CPU virtualization (Intel VT-x or AMD-V), Second Level Address Translation (SLAT), and have secure firmware (UEFI, Secure Boot, IOMMU / DMA protection). Older client hardware that does not support these specifications cannot run Credential Guard.
+* **Firmware Requirements**: PAWs must use modern UEFI firmware, native UEFI boot (Legacy CSM disabled), Secure Boot, IOMMU (Intel VT-d or AMD-Vi), CPU Virtualization (Intel VT-x or AMD-V), and TPM 2.0. If physical hardware does not meet these criteria, it is unfit for use as a PAW.
+* **Hypervisor Conflicts**: Standard Windows virtualization layers will be required. Running non-compliant third-party hypervisors (such as older VirtualBox or VMware Workstation configurations) that do not support nested virtualization on Hyper-V will fail.
 
 ---
 
@@ -44,31 +41,30 @@ Enforcing VBS and Credential Guard prevents in-memory credential harvesting, bre
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAW`).
 3. Navigate to:
    `Computer Configuration\Administrative Templates\System\Device Guard`
 4. Configure the setting:
-    * **Policy**: `Turn On Virtualization Based Security`
-    * **Setting**: `Enabled`
-    * **Select Platform Security Level**: `Secure Boot and DMA Protection`
-    * **Virtualization Based Protection of Code Integrity**: `Enabled with UEFI lock`
-    * **Credential Guard Configuration**: `Enabled with UEFI lock`
-    * **Secure Launch Configuration**: `Enabled`
-    * **Require UEFI Memory Attributes Table**: `Enabled`
- 
-*Note: The "Enabled with UEFI lock" setting ensures that an administrator cannot remotely disable Credential Guard via registry changes alone; it requires physical access to the machine to clear UEFI variables on reboot.*
+   * **Policy**: `Turn On Virtualization Based Security`
+   * **Setting**: `Enabled`
+   * **Select Platform Security Level**: `Secure Boot and DMA Protection`
+   * **Virtualization Based Protection of Code Integrity**: `Enabled with UEFI lock`
+   * **Credential Guard Configuration**: `Enabled with UEFI lock`
+   * **Secure Launch Configuration**: `Enabled`
+   * **Require UEFI Memory Attributes Table**: `Enabled`
+5. Link the GPO to the PAWs Organizational Unit (OU).
 
 ---
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to configure registry keys to enable VBS and Credential Guard.
+Configure the local registry parameters to activate VBS, Credential Guard, and Secure Launch.
 
 ```powershell
-# Enable-VBSCredentialGuard.ps1
-# Configures local registry keys to activate VBS and Credential Guard.
+# Enable-PawVBSCredentialGuard.ps1
+# Description: Configures local registry keys to activate VBS and Credential Guard on PAWs.
 
-Write-Host "--- Enforcing VBS & Credential Guard ---" -ForegroundColor Cyan
+Write-Host "--- Enforcing VBS & Credential Guard for PAWs ---" -ForegroundColor Cyan
 
 $DeviceGuardPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard"
 
@@ -89,15 +85,15 @@ Set-ItemProperty -Path $DeviceGuardPath -Name "ConfigureSystemGuardLaunch" -Valu
 # HVCIMATRequired = 1 (Require UEFI Memory Attributes Table)
 Set-ItemProperty -Path $DeviceGuardPath -Name "HVCIMATRequired" -Value 1 -Type DWord
 
-Write-Host "[+] VBS and Credential Guard registry settings applied. (Reboot required)." -ForegroundColor Green
+Write-Host "[+] PAW VBS and Credential Guard registry settings applied. (Reboot required)." -ForegroundColor Green
 ```
 
-*To audit VBS and Credential Guard status using WMI:*
+*To audit VBS and Credential Guard status using WMI and Registry:*
 ```powershell
-# Test-VBSCredentialGuard.ps1
-# Queries the local Win32_DeviceGuard class to verify active protection states.
+# Test-PawVBSCredentialGuard.ps1
+# Description: Queries the local Win32_DeviceGuard class and registry settings to verify VBS protection states on PAWs.
 
-Write-Host "--- Auditing Virtualization-Based Security Baseline ---" -ForegroundColor Cyan
+Write-Host "--- Auditing PAW Virtualization-Based Security Baseline ---" -ForegroundColor Cyan
 
 try {
     $DG = Get-CimInstance -Namespace "Root\Microsoft\Windows\DeviceGuard" -ClassName "Win32_DeviceGuard" -ErrorAction Stop
@@ -130,6 +126,6 @@ try {
 
 ---
 
-## 🔗 Sources & Compliance References
-* **CIS Microsoft Windows 10 Benchmark**: Section 18.8.14.1 (Turn On Virtualization Based Security), Section 18.8.14.2 (Turn On Virtualization Based Security: Credential Guard Configuration)
-* **ANSSI AD Hardening Guide**: Recommendations regarding LSA Protection and Credential Guard deployment.
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.14.1 (Turn On Virtualization Based Security), Section 18.8.14.2 (Turn On Virtualization Based Security: Credential Guard Configuration)
+* **ANSSI AD Hardening Guide**: Recommendations regarding administrative workstation isolation and credential protections.

@@ -13,8 +13,16 @@
   * **Policy**: `Turn On Virtualization-Based Security`
   * **Setting**: `Enabled`
     * **Virtualization Based Protection of Code Integrity**: `Enabled with UEFI lock`
-    * **Credential Guard Configuration**: `Enabled with UEFI lock` (or `Enabled without UEFI lock` depending on hardware management requirements)
-  * **Registry Location (VBS)**: `HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard` -> `EnableVirtualizationBasedSecurity` = `1` (REG_DWORD)
+    * **Credential Guard Configuration**: `Enabled with UEFI lock`
+    * **Require UEFI Memory Attributes Table**: `Enabled`
+    * **Secure Launch Configuration**: `Enabled`
+    * **Select Platform Security Level**: `Secure Boot`
+  * **Registry Location (VBS)**: `HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard` for:
+    * `EnableVirtualizationBasedSecurity` = `1` (REG_DWORD)
+    * `HVCIMATRequired` = `1` (REG_DWORD)
+    * `ConfigureSystemGuardLaunch` = `1` (REG_DWORD)
+    * `RequirePlatformSecurityFeatures` = `1` (REG_DWORD)
+    * `HypervisorEnforcedCodeIntegrity` = `1` (REG_DWORD)
   * **Registry Location (Credential Guard)**: `HKLM\SYSTEM\CurrentControlSet\Control\Lsa` -> `LsaCfgFlags` = `1` (REG_DWORD, Enabled with UEFI lock) or `2` (REG_DWORD, Enabled without UEFI lock)
 
 ---
@@ -59,15 +67,26 @@ Use this method to apply the settings locally.
 # Configure-CredentialGuard.ps1
 # Description: Enables Virtualization-Based Security (VBS) and Credential Guard in the registry.
 
-Write-Host "Applying hardening requirement: Enable Credential Guard..." -ForegroundColor Cyan
+Write-Host "Applying hardening requirement: Enable Credential Guard and VBS Baseline..." -ForegroundColor Cyan
 
-# 1. Enable Virtualization-Based Security
+# 1. Enable Virtualization-Based Security and related hypervisor options
 $vbsPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard"
 if (-not (Test-Path $vbsPath)) {
     New-Item -Path $vbsPath -Force | Out-Null
 }
-Set-ItemProperty -Path $vbsPath -Name "EnableVirtualizationBasedSecurity" -Value 1 -Type DWord
-Write-Host "Virtualization-Based Security enabled in registry." -ForegroundColor Green
+
+$vbsSettings = @{
+    "EnableVirtualizationBasedSecurity" = 1
+    "HVCIMATRequired"                   = 1
+    "ConfigureSystemGuardLaunch"        = 1
+    "RequirePlatformSecurityFeatures"   = 1
+    "HypervisorEnforcedCodeIntegrity"   = 1
+}
+
+foreach ($Setting in $vbsSettings.Keys) {
+    Set-ItemProperty -Path $vbsPath -Name $Setting -Value $vbsSettings[$Setting] -Type DWord -ErrorAction Stop
+}
+Write-Host "Virtualization-Based Security parameters enabled in registry." -ForegroundColor Green
 
 # 2. Configure Credential Guard (LsaCfgFlags: 1 = UEFI Lock, 2 = No UEFI Lock)
 $lsaPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
@@ -89,13 +108,31 @@ Write-Host "--- Auditing Credential Guard ---" -ForegroundColor Cyan
 $vulnerable = $false
 
 # 1. Audit Registry Settings
-$vbsReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard" -Name "EnableVirtualizationBasedSecurity" -ErrorAction SilentlyContinue
+$vbsRegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard"
 $lsaReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa" -Name "LsaCfgFlags" -ErrorAction SilentlyContinue
 
-if ($vbsReg -and $vbsReg.EnableVirtualizationBasedSecurity -eq 1) {
-    Write-Host "[+] Virtualization-Based Security registry key is enabled." -ForegroundColor Green
+$ExpectedVbsSettings = @{
+    "EnableVirtualizationBasedSecurity" = 1
+    "HVCIMATRequired"                   = 1
+    "ConfigureSystemGuardLaunch"        = 1
+    "RequirePlatformSecurityFeatures"   = 1
+    "HypervisorEnforcedCodeIntegrity"   = 1
+}
+
+if (Test-Path $vbsRegPath) {
+    $vbsValues = Get-ItemProperty -Path $vbsRegPath -ErrorAction SilentlyContinue
+    foreach ($Setting in $ExpectedVbsSettings.Keys) {
+        $Val = $vbsValues.$Setting
+        $Expected = $ExpectedVbsSettings[$Setting]
+        if ($Val -eq $Expected) {
+            Write-Host "[+] VBS setting '$Setting' is correctly configured ($Val)." -ForegroundColor Green
+        } else {
+            Write-Host "[!] VULNERABLE: VBS setting '$Setting' is missing or incorrect ($Val)." -ForegroundColor Red
+            $vulnerable = $true
+        }
+    }
 } else {
-    Write-Host "[!] VULNERABLE: Virtualization-Based Security registry key is disabled or missing." -ForegroundColor Red
+    Write-Host "[!] VULNERABLE: Virtualization-Based Security registry path does not exist." -ForegroundColor Red
     $vulnerable = $true
 }
 

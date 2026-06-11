@@ -10,7 +10,19 @@
 * **Priority**: High
 * **GPO Path / Registry Location**: 
   * **Client Configuration (GPO)**: `Computer Configuration\Policies\Administrative Templates\System\Credentials Delegation\Restrict delegation of credentials to remote servers` -> Enabled (Require Restricted Admin)
-  * **Server Configuration (Registry)**: `HKLM:\System\CurrentControlSet\Control\Lsa\DisableRestrictedAdmin` -> `0` (DWORD)
+  * **RDP Session Security GPO**:
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Connection Client\Do not allow passwords to be saved` -> Enabled
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Device and Resource Redirection\Do not allow drive redirection` -> Enabled
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Security\Always prompt for password upon connection` -> Enabled
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Security\Require secure RPC communication` -> Enabled
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Security\Set client connection encryption level` -> Enabled (Encryption Level: High Level)
+  * **Server Configuration (Registry)**:
+    * `HKLM\System\CurrentControlSet\Control\Lsa\DisableRestrictedAdmin` -> `0` (DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `DisablePasswordSaving` = `1` (DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `fDisableCdm` = `1` (DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `fPromptForPassword` = `1` (DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `fEncryptRPCTraffic` = `1` (DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `MinEncryptionLevel` = `3` (DWORD)
 
 ---
 
@@ -57,7 +69,26 @@ Ensure that all target hosts are configured to permit Restricted Admin connectio
 4. Double-click **Restrict delegation of credentials to remote servers**.
 5. Set it to **Enabled**.
 6. Select **Require Remote Credential Guard or Restricted Admin** (or **Require Restricted Admin**).
-7. Click **OK** and link the GPO to your Domain Controllers and Member Servers OUs.
+7. Navigate to:
+   `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Connection Client`
+8. Configure the setting:
+   * **Policy**: `Do not allow passwords to be saved`
+   * **Setting**: `Enabled`
+9. Navigate to:
+   `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Device and Resource Redirection`
+10. Configure the setting:
+    * **Policy**: `Do not allow drive redirection`
+    * **Setting**: `Enabled`
+11. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Security`
+12. Configure the following settings:
+    * **Policy**: `Always prompt for password upon connection`
+    * **Setting**: `Enabled`
+    * **Policy**: `Require secure RPC communication`
+    * **Setting**: `Enabled`
+    * **Policy**: `Set client connection encryption level`
+    * **Setting**: `Enabled` (Select `High Level` in the options dropdown)
+13. Click **OK** and link the GPO to your Domain Controllers and Member Servers OUs.
 
 ---
 
@@ -67,26 +98,46 @@ Run the following script to configure the local host registry to allow and enfor
 
 ```powershell
 # Set-RdpRestrictedAdmin.ps1
-# Description: Enables RDP Restricted Admin mode support on the local system.
+# Description: Enables RDP Restricted Admin mode support and hardens RDP session options.
 
-Write-Host "Applying hardening requirement: Enforce RDP Restricted Admin Mode..." -ForegroundColor Cyan
+Write-Host "Applying hardening requirement: Enforce RDP Restricted Admin Mode and Session Controls..." -ForegroundColor Cyan
 
+# 1. Enable Restricted Admin support
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
 $ValueName = "DisableRestrictedAdmin"
-$ValueData = 0 # 0 enables Restricted Admin support
+$ValueData = 0
 
 if (Test-Path $LsaPath) {
     Set-ItemProperty -Path $LsaPath -Name $ValueName -Value $ValueData -Type DWord -ErrorAction Stop
     Write-Host "[+] Local system configured to accept RDP Restricted Admin connections." -ForegroundColor Green
 } else {
-    Write-Host "[-] Error: LSA Registry path not found." -ForegroundColor Red
+    Write-Warning "LSA Registry path not found."
 }
+
+# 2. Harden RDP Session options in registry
+$RdpPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+if (-not (Test-Path $RdpPolicyPath)) {
+    New-Item -Path $RdpPolicyPath -Force | Out-Null
+}
+
+$RdpSettings = @{
+    "DisablePasswordSaving" = 1
+    "fDisableCdm"           = 1
+    "fPromptForPassword"    = 1
+    "fEncryptRPCTraffic"    = 1
+    "MinEncryptionLevel"    = 3
+}
+
+foreach ($Setting in $RdpSettings.Keys) {
+    Set-ItemProperty -Path $RdpPolicyPath -Name $Setting -Value $RdpSettings[$Setting] -Type DWord -ErrorAction Stop
+}
+Write-Host "[+] RDP session security controls applied to registry." -ForegroundColor Green
 ```
 
 *To verify the local RDP configuration status:*
 ```powershell
 # Get-RdpRestrictedAdminStatus.ps1
-# Description: Checks the configuration state of RDP Restricted Admin.
+# Description: Checks the configuration state of RDP Restricted Admin and session security settings.
 
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
 $ValueName = "DisableRestrictedAdmin"
@@ -104,6 +155,29 @@ if (Test-Path $LsaPath) {
     } else {
         Write-Host "[+] RDP Restricted Admin Mode: Enabled (Default state: No registry restriction)." -ForegroundColor Green
     }
+}
+
+Write-Host "Checking RDP Session Security registry settings..." -ForegroundColor Cyan
+$RdpPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+
+$ExpectedRdpSettings = @{
+    "DisablePasswordSaving" = 1
+    "fDisableCdm"           = 1
+    "fPromptForPassword"    = 1
+    "fEncryptRPCTraffic"    = 1
+    "MinEncryptionLevel"    = 3
+}
+
+if (Test-Path $RdpPolicyPath) {
+    $PolicyValues = Get-ItemProperty -Path $RdpPolicyPath -ErrorAction SilentlyContinue
+    foreach ($Setting in $ExpectedRdpSettings.Keys) {
+        $Val = $PolicyValues.$Setting
+        $Expected = $ExpectedRdpSettings[$Setting]
+        $Color = if ($Val -eq $Expected) { "Green" } else { "Red" }
+        Write-Host "    - $($Setting): $Val (Expected: $Expected)" -ForegroundColor $Color
+    }
+} else {
+    Write-Host "[-] RDP Session Policies path not found." -ForegroundColor Red
 }
 ```
 

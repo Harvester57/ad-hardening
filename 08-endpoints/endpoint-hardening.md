@@ -6,7 +6,7 @@ Standard workstations represent the largest attack surface in the Active Directo
 
 ## Technical Hardening Requirements
 
-1. **[Disable Legacy Name Resolution](disable-legacy-name-resolution.md)**
+1. **[Disable Legacy Name Resolution](harden-network-and-name-resolution.md)**
    Disables Link-Local Multicast Name Resolution (LLMNR), NetBIOS over TCP/IP, and mDNS to prevent local credential harvesting via spoofing and relay attacks.
 
 2. **[Configure User Account Control (UAC) Policies](configure-uac-policies.md)**

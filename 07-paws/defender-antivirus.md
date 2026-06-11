@@ -47,7 +47,7 @@ This control introduces a highly restrictive protective barrier on PAWs:
 4. Configure the following settings:
    * **Policy**: `Turn off Windows Defender Antivirus`
    * **Setting**: `Disabled` (ensures Defender is active)
-5. Navigate to:
+5. Navigation to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Real-time Protection`
 6. Configure the following settings:
    * **Policy**: `Turn off real-time protection`
@@ -62,27 +62,54 @@ This control introduces a highly restrictive protective barrier on PAWs:
    * **Policy**: `Prevent users from configuring exclusions`
    * **Setting**: `Enabled`
 9. Navigate to:
-   `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
-10. Configure the setting:
+   `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MAPS`
+10. Configure the following settings:
+    * **Policy**: `Join Microsoft MAPS`
+    * **Setting**: `Enabled` (Select `Advanced MAPS` in options)
+    * **Policy**: `Send file samples when further analysis is required`
+    * **Setting**: `Enabled` (Select `Send safe samples` in options)
+11. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
+12. Configure the setting:
+    * **Policy**: `Select cloud protection level`
+    * **Setting**: `Enabled` (Select `High blocking level` in options)
+13. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
+14. Configure the setting:
+    * **Policy**: `Scan removable drives`
+    * **Setting**: `Enabled`
+15. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Network Protection`
+16. Configure the setting:
+    * **Policy**: `Prevent users and apps from accessing dangerous websites`
+    * **Setting**: `Enabled` (Select `Block` in options)
+17. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus`
+18. Configure the setting:
+    * **Policy**: `Configure detection for potentially unwanted applications`
+    * **Setting**: `Enabled` (Select `Block` in options)
+19. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
+20. Configure the setting:
     * **Policy**: `Configure Attack Surface Reduction rules`
     * **Setting**: `Enabled`
     * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block):
-      * `56a863a9-875e-4185-98a7-b942c6b2d340` (Block abuse of exploited vulnerable signed drivers)
-      * `7674ba7d-e6d2-4350-9d58-7c1dbb33e758` (Block Adobe Reader from creating child processes)
+      * `56a863a9-875e-4185-98a7-b882c64b5ce5` (Block abuse of exploited vulnerable signed drivers)
+      * `7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c` (Block Adobe Reader from creating child processes)
       * `d4f940ab-401b-4efc-aadc-ad5f3c50688a` (Block all Office applications from creating child processes)
       * `9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2` (Block credential stealing from the Windows Local Security Authority subsystem)
-      * `be9ba2d9-53ea-4d1e-8a57-ab6b53dbb5c5` (Block executable content from email client and webmail)
+      * `be9ba2d9-53ea-4cdc-84e5-9b1eeee46550` (Block executable content from email client and webmail)
       * `01443614-cd74-433a-b99e-2ecdc7777d85` (Block executable files from running unless they meet a prevalence, age, or trusted list criterion)
       * `5beb7efe-fd9a-4556-801d-275e5ffc04cc` (Block execution of potentially obfuscated scripts)
-      * `d3e03999-47ed-4e2a-8747-0d41b5906d20` (Block JavaScript or VBScript from launching downloaded executable content)
-      * `3b576869-74b4-40f2-aa33-a652e742e285` (Block Office applications from creating executable content)
-      * `75668c1f-73b5-4cf0-bb9c-a86f45a22650` (Block Office applications from injecting code into other processes)
-      * `261908b1-1602-4977-800c-d10d9d93d34f` (Block Office communication application from creating child processes)
-      * `e1105574-81d5-4b0c-8a1e-8793133d82e9` (Block persistence through WMI event subscription)
-      * `d1e49fe6-3b60-4270-a130-058b290d024a` (Block process creations originating from PSExec and WMI commands)
-      * `b2b3f03d-fd1f-4654-8491-64d549174092` (Block untrusted and unsigned processes that run from USB)
+      * `d3e037e1-3eb8-44c8-a917-57927947596d` (Block JavaScript or VBScript from launching downloaded executable content)
+      * `3b576869-a4ec-4529-8536-b80a7769e899` (Block Office applications from creating executable content)
+      * `75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84` (Block Office applications from injecting code into other processes)
+      * `26190899-1602-49e8-8b27-eb1d0a1ce869` (Block Office communication application from creating child processes)
+      * `e6db77e5-3df2-4cf1-b95a-636979351e5b` (Block persistence through WMI event subscription)
+      * `d1e49aac-8f56-4280-b9ba-993a6d77406c` (Block process creations originating from PSExec and WMI commands)
+      * `b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4` (Block untrusted and unsigned processes that run from USB)
       * `92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b` (Block Win32 API calls from Office macros)
-      * `c1db55ab-c21a-4637-bb3f-a125b2061d5d` (Use advanced protection against ransomware)
+      * `c1db55ab-c21a-4637-bb3f-a12568109d35` (Use advanced protection against ransomware)
 11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
 12. Configure the setting:
@@ -115,7 +142,13 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Set-MpPreference -DisableRealtimeMonitoring $false
     Set-MpPreference -DisableBehaviorMonitoring $false
     Set-MpPreference -DisableIOAVProtection $false
-    Set-MpPreference -DisableBlockAtFirstSeen $true
+    Set-MpPreference -DisableBlockAtFirstSeen $false
+    Set-MpPreference -MAPSReporting 2
+    Set-MpPreference -SubmitSamplesConsent 1
+    Set-MpPreference -MpCloudBlockLevel 2
+    Set-MpPreference -DisableRemovableDriveScanning $false
+    Set-MpPreference -EnableNetworkProtection 1
+    Set-MpPreference -PUAProtection 1
     Set-MpPreference -DisableExclusionRestriction $false
 } else {
     Write-Warning "Set-MpPreference cmdlet is not available."
@@ -127,6 +160,7 @@ if (-not (Test-Path $DefenderPath)) {
     New-Item -Path $DefenderPath -Force | Out-Null
 }
 Set-ItemProperty -Path $DefenderPath -Name "DisableAntiSpyware" -Value 0 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "PUAProtection" -Value 1 -Type DWord
 
 $ExclPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions"
 if (-not (Test-Path $ExclPath)) {
@@ -145,22 +179,22 @@ if (-not (Test-Path $AsrRulesPath)) {
 }
 
 $AsrRules = @{
-    "56a863a9-875e-4185-98a7-b942c6b2d340" = "1"
-    "7674ba7d-e6d2-4350-9d58-7c1dbb33e758" = "1"
+    "56a863a9-875e-4185-98a7-b882c64b5ce5" = "1"
+    "7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c" = "1"
     "d4f940ab-401b-4efc-aadc-ad5f3c50688a" = "1"
     "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2" = "1"
-    "be9ba2d9-53ea-4d1e-8a57-ab6b53dbb5c5" = "1"
+    "be9ba2d9-53ea-4cdc-84e5-9b1eeee46550" = "1"
     "01443614-cd74-433a-b99e-2ecdc7777d85" = "1"
     "5beb7efe-fd9a-4556-801d-275e5ffc04cc" = "1"
-    "d3e03999-47ed-4e2a-8747-0d41b5906d20" = "1"
-    "3b576869-74b4-40f2-aa33-a652e742e285" = "1"
-    "75668c1f-73b5-4cf0-bb9c-a86f45a22650" = "1"
-    "261908b1-1602-4977-800c-d10d9d93d34f" = "1"
-    "e1105574-81d5-4b0c-8a1e-8793133d82e9" = "1"
-    "d1e49fe6-3b60-4270-a130-058b290d024a" = "1"
-    "b2b3f03d-fd1f-4654-8491-64d549174092" = "1"
+    "d3e037e1-3eb8-44c8-a917-57927947596d" = "1"
+    "3b576869-a4ec-4529-8536-b80a7769e899" = "1"
+    "75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84" = "1"
+    "26190899-1602-49e8-8b27-eb1d0a1ce869" = "1"
+    "e6db77e5-3df2-4cf1-b95a-636979351e5b" = "1"
+    "d1e49aac-8f56-4280-b9ba-993a6d77406c" = "1"
+    "b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4" = "1"
     "92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b" = "1"
-    "c1db55ab-c21a-4637-bb3f-a125b2061d5d" = "1"
+    "c1db55ab-c21a-4637-bb3f-a12568109d35" = "1"
 }
 
 foreach ($RuleId in $AsrRules.Keys) {
@@ -206,10 +240,22 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     $RealtimeColor = if ($Pref.DisableRealtimeMonitoring -eq $false) { "Green" } else { "Red" }
     $BehaviorColor = if ($Pref.DisableBehaviorMonitoring -eq $false) { "Green" } else { "Red" }
     $ExclColor = if ($Pref.DisableLocalAdminConfiguration -eq 1 -or $Pref.DisableLocalAdminConfiguration -eq $true) { "Green" } else { "Red" }
+    $MapsColor = if ($Pref.MAPSReporting -eq 2) { "Green" } else { "Red" }
+    $SamplesColor = if ($Pref.SubmitSamplesConsent -eq 1) { "Green" } else { "Red" }
+    $CloudColor = if ($Pref.MpCloudBlockLevel -eq 2) { "Green" } else { "Red" }
+    $RemovableColor = if ($Pref.DisableRemovableDriveScanning -eq $false) { "Green" } else { "Red" }
+    $NetProtColor = if ($Pref.EnableNetworkProtection -eq 1 -or $Pref.EnableNetworkProtection -eq $true) { "Green" } else { "Red" }
+    $PuaColor = if ($Pref.PUAProtection -eq 1) { "Green" } else { "Red" }
     
     Write-Host "    - Real-Time Monitoring Active: $(!$Pref.DisableRealtimeMonitoring) (Required: True)" -ForegroundColor $RealtimeColor
     Write-Host "    - Behavior Monitoring Active: $(!$Pref.DisableBehaviorMonitoring) (Required: True)" -ForegroundColor $BehaviorColor
     Write-Host "    - Exclusions Blocked: $($Pref.DisableLocalAdminConfiguration) (Required: True)" -ForegroundColor $ExclColor
+    Write-Host "    - MAPS Reporting (Advanced): $($Pref.MAPSReporting) (Required: 2)" -ForegroundColor $MapsColor
+    Write-Host "    - Submit Samples (Safe): $($Pref.SubmitSamplesConsent) (Required: 1)" -ForegroundColor $SamplesColor
+    Write-Host "    - Cloud Protection Level: $($Pref.MpCloudBlockLevel) (Required: 2)" -ForegroundColor $CloudColor
+    Write-Host "    - Removable Drive Scanning: $(!$Pref.DisableRemovableDriveScanning) (Required: True)" -ForegroundColor $RemovableColor
+    Write-Host "    - Network Protection: $($Pref.EnableNetworkProtection) (Required: 1)" -ForegroundColor $NetProtColor
+    Write-Host "    - PUA Protection: $($Pref.PUAProtection) (Required: 1)" -ForegroundColor $PuaColor
 } else {
     Write-Warning "Get-MpPreference is not available."
 }
