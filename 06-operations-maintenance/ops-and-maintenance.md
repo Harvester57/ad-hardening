@@ -55,11 +55,32 @@ sequenceDiagram
 
 ## 3. Continuous Security Assessments (ANSSI R57)
 
-Administrators must actively search for misconfigurations, weak permissions, and signs of compromise in Active Directory.
+Administrators must actively search for misconfigurations, weak permissions, and signs of compromise in Active Directory. In an isolated, air-gapped network, online scanning is impossible, requiring all diagnostic tools to run natively and extract results offline.
 
-### Recommended Offline Assessment Tools
-1. **PingCastle**: A highly regarded French utility that evaluates the security level of an Active Directory domain. It runs entirely offline, queries AD via LDAP, and outputs a comprehensive HTML report with a security score and detailed recommendations aligned with ANSSI guidelines.
-2. **ADRecon**: A PowerShell tool that extracts Active Directory configuration details and formats them into an Excel workbook. It allows admins to examine user permissions, GPO settings, trusts, and computers.
+### Recommended Offline Assessment Tools & Execution Guides
+
+#### 1. PingCastle (Active Directory Health & Security Auditing)
+PingCastle evaluates the security posture of an Active Directory domain by querying the directory database via LDAP and generating a comprehensive HTML report with a security score and recommendations mapped to ANSSI guidelines.
+* **Execution Interval**: Run monthly, or after any major schema or GPO changes.
+* **Operational Command**: Run the following command from an administrative workstation to generate the report without user interaction:
+  ```cmd
+  PingCastle.exe --server target.domain.local --level level_Default --xml --no_update
+  ```
+* **Post-Execution**: Transfer the generated HTML report and XML output to a secure auditing platform. Analyze the security score, paying close attention to anomalous Trust relationships and Delegation paths.
+
+#### 2. BloodHound & SharpHound (Lateral Movement Graph Analysis)
+BloodHound uses graph theory to reveal hidden relationships and complex attack paths within an Active Directory environment. SharpHound is the offline data collector.
+* **Execution Interval**: Run quarterly, or during dedicated red/blue team security reviews.
+* **SharpHound Execution Command**: Run the collector locally from a domain-joined system using:
+  ```cmd
+  SharpHound.exe --CollectionMethods All --Domain target.domain.local --ZipFileName AD_BloodHound_Export.zip
+  ```
+* **Data Processing**: Securely copy the output `.zip` file from the isolated environment. Import the JSON files into the offline BloodHound GUI dashboard to query for attack paths (e.g. finding paths from Domain Users to Domain Admins).
+
+#### 3. ORADAD (Offline Active Directory Database Analysis)
+ORADAD allows administrators to perform offline analysis of Active Directory configurations and database objects, helping audit and flag anomalous permissions or structural variations.
+* **Execution Interval**: Run semi-annually, or during forensic investigation scenarios.
+* **Extraction Command**: Perform offline analysis by leveraging PowerShell to audit AD configuration states or dump schema values without query overhead.
 
 ---
 

@@ -10,3 +10,12 @@ This directory contains operational procedures and configuration baselines for s
 2. **[Enforce KRBTGT Password Rotation](enforce-krbtgt-password-rotation.md)**
    Enforces and audits periodic rotation of the domain KRBTGT account password to prevent Golden Ticket attacks.
 
+3. **[Enable and Configure Active Directory Recycle Bin](enable-recycle-bin.md)**
+   Enables the forest-wide Recycle Bin optional feature to preserve all link-valued attributes and permit rapid recovery of deleted objects.
+
+4. **[Establish and Maintain Group Policy ADMX Central Store](maintain-gpo-templates.md)**
+   Centralizes ADMX administrative templates within the SYSVOL share to prevent console drift and version mismatches.
+
+5. **[Implement Third-Party and Custom GPO Templates for COTS Hardening](use-third-party-templates.md)**
+   Enforces standardized configuration templates to lock down third-party application configurations (browsers, reader software, security guides).
+

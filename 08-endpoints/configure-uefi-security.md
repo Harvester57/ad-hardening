@@ -53,9 +53,15 @@ UEFI parameters can be configured manually on individual systems or programmatic
    * Locate **Intel Virtualization Technology (VT-x)** or **AMD-V** and set it to **Enabled**.
    * Locate **Intel VT for Directed I/O (VT-d)** or **AMD IOMMU** and set it to **Enabled** (required for IOMMU/Kernel DMA Protection).
    * Locate **TPM 2.0 Device** (or **Security Chip / Intel PTT / AMD fTPM**) and set it to **Enabled** or **Active** (with SHA-256 PCR bank).
-5. Navigate to the **Advanced** or **Firmware Update** section:
+   * Locate **Memory Overwrite Request Control Lock** (or **MOR Lock**) and set it to **Enabled**.
+5. Navigate to the **Security** or **Secure Boot** section:
+   * Ensure **Secure Boot** is **Enabled** and the **Secure Boot Mode** is set to **Deployed** or **User Mode**.
+   * Harden the certificates allowlist:
+     * **Key Exchange Key (KEK)**: Must only contain "Microsoft Corporation KEK CA 2011" and "Microsoft Corporation KEK 2K CA 2023".
+     * **Signature Database (db)**: Must only contain "Microsoft Windows Production PCA 2011" and "Windows UEFI CA 2023". Remove "Microsoft UEFI CA 2011" and "Microsoft Option ROM UEFI CA 2023" unless strictly required by specific physical PCIe expansion hardware.
+6. Navigate to the **Advanced** or **Firmware Update** section:
    * Locate the option for **BIOS Flash Protection** or **Firmware Rollback Protection** and set it to **Enabled** or **Block Downgrades**.
-6. Save settings and exit the utility.
+7. Save settings and exit the utility.
 
 #### 2. Programmatic Configuration (Enterprise Deployment)
 Use OEM utilities to deploy the UEFI password and boot configuration:
@@ -68,6 +74,7 @@ cctk.exe --embuefipxe=disable
 cctk.exe --virtualization=enable
 cctk.exe --vt-d=enable
 cctk.exe --fastboot=disable
+cctk.exe --mor=enable
 ```
 * **HP Systems**: Use HP Client Management Script Library (CMSL) in PowerShell:
 ```powershell
@@ -77,6 +84,7 @@ Set-HPBiosSettingValue -Setting "Boot Order" -Value "Hard Drive"
 Set-HPBiosSettingValue -Setting "Virtualization Technology (VTx)" -Value "Enable"
 Set-HPBiosSettingValue -Setting "Virtualization Technology Directed I/O (VTd)" -Value "Enable"
 Set-HPBiosSettingValue -Setting "Fast Boot" -Value "Disable"
+Set-HPBiosSettingValue -Setting "Memory Overwrite Request" -Value "Enable"
 ```
 
 ---

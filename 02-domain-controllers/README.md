@@ -28,3 +28,5 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to restrict remote RPC access to the SAM database to local Administrators, preventing remote recon and user enumeration.
 * **[Disable Unnecessary Services](disable-unnecessary-services.md)**
   Requirement to disable unnecessary system services (such as Xbox services and other non-essential services) on Domain Controllers to minimize the attack surface.
+* **[Enable Kerberos Armoring](enable-kerberos-armoring.md)**
+  Requirement to enable Kerberos Armoring (FAST) on Domain Controllers and client endpoints to encrypt pre-authentication exchanges and protect credentials from offline brute-force attacks.

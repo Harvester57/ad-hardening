@@ -28,4 +28,13 @@ This directory contains security requirements and policies designed to protect a
 8. **[Enforce User and Service Account Kerberos Encryption (AES-Only)](enforce-user-aes-encryption.md)**
    Sets the msDS-SupportedEncryptionTypes attribute to AES-only to mitigate Kerberoasting and session hijacking.
 
+9. **[Enforce Kerberos Pre-Authentication](enforce-kerberos-preauthentication.md)**
+   Mandates Kerberos pre-authentication on all active user accounts to mitigate AS-REP Roasting attacks.
+
+10. **[Restrict Schema Administrators Group Membership](restrict-schema-admins.md)**
+    Automates Schema Admins membership audit and locking using Restricted Groups GPO to minimize the attack surface.
+
+11. **[Enforce Accidental Deletion Protection on Organizational Units](prevent-accidental-deletion-ous.md)**
+    Safeguards OUs from deletion errors or malicious administrative actions via the `ProtectedFromAccidentalDeletion` attribute.
+
 

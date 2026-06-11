@@ -54,9 +54,15 @@ UEFI settings must be configured directly within the hardware platform firmware 
    * Locate **Intel Virtualization Technology (VT-x)** or **AMD-V** and set it to **Enabled**.
    * Locate **Intel VT for Directed I/O (VT-d)** or **AMD IOMMU** and set it to **Enabled** (required for IOMMU/Kernel DMA Protection).
    * Locate **TPM 2.0 Device** (or **Security Chip / Intel PTT / AMD fTPM**) and set it to **Enabled** or **Active** (with SHA-256 PCR bank).
-5. Navigate to the **Advanced** or **Firmware Update** section:
+   * Locate **Memory Overwrite Request Control Lock** (or **MOR Lock**) and set it to **Enabled**.
+5. Navigate to the **Security** or **Secure Boot** section:
+   * Ensure **Secure Boot** is **Enabled** and the **Secure Boot Mode** is set to **Deployed** or **User Mode**.
+   * Harden the certificates allowlist:
+     * **Key Exchange Key (KEK)**: Must only contain "Microsoft Corporation KEK CA 2011" and "Microsoft Corporation KEK 2K CA 2023".
+     * **Signature Database (db)**: Must only contain "Microsoft Windows Production PCA 2011" and "Windows UEFI CA 2023". Remove "Microsoft UEFI CA 2011" and "Microsoft Option ROM UEFI CA 2023" unless strictly required by specific physical PCIe expansion hardware.
+6. Navigate to the **Advanced** or **Firmware Update** section:
    * Locate the option for **BIOS Flash Protection** or **Firmware Rollback Protection** and set it to **Enabled** or **Block Downgrades**.
-6. Save the configuration and restart the workstation.
+7. Save the configuration and restart the workstation.
 
 ---
 

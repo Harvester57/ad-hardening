@@ -17,3 +17,9 @@ This directory contains the Active Directory Administrative Tiering Model defini
 
 3. **[Audit Privileged Groups](audit-privileged-groups.md)**
    Implements automated auditing of Tier 0 administrative Active Directory groups to detect nested memberships and unauthorized additions.
+
+4. **[Keep Functional Levels Up-To-Date](keep-functional-levels-up-to-date.md)**
+   Recommends migrating Domain and Forest Functional Levels to Windows Server 2016 or higher to unlock critical security features like the Protected Users group, gMSAs, and Kerberos Armoring.
+
+5. **[Default Domain and Domain Controllers Policies Management](default-policies-recommendations.md)**
+   Provides structural guidelines to separate custom hardening policies into dedicated, modular GPOs rather than directly editing Default Domain/DC policies, protecting the forest baseline.
