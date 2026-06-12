@@ -6,5 +6,12 @@
     "-sharing",
     "prism",
     "-highlight"
-  ]
+  ],
+  "pluginsConfig": {
+    "prism": {
+      "ignore": [
+        "mermaid"
+      ]
+    }
+  }
 }

@@ -9,6 +9,6 @@
   },
   "devDependencies": {
     "honkit": "^6.0.0",
-    "gitbook-plugin-prism": "^2.4.0"
+    "honkit-plugin-prism": "^2.5.4"
   }
 }
