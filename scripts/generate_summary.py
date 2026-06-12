@@ -39,8 +39,10 @@ def main():
             title_match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
             module_title = title_match.group(1) if title_match else module
             
+            overview_title = module_title
+            
             summary_lines.append(f"## {module_title}")
-            summary_lines.append(f"* [Overview]({module_readme})")
+            summary_lines.append(f"* [{overview_title}]({module_readme})")
             
             # Find all local markdown links in the module README
             # e.g. [Link Text](disable-smbv1.md)
@@ -52,7 +54,7 @@ def main():
                     added_files.add(link_path)
                     # Convert to path relative to repository root
                     rel_path = f"{module}/{link_path}"
-                    summary_lines.append(f"* [{text}]({rel_path})")
+                    summary_lines.append(f"    * [{text}]({rel_path})")
         else:
             print(f"Warning: Module README {module_readme} not found.")
 
