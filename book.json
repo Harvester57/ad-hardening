@@ -3,6 +3,8 @@
   "description": "Production-Grade Hardening Requirements & Guidelines for Air-Gapped Environments",
   "language": "en",
   "plugins": [
-    "-sharing"
+    "-sharing",
+    "prism",
+    "-highlight"
   ]
 }

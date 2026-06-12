@@ -8,6 +8,7 @@
     "gitbook:serve": "npm run gitbook:summary && honkit serve"
   },
   "devDependencies": {
-    "honkit": "^6.0.0"
+    "honkit": "^6.0.0",
+    "gitbook-plugin-prism": "^2.4.0"
   }
 }
