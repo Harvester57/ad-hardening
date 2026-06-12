@@ -1,0 +1,9 @@
+# HonKit / GitBook build outputs
+_book/
+
+# Node dependencies
+node_modules/
+
+# Local/OS files
+.DS_Store
+Thumbs.db
