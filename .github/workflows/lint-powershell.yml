@@ -34,7 +34,7 @@ jobs:
           }
           
           Write-Host "Found $($scripts.Count) scripts to analyze."
-          $results = $scripts | Invoke-ScriptAnalyzer -Severity Error, Warning
+          $results = $scripts | Invoke-ScriptAnalyzer -Settings .\PSScriptAnalyzerSettings.psd1 -Severity Error, Warning
           
           if ($results) {
               $results | Format-Table -AutoSize
