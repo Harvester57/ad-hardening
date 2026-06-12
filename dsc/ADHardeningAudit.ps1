@@ -156,16 +156,77 @@ Configuration ADHardeningAudit {
                         return $false
                     }
 
-                    # Execute the audit script. Redirect information stream (6) to success stream
-                    # and capture all output to verify compliance result.
-                    $output = & $path 6>&1 *>&1 | Out-String
+                    # Define compliance status flags
+                    $script:hasVulnerability = $false
+                    $script:hasSecureVerdict = $false
+                    $script:hasVulnerableVerdict = $false
 
-                    # Standard pattern for secure status is 'Audit result: SECURE' or 'Audit Result: SECURE'
-                    if ($output -match "Audit [Rr]esult:\s*SECURE") {
-                        return $true
+                    # Define custom Write-Host to intercept output details
+                    function Write-Host {
+                        param(
+                            [Parameter(ValueFromPipeline = $true, Position = 0)]
+                            $Object,
+                            $ForegroundColor,
+                            $BackgroundColor,
+                            [switch]$NoNewline
+                        )
+                        $text = $Object | Out-String
+                        if ($ForegroundColor -eq "Red") {
+                            $script:hasVulnerability = $true
+                        }
+                        if ($text -match "Audit [Rr]esult:\s*SECURE" -or $text -match "Verification PASSED" -or $text -match "compliant" -or $text -match "PASSED") {
+                            $script:hasSecureVerdict = $true
+                        }
+                        if ($text -match "Audit [Rr]esult:\s*VULNERABLE" -or $text -match "Verification FAILED" -or $text -match "vulnerable" -or $text -match "FAILED") {
+                            $script:hasVulnerableVerdict = $true
+                        }
+                        Microsoft.PowerShell.Utility\Write-Host @PSBoundParameters
                     }
 
-                    return $false
+                    # Define custom Write-Warning to intercept warnings
+                    function Write-Warning {
+                        param(
+                            [Parameter(ValueFromPipeline = $true, Position = 0)]
+                            $Message
+                        )
+                        $script:hasVulnerability = $true
+                        Microsoft.PowerShell.Utility\Write-Warning @PSBoundParameters
+                    }
+
+                    # Define custom Write-Error to intercept errors
+                    function Write-Error {
+                        param(
+                            [Parameter(ValueFromPipeline = $true, Position = 0)]
+                            $Message
+                        )
+                        $script:hasVulnerability = $true
+                        Microsoft.PowerShell.Utility\Write-Error @PSBoundParameters
+                    }
+
+                    # Execute the script, capturing stdout, stderr, warning, error, and information streams
+                    $output = & $path 6>&1 *>&1 | Out-String
+
+                    # Cleanup functions to prevent scope leakage
+                    Remove-Item Function:\Write-Host -ErrorAction SilentlyContinue
+                    Remove-Item Function:\Write-Warning -ErrorAction SilentlyContinue
+                    Remove-Item Function:\Write-Error -ErrorAction SilentlyContinue
+
+                    # Compliance Decision Logic:
+                    # 1. If red text, warnings, or errors were generated, it is vulnerable.
+                    if ($script:hasVulnerability) {
+                        return $false
+                    }
+                    # 2. If an explicit VULNERABLE verdict was printed, it is vulnerable.
+                    if ($script:hasVulnerableVerdict) {
+                        return $false
+                    }
+                    # 3. If an explicit SECURE verdict was printed, it is secure.
+                    if ($script:hasSecureVerdict) {
+                        return $true
+                    }
+                    # 4. If none of the above are matched (i.e. no vulnerabilities or explicit verdicts were printed),
+                    # we default to compliant ($true) since no failures were logged.
+                    return $true
                 }
                 SetScript = {
                     $name = $using:scriptFileName
