@@ -1,0 +1,236 @@
+/* CSS Stylesheet for Active Directory Hardening Guidebook PDF */
+
+/* Import Outfit or Inter from Google Fonts for a highly premium look */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Page setup */
+@page {
+  size: A4;
+  margin: 20mm;
+}
+
+/* Base Body Styles */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1f2937; /* Dark charcoal */
+  line-height: 1.6;
+  font-size: 10.5pt;
+  background-color: #ffffff;
+}
+
+/* Cover Page styling */
+.cover-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin-top: 60mm;
+  text-align: center;
+  page-break-after: always;
+}
+
+.cover-page h1 {
+  font-size: 32pt;
+  font-weight: 700;
+  color: #1e3a8a; /* Deep Slate Blue */
+  margin-bottom: 5mm;
+  line-height: 1.2;
+}
+
+.cover-page h2 {
+  font-size: 16pt;
+  font-weight: 400;
+  color: #4b5563; /* Gray */
+  margin-bottom: 25mm;
+  line-height: 1.4;
+  border: none;
+  padding: 0;
+}
+
+.cover-page hr {
+  width: 60mm;
+  border: 0;
+  border-top: 2px solid #3b82f6;
+  margin: 10mm auto;
+}
+
+.cover-page p {
+  font-size: 11pt;
+  color: #374151;
+}
+
+.cover-page ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 10mm 0;
+}
+
+.cover-page li {
+  margin: 2mm 0;
+  font-size: 11pt;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  color: #1e3a8a; /* Deep Slate Blue */
+  font-weight: 700;
+  margin-top: 6mm;
+  margin-bottom: 3mm;
+  page-break-after: avoid; /* Prevent headings at the bottom of pages */
+}
+
+h1 {
+  font-size: 20pt;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 2mm;
+  margin-top: 10mm;
+}
+
+h2 {
+  font-size: 15pt;
+  color: #0f766e; /* Teal */
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 1.5mm;
+  margin-top: 8mm;
+}
+
+h3 {
+  font-size: 12pt;
+  color: #1e3a8a;
+  margin-top: 6mm;
+}
+
+h4 {
+  font-size: 11pt;
+  color: #374151;
+}
+
+/* Paragraphs and list items */
+p {
+  margin-top: 0;
+  margin-bottom: 4mm;
+  text-align: justify;
+}
+
+ul, ol {
+  margin-top: 0;
+  margin-bottom: 4mm;
+  padding-left: 6mm;
+}
+
+li {
+  margin-bottom: 1.5mm;
+}
+
+/* Code Blocks and Inline Code */
+code {
+  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+  font-size: 9pt;
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  color: #0f766e; /* Teal-green code highlight */
+}
+
+pre {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12mm 6mm 6mm 6mm; /* Extra top padding for the language tab */
+  margin: 6mm 0;
+  page-break-inside: avoid; /* Prevent splitting code blocks */
+  position: relative;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: #0f172a;
+  font-size: 8.5pt;
+  white-space: pre-wrap;
+  word-break: break-all;
+  display: block;
+}
+
+/* Premium Styling for Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 6mm 0;
+  font-size: 9.5pt;
+  page-break-inside: avoid; /* Prevent table rows from splitting awkwardly */
+}
+
+th, td {
+  border: 1px solid #e2e8f0;
+  padding: 2.5mm 3.5mm;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background-color: #1e3a8a; /* Deep Slate Blue */
+  color: #ffffff;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 8.5pt;
+  letter-spacing: 0.5px;
+}
+
+tr:nth-child(even) {
+  background-color: #f8fafc; /* Alternating light-gray background */
+}
+
+/* Callouts / Blockquotes styling */
+blockquote {
+  margin: 6mm 0;
+  padding: 4mm 6mm;
+  background-color: #f8fafc;
+  border-left: 4px solid #1e3a8a;
+  border-radius: 0 6px 6px 0;
+  page-break-inside: avoid;
+}
+
+blockquote p {
+  margin: 0;
+  font-style: italic;
+  color: #374151;
+  text-align: left;
+}
+
+/* Highlight important alert-like paragraphs inside blockquotes */
+blockquote strong {
+  color: #1e3a8a;
+  text-transform: uppercase;
+  font-size: 8.5pt;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 1mm;
+}
+
+/* Links */
+a {
+  color: #2563eb; /* Blue links */
+  text-decoration: none;
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Page Break Helper */
+.page-break {
+  page-break-before: always;
+}
+
+/* Print Specific Rules */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

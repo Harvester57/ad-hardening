@@ -1,0 +1,39 @@
+name: Generate Guidebook PDF
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-pdf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Compile Markdown Files
+        run: python scripts/compile_docs.py
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Generate PDF from Markdown
+        run: |
+          npx md-to-pdf AD-Hardening-Guidebook.md --stylesheet scripts/pdf-style.css --launch-options '{"args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]}'
+
+      - name: Upload PDF Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Active-Directory-Hardening-Guidebook
+          path: AD-Hardening-Guidebook.pdf
