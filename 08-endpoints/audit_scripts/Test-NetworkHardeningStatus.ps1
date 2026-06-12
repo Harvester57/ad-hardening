@@ -3,7 +3,7 @@
 
 Write-Host "--- Auditing Network and Name Resolution Baseline ---" -ForegroundColor Cyan
 
-$Vulnerable = $false
+$script:Vulnerable = $false
 
 # Helper function to audit registry properties
 function Test-RegistryValue ($path, $name, $expectedValue) {
@@ -13,7 +13,7 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     if ($actual -eq $expectedValue) {
         $color = "Green"
     } else {
-        $global:Vulnerable = $true
+        $script:Vulnerable = $true
     }
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
@@ -55,7 +55,7 @@ Test-RegistryValue $PrinterPath "DisableHTTPPrinting" 1
 $ServerPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
 Test-RegistryValue $ServerPath "RestrictNullSessAccess" 1
 
-if ($Vulnerable) {
+if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
 } else {
     Write-Host "Audit Result: SECURE" -ForegroundColor Green

@@ -4,15 +4,23 @@
 Write-Host "Applying network and name resolution hardening..." -ForegroundColor Cyan
 
 # Helper to configure registry keys
-function Set-RegDWord ($path, $name, $value) {
-    $parent = Split-Path -Path $path
-    if (-not (Test-Path $parent)) {
-        New-Item -Path $parent -Force | Out-Null
+function Set-RegDWord {
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        [string]$path,
+        [string]$name,
+        [int]$value
+    )
+    if ($PSCmdlet.ShouldProcess($path, "Set registry DWORD value $name to $value")) {
+        $parent = Split-Path -Path $path
+        if (-not (Test-Path $parent)) {
+            New-Item -Path $parent -Force | Out-Null
+        }
+        if (-not (Test-Path $path)) {
+            New-Item -Path $path -Force | Out-Null
+        }
+        Set-ItemProperty -Path $path -Name $name -Value $value -Type DWord -Force
     }
-    if (-not (Test-Path $path)) {
-        New-Item -Path $path -Force | Out-Null
-    }
-    Set-ItemProperty -Path $path -Name $name -Value $value -Type DWord -Force
 }
 
 # 1. Disable LLMNR

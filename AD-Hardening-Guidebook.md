@@ -13,7 +13,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 8a59706 | Generated: June 12, 2026</span>
+      <span>Commit: a84956f | Generated: June 12, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -16436,7 +16436,7 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host "--- Auditing PAW Account and Password Policies ---" -ForegroundColor Cyan
 
-$Vulnerable = $false
+$script:Vulnerable = $false
 
 <a id="07-paws-configure-account-policies-md-helper-function-to-audit-registry-properties"></a>
 # Helper function to audit registry properties
@@ -16447,7 +16447,7 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     if ($actual -eq $expectedValue) {
         $color = "Green"
     } else {
-        $global:Vulnerable = $true
+        $script:Vulnerable = $true
     }
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
@@ -16541,14 +16541,14 @@ foreach ($Key in $AccountSettings.Keys) {
     if ($Actual -eq [string]$Expected) {
         $Color = "Green"
     } else {
-        $Vulnerable = $true
+        $script:Vulnerable = $true
     }
     Write-Host "    - System Access Setting: $($Key) | Actual: '$($Actual)' (Expected: '$($Expected)')" -ForegroundColor $Color
 }
 
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
-if ($Vulnerable) {
+if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
 } else {
     Write-Host "Audit Result: SECURE" -ForegroundColor Green
@@ -16859,15 +16859,23 @@ Write-Host "Applying network and name resolution hardening..." -ForegroundColor 
 
 <a id="08-endpoints-harden-network-and-name-resolution-md-helper-to-configure-registry-keys"></a>
 # Helper to configure registry keys
-function Set-RegDWord ($path, $name, $value) {
-    $parent = Split-Path -Path $path
-    if (-not (Test-Path $parent)) {
-        New-Item -Path $parent -Force | Out-Null
+function Set-RegDWord {
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        [string]$path,
+        [string]$name,
+        [int]$value
+    )
+    if ($PSCmdlet.ShouldProcess($path, "Set registry DWORD value $name to $value")) {
+        $parent = Split-Path -Path $path
+        if (-not (Test-Path $parent)) {
+            New-Item -Path $parent -Force | Out-Null
+        }
+        if (-not (Test-Path $path)) {
+            New-Item -Path $path -Force | Out-Null
+        }
+        Set-ItemProperty -Path $path -Name $name -Value $value -Type DWord -Force
     }
-    if (-not (Test-Path $path)) {
-        New-Item -Path $path -Force | Out-Null
-    }
-    Set-ItemProperty -Path $path -Name $name -Value $value -Type DWord -Force
 }
 
 <a id="08-endpoints-harden-network-and-name-resolution-md-1-disable-llmnr"></a>
@@ -16938,7 +16946,7 @@ Write-Host "Network and name resolution hardening applied successfully." -Foregr
 
 Write-Host "--- Auditing Network and Name Resolution Baseline ---" -ForegroundColor Cyan
 
-$Vulnerable = $false
+$script:Vulnerable = $false
 
 <a id="08-endpoints-harden-network-and-name-resolution-md-helper-function-to-audit-registry-properties"></a>
 # Helper function to audit registry properties
@@ -16949,7 +16957,7 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     if ($actual -eq $expectedValue) {
         $color = "Green"
     } else {
-        $global:Vulnerable = $true
+        $script:Vulnerable = $true
     }
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
@@ -16997,7 +17005,7 @@ Test-RegistryValue $PrinterPath "DisableHTTPPrinting" 1
 $ServerPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
 Test-RegistryValue $ServerPath "RestrictNullSessAccess" 1
 
-if ($Vulnerable) {
+if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
 } else {
     Write-Host "Audit Result: SECURE" -ForegroundColor Green
@@ -18747,7 +18755,7 @@ Run the following script to check the status of Secure Boot on the local machine
 
 Write-Host "--- Auditing UEFI Secure Boot & BlackLotus Mitigations ---" -ForegroundColor Cyan
 
-$NonCompliant = $false
+$script:NonCompliant = $false
 
 try {
     # Confirm-SecureBootUEFI returns $true if Secure Boot is active, $false if disabled,
@@ -18756,14 +18764,14 @@ try {
     
     $Color = if ($SecureBootState -eq $true) { "Green" } else { "Red" }
     Write-Host "    - Secure Boot Active: $SecureBootState" -ForegroundColor $Color
-    if ($SecureBootState -eq $false) { $global:NonCompliant = $true }
+    if ($SecureBootState -eq $false) { $script:NonCompliant = $true }
 } catch [System.PlatformNotSupportedException] {
     Write-Host "    - VULNERABLE: UEFI Secure Boot is not supported on this platform (Legacy BIOS mode)." -ForegroundColor Red
-    $global:NonCompliant = $true
+    $script:NonCompliant = $true
 } catch {
     # If cmdlet throws unauthorized access or not enabled error
     Write-Host "    - VULNERABLE: Secure Boot is disabled in firmware or cannot be verified. Error: $($_.Exception.Message)" -ForegroundColor Red
-    $global:NonCompliant = $true
+    $script:NonCompliant = $true
 }
 
 <a id="08-endpoints-enable-secure-boot-md-audit-availableupdates-registry-key"></a>
@@ -18778,14 +18786,14 @@ if (Test-Path $Path) {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Compliant)" -ForegroundColor Green
     } else {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
-        $global:NonCompliant = $true
+        $script:NonCompliant = $true
     }
 } else {
     Write-Host "    - BlackLotus Revocation Updates: Registry path not found (Non-Compliant)" -ForegroundColor Red
-    $global:NonCompliant = $true
+    $script:NonCompliant = $true
 }
 
-if ($NonCompliant) {
+if ($script:NonCompliant) {
     exit 1
 }
 ```
@@ -21067,7 +21075,7 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host "--- Auditing Account and Password Policies ---" -ForegroundColor Cyan
 
-$Vulnerable = $false
+$script:Vulnerable = $false
 
 <a id="08-endpoints-configure-account-policies-md-helper-function-to-audit-registry-properties"></a>
 # Helper function to audit registry properties
@@ -21078,7 +21086,7 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     if ($actual -eq $expectedValue) {
         $color = "Green"
     } else {
-        $global:Vulnerable = $true
+        $script:Vulnerable = $true
     }
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
@@ -21172,14 +21180,14 @@ foreach ($Key in $AccountSettings.Keys) {
     if ($Actual -eq [string]$Expected) {
         $Color = "Green"
     } else {
-        $Vulnerable = $true
+        $script:Vulnerable = $true
     }
     Write-Host "    - System Access Setting: $($Key) | Actual: '$($Actual)' (Expected: '$($Expected)')" -ForegroundColor $Color
 }
 
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
-if ($Vulnerable) {
+if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
 } else {
     Write-Host "Audit Result: SECURE" -ForegroundColor Green
@@ -21429,26 +21437,42 @@ Write-Host "Applying User Profile and System Restrictions..." -ForegroundColor C
 
 <a id="08-endpoints-configure-user-profile-restrictions-md-helper-function-to-create-keys-and-set-values-safely"></a>
 # Helper function to create keys and set values safely
-function Set-RegDWord ($path, $name, $value) {
-    $parent = Split-Path -Path $path
-    if (-not (Test-Path $parent)) {
-        New-Item -Path $parent -Force | Out-Null
+function Set-RegDWord {
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        [string]$path,
+        [string]$name,
+        [int]$value
+    )
+    if ($PSCmdlet.ShouldProcess($path, "Set registry DWORD value $name to $value")) {
+        $parent = Split-Path -Path $path
+        if (-not (Test-Path $parent)) {
+            New-Item -Path $parent -Force | Out-Null
+        }
+        if (-not (Test-Path $path)) {
+            New-Item -Path $path -Force | Out-Null
+        }
+        Set-ItemProperty -Path $path -Name $name -Value $value -Type DWord -Force
     }
-    if (-not (Test-Path $path)) {
-        New-Item -Path $path -Force | Out-Null
-    }
-    Set-ItemProperty -Path $path -Name $name -Value $value -Type DWord -Force
 }
 
-function Set-RegString ($path, $name, $value) {
-    $parent = Split-Path -Path $path
-    if (-not (Test-Path $parent)) {
-        New-Item -Path $parent -Force | Out-Null
+function Set-RegString {
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        [string]$path,
+        [string]$name,
+        [string]$value
+    )
+    if ($PSCmdlet.ShouldProcess($path, "Set registry string value $name to $value")) {
+        $parent = Split-Path -Path $path
+        if (-not (Test-Path $parent)) {
+            New-Item -Path $parent -Force | Out-Null
+        }
+        if (-not (Test-Path $path)) {
+            New-Item -Path $path -Force | Out-Null
+        }
+        Set-ItemProperty -Path $path -Name $name -Value $value -Type String -Force
     }
-    if (-not (Test-Path $path)) {
-        New-Item -Path $path -Force | Out-Null
-    }
-    Set-ItemProperty -Path $path -Name $name -Value $value -Type String -Force
 }
 
 <a id="08-endpoints-configure-user-profile-restrictions-md-1-enforce-hklm-registry-hardening-settings"></a>
@@ -21632,7 +21656,7 @@ if (Test-Path $DefaultHivePath) {
 
 Write-Host "--- Auditing User Profile Restrictions ---" -ForegroundColor Cyan
 
-$Vulnerable = $false
+$script:Vulnerable = $false
 
 <a id="08-endpoints-configure-user-profile-restrictions-md-helper-function-to-audit-registry-properties"></a>
 # Helper function to audit registry properties
@@ -21643,7 +21667,7 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     if ($actual -eq $expectedValue) {
         $color = "Green"
     } else {
-        $global:Vulnerable = $true
+        $script:Vulnerable = $true
     }
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
@@ -21762,7 +21786,7 @@ Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Insta
 # Kernel-level Shadow Stacks
 Test-RegistryValue "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
-if ($Vulnerable) {
+if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
 } else {
     Write-Host "Audit Result: SECURE" -ForegroundColor Green

@@ -3,7 +3,7 @@
 
 Write-Host "--- Auditing User Profile Restrictions ---" -ForegroundColor Cyan
 
-$Vulnerable = $false
+$script:Vulnerable = $false
 
 # Helper function to audit registry properties
 function Test-RegistryValue ($path, $name, $expectedValue) {
@@ -13,7 +13,7 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     if ($actual -eq $expectedValue) {
         $color = "Green"
     } else {
-        $global:Vulnerable = $true
+        $script:Vulnerable = $true
     }
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
@@ -122,7 +122,7 @@ Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Insta
 # Kernel-level Shadow Stacks
 Test-RegistryValue "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
-if ($Vulnerable) {
+if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
 } else {
     Write-Host "Audit Result: SECURE" -ForegroundColor Green

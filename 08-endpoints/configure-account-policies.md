@@ -370,7 +370,7 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host "--- Auditing Account and Password Policies ---" -ForegroundColor Cyan
 
-$Vulnerable = $false
+$script:Vulnerable = $false
 
 # Helper function to audit registry properties
 function Test-RegistryValue ($path, $name, $expectedValue) {
@@ -380,7 +380,7 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     if ($actual -eq $expectedValue) {
         $color = "Green"
     } else {
-        $global:Vulnerable = $true
+        $script:Vulnerable = $true
     }
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
@@ -472,14 +472,14 @@ foreach ($Key in $AccountSettings.Keys) {
     if ($Actual -eq [string]$Expected) {
         $Color = "Green"
     } else {
-        $Vulnerable = $true
+        $script:Vulnerable = $true
     }
     Write-Host "    - System Access Setting: $($Key) | Actual: '$($Actual)' (Expected: '$($Expected)')" -ForegroundColor $Color
 }
 
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
-if ($Vulnerable) {
+if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
 } else {
     Write-Host "Audit Result: SECURE" -ForegroundColor Green

@@ -193,15 +193,23 @@ Run the following scripts locally to disable legacy resolution and enforce secur
 Write-Host "Applying network and name resolution hardening..." -ForegroundColor Cyan
 
 # Helper to configure registry keys
-function Set-RegDWord ($path, $name, $value) {
-    $parent = Split-Path -Path $path
-    if (-not (Test-Path $parent)) {
-        New-Item -Path $parent -Force | Out-Null
+function Set-RegDWord {
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        [string]$path,
+        [string]$name,
+        [int]$value
+    )
+    if ($PSCmdlet.ShouldProcess($path, "Set registry DWORD value $name to $value")) {
+        $parent = Split-Path -Path $path
+        if (-not (Test-Path $parent)) {
+            New-Item -Path $parent -Force | Out-Null
+        }
+        if (-not (Test-Path $path)) {
+            New-Item -Path $path -Force | Out-Null
+        }
+        Set-ItemProperty -Path $path -Name $name -Value $value -Type DWord -Force
     }
-    if (-not (Test-Path $path)) {
-        New-Item -Path $path -Force | Out-Null
-    }
-    Set-ItemProperty -Path $path -Name $name -Value $value -Type DWord -Force
 }
 
 # 1. Disable LLMNR
@@ -263,7 +271,7 @@ Write-Host "Network and name resolution hardening applied successfully." -Foregr
 
 Write-Host "--- Auditing Network and Name Resolution Baseline ---" -ForegroundColor Cyan
 
-$Vulnerable = $false
+$script:Vulnerable = $false
 
 # Helper function to audit registry properties
 function Test-RegistryValue ($path, $name, $expectedValue) {
@@ -273,7 +281,7 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     if ($actual -eq $expectedValue) {
         $color = "Green"
     } else {
-        $global:Vulnerable = $true
+        $script:Vulnerable = $true
     }
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
@@ -315,7 +323,7 @@ Test-RegistryValue $PrinterPath "DisableHTTPPrinting" 1
 $ServerPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
 Test-RegistryValue $ServerPath "RestrictNullSessAccess" 1
 
-if ($Vulnerable) {
+if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
 } else {
     Write-Host "Audit Result: SECURE" -ForegroundColor Green
