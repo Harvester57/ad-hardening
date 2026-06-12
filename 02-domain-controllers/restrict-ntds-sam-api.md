@@ -48,6 +48,8 @@ Tools like BloodHound/SharpHound, or simple commands like `net user /domain`, re
 
 Use this method to apply the setting locally.
 
+[Download Script: Configure-RestrictRemoteSAM.ps1](implementation_scripts/Configure-RestrictRemoteSAM.ps1)
+
 ```powershell
 # Configure-RestrictRemoteSAM.ps1
 # Description: Restricts remote RPC access to the SAM database to local Administrators.
@@ -65,6 +67,8 @@ Write-Host "SAM remote API access restricted to Administrators (SDDL applied)." 
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-RestrictRemoteSAMStatus.ps1](audit_scripts/Get-RestrictRemoteSAMStatus.ps1)
+
 ```powershell
 # Get-RestrictRemoteSAMStatus.ps1
 # Description: Audits the RestrictRemoteSAM registry value.

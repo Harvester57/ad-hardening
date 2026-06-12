@@ -131,6 +131,8 @@ This control introduces three primary hardening mechanisms:
 
 Run the following scripts locally to configure Windows Defender baseline protection, Attack Surface Reduction rules, Tamper Protection, and Sandbox execution.
 
+[Download Script: Set-DefenderAdvancedBaseline.ps1](implementation_scripts/Set-DefenderAdvancedBaseline.ps1)
+
 ```powershell
 # Set-DefenderAdvancedBaseline.ps1
 # Description: Configures advanced Windows Defender Antivirus options, ASR rules, Tamper Protection, and Sandbox execution.
@@ -230,6 +232,8 @@ Write-Host "Defender advanced baseline configuration completed. A reboot is requ
 ```
 
 *To audit the Windows Defender advanced hardening status:*
+[Download Script: Get-DefenderAdvancedStatus.ps1](audit_scripts/Get-DefenderAdvancedStatus.ps1)
+
 ```powershell
 # Get-DefenderAdvancedStatus.ps1
 # Description: Audits the registry and preferences for ASR, Tamper Protection, and Sandbox status.

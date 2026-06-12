@@ -130,6 +130,8 @@ This control introduces a highly restrictive protective barrier on PAWs:
 
 Run the following scripts locally on the PAW to configure Windows Defender baseline, ASR rules, Tamper Protection, and Sandbox execution.
 
+[Download Script: Set-DefenderPawBaseline.ps1](implementation_scripts/Set-DefenderPawBaseline.ps1)
+
 ```powershell
 # Set-DefenderPawBaseline.ps1
 # Description: Configures Windows Defender Antivirus options, ASR rules, Tamper Protection, and Sandbox execution on PAWs.
@@ -227,6 +229,8 @@ Write-Host "Defender PAW baseline configuration completed. A reboot is required 
 ```
 
 *To audit the local PAW Windows Defender security status:*
+[Download Script: Get-DefenderPawStatus.ps1](audit_scripts/Get-DefenderPawStatus.ps1)
+
 ```powershell
 # Get-DefenderPawStatus.ps1
 # Description: Audits the registry and preferences for ASR, Tamper Protection, and Sandbox status on PAWs.

@@ -40,6 +40,8 @@ Because KDS keys and gMSAs do not have standard GPO management interfaces, the c
 #### 1. Generate a New KDS Root Key
 Open an elevated PowerShell console on the PDC Emulator Domain Controller and run:
 
+[Download Script: New-KdsKey.ps1](implementation_scripts/New-KdsKey.ps1)
+
 ```powershell
 # New-KdsKey.ps1
 # Description: Generates a new KDS Root Key.
@@ -58,6 +60,8 @@ if ($null -ne $NewKey) {
 
 #### 2. Force gMSA Password Rotation
 Once the new root key is active, force password rotation for all gMSAs:
+
+[Download Script: Rotate-gMSAPasswords.ps1](implementation_scripts/Rotate-gMSAPasswords.ps1)
 
 ```powershell
 # Rotate-gMSAPasswords.ps1
@@ -88,6 +92,8 @@ if ($gMSAs) {
 ### Option B: PowerShell Auditing Status
 
 Use this PowerShell script to audit current KDS root keys and gMSA replication status.
+
+[Download Script: Get-KdsAndGmsaAudit.ps1](audit_scripts/Get-KdsAndGmsaAudit.ps1)
 
 ```powershell
 # Get-KdsAndGmsaAudit.ps1

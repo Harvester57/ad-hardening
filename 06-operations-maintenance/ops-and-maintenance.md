@@ -90,6 +90,8 @@ ORADAD allows administrators to perform offline analysis of Active Directory con
 
 Run this script locally on a Domain Controller to query the status and location of recent System State backups using the Windows Server Backup module.
 
+[Download Script: Audit-ADBackupStatus.ps1](audit_scripts/Audit-ADBackupStatus.ps1)
+
 ```powershell
 # Audit-ADBackupStatus.ps1
 # Audits the status of local system state backups.
@@ -125,6 +127,8 @@ try {
 ### 2. Creating an Automated System State Backup (Remediation)
 
 Execute the following PowerShell script to install the Windows Server Backup feature, configure a System State backup policy, and execute an immediate System State backup to a designated disk volume (e.g. `E:`).
+
+[Download Script: Set-ADSystemStateBackup.ps1](implementation_scripts/Set-ADSystemStateBackup.ps1)
 
 ```powershell
 # Set-ADSystemStateBackup.ps1

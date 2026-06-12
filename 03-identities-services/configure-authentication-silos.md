@@ -66,6 +66,8 @@ Before configuring silos, Domain Controllers must be configured to support claim
 
 Run the following script block to programmatically define the Authentication Policy, create the Silo, and enroll Tier 0 members.
 
+[Download Script: Set-ADAuthenticationSilo.ps1](implementation_scripts/Set-ADAuthenticationSilo.ps1)
+
 ```powershell
 # Set-ADAuthenticationSilo.ps1
 # Description: Creates a Tier 0 Authentication Policy Silo and assigns accounts.
@@ -139,6 +141,8 @@ Write-Host "[+] Authentication Silo membership initialized." -ForegroundColor Gr
 ```
 
 *To verify active Authentication Silo status:*
+[Download Script: Get-AuthSiloAuditStatus.ps1](audit_scripts/Get-AuthSiloAuditStatus.ps1)
+
 ```powershell
 # Get-AuthSiloAuditStatus.ps1
 # Description: Queries the active Authentication Silos and lists their configuration settings.

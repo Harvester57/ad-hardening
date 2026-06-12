@@ -111,6 +111,8 @@ Edit `ossec.conf` (located by default under `%ProgramFiles(x86)%\ossec-agent\oss
 
 Run the following scripts locally to secure agent configuration files and verify SIEM shipping services status.
 
+[Download Script: Set-SiemLogShipping.ps1](implementation_scripts/Set-SiemLogShipping.ps1)
+
 ```powershell
 # Set-SiemLogShipping.ps1
 # Secures Winlogbeat and Wazuh log shipping configuration file ACLs.
@@ -165,6 +167,8 @@ foreach ($File in $ConfigFiles) {
 ```
 
 *To verify the settings have been applied:*
+
+[Download Script: Test-SiemLogShipping.ps1](audit_scripts/Test-SiemLogShipping.ps1)
 
 ```powershell
 # Test-SiemLogShipping.ps1

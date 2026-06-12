@@ -52,6 +52,8 @@ Enforcing Fine-Grained Password Policies (FGPP) via Password Settings Objects (P
 
 Run the following script to create and apply the Fine-Grained Password Policy using PowerShell.
 
+[Download Script: Set-AdminPasswordPolicy.ps1](implementation_scripts/Set-AdminPasswordPolicy.ps1)
+
 ```powershell
 # Set-AdminPasswordPolicy.ps1
 # Description: Creates a secure Fine-Grained Password Policy for administrative accounts.
@@ -84,6 +86,8 @@ if (-not $ExistingPSO) {
 ```
 
 *To verify the applied Fine-Grained Password Policies:*
+[Download Script: Get-AdminPasswordPolicyStatus.ps1](audit_scripts/Get-AdminPasswordPolicyStatus.ps1)
+
 ```powershell
 # Get-AdminPasswordPolicyStatus.ps1
 # Description: Audits Fine-Grained Password Policies in the Active Directory domain.

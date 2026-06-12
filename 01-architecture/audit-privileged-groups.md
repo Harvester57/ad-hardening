@@ -52,6 +52,8 @@ This ensures that Event ID **5136** is logged in the Security log of the Domain 
 
 Run this script from a secure administrative workstation to audit nested and direct memberships in critical Tier 0 groups, highlighting any unexpected accounts.
 
+[Download Script: Audit-ADAdminGroups.ps1](audit_scripts/Audit-ADAdminGroups.ps1)
+
 ```powershell
 # Audit-ADAdminGroups.ps1
 # Queries memberships of privileged Tier 0 AD groups recursively.
@@ -98,6 +100,8 @@ foreach ($GroupName in $Tier0Groups) {
 ```
 
 *To verify that directory auditing is active on the local DC:*
+[Download Script: Test-ADChangesAuditing.ps1](audit_scripts/Test-ADChangesAuditing.ps1)
+
 ```powershell
 # Test-ADChangesAuditing.ps1
 # Audits local DC auditpol settings to verify Directory Service auditing is enabled.

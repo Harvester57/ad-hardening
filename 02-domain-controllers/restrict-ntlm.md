@@ -76,6 +76,8 @@ By auditing and subsequently restricting NTLM authentication incoming to, outgoi
 
 Use this method to apply the setting locally (for testing or standalone systems) or if the control is not manageable via standard GPO GUI interfaces.
 
+[Download Script: Configure-RestrictNTLM.ps1](implementation_scripts/Configure-RestrictNTLM.ps1)
+
 ```powershell
 # Configure-RestrictNTLM.ps1
 # Description: Configures local registry values to enforce NTLM restrictions and auditing.
@@ -106,6 +108,8 @@ Write-Host "NTLM restriction registry configurations applied successfully." -For
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-RestrictNTLMStatus.ps1](audit_scripts/Get-RestrictNTLMStatus.ps1)
+
 ```powershell
 # Get-RestrictNTLMStatus.ps1
 # Description: Audits the registry configuration for NTLM auditing and restrictions.

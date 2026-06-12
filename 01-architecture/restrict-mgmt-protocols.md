@@ -50,6 +50,8 @@ Restricting administrative protocols at the network and local firewall levels to
 
 Run the following scripts locally on a Domain Controller or member server to create Windows Defender Firewall rules restricting WinRM and RDP to authorized subnets.
 
+[Download Script: Set-AdminProtocolRestrictions.ps1](implementation_scripts/Set-AdminProtocolRestrictions.ps1)
+
 ```powershell
 # Set-AdminProtocolRestrictions.ps1
 # Creates inbound firewall rules to restrict RDP and WinRM to designated management subnets.
@@ -97,6 +99,8 @@ if ($WinRMRule) {
 ```
 
 *To audit the firewall restrictions:*
+[Download Script: Test-AdminProtocolRestrictions.ps1](audit_scripts/Test-AdminProtocolRestrictions.ps1)
+
 ```powershell
 # Test-AdminProtocolRestrictions.ps1
 # Audits local firewall rules for RDP and WinRM to check remote address restrictions.

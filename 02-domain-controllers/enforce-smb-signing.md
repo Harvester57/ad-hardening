@@ -56,6 +56,8 @@ Enforcing SMB signing ensures that all SMB packets are digitally signed using se
 
 Use this method to apply the settings locally.
 
+[Download Script: Configure-SMBSigning.ps1](implementation_scripts/Configure-SMBSigning.ps1)
+
 ```powershell
 # Configure-SMBSigning.ps1
 # Description: Enforces SMB signing for both SMB server and client.
@@ -80,6 +82,8 @@ Write-Host "SMB Client signing (always) enabled." -ForegroundColor Green
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-SMBSigningStatus.ps1](audit_scripts/Get-SMBSigningStatus.ps1)
+
 ```powershell
 # Get-SMBSigningStatus.ps1
 # Description: Audits the registry settings for SMB server and client signing.

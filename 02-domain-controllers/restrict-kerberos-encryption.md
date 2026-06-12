@@ -56,6 +56,8 @@ Restricting allowed Kerberos encryption types to Advanced Encryption Standard (A
 
 Use this method to apply the setting locally.
 
+[Download Script: Configure-KerberosEncryptionTypes.ps1](implementation_scripts/Configure-KerberosEncryptionTypes.ps1)
+
 ```powershell
 # Configure-KerberosEncryptionTypes.ps1
 # Description: Restricts Kerberos encryption types to AES128, AES256, and Future types.
@@ -73,6 +75,8 @@ Write-Host "Kerberos encryption types restricted to AES and future types." -Fore
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-KerberosEncryptionStatus.ps1](audit_scripts/Get-KerberosEncryptionStatus.ps1)
+
 ```powershell
 # Get-KerberosEncryptionStatus.ps1
 # Description: Audits the allowed Kerberos encryption types in the registry.

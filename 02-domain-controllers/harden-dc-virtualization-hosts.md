@@ -52,6 +52,8 @@ To mitigate these risks:
 
 Run the following script block on a Domain Controller to determine if it is virtualized, identify the hypervisor type, and audit key integration parameters.
 
+[Download Script: Get-DcVirtualizationStatus.ps1](audit_scripts/Get-DcVirtualizationStatus.ps1)
+
 ```powershell
 # Get-DcVirtualizationStatus.ps1
 # Description: Audits the virtualization environment of the Domain Controller.

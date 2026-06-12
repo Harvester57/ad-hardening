@@ -72,6 +72,8 @@ User Rights Assignments (URAs) govern the specific actions that security princip
 
 Configure User Rights Assignments locally using `secedit.exe` and PowerShell.
 
+[Download Script: Set-UserRightsAssignments.ps1](implementation_scripts/Set-UserRightsAssignments.ps1)
+
 ```powershell
 # Set-UserRightsAssignments.ps1
 # Description: Enforces the local user rights assignments baseline configuration using secedit templates.
@@ -191,6 +193,8 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 ```
 
 *To audit local User Rights Assignments:*
+[Download Script: Test-UserRightsAssignments.ps1](audit_scripts/Test-UserRightsAssignments.ps1)
+
 ```powershell
 # Test-UserRightsAssignments.ps1
 # Description: Exports local user rights assignments and checks them against the baseline.

@@ -47,6 +47,8 @@ The Print Spooler service has a history of high-severity vulnerabilities, includ
 
 Use this method to apply the setting locally.
 
+[Download Script: Configure-DisablePrintSpooler.ps1](implementation_scripts/Configure-DisablePrintSpooler.ps1)
+
 ```powershell
 # Configure-DisablePrintSpooler.ps1
 # Description: Stops and disables the Print Spooler service.
@@ -71,6 +73,8 @@ if ($service) {
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-PrintSpoolerStatus.ps1](audit_scripts/Get-PrintSpoolerStatus.ps1)
+
 ```powershell
 # Get-PrintSpoolerStatus.ps1
 # Description: Audits the operational status and startup type of the Print Spooler service.

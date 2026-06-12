@@ -49,6 +49,8 @@ Attackers use USB drives to bypass network-based security boundaries (such as fi
 
 Run the following scripts locally to configure registry keys to block all removable storage devices.
 
+[Download Script: Block-RemovableStorage.ps1](implementation_scripts/Block-RemovableStorage.ps1)
+
 ```powershell
 # Block-RemovableStorage.ps1
 # Configures local registry parameters to deny access to all removable storage classes.
@@ -68,6 +70,8 @@ Write-Host "[+] Removable storage block configured." -ForegroundColor Green
 ```
 
 *To audit removable storage block configurations:*
+[Download Script: Test-RemovableStorage.ps1](audit_scripts/Test-RemovableStorage.ps1)
+
 ```powershell
 # Test-RemovableStorage.ps1
 # Audits registry values for removable storage blocks.

@@ -59,6 +59,8 @@ Because these accounts are well-known, they are frequent targets for automated b
 
 Run the following script to disable the local Administrator and Guest accounts locally using PowerShell.
 
+[Download Script: Set-HardenDefaultAccounts.ps1](implementation_scripts/Set-HardenDefaultAccounts.ps1)
+
 ```powershell
 # Set-HardenDefaultAccounts.ps1
 # Description: Disables the built-in local Administrator and Guest accounts locally.
@@ -98,6 +100,8 @@ if ($guestAccount) {
 ```
 
 *To audit default accounts status locally:*
+[Download Script: Get-DefaultAccountsStatus.ps1](audit_scripts/Get-DefaultAccountsStatus.ps1)
+
 ```powershell
 # Get-DefaultAccountsStatus.ps1
 # Description: Audits the enabled status of the built-in local Administrator and Guest accounts.

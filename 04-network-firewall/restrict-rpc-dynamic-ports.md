@@ -82,6 +82,8 @@ Create or edit a GPO (e.g., `GPO_Hardening_RPC_Range`) and apply Registry Prefer
 Run the following scripts locally to audit and restrict the RPC dynamic port configuration.
 
 #### Remediation Script:
+[Download Script: Set-RPCDynamicPorts.ps1](implementation_scripts/Set-RPCDynamicPorts.ps1)
+
 ```powershell
 # Set-RPCDynamicPorts.ps1
 # Configures static RPC ports for NTDS/Netlogon and restricts system-wide ephemeral range.
@@ -145,6 +147,8 @@ Write-Host "RPC Dynamic Port configuration applied successfully." -ForegroundCol
 ```
 
 #### Audit Script:
+[Download Script: Test-RPCDynamicPorts.ps1](audit_scripts/Test-RPCDynamicPorts.ps1)
+
 ```powershell
 # Test-RPCDynamicPorts.ps1
 # Audits dynamic RPC configurations and static ports.

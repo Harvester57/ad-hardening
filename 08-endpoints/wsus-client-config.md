@@ -57,6 +57,8 @@ Enforcing the intranet update service location redirects all system update queri
 
 Run the following scripts locally to configure registry keys to enforce local WSUS parameters.
 
+[Download Script: Set-WSUSClientConfiguration.ps1](implementation_scripts/Set-WSUSClientConfiguration.ps1)
+
 ```powershell
 # Set-WSUSClientConfiguration.ps1
 # Configures local registry keys to point the Windows Update client to the intranet WSUS server.
@@ -91,6 +93,8 @@ Write-Host "[+] Local WSUS parameters applied." -ForegroundColor Green
 ```
 
 *To audit the WSUS client configuration status:*
+[Download Script: Test-WSUSClientStatus.ps1](audit_scripts/Test-WSUSClientStatus.ps1)
+
 ```powershell
 # Test-WSUSClientStatus.ps1
 # Audits registry values to verify WSUS server assignment.

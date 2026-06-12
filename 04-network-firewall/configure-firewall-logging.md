@@ -65,6 +65,8 @@ Windows Defender Firewall with Advanced Security (WFAS) serves as the host-level
 
 Use this method to apply the setting locally (for testing or standalone systems) or if the control is not manageable via standard GPO GUI interfaces.
 
+[Download Script: Set-FirewallLoggingAndSettings.ps1](implementation_scripts/Set-FirewallLoggingAndSettings.ps1)
+
 ```powershell
 # Set-FirewallLoggingAndSettings.ps1
 # Description: Configures Windows Defender Firewall settings, log size, and log permissions for all profiles.
@@ -119,8 +121,10 @@ Write-Host "Firewall logging and operational settings configuration completed su
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-FirewallLoggingAndSettingsStatus.ps1](audit_scripts/Get-FirewallLoggingAndSettingsStatus.ps1)
+
 ```powershell
-# Check current configuration state
+# Get-FirewallLoggingAndSettingsStatus.ps1
 Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, DefaultOutboundAction, NotifyOnListen, LogBlocked, LogAllowed, LogMaxSizeKilobytes, LogFileName, AllowLocalFirewallRules, AllowLocalIPsecRules
 ```
 

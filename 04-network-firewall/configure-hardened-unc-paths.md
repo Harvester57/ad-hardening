@@ -71,6 +71,8 @@ Enforcing these channel-level controls mitigates the following threat vectors:
 
 Run the following scripts locally to apply the hardened network provider, Lanman Workstation, and LDAP client configurations.
 
+[Download Script: Set-HardenedUNCAndClientSigning.ps1](implementation_scripts/Set-HardenedUNCAndClientSigning.ps1)
+
 ```powershell
 # Set-HardenedUNCAndClientSigning.ps1
 # Description: Configures Hardened UNC Paths for SYSVOL/NETLOGON, disables insecure guest logons, and enforces LDAP client signing.
@@ -104,6 +106,8 @@ Write-Host "[+] LDAP Client signing requirement set to Negotiate signing." -Fore
 ```
 
 *To audit the network provider, Lanman workstation, and LDAP client signing configurations:*
+[Download Script: Get-HardenedUNCAndClientSigningStatus.ps1](audit_scripts/Get-HardenedUNCAndClientSigningStatus.ps1)
+
 ```powershell
 # Get-HardenedUNCAndClientSigningStatus.ps1
 # Description: Audits the registry configuration of Hardened UNC Paths, Lanman guest authentication, and LDAP Client signing.

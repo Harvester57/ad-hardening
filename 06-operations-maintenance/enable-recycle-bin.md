@@ -49,6 +49,8 @@ Run the following scripts to audit and activate the optional feature forest-wide
 
 #### 1. Local Audit (Audit-ADRecycleBin.ps1)
 
+[Download Script: Audit-ADRecycleBin.ps1](audit_scripts/Audit-ADRecycleBin.ps1)
+
 ```powershell
 # Audit-ADRecycleBin.ps1
 # Description: Audits the enablement status of the AD Recycle Bin.
@@ -73,6 +75,8 @@ try {
 ```
 
 #### 2. Local Remediation (Enable-ADRecycleBin.ps1)
+
+[Download Script: Enable-ADRecycleBin.ps1](implementation_scripts/Enable-ADRecycleBin.ps1)
 
 ```powershell
 # Enable-ADRecycleBin.ps1

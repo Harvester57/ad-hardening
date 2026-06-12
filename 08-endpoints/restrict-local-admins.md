@@ -53,6 +53,8 @@ Deploy Restricted Groups via GPO to enforce local administrators group membershi
 
 Run the following scripts locally to audit and remediate unauthorized administrative accounts in the local Administrators group.
 
+[Download Script: Clean-LocalAdministrators.ps1](implementation_scripts/Clean-LocalAdministrators.ps1)
+
 ```powershell
 # Clean-LocalAdministrators.ps1
 # Removes unauthorized domain or local accounts from the local Administrators group.
@@ -95,6 +97,8 @@ if ($LocalAdmins) {
 ```
 
 *To audit local Administrators group memberships:*
+[Download Script: Test-LocalAdministrators.ps1](audit_scripts/Test-LocalAdministrators.ps1)
+
 ```powershell
 # Test-LocalAdministrators.ps1
 # Audits membership of the local Administrators group to find unauthorized domain accounts.

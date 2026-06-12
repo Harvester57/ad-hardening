@@ -81,6 +81,8 @@ Hardening these features mitigates the following vulnerabilities:
 
 Run the following scripts locally to apply the printers, boot drivers, logon screen, and delegation settings to the registry.
 
+[Download Script: Set-EndpointDelegationAndBootHardening.ps1](implementation_scripts/Set-EndpointDelegationAndBootHardening.ps1)
+
 ```powershell
 # Set-EndpointDelegationAndBootHardening.ps1
 # Description: Hardens Point and Print restrictions, ELAM policies, logon screen enumeration, and credentials delegation.
@@ -129,6 +131,8 @@ Write-Host "[+] Delegation of non-exportable credentials enabled." -ForegroundCo
 ```
 
 *To audit these printers, boot drivers, logon screen, and delegation settings:*
+[Download Script: Get-EndpointDelegationAndBootStatus.ps1](audit_scripts/Get-EndpointDelegationAndBootStatus.ps1)
+
 ```powershell
 # Get-EndpointDelegationAndBootStatus.ps1
 # Description: Audits registry configuration of Point and Print, ELAM, user enumeration, and delegation.

@@ -96,6 +96,8 @@ Navigate to:
 
 Run the following scripts locally on the PAW to apply DMA, Sleep, and BitLocker USB registry parameters.
 
+[Download Script: Set-PawDMAPhysicalSecurity.ps1](implementation_scripts/Set-PawDMAPhysicalSecurity.ps1)
+
 ```powershell
 # Set-PawDMAPhysicalSecurity.ps1
 # Description: Hardens local registry keys on PAWs to mitigate DMA attacks, disable standby sleep states, and restrict unencrypted USB writing.
@@ -162,6 +164,8 @@ Write-Host "PAW DMA and physical security settings applied successfully." -Foreg
 ```
 
 *To audit local PAW DMA and physical security configuration:*
+[Download Script: Test-PawDMAPhysicalSecurity.ps1](audit_scripts/Test-PawDMAPhysicalSecurity.ps1)
+
 ```powershell
 # Test-PawDMAPhysicalSecurity.ps1
 # Description: Audits local registry configuration for standby settings, DMA protection under lock, USB restrictions, and blocked device setup classes on PAWs.

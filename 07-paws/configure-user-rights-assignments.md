@@ -71,6 +71,8 @@ Privileged Access Workstations (PAWs) host the most sensitive credentials in the
 
 Configure User Rights Assignments locally on the PAW using `secedit.exe` and PowerShell.
 
+[Download Script: Set-PawUserRightsAssignments.ps1](implementation_scripts/Set-PawUserRightsAssignments.ps1)
+
 ```powershell
 # Set-PawUserRightsAssignments.ps1
 # Description: Enforces the PAW user rights assignments baseline configuration using secedit templates.
@@ -189,6 +191,8 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 ```
 
 *To audit local PAW User Rights Assignments:*
+[Download Script: Test-PawUserRightsAssignments.ps1](audit_scripts/Test-PawUserRightsAssignments.ps1)
+
 ```powershell
 # Test-PawUserRightsAssignments.ps1
 # Description: Exports local user rights assignments and checks them against the PAW baseline.

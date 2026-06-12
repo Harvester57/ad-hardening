@@ -47,6 +47,8 @@
 
 Use this method to apply the setting locally (for testing or standalone systems) or if the control is not manageable via standard GPO GUI interfaces.
 
+[Download Script: [Name-Of-Script].ps1](implementation_scripts/[Name-Of-Script].ps1)
+
 ```powershell
 # [Name-Of-Script].ps1
 # Description: [Brief description of what the script configures]
@@ -67,7 +69,11 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green
 ```
 
 *To verify the setting has been applied:*
+
+[Download Script: [Audit-Script-Name].ps1](audit_scripts/[Audit-Script-Name].ps1)
+
 ```powershell
+# [Audit-Script-Name].ps1
 # Check current configuration state
 Get-ItemProperty -Path "HKLM:\System\CurrentControlSet\..." -Name "..."
 ```

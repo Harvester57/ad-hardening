@@ -51,6 +51,8 @@ Therefore:
 
 Run the following script to audit and remediate unauthorized permissions on the `adminSDHolder` object.
 
+[Download Script: Harden-AdminSDHolder.ps1](implementation_scripts/Harden-AdminSDHolder.ps1)
+
 ```powershell
 # Harden-AdminSDHolder.ps1
 # Description: Hardens the adminSDHolder ACL by auditing permissions and removing delegated helpdesk groups.
@@ -107,6 +109,8 @@ if ($AclModified) {
 ```
 
 *To verify current adminSDHolder permissions:*
+[Download Script: Get-AdminSDHolderAudit.ps1](audit_scripts/Get-AdminSDHolderAudit.ps1)
+
 ```powershell
 # Get-AdminSDHolderAudit.ps1
 # Description: Audits and prints all active permission entries on adminSDHolder.

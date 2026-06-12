@@ -75,6 +75,8 @@ The migration process consists of transitioning the domain through four replicat
 
 Use this PowerShell script to monitor the progress of the DFSR migration across all Domain Controllers in the forest.
 
+[Download Script: Get-SYSVOLDfsrMigrationStatus.ps1](audit_scripts/Get-SYSVOLDfsrMigrationStatus.ps1)
+
 ```powershell
 # Get-SYSVOLDfsrMigrationStatus.ps1
 # Description: Checks the current SYSVOL replication migration state.
@@ -104,6 +106,8 @@ if ($DfsMigOutput -like "*Eliminated*") {
 ```
 
 *To verify active DFSR health on the server:*
+[Download Script: Get-DfsrHealthStatus.ps1](audit_scripts/Get-DfsrHealthStatus.ps1)
+
 ```powershell
 # Get-DfsrHealthStatus.ps1
 # Description: Checks the event logs for DFSR replication errors.

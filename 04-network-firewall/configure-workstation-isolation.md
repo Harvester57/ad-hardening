@@ -75,6 +75,8 @@ In the same GPO, ensure there are priority inbound **Allow** rules configured to
 Run the following scripts locally to audit and apply workstation/server isolation rules.
 
 #### Remediation Script:
+[Download Script: Set-WorkstationIsolation.ps1](implementation_scripts/Set-WorkstationIsolation.ps1)
+
 ```powershell
 # Set-WorkstationIsolation.ps1
 # Configures local firewall rules to block inbound SMB, RPC, and RDP from peer subnets.
@@ -149,6 +151,8 @@ Write-Host "Workstation and Server isolation firewall rules applied successfully
 ```
 
 #### Audit Script:
+[Download Script: Test-WorkstationIsolation.ps1](audit_scripts/Test-WorkstationIsolation.ps1)
+
 ```powershell
 # Test-WorkstationIsolation.ps1
 # Audits the presence of isolation blocking rules on local firewall profiles.

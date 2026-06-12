@@ -73,6 +73,8 @@ Run the following scripts to audit and remediate these configurations.
 
 #### 1. Local Audit (Audit-PreWin2000Group.ps1)
 
+[Download Script: Audit-PreWin2000Group.ps1](audit_scripts/Audit-PreWin2000Group.ps1)
+
 ```powershell
 # Audit-PreWin2000Group.ps1
 # Description: Audits the Pre-Windows 2000 Compatible Access group membership and local LSA registry configurations.
@@ -146,6 +148,8 @@ foreach ($Key in $Settings.Keys) {
 ```
 
 #### 2. Local Remediation (Set-PreWin2000Group.ps1)
+
+[Download Script: Set-PreWin2000Group.ps1](implementation_scripts/Set-PreWin2000Group.ps1)
 
 ```powershell
 # Set-PreWin2000Group.ps1

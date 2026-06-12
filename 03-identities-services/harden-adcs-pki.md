@@ -66,6 +66,8 @@ Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary
 
 Run the following script block to audit active certificate templates for vulnerable configurations (ESC1).
 
+[Download Script: Get-ADCSTemplateAudit.ps1](audit_scripts/Get-ADCSTemplateAudit.ps1)
+
 ```powershell
 # Get-ADCSTemplateAudit.ps1
 # Description: Audits Active Directory certificate templates for SAN and authentication misconfigurations.

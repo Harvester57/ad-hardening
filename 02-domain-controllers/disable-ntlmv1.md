@@ -48,6 +48,8 @@ By configuring the system to send only NTLMv2 responses and refuse both LM and N
 
 Use this method to apply the setting locally.
 
+[Download Script: Configure-DisableNTLMv1.ps1](implementation_scripts/Configure-DisableNTLMv1.ps1)
+
 ```powershell
 # Configure-DisableNTLMv1.ps1
 # Description: Restricts NTLM authentication to NTLMv2 and refuses NTLMv1 / LM.
@@ -64,6 +66,8 @@ Write-Host "LM Compatibility Level set to 5 (Send NTLMv2 response only. Refuse L
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-NTLMv1Status.ps1](audit_scripts/Get-NTLMv1Status.ps1)
+
 ```powershell
 # Get-NTLMv1Status.ps1
 # Description: Audits the LM Compatibility Level setting in the registry.

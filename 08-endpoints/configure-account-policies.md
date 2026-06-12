@@ -70,6 +70,8 @@ In the endpoints GPO (e.g., `GPO_Hardening_Workstations`), navigate to:
 
 Enforce the local security settings and SecEdit configuration locally.
 
+[Download Script: Set-AccountPolicies.ps1](implementation_scripts/Set-AccountPolicies.ps1)
+
 ```powershell
 # Set-AccountPolicies.ps1
 # Description: Configures local account lockout, password parameters (via secedit), smart card behavior, and blank password blocks.
@@ -181,6 +183,8 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 ```
 
 *To audit local account and password policies:*
+[Download Script: Test-AccountPolicies.ps1](audit_scripts/Test-AccountPolicies.ps1)
+
 ```powershell
 # Test-AccountPolicies.ps1
 # Description: Checks the local registry and SecEdit settings for account lockout, password options, and smart card removal behavior.

@@ -51,6 +51,8 @@ By enforcing User Rights Assignment policies that explicitly deny service accoun
 
 Since User Rights Assignment is typically controlled by GPO or local security policy database (`secedit.sdb`), local changes can be made using the `secedit` command-line utility.
 
+[Download Script: Set-DenyServiceLogons.ps1](implementation_scripts/Set-DenyServiceLogons.ps1)
+
 ```powershell
 # Set-DenyServiceLogons.ps1
 # Description: Configures local security database to deny interactive logons for a service account group.
@@ -122,6 +124,8 @@ Write-Host "Local security policy updated: Deny log on locally/RDP applied to gr
 ```
 
 *To audit local User Rights Assignment settings:*
+[Download Script: Get-DenyServiceLogonsStatus.ps1](audit_scripts/Get-DenyServiceLogonsStatus.ps1)
+
 ```powershell
 # Get-DenyServiceLogonsStatus.ps1
 # Description: Audits the Deny logon rights configurations locally.

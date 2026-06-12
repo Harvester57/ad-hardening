@@ -69,6 +69,8 @@ Configure Group Policy Preferences to enforce the registry settings:
 
 Use this method to apply the setting locally or if the control is not manageable via standard GPO GUI interfaces.
 
+[Download Script: Configure-DisableSMBv1.ps1](implementation_scripts/Configure-DisableSMBv1.ps1)
+
 ```powershell
 # Configure-DisableSMBv1.ps1
 # Description: Disables SMBv1 server protocol and mrxsmb10 client driver.
@@ -102,6 +104,8 @@ Write-Host "Hardening applied successfully. A system reboot is required." -Foreg
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-SMBv1Status.ps1](audit_scripts/Get-SMBv1Status.ps1)
+
 ```powershell
 # Get-SMBv1Status.ps1
 # Description: Audits the registry configuration of SMBv1 server and client components.

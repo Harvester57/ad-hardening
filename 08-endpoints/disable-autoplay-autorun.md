@@ -49,6 +49,8 @@ Attackers exploit these features by placing malicious scripts, payloads, or exec
 
 Run the following scripts locally to configure Explorer registry keys to disable AutoPlay and AutoRun on all drive types.
 
+[Download Script: Disable-AutoPlay.ps1](implementation_scripts/Disable-AutoPlay.ps1)
+
 ```powershell
 # Disable-AutoPlay.ps1
 # Disables AutoPlay/AutoRun registry settings globally on all drive types.
@@ -72,6 +74,8 @@ Write-Host "[+] AutoPlay and AutoRun registry parameters set." -ForegroundColor 
 ```
 
 *To audit AutoPlay configurations:*
+[Download Script: Test-AutoPlay.ps1](audit_scripts/Test-AutoPlay.ps1)
+
 ```powershell
 # Test-AutoPlay.ps1
 # Audits local system registry parameters for AutoPlay status.

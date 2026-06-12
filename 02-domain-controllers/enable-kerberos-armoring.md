@@ -68,6 +68,8 @@ Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Cont
 
 Use this method to apply the setting locally (for testing or standalone systems) or if the control is not manageable via standard GPO GUI interfaces.
 
+[Download Script: Configure-KerberosArmoring.ps1](implementation_scripts/Configure-KerberosArmoring.ps1)
+
 ```powershell
 # Configure-KerberosArmoring.ps1
 # Description: Configures Kerberos Armoring (FAST) registry settings on Domain Controllers and clients.
@@ -102,6 +104,8 @@ if ($IsDC) {
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-KerberosArmoringStatus.ps1](audit_scripts/Get-KerberosArmoringStatus.ps1)
+
 ```powershell
 # Get-KerberosArmoringStatus.ps1
 # Description: Audits the Kerberos Armoring (FAST) configuration on DCs and clients.

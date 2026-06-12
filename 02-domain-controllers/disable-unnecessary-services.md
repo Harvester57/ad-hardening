@@ -168,6 +168,8 @@ Apply this registry change for the service names listed in the tables above.
 
 Run the following script to configure the registry settings and stop the services locally:
 
+[Download Script: Configure-DisableUnnecessaryServices.ps1](implementation_scripts/Configure-DisableUnnecessaryServices.ps1)
+
 ```powershell
 # Configure-DisableUnnecessaryServices.ps1
 # Description: Stops and disables unnecessary services on Domain Controllers.
@@ -243,6 +245,8 @@ Write-Host "Remediation completed successfully." -ForegroundColor Cyan
 ```
 
 *To verify that the services have been disabled:*
+
+[Download Script: Get-UnnecessaryServicesStatus.ps1](audit_scripts/Get-UnnecessaryServicesStatus.ps1)
 
 ```powershell
 # Get-UnnecessaryServicesStatus.ps1

@@ -63,6 +63,8 @@ If RDP is strictly required, enable it but restrict it using the following setti
 
 Run the following scripts locally to disable Remote Desktop or enforce NLA and secure registry keys.
 
+[Download Script: Disable-RemoteDesktop.ps1](implementation_scripts/Disable-RemoteDesktop.ps1)
+
 ```powershell
 # Disable-RemoteDesktop.ps1
 # Disables Remote Desktop connection requests and sets NLA requirements locally.
@@ -89,6 +91,8 @@ Write-Host "[+] Remote Assistance connection requests disabled." -ForegroundColo
 ```
 
 *To audit Remote Desktop and NLA status:*
+[Download Script: Test-RemoteDesktopStatus.ps1](audit_scripts/Test-RemoteDesktopStatus.ps1)
+
 ```powershell
 # Test-RemoteDesktopStatus.ps1
 # Audits local RDP registry configuration and listening firewall ports.

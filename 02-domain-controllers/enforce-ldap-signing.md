@@ -49,6 +49,8 @@ Enforcing LDAP signing ensures that the LDAP server (Domain Controller) rejects 
 
 Use this method to apply the setting locally.
 
+[Download Script: Configure-LDAPSigning.ps1](implementation_scripts/Configure-LDAPSigning.ps1)
+
 ```powershell
 # Configure-LDAPSigning.ps1
 # Description: Configures the LDAP server signing requirement to Require Signing.
@@ -65,6 +67,8 @@ Write-Host "LDAP Server Integrity set to 2 (Require Signing)." -ForegroundColor 
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-LDAPSigningStatus.ps1](audit_scripts/Get-LDAPSigningStatus.ps1)
+
 ```powershell
 # Get-LDAPSigningStatus.ps1
 # Description: Audits the LDAP server signing configuration in the registry.

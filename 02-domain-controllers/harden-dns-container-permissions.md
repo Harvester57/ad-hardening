@@ -50,6 +50,8 @@ This default configuration presents a critical privilege escalation vector:
 
 Run the following script block to audit and remove the `ServerLevelPluginDll` registry backdoor on Domain Controllers, and verify DNSAdmins membership.
 
+[Download Script: Harden-DnsServerConfiguration.ps1](implementation_scripts/Harden-DnsServerConfiguration.ps1)
+
 ```powershell
 # Harden-DnsServerConfiguration.ps1
 # Description: Deletes any ServerLevelPluginDll entry to block DNS DLL hijacking, and checks DnsAdmins group.
@@ -90,6 +92,8 @@ if ($null -ne $DnsAdminsGroup) {
 ```
 
 *To verify active DNS parameters and container permissions:*
+[Download Script: Get-DnsAuditStatus.ps1](audit_scripts/Get-DnsAuditStatus.ps1)
+
 ```powershell
 # Get-DnsAuditStatus.ps1
 # Description: Queries the DNS registry parameter settings and AD container ACLs.

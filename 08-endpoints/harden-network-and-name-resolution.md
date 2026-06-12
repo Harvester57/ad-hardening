@@ -111,6 +111,8 @@ Legacy name resolution protocols and insecure default network configurations are
 
 Run the following scripts locally to disable legacy resolution and enforce secure TCP/IP registry parameters.
 
+[Download Script: Set-NetworkHardeningSettings.ps1](implementation_scripts/Set-NetworkHardeningSettings.ps1)
+
 ```powershell
 # Set-NetworkHardeningSettings.ps1
 # Description: Configures local registry keys to disable LLMNR/NetBIOS fallbacks and harden TCP/IP stack against redirection/source routing.
@@ -162,6 +164,8 @@ Write-Host "Network and name resolution hardening applied successfully." -Foregr
 ```
 
 *To audit the network and name resolution status:*
+[Download Script: Test-NetworkHardeningStatus.ps1](audit_scripts/Test-NetworkHardeningStatus.ps1)
+
 ```powershell
 # Test-NetworkHardeningStatus.ps1
 # Description: Audits LLMNR, NetBIOS parameters, NetBIOS adapter state, and TCP/IP security parameters.

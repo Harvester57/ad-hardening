@@ -49,6 +49,8 @@ Run the following scripts to audit and import custom templates.
 
 #### 1. Local Audit (Audit-ThirdPartyTemplates.ps1)
 
+[Download Script: Audit-ThirdPartyTemplates.ps1](audit_scripts/Audit-ThirdPartyTemplates.ps1)
+
 ```powershell
 # Audit-ThirdPartyTemplates.ps1
 # Description: Checks the GPO Central Store for common third-party templates.
@@ -89,6 +91,8 @@ try {
 ```
 
 #### 2. Local Remediation (Import-ThirdPartyTemplate.ps1)
+
+[Download Script: Import-ThirdPartyTemplate.ps1](implementation_scripts/Import-ThirdPartyTemplate.ps1)
 
 ```powershell
 # Import-ThirdPartyTemplate.ps1

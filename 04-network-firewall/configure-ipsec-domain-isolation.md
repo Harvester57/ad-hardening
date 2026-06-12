@@ -67,6 +67,8 @@ On Domain Controllers, replication traffic should be encrypted:
 Run the following scripts locally to audit and configure Connection Security Rules.
 
 #### Remediation Script:
+[Download Script: Set-IPsecDomainIsolation.ps1](implementation_scripts/Set-IPsecDomainIsolation.ps1)
+
 ```powershell
 # Set-IPsecDomainIsolation.ps1
 # Configures local IPsec Connection Security Rules requesting Kerberos V5 authentication.
@@ -93,6 +95,8 @@ if ($null -eq $ExistingRule) {
 ```
 
 #### Audit Script:
+[Download Script: Test-IPsecDomainIsolation.ps1](audit_scripts/Test-IPsecDomainIsolation.ps1)
+
 ```powershell
 # Test-IPsecDomainIsolation.ps1
 # Checks the state of local IPsec Connection Security Rules.

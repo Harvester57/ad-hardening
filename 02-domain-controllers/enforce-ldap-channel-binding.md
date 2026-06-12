@@ -49,6 +49,8 @@ LDAP Channel Binding Tokens (CBT) mitigate these relay attacks. CBT establishes 
 
 Use this method to apply the setting locally.
 
+[Download Script: Configure-LDAPChannelBinding.ps1](implementation_scripts/Configure-LDAPChannelBinding.ps1)
+
 ```powershell
 # Configure-LDAPChannelBinding.ps1
 # Description: Enforces LDAP Channel Binding Token requirements to Always.
@@ -65,6 +67,8 @@ Write-Host "LDAP Channel Binding requirements set to 2 (Always)." -ForegroundCol
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-LDAPChannelBindingStatus.ps1](audit_scripts/Get-LDAPChannelBindingStatus.ps1)
+
 ```powershell
 # Get-LDAPChannelBindingStatus.ps1
 # Description: Audits the LDAP Channel Binding Token configuration in the registry.

@@ -63,6 +63,8 @@ By running LSA in a secure container separate from the main LSASS process, Crede
 
 Use this method to apply the settings locally.
 
+[Download Script: Configure-CredentialGuard.ps1](implementation_scripts/Configure-CredentialGuard.ps1)
+
 ```powershell
 # Configure-CredentialGuard.ps1
 # Description: Enables Virtualization-Based Security (VBS) and Credential Guard in the registry.
@@ -100,6 +102,8 @@ Write-Host "Hardening applied successfully. A system reboot is required." -Foreg
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-CredentialGuardStatus.ps1](audit_scripts/Get-CredentialGuardStatus.ps1)
+
 ```powershell
 # Get-CredentialGuardStatus.ps1
 # Description: Audits the configuration and operational status of Credential Guard.

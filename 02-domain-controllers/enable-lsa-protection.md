@@ -50,6 +50,8 @@ Enabling LSA Protection configures LSASS to run as a Protected Process Light (PP
 
 Use this method to apply the setting locally.
 
+[Download Script: Configure-LSAProtection.ps1](implementation_scripts/Configure-LSAProtection.ps1)
+
 ```powershell
 # Configure-LSAProtection.ps1
 # Description: Enables LSA Protection (RunAsPPL) in the registry.
@@ -66,6 +68,8 @@ Write-Host "LSA Protection registry configuration applied. A reboot is required 
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-LSAProtectionStatus.ps1](audit_scripts/Get-LSAProtectionStatus.ps1)
+
 ```powershell
 # Get-LSAProtectionStatus.ps1
 # Description: Audits LSA Protection (RunAsPPL) in the registry.

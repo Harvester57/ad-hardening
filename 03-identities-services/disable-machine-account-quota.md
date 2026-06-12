@@ -68,6 +68,8 @@ Run the following scripts to audit and remediate these settings.
 
 #### 1. Local Audit (Audit-MachineAccountQuota.ps1)
 
+[Download Script: Audit-MachineAccountQuota.ps1](audit_scripts/Audit-MachineAccountQuota.ps1)
+
 ```powershell
 # Audit-MachineAccountQuota.ps1
 # Description: Audits the domain-wide machine account quota attribute and local Add workstations to domain user right assignment.
@@ -126,6 +128,8 @@ try {
 ```
 
 #### 2. Local Remediation (Set-MachineAccountQuota.ps1)
+
+[Download Script: Set-MachineAccountQuota.ps1](implementation_scripts/Set-MachineAccountQuota.ps1)
 
 ```powershell
 # Set-MachineAccountQuota.ps1

@@ -58,6 +58,8 @@ Because there is no default ADMX administrative template to manage WPBT executio
 
 Run the following script to configure the registry setting locally on the system:
 
+[Download Script: Configure-DisableWpbt.ps1](implementation_scripts/Configure-DisableWpbt.ps1)
+
 ```powershell
 # Configure-DisableWpbt.ps1
 # Description: Disables Windows Platform Binary Table (WPBT) execution in the registry.
@@ -77,6 +79,8 @@ Write-Host "Registry setting DisableWpbtExecution configured to 1." -ForegroundC
 ```
 
 *To verify that the registry value is correctly enforced:*
+
+[Download Script: Get-WpbtStatus.ps1](audit_scripts/Get-WpbtStatus.ps1)
 
 ```powershell
 # Get-WpbtStatus.ps1

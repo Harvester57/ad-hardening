@@ -61,6 +61,8 @@ Implementing the Local Administrator Password Solution (LAPS) completely mitigat
 
 Run the following script to configure Windows LAPS locally using the registry.
 
+[Download Script: Configure-LAPS.ps1](implementation_scripts/Configure-LAPS.ps1)
+
 ```powershell
 # Configure-LAPS.ps1
 # Description: Configures Windows LAPS parameters in the registry.
@@ -84,6 +86,8 @@ Write-Host "Windows LAPS configuration registry settings applied successfully." 
 ```
 
 *To verify LAPS configuration settings locally:*
+[Download Script: Get-LAPSStatus.ps1](audit_scripts/Get-LAPSStatus.ps1)
+
 ```powershell
 # Get-LAPSStatus.ps1
 # Description: Checks the Windows LAPS registry parameters.

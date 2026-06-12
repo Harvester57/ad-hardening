@@ -48,6 +48,8 @@ Run the following scripts to audit and remediate accounts in the forest.
 
 #### 1. Local AD Audit (Audit-KerberosPreAuth.ps1)
 
+[Download Script: Audit-KerberosPreAuth.ps1](audit_scripts/Audit-KerberosPreAuth.ps1)
+
 ```powershell
 # Audit-KerberosPreAuth.ps1
 # Description: Audits active user accounts to find any with pre-authentication disabled.
@@ -74,6 +76,8 @@ try {
 ```
 
 #### 2. Local AD Remediation (Set-KerberosPreAuth.ps1)
+
+[Download Script: Set-KerberosPreAuth.ps1](implementation_scripts/Set-KerberosPreAuth.ps1)
 
 ```powershell
 # Set-KerberosPreAuth.ps1

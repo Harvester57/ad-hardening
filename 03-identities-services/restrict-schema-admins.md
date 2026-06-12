@@ -55,6 +55,8 @@ Run the following scripts to audit and clear the group membership.
 
 #### 1. Local Audit (Audit-SchemaAdminsGroup.ps1)
 
+[Download Script: Audit-SchemaAdminsGroup.ps1](audit_scripts/Audit-SchemaAdminsGroup.ps1)
+
 ```powershell
 # Audit-SchemaAdminsGroup.ps1
 # Description: Audits the Schema Admins group membership.
@@ -82,6 +84,8 @@ try {
 ```
 
 #### 2. Local Remediation (Clear-SchemaAdminsGroup.ps1)
+
+[Download Script: Clear-SchemaAdminsGroup.ps1](implementation_scripts/Clear-SchemaAdminsGroup.ps1)
 
 ```powershell
 # Clear-SchemaAdminsGroup.ps1

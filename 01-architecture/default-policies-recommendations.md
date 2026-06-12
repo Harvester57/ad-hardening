@@ -53,6 +53,8 @@ Run the following scripts to audit and set up the GPO structure.
 
 #### 1. Local Audit (Audit-GPOPrecedence.ps1)
 
+[Download Script: Audit-GPOPrecedence.ps1](audit_scripts/Audit-GPOPrecedence.ps1)
+
 ```powershell
 # Audit-GPOPrecedence.ps1
 # Description: Verifies that a dedicated hardening GPO exists with higher precedence than Default DC Policy.
@@ -97,6 +99,8 @@ try {
 ```
 
 #### 2. Local Remediation (Set-ADModularGPO.ps1)
+
+[Download Script: Set-ADModularGPO.ps1](implementation_scripts/Set-ADModularGPO.ps1)
 
 ```powershell
 # Set-ADModularGPO.ps1

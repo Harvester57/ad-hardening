@@ -60,6 +60,8 @@ Privileged Access Workstations (PAWs) contain Tier 0 administrative tokens. A co
 
 Configure the local registry parameters to activate VBS, Credential Guard, and Secure Launch.
 
+[Download Script: Enable-PawVBSCredentialGuard.ps1](implementation_scripts/Enable-PawVBSCredentialGuard.ps1)
+
 ```powershell
 # Enable-PawVBSCredentialGuard.ps1
 # Description: Configures local registry keys to activate VBS and Credential Guard on PAWs.
@@ -89,6 +91,8 @@ Write-Host "[+] PAW VBS and Credential Guard registry settings applied. (Reboot 
 ```
 
 *To audit VBS and Credential Guard status using WMI and Registry:*
+[Download Script: Test-PawVBSCredentialGuard.ps1](audit_scripts/Test-PawVBSCredentialGuard.ps1)
+
 ```powershell
 # Test-PawVBSCredentialGuard.ps1
 # Description: Queries the local Win32_DeviceGuard class and registry settings to verify VBS protection states on PAWs.

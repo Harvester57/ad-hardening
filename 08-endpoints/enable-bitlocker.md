@@ -89,6 +89,8 @@ If the workstation is stolen or boots outside the local LAN (e.g., on a public n
 
 Run the following scripts locally to audit and configure BitLocker parameters.
 
+[Download Script: Set-BitLockerEncryption.ps1](implementation_scripts/Set-BitLockerEncryption.ps1)
+
 ```powershell
 # Set-BitLockerEncryption.ps1
 # Enables BitLocker encryption locally and backs up recovery keys to AD.
@@ -116,6 +118,8 @@ if ($Volume.ProtectionStatus -eq "Off") {
 ```
 
 *To audit local BitLocker and Network Unlock registry settings:*
+[Download Script: Test-BitLockerStatus.ps1](audit_scripts/Test-BitLockerStatus.ps1)
+
 ```powershell
 # Test-BitLockerStatus.ps1
 # Audits current BitLocker protection state, key protector types, and Network Unlock configuration.

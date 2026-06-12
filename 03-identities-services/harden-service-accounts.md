@@ -47,6 +47,8 @@ gMSAs are primarily created and managed using administrative consoles or PowerSh
 
 Use the following PowerShell script to initialize the KDS root key (if not already done) and create a gMSA.
 
+[Download Script: Set-gMSAServiceAccount.ps1](implementation_scripts/Set-gMSAServiceAccount.ps1)
+
 ```powershell
 # Set-gMSAServiceAccount.ps1
 # Description: Generates the KDS root key and registers a new gMSA.
@@ -83,6 +85,8 @@ if (-not $existingMSA) {
 ```
 
 *To audit registered Managed Service Accounts:*
+[Download Script: Get-gMSAStatus.ps1](audit_scripts/Get-gMSAStatus.ps1)
+
 ```powershell
 # Get-gMSAStatus.ps1
 # Description: Lists all registered gMSAs and their configuration details.

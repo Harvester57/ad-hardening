@@ -53,6 +53,8 @@ Run the following scripts to audit and raise the functional levels.
 
 #### 1. Local Audit (Audit-ADFunctionalLevels.ps1)
 
+[Download Script: Audit-ADFunctionalLevels.ps1](audit_scripts/Audit-ADFunctionalLevels.ps1)
+
 ```powershell
 # Audit-ADFunctionalLevels.ps1
 # Description: Audits the current domain and forest functional levels.
@@ -91,6 +93,8 @@ if ($Domain -and $Forest) {
 ```
 
 #### 2. Local Remediation (Set-ADFunctionalLevels.ps1)
+
+[Download Script: Set-ADFunctionalLevels.ps1](implementation_scripts/Set-ADFunctionalLevels.ps1)
 
 ```powershell
 # Set-ADFunctionalLevels.ps1

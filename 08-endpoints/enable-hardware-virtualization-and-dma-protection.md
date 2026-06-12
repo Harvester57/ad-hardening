@@ -58,6 +58,8 @@ Configure local registry keys to enforce Kernel DMA Protection and programmatica
 
 Run the following script to configure the Kernel DMA Protection policy locally:
 
+[Download Script: Configure-KernelDMAProtection.ps1](implementation_scripts/Configure-KernelDMAProtection.ps1)
+
 ```powershell
 # Configure-KernelDMAProtection.ps1
 # Description: Configures registry keys to enable Kernel DMA Protection.
@@ -78,6 +80,8 @@ Write-Host "Status: Kernel DMA Protection registry configuration applied." -Fore
 #### 2. Local Audit (TPM, Virtualization, and DMA Support)
 
 Run the following script to audit the status of the required hardware security components:
+
+[Download Script: Audit-HardwareSecurityFeatures.ps1](audit_scripts/Audit-HardwareSecurityFeatures.ps1)
 
 ```powershell
 # Audit-HardwareSecurityFeatures.ps1

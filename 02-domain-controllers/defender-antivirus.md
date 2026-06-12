@@ -118,6 +118,8 @@ This control establishes a server-optimized defense posture:
 
 Run the following scripts locally on the Domain Controller to configure Windows Defender baseline, ASR rules, Tamper Protection, and Sandbox execution.
 
+[Download Script: Set-DefenderDCBaseline.ps1](implementation_scripts/Set-DefenderDCBaseline.ps1)
+
 ```powershell
 # Set-DefenderDCBaseline.ps1
 # Description: Configures Windows Defender Antivirus options, ASR rules, Tamper Protection, and Sandbox execution on DCs.
@@ -204,6 +206,8 @@ Write-Host "Defender Domain Controller baseline configuration completed. A reboo
 ```
 
 *To audit the local Domain Controller Windows Defender security status:*
+[Download Script: Get-DefenderDCStatus.ps1](audit_scripts/Get-DefenderDCStatus.ps1)
+
 ```powershell
 # Get-DefenderDCStatus.ps1
 # Description: Audits the registry and preferences for ASR, Tamper Protection, and Sandbox status on Domain Controllers.

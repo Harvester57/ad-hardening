@@ -72,6 +72,8 @@ Since firmware password and boot order configurations are set at the hardware le
 
 Run the following script to verify the native boot mode, Secure Boot support, and retrieve BIOS vendor information:
 
+[Download Script: Audit-UEFISecurity.ps1](audit_scripts/Audit-UEFISecurity.ps1)
+
 ```powershell
 # Audit-UEFISecurity.ps1
 # Description: Audits local boot environment and BIOS firmware properties.

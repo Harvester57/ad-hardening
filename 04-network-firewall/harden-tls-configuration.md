@@ -72,6 +72,8 @@ Since Schannel protocol versions (disabling TLS 1.0/1.1 and enabling TLS 1.2/1.3
 Run the following scripts locally on testing hosts or non-GPO-managed systems.
 
 #### Remediation Script:
+[Download Script: Set-TLSConfiguration.ps1](implementation_scripts/Set-TLSConfiguration.ps1)
+
 ```powershell
 # Set-TLSConfiguration.ps1
 # Description: Hardens TLS/Schannel protocols, prioritizes modern cipher suites, and orders ECC curves.
@@ -141,6 +143,8 @@ Write-Host "Schannel configuration applied. A system reboot is required to apply
 ```
 
 #### Audit Script:
+[Download Script: Test-TLSConfiguration.ps1](audit_scripts/Test-TLSConfiguration.ps1)
+
 ```powershell
 # Test-TLSConfiguration.ps1
 # Description: Audits TLS/Schannel protocol configuration, cipher suites, and ECC curves.

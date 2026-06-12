@@ -109,6 +109,8 @@ sc.exe failure Sysmon actions= restart/60000/restart/60000/restart/60000 reset= 
 
 Run the following scripts locally to deploy/configure Sysmon and verify its operational state.
 
+[Download Script: Set-SysmonHardening.ps1](implementation_scripts/Set-SysmonHardening.ps1)
+
 ```powershell
 # Set-SysmonHardening.ps1
 # Configures Sysmon service recovery settings.
@@ -134,6 +136,8 @@ if ($Process.ExitCode -eq 0) {
 ```
 
 *To verify the settings have been applied:*
+
+[Download Script: Test-SysmonHardening.ps1](audit_scripts/Test-SysmonHardening.ps1)
 
 ```powershell
 # Test-SysmonHardening.ps1

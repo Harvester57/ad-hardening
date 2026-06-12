@@ -48,6 +48,8 @@ Auditing and resetting these orphan accounts restores proper security inheritanc
 
 Run the following script to automatically identify all user accounts with `adminCount=1` that are no longer members of any protected AD group, reset the attribute, and re-enable security inheritance.
 
+[Download Script: Cleanup-AdminCountOrphans.ps1](implementation_scripts/Cleanup-AdminCountOrphans.ps1)
+
 ```powershell
 # Cleanup-AdminCountOrphans.ps1
 # Description: Resets adminCount and re-enables inheritance on user accounts that are no longer in protected groups.
@@ -121,6 +123,8 @@ Write-Host "[+] Cleanup complete. Total orphan accounts remediated: $($CleanedCo
 ```
 
 *To audit and list orphan accounts without making changes:*
+[Download Script: Get-AdminCountOrphansAudit.ps1](audit_scripts/Get-AdminCountOrphansAudit.ps1)
+
 ```powershell
 # Get-AdminCountOrphansAudit.ps1
 # Description: Scans the domain and prints all orphan adminCount accounts.

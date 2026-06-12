@@ -47,6 +47,8 @@ Run the following scripts to audit and configure the setting domain-wide.
 
 #### 1. Local Audit (Audit-OUAccidentalDeletion.ps1)
 
+[Download Script: Audit-OUAccidentalDeletion.ps1](audit_scripts/Audit-OUAccidentalDeletion.ps1)
+
 ```powershell
 # Audit-OUAccidentalDeletion.ps1
 # Description: Audits all OUs to find any without accidental deletion protection.
@@ -72,6 +74,8 @@ try {
 ```
 
 #### 2. Local Remediation (Enforce-OUAccidentalDeletion.ps1)
+
+[Download Script: Enforce-OUAccidentalDeletion.ps1](implementation_scripts/Enforce-OUAccidentalDeletion.ps1)
 
 ```powershell
 # Enforce-OUAccidentalDeletion.ps1

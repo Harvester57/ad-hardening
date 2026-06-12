@@ -71,6 +71,8 @@ For GPOs targeting Domain Controllers, configure the following inbound rules und
 Run the following scripts locally to audit and configure the firewall profiles and inbound port rules.
 
 #### Remediation Script:
+[Download Script: Set-ADPortMatrixRules.ps1](implementation_scripts/Set-ADPortMatrixRules.ps1)
+
 ```powershell
 # Set-ADPortMatrixRules.ps1
 # Configures local Windows Defender Firewall profiles and applies basic AD port matrix baseline rules.
@@ -125,6 +127,8 @@ Write-Host "Firewall port matrix configuration completed successfully." -Foregro
 ```
 
 #### Audit Script:
+[Download Script: Test-ADPortMatrixRules.ps1](audit_scripts/Test-ADPortMatrixRules.ps1)
+
 ```powershell
 # Test-ADPortMatrixRules.ps1
 # Audits local firewall status and checks if default inbound traffic is blocked.

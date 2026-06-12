@@ -45,6 +45,8 @@ Because RC4 utilizes weaker, legacy cryptography, tickets encrypted using RC4 ca
 
 Run the following script to enforce AES-only encryption on active user accounts in the domain.
 
+[Download Script: Set-AccountAESEncryption.ps1](implementation_scripts/Set-AccountAESEncryption.ps1)
+
 ```powershell
 # Set-AccountAESEncryption.ps1
 # Description: Configures the msDS-SupportedEncryptionTypes attribute to AES-only (24) on active user accounts.
@@ -72,6 +74,8 @@ Write-Host "AES encryption has been successfully enforced on active accounts." -
 ```
 
 *To audit account Kerberos encryption configuration:*
+[Download Script: Get-AccountEncryptionStatus.ps1](audit_scripts/Get-AccountEncryptionStatus.ps1)
+
 ```powershell
 # Get-AccountEncryptionStatus.ps1
 # Description: Identifies accounts that do not have msDS-SupportedEncryptionTypes set to 24 (AES-only).

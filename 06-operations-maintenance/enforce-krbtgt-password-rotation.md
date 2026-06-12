@@ -55,6 +55,8 @@ To execute the manual graphical procedure using Active Directory Users and Compu
 
 Use the following scripts to audit the age of the `krbtgt` password and programmatically perform a reset.
 
+[Download Script: Reset-KrbtgtPassword.ps1](implementation_scripts/Reset-KrbtgtPassword.ps1)
+
 ```powershell
 # Reset-KrbtgtPassword.ps1
 # Description: Resets the password of the krbtgt account with a strong, random password.
@@ -92,6 +94,8 @@ try {
 ```
 
 *To audit the password last set age of the KRBTGT account:*
+[Download Script: Get-KrbtgtRotationStatus.ps1](audit_scripts/Get-KrbtgtRotationStatus.ps1)
+
 ```powershell
 # Get-KrbtgtRotationStatus.ps1
 # Description: Audits the password age of the krbtgt account.

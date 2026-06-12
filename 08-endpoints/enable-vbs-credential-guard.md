@@ -64,6 +64,8 @@ Enforcing VBS and Credential Guard prevents in-memory credential harvesting, bre
 
 Run the following scripts locally to configure registry keys to enable VBS and Credential Guard.
 
+[Download Script: Enable-VBSCredentialGuard.ps1](implementation_scripts/Enable-VBSCredentialGuard.ps1)
+
 ```powershell
 # Enable-VBSCredentialGuard.ps1
 # Configures local registry keys to activate VBS and Credential Guard.
@@ -93,6 +95,8 @@ Write-Host "[+] VBS and Credential Guard registry settings applied. (Reboot requ
 ```
 
 *To audit VBS and Credential Guard status using WMI:*
+[Download Script: Test-VBSCredentialGuard.ps1](audit_scripts/Test-VBSCredentialGuard.ps1)
+
 ```powershell
 # Test-VBSCredentialGuard.ps1
 # Queries the local Win32_DeviceGuard class to verify active protection states.

@@ -106,6 +106,8 @@ To achieve maximum protection, the PAW BitLocker configuration enforces a signif
 
 Run the following scripts locally on the PAW to apply registry configuration baselines and enable BitLocker.
 
+[Download Script: Set-PAWBitLockerEncryption.ps1](implementation_scripts/Set-PAWBitLockerEncryption.ps1)
+
 ```powershell
 # Set-PAWBitLockerEncryption.ps1
 # Configures registry settings for PAW BitLocker, disables sleep states, and enables encryption.
@@ -176,6 +178,8 @@ if ($Volume.ProtectionStatus -eq "Off") {
 ```
 
 *To audit the PAW BitLocker status and security parameters:*
+[Download Script: Test-PAWBitLockerStatus.ps1](audit_scripts/Test-PAWBitLockerStatus.ps1)
+
 ```powershell
 # Test-PAWBitLockerStatus.ps1
 # Audits current BitLocker configuration, active protectors, sleep state, and DMA protection.

@@ -46,6 +46,8 @@ To prevent this critical privilege escalation path, **Unconstrained Delegation m
 
 Use the following PowerShell script to audit and disable unconstrained delegation on all computers and users.
 
+[Download Script: Set-RestrictDelegation.ps1](implementation_scripts/Set-RestrictDelegation.ps1)
+
 ```powershell
 # Set-RestrictDelegation.ps1
 # Description: Disables unconstrained delegation on computer and user accounts.
@@ -72,6 +74,8 @@ Write-Host "Unconstrained delegation has been disabled on all identified account
 ```
 
 *To audit delegation settings in the domain:*
+[Download Script: Get-KerberosDelegationStatus.ps1](audit_scripts/Get-KerberosDelegationStatus.ps1)
+
 ```powershell
 # Get-KerberosDelegationStatus.ps1
 # Description: Audits accounts with unconstrained delegation in the Active Directory domain.

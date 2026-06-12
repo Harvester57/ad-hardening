@@ -95,6 +95,8 @@ While hardware firmware settings cannot be directly written via standard Windows
 
 Run the following script to verify native UEFI boot, Secure Boot state, and retrieve system BIOS properties:
 
+[Download Script: Audit-UEFISecurity.ps1](audit_scripts/Audit-UEFISecurity.ps1)
+
 ```powershell
 # Audit-UEFISecurity.ps1
 # Description: Audits local boot environment and BIOS firmware properties.

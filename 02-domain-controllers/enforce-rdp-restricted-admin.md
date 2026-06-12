@@ -96,6 +96,8 @@ Ensure that all target hosts are configured to permit Restricted Admin connectio
 
 Run the following script to configure the local host registry to allow and enforce Restricted Admin mode.
 
+[Download Script: Set-RdpRestrictedAdmin.ps1](implementation_scripts/Set-RdpRestrictedAdmin.ps1)
+
 ```powershell
 # Set-RdpRestrictedAdmin.ps1
 # Description: Enables RDP Restricted Admin mode support and hardens RDP session options.
@@ -135,6 +137,8 @@ Write-Host "[+] RDP session security controls applied to registry." -ForegroundC
 ```
 
 *To verify the local RDP configuration status:*
+[Download Script: Get-RdpRestrictedAdminStatus.ps1](audit_scripts/Get-RdpRestrictedAdminStatus.ps1)
+
 ```powershell
 # Get-RdpRestrictedAdminStatus.ps1
 # Description: Checks the configuration state of RDP Restricted Admin and session security settings.

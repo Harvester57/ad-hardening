@@ -67,6 +67,8 @@ ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\BaselinePolicy.xml" -BinaryFilePath "
 
 Run the following scripts locally to generate a baseline WDAC policy, enable Audit Mode, and configure local registry parameters.
 
+[Download Script: Configure-WDACLocalPolicy.ps1](implementation_scripts/Configure-WDACLocalPolicy.ps1)
+
 ```powershell
 # Configure-WDACLocalPolicy.ps1
 # Generates a baseline local Code Integrity policy and sets it to Audit Mode.
@@ -102,6 +104,8 @@ Write-Host "[+] Local WDAC baseline policy compiled and deployed to $PolicyBin."
 ```
 
 *To audit the running WDAC policy states:*
+[Download Script: Test-WDACStatus.ps1](audit_scripts/Test-WDACStatus.ps1)
+
 ```powershell
 # Test-WDACStatus.ps1
 # Audits the local system to check if Code Integrity policies are active.

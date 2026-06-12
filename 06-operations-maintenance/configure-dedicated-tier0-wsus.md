@@ -65,6 +65,8 @@ On the dedicated Tier 0 WSUS server:
 
 Run the following script block to apply the dedicated WSUS target server configuration locally via registry parameters.
 
+[Download Script: Set-LocalWsusServer.ps1](implementation_scripts/Set-LocalWsusServer.ps1)
+
 ```powershell
 # Set-LocalWsusServer.ps1
 # Description: Configures the local client registry to utilize the dedicated Tier 0 WSUS over HTTPS.
@@ -93,6 +95,8 @@ Write-Host "[+] Local system configured to use secure WSUS server: $WsusServerUr
 ```
 
 *To verify active WSUS configurations:*
+[Download Script: Get-WsusConfigStatus.ps1](audit_scripts/Get-WsusConfigStatus.ps1)
+
 ```powershell
 # Get-WsusConfigStatus.ps1
 # Description: Audits local WSUS configuration settings.

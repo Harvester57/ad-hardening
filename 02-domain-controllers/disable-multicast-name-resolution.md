@@ -73,6 +73,8 @@ Configure Group Policy to disable LLMNR, and Group Policy Preferences to disable
 
 Use this method to apply the settings locally.
 
+[Download Script: Configure-DisableMulticastNameResolution.ps1](implementation_scripts/Configure-DisableMulticastNameResolution.ps1)
+
 ```powershell
 # Configure-DisableMulticastNameResolution.ps1
 # Description: Disables LLMNR, NetBIOS over TCP/IP, and mDNS on all interfaces.
@@ -114,6 +116,8 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green
 ```
 
 *To verify the setting has been applied:*
+[Download Script: Get-MulticastNameResolutionStatus.ps1](audit_scripts/Get-MulticastNameResolutionStatus.ps1)
+
 ```powershell
 # Get-MulticastNameResolutionStatus.ps1
 # Description: Audits LLMNR, NetBIOS, and mDNS registry settings.

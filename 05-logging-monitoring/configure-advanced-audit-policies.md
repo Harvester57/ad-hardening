@@ -83,6 +83,8 @@ Enforcing advanced auditing policies provides the following security coverages:
 
 Run the following scripts locally to query and enforce Advanced Security Audit Policies.
 
+[Download Script: Set-AdvancedAuditPolicies.ps1](implementation_scripts/Set-AdvancedAuditPolicies.ps1)
+
 ```powershell
 # Set-AdvancedAuditPolicies.ps1
 # Configures Advanced Security Audit Policies and registry override values.
@@ -144,6 +146,8 @@ Write-Host "Advanced Audit Policies applied successfully." -ForegroundColor Cyan
 ```
 
 *To verify the settings have been applied:*
+
+[Download Script: Test-AdvancedAuditPolicies.ps1](audit_scripts/Test-AdvancedAuditPolicies.ps1)
 
 ```powershell
 # Test-AdvancedAuditPolicies.ps1

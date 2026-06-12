@@ -54,6 +54,8 @@ Hardening UAC settings ensures:
 
 Run the following scripts locally to configure maximum security parameters for UAC in the system registry.
 
+[Download Script: Configure-UACPolicies.ps1](implementation_scripts/Configure-UACPolicies.ps1)
+
 ```powershell
 # Configure-UACPolicies.ps1
 # Enforces hardened User Account Control (UAC) registry configuration values.
@@ -79,6 +81,8 @@ Write-Host "[+] UAC registry values configured successfully." -ForegroundColor G
 ```
 
 *To audit UAC configurations:*
+[Download Script: Test-UACPolicies.ps1](audit_scripts/Test-UACPolicies.ps1)
+
 ```powershell
 # Test-UACPolicies.ps1
 # Verifies local system registry settings for User Account Control.

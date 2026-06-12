@@ -56,6 +56,8 @@ Since Secure Boot is a hardware firmware configuration, it cannot be turned on f
 
 Run the following script to check the status of Secure Boot on the local machine:
 
+[Download Script: Audit-SecureBoot.ps1](audit_scripts/Audit-SecureBoot.ps1)
+
 ```powershell
 # Audit-SecureBoot.ps1
 # Queries UEFI Secure Boot parameters using native cmdlets.

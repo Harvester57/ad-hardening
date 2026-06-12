@@ -74,6 +74,8 @@ Enforcing advanced execution logging mitigates these threat vectors:
 
 Run the following scripts locally to configure command line process creation, PowerShell logging registry keys, and create the hardened transcript directory with write-only NTFS permissions.
 
+[Download Script: Set-PowerShellAuditing.ps1](implementation_scripts/Set-PowerShellAuditing.ps1)
+
 ```powershell
 # Set-PowerShellAuditing.ps1
 # Configures command line auditing, PowerShell logging, transcription, and hardens folder ACLs.
@@ -160,6 +162,8 @@ Write-Host "    Hardened NTFS permissions applied to $($TranscriptPath) successf
 ```
 
 *To verify the settings have been applied:*
+
+[Download Script: Test-PowerShellAuditing.ps1](audit_scripts/Test-PowerShellAuditing.ps1)
 
 ```powershell
 # Test-PowerShellAuditing.ps1

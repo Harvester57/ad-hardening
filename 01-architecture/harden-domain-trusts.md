@@ -48,6 +48,8 @@ Specifically:
 
 Run the following script block to audit and harden trust relationships. The `netdom` utility is used to query and apply the trust settings.
 
+[Download Script: Set-ADTrustHardening.ps1](implementation_scripts/Set-ADTrustHardening.ps1)
+
 ```powershell
 # Set-ADTrustHardening.ps1
 # Description: Hardens trust relationships by disabling SID History and TGT Delegation, and enabling Quarantine.
@@ -74,6 +76,8 @@ Write-Host "Trust hardening commands executed." -ForegroundColor Green
 ```
 
 *To verify the trust configuration state:*
+[Download Script: Get-ADTrustStatus.ps1](audit_scripts/Get-ADTrustStatus.ps1)
+
 ```powershell
 # Get-ADTrustStatus.ps1
 # Description: Audits trust attributes and configuration settings.

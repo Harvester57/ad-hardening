@@ -95,6 +95,8 @@ Navigate to:
 
 Run the following scripts locally to apply DMA, Sleep, and BitLocker USB registry parameters.
 
+[Download Script: Set-DMAPhysicalSecurity.ps1](implementation_scripts/Set-DMAPhysicalSecurity.ps1)
+
 ```powershell
 # Set-DMAPhysicalSecurity.ps1
 # Description: Hardens local registry keys to mitigate DMA attacks, disable standby sleep states, and restrict unencrypted USB writing.
@@ -161,6 +163,8 @@ Write-Host "DMA and physical security settings applied successfully." -Foregroun
 ```
 
 *To audit local DMA and physical security configuration:*
+[Download Script: Test-DMAPhysicalSecurity.ps1](audit_scripts/Test-DMAPhysicalSecurity.ps1)
+
 ```powershell
 # Test-DMAPhysicalSecurity.ps1
 # Description: Audits local registry configuration for standby settings, DMA protection under lock, USB restrictions, and blocked device setup classes.

@@ -71,6 +71,8 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
 
 Run the following scripts locally to configure the Application Identity service and verify AppLocker configuration. Note that local AppLocker policies are typically managed by importing XML configurations.
 
+[Download Script: Set-AppLockerDCPolicy.ps1](implementation_scripts/Set-AppLockerDCPolicy.ps1)
+
 ```powershell
 # Set-AppLockerDCPolicy.ps1
 # Description: Configures the Application Identity service and imports a basic local AppLocker XML policy.
@@ -109,6 +111,8 @@ Write-Host "[+] AppLocker enforcement registry values configured." -ForegroundCo
 ```
 
 *To audit the Application Identity service and AppLocker registry configuration:*
+[Download Script: Get-AppLockerDCStatus.ps1](audit_scripts/Get-AppLockerDCStatus.ps1)
+
 ```powershell
 # Get-AppLockerDCStatus.ps1
 # Description: Checks the configuration state of the AppIDSvc service and AppLocker registry paths.

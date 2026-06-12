@@ -63,6 +63,8 @@ To prevent Tier 0 credentials from being exposed on Tier 1 and Tier 2 systems, c
 
 Use this script to configure local security database files via `secedit` to deny specified administrative groups from logging on locally, over the network, or via Remote Desktop.
 
+[Download Script: Set-LocalLogonRestrictions.ps1](implementation_scripts/Set-LocalLogonRestrictions.ps1)
+
 ```powershell
 # Set-LocalLogonRestrictions.ps1
 # Configures secedit User Rights Assignment to block domain administrative groups.
@@ -158,6 +160,8 @@ if ($process.ExitCode -eq 0) {
 ```
 
 *To audit active logon restriction settings locally:*
+[Download Script: Test-LocalLogonRestrictions.ps1](audit_scripts/Test-LocalLogonRestrictions.ps1)
+
 ```powershell
 # Test-LocalLogonRestrictions.ps1
 # Audits local security policies to check if SeDeny rights are populated.

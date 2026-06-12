@@ -85,6 +85,8 @@ To ensure the SMBv1 driver is disabled on older machines, deploy a registry chan
 Run the following scripts locally to enforce SMBv3 standards.
 
 #### Remediation Script:
+[Download Script: Set-SMBSecurity.ps1](implementation_scripts/Set-SMBSecurity.ps1)
+
 ```powershell
 # Set-SMBSecurity.ps1
 # Description: Disables SMBv1, mandates signing, sets SMBv3 as minimum dialect, and enforces encryption.
@@ -130,6 +132,8 @@ Write-Host "SMBv3 minimum dialect rules configured." -ForegroundColor Green
 ```
 
 #### Audit Script:
+[Download Script: Test-SMBSecurity.ps1](audit_scripts/Test-SMBSecurity.ps1)
+
 ```powershell
 # Test-SMBSecurity.ps1
 # Description: Audits local SMB configuration for signing, encryption, and dialects.

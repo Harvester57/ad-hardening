@@ -83,6 +83,8 @@ Hardening these service channels blocks the following exploit vectors:
 
 Run the following scripts locally to enforce WinRM client/service and RPC restrictions in the registry.
 
+[Download Script: Set-WinRMAndRpcHardening.ps1](implementation_scripts/Set-WinRMAndRpcHardening.ps1)
+
 ```powershell
 # Set-WinRMAndRpcHardening.ps1
 # Description: Hardens WinRM client/service parameters and restricts remote RPC clients.
@@ -119,6 +121,8 @@ Write-Host "[+] Unauthenticated RPC client restrictions enforced (RestrictRemote
 ```
 
 *To audit the WinRM client/service and RPC client settings status:*
+[Download Script: Get-WinRMAndRpcHardeningStatus.ps1](audit_scripts/Get-WinRMAndRpcHardeningStatus.ps1)
+
 ```powershell
 # Get-WinRMAndRpcHardeningStatus.ps1
 # Description: Audits registry configuration of WinRM client/service options and RPC client restrictions.

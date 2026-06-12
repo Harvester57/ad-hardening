@@ -62,6 +62,8 @@ Navigate to:
 
 Since user configurations reside in `HKEY_CURRENT_USER` (HKCU), remediation scripts must run in the context of the logged-on user. To apply these configurations machine-wide for all future profiles, the script can load the Default User hive (`NTUSER.DAT`) and apply the keys.
 
+[Download Script: Set-UserProfileRestrictions.ps1](implementation_scripts/Set-UserProfileRestrictions.ps1)
+
 ```powershell
 # Set-UserProfileRestrictions.ps1
 # Description: Configures HKCU registry parameters for the active user, and sets them in the Default User hive for new profiles.
@@ -116,6 +118,8 @@ if (Test-Path $DefaultHivePath) {
 ```
 
 *To audit local user profile configuration:*
+[Download Script: Test-UserProfileRestrictions.ps1](audit_scripts/Test-UserProfileRestrictions.ps1)
+
 ```powershell
 # Test-UserProfileRestrictions.ps1
 # Description: Checks the HKCU registry settings of the active user for profile restrictions.

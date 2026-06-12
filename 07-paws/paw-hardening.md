@@ -71,6 +71,8 @@ Refer to the detailed implementation guide:
 
 Run the following scripts locally on the PAW to enforce LSA Protection, enable AppLocker's dependency service, and verify group membership.
 
+[Download Script: Configure-PAWLocalSettings.ps1](implementation_scripts/Configure-PAWLocalSettings.ps1)
+
 ```powershell
 # Configure-PAWLocalSettings.ps1
 # Configures local registry keys and services required for PAW isolation.
@@ -109,6 +111,8 @@ Write-Host "`nLocal PAW modifications complete. Please reboot to enforce VBS and
 ```
 
 *To verify the local PAW security posture:*
+[Download Script: Test-PAWSecurityPosture.ps1](audit_scripts/Test-PAWSecurityPosture.ps1)
+
 ```powershell
 # Test-PAWSecurityPosture.ps1
 # Audits the local PAW state for BitLocker, AppIDSvc, and Credential Guard registry settings.

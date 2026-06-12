@@ -64,6 +64,8 @@ To maintain secure communications through 2030 and beyond, IPsec configurations 
 Run the following scripts locally to audit and configure custom cryptographic sets on individual systems.
 
 #### Remediation Script:
+[Download Script: Set-IPsecCryptography.ps1](implementation_scripts/Set-IPsecCryptography.ps1)
+
 ```powershell
 # Set-IPsecCryptography.ps1
 # Description: Configures local IPsec Main Mode and Quick Mode custom cryptographic configurations.
@@ -119,6 +121,8 @@ Write-Host "IPsec cryptography configuration applied." -ForegroundColor Green
 ```
 
 #### Audit Script:
+[Download Script: Test-IPsecCryptography.ps1](audit_scripts/Test-IPsecCryptography.ps1)
+
 ```powershell
 # Test-IPsecCryptography.ps1
 # Description: Checks that IPsec rules only utilize strong cryptographic sets.

@@ -49,6 +49,25 @@ To ensure scripts run correctly on standard systems:
 
 ---
 
+## Script Extraction and Directories
+
+Every module directory contains two folders:
+* `implementation_scripts`: Contains PowerShell scripts to implement technical controls locally.
+* `audit_scripts`: Contains PowerShell scripts to audit technical controls locally.
+
+When adding or modifying a technical control:
+1. Ensure the implementation and audit PowerShell code blocks start with a comment designating the script filename (e.g., `# Configure-DisableSMBv1.ps1` or `# Get-SMBv1Status.ps1`).
+2. Extract the code block content and save it to the corresponding `implementation_scripts` or `audit_scripts` directory inside the module folder.
+3. Add download links in the markdown file directly above the code blocks:
+   * Implementation link: `[Download Script: Configure-DisableSMBv1.ps1](02-domain-controllers/implementation_scripts/Configure-DisableSMBv1.ps1)`
+   * Audit link: `[Download Script: Get-SMBv1Status.ps1](02-domain-controllers/audit_scripts/Get-SMBv1Status.ps1)`
+4. You can run the automation script to extract these scripts and inject the links:
+   ```text
+   py scripts/extract_scripts.py
+   ```
+
+---
+
 ## Validation Before Committing
 
 This repository contains a programmatic validator: **[Verify-ADHardeningDocs.ps1](Verify-ADHardeningDocs.ps1)**.

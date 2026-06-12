@@ -50,6 +50,8 @@ Run the following scripts to audit and initialize the Central Store folder struc
 
 #### 1. Local Audit (Audit-GPOCentralStore.ps1)
 
+[Download Script: Audit-GPOCentralStore.ps1](audit_scripts/Audit-GPOCentralStore.ps1)
+
 ```powershell
 # Audit-GPOCentralStore.ps1
 # Description: Audits the existence of the GPO Central Store in SYSVOL.
@@ -78,6 +80,8 @@ try {
 ```
 
 #### 2. Local Remediation (Create-GPOCentralStore.ps1)
+
+[Download Script: Create-GPOCentralStore.ps1](implementation_scripts/Create-GPOCentralStore.ps1)
 
 ```powershell
 # Create-GPOCentralStore.ps1

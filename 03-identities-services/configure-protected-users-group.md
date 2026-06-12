@@ -52,6 +52,8 @@ Placing Tier 0 and Tier 1 administrative accounts into the Protected Users group
 
 Run the following script to add administrative accounts to the Protected Users security group using PowerShell.
 
+[Download Script: Set-ProtectedUsers.ps1](implementation_scripts/Set-ProtectedUsers.ps1)
+
 ```powershell
 # Set-ProtectedUsers.ps1
 # Description: Adds privileged accounts to the Protected Users group.
@@ -83,6 +85,8 @@ foreach ($Admin in $TargetAdmins) {
 ```
 
 *To audit the members of the Protected Users group:*
+[Download Script: Get-ProtectedUsersStatus.ps1](audit_scripts/Get-ProtectedUsersStatus.ps1)
+
 ```powershell
 # Get-ProtectedUsersStatus.ps1
 # Description: Lists all members of the Protected Users security group.
