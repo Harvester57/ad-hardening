@@ -9,8 +9,14 @@
   ],
   "pluginsConfig": {
     "prism": {
+      "lang": {
+        "cmd": "batch"
+      },
       "ignore": [
-        "mermaid"
+        "mermaid",
+        "text",
+        "none",
+        "plain"
       ]
     }
   }
