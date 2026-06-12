@@ -6,7 +6,11 @@
 /* Page setup */
 @page {
   size: A4;
-  margin: 20mm;
+  margin: 25mm 20mm;
+}
+
+@page:first {
+  margin: 0 !important;
 }
 
 /* Base Body Styles */

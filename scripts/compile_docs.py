@@ -1,6 +1,15 @@
 import os
 import re
+import subprocess
 from datetime import datetime
+
+def get_git_commit(repo_root):
+    try:
+        commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], cwd=repo_root).decode('utf-8').strip()
+        return commit
+    except Exception:
+        return "unknown"
+
 
 def slugify(text):
     # Strip markdown links: [text](url) -> text
@@ -37,7 +46,7 @@ def process_file(filepath, repo_root):
         content = f.read()
         
     # Prepend a target anchor for the top of this file
-    processed = f'<div id="{file_id}"></div>\n\n'
+    processed = f'<a id="{file_id}"></a>\n\n'
     
     # We will process line by line to inject header anchors
     lines = content.split('\n')
@@ -51,7 +60,7 @@ def process_file(filepath, repo_root):
             header_text = header_match.group(2)
             header_slug = slugify(header_text)
             # Prepend an HTML anchor for header cross-referencing
-            anchor = f'<div id="{file_id}-{header_slug}"></div>'
+            anchor = f'<a id="{file_id}-{header_slug}"></a>'
             new_lines.append(f'{anchor}\n{line}')
         else:
             new_lines.append(line)
@@ -148,31 +157,54 @@ def main():
             
     print(f"Discovered {len(modules)} modules in order: {modules}")
     
+    # Get git commit hash
+    commit_sha = get_git_commit(repo_root)
+    current_date = datetime.now().strftime("%B %d, %Y")
+
     # Start building compiled markdown
     compiled_lines = []
     
-    # 1. Add Cover Page
-    current_date = datetime.now().strftime("%B %d, %Y")
+    # 0. Add Front Matter for md-to-pdf configuration
+    front_matter = f"""---
+pdf_options:
+  format: A4
+  margin:
+    top: 25mm
+    bottom: 25mm
+    left: 20mm
+    right: 20mm
+  displayHeaderFooter: true
+  headerTemplate: |
+    <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; text-align: right; padding-right: 20mm; color: #9ca3af;">
+      Active Directory Hardening Guidebook
+    </div>
+  footerTemplate: |
+    <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
+      <span>Commit: {commit_sha} | Generated: {current_date}</span>
+      <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
+    </div>
+---
+"""
+    compiled_lines.append(front_matter)
+    
+    # 1. Add Cover Page in HTML format to prevent it from interfering with Markdown parsing
     cover_page = f"""<div class="cover-page">
-
-# Active Directory Hardening Guidebook
-## Production-Grade Hardening Requirements & Guidelines for Air-Gapped Environments
-
-<hr>
-
-**Standards Alignment:**
-- ANSSI (French National Agency for the Security of Information Systems)
-- CIS Benchmarks (Center for Internet Security)
-- Microsoft Security Baselines
-
-**Target Operating Systems:**
-- Domain Controllers: Windows Server 2016 and above
-- Tier 2 Client Workstations: Windows 10 and above
-
-<hr>
-
-*Generated dynamically on: {current_date}*
-
+  <h1>Active Directory Hardening Guidebook</h1>
+  <h2>Production-Grade Hardening Requirements & Guidelines for Air-Gapped Environments</h2>
+  <hr>
+  <p><strong>Standards Alignment:</strong></p>
+  <ul>
+    <li>ANSSI (French National Agency for the Security of Information Systems)</li>
+    <li>CIS Benchmarks (Center for Internet Security)</li>
+    <li>Microsoft Security Baselines</li>
+  </ul>
+  <p><strong>Target Operating Systems:</strong></p>
+  <ul>
+    <li>Domain Controllers: Windows Server 2016 and above</li>
+    <li>Tier 2 Client Workstations: Windows 10 and above</li>
+  </ul>
+  <hr>
+  <p><em>Generated dynamically on: {current_date}</em></p>
 </div>
 """
     compiled_lines.append(cover_page)
