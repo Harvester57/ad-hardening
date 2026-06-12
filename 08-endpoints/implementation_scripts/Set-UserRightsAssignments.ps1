@@ -1,5 +1,5 @@
 # Set-UserRightsAssignments.ps1
-# Description: Enforces the local user rights assignments baseline configuration using secedit templates.
+# Enforces the local user rights assignments baseline configuration using secedit templates.
 
 Write-Host "Applying User Rights Assignments hardening..." -ForegroundColor Cyan
 
@@ -36,10 +36,12 @@ $BaselineRights = @{
     "SeTcbPrivilege"                  = ""
     "SeInteractiveLogonRight"         = "*S-1-5-32-544,*S-1-5-32-545"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
+    "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
     "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
     "SeCreateTokenPrivilege"          = ""
     "SeCreateGlobalPrivilege"         = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
     "SeCreatePermanentPrivilege"      = ""
+    "SeCreateSymbolicLinkPrivilege"   = "*S-1-5-32-544"
     "SeDebugPrivilege"                = "*S-1-5-32-544"
     "SeEnableDelegationPrivilege"     = ""
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"

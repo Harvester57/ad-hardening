@@ -19,7 +19,8 @@ if (-not (Test-Path $ScriptBlockReg)) {
     New-Item -Path $ScriptBlockReg -Force | Out-Null
 }
 Set-ItemProperty -Path $ScriptBlockReg -Name "EnableScriptBlockLogging" -Value 1 -Type DWord
-Write-Host "    PowerShell Script Block Logging enabled." -ForegroundColor Green
+Set-ItemProperty -Path $ScriptBlockReg -Name "EnableScriptBlockInvocationLogging" -Value 0 -Type DWord
+Write-Host "    PowerShell Script Block Logging enabled and invocation start/stop logging disabled." -ForegroundColor Green
 
 # 3. Configure PowerShell Module Logging
 Write-Host "[+] Configuring PowerShell Module Logging..." -ForegroundColor Gray

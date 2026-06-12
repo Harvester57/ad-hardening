@@ -12,6 +12,11 @@
   * **GPO Paths**:
     * Computer Configuration\Administrative Templates\Network\DNS Client\Turn off Multicast Name Resolution
     * Computer Configuration\Policies\Windows Settings\Security Settings\Windows Defender Firewall with Advanced Security
+    * Computer Configuration\Administrative Templates\Network\Network Connections
+    * Computer Configuration\Administrative Templates\Network\Windows Connection Manager
+    * Computer Configuration\Administrative Templates\Network\WLAN Service\WLAN Settings
+    * Computer Configuration\Administrative Templates\Printers
+    * Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options
   * **Registry Locations**:
     * HKLM\Software\Policies\Microsoft\Windows NT\DNSClient
       * `EnableMulticast` = `0` (REG_DWORD, Disables LLMNR)
@@ -23,6 +28,18 @@
       * `DisableIPSourceRouting` = `2` (REG_DWORD)
     * HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters
       * `DisableIPSourceRouting` = `2` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\Network Connections
+      * `NC_ShowSharedAccessUI` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy
+      * `fMinimizeConnections` = `3` (REG_DWORD)
+      * `fBlockNonDomain` = `1` (REG_DWORD)
+    * HKLM\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config
+      * `AutoConnectAllowedOEM` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers
+      * `DisableWebPnPDownload` = `1` (REG_DWORD)
+      * `DisableHTTPPrinting` = `1` (REG_DWORD)
+    * HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
+      * `RestrictNullSessAccess` = `1` (REG_DWORD)
 
 ---
 
@@ -103,7 +120,63 @@ Legacy name resolution protocols and insecure default network configurations are
      * **Key Path**: `SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters`
      * **Value Name**: `DisableIPSourceRouting`
      * **Value Type**: `REG_DWORD`
-     * **Value Data**: `2`
+      * **Value Data**: `2`
+
+    * **Internet Connection Sharing Block**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\Network Connections`
+      * **Value Name**: `NC_ShowSharedAccessUI`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `0`
+
+    * **Minimize Connection Count**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy`
+      * **Value Name**: `fMinimizeConnections`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `3`
+
+    * **Block Non-Domain Networks**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy`
+      * **Value Name**: `fBlockNonDomain`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `1`
+
+    * **Disable Hotspot Auto-Connect**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config`
+      * **Value Name**: `AutoConnectAllowedOEM`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `0`
+
+    * **Disable Web print driver downloads**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows NT\Printers`
+      * **Value Name**: `DisableWebPnPDownload`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `1`
+
+    * **Disable HTTP printing**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows NT\Printers`
+      * **Value Name**: `DisableHTTPPrinting`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `1`
+
+    * **Restrict anonymous access to SAM and Named Pipes/Shares**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters`
+      * **Value Name**: `RestrictNullSessAccess`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `1`
 
 ---
 
@@ -115,16 +188,24 @@ Run the following scripts locally to disable legacy resolution and enforce secur
 
 ```powershell
 # Set-NetworkHardeningSettings.ps1
-# Description: Configures local registry keys to disable LLMNR/NetBIOS fallbacks and harden TCP/IP stack against redirection/source routing.
+# Description: Configures local registry keys to disable LLMNR/NetBIOS, harden TCP/IP stack, prevent dual-homing, block hotspot auto-connect, print driver web downloads, HTTP printing, and limit anonymous share access.
 
 Write-Host "Applying network and name resolution hardening..." -ForegroundColor Cyan
 
-# 1. Disable LLMNR
-$DnsPath = "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient"
-if (-not (Test-Path $DnsPath)) {
-    New-Item -Path $DnsPath -Force | Out-Null
+# Helper to configure registry keys
+function Set-RegDWord ($path, $name, $value) {
+    $parent = Split-Path -Path $path
+    if (-not (Test-Path $parent)) {
+        New-Item -Path $parent -Force | Out-Null
+    }
+    if (-not (Test-Path $path)) {
+        New-Item -Path $path -Force | Out-Null
+    }
+    Set-ItemProperty -Path $path -Name $name -Value $value -Type DWord -Force
 }
-Set-ItemProperty -Path $DnsPath -Name "EnableMulticast" -Value 0 -Type DWord
+
+# 1. Disable LLMNR
+Set-RegDWord "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" "EnableMulticast" 0
 Write-Host "[+] LLMNR (Multicast Name Resolution) disabled." -ForegroundColor Green
 
 # 2. Configure NetBIOS Parameters
@@ -138,27 +219,37 @@ Write-Host "[+] NetBIOS name release protection and P-node type configured." -Fo
 
 # 3. Disable NetBIOS over TCP/IP on all active adapters
 Write-Host "[+] Disabling NetBIOS on all active network adapters..." -ForegroundColor Gray
-$Adapters = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | Where-Object { $_.IPEnabled -eq $true }
-foreach ($Adapter in $Adapters) {
-    Invoke-CimMethod -InputObject $Adapter -MethodName SetTCPIPNetBIOS -Arguments @{ TcpipNetbiosOptions = 2 } | Out-Null
+$Adapters = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue | Where-Object { $_.IPEnabled -eq $true }
+if ($Adapters) {
+    foreach ($Adapter in $Adapters) {
+        Invoke-CimMethod -InputObject $Adapter -MethodName SetTCPIPNetBIOS -Arguments @{ TcpipNetbiosOptions = 2 } | Out-Null
+    }
+    Write-Host "    NetBIOS disabled on active network interfaces." -ForegroundColor Green
 }
-Write-Host "    NetBIOS disabled on active network interfaces." -ForegroundColor Green
 
 # 4. Harden TCP/IP Parameters
-$TcpipPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
-if (-not (Test-Path $TcpipPath)) {
-    New-Item -Path $TcpipPath -Force | Out-Null
-}
-Set-ItemProperty -Path $TcpipPath -Name "EnableICMPRedirect" -Value 0 -Type DWord
-Set-ItemProperty -Path $TcpipPath -Name "DisableIPSourceRouting" -Value 2 -Type DWord
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" "EnableICMPRedirect" 0
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" "DisableIPSourceRouting" 2
 Write-Host "[+] IPv4 TCP/IP parameter redirects and source routing disabled." -ForegroundColor Green
 
-$Tcpip6Path = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
-if (-not (Test-Path $Tcpip6Path)) {
-    New-Item -Path $Tcpip6Path -Force | Out-Null
-}
-Set-ItemProperty -Path $Tcpip6Path -Name "DisableIPSourceRouting" -Value 2 -Type DWord
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" "DisableIPSourceRouting" 2
 Write-Host "[+] IPv6 TCP/IP parameter source routing disabled." -ForegroundColor Green
+
+# 5. Prevent Network Connection Sharing and Dual-Homing Bridging
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_ShowSharedAccessUI" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fMinimizeConnections" 3
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fBlockNonDomain" 1
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config" "AutoConnectAllowedOEM" 0
+Write-Host "[+] Network connections, sharing, and hotspot settings configured." -ForegroundColor Green
+
+# 6. Printing Spooler Web Downloads and HTTP printing block
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" "DisableWebPnPDownload" 1
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" "DisableHTTPPrinting" 1
+Write-Host "[+] Printing spooler HTTP and Web service options disabled." -ForegroundColor Green
+
+# 7. Restrict anonymous access to SAM and Named Pipes/Shares
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" "RestrictNullSessAccess" 1
+Write-Host "[+] Anonymous null session share access restricted." -ForegroundColor Green
 
 Write-Host "Network and name resolution hardening applied successfully." -ForegroundColor Green
 ```
@@ -168,51 +259,67 @@ Write-Host "Network and name resolution hardening applied successfully." -Foregr
 
 ```powershell
 # Test-NetworkHardeningStatus.ps1
-# Description: Audits LLMNR, NetBIOS parameters, NetBIOS adapter state, and TCP/IP security parameters.
+# Description: Audits LLMNR, NetBIOS parameters, NetBIOS adapter state, TCP/IP parameters, and STIG print / network connection options.
 
 Write-Host "--- Auditing Network and Name Resolution Baseline ---" -ForegroundColor Cyan
 
+$Vulnerable = $false
+
+# Helper function to audit registry properties
+function Test-RegistryValue ($path, $name, $expectedValue) {
+    $val = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
+    $actual = if ($val) { $val.$name } else { "" }
+    $color = "Red"
+    if ($actual -eq $expectedValue) {
+        $color = "Green"
+    } else {
+        $global:Vulnerable = $true
+    }
+    Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
+}
+
 # 1. Audit LLMNR
 $DnsPath = "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient"
-$LlmnrVal = Get-ItemProperty -Path $DnsPath -Name "EnableMulticast" -ErrorAction SilentlyContinue
-$LlmnrSetting = if ($LlmnrVal) { $LlmnrVal.EnableMulticast } else { 1 }
-$LlmnrColor = if ($LlmnrSetting -eq 0) { "Green" } else { "Red" }
-Write-Host "    - LLMNR Enabled: $LlmnrSetting (Required = 0 [Disabled])" -ForegroundColor $LlmnrColor
+Test-RegistryValue $DnsPath "EnableMulticast" 0
 
 # 2. Audit NetBIOS Parameters
 $NetbtPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netbt\Parameters"
-$NoRelease = Get-ItemProperty -Path $NetbtPath -Name "NoNameReleaseOnDemand" -ErrorAction SilentlyContinue
-$Node = Get-ItemProperty -Path $NetbtPath -Name "NodeType" -ErrorAction SilentlyContinue
-
-$NoReleaseVal = if ($NoRelease) { $NoRelease.NoNameReleaseOnDemand } else { 0 }
-$NodeVal = if ($Node) { $Node.NodeType } else { 0 }
-
-$NoReleaseColor = if ($NoReleaseVal -eq 1) { "Green" } else { "Red" }
-$NodeColor = if ($NodeVal -eq 2) { "Green" } else { "Red" }
-
-Write-Host "    - NetBIOS NoNameReleaseOnDemand: $NoReleaseVal (Required = 1)" -ForegroundColor $NoReleaseColor
-Write-Host "    - NetBIOS NodeType (P-Node): $NodeVal (Required = 2)" -ForegroundColor $NodeColor
+Test-RegistryValue $NetbtPath "NoNameReleaseOnDemand" 1
+Test-RegistryValue $NetbtPath "NodeType" 2
 
 # 3. Audit TCP/IP Parameters
 $TcpipPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
-$Icmp = Get-ItemProperty -Path $TcpipPath -Name "EnableICMPRedirect" -ErrorAction SilentlyContinue
-$RoutingV4 = Get-ItemProperty -Path $TcpipPath -Name "DisableIPSourceRouting" -ErrorAction SilentlyContinue
-
-$IcmpVal = if ($Icmp) { $Icmp.EnableICMPRedirect } else { 1 }
-$RoutingV4Val = if ($RoutingV4) { $RoutingV4.DisableIPSourceRouting } else { 0 }
-
-$IcmpColor = if ($IcmpVal -eq 0) { "Green" } else { "Red" }
-$RoutingV4Color = if ($RoutingV4Val -eq 2) { "Green" } else { "Red" }
-
-Write-Host "    - IPv4 EnableICMPRedirect: $IcmpVal (Required = 0)" -ForegroundColor $IcmpColor
-Write-Host "    - IPv4 DisableIPSourceRouting: $RoutingV4Val (Required = 2)" -ForegroundColor $RoutingV4Color
+Test-RegistryValue $TcpipPath "EnableICMPRedirect" 0
+Test-RegistryValue $TcpipPath "DisableIPSourceRouting" 2
 
 $Tcpip6Path = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
-$RoutingV6 = Get-ItemProperty -Path $Tcpip6Path -Name "DisableIPSourceRouting" -ErrorAction SilentlyContinue
-$RoutingV6Val = if ($RoutingV6) { $RoutingV6.DisableIPSourceRouting } else { 0 }
-$RoutingV6Color = if ($RoutingV6Val -eq 2) { "Green" } else { "Red" }
+Test-RegistryValue $Tcpip6Path "DisableIPSourceRouting" 2
 
-Write-Host "    - IPv6 DisableIPSourceRouting: $RoutingV6Val (Required = 2)" -ForegroundColor $RoutingV6Color
+# 4. Audit Connection Sharing & Dual-Homing Settings
+$NetConnPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections"
+Test-RegistryValue $NetConnPath "NC_ShowSharedAccessUI" 0
+
+$WcmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy"
+Test-RegistryValue $WcmPath "fMinimizeConnections" 3
+Test-RegistryValue $WcmPath "fBlockNonDomain" 1
+
+$WifiPath = "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config"
+Test-RegistryValue $WifiPath "AutoConnectAllowedOEM" 0
+
+# 5. Audit HTTP Print Options
+$PrinterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
+Test-RegistryValue $PrinterPath "DisableWebPnPDownload" 1
+Test-RegistryValue $PrinterPath "DisableHTTPPrinting" 1
+
+# 6. Audit Null Session Share Restrict
+$ServerPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
+Test-RegistryValue $ServerPath "RestrictNullSessAccess" 1
+
+if ($Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+}
 ```
 
 ---
@@ -220,3 +327,5 @@ Write-Host "    - IPv6 DisableIPSourceRouting: $RoutingV6Val (Required = 2)" -Fo
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 9.1 (Disable LLMNR), Section 18.8.44.1 (Configure EnableICMPRedirect), Section 18.8.44.2 (Configure DisableIPSourceRouting)
 * **ANSSI AD Hardening Guide**: Recommendation R19 (LDAP and name resolution security recommendations)
+* **DoD Windows 11 Computer STIG v2r6**: Various print driver download limits, HTTP printing blocks, internet connection sharing prohibitions, hotspot connection rules, and null session restrictions.
+

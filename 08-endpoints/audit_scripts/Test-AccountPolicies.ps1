@@ -1,20 +1,68 @@
 # Test-AccountPolicies.ps1
-# Description: Checks the local registry and SecEdit settings for account lockout, password options, and smart card removal behavior.
+# Checks local registry and SecEdit settings for account lockout, password options, smart card removal behavior, PIN parameters, Hello for Business, Microsoft account settings, secure channel properties, and NTLM session configuration.
 
 Write-Host "--- Auditing Account and Password Policies ---" -ForegroundColor Cyan
 
+$Vulnerable = $false
+
+# Helper function to audit registry properties
+function Test-RegistryValue ($path, $name, $expectedValue) {
+    $val = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
+    $actual = if ($val) { $val.$name } else { "" }
+    $color = "Red"
+    if ($actual -eq $expectedValue) {
+        $color = "Green"
+    } else {
+        $global:Vulnerable = $true
+    }
+    Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
+}
+
 # 1. Audit Registry Settings
 $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
-$ScRemove = Get-ItemProperty -Path $WinlogonPath -Name "ScRemoveOption" -ErrorAction SilentlyContinue
-$ScRemoveVal = if ($ScRemove) { $ScRemove.ScRemoveOption } else { "" }
-$ScRemoveColor = if ($ScRemoveVal -eq "1") { "Green" } else { "Red" }
-Write-Host "    - Smart Card Removal Behavior: '$ScRemoveVal' (Required = '1' [Lock])" -ForegroundColor $ScRemoveColor
+Test-RegistryValue $WinlogonPath "ScRemoveOption" "1"
+Test-RegistryValue $WinlogonPath "CachedLogonsCount" 0
 
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
-$BlankPwd = Get-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -ErrorAction SilentlyContinue
-$BlankPwdVal = if ($BlankPwd) { $BlankPwd.LimitBlankPasswordUse } else { 0 }
-$BlankPwdColor = if ($BlankPwdVal -eq 1) { "Green" } else { "Red" }
-Write-Host "    - Limit Blank Password Use: $BlankPwdVal (Required = 1)" -ForegroundColor $BlankPwdColor
+Test-RegistryValue $LsaPath "LimitBlankPasswordUse" 1
+Test-RegistryValue $LsaPath "NoLMHash" 1
+
+$WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
+Test-RegistryValue $WDigestPath "UseLogonCredential" 0
+
+$SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+Test-RegistryValue $SystemPolicyPath "AllowDomainPINLogon" 0
+
+$PinComplexityPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity"
+Test-RegistryValue $PinComplexityPath "MinimumPINLength" 6
+
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+Test-RegistryValue $SystemPath "MSAOptional" 1
+
+$MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
+Test-RegistryValue $MsaPath "DisableUserAuth" 1
+
+$PassportPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork"
+Test-RegistryValue $PassportPath "RequireSecurityDevice" 1
+
+$ExcludeDevicesPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices"
+Test-RegistryValue $ExcludeDevicesPath "TPM12" 0
+
+$NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
+Test-RegistryValue $NetlogonPath "RequireSignOrSeal" 1
+Test-RegistryValue $NetlogonPath "SealSecureChannel" 1
+Test-RegistryValue $NetlogonPath "SignSecureChannel" 1
+Test-RegistryValue $NetlogonPath "DisablePasswordChange" 0
+Test-RegistryValue $NetlogonPath "MaximumPasswordAge" 30
+Test-RegistryValue $NetlogonPath "RequireStrongKey" 1
+
+$LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
+Test-RegistryValue $LanmanWorkPath "EnablePlainTextPassword" 0
+
+$MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
+Test-RegistryValue $MsvPath "allownullsessionfallback" 0
+Test-RegistryValue $MsvPath "NTLMMinClientSec" 537395200
+Test-RegistryValue $MsvPath "NTLMMinServerSec" 537395200
 
 # 2. Audit SecEdit Settings
 $SecTempDir = Join-Path $env:TEMP "AccountAuditSecurityTemplates"
@@ -48,8 +96,16 @@ foreach ($Key in $AccountSettings.Keys) {
     $Color = "Red"
     if ($Actual -eq [string]$Expected) {
         $Color = "Green"
+    } else {
+        $Vulnerable = $true
     }
     Write-Host "    - System Access Setting: $($Key) | Actual: '$($Actual)' (Expected: '$($Expected)')" -ForegroundColor $Color
 }
 
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+
+if ($Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+}

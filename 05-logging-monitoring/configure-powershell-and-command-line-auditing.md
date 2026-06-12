@@ -13,6 +13,7 @@
     - Registry: `HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit\ProcessCreationIncludeCmdLine_Policy` (Value: 1)
   * **PowerShell Script Block Logging**: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows PowerShell\Turn on PowerShell Script Block Logging`
     - Registry: `HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\EnableScriptBlockLogging` (Value: 1)
+    - Registry: `HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\EnableScriptBlockInvocationLogging` (Value: 0)
   * **PowerShell Module Logging**: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows PowerShell\Turn on PowerShell Module Logging`
     - Registry: `HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging\EnableModuleLogging` (Value: 1)
     - Registry: `HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging\ModuleNames\*` (Value: "*")
@@ -58,7 +59,7 @@ Enforcing advanced execution logging mitigates these threat vectors:
    `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows PowerShell`
 2. Configure **Script Block Logging**:
    * **Policy**: `Turn on PowerShell Script Block Logging`
-   * **Setting**: `Enabled` (Check `Log script block invocation start / stop events`)
+   * **Setting**: `Enabled` (Ensure **Log script block invocation start / stop events** is **unchecked** / disabled to prevent operational log flooding)
 3. Configure **Module Logging**:
    * **Policy**: `Turn on PowerShell Module Logging`
    * **Setting**: `Enabled` -> Click **Show...** -> Add `*` under Value.
@@ -98,7 +99,8 @@ if (-not (Test-Path $ScriptBlockReg)) {
     New-Item -Path $ScriptBlockReg -Force | Out-Null
 }
 Set-ItemProperty -Path $ScriptBlockReg -Name "EnableScriptBlockLogging" -Value 1 -Type DWord
-Write-Host "    PowerShell Script Block Logging enabled." -ForegroundColor Green
+Set-ItemProperty -Path $ScriptBlockReg -Name "EnableScriptBlockInvocationLogging" -Value 0 -Type DWord
+Write-Host "    PowerShell Script Block Logging enabled and invocation start/stop logging disabled." -ForegroundColor Green
 
 # 3. Configure PowerShell Module Logging
 Write-Host "[+] Configuring PowerShell Module Logging..." -ForegroundColor Gray
@@ -196,6 +198,17 @@ if ($SBSetting -eq 1) {
     $SBColor = "Green"
 }
 Write-Host "    - PowerShell Script Block Logging: $($SBSetting) (Required = 1)" -ForegroundColor $SBColor
+
+$SBInvVal = Get-ItemProperty -Path $SBPath -Name "EnableScriptBlockInvocationLogging" -ErrorAction SilentlyContinue
+$SBInvSetting = 0
+if ($SBInvVal) {
+    $SBInvSetting = $SBInvVal.EnableScriptBlockInvocationLogging
+}
+$SBInvColor = "Red"
+if ($SBInvSetting -eq 0) {
+    $SBInvColor = "Green"
+}
+Write-Host "    - PowerShell Script Block Invocation Logging (Start/Stop): $($SBInvSetting) (Required = 0)" -ForegroundColor $SBInvColor
 
 # 3. Audit Module Logging
 $ModPath = "HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging"

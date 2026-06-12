@@ -9,9 +9,21 @@
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Connections
-  * Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Security
-  * HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server
+  * **GPO Paths**:
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Connections`
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Security`
+    * `Computer Configuration\Administrative Templates\System\Remote Assistance`
+  * **Registry Locations**:
+    * `HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server`
+      * `fDenyTSConnections` = `1` (REG_DWORD, Disabled)
+    * `HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp`
+      * `UserAuthentication` = `1` (REG_DWORD, NLA Enabled)
+    * `HKLM\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services`
+      * `fAllowToGetHelp` = `0` (REG_DWORD, Solicited Remote Assistance Disabled)
+      * `MaxTicketExpiryUnits` = (Delete / Not Configured)
+      * `MaxTicketExpiry` = (Delete / Not Configured)
+      * `fUseMailto` = (Delete / Not Configured)
+      * `fAllowFullControl` = (Delete / Not Configured)
 
 ---
 
@@ -21,13 +33,15 @@ Remote Desktop Protocol (RDP) is one of the primary mechanisms used by attackers
 2. **Session Hijacking**: Attackers can hijack existing administrative RDP sessions using built-in command-line tools (such as `tscon.exe`) if they obtain administrator privileges on the system.
 3. **Password Spraying**: Open RDP ports allow attackers to attempt password spraying or brute-force attacks against local administrative accounts.
 
-The safest configuration is to disable Remote Desktop Services entirely on all Tier 2 workstations. If RDP is strictly necessary for remote technical support, it must require Network Level Authentication (NLA) and the listening firewall rules must restrict access to authorized management subnets only.
+Furthermore, Windows **Remote Assistance** allows helper connections that can lead to remote code execution or unauthorized access if not properly restricted. Disabling Solicited Remote Assistance and removing any legacy configuration values limits the workstation's attack surface.
+
+The safest configuration is to disable Remote Desktop Services and Remote Assistance entirely on all Tier 2 workstations. If RDP is strictly necessary for remote technical support, it must require Network Level Authentication (NLA) and the listening firewall rules must restrict access to authorized management subnets only.
 
 ---
 
 ## Legacy Impact & Compatibility
 * **Remote Administration**: Support technicians cannot connect to workstations via RDP unless they connect from an IP address inside the authorized administrative subnet (e.g., from a PAW or Jump Host).
-* **User Assistance**: Standard users cannot use Remote Desktop to share screens or assist one another. Alternate secure remote assistance tools (which require local user approval and do not open listener ports) must be used.
+* **User Assistance**: Standard users cannot use Remote Desktop or Remote Assistance to share screens or assist one another. Alternate secure remote assistance tools (which require local user approval and do not open listener ports) must be used.
 
 ---
 
@@ -57,50 +71,71 @@ If RDP is strictly required, enable it but restrict it using the following setti
    * **Setting**: `Enabled` (Select `High Level` in the options dropdown)
 4. Deploy local firewall rules via GPO to restrict TCP port 3389 inbound to administrative subnet ranges only.
 
+#### 3. Disable Solicited Remote Assistance
+1. Navigate to:
+   `Computer Configuration\Administrative Templates\System\Remote Assistance`
+2. Configure the setting:
+   * **Policy**: `Configure Solicited Remote Assistance`
+   * **Setting**: `Disabled`
+
 ---
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to disable Remote Desktop or enforce NLA and secure registry keys.
+Run the following scripts locally to disable Remote Desktop and Remote Assistance, and enforce NLA and secure registry keys.
 
 [Download Script: Disable-RemoteDesktop.ps1](implementation_scripts/Disable-RemoteDesktop.ps1)
 
 ```powershell
 # Disable-RemoteDesktop.ps1
-# Disables Remote Desktop connection requests and sets NLA requirements locally.
+# Disables Remote Desktop and Solicited Remote Assistance connections, sets NLA requirements, and cleans parameters.
 
-Write-Host "--- Restricting Remote Desktop Access ---" -ForegroundColor Cyan
+Write-Host "--- Restricting Remote Desktop and Remote Assistance Access ---" -ForegroundColor Cyan
 
 $RdpPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server"
 
 # 1. Disable RDP Connections (fDenyTSConnections = 1)
-Set-ItemProperty -Path $RdpPath -Name "fDenyTSConnections" -Value 1 -Type DWord
+Set-ItemProperty -Path $RdpPath -Name "fDenyTSConnections" -Value 1 -Type DWord -Force
 Write-Host "[+] Inbound Remote Desktop connections disabled." -ForegroundColor Green
 
 # 2. Enforce Network Level Authentication (UserAuthentication = 1)
 $RdpSecPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp"
 if (Test-Path $RdpSecPath) {
-    Set-ItemProperty -Path $RdpSecPath -Name "UserAuthentication" -Value 1 -Type DWord
+    Set-ItemProperty -Path $RdpSecPath -Name "UserAuthentication" -Value 1 -Type DWord -Force
     Write-Host "[+] Network Level Authentication (NLA) enforced." -ForegroundColor Green
 }
 
-# 3. Disable Remote Assistance Connections
-$RAPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server"
-Set-ItemProperty -Path $RAPath -Name "fAllowToGetHelp" -Value 0 -Type DWord
-Write-Host "[+] Remote Assistance connection requests disabled." -ForegroundColor Green
+# 3. Disable Remote Assistance (fAllowToGetHelp = 0)
+Set-ItemProperty -Path $RdpPath -Name "fAllowToGetHelp" -Value 0 -Type DWord -Force
+
+# 4. Disable and clean Solicited Remote Assistance Policies
+$TSPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services"
+if (-not (Test-Path $TSPoliciesPath)) {
+    New-Item -Path $TSPoliciesPath -Force | Out-Null
+}
+Set-ItemProperty -Path $TSPoliciesPath -Name "fAllowToGetHelp" -Value 0 -Type DWord -Force
+
+$ParamsToDelete = @("MaxTicketExpiryUnits", "MaxTicketExpiry", "fUseMailto", "fAllowFullControl")
+foreach ($Param in $ParamsToDelete) {
+    if (Get-ItemProperty -Path $TSPoliciesPath -Name $Param -ErrorAction SilentlyContinue) {
+        Remove-ItemProperty -Path $TSPoliciesPath -Name $Param -Force -ErrorAction SilentlyContinue
+    }
+}
+Write-Host "[+] Solicited Remote Assistance policies disabled and cleaned." -ForegroundColor Green
 ```
 
-*To audit Remote Desktop and NLA status:*
+*To audit Remote Desktop and Remote Assistance status:*
 [Download Script: Test-RemoteDesktopStatus.ps1](audit_scripts/Test-RemoteDesktopStatus.ps1)
 
 ```powershell
 # Test-RemoteDesktopStatus.ps1
-# Audits local RDP registry configuration and listening firewall ports.
+# Audits local RDP, Remote Assistance, and NLA registry configuration and listening firewall ports.
 
 Write-Host "--- Auditing Remote Desktop Configuration ---" -ForegroundColor Cyan
 
 $RdpPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server"
 $RdpSecPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp"
+$TSPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services"
 
 $DenyTS = Get-ItemProperty -Path $RdpPath -Name "fDenyTSConnections" -ErrorAction SilentlyContinue
 $DenyVal = if ($DenyTS) { $DenyTS.fDenyTSConnections } else { 1 }
@@ -120,6 +155,33 @@ if ($RdpFirewall) {
     $FirewallColor = if ($RdpFirewall.Enabled -eq $true) { "Yellow" } else { "Green" }
     Write-Host "    - RDP Inbound Firewall Rule Active: $($RdpFirewall.Enabled)" -ForegroundColor $FirewallColor
 }
+
+# Audit Remote Assistance
+$GetHelpTS = Get-ItemProperty -Path $RdpPath -Name "fAllowToGetHelp" -ErrorAction SilentlyContinue
+$GetHelpTSVal = if ($GetHelpTS) { $GetHelpTS.fAllowToGetHelp } else { 0 }
+$HelpColor = if ($GetHelpTSVal -eq 0) { "Green" } else { "Red" }
+Write-Host "    - fAllowToGetHelp (Terminal Server): $GetHelpTSVal (Recommended = 0)" -ForegroundColor $HelpColor
+
+# Audit Solicited Remote Assistance Policy
+if (Test-Path $TSPoliciesPath) {
+    $PolGetHelp = Get-ItemProperty -Path $TSPoliciesPath -Name "fAllowToGetHelp" -ErrorAction SilentlyContinue
+    $PolGetHelpVal = if ($PolGetHelp) { $PolGetHelp.fAllowToGetHelp } else { $null }
+    
+    $PolHelpColor = if ($PolGetHelpVal -eq 0) { "Green" } else { "Red" }
+    Write-Host "    - fAllowToGetHelp (Policies): $($PolGetHelpVal | Out-String).Trim() (Recommended = 0)" -ForegroundColor $PolHelpColor
+    
+    $Params = @("MaxTicketExpiryUnits", "MaxTicketExpiry", "fUseMailto", "fAllowFullControl")
+    foreach ($Param in $Params) {
+        $Val = (Get-ItemProperty -Path $TSPoliciesPath -Name $Param -ErrorAction SilentlyContinue).$Param
+        if ($null -ne $Val) {
+            Write-Host "    - VULNERABLE: Solicited Remote Assistance parameter '$Param' is set to '$Val' (Expected: Deleted/Not Configured)" -ForegroundColor Red
+        } else {
+            Write-Host "    - Parameter '$Param': Not Configured (Correct)" -ForegroundColor Green
+        }
+    }
+} else {
+    Write-Host "    - Solicited Remote Assistance Policy Path does not exist (Expected fAllowToGetHelp = 0)" -ForegroundColor Red
+}
 ```
 
 ---
@@ -127,3 +189,4 @@ if ($RdpFirewall) {
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.2.1 (Require user authentication for remote connections by using Network Level Authentication)
 * **ANSSI AD Hardening Guide**: Security guidelines regarding Remote Desktop access and management protocols.
+* **DoD Windows 11 STIG**: Solicited Remote Assistance requirements.

@@ -1,5 +1,5 @@
 # Clean-LocalAdministrators.ps1
-# Removes unauthorized domain or local accounts from the local Administrators group.
+# Removes unauthorized domain or local accounts from the local Administrators group and disables local account remote token filtering bypass.
 
 Write-Host "--- Restricting Local Administrators Group ---" -ForegroundColor Cyan
 
@@ -35,4 +35,18 @@ if ($LocalAdmins) {
     }
 } else {
     Write-Error "Could not retrieve members of local Administrators group."
+}
+
+# Enforce LocalAccountTokenFilterPolicy = 0
+$RegistryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "LocalAccountTokenFilterPolicy"
+
+try {
+    if (-not (Test-Path $RegistryPath)) {
+        New-Item -Path $RegistryPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegistryPath -Name $ValueName -Value 0 -Type DWord -Force | Out-Null
+    Write-Host "[+] LocalAccountTokenFilterPolicy configured to 0." -ForegroundColor Green
+} catch {
+    Write-Error "Failed to configure LocalAccountTokenFilterPolicy. Error: $($_.Exception.Message)"
 }

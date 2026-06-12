@@ -9,8 +9,9 @@
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Policies\Windows Settings\Security Settings\Restricted Groups
-  * Computer Configuration\Preferences\Control Panel Settings\Local Users and Groups
+  * **GPO Path**: Computer Configuration\Policies\Windows Settings\Security Settings\Restricted Groups
+  * **Registry Location**: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    * `LocalAccountTokenFilterPolicy` = `0` (REG_DWORD, Disabled)
 
 ---
 
@@ -34,30 +35,39 @@ Securing the local Administrators group ensures only local security accounts (li
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-Deploy Restricted Groups via GPO to enforce local administrators group memberships:
+Enforce local Administrators group membership and restrict remote execution via local accounts (UAC remote restrictions):
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
-3. Navigate to:
-   `Computer Configuration\Policies\Windows Settings\Security Settings\Restricted Groups`
-4. Right-click **Restricted Groups** and select **Add Group**.
-5. Type `Administrators` (or click Browse to find the local group).
-6. Under **Members of this group**, define the allowed members:
-   * `Administrator` (the built-in local administrator account)
-   * `DomainName\Workstation-Support-Admins` (dedicated Tier 2 support team group, if used)
-   * *Leave out `Domain Users` or any other general domain accounts.*
-7. Applying this GPO will overwrite the membership of the local Administrators group, immediately removing any account not explicitly listed.
+3. **Configure Restricted Groups**:
+   * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Restricted Groups`
+   * Right-click **Restricted Groups** and select **Add Group**.
+   * Type `Administrators` (or click Browse to find the local group).
+   * Under **Members of this group**, define the allowed members:
+     * `Administrator` (the built-in local administrator account)
+     * `DomainName\Workstation-Support-Admins` (dedicated Tier 2 support team group, if used)
+     * *Leave out `Domain Users` or any other general domain accounts.*
+   * Applying this GPO will overwrite the membership of the local Administrators group, immediately removing any account not explicitly listed.
+4. **Configure Local Account Token Filter Policy**:
+   * Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+   * Right-click **Registry** and select **New** -> **Registry Item**.
+   * Set **Action**: `Update`
+   * Set **Hive**: `HKEY_LOCAL_MACHINE`
+   * Set **Key Path**: `SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
+   * Set **Value name**: `LocalAccountTokenFilterPolicy`
+   * Set **Value type**: `REG_DWORD`
+   * Set **Value data**: `0`
 
 ---
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to audit and remediate unauthorized administrative accounts in the local Administrators group.
+Run the following scripts locally to audit and remediate unauthorized administrative accounts in the local Administrators group and enforce local account remote token restrictions.
 
 [Download Script: Clean-LocalAdministrators.ps1](implementation_scripts/Clean-LocalAdministrators.ps1)
 
 ```powershell
 # Clean-LocalAdministrators.ps1
-# Removes unauthorized domain or local accounts from the local Administrators group.
+# Removes unauthorized domain or local accounts from the local Administrators group and disables local account remote token filtering bypass.
 
 Write-Host "--- Restricting Local Administrators Group ---" -ForegroundColor Cyan
 
@@ -94,14 +104,28 @@ if ($LocalAdmins) {
 } else {
     Write-Error "Could not retrieve members of local Administrators group."
 }
+
+# Enforce LocalAccountTokenFilterPolicy = 0
+$RegistryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "LocalAccountTokenFilterPolicy"
+
+try {
+    if (-not (Test-Path $RegistryPath)) {
+        New-Item -Path $RegistryPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegistryPath -Name $ValueName -Value 0 -Type DWord -Force | Out-Null
+    Write-Host "[+] LocalAccountTokenFilterPolicy configured to 0." -ForegroundColor Green
+} catch {
+    Write-Error "Failed to configure LocalAccountTokenFilterPolicy. Error: $($_.Exception.Message)"
+}
 ```
 
-*To audit local Administrators group memberships:*
+*To audit local Administrators group memberships and UAC token filtering policy:*
 [Download Script: Test-LocalAdministrators.ps1](audit_scripts/Test-LocalAdministrators.ps1)
 
 ```powershell
 # Test-LocalAdministrators.ps1
-# Audits membership of the local Administrators group to find unauthorized domain accounts.
+# Audits membership of the local Administrators group and checks local account remote token filtering bypass policy.
 
 Write-Host "--- Auditing Local Administrators Group ---" -ForegroundColor Cyan
 
@@ -121,6 +145,23 @@ if ($LocalAdmins) {
     }
 } else {
     Write-Error "Failed to retrieve local Administrators group members."
+}
+
+# Audit LocalAccountTokenFilterPolicy
+$RegistryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "LocalAccountTokenFilterPolicy"
+
+if (Test-Path $RegistryPath) {
+    $Val = (Get-ItemProperty -Path $RegistryPath -Name $ValueName -ErrorAction SilentlyContinue).$ValueName
+    if ($Val -eq 0) {
+        Write-Host "[+] LocalAccountTokenFilterPolicy is configured correctly (0)." -ForegroundColor Green
+    } elseif ($null -eq $Val) {
+        Write-Host "[-] LocalAccountTokenFilterPolicy is not explicitly set (Expected: 0)." -ForegroundColor Red
+    } else {
+        Write-Host "[-] LocalAccountTokenFilterPolicy is vulnerable: $Val (Expected: 0)." -ForegroundColor Red
+    }
+} else {
+    Write-Host "[-] LocalAccountTokenFilterPolicy is not configured (Expected: 0)." -ForegroundColor Red
 }
 ```
 

@@ -11,8 +11,8 @@ if (-not (Test-Path $DeviceGuardPath)) {
 
 # Enable Virtualization-Based Security (VBS)
 Set-ItemProperty -Path $DeviceGuardPath -Name "EnableVirtualizationBasedSecurity" -Value 1 -Type DWord
-# RequirePlatformSecurityFeatures = 3 (Secure Boot and DMA Protection)
-Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 3 -Type DWord
+# RequirePlatformSecurityFeatures = 1 (Secure Boot)
+Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 1 -Type DWord
 # HypervisorEnforcedCodeIntegrity = 1 (HVCI / Memory Integrity Enabled)
 Set-ItemProperty -Path $DeviceGuardPath -Name "HypervisorEnforcedCodeIntegrity" -Value 1 -Type DWord
 # LsaCfgFlags = 1 (Credential Guard Enabled with UEFI Lock)

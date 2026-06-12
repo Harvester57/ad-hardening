@@ -1,14 +1,22 @@
 # Set-NetworkHardeningSettings.ps1
-# Description: Configures local registry keys to disable LLMNR/NetBIOS fallbacks and harden TCP/IP stack against redirection/source routing.
+# Description: Configures local registry keys to disable LLMNR/NetBIOS, harden TCP/IP stack, prevent dual-homing, block hotspot auto-connect, print driver web downloads, HTTP printing, and limit anonymous share access.
 
 Write-Host "Applying network and name resolution hardening..." -ForegroundColor Cyan
 
-# 1. Disable LLMNR
-$DnsPath = "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient"
-if (-not (Test-Path $DnsPath)) {
-    New-Item -Path $DnsPath -Force | Out-Null
+# Helper to configure registry keys
+function Set-RegDWord ($path, $name, $value) {
+    $parent = Split-Path -Path $path
+    if (-not (Test-Path $parent)) {
+        New-Item -Path $parent -Force | Out-Null
+    }
+    if (-not (Test-Path $path)) {
+        New-Item -Path $path -Force | Out-Null
+    }
+    Set-ItemProperty -Path $path -Name $name -Value $value -Type DWord -Force
 }
-Set-ItemProperty -Path $DnsPath -Name "EnableMulticast" -Value 0 -Type DWord
+
+# 1. Disable LLMNR
+Set-RegDWord "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" "EnableMulticast" 0
 Write-Host "[+] LLMNR (Multicast Name Resolution) disabled." -ForegroundColor Green
 
 # 2. Configure NetBIOS Parameters
@@ -22,26 +30,36 @@ Write-Host "[+] NetBIOS name release protection and P-node type configured." -Fo
 
 # 3. Disable NetBIOS over TCP/IP on all active adapters
 Write-Host "[+] Disabling NetBIOS on all active network adapters..." -ForegroundColor Gray
-$Adapters = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | Where-Object { $_.IPEnabled -eq $true }
-foreach ($Adapter in $Adapters) {
-    Invoke-CimMethod -InputObject $Adapter -MethodName SetTCPIPNetBIOS -Arguments @{ TcpipNetbiosOptions = 2 } | Out-Null
+$Adapters = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue | Where-Object { $_.IPEnabled -eq $true }
+if ($Adapters) {
+    foreach ($Adapter in $Adapters) {
+        Invoke-CimMethod -InputObject $Adapter -MethodName SetTCPIPNetBIOS -Arguments @{ TcpipNetbiosOptions = 2 } | Out-Null
+    }
+    Write-Host "    NetBIOS disabled on active network interfaces." -ForegroundColor Green
 }
-Write-Host "    NetBIOS disabled on active network interfaces." -ForegroundColor Green
 
 # 4. Harden TCP/IP Parameters
-$TcpipPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
-if (-not (Test-Path $TcpipPath)) {
-    New-Item -Path $TcpipPath -Force | Out-Null
-}
-Set-ItemProperty -Path $TcpipPath -Name "EnableICMPRedirect" -Value 0 -Type DWord
-Set-ItemProperty -Path $TcpipPath -Name "DisableIPSourceRouting" -Value 2 -Type DWord
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" "EnableICMPRedirect" 0
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" "DisableIPSourceRouting" 2
 Write-Host "[+] IPv4 TCP/IP parameter redirects and source routing disabled." -ForegroundColor Green
 
-$Tcpip6Path = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
-if (-not (Test-Path $Tcpip6Path)) {
-    New-Item -Path $Tcpip6Path -Force | Out-Null
-}
-Set-ItemProperty -Path $Tcpip6Path -Name "DisableIPSourceRouting" -Value 2 -Type DWord
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" "DisableIPSourceRouting" 2
 Write-Host "[+] IPv6 TCP/IP parameter source routing disabled." -ForegroundColor Green
+
+# 5. Prevent Network Connection Sharing and Dual-Homing Bridging
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_ShowSharedAccessUI" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fMinimizeConnections" 3
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fBlockNonDomain" 1
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config" "AutoConnectAllowedOEM" 0
+Write-Host "[+] Network connections, sharing, and hotspot settings configured." -ForegroundColor Green
+
+# 6. Printing Spooler Web Downloads and HTTP printing block
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" "DisableWebPnPDownload" 1
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" "DisableHTTPPrinting" 1
+Write-Host "[+] Printing spooler HTTP and Web service options disabled." -ForegroundColor Green
+
+# 7. Restrict anonymous access to SAM and Named Pipes/Shares
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" "RestrictNullSessAccess" 1
+Write-Host "[+] Anonymous null session share access restricted." -ForegroundColor Green
 
 Write-Host "Network and name resolution hardening applied successfully." -ForegroundColor Green

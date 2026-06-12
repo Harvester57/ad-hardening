@@ -29,6 +29,17 @@ if ($SBSetting -eq 1) {
 }
 Write-Host "    - PowerShell Script Block Logging: $($SBSetting) (Required = 1)" -ForegroundColor $SBColor
 
+$SBInvVal = Get-ItemProperty -Path $SBPath -Name "EnableScriptBlockInvocationLogging" -ErrorAction SilentlyContinue
+$SBInvSetting = 0
+if ($SBInvVal) {
+    $SBInvSetting = $SBInvVal.EnableScriptBlockInvocationLogging
+}
+$SBInvColor = "Red"
+if ($SBInvSetting -eq 0) {
+    $SBInvColor = "Green"
+}
+Write-Host "    - PowerShell Script Block Invocation Logging (Start/Stop): $($SBInvSetting) (Required = 0)" -ForegroundColor $SBInvColor
+
 # 3. Audit Module Logging
 $ModPath = "HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging"
 $ModVal = Get-ItemProperty -Path $ModPath -Name "EnableModuleLogging" -ErrorAction SilentlyContinue

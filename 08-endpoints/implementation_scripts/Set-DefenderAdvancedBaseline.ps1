@@ -1,5 +1,5 @@
 # Set-DefenderAdvancedBaseline.ps1
-# Description: Configures advanced Windows Defender Antivirus options, ASR rules, Tamper Protection, and Sandbox execution.
+# Configures advanced Windows Defender Antivirus options, ASR rules, Tamper Protection, SmartScreen, and Sandbox execution.
 
 Write-Host "Applying Windows Defender Advanced Baseline..." -ForegroundColor Cyan
 
@@ -29,86 +29,86 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
 }
 
 # 2. Configure Exclusion restrictions and Local Merges in Registry
-$DefenderPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender"
+$DefenderPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
 if (-not (Test-Path $DefenderPath)) {
     New-Item -Path $DefenderPath -Force | Out-Null
 }
-Set-ItemProperty -Path $DefenderPath -Name "DisableAntiSpyware" -Value 0 -Type DWord
-Set-ItemProperty -Path $DefenderPath -Name "PUAProtection" -Value 1 -Type DWord
-Set-ItemProperty -Path $DefenderPath -Name "DisableLocalAdminMerge" -Value 1 -Type DWord
-Set-ItemProperty -Path $DefenderPath -Name "HideExclusionsFromLocalAdmins" -Value 1 -Type DWord
-Set-ItemProperty -Path $DefenderPath -Name "RandomizeScheduleTaskTimes" -Value 1 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "DisableAntiSpyware" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $DefenderPath -Name "PUAProtection" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $DefenderPath -Name "DisableLocalAdminMerge" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $DefenderPath -Name "HideExclusionsFromLocalAdmins" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $DefenderPath -Name "RandomizeScheduleTaskTimes" -Value 1 -Type DWord -Force
 
-$ExclPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Exclusions"
+$ExclPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions"
 if (-not (Test-Path $ExclPath)) {
     New-Item -Path $ExclPath -Force | Out-Null
 }
-Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord
-Set-ItemProperty -Path $ExclPath -Name "DisableAutoExclusions" -Value 0 -Type DWord
+Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $ExclPath -Name "DisableAutoExclusions" -Value 0 -Type DWord -Force
 
 # 3. Configure NIS, Reporting, Engine, and Scan Settings in Registry
-$FeaturesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Features"
+$FeaturesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
     New-Item -Path $FeaturesPath -Force | Out-Null
 }
-Set-ItemProperty -Path $FeaturesPath -Name "PassiveRemediation" -Value 1 -Type DWord
+Set-ItemProperty -Path $FeaturesPath -Name "PassiveRemediation" -Value 1 -Type DWord -Force
 
-$NetProtPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\Network Protection"
+$NetProtPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\Network Protection"
 if (-not (Test-Path $NetProtPath)) {
     New-Item -Path $NetProtPath -Force | Out-Null
 }
-Set-ItemProperty -Path $NetProtPath -Name "AllowNetworkProtectionOnWinServer" -Value 1 -Type DWord
+Set-ItemProperty -Path $NetProtPath -Name "AllowNetworkProtectionOnWinServer" -Value 1 -Type DWord -Force
 
-$MpEnginePath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\MpEngine"
+$MpEnginePath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine"
 if (-not (Test-Path $MpEnginePath)) {
     New-Item -Path $MpEnginePath -Force | Out-Null
 }
-Set-ItemProperty -Path $MpEnginePath -Name "MpBafsExtendedTimeout" -Value 50 -Type DWord
-Set-ItemProperty -Path $MpEnginePath -Name "EnableFileHashComputation" -Value 1 -Type DWord
+Set-ItemProperty -Path $MpEnginePath -Name "MpBafsExtendedTimeout" -Value 50 -Type DWord -Force
+Set-ItemProperty -Path $MpEnginePath -Name "EnableFileHashComputation" -Value 1 -Type DWord -Force
 
-$NisPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\NIS"
+$NisPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\NIS"
 if (-not (Test-Path $NisPath)) {
     New-Item -Path $NisPath -Force | Out-Null
 }
-Set-ItemProperty -Path $NisPath -Name "EnableConvertWarnToBlock" -Value 1 -Type DWord
-Set-ItemProperty -Path $NisPath -Name "AllowSwitchToAsyncInspection" -Value 1 -Type DWord
+Set-ItemProperty -Path $NisPath -Name "EnableConvertWarnToBlock" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $NisPath -Name "AllowSwitchToAsyncInspection" -Value 1 -Type DWord -Force
 
-$RtpPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection"
+$RtpPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"
 if (-not (Test-Path $RtpPath)) {
     New-Item -Path $RtpPath -Force | Out-Null
 }
-Set-ItemProperty -Path $RtpPath -Name "OobeEnableRtpAndSigUpdate" -Value 1 -Type DWord
+Set-ItemProperty -Path $RtpPath -Name "OobeEnableRtpAndSigUpdate" -Value 1 -Type DWord -Force
 
-$RepPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Reporting"
+$RepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Reporting"
 if (-not (Test-Path $RepPath)) {
     New-Item -Path $RepPath -Force | Out-Null
 }
-Set-ItemProperty -Path $RepPath -Name "EnableDynamicSignatureDroppedEventReporting" -Value 1 -Type DWord
+Set-ItemProperty -Path $RepPath -Name "EnableDynamicSignatureDroppedEventReporting" -Value 1 -Type DWord -Force
 
-$ScanPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Scan"
+$ScanPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
 if (-not (Test-Path $ScanPath)) {
     New-Item -Path $ScanPath -Force | Out-Null
 }
-Set-ItemProperty -Path $ScanPath -Name "QuickScanIncludeExclusions" -Value 1 -Type DWord
-Set-ItemProperty -Path $ScanPath -Name "DisablePackedExeScanning" -Value 0 -Type DWord
-Set-ItemProperty -Path $ScanPath -Name "ScheduleDay" -Value 0 -Type DWord
-Set-ItemProperty -Path $ScanPath -Name "DisableEmailScanning" -Value 0 -Type DWord
-Set-ItemProperty -Path $ScanPath -Name "DisableHeuristics" -Value 0 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "QuickScanIncludeExclusions" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $ScanPath -Name "DisablePackedExeScanning" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $ScanPath -Name "ScheduleDay" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $ScanPath -Name "DisableEmailScanning" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $ScanPath -Name "DisableHeuristics" -Value 0 -Type DWord -Force
 
-$SigPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Signature Updates"
+$SigPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates"
 if (-not (Test-Path $SigPath)) {
     New-Item -Path $SigPath -Force | Out-Null
 }
-Set-ItemProperty -Path $SigPath -Name "ASSignatureDue" -Value 7 -Type DWord
-Set-ItemProperty -Path $SigPath -Name "AVSignatureDue" -Value 7 -Type DWord
-Set-ItemProperty -Path $SigPath -Name "ScheduleDay" -Value 0 -Type DWord
+Set-ItemProperty -Path $SigPath -Name "ASSignatureDue" -Value 7 -Type DWord -Force
+Set-ItemProperty -Path $SigPath -Name "AVSignatureDue" -Value 7 -Type DWord -Force
+Set-ItemProperty -Path $SigPath -Name "ScheduleDay" -Value 0 -Type DWord -Force
 
 # 4. Configure ASR Rules in Registry
-$AsrPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR"
+$AsrPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR"
 if (-not (Test-Path $AsrPath)) {
     New-Item -Path $AsrPath -Force | Out-Null
 }
-$AsrRulesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules"
+$AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
 if (-not (Test-Path $AsrRulesPath)) {
     New-Item -Path $AsrRulesPath -Force | Out-Null
 }
@@ -134,50 +134,59 @@ $AsrRules = @{
 
 foreach ($RuleId in $AsrRules.Keys) {
     $ActionValue = $AsrRules[$RuleId]
-    Set-ItemProperty -Path $AsrRulesPath -Name $RuleId -Value $ActionValue -Type String
+    Set-ItemProperty -Path $AsrRulesPath -Name $RuleId -Value $ActionValue -Type String -Force
 }
 Write-Host "ASR rules configured in registry." -ForegroundColor Green
 
 # 5. Configure Threat severity default quarantine actions
-$ThreatsPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Threats"
+$ThreatsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Threats"
 if (-not (Test-Path $ThreatsPath)) {
     New-Item -Path $ThreatsPath -Force | Out-Null
 }
-Set-ItemProperty -Path $ThreatsPath -Name "Threats_ThreatSeverityDefaultAction" -Value 1 -Type DWord
+Set-ItemProperty -Path $ThreatsPath -Name "Threats_ThreatSeverityDefaultAction" -Value 1 -Type DWord -Force
 
-$ThreatsSevPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Threats\\ThreatSeverityDefaultAction"
+$ThreatsSevPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction"
 if (-not (Test-Path $ThreatsSevPath)) {
     New-Item -Path $ThreatsSevPath -Force | Out-Null
 }
-Set-ItemProperty -Path $ThreatsSevPath -Name "1" -Value 2 -Type DWord
-Set-ItemProperty -Path $ThreatsSevPath -Name "2" -Value 2 -Type DWord
-Set-ItemProperty -Path $ThreatsSevPath -Name "4" -Value 2 -Type DWord
-Set-ItemProperty -Path $ThreatsSevPath -Name "5" -Value 2 -Type DWord
+Set-ItemProperty -Path $ThreatsSevPath -Name "1" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $ThreatsSevPath -Name "2" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $ThreatsSevPath -Name "4" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $ThreatsSevPath -Name "5" -Value 2 -Type DWord -Force
 
-$FamilyPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender Security Center\\Family options"
+$FamilyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Family options"
 if (-not (Test-Path $FamilyPath)) {
     New-Item -Path $FamilyPath -Force | Out-Null
 }
-Set-ItemProperty -Path $FamilyPath -Name "UILockdown" -Value 1 -Type DWord
+Set-ItemProperty -Path $FamilyPath -Name "UILockdown" -Value 1 -Type DWord -Force
 
 # 6. Configure Tamper Protection in Registry
-$FeaturesPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows Defender\\Features"
+$FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
     New-Item -Path $FeaturesPath -Force | Out-Null
 }
 try {
-    Set-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -Value 5 -Type DWord -ErrorAction Stop
+    Set-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -Value 5 -Type DWord -ErrorAction Stop -Force
     Write-Host "Tamper Protection enabled in registry." -ForegroundColor Green
 } catch {
     Write-Warning "Failed to set Tamper Protection in registry. Access is typically restricted to TrustedInstaller. Use GPO or Defender portal management."
 }
 
 # 7. Configure Sandbox Execution Environment Variable
-$EnvPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
+$EnvPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
 if (-not (Test-Path $EnvPath)) {
     New-Item -Path $EnvPath -Force | Out-Null
 }
-Set-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -Value "1" -Type String
+Set-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -Value "1" -Type String -Force
 Write-Host "Sandbox Execution environment variable configured." -ForegroundColor Green
+
+# 8. Configure SmartScreen (EnableSmartScreen = 1, ShellSmartScreenLevel = Block)
+$SmartScreenPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+if (-not (Test-Path $SmartScreenPath)) {
+    New-Item -Path $SmartScreenPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SmartScreenPath -Name "EnableSmartScreen" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $SmartScreenPath -Name "ShellSmartScreenLevel" -Value "Block" -Type String -Force
+Write-Host "[+] Windows Defender SmartScreen configured in registry." -ForegroundColor Green
 
 Write-Host "Defender advanced baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan

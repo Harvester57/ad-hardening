@@ -12,7 +12,7 @@
   * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Turn On Virtualization Based Security
   * **Registry Location**: HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard
     * `EnableVirtualizationBasedSecurity` = `1` (REG_DWORD)
-    * `RequirePlatformSecurityFeatures` = `3` (REG_DWORD, Secure Boot and DMA)
+    * `RequirePlatformSecurityFeatures` = `1` (REG_DWORD, Secure Boot)
     * `HypervisorEnforcedCodeIntegrity` = `1` (REG_DWORD)
     * `LsaCfgFlags` = `1` (REG_DWORD, Credential Guard Enabled with UEFI Lock)
     * `ConfigureSystemGuardLaunch` = `1` (REG_DWORD, Secure Launch Enabled)
@@ -50,7 +50,7 @@ Enforcing VBS and Credential Guard prevents in-memory credential harvesting, bre
 4. Configure the setting:
     * **Policy**: `Turn On Virtualization Based Security`
     * **Setting**: `Enabled`
-    * **Select Platform Security Level**: `Secure Boot and DMA Protection`
+    * **Select Platform Security Level**: `Secure Boot`
     * **Virtualization Based Protection of Code Integrity**: `Enabled with UEFI lock`
     * **Credential Guard Configuration**: `Enabled with UEFI lock`
     * **Secure Launch Configuration**: `Enabled`
@@ -80,8 +80,8 @@ if (-not (Test-Path $DeviceGuardPath)) {
 
 # Enable Virtualization-Based Security (VBS)
 Set-ItemProperty -Path $DeviceGuardPath -Name "EnableVirtualizationBasedSecurity" -Value 1 -Type DWord
-# RequirePlatformSecurityFeatures = 3 (Secure Boot and DMA Protection)
-Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 3 -Type DWord
+# RequirePlatformSecurityFeatures = 1 (Secure Boot)
+Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 1 -Type DWord
 # HypervisorEnforcedCodeIntegrity = 1 (HVCI / Memory Integrity Enabled)
 Set-ItemProperty -Path $DeviceGuardPath -Name "HypervisorEnforcedCodeIntegrity" -Value 1 -Type DWord
 # LsaCfgFlags = 1 (Credential Guard Enabled with UEFI Lock)

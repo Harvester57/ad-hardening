@@ -47,10 +47,12 @@ User Rights Assignments (URAs) govern the specific actions that security princip
 | **Act as part of the operating system** | No one (Empty) |
 | **Allow log on locally** | `BUILTIN\Administrators`, `BUILTIN\Users` |
 | **Back up files and directories** | `BUILTIN\Administrators` |
+| **Change the system time** | `BUILTIN\Administrators`, `NT SERVICE\LocalService` |
 | **Create a pagefile** | `BUILTIN\Administrators` |
 | **Create a token object** | No one (Empty) |
 | **Create global objects** | `Administrators`, `LOCAL SERVICE`, `NETWORK SERVICE`, `SERVICE` |
 | **Create permanent shared objects** | No one (Empty) |
+| **Create symbolic links** | `BUILTIN\Administrators` |
 | **Debug programs** | `BUILTIN\Administrators` |
 | **Enable computer and user accounts to be trusted for delegation** | No one (Empty) |
 | **Force shutdown from a remote system** | `BUILTIN\Administrators` |
@@ -76,7 +78,7 @@ Configure User Rights Assignments locally using `secedit.exe` and PowerShell.
 
 ```powershell
 # Set-UserRightsAssignments.ps1
-# Description: Enforces the local user rights assignments baseline configuration using secedit templates.
+# Enforces the local user rights assignments baseline configuration using secedit templates.
 
 Write-Host "Applying User Rights Assignments hardening..." -ForegroundColor Cyan
 
@@ -113,10 +115,12 @@ $BaselineRights = @{
     "SeTcbPrivilege"                  = ""
     "SeInteractiveLogonRight"         = "*S-1-5-32-544,*S-1-5-32-545"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
+    "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
     "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
     "SeCreateTokenPrivilege"          = ""
     "SeCreateGlobalPrivilege"         = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
     "SeCreatePermanentPrivilege"      = ""
+    "SeCreateSymbolicLinkPrivilege"   = "*S-1-5-32-544"
     "SeDebugPrivilege"                = "*S-1-5-32-544"
     "SeEnableDelegationPrivilege"     = ""
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
@@ -197,7 +201,7 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 ```powershell
 # Test-UserRightsAssignments.ps1
-# Description: Exports local user rights assignments and checks them against the baseline.
+# Exports local user rights assignments and checks them against the baseline.
 
 Write-Host "--- Auditing User Rights Assignments ---" -ForegroundColor Cyan
 
@@ -220,10 +224,12 @@ $BaselineRights = @{
     "SeTcbPrivilege"                  = ""
     "SeInteractiveLogonRight"         = "*S-1-5-32-544,*S-1-5-32-545"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
+    "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
     "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
     "SeCreateTokenPrivilege"          = ""
     "SeCreateGlobalPrivilege"         = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
     "SeCreatePermanentPrivilege"      = ""
+    "SeCreateSymbolicLinkPrivilege"   = "*S-1-5-32-544"
     "SeDebugPrivilege"                = "*S-1-5-32-544"
     "SeEnableDelegationPrivilege"     = ""
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
@@ -262,6 +268,7 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 ---
 
-## Sources & Compliance References
+## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 2.2 (User Rights Assignment)
 * **ANSSI AD Hardening Guide**: Recommendations on restricting privileged capabilities and limiting local privileges on administrative workstations
+* **DoD Windows 11 STIG**: User Rights Assignment settings for SeSystemtimePrivilege and SeCreateSymbolicLinkPrivilege.

@@ -1,5 +1,5 @@
 # Set-AccountPolicies.ps1
-# Description: Configures local account lockout, password parameters (via secedit), smart card behavior, and blank password blocks.
+# Configures local account lockout, password parameters, smart card removal behavior, blank password blocks, Hello for Business, Microsoft accounts, secure channel options, and NTLM session security options.
 
 Write-Host "Applying account and password policies..." -ForegroundColor Cyan
 
@@ -8,16 +8,93 @@ $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
 if (-not (Test-Path $WinlogonPath)) {
     New-Item -Path $WinlogonPath -Force | Out-Null
 }
-# ScRemoveOption: "1" = Lock Workstation, "2" = Force Logoff
-Set-ItemProperty -Path $WinlogonPath -Name "ScRemoveOption" -Value "1" -Type String
-Write-Host "[+] Smart card removal behavior set to Lock Workstation." -ForegroundColor Green
+Set-ItemProperty -Path $WinlogonPath -Name "ScRemoveOption" -Value "1" -Type String -Force
+Set-ItemProperty -Path $WinlogonPath -Name "CachedLogonsCount" -Value 0 -Type DWord -Force
+Write-Host "[+] Smart card removal behavior and logon caching configured." -ForegroundColor Green
 
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
 if (-not (Test-Path $LsaPath)) {
     New-Item -Path $LsaPath -Force | Out-Null
 }
-Set-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -Value 1 -Type DWord
-Write-Host "[+] Blank password restriction enforced." -ForegroundColor Green
+Set-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "NoLMHash" -Value 1 -Type DWord -Force
+Write-Host "[+] Blank password restriction and NoLMHash options enforced." -ForegroundColor Green
+
+# LSASS WDigest caching block
+$WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
+if (-not (Test-Path $WDigestPath)) {
+    New-Item -Path $WDigestPath -Force | Out-Null
+}
+Set-ItemProperty -Path $WDigestPath -Name "UseLogonCredential" -Value 0 -Type DWord -Force
+Write-Host "[+] LSASS WDigest credential caching disabled." -ForegroundColor Green
+
+# Hello for Business, PIN and Microsoft Account policies
+$SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+if (-not (Test-Path $SystemPolicyPath)) {
+    New-Item -Path $SystemPolicyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SystemPolicyPath -Name "AllowDomainPINLogon" -Value 0 -Type DWord -Force
+
+$PinComplexityPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity"
+if (-not (Test-Path $PinComplexityPath)) {
+    New-Item -Path $PinComplexityPath -Force | Out-Null
+}
+Set-ItemProperty -Path $PinComplexityPath -Name "MinimumPINLength" -Value 6 -Type DWord -Force
+
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+if (-not (Test-Path $SystemPath)) {
+    New-Item -Path $SystemPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SystemPath -Name "MSAOptional" -Value 1 -Type DWord -Force
+
+$MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
+if (-not (Test-Path $MsaPath)) {
+    New-Item -Path $MsaPath -Force | Out-Null
+}
+Set-ItemProperty -Path $MsaPath -Name "DisableUserAuth" -Value 1 -Type DWord -Force
+
+$PassportPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork"
+if (-not (Test-Path $PassportPath)) {
+    New-Item -Path $PassportPath -Force | Out-Null
+}
+Set-ItemProperty -Path $PassportPath -Name "RequireSecurityDevice" -Value 1 -Type DWord -Force
+
+$ExcludeDevicesPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices"
+if (-not (Test-Path $ExcludeDevicesPath)) {
+    New-Item -Path $ExcludeDevicesPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ExcludeDevicesPath -Name "TPM12" -Value 0 -Type DWord -Force
+Write-Host "[+] Hello for Business, PIN and Microsoft Account options configured." -ForegroundColor Green
+
+# Domain Member Secure Channel netlogon settings
+$NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
+if (-not (Test-Path $NetlogonPath)) {
+    New-Item -Path $NetlogonPath -Force | Out-Null
+}
+Set-ItemProperty -Path $NetlogonPath -Name "RequireSignOrSeal" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $NetlogonPath -Name "SealSecureChannel" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $NetlogonPath -Name "SignSecureChannel" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $NetlogonPath -Name "DisablePasswordChange" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $NetlogonPath -Name "MaximumPasswordAge" -Value 30 -Type DWord -Force
+Set-ItemProperty -Path $NetlogonPath -Name "RequireStrongKey" -Value 1 -Type DWord -Force
+Write-Host "[+] Domain Member secure channel configurations applied." -ForegroundColor Green
+
+# LanmanWorkstation plain text passwords block
+$LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
+if (-not (Test-Path $LanmanWorkPath)) {
+    New-Item -Path $LanmanWorkPath -Force | Out-Null
+}
+Set-ItemProperty -Path $LanmanWorkPath -Name "EnablePlainTextPassword" -Value 0 -Type DWord -Force
+
+# NTLM SSP Client & Server security and Null Session Fallback
+$MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
+if (-not (Test-Path $MsvPath)) {
+    New-Item -Path $MsvPath -Force | Out-Null
+}
+Set-ItemProperty -Path $MsvPath -Name "allownullsessionfallback" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $MsvPath -Name "NTLMMinClientSec" -Value 537395200 -Type DWord -Force
+Set-ItemProperty -Path $MsvPath -Name "NTLMMinServerSec" -Value 537395200 -Type DWord -Force
+Write-Host "[+] Network authentication security and NTLM session settings applied." -ForegroundColor Green
 
 # 2. Enforce Account Lockout and Password Policy via secedit
 $SecTempDir = Join-Path $env:TEMP "AccountSecurityTemplates"

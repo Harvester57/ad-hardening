@@ -9,8 +9,13 @@
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\Windows Components\AutoPlay Policies
-  * HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoDriveTypeAutoRun
+  * **GPO Path**: `Computer Configuration\Administrative Templates\Windows Components\AutoPlay Policies`
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer`
+      * `NoDriveTypeAutoRun` = `255` (0xFF, REG_DWORD)
+      * `NoAutorun` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer`
+      * `NoAutoplayfornonVolume` = `1` (REG_DWORD)
 
 ---
 
@@ -18,6 +23,8 @@
 The AutoPlay and AutoRun features in Windows are designed to automatically execute programs or open media when a removable drive, network share, or CD-ROM is inserted or connected. 
 
 Attackers exploit these features by placing malicious scripts, payloads, or executables on USB drives or external storage media. If AutoPlay is enabled, connecting the drive triggers automatic execution of these scripts or programs without user interaction or approval, allowing malware to achieve immediate execution in the context of the logged-on user. Disabling AutoPlay across all drive types completely mitigates this physical transmission vector.
+
+Additionally, non-volume devices (such as mobile phones, cameras, or media players) can still trigger AutoPlay behavior. Disallowing AutoPlay for non-volume devices ensures these devices do not introduce unauthorized execution pathways when plugged into standard client machines.
 
 ---
 
@@ -37,23 +44,25 @@ Attackers exploit these features by placing malicious scripts, payloads, or exec
    `Computer Configuration\Administrative Templates\Windows Components\AutoPlay Policies`
 4. Configure the following settings:
    * **Policy**: `Turn off AutoPlay`
-   * **Setting**: `Enabled`
-   * **Select Options**: `All drives`
+     * **Setting**: `Enabled`
+     * **Select Options**: `All drives`
    * **Policy**: `Set the default behavior for AutoRun`
-   * **Setting**: `Enabled`
-   * **Select Options**: `Do not execute any autorun commands`
+     * **Setting**: `Enabled`
+     * **Select Options**: `Do not execute any autorun commands`
+   * **Policy**: `Disallow Autoplay for non-volume devices`
+     * **Setting**: `Enabled`
 
 ---
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to configure Explorer registry keys to disable AutoPlay and AutoRun on all drive types.
+Run the following scripts locally to configure Explorer registry keys to disable AutoPlay, AutoRun, and AutoPlay for non-volume devices.
 
 [Download Script: Disable-AutoPlay.ps1](implementation_scripts/Disable-AutoPlay.ps1)
 
 ```powershell
 # Disable-AutoPlay.ps1
-# Disables AutoPlay/AutoRun registry settings globally on all drive types.
+# Disables AutoPlay/AutoRun registry settings globally on all drive types and non-volume devices.
 
 Write-Host "--- Disabling AutoPlay and AutoRun ---" -ForegroundColor Cyan
 
@@ -64,11 +73,17 @@ if (-not (Test-Path $ExplorerPath)) {
 }
 
 # NoDriveTypeAutoRun = 0xFF (255 in decimal) disables AutoRun on all types of drives
-Set-ItemProperty -Path $ExplorerPath -Name "NoDriveTypeAutoRun" -Value 255 -Type DWord
+Set-ItemProperty -Path $ExplorerPath -Name "NoDriveTypeAutoRun" -Value 255 -Type DWord -Force
 
 # NoAutorun = 1 disables AutoRun commands in inf files
-$SystemExplorerPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
-Set-ItemProperty -Path $SystemExplorerPath -Name "NoAutorun" -Value 1 -Type DWord
+Set-ItemProperty -Path $ExplorerPath -Name "NoAutorun" -Value 1 -Type DWord -Force
+
+# Disallow Autoplay for non-volume devices (NoAutoplayfornonVolume = 1)
+$PolExplorerPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
+if (-not (Test-Path $PolExplorerPath)) {
+    New-Item -Path $PolExplorerPath -Force | Out-Null
+}
+Set-ItemProperty -Path $PolExplorerPath -Name "NoAutoplayfornonVolume" -Value 1 -Type DWord -Force
 
 Write-Host "[+] AutoPlay and AutoRun registry parameters set." -ForegroundColor Green
 ```
@@ -83,18 +98,23 @@ Write-Host "[+] AutoPlay and AutoRun registry parameters set." -ForegroundColor 
 Write-Host "--- Auditing AutoPlay Configuration ---" -ForegroundColor Cyan
 
 $ExplorerPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+$PolExplorerPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
 
 $NoDriveAuto = Get-ItemProperty -Path $ExplorerPath -Name "NoDriveTypeAutoRun" -ErrorAction SilentlyContinue
 $NoAutoCmd = Get-ItemProperty -Path $ExplorerPath -Name "NoAutorun" -ErrorAction SilentlyContinue
+$NoNonVol = Get-ItemProperty -Path $PolExplorerPath -Name "NoAutoplayfornonVolume" -ErrorAction SilentlyContinue
 
 $NoDriveVal = if ($NoDriveAuto) { $NoDriveAuto.NoDriveTypeAutoRun } else { 0 }
 $NoAutoVal = if ($NoAutoCmd) { $NoAutoCmd.NoAutorun } else { 0 }
+$NoNonVolVal = if ($NoNonVol) { $NoNonVol.NoAutoplayfornonVolume } else { 0 }
 
 $NoDriveColor = if ($NoDriveVal -eq 255) { "Green" } else { "Red" }
 $NoAutoColor = if ($NoAutoVal -eq 1) { "Green" } else { "Red" }
+$NoNonVolColor = if ($NoNonVolVal -eq 1) { "Green" } else { "Red" }
 
 Write-Host "    - NoDriveTypeAutoRun: $NoDriveVal (Required = 255 to disable all drives)" -ForegroundColor $NoDriveColor
 Write-Host "    - NoAutorun: $NoAutoVal (Required = 1)" -ForegroundColor $NoAutoColor
+Write-Host "    - NoAutoplayfornonVolume: $NoNonVolVal (Required = 1)" -ForegroundColor $NoNonVolColor
 ```
 
 ---
@@ -102,3 +122,4 @@ Write-Host "    - NoAutorun: $NoAutoVal (Required = 1)" -ForegroundColor $NoAuto
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.3.1 (Turn off AutoPlay), Section 18.3.2 (Set the default behavior for AutoRun)
 * **Microsoft Security Baselines**: Windows Client Explorer configuration standards.
+* **DoD Windows 11 STIG**: Disallow Autoplay for non-volume devices requirements.

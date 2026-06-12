@@ -62,16 +62,21 @@ Enforcing advanced auditing policies provides the following security coverages:
 | **DS Access** | `Audit Directory Service Changes` | Success and Failure |
 | **DS Access** | `Audit Directory Service Access` | Success and Failure |
 | **Logon/Logoff** | `Audit Logon` | Success and Failure |
+| **Logon/Logoff** | `Audit Logoff` | Success |
 | **Logon/Logoff** | `Audit Special Logon` | Success |
 | **Logon/Logoff** | `Audit Account Lockout` | Success and Failure |
 | **Logon/Logoff** | `Audit Other Logon/Logoff Events` | Success and Failure |
+| **Object Access** | `Audit Handle Manipulation` | Success and Failure |
+| **Object Access** | `Audit Registry` | Success and Failure |
 | **Object Access** | `Audit Detailed File Share` | Failure |
 | **Object Access** | `Audit Other Object Access Events` | Success and Failure |
 | **Policy Change** | `Audit Policy Change` | Success and Failure |
 | **Policy Change** | `Audit Authentication Policy Change` | Success |
+| **Policy Change** | `Audit Authorization Policy Change` | Success |
 | **Policy Change** | `Audit MPSSVC Rule-Level Policy Change` | Success and Failure |
 | **Policy Change** | `Audit Other Policy Change Events` | Failure |
 | **Privilege Use** | `Audit Sensitive Privilege Use` | Success and Failure |
+| **System** | `Audit IPsec Driver` | Failure |
 | **System** | `Audit Other System Events` | Success and Failure |
 | **System** | `Audit Security State Change` | Success |
 | **System** | `Audit Security System Extension` | Success |
@@ -112,16 +117,21 @@ $Policies = @(
     @{ Subcategory = "Directory Service Changes"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Directory Service Access"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Logon"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "Logoff"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Special Logon"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Policy Change"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Account Lockout"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Other Logon/Logoff Events"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "Handle Manipulation"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "Registry"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Detailed File Share"; Success = "disable"; Failure = "enable" },
     @{ Subcategory = "Other Object Access Events"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Authentication Policy Change"; Success = "enable"; Failure = "disable" },
+    @{ Subcategory = "Authorization Policy Change"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "MPSSVC Rule-Level Policy Change"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Other Policy Change Events"; Success = "disable"; Failure = "enable" },
     @{ Subcategory = "Sensitive Privilege Use"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "IPsec Driver"; Success = "disable"; Failure = "enable" },
     @{ Subcategory = "Other System Events"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Security State Change"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Security System Extension"; Success = "enable"; Failure = "disable" },
@@ -181,16 +191,21 @@ $RequiredPolicies = @(
     @{ Subcategory = "Directory Service Changes"; Expected = "Success and Failure" },
     @{ Subcategory = "Directory Service Access"; Expected = "Success and Failure" },
     @{ Subcategory = "Logon"; Expected = "Success and Failure" },
+    @{ Subcategory = "Logoff"; Expected = "Success" },
     @{ Subcategory = "Special Logon"; Expected = "Success" },
     @{ Subcategory = "Policy Change"; Expected = "Success and Failure" },
     @{ Subcategory = "Account Lockout"; Expected = "Success and Failure" },
     @{ Subcategory = "Other Logon/Logoff Events"; Expected = "Success and Failure" },
+    @{ Subcategory = "Handle Manipulation"; Expected = "Success and Failure" },
+    @{ Subcategory = "Registry"; Expected = "Success and Failure" },
     @{ Subcategory = "Detailed File Share"; Expected = "Failure" },
     @{ Subcategory = "Other Object Access Events"; Expected = "Success and Failure" },
     @{ Subcategory = "Authentication Policy Change"; Expected = "Success" },
+    @{ Subcategory = "Authorization Policy Change"; Expected = "Success" },
     @{ Subcategory = "MPSSVC Rule-Level Policy Change"; Expected = "Success and Failure" },
     @{ Subcategory = "Other Policy Change Events"; Expected = "Failure" },
     @{ Subcategory = "Sensitive Privilege Use"; Expected = "Success and Failure" },
+    @{ Subcategory = "IPsec Driver"; Expected = "Failure" },
     @{ Subcategory = "Other System Events"; Expected = "Success and Failure" },
     @{ Subcategory = "Security State Change"; Expected = "Success" },
     @{ Subcategory = "Security System Extension"; Expected = "Success" },

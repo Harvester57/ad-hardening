@@ -1,5 +1,5 @@
 # Test-UserRightsAssignments.ps1
-# Description: Exports local user rights assignments and checks them against the baseline.
+# Exports local user rights assignments and checks them against the baseline.
 
 Write-Host "--- Auditing User Rights Assignments ---" -ForegroundColor Cyan
 
@@ -22,10 +22,12 @@ $BaselineRights = @{
     "SeTcbPrivilege"                  = ""
     "SeInteractiveLogonRight"         = "*S-1-5-32-544,*S-1-5-32-545"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
+    "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
     "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
     "SeCreateTokenPrivilege"          = ""
     "SeCreateGlobalPrivilege"         = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
     "SeCreatePermanentPrivilege"      = ""
+    "SeCreateSymbolicLinkPrivilege"   = "*S-1-5-32-544"
     "SeDebugPrivilege"                = "*S-1-5-32-544"
     "SeEnableDelegationPrivilege"     = ""
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
