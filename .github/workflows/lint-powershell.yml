@@ -1,0 +1,45 @@
+name: Lint PowerShell Scripts
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
+              Write-Host "Installing PSScriptAnalyzer..."
+              Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+          }
+          
+          $scripts = Get-ChildItem -Path . -Filter *.ps1 -Recurse
+          if (-not $scripts) {
+              Write-Host "No PowerShell scripts found to lint."
+              exit 0
+          }
+          
+          Write-Host "Found $($scripts.Count) scripts to analyze."
+          $results = $scripts | Invoke-ScriptAnalyzer -Severity Error, Warning
+          
+          if ($results) {
+              $results | Format-Table -AutoSize
+              Write-Error "PSScriptAnalyzer found errors/warnings in scripts. Please fix them."
+              exit 1
+          } else {
+              Write-Host "PSScriptAnalyzer passed successfully!"
+          }
