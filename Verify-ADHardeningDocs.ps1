@@ -6,7 +6,7 @@ $repoRoot = Split-Path -Parent $scriptPath
 
 Write-Host "Starting documentation validation in: $repoRoot" -ForegroundColor Cyan
 
-$mdFiles = Get-ChildItem -Path $repoRoot -Filter *.md -Recurse | Where-Object { $_.FullName -notlike "*\.git*" -and $_.FullName -notlike "*\.gemini*" }
+$mdFiles = Get-ChildItem -Path $repoRoot -Filter *.md -Recurse | Where-Object { $_.FullName -notlike "*\.git*" -and $_.FullName -notlike "*\.gemini*" -and $_.Name -ne "AD-Hardening-Guidebook.md" }
 $errorsCount = 0
 
 foreach ($file in $mdFiles) {

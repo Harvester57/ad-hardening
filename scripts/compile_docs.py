@@ -128,6 +128,26 @@ def process_file(filepath, repo_root):
     img_regex = re.compile(r'!\[([^\]]*)\]\(([^:\n)]+)\)')
     content = img_regex.sub(img_replacer, content)
     
+    # Convert GitBook hint blocks to standard blockquotes
+    def hint_replacer(match):
+        style = match.group(1).upper()
+        if style == "DANGER":
+            style = "WARNING"
+        body = match.group(2)
+        body = body.strip('\r\n')
+        lines = body.split('\n')
+        blockquote_lines = []
+        for line in lines:
+            stripped = line.rstrip('\r\n')
+            if stripped == "":
+                blockquote_lines.append(">")
+            else:
+                blockquote_lines.append(f"> {stripped}")
+        return f"> **{style}:**\n" + "\n".join(blockquote_lines)
+
+    hint_regex = re.compile(r'{%\s*hint\s+style="([^"]+)"\s*%}(.*?){%\s*endhint\s*%}', re.DOTALL | re.IGNORECASE)
+    content = hint_regex.sub(hint_replacer, content)
+
     # Convert GitHub alert blockquotes to standard readable strong tags
     # e.g., > [!NOTE] -> > **NOTE:**
     def alert_replacer(match):
