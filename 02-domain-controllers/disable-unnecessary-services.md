@@ -97,9 +97,8 @@ These services are disabled by default. Administrators must ensure they are not 
 ### Critical Services That Must Not Be Disabled (Do Not Disable)
 The following services are essential for system stability, network roles, administration, or virtualization integration, and must not be disabled.
 
-{% hint style="warning" %}
-Disabling any of the services listed below will severely degrade or completely break core system functionality, remote management access, or hypervisor integrations. Under no circumstances should these services be disabled.
-{% endhint %}
+> [!WARNING]
+> Disabling any of the services listed below will severely degrade or completely break core system functionality, remote management access, or hypervisor integrations. Under no circumstances should these services be disabled.
 
 | Service Name | Display Name | Purpose & Impact of Disabling (Microsoft Rationale) |
 | :--- | :--- | :--- |
