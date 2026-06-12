@@ -56,11 +56,27 @@ foreach ($module in $modules) {
     }
 }
 
+# Copy the primary helper execution script to target path root
+$null = New-Item -Path $TargetPath -ItemType Directory -Force
+Copy-Item -Path (Join-Path $PSScriptRoot "Invoke-ADHardeningAudit.ps1") -Destination $TargetPath -Force
+Write-Host "  Copying audit helper script: Invoke-ADHardeningAudit.ps1" -ForegroundColor DarkGray
+
 # 3. Configure LCM (ApplyAndMonitor)
 $lcmBuildPath = Join-Path $PSScriptRoot "Build\LCM"
 if (-not $CompileOnly) {
-    Write-Host "Configuring Local Configuration Manager (LCM) to 'ApplyAndMonitor' mode..." -ForegroundColor Cyan
+    Write-Host "Configuring Local Configuration Manager (LCM) and WinRM parameters..." -ForegroundColor Cyan
     
+    # Configure WSMan MaxEnvelopeSizeKB to prevent WSMan size limit issues
+    try {
+        $currentMax = (Get-Item -Path "WSMan:\localhost\MaxEnvelopeSizeKB" -ErrorAction SilentlyContinue).Value
+        if ($null -ne $currentMax -and [int]$currentMax -lt 8000) {
+            Set-Item -Path "WSMan:\localhost\MaxEnvelopeSizeKB" -Value 8000 -Force -ErrorAction SilentlyContinue
+            Write-Host "  Increased WinRM MaxEnvelopeSizeKB to 8000 KB" -ForegroundColor DarkGray
+        }
+    } catch {
+        # Silently ignore if WSMan provider is not accessible
+    }
+
     if (-not (Test-Path -Path $lcmBuildPath)) {
         $null = New-Item -Path $lcmBuildPath -ItemType Directory -Force
     }
