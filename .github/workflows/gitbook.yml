@@ -25,7 +25,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.14'
 
       - name: Generate SUMMARY.md
         run: python scripts/generate_summary.py
@@ -33,11 +33,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '24'
 
       - name: Install dependencies
-        run: npm install
+        run: npm clean-install
 
       - name: Build GitBook
         run: npm run gitbook:build
