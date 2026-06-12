@@ -11,6 +11,7 @@
 * **GPO Path / Registry Location**:
   * Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options
   * HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+  * **Windows Sudo Command**: `Computer Configuration\Administrative Templates\System` -> **Configure the behavior of the sudo command** (Registry: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sudo` -> `Enabled` = `1` [Force new elevated window] or `0` [Disabled])
 
 ---
 
@@ -21,12 +22,14 @@ Hardening UAC settings ensures:
 1. **Secure Desktop Enforcement**: The elevation prompt is displayed on a separate, secure desktop environment that isolated system threads run on. This prevents third-party malware running in user space from intercepting credentials or programmatically clicking "Yes" to elevate itself.
 2. **Auto-Denial of Standard User Elevation**: Standard users should not be allowed to request elevation. If a standard user triggers a task requiring administrative rights, the prompt should auto-deny rather than requesting an administrator password, preventing users from attempting to bypass controls or exposing local admin passwords on a non-secure user terminal.
 3. **Admin Approval Mode**: Forcing built-in administrators to run in Admin Approval Mode ensures that even administrative users do not run web browsers or document editors with administrative tokens by default.
+4. **Sudo Command Control**: The `sudo` command introduced in Windows 11 (24H2) allows users to run elevated commands from an unelevated console. Leaving this feature unconfigured or allowing execution within the current console session can expose elevated processes to command injection or token interception in the same console session. Restricting `sudo` to opening a new elevated window (`1`) or disabling it entirely (`0`) mitigates session hijacking risks.
 
 ---
 
 ## Legacy Impact & Compatibility
 * **User Experience**: Standard users will not be able to install software or change system settings that require administrative credentials. Support technicians must log on as local administrators to perform maintenance tasks or use remote tools.
 * **Script and Installer Behaviors**: Legacy scripts and administrative install tasks that run programmatically without secure-desktop awareness may fail or hang if they trigger elevation prompts that cannot be programmatically bypassed.
+* **Command Line Tools**: Disabling or restricting `sudo` means administrative users must explicitly open an elevated PowerShell or Cmd window to run administrative commands, which is the standard enterprise practice.
 
 ---
 
@@ -45,8 +48,11 @@ Hardening UAC settings ensures:
    * **Setting**: `Automatically deny elevation requests`
    * **Policy**: `User Account Control: Run all administrators in Admin Approval Mode`
    * **Setting**: `Enabled`
-   * **Policy**: `User Account Control: Switch to the secure desktop when prompting for elevation`
-   * **Setting**: `Enabled`
+    * **Policy**: `User Account Control: Switch to the secure desktop when prompting for elevation`
+    * **Setting**: `Enabled`
+  * Navigate to: `Computer Configuration\Administrative Templates\System`
+    * **Policy**: `Configure the behavior of the sudo command`
+    * **Setting**: `Enabled` with options set to **Force a new elevated window** (or **Disabled** to disable the feature entirely)
 
 ---
 
@@ -76,6 +82,13 @@ Set-ItemProperty -Path $SystemPath -Name "ConsentPromptBehaviorUser" -Value 0 -T
 Set-ItemProperty -Path $SystemPath -Name "EnableLUA" -Value 1 -Type DWord
 # PromptOnSecureDesktop = 1 (Switch to secure desktop when prompting)
 Set-ItemProperty -Path $SystemPath -Name "PromptOnSecureDesktop" -Value 1 -Type DWord
+
+# Configure Windows Sudo command behavior (Enabled = 1 [Force new elevated window])
+$SudoPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sudo"
+if (-not (Test-Path $SudoPath)) {
+    New-Item -Path $SudoPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SudoPath -Name "Enabled" -Value 1 -Type DWord -Force
 
 Write-Host "[+] UAC registry values configured successfully." -ForegroundColor Green
 ```
@@ -110,6 +123,16 @@ Write-Host "    - ConsentPromptBehaviorAdmin: $AdminVal (Required = 1 [Prompt fo
 Write-Host "    - ConsentPromptBehaviorUser: $UserVal (Required = 0 [Auto Deny])" -ForegroundColor $UserColor
 Write-Host "    - EnableLUA: $LuaVal (Required = 1)" -ForegroundColor $LuaColor
 Write-Host "    - PromptOnSecureDesktop: $SecureVal (Required = 1)" -ForegroundColor $SecureColor
+
+$SudoPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sudo"
+if (Test-Path $SudoPath) {
+    $SudoState = Get-ItemProperty -Path $SudoPath -Name "Enabled" -ErrorAction SilentlyContinue
+    $SudoVal = if ($SudoState) { $SudoState.Enabled } else { 0 }
+    $SudoColor = if ($SudoVal -eq 0 -or $SudoVal -eq 1) { "Green" } else { "Red" }
+    Write-Host "    - Sudo Command Enabled state: $SudoVal (Required = 1 [New Window] or 0 [Disabled])" -ForegroundColor $SudoColor
+} else {
+    Write-Host "    - Sudo Command Enabled state: Not Configured (Default/Compliant as it inherits disabled or default elevation window)." -ForegroundColor Green
+}
 ```
 
 ---

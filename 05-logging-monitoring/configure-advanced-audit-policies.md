@@ -11,7 +11,9 @@
 * **GPO Path / Registry Location**:
   * **Policy Override**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings` (Value: Enabled)
   * **Advanced Policies**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
-  * **Registry Location**: `HKLM\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy` (Value: 1)
+  * **Registry Locations**:
+    * `HKLM\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy` (Value: 1)
+    * `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\LogLevel` (Value: 0 [Disabled debug events])
 
 ---
 
@@ -23,12 +25,14 @@ Enforcing advanced auditing policies provides the following security coverages:
 2. **Account and Privilege Monitoring**: Audit User Account Management (Event IDs 4720, 4722, 4724) tracks creation and password resets. Audit Security Group Management (Event IDs 4728, 4732, 4756) detects unauthorized membership changes in highly privileged groups like Domain Admins.
 3. **Execution and Directory Access**: Process Creation (Event ID 4688) tracks executing binaries. Directory Service Changes (Event ID 5136) and Directory Service Access (Event ID 4662) log Active Directory object modifications and querying to discover reconnaissance activity.
 4. **Logon and Tampering Auditing**: Logon and Special Logon auditing (Event IDs 4624, 4625, 4672) tracks remote access, elevation events, and suspicious logons. Policy Change (Event ID 4719) detects when auditing configurations are disabled or altered by adversaries trying to hide their footprints.
+5. **Kerberos Debug Events Logging (`LogLevel`)**: By default, verbose debug logging for Kerberos protocol operations is disabled. Enforcing `LogLevel` = `0` under the Kerberos Parameters registry path prevents verbose debug events from flooding the System Event log in production. Logging of Kerberos debug events (value `1`) should only be enabled temporarily for troubleshooting purposes. Standard security auditing is handled by advanced subcategories like `Audit Kerberos Authentication Service` instead.
 
 ---
 
 ## Legacy Impact & Compatibility
 * **Event Log Volume**: Enabling these detailed policies will increase log volume. The local Security Event Log size must be sized appropriately (minimum 1GB on Domain Controllers, 512MB on Member Servers and Workstations) to prevent logs from rotating out too quickly.
 * **Override Enforcement**: Forcing advanced policies to override legacy settings ensures that older group policies do not accidentally weaken system visibility. Ensure that this GPO setting is applied across all organizational units.
+* **Kerberos Events Logging**: Disabling verbose Kerberos debug logging ensures system performance and prevents event log exhaustion. It has no negative impact on standard Kerberos ticket generation or authentication operations.
 
 ---
 
@@ -82,6 +86,19 @@ Enforcing advanced auditing policies provides the following security coverages:
 | **System** | `Audit Security System Extension` | Success |
 | **System** | `Audit System Integrity` | Success and Failure |
 
+#### 3. Deploy Kerberos LogLevel Registry Settings via GPO Preferences
+To ensure verbose Kerberos debug logging is disabled in production, deploy the setting via Registry GPO Preferences:
+1. Within the logging GPO, navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+2. Right-click **Registry**, select **New** -> **Registry Item**.
+3. Configure:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters`
+   * **Value name**: `LogLevel`
+   * **Value type**: `REG_DWORD`
+   * **Value data**: `0` (Decimal)
+
 ---
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
@@ -104,6 +121,14 @@ if (-not (Test-Path $LsaPath)) {
 }
 Set-ItemProperty -Path $LsaPath -Name "SCENoApplyLegacyAuditPolicy" -Value 1 -Type DWord
 Write-Host "    Force advanced audit policy override enabled." -ForegroundColor Green
+
+# Enforce Kerberos Debug Logging disabled (LogLevel = 0)
+$KerbPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+if (-not (Test-Path $KerbPath)) {
+    New-Item -Path $KerbPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KerbPath -Name "LogLevel" -Value 0 -Type DWord -Force
+Write-Host "    Kerberos debug events logging disabled." -ForegroundColor Green
 
 # 2. Configure Advanced Audit Policy subcategories
 $Policies = @(
@@ -178,6 +203,17 @@ if ($OverrideSetting -eq 1) {
     $OverrideColor = "Green"
 }
 Write-Host "    - Force Advanced Audit Policy Override: $($OverrideSetting) (Required = 1)" -ForegroundColor $OverrideColor
+
+# Audit Kerberos LogLevel
+$KerbPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+if (Test-Path $KerbPath) {
+    $LogLevelVal = Get-ItemProperty -Path $KerbPath -Name "LogLevel" -ErrorAction SilentlyContinue
+    $LogLevelSetting = if ($LogLevelVal) { $LogLevelVal.LogLevel } else { 0 }
+    $LogLevelColor = if ($LogLevelSetting -eq 0) { "Green" } else { "Red" }
+    Write-Host "    - Kerberos Debug LogLevel: $($LogLevelSetting) (Required = 0)" -ForegroundColor $LogLevelColor
+} else {
+    Write-Host "    - Kerberos Debug LogLevel: Not Configured (Default/Compliant as it inherits disabled)" -ForegroundColor Green
+}
 
 # 2. Audit specific subcategories
 $RequiredPolicies = @(

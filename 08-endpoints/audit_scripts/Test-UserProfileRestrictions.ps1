@@ -94,6 +94,34 @@ Test-RegistryValue $SessionMgr "ProtectionMode" 1
 $SecLogon = "HKLM:\SYSTEM\CurrentControlSet\Services\seclogon"
 Test-RegistryValue $SecLogon "Start" 4
 
+# ASLR and Speculative mitigations
+$MemMgmt = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management"
+Test-RegistryValue $MemMgmt "MoveImages" 4294967295
+Test-RegistryValue $MemMgmt "FeatureSettingsOverride" 72
+Test-RegistryValue $MemMgmt "FeatureSettingsOverrideMask" 3
+
+# Strict Authenticode check
+Test-RegistryValue "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
+Test-RegistryValue "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
+
+# Secure Batch processing
+Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" 1
+
+# Disable Time-Travel Debugging
+Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\TTD" "RecordingPolicy" 2
+
+# Prevent standard users from root cert installation
+Test-RegistryValue "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" 1
+
+# Disable AppInit_DLLs
+Test-RegistryValue "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" 0
+
+# Block driver co-installers
+Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" "DisableCoInstallers" 1
+
+# Kernel-level Shadow Stacks
+Test-RegistryValue "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
+
 if ($Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
 } else {

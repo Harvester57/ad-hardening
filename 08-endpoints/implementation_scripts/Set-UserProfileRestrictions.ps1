@@ -91,6 +91,35 @@ Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" "Protectio
 # Secondary Logon Service (Disabled = 4)
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\seclogon" "Start" 4
 
+# ASLR Force Randomization
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" 4294967295
+
+# Strict Authenticode Cert Padding Check
+Set-RegDWord "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
+Set-RegDWord "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
+
+# Secure Batch Processing
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" 1
+
+# Disable Time-Travel Debugging (TTD)
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\TTD" "RecordingPolicy" 2
+
+# Prevent standard users from installing root certificates
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" 1
+
+# Disable AppInit_DLLs
+Set-RegDWord "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" 0
+
+# Block driver co-installers
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" "DisableCoInstallers" 1
+
+# Spectre/Meltdown speculative execution mitigations
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" 72
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" 3
+
+# Kernel-level Shadow Stacks
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
+
 Write-Host "[+] Local computer system restrictions applied." -ForegroundColor Green
 
 # 2. Enforce HKCU Settings on Current User

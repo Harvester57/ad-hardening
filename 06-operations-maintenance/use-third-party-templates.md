@@ -17,7 +17,7 @@ Group Policy Objects (GPOs) natively manage core Windows operating system compon
 
 Implementing third-party and custom GPO templates provides the following benefits:
 1. **Centralized Configuration**: Administrators can enforce security configurations across all enterprise workstations and member servers (e.g. disabling insecure browser protocols, locking PDF execution properties) directly from the Group Policy Management Console.
-2. **Reduced Attack Surface**: Custom templates (such as Microsoft's Security-ADMX or the Microsoft Security Guide template) expose hidden or advanced registry configurations, allowing administrators to restrict features like WDigest authentication or LSA credential caching that are not exposed in standard out-of-the-box Windows templates.
+2. **Reduced Attack Surface**: Custom templates (such as [Security-ADMX GitHub Repository](https://github.com/Harvester57/Security-ADMX) or the Microsoft Security Guide template) expose hidden or advanced registry configurations, allowing administrators to restrict features like WDigest authentication or LSA credential caching that are not exposed in standard out-of-the-box Windows templates.
 3. **Consistency**: Linking COTS hardening GPOs ensures that third-party applications remain compliant with corporate security baselines, preventing local user overrides.
 
 ---
@@ -138,5 +138,6 @@ try {
 ---
 
 ## Sources & Compliance References
+* **Security-ADMX Project**: Custom GPO templates for hardening Windows client and server environments. Available at the [Security-ADMX GitHub Repository](https://github.com/Harvester57/Security-ADMX).
 * **CIS Microsoft Windows Server Benchmarks**: Sections recommending the use of administrative templates to control third-party browser settings.
 * **ANSSI AD Hardening Guide**: Recommendations on secure configuration templates for operating systems and software.

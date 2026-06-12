@@ -18,4 +18,11 @@ Set-ItemProperty -Path $SystemPath -Name "EnableLUA" -Value 1 -Type DWord
 # PromptOnSecureDesktop = 1 (Switch to secure desktop when prompting)
 Set-ItemProperty -Path $SystemPath -Name "PromptOnSecureDesktop" -Value 1 -Type DWord
 
+# Configure Windows Sudo command behavior (Enabled = 1 [Force new elevated window])
+$SudoPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sudo"
+if (-not (Test-Path $SudoPath)) {
+    New-Item -Path $SudoPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SudoPath -Name "Enabled" -Value 1 -Type DWord -Force
+
 Write-Host "[+] UAC registry values configured successfully." -ForegroundColor Green

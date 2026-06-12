@@ -17,6 +17,17 @@ if ($OverrideSetting -eq 1) {
 }
 Write-Host "    - Force Advanced Audit Policy Override: $($OverrideSetting) (Required = 1)" -ForegroundColor $OverrideColor
 
+# Audit Kerberos LogLevel
+$KerbPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+if (Test-Path $KerbPath) {
+    $LogLevelVal = Get-ItemProperty -Path $KerbPath -Name "LogLevel" -ErrorAction SilentlyContinue
+    $LogLevelSetting = if ($LogLevelVal) { $LogLevelVal.LogLevel } else { 0 }
+    $LogLevelColor = if ($LogLevelSetting -eq 0) { "Green" } else { "Red" }
+    Write-Host "    - Kerberos Debug LogLevel: $($LogLevelSetting) (Required = 0)" -ForegroundColor $LogLevelColor
+} else {
+    Write-Host "    - Kerberos Debug LogLevel: Not Configured (Default/Compliant as it inherits disabled)" -ForegroundColor Green
+}
+
 # 2. Audit specific subcategories
 $RequiredPolicies = @(
     @{ Subcategory = "Kerberos Authentication Service"; Expected = "Success and Failure" },

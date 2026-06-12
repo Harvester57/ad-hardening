@@ -21,6 +21,8 @@
     * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon`
       * `ScRemoveOption` = `"1"` (REG_SZ, 1 = Lock Workstation)
       * `CachedLogonsCount` = `0` (REG_DWORD)
+    * `HKLM\SECURITY\Cache`
+      * `NL$IterationCount` = `1954` (REG_DWORD, 1954 = 2,000,896 rounds of PBKDF2-SHA1)
     * `HKLM\System\CurrentControlSet\Control\Lsa`
       * `LimitBlankPasswordUse` = `1` (REG_DWORD)
       * `NoLMHash` = `1` (REG_DWORD)
@@ -62,7 +64,7 @@ Securing authentication parameters and account controls reduces the risk of pass
 3. **Reversible Encryption (`ClearTextPassword`)**: Storing passwords using reversible encryption is equivalent to storing cleartext passwords in the directory database. This key option exists only for legacy application support (such as CHAP authentication) and must be disabled to prevent database dumping/credential recovery.
 4. **Smart Card Removal Behavior (`ScRemoveOption`)**: In secure environments using Smart Card or token-based authentication, removing the card must automatically lock the desktop session (`1`). If disabled, a user leaving their workstation with the card removed leaves the session exposed.
 5. **Blank Passwords Limit (`LimitBlankPasswordUse`)**: Restricting the use of blank passwords to physical console logons prevents attackers from using empty-password accounts to authenticate remotely over network shares or RDP.
-6. **Logon Caching Restriction (`CachedLogonsCount` = `0`)**: By default, Windows caches previous logons locally. If a workstation is compromised, cached logon credentials can be dumped and cracked offline. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation, forcing standard network authentication against a domain controller.
+6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, dramatically increasing resistance to offline brute-force and GPU-accelerated cracking attacks (like RTX 4090 models).
 7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
 8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
 9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, and requiring NTLMv2 and 128-bit encryption block legacy protocol exploitation.
@@ -74,6 +76,7 @@ Securing authentication parameters and account controls reduces the risk of pass
 * **Smart Card Removal**: Users must be trained to carry their smart cards with them, which automatically locks the session. Re-authenticating requires inserting the card and entering the PIN.
 * **Reversible Encryption**: Disabling reversible encryption may break legacy applications that rely on reading cleartext password equivalents. These applications should be modernized to support modern Kerberos or SAML/OIDC federations.
 * **Logon Caching (CachedLogonsCount = 0)**: Workstations must have active, real-time connectivity to a Domain Controller to allow users to log on. Off-domain logons (e.g., users traveling or working offline without a pre-boot VPN connection) will fail. Remote users must use pre-boot VPN tunnels or alternate remote access architectures.
+* **PBKDF2 Iteration Overhead**: Increasing the iteration count raises the CPU processing time required during logons that use cached credentials. A value of 1954 may introduce a slight delay (typically under 1 second) during interactive logins on older hardware.
 
 ---
 
@@ -122,6 +125,19 @@ Navigate to:
 * **Policy**: `Use convenience PIN sign-in` -> Set to **Disabled** (value 0)
 * **Policy**: `Allow Microsoft accounts to be optional` -> Set to **Enabled** (value 1)
 
+#### Step 4: Configure PBKDF2 Iteration Count via GPO Preferences
+Since the PBKDF2 iteration count setting is not exposed in standard ADMX templates, deploy it via Registry GPO Preferences:
+1. Within the endpoints GPO, navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+2. Right-click **Registry**, select **New** -> **Registry Item**.
+3. Configure:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SECURITY\Cache`
+   * **Value name**: `NL$IterationCount`
+   * **Value type**: `REG_DWORD`
+   * **Value data**: `1954` (Decimal)
+
 ---
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
@@ -160,6 +176,14 @@ if (-not (Test-Path $WDigestPath)) {
 }
 Set-ItemProperty -Path $WDigestPath -Name "UseLogonCredential" -Value 0 -Type DWord -Force
 Write-Host "[+] LSASS WDigest credential caching disabled." -ForegroundColor Green
+
+# PBKDF2 Iterations for Cached Logons
+$CachePath = "HKLM:\SECURITY\Cache"
+if (-not (Test-Path $CachePath)) {
+    New-Item -Path $CachePath -Force | Out-Null
+}
+Set-ItemProperty -Path $CachePath -Name "NL`$IterationCount" -Value 1954 -Type DWord -Force
+Write-Host "[+] PBKDF2 cached credentials iteration count configured." -ForegroundColor Green
 
 # Hello for Business, PIN and Microsoft Account policies
 $SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
@@ -352,6 +376,9 @@ Test-RegistryValue $LsaPath "NoLMHash" 1
 
 $WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
 Test-RegistryValue $WDigestPath "UseLogonCredential" 0
+
+$CachePath = "HKLM:\SECURITY\Cache"
+Test-RegistryValue $CachePath "NL`$IterationCount" 1954
 
 $SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
 Test-RegistryValue $SystemPolicyPath "AllowDomainPINLogon" 0

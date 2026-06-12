@@ -28,6 +28,14 @@ if (-not (Test-Path $WDigestPath)) {
 Set-ItemProperty -Path $WDigestPath -Name "UseLogonCredential" -Value 0 -Type DWord -Force
 Write-Host "[+] LSASS WDigest credential caching disabled." -ForegroundColor Green
 
+# PBKDF2 Iterations for Cached Logons
+$CachePath = "HKLM:\SECURITY\Cache"
+if (-not (Test-Path $CachePath)) {
+    New-Item -Path $CachePath -Force | Out-Null
+}
+Set-ItemProperty -Path $CachePath -Name "NL`$IterationCount" -Value 1954 -Type DWord -Force
+Write-Host "[+] PBKDF2 cached credentials iteration count configured." -ForegroundColor Green
+
 # Hello for Business, PIN and Microsoft Account policies
 $SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
 if (-not (Test-Path $SystemPolicyPath)) {

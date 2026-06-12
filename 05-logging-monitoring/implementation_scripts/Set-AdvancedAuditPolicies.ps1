@@ -12,6 +12,14 @@ if (-not (Test-Path $LsaPath)) {
 Set-ItemProperty -Path $LsaPath -Name "SCENoApplyLegacyAuditPolicy" -Value 1 -Type DWord
 Write-Host "    Force advanced audit policy override enabled." -ForegroundColor Green
 
+# Enforce Kerberos Debug Logging disabled (LogLevel = 0)
+$KerbPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+if (-not (Test-Path $KerbPath)) {
+    New-Item -Path $KerbPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KerbPath -Name "LogLevel" -Value 0 -Type DWord -Force
+Write-Host "    Kerberos debug events logging disabled." -ForegroundColor Green
+
 # 2. Configure Advanced Audit Policy subcategories
 $Policies = @(
     @{ Subcategory = "Kerberos Authentication Service"; Success = "enable"; Failure = "enable" },

@@ -84,6 +84,15 @@ ORADAD allows administrators to perform offline analysis of Active Directory con
 
 ---
 
+## 4. Crash Control & Troubleshooting (BSOD Detailed Display)
+
+During critical system failures, Windows by default displays a simplified Blue Screen of Death (BSOD) screen. Enabling detailed stop error parameters ensures that critical diagnostic information (such as the stop code and parameters) is immediately visible on the physical or virtual console screen. This is crucial for administrators in isolated, air-gapped environments who must troubleshoot system failures without access to online analysis tools or automatic crash dumps.
+
+* **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\CrashControl`
+* **Registry Value**: `DisplayParameters` (REG_DWORD = `1`)
+
+---
+
 ## PowerShell Implementation Guide
 
 ### 1. Auditing System State Backup Status (Audit)
@@ -185,4 +194,49 @@ if ($finalJob.JobState -eq "Completed") {
 } else {
     Write-Error "`nBackup failed with status: $($finalJob.JobState). Error: $($finalJob.ErrorDescription)"
 }
+```
+
+### 3. Auditing Crash Control Settings (Audit)
+
+[Download Script: Audit-CrashControl.ps1](audit_scripts/Audit-CrashControl.ps1)
+
+```powershell
+# Audit-CrashControl.ps1
+# Description: Audits whether detailed BSOD parameters are enabled in the registry.
+
+Write-Host "--- Auditing Detailed BSOD Parameters ---" -ForegroundColor Cyan
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl"
+if (Test-Path $Path) {
+    $Val = Get-ItemProperty -Path $Path -Name "DisplayParameters" -ErrorAction SilentlyContinue
+    if ($Val -and $Val.DisplayParameters -eq 1) {
+        Write-Host "[+] Detailed BSOD stop parameters are ENABLED (Compliant)." -ForegroundColor Green
+    } else {
+        Write-Host "[-] Detailed BSOD stop parameters are DISABLED (Non-Compliant)." -ForegroundColor Red
+        exit 1
+    }
+} else {
+    Write-Host "[-] Registry path HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl not found." -ForegroundColor Red
+    exit 1
+}
+```
+
+### 4. Configuring Crash Control Settings (Remediation)
+
+[Download Script: Set-CrashControl.ps1](implementation_scripts/Set-CrashControl.ps1)
+
+```powershell
+# Set-CrashControl.ps1
+# Description: Enables detailed BSOD parameters in the registry.
+
+Write-Host "--- Configuring Detailed BSOD Parameters ---" -ForegroundColor Cyan
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl"
+if (-not (Test-Path $Path)) {
+    New-Item -Path $Path -Force | Out-Null
+}
+
+Set-ItemProperty -Path $Path -Name "DisplayParameters" -Value 1 -Type DWord -Force | Out-Null
+Write-Host "[+] Detailed BSOD stop parameters configured successfully." -ForegroundColor Green
+```
 ```

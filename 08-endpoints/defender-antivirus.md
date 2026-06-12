@@ -19,6 +19,8 @@
     * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR`
     * `HKLM\SOFTWARE\Microsoft\Windows Defender\Features`
     * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment`
+    * `HKLM\SOFTWARE\Microsoft\AMSI`
+      * `FeatureBits` = `2` (REG_DWORD)
     * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
       * `EnableSmartScreen` = `1` (REG_DWORD)
       * `ShellSmartScreenLevel` = `Block` (REG_SZ)
@@ -33,6 +35,7 @@ This control introduces four primary hardening mechanisms:
 2. **Tamper Protection**: Secures the Defender Antivirus services and registry keys. Without this control, an administrative account compromised via lateral movement could disable Defender or add exclusions to permit payload execution.
 3. **Sandbox Execution (AppContainer)**: Forces the Defender service (MsMpEng.exe) to run in a restricted AppContainer sandbox. Since antimalware engines parse untrusted, potentially malicious file structures, a zero-day vulnerability in the parsing engine could lead to system compromise. Sandbox execution mitigates this by containing any exploit inside the AppContainer, preventing privilege escalation.
 4. **Windows Defender SmartScreen**: Protects against phishing and malware by warning or blocking users before running unrecognized software or visiting potentially dangerous sites. Enforcing a SmartScreen level of "Block" prevents users from bypassing security warnings and executing unauthorized applications.
+5. **AMSI Authenticode Signature Verification (`FeatureBits`)**: The Antimalware Scan Interface (AMSI) allows applications to integrate with the installed antivirus product to scan script content and buffers. Attackers may attempt to register rogue AMSI providers to intercept or bypass scans. Enforcing Authenticode signature checks on registered AMSI providers (`FeatureBits` = `2`) ensures that only signed and trusted AMSI provider DLLs are loaded by applications.
 
 ---
 
@@ -41,6 +44,7 @@ This control introduces four primary hardening mechanisms:
 * **Office Application Rules**: Rules related to Microsoft Office (e.g., blocking child processes) apply only to endpoints where productivity suites are installed. They will have no impact on member servers without Office.
 * **Sandbox Boot Overhead**: Setting `MP_FORCE_USE_SANDBOX` requires a reboot to initialize the scanning process within the AppContainer sandbox. There is negligible performance overhead once initialized.
 * **SmartScreen Impact**: Standard users will be blocked from launching unrecognized software. Support staff must assist with authorizing internal or uncertified custom business applications.
+* **AMSI Provider Signatures**: Any third-party antimalware software that registers itself as an AMSI provider must possess a valid, trusted Authenticode signature. Unsigned or self-signed providers will be blocked from loading.
 
 ---
 
@@ -198,6 +202,19 @@ This control introduces four primary hardening mechanisms:
    * **Policy**: `Configure Windows Defender SmartScreen`
      * **Setting**: `Enabled`
      * **Options**: Select `Require approval from an administrator before running unrecognized software` (forces `ShellSmartScreenLevel` to `Block` and `EnableSmartScreen` to `1`)
+
+#### Step 36: Deploy AMSI Authenticode Verification via GPO Preferences
+Since AMSI provider signature verification is not exposed in standard ADMX templates, deploy it via Registry GPO Preferences:
+1. Within the endpoints GPO, navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+2. Right-click **Registry**, select **New** -> **Registry Item**.
+3. Configure:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\Microsoft\AMSI`
+   * **Value name**: `FeatureBits`
+   * **Value type**: `REG_DWORD`
+   * **Value data**: `2` (Decimal)
 
 ---
 
@@ -399,6 +416,14 @@ Set-ItemProperty -Path $SmartScreenPath -Name "EnableSmartScreen" -Value 1 -Type
 Set-ItemProperty -Path $SmartScreenPath -Name "ShellSmartScreenLevel" -Value "Block" -Type String -Force
 Write-Host "[+] Windows Defender SmartScreen configured in registry." -ForegroundColor Green
 
+# 9. Configure AMSI Authenticode Signature Verification (FeatureBits = 2)
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (-not (Test-Path $AmsiPath)) {
+    New-Item -Path $AmsiPath -Force | Out-Null
+}
+Set-ItemProperty -Path $AmsiPath -Name "FeatureBits" -Value 2 -Type DWord -Force
+Write-Host "[+] AMSI Authenticode signature verification enabled." -ForegroundColor Green
+
 Write-Host "Defender advanced baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan
 ```
 
@@ -529,6 +554,17 @@ foreach ($KeyName in $CheckKeys.Keys) {
         $Actual = if ($Val) { $Val.$KeyName } else { "Not Configured" }
         Write-Host "      * Missing/Misconfigured: $KeyName (Expected: $($Target.Expected), Got: $Actual)" -ForegroundColor Yellow
     }
+}
+
+# 7. Audit AMSI Authenticode verification
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (Test-Path $AmsiPath) {
+    $AmsiBits = Get-ItemProperty -Path $AmsiPath -Name "FeatureBits" -ErrorAction SilentlyContinue
+    $AmsiVal = if ($AmsiBits) { $AmsiBits.FeatureBits } else { 0 }
+    $AmsiColor = if ($AmsiVal -eq 2) { "Green" } else { "Red" }
+    Write-Host "    - AMSI Authenticode verification (FeatureBits): $AmsiVal (Expected: 2)" -ForegroundColor $AmsiColor
+} else {
+    Write-Host "    - AMSI Authenticode verification (FeatureBits): NOT ENABLED" -ForegroundColor Red
 }
 ```
 

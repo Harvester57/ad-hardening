@@ -189,4 +189,12 @@ Set-ItemProperty -Path $SmartScreenPath -Name "EnableSmartScreen" -Value 1 -Type
 Set-ItemProperty -Path $SmartScreenPath -Name "ShellSmartScreenLevel" -Value "Block" -Type String -Force
 Write-Host "[+] Windows Defender SmartScreen configured in registry." -ForegroundColor Green
 
+# 9. Configure AMSI Authenticode Signature Verification (FeatureBits = 2)
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (-not (Test-Path $AmsiPath)) {
+    New-Item -Path $AmsiPath -Force | Out-Null
+}
+Set-ItemProperty -Path $AmsiPath -Name "FeatureBits" -Value 2 -Type DWord -Force
+Write-Host "[+] AMSI Authenticode signature verification enabled." -ForegroundColor Green
+
 Write-Host "Defender advanced baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan

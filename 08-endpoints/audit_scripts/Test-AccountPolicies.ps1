@@ -30,6 +30,9 @@ Test-RegistryValue $LsaPath "NoLMHash" 1
 $WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
 Test-RegistryValue $WDigestPath "UseLogonCredential" 0
 
+$CachePath = "HKLM:\SECURITY\Cache"
+Test-RegistryValue $CachePath "NL`$IterationCount" 1954
+
 $SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
 Test-RegistryValue $SystemPolicyPath "AllowDomainPINLogon" 0
 

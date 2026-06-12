@@ -73,6 +73,24 @@
       * `ProtectionMode` = `1` (REG_DWORD)
     * HKLM\SYSTEM\CurrentControlSet\Services\seclogon
       * `Start` = `4` (REG_DWORD, Disabled)
+    * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management
+      * `MoveImages` = `0xFFFFFFFF` (REG_DWORD, force ASLR for relocatable images)
+      * `FeatureSettingsOverride` = `72` (REG_DWORD, enable speculative execution mitigations)
+      * `FeatureSettingsOverrideMask` = `3` (REG_DWORD, mask for mitigations)
+    * HKLM\Software\Microsoft\Cryptography\Wintrust\Config (and Wow6432Node equivalent)
+      * `EnableCertPaddingCheck` = `1` (REG_DWORD, strict Authenticode cert padding verification)
+    * HKLM\SOFTWARE\Microsoft\Command Processor
+      * `LockBatchFilesWhenInUse` = `1` (REG_DWORD, secure mode for batch file processing)
+    * HKLM\SOFTWARE\Microsoft\TTD
+      * `RecordingPolicy` = `2` (REG_DWORD, disable Time-Travel Debugging)
+    * HKLM\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots
+      * `Flags` = `1` (REG_DWORD, prevent standard users from installing root certificates)
+    * HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows
+      * `LoadAppInit_DLLs` = `0` (REG_DWORD, disable custom DLL loading list)
+    * HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer
+      * `DisableCoInstallers` = `1` (REG_DWORD, block driver co-installer execution)
+    * HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks
+      * `Enabled` = `1` (REG_DWORD, enable hardware-enforced stack protection)
 
 ---
 
@@ -85,13 +103,25 @@ Securing user profile characteristics and administrative explorer behaviors prev
 4. **Kernel SEHOP (`DisableExceptionChainValidation`)**: Structured Exception Handler Overwrite Protection (SEHOP) detects and blocks stack-based buffer overflow exploit redirection techniques at the OS level.
 5. **Explorer and Installer Hardening (`AlwaysInstallElevated`, `EnableUserControl`)**: Forcing standard user installer locks and disabling elevated installations prevents users from escalating privileges using crafted installer files.
 6. **Inactivity Timeout (`InactivityTimeoutSecs`)**: Automatically locking idle workstations after 15 minutes of inactivity (900 seconds) prevents physical session hijacking.
+7. **Memory Protection & ASLR Enforcement (`MoveImages`)**: Address Space Layout Randomization (ASLR) makes it difficult for exploit payloads to find precise memory locations of APIs or system functions. Forcing ASLR on relocatable images ensures binary mitigation compliance.
+8. **Strict Authenticode Signature Verification (`EnableCertPaddingCheck`)**: Prevents signature manipulation by enforcing strict padding validation, blocking attempts to append malicious payloads to signed binaries without invalidating the signature.
+9. **Secure Batch processing (`LockBatchFilesWhenInUse`)**: Holds an opportunistic lock on batch/cmd scripts during execution to prevent files from being modified on-the-fly, which mitigates race conditions and statement-modification exploits.
+10. **Disable Debugging & Telemetry abuse (`RecordingPolicy`, `DisableCoInstallers`, `LoadAppInit_DLLs`)**: Disabling Time-Travel Debugging prevents adversaries from dumping memory or executing arbitrary binaries. Disabling custom DLL loading (AppInit_DLLs) blocks persistent user-mode DLL injection. Disabling driver co-installers prevents unauthorized executable downloads during peripheral plugin.
+11. **Standard User Root Certificate Restriction (`Flags` under `ProtectedRoots`)**: Restricting certificate store installation to administrators prevents standard users from importing rogue root certificate authorities into their personal store, which blocks internal MitM or code-signing forgery attacks.
+12. **Spectre & Meltdown CPU Mitigations (`FeatureSettingsOverride`)**: Hardware-level speculative execution vulnerabilities can allow a malicious process to leak kernel memory. Enforcing modern speculative execution overrides blocks these side-channel exploitation paths.
+13. **Kernel-Level Shadow Stacks (`Enabled` under `KernelShadowStacks`)**: Enforces hardware-backed control flow integrity (Intel CET/AMD Shadow Stack) to prevent Return-Oriented Programming (ROP) execution hijacks.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **User Notifications**: Users will still receive notifications while logged in and unlocked. However, when the workstation is locked, they will only see system status indicators, not detailed content banners.
+* **User Experience**: Users will still receive notifications while logged in and unlocked. However, when the workstation is locked, they will only see system status indicators, not detailed content banners.
 * **Spotlight Aesthetics**: The lock screen background can still show administrative wallpaper choices, but will not query online Microsoft consumer recommendations.
 * **Installer Failures**: Administrators will need to perform standard GPO-based software distribution or elevate installers manually, since "AlwaysInstallElevated" is securely disabled.
+* **Driver Installations**: Blocking co-installers means manufacturer companion software for USB devices (gaming mouses, keyboards, headsets) must be downloaded and installed manually by an administrator.
+* **Legacy Application Compatibility**:
+  * Some legacy software relying on custom DLL injection via AppInit_DLLs will fail to load their helper libraries.
+  * Forcing ASLR or enabling Kernel Shadow Stacks may cause stability issues in older 32-bit executables or unsigned drivers. Proper sandbox verification is required.
+  * Batch files that are dynamically self-modifying during runtime will fail when secure batch processing is enabled due to opportunistic file locks.
 
 ---
 
@@ -156,6 +186,18 @@ Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings
 * **Policy**: `Interactive logon: Message title for users attempting to log on` -> Set to **US Department of Defense Warning Statement**
 * **Policy**: `System objects: Strengthen default permissions of internal system objects (e.g. Symbolic Links)` -> Set to **Enabled**
 * **Policy**: `Devices: Allowed to format and eject removable media` -> Set to **Administrators**
+
+#### 3. Deploy Custom Settings via GPO Preferences and System Mitigations
+Configure GPO Preferences registry items or Administrative Templates for the remaining custom settings:
+* **ASLR Force Randomization**: Enable in Exploit Guard mitigation policies or set registry `MoveImages` = `4294967295` (0xFFFFFFFF).
+* **Kernel Shadow Stacks**: Navigate to: `Computer Configuration\Administrative Templates\System\Device Guard` -> `Turn on Virtualization-Based Security` -> Set **Kernel-level shadow stacks** to **Enabled** (or set registry `Enabled` = `1`).
+* **Spectre & Meltdown CPU Mitigations**: Configure registry `FeatureSettingsOverride` = `72` and `FeatureSettingsOverrideMask` = `3`.
+* **LockBatchFilesWhenInUse**: Configure registry `LockBatchFilesWhenInUse` = `1` under `HKLM\SOFTWARE\Microsoft\Command Processor`.
+* **EnableCertPaddingCheck**: Configure registry `EnableCertPaddingCheck` = `1` under `HKLM\Software\Microsoft\Cryptography\Wintrust\Config` (and Wow6432Node).
+* **RecordingPolicy**: Configure registry `RecordingPolicy` = `2` under `HKLM\SOFTWARE\Microsoft\TTD`.
+* **Root Cert Flags**: Configure registry `Flags` = `1` under `HKLM\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots`.
+* **LoadAppInit_DLLs**: Configure registry `LoadAppInit_DLLs` = `0` under `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows`.
+* **DisableCoInstallers**: Configure registry `DisableCoInstallers` = `1` under `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer`.
 
 ---
 
@@ -258,6 +300,35 @@ Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" "Protectio
 
 # Secondary Logon Service (Disabled = 4)
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\seclogon" "Start" 4
+
+# ASLR Force Randomization
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" 4294967295
+
+# Strict Authenticode Cert Padding Check
+Set-RegDWord "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
+Set-RegDWord "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
+
+# Secure Batch Processing
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" 1
+
+# Disable Time-Travel Debugging (TTD)
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\TTD" "RecordingPolicy" 2
+
+# Prevent standard users from installing root certificates
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" 1
+
+# Disable AppInit_DLLs
+Set-RegDWord "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" 0
+
+# Block driver co-installers
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" "DisableCoInstallers" 1
+
+# Spectre/Meltdown speculative execution mitigations
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" 72
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" 3
+
+# Kernel-level Shadow Stacks
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
 Write-Host "[+] Local computer system restrictions applied." -ForegroundColor Green
 
@@ -407,6 +478,34 @@ Test-RegistryValue $SessionMgr "ProtectionMode" 1
 
 $SecLogon = "HKLM:\SYSTEM\CurrentControlSet\Services\seclogon"
 Test-RegistryValue $SecLogon "Start" 4
+
+# ASLR and Speculative mitigations
+$MemMgmt = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management"
+Test-RegistryValue $MemMgmt "MoveImages" 4294967295
+Test-RegistryValue $MemMgmt "FeatureSettingsOverride" 72
+Test-RegistryValue $MemMgmt "FeatureSettingsOverrideMask" 3
+
+# Strict Authenticode check
+Test-RegistryValue "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
+Test-RegistryValue "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
+
+# Secure Batch processing
+Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" 1
+
+# Disable Time-Travel Debugging
+Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\TTD" "RecordingPolicy" 2
+
+# Prevent standard users from root cert installation
+Test-RegistryValue "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" 1
+
+# Disable AppInit_DLLs
+Test-RegistryValue "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" 0
+
+# Block driver co-installers
+Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" "DisableCoInstallers" 1
+
+# Kernel-level Shadow Stacks
+Test-RegistryValue "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
 if ($Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red

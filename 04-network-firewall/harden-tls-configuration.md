@@ -12,6 +12,16 @@
   * **Protocols**: `HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols`
   * **Cipher Suite Order**: `Computer Configuration\Administrative Templates\Network\SSL Configuration Settings` -> **SSL Cipher Suite Order** (Registry: `HKLM:\SOFTWARE\Policies\Microsoft\Cryptography\Configuration\SSL\00010002` -> `Functions`)
   * **ECC Curve Order**: `Computer Configuration\Administrative Templates\Network\SSL Configuration Settings` -> **ECC Curve Order** (Registry: `HKLM:\SOFTWARE\Policies\Microsoft\Cryptography\Configuration\SSL\00010002` -> `EccCurves`)
+  * **.NET strong cryptography support**:
+    * `HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727` and `v4.0.30319` (and Wow6432Node equivalents)
+      * `SchUseStrongCrypto` = `1` (REG_DWORD)
+      * `SystemDefaultTlsVersions` = `1` (REG_DWORD)
+  * **Disable .NET strong-name bypass**:
+    * `HKLM:\SOFTWARE\Microsoft\.NETFramework` (and Wow6432Node equivalent)
+      * `AllowStrongNameBypass` = `0` (REG_DWORD)
+  * **WinHTTP TLS 1.2 support**:
+    * `HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp` (and Wow6432Node equivalent)
+      * `DefaultSecureProtocols` = `2048` (REG_DWORD, 0x00000800)
 
 ---
 
@@ -20,12 +30,15 @@ Legacy versions of SSL (2.0 and 3.0) and TLS (1.0 and 1.1) are cryptographically
 
 In addition to disabling insecure protocol versions, the TLS cipher suites and Elliptic Curves must be restricted to modern, collision-resistant options. CBC (Cipher Block Chaining) mode and RC4 ciphers are prone to padding oracle attacks. Restricting configurations to AES-GCM (Galois/Counter Mode) authenticated encryption suites combined with strong Elliptic Curve Diffie-Hellman (ECDHE) curves (such as Curve25519 and NIST P-384) guarantees confidentiality, integrity, and perfect forward secrecy (PFS).
 
+By default, legacy .NET Framework applications (targeting .NET 3.5 or earlier) and WinHTTP-based APIs do not enforce TLS 1.2 or TLS 1.3, potentially defaulting to weak protocols like SSL 3.0 or TLS 1.0. Enabling `SchUseStrongCrypto` and `SystemDefaultTlsVersions` forces .NET to use the system default secure TLS versions. Restricting `DefaultSecureProtocols` forces WinHTTP clients to use TLS 1.2. Disabling the strong-name bypass (`AllowStrongNameBypass` = `0`) prevents full-trust assemblies from skipping signature validation, protecting the .NET runtime from loading tampered assemblies.
+
 ---
 
 ## Legacy Impact & Compatibility
 * **Legacy Clients**: Operating systems prior to Windows 7/Server 2008 R2 (without updates enabling TLS 1.2) or outdated third-party management agents, appliances, and legacy printers will fail to establish secure connections (LDAPS, HTTPS, RDP, WinRM) with hardened hosts.
 * **Domain Controller Reachability**: Active Directory replication between DCs remains unaffected as it relies on RPC (Kerberos) rather than TLS. However, client-facing services such as secure LDAP (LDAPS) require TLS; clients must support TLS 1.2.
 * **Administrative Access**: Admin connections (such as WinRM over HTTPS or RDP) will require TLS 1.2. Administrative machines (PAWs) must be configured to support the same cipher suites.
+* **.NET Framework Applications**: Forcing strong cryptography may break communication with legacy servers or web services that do not support TLS 1.2. Applications targeting .NET 3.5 or older should be tested for compatibility.
 
 ---
 
@@ -64,6 +77,27 @@ Since Schannel protocol versions (disabling TLS 1.0/1.1 and enabling TLS 1.2/1.3
      * Value Name: `DisabledByDefault` | Type: `REG_DWORD` | Value Data: `0`
 
 *Note: Systems must be rebooted for Schannel protocol and cipher settings to take effect.*
+
+#### 3. Deploy .NET and WinHTTP Registry Settings via GPO Preferences
+1. Within the same GPO, navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+2. Configure the following registry entries (as Registry Items):
+   * **.NET 4.0 (32-bit & 64-bit)**:
+     * Key: `HKLM\SOFTWARE\Microsoft\.NETFramework\v4.0.30319` | Value: `SchUseStrongCrypto` = `1` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Microsoft\.NETFramework\v4.0.30319` | Value: `SystemDefaultTlsVersions` = `1` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319` | Value: `SchUseStrongCrypto` = `1` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319` | Value: `SystemDefaultTlsVersions` = `1` (REG_DWORD)
+   * **.NET 2.0 (32-bit & 64-bit)**:
+     * Key: `HKLM\SOFTWARE\Microsoft\.NETFramework\v2.0.50727` | Value: `SchUseStrongCrypto` = `1` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Microsoft\.NETFramework\v2.0.50727` | Value: `SystemDefaultTlsVersions` = `1` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727` | Value: `SchUseStrongCrypto` = `1` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727` | Value: `SystemDefaultTlsVersions` = `1` (REG_DWORD)
+   * **.NET Strong-Name Bypass**:
+     * Key: `HKLM\SOFTWARE\Microsoft\.NETFramework` | Value: `AllowStrongNameBypass` = `0` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Wow6432Node\Microsoft\.NETFramework` | Value: `AllowStrongNameBypass` = `0` (REG_DWORD)
+   * **WinHTTP (32-bit & 64-bit)**:
+     * Key: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp` | Value: `DefaultSecureProtocols` = `2048` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp` | Value: `DefaultSecureProtocols` = `2048` (REG_DWORD)
 
 ---
 
@@ -139,6 +173,32 @@ $EccCurves = @(
 Set-ItemProperty -Path $SSLConfigPath -Name "Functions" -Value $CipherSuites -Type MultiString -Force | Out-Null
 Set-ItemProperty -Path $SSLConfigPath -Name "EccCurves" -Value $EccCurves -Type MultiString -Force | Out-Null
 
+# 3. Configure .NET strong cryptography, strong-name bypass, and WinHTTP TLS
+$RegistryTargets = @(
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727"; Name = "SchUseStrongCrypto"; Value = 1; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727"; Name = "SystemDefaultTlsVersions"; Value = 1; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727"; Name = "SchUseStrongCrypto"; Value = 1; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727"; Name = "SystemDefaultTlsVersions"; Value = 1; Type = "DWord" }
+    
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319"; Name = "SchUseStrongCrypto"; Value = 1; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319"; Name = "SystemDefaultTlsVersions"; Value = 1; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319"; Name = "SchUseStrongCrypto"; Value = 1; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319"; Name = "SystemDefaultTlsVersions"; Value = 1; Type = "DWord" }
+    
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework"; Name = "AllowStrongNameBypass"; Value = 0; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework"; Name = "AllowStrongNameBypass"; Value = 0; Type = "DWord" }
+    
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp"; Name = "DefaultSecureProtocols"; Value = 2048; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp"; Name = "DefaultSecureProtocols"; Value = 2048; Type = "DWord" }
+)
+
+foreach ($target in $RegistryTargets) {
+    if (-not (Test-Path $target.Path)) {
+        New-Item -Path $target.Path -Force | Out-Null
+    }
+    Set-ItemProperty -Path $target.Path -Name $target.Name -Value $target.Value -Type $target.Type -Force | Out-Null
+}
+
 Write-Host "Schannel configuration applied. A system reboot is required to apply changes." -ForegroundColor Green
 ```
 
@@ -206,6 +266,40 @@ if (Test-Path $SSLConfigPath) {
 } else {
     Write-Host "    - Custom SSL configuration policies are not configured (Non-Compliant)." -ForegroundColor Red
     $NonCompliantCount++
+}
+
+# 3. Audit .NET and WinHTTP registry configurations
+$RegistryAudits = @(
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727"; Name = "SchUseStrongCrypto"; Value = 1 }
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727"; Name = "SystemDefaultTlsVersions"; Value = 1 }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727"; Name = "SchUseStrongCrypto"; Value = 1 }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727"; Name = "SystemDefaultTlsVersions"; Value = 1 }
+    
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319"; Name = "SchUseStrongCrypto"; Value = 1 }
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319"; Name = "SystemDefaultTlsVersions"; Value = 1 }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319"; Name = "SchUseStrongCrypto"; Value = 1 }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319"; Name = "SystemDefaultTlsVersions"; Value = 1 }
+    
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework"; Name = "AllowStrongNameBypass"; Value = 0 }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework"; Name = "AllowStrongNameBypass"; Value = 0 }
+    
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp"; Name = "DefaultSecureProtocols"; Value = 2048 }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp"; Name = "DefaultSecureProtocols"; Value = 2048 }
+)
+
+foreach ($target in $RegistryAudits) {
+    if (Test-Path $target.Path) {
+        $val = Get-ItemPropertyValue -Path $target.Path -Name $target.Name -ErrorAction SilentlyContinue
+        if ($val -eq $target.Value) {
+            Write-Host "    - Registry Setting: $($target.Path)\$($target.Name) is Compliant." -ForegroundColor Green
+        } else {
+            Write-Host "    - Registry Setting: $($target.Path)\$($target.Name) is Non-Compliant (Actual: '$val', Expected: '$($target.Value)')." -ForegroundColor Red
+            $NonCompliantCount++
+        }
+    } else {
+        Write-Host "    - Registry Key: $($target.Path) does not exist (Non-Compliant)." -ForegroundColor Red
+        $NonCompliantCount++
+    }
 }
 
 if ($NonCompliantCount -eq 0) {

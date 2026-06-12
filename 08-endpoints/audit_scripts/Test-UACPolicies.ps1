@@ -24,3 +24,13 @@ Write-Host "    - ConsentPromptBehaviorAdmin: $AdminVal (Required = 1 [Prompt fo
 Write-Host "    - ConsentPromptBehaviorUser: $UserVal (Required = 0 [Auto Deny])" -ForegroundColor $UserColor
 Write-Host "    - EnableLUA: $LuaVal (Required = 1)" -ForegroundColor $LuaColor
 Write-Host "    - PromptOnSecureDesktop: $SecureVal (Required = 1)" -ForegroundColor $SecureColor
+
+$SudoPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sudo"
+if (Test-Path $SudoPath) {
+    $SudoState = Get-ItemProperty -Path $SudoPath -Name "Enabled" -ErrorAction SilentlyContinue
+    $SudoVal = if ($SudoState) { $SudoState.Enabled } else { 0 }
+    $SudoColor = if ($SudoVal -eq 0 -or $SudoVal -eq 1) { "Green" } else { "Red" }
+    Write-Host "    - Sudo Command Enabled state: $SudoVal (Required = 1 [New Window] or 0 [Disabled])" -ForegroundColor $SudoColor
+} else {
+    Write-Host "    - Sudo Command Enabled state: Not Configured (Default/Compliant as it inherits disabled or default elevation window)." -ForegroundColor Green
+}
