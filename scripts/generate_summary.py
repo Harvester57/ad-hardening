@@ -3,15 +3,22 @@ import re
 
 def main():
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    readme_path = os.path.join(repo_root, 'README.md')
-    summary_path = os.path.join(repo_root, 'SUMMARY.md')
+    root_readme_path = os.path.join(repo_root, "README.md")
+    summary_path = os.path.join(repo_root, "SUMMARY.md")
     
-    if not os.path.exists(readme_path):
-        print(f"Error: {readme_path} not found.")
+    if not os.path.exists(root_readme_path):
+        print(f"Error: {root_readme_path} not found.")
         return
 
-    with open(readme_path, 'r', encoding='utf-8') as f:
+    with open(root_readme_path, "r", encoding="utf-8") as f:
         readme_content = f.read()
+
+    # Parse module directories in order (e.g. 01-architecture, 02-domain-controllers)
+    module_matches = re.findall(r'(\d{2}-[a-zA-Z0-9-]+)/README\.md', readme_content)
+    modules = []
+    for m in module_matches:
+        if m not in modules:
+            modules.append(m)
 
     summary_lines = [
         "# Summary",
@@ -20,46 +27,34 @@ def main():
         ""
     ]
 
-    # Regex to match module header line, e.g.:
-    # 1. **[Module 1: Architecture & Administrative Tiering](01-architecture/README.md)**
-    module_regex = re.compile(r'^\d+\.\s+\*\*\[(Module\s+\d+:\s+[^\]]+)\]\(([^)]+)\)\*\*')
-    
-    # Regex to match a hardening control link inside a module list, e.g.:
-    #      * [Restrict Tier Logons](01-architecture/restrict-tier-logons.md)
-    link_regex = re.compile(r'\[([^\]]+)\]\(([^)]+\.md)\)')
-
-    lines = readme_content.splitlines()
-    in_toc = False
-    
-    for line in lines:
-        stripped = line.strip()
-        # Find Table of Contents section
-        if stripped.startswith('### Table of Contents'):
-            in_toc = True
-            continue
-        # Stop parsing when we hit the Compliance Mapping Matrix or divider
-        if in_toc and (stripped.startswith('---') or stripped.startswith('## Compliance Mapping Matrix')):
-            in_toc = False
-            break
-            
-        if in_toc:
-            module_match = module_regex.match(stripped)
-            if module_match:
-                module_title = module_match.group(1)
-                module_path = module_match.group(2)
-                summary_lines.append(f"## {module_title}")
-                summary_lines.append(f"* [Overview]({module_path})")
-                continue
+    for module in modules:
+        module_readme = f"{module}/README.md"
+        module_readme_abs = os.path.join(repo_root, module_readme)
+        
+        if os.path.exists(module_readme_abs):
+            with open(module_readme_abs, "r", encoding="utf-8") as f:
+                content = f.read()
                 
-            # If it's a list item and contains a markdown link
-            if stripped.startswith('*') or stripped.startswith('-'):
-                link_match = link_regex.search(stripped)
-                if link_match:
-                    title = link_match.group(1)
-                    path = link_match.group(2)
-                    # Skip module README since we already added it as Overview
-                    if not path.endswith('README.md'):
-                        summary_lines.append(f"* [{title}]({path})")
+            # Parse module title from the first level-1 header
+            title_match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
+            module_title = title_match.group(1) if title_match else module
+            
+            summary_lines.append(f"## {module_title}")
+            summary_lines.append(f"* [Overview]({module_readme})")
+            
+            # Find all local markdown links in the module README
+            # e.g. [Link Text](disable-smbv1.md)
+            links = re.findall(r'\[([^\]]+)\]\(([^:\n)]+\.md)\)', content)
+            
+            added_files = set()
+            for text, link_path in links:
+                if link_path != "README.md" and link_path not in added_files:
+                    added_files.add(link_path)
+                    # Convert to path relative to repository root
+                    rel_path = f"{module}/{link_path}"
+                    summary_lines.append(f"* [{text}]({rel_path})")
+        else:
+            print(f"Warning: Module README {module_readme} not found.")
 
     # Add TEMPLATE.md at the end as an Appendix
     template_path = "TEMPLATE.md"

@@ -4,6 +4,7 @@
 
 ## Module 1: Architecture & Administrative Tiering
 * [Overview](01-architecture/README.md)
+* [Tiering and Architecture Overview](01-architecture/tiering-and-architecture.md)
 * [Restrict Tier Logons](01-architecture/restrict-tier-logons.md)
 * [Restrict Administrative Management Protocols](01-architecture/restrict-mgmt-protocols.md)
 * [Audit Privileged Groups](01-architecture/audit-privileged-groups.md)
@@ -93,12 +94,12 @@
 ## Module 8: Endpoint Hardening
 * [Overview](08-endpoints/README.md)
 * [Harden Network and Name Resolution](08-endpoints/harden-network-and-name-resolution.md)
-* [Configure UAC Policies](08-endpoints/configure-uac-policies.md)
+* [Configure User Account Control (UAC) Policies](08-endpoints/configure-uac-policies.md)
 * [Disable AutoPlay and AutoRun](08-endpoints/disable-autoplay-autorun.md)
 * [Block Removable Storage](08-endpoints/block-removable-storage.md)
 * [Restrict Remote Desktop (RDP) Access](08-endpoints/restrict-rdp-access.md)
 * [Restrict Local Administrators Group](08-endpoints/restrict-local-admins.md)
-* [Windows Defender Antivirus Offline Baseline](08-endpoints/defender-antivirus.md)
+* [Windows Defender Antivirus Baseline and Exploit Guard](08-endpoints/defender-antivirus.md)
 * [WSUS Client Configuration](08-endpoints/wsus-client-config.md)
 * [Enable Secure Boot](08-endpoints/enable-secure-boot.md)
 * [Enable VBS and Credential Guard](08-endpoints/enable-vbs-credential-guard.md)
