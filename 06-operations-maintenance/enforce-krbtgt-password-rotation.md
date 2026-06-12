@@ -10,6 +10,12 @@
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory Object Management (krbtgt account object in the Users container: `CN=krbtgt,CN=Users,DC=[Domain]`)
 
+> [!WARNING]
+> The `krbtgt` account password must be rotated periodically to limit the lifespan of potentially compromised Ticket Granting Tickets (TGTs).
+> * **Standard Frequency**: Reset the password at least every 180 days (semi-annually) in accordance with the DoD STIG requirement.
+> * **High-Security Frequency**: High-security baselines (such as the ANSSI Active Directory hardening guide) recommend rotating the password every 40 days in high-security environments.
+> * **Ad-Hoc Rotation**: Perform an immediate two-step rotation in the event of a suspected Active Directory compromise, or following the departure of key administrative staff with Tier 0 access.
+
 ---
 
 ## Rationale
