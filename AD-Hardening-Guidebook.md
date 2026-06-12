@@ -13,7 +13,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: a84956f | Generated: June 12, 2026</span>
+      <span>Commit: cec9754 | Generated: June 12, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -469,16 +469,12 @@ Use this script to configure local security database files via `secedit` to deny
 [Download Script: Set-LocalLogonRestrictions.ps1](implementation_scripts/Set-LocalLogonRestrictions.ps1)
 
 ```powershell
-<a id="01-architecture-restrict-tier-logons-md-set-locallogonrestrictionsps1"></a>
 # Set-LocalLogonRestrictions.ps1
-<a id="01-architecture-restrict-tier-logons-md-configures-secedit-user-rights-assignment-to-block-domain-administrative-groups"></a>
 # Configures secedit User Rights Assignment to block domain administrative groups.
 
-<a id="01-architecture-restrict-tier-logons-md-1-define-groups-to-block-tier-0-admin-groups"></a>
 # 1. Define groups to block (Tier 0 admin groups)
 $DenyGroups = @("Domain Admins", "Enterprise Admins", "Schema Admins")
 
-<a id="01-architecture-restrict-tier-logons-md-2-translate-group-names-to-sid-strings"></a>
 # 2. Translate group names to SID strings
 $SIDs = foreach ($group in $DenyGroups) {
     try {
@@ -494,17 +490,14 @@ if ($SIDs.Count -eq 0) {
     exit 1
 }
 
-<a id="01-architecture-restrict-tier-logons-md-3-define-the-temporary-paths-for-secedit-config"></a>
 # 3. Define the temporary paths for secedit config
 $tempDir = [System.IO.Path]::GetTempPath()
 $secConfigPath = Join-Path $tempDir "sec_config.inf"
 $secDbPath = Join-Path $tempDir "sec_db.sdb"
 
-<a id="01-architecture-restrict-tier-logons-md-4-export-current-local-security-policy"></a>
 # 4. Export current local security policy
 secedit /export /cfg $secConfigPath /areas USER_RIGHTS /quiet
 
-<a id="01-architecture-restrict-tier-logons-md-5-modify-exported-config-to-inject-our-deny-rules"></a>
 # 5. Modify exported config to inject our deny rules
 $configContent = Get-Content -Path $secConfigPath
 $NewContent = [System.Collections.Generic.List[string]]::new()
@@ -540,7 +533,6 @@ foreach ($line in $configContent) {
     }
 }
 
-<a id="01-architecture-restrict-tier-logons-md-insert-new-rules-into-privilege-rights-section"></a>
 # Insert new rules into [Privilege Rights] section
 $InsertIndex = $NewContent.FindIndex({ $args[0] -match '^\[Privilege Rights\]' })
 if ($InsertIndex -ge 0) {
@@ -552,16 +544,13 @@ if ($InsertIndex -ge 0) {
     }
 }
 
-<a id="01-architecture-restrict-tier-logons-md-save-new-configuration"></a>
 # Save new configuration
 $NewContent | Out-File -FilePath $secConfigPath -Encoding utf16
 
-<a id="01-architecture-restrict-tier-logons-md-6-apply-configuration-using-secedit"></a>
 # 6. Apply configuration using secedit
 Write-Host "Applying User Rights Assignment restrictions via secedit..." -ForegroundColor Cyan
 $process = Start-Process secedit -ArgumentList "/configure /db $secDbPath /cfg $secConfigPath /areas USER_RIGHTS /quiet" -Wait -NoNewWindow -PassThru
 
-<a id="01-architecture-restrict-tier-logons-md-cleanup-temporary-database-files"></a>
 # Cleanup temporary database files
 if (Test-Path $secConfigPath) { Remove-Item $secConfigPath -Force }
 if (Test-Path $secDbPath) { Remove-Item $secDbPath -Force }
@@ -577,9 +566,7 @@ if ($process.ExitCode -eq 0) {
 [Download Script: Test-LocalLogonRestrictions.ps1](audit_scripts/Test-LocalLogonRestrictions.ps1)
 
 ```powershell
-<a id="01-architecture-restrict-tier-logons-md-test-locallogonrestrictionsps1"></a>
 # Test-LocalLogonRestrictions.ps1
-<a id="01-architecture-restrict-tier-logons-md-audits-local-security-policies-to-check-if-sedeny-rights-are-populated"></a>
 # Audits local security policies to check if SeDeny rights are populated.
 
 Write-Host "--- Auditing Local User Rights Assignments ---" -ForegroundColor Cyan
@@ -587,7 +574,6 @@ Write-Host "--- Auditing Local User Rights Assignments ---" -ForegroundColor Cya
 $tempDir = [System.IO.Path]::GetTempPath()
 $secConfigPath = Join-Path $tempDir "sec_audit.inf"
 
-<a id="01-architecture-restrict-tier-logons-md-export-current-configuration"></a>
 # Export current configuration
 secedit /export /cfg $secConfigPath /areas USER_RIGHTS /quiet
 
@@ -686,18 +672,14 @@ Run the following scripts locally on a Domain Controller or member server to cre
 [Download Script: Set-AdminProtocolRestrictions.ps1](implementation_scripts/Set-AdminProtocolRestrictions.ps1)
 
 ```powershell
-<a id="01-architecture-restrict-mgmt-protocols-md-set-adminprotocolrestrictionsps1"></a>
 # Set-AdminProtocolRestrictions.ps1
-<a id="01-architecture-restrict-mgmt-protocols-md-creates-inbound-firewall-rules-to-restrict-rdp-and-winrm-to-designated-management-subnets"></a>
 # Creates inbound firewall rules to restrict RDP and WinRM to designated management subnets.
 
 Write-Host "--- Restricting Administrative Protocols Inbound ---" -ForegroundColor Cyan
 
-<a id="01-architecture-restrict-mgmt-protocols-md-define-the-authorized-administrative-network-subnet"></a>
 # Define the authorized administrative network subnet
 $AdminSubnet = "10.10.0.0/24" # Replace with your PAW / Jump Host subnet
 
-<a id="01-architecture-restrict-mgmt-protocols-md-1-restrict-rdp-tcp-port-3389-inbound"></a>
 # 1. Restrict RDP (TCP port 3389) Inbound
 $RdpRule = Get-NetFirewallRule -DisplayName "Remote Desktop - User Mode (TCP-In)" -ErrorAction SilentlyContinue
 if ($RdpRule) {
@@ -716,7 +698,6 @@ if ($RdpRule) {
     Write-Host "    Restricted RDP rule created." -ForegroundColor Green
 }
 
-<a id="01-architecture-restrict-mgmt-protocols-md-2-restrict-winrm-https-tcp-port-5986-inbound"></a>
 # 2. Restrict WinRM HTTPS (TCP port 5986) Inbound
 $WinRMRule = Get-NetFirewallRule -DisplayName "Windows Remote Management (HTTPS-In)" -ErrorAction SilentlyContinue
 if ($WinRMRule) {
@@ -740,9 +721,7 @@ if ($WinRMRule) {
 [Download Script: Test-AdminProtocolRestrictions.ps1](audit_scripts/Test-AdminProtocolRestrictions.ps1)
 
 ```powershell
-<a id="01-architecture-restrict-mgmt-protocols-md-test-adminprotocolrestrictionsps1"></a>
 # Test-AdminProtocolRestrictions.ps1
-<a id="01-architecture-restrict-mgmt-protocols-md-audits-local-firewall-rules-for-rdp-and-winrm-to-check-remote-address-restrictions"></a>
 # Audits local firewall rules for RDP and WinRM to check remote address restrictions.
 
 Write-Host "--- Auditing Administrative Port Firewall Rules ---" -ForegroundColor Cyan
@@ -841,9 +820,7 @@ Run this script from a secure administrative workstation to audit nested and dir
 [Download Script: Audit-ADAdminGroups.ps1](audit_scripts/Audit-ADAdminGroups.ps1)
 
 ```powershell
-<a id="01-architecture-audit-privileged-groups-md-audit-adadmingroupsps1"></a>
 # Audit-ADAdminGroups.ps1
-<a id="01-architecture-audit-privileged-groups-md-queries-memberships-of-privileged-tier-0-ad-groups-recursively"></a>
 # Queries memberships of privileged Tier 0 AD groups recursively.
 
 Import-Module ActiveDirectory
@@ -860,7 +837,6 @@ $Tier0Groups = @(
 
 Write-Host "--- Auditing Privileged AD Groups ---" -ForegroundColor Cyan
 
-<a id="01-architecture-audit-privileged-groups-md-define-the-list-of-explicitly-authorized-accounts-eg-emergency-break-glass-account"></a>
 # Define the list of explicitly authorized accounts (e.g. emergency break-glass account)
 $AuthorizedUsers = @("Administrator", "a0-breakglass")
 
@@ -892,15 +868,12 @@ foreach ($GroupName in $Tier0Groups) {
 [Download Script: Test-ADChangesAuditing.ps1](audit_scripts/Test-ADChangesAuditing.ps1)
 
 ```powershell
-<a id="01-architecture-audit-privileged-groups-md-test-adchangesauditingps1"></a>
 # Test-ADChangesAuditing.ps1
-<a id="01-architecture-audit-privileged-groups-md-audits-local-dc-auditpol-settings-to-verify-directory-service-auditing-is-enabled"></a>
 # Audits local DC auditpol settings to verify Directory Service auditing is enabled.
 
 Write-Host "--- Auditing Directory Service Audit Policy ---" -ForegroundColor Cyan
 
 $rawOutput = auditpol.exe /get /subcategory:"Directory Service Changes" /r
-<a id="01-architecture-audit-privileged-groups-md-parse-csv-output-machinesubcategoryguidpolicyval"></a>
 # Parse CSV output: Machine,Subcategory,GUID,PolicyVal
 if ($rawOutput -match "^.+,Directory Service Changes,.+,(.+)$") {
     $policyVal = $Matches[1]
@@ -991,9 +964,7 @@ Run the following scripts to audit and raise the functional levels.
 [Download Script: Audit-ADFunctionalLevels.ps1](audit_scripts/Audit-ADFunctionalLevels.ps1)
 
 ```powershell
-<a id="01-architecture-keep-functional-levels-up-to-date-md-audit-adfunctionallevelsps1"></a>
 # Audit-ADFunctionalLevels.ps1
-<a id="01-architecture-keep-functional-levels-up-to-date-md-description-audits-the-current-domain-and-forest-functional-levels"></a>
 # Description: Audits the current domain and forest functional levels.
 
 Import-Module ActiveDirectory
@@ -1035,9 +1006,7 @@ if ($Domain -and $Forest) {
 [Download Script: Set-ADFunctionalLevels.ps1](implementation_scripts/Set-ADFunctionalLevels.ps1)
 
 ```powershell
-<a id="01-architecture-keep-functional-levels-up-to-date-md-set-adfunctionallevelsps1"></a>
 # Set-ADFunctionalLevels.ps1
-<a id="01-architecture-keep-functional-levels-up-to-date-md-description-raises-domain-and-forest-functional-levels-to-windows-server-2016"></a>
 # Description: Raises Domain and Forest Functional Levels to Windows Server 2016.
 
 Import-Module ActiveDirectory
@@ -1052,7 +1021,6 @@ if (-not $Domain -or -not $Forest) {
     exit 1
 }
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-raise-domain-functional-level"></a>
 # Raise Domain Functional Level
 if ($Domain.DomainMode -lt [Microsoft.ActiveDirectory.Management.ADDomainMode]::Windows2016Domain) {
     try {
@@ -1065,7 +1033,6 @@ if ($Domain.DomainMode -lt [Microsoft.ActiveDirectory.Management.ADDomainMode]::
     Write-Host "Domain Functional Level is already Windows Server 2016 or higher." -ForegroundColor Green
 }
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-raise-forest-functional-level"></a>
 # Raise Forest Functional Level
 if ($Forest.ForestMode -lt [Microsoft.ActiveDirectory.Management.ADForestMode]::Windows2016Forest) {
     try {
@@ -1158,9 +1125,7 @@ Run the following scripts to audit and set up the GPO structure.
 [Download Script: Audit-GPOPrecedence.ps1](audit_scripts/Audit-GPOPrecedence.ps1)
 
 ```powershell
-<a id="01-architecture-default-policies-recommendations-md-audit-gpoprecedenceps1"></a>
 # Audit-GPOPrecedence.ps1
-<a id="01-architecture-default-policies-recommendations-md-description-verifies-that-a-dedicated-hardening-gpo-exists-with-higher-precedence-than-default-dc-policy"></a>
 # Description: Verifies that a dedicated hardening GPO exists with higher precedence than Default DC Policy.
 
 Import-Module ActiveDirectory
@@ -1208,9 +1173,7 @@ try {
 [Download Script: Set-ADModularGPO.ps1](implementation_scripts/Set-ADModularGPO.ps1)
 
 ```powershell
-<a id="01-architecture-default-policies-recommendations-md-set-admodulargpops1"></a>
 # Set-ADModularGPO.ps1
-<a id="01-architecture-default-policies-recommendations-md-description-creates-a-new-dedicated-domain-controllers-hardening-gpo-and-links-it-with-top-precedence"></a>
 # Description: Creates a new, dedicated Domain Controllers hardening GPO and links it with top precedence.
 
 Import-Module ActiveDirectory
@@ -1331,29 +1294,23 @@ Run the following script block to audit and harden trust relationships. The `net
 [Download Script: Set-ADTrustHardening.ps1](implementation_scripts/Set-ADTrustHardening.ps1)
 
 ```powershell
-<a id="01-architecture-harden-domain-trusts-md-set-adtrusthardeningps1"></a>
 # Set-ADTrustHardening.ps1
-<a id="01-architecture-harden-domain-trusts-md-description-hardens-trust-relationships-by-disabling-sid-history-and-tgt-delegation-and-enabling-quarantine"></a>
 # Description: Hardens trust relationships by disabling SID History and TGT Delegation, and enabling Quarantine.
 
 Write-Host "Applying hardening requirement: Harden Active Directory Domain Trusts..." -ForegroundColor Cyan
 
-<a id="01-architecture-harden-domain-trusts-md-set-target-trust-variables-replace-with-your-domain-names"></a>
 # Set target trust variables (replace with your domain names)
 $TrustingDomain = "corp.local"
 $TrustedDomain = "partner.local"
 
-<a id="01-architecture-harden-domain-trusts-md-1-disable-sid-history-on-forestexternal-trust"></a>
 # 1. Disable SID History on Forest/External Trust
 Write-Host "Disabling SID History on trust from $($TrustingDomain) to $($TrustedDomain)..." -ForegroundColor White
 netdom trust $TrustingDomain /domain:$TrustedDomain /EnableSIDHistory:no
 
-<a id="01-architecture-harden-domain-trusts-md-2-enable-quarantine-sid-filtering-on-external-domain-trust"></a>
 # 2. Enable Quarantine (SID Filtering) on External Domain Trust
 Write-Host "Enabling Quarantine on trust from $($TrustingDomain) to $($TrustedDomain)..." -ForegroundColor White
 netdom trust $TrustingDomain /domain:$TrustedDomain /Quarantine:yes
 
-<a id="01-architecture-harden-domain-trusts-md-3-disable-tgt-delegation-over-inbound-trust"></a>
 # 3. Disable TGT Delegation over Inbound Trust
 Write-Host "Disabling Kerberos TGT Delegation on trust from $($TrustingDomain) to $($TrustedDomain)..." -ForegroundColor White
 netdom trust $TrustingDomain /domain:$TrustedDomain /EnableTGTDelegation:no
@@ -1365,9 +1322,7 @@ Write-Host "Trust hardening commands executed." -ForegroundColor Green
 [Download Script: Get-ADTrustStatus.ps1](audit_scripts/Get-ADTrustStatus.ps1)
 
 ```powershell
-<a id="01-architecture-harden-domain-trusts-md-get-adtruststatusps1"></a>
 # Get-ADTrustStatus.ps1
-<a id="01-architecture-harden-domain-trusts-md-description-audits-trust-attributes-and-configuration-settings"></a>
 # Description: Audits trust attributes and configuration settings.
 
 Import-Module ActiveDirectory
@@ -1549,14 +1504,11 @@ Use this method to apply the setting locally or if the control is not manageable
 [Download Script: Configure-DisableSMBv1.ps1](implementation_scripts/Configure-DisableSMBv1.ps1)
 
 ```powershell
-<a id="02-domain-controllers-disable-smbv1-md-configure-disablesmbv1ps1"></a>
 # Configure-DisableSMBv1.ps1
-<a id="02-domain-controllers-disable-smbv1-md-description-disables-smbv1-server-protocol-and-mrxsmb10-client-driver"></a>
 # Description: Disables SMBv1 server protocol and mrxsmb10 client driver.
 
 Write-Host "Applying hardening requirement: Disable SMBv1..." -ForegroundColor Cyan
 
-<a id="02-domain-controllers-disable-smbv1-md-1-disable-smbv1-server"></a>
 # 1. Disable SMBv1 Server
 $srvRegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
 if (-not (Test-Path $srvRegPath)) {
@@ -1565,14 +1517,12 @@ if (-not (Test-Path $srvRegPath)) {
 Set-ItemProperty -Path $srvRegPath -Name "SMB1" -Value 0 -Type DWord
 Write-Host "SMBv1 Server registry configuration applied." -ForegroundColor Green
 
-<a id="02-domain-controllers-disable-smbv1-md-use-standard-cmdlet-if-available"></a>
 # Use standard cmdlet if available
 if (Get-Command -Name Set-SmbServerConfiguration -ErrorAction SilentlyContinue) {
     Set-SmbServerConfiguration -EnableSMB1Protocol $false -Force
     Write-Host "SMBv1 Server protocol disabled via cmdlet." -ForegroundColor Green
 }
 
-<a id="02-domain-controllers-disable-smbv1-md-2-disable-smbv1-client-driver"></a>
 # 2. Disable SMBv1 Client Driver
 $clientRegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10"
 if (Test-Path $clientRegPath) {
@@ -1589,15 +1539,12 @@ Write-Host "Hardening applied successfully. A system reboot is required." -Foreg
 [Download Script: Get-SMBv1Status.ps1](audit_scripts/Get-SMBv1Status.ps1)
 
 ```powershell
-<a id="02-domain-controllers-disable-smbv1-md-get-smbv1statusps1"></a>
 # Get-SMBv1Status.ps1
-<a id="02-domain-controllers-disable-smbv1-md-description-audits-the-registry-configuration-of-smbv1-server-and-client-components"></a>
 # Description: Audits the registry configuration of SMBv1 server and client components.
 
 Write-Host "--- Auditing SMBv1 Configuration ---" -ForegroundColor Cyan
 $vulnerable = $false
 
-<a id="02-domain-controllers-disable-smbv1-md-check-server-configuration"></a>
 # Check Server configuration
 if (Get-Command -Name Get-SmbServerConfiguration -ErrorAction SilentlyContinue) {
     $smbConfig = Get-SmbServerConfiguration
@@ -1617,7 +1564,6 @@ if (Get-Command -Name Get-SmbServerConfiguration -ErrorAction SilentlyContinue) 
     }
 }
 
-<a id="02-domain-controllers-disable-smbv1-md-check-client-configuration"></a>
 # Check Client configuration
 $driverReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10" -Name "Start" -ErrorAction SilentlyContinue
 if ($driverReg -and $driverReg.Start -ne 4) {
@@ -1733,14 +1679,11 @@ Use this method to apply the settings locally.
 [Download Script: Configure-DisableMulticastNameResolution.ps1](implementation_scripts/Configure-DisableMulticastNameResolution.ps1)
 
 ```powershell
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-configure-disablemulticastnameresolutionps1"></a>
 # Configure-DisableMulticastNameResolution.ps1
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-description-disables-llmnr-netbios-over-tcpip-and-mdns-on-all-interfaces"></a>
 # Description: Disables LLMNR, NetBIOS over TCP/IP, and mDNS on all interfaces.
 
 Write-Host "Applying hardening requirement: Disable Multicast Name Resolution..." -ForegroundColor Cyan
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-1-disable-llmnr"></a>
 # 1. Disable LLMNR
 $llmnrPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient"
 if (-not (Test-Path $llmnrPath)) {
@@ -1749,7 +1692,6 @@ if (-not (Test-Path $llmnrPath)) {
 Set-ItemProperty -Path $llmnrPath -Name "EnableMulticast" -Value 0 -Type DWord
 Write-Host "LLMNR disabled via registry policy." -ForegroundColor Green
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-2-disable-mdns"></a>
 # 2. Disable mDNS
 $mdnsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters"
 if (-not (Test-Path $mdnsPath)) {
@@ -1758,7 +1700,6 @@ if (-not (Test-Path $mdnsPath)) {
 Set-ItemProperty -Path $mdnsPath -Name "EnableMDNS" -Value 0 -Type DWord
 Write-Host "mDNS disabled via registry." -ForegroundColor Green
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-3-disable-netbios-over-tcpip-on-all-network-adapters"></a>
 # 3. Disable NetBIOS over TCP/IP on all Network Adapters
 $interfacesPath = "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces"
 if (Test-Path $interfacesPath) {
@@ -1781,15 +1722,12 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green
 [Download Script: Get-MulticastNameResolutionStatus.ps1](audit_scripts/Get-MulticastNameResolutionStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-get-multicastnameresolutionstatusps1"></a>
 # Get-MulticastNameResolutionStatus.ps1
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-description-audits-llmnr-netbios-and-mdns-registry-settings"></a>
 # Description: Audits LLMNR, NetBIOS, and mDNS registry settings.
 
 Write-Host "--- Auditing Multicast Name Resolution ---" -ForegroundColor Cyan
 $vulnerable = $false
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-1-audit-llmnr"></a>
 # 1. Audit LLMNR
 $llmnrReg = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" -Name "EnableMulticast" -ErrorAction SilentlyContinue
 if ($llmnrReg) {
@@ -1804,7 +1742,6 @@ if ($llmnrReg) {
     $vulnerable = $true
 }
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-2-audit-mdns"></a>
 # 2. Audit mDNS
 $mdnsReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" -Name "EnableMDNS" -ErrorAction SilentlyContinue
 if ($mdnsReg) {
@@ -1820,7 +1757,6 @@ if ($mdnsReg) {
     $vulnerable = $true
 }
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-3-audit-netbios-over-tcpip"></a>
 # 3. Audit NetBIOS over TCP/IP
 $interfacesPath = "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces"
 if (Test-Path $interfacesPath) {
@@ -1930,9 +1866,7 @@ Use this method to apply the setting locally.
 [Download Script: Configure-DisableNTLMv1.ps1](implementation_scripts/Configure-DisableNTLMv1.ps1)
 
 ```powershell
-<a id="02-domain-controllers-disable-ntlmv1-md-configure-disablentlmv1ps1"></a>
 # Configure-DisableNTLMv1.ps1
-<a id="02-domain-controllers-disable-ntlmv1-md-description-restricts-ntlm-authentication-to-ntlmv2-and-refuses-ntlmv1-lm"></a>
 # Description: Restricts NTLM authentication to NTLMv2 and refuses NTLMv1 / LM.
 
 Write-Host "Applying hardening requirement: Disable NTLMv1..." -ForegroundColor Cyan
@@ -1950,9 +1884,7 @@ Write-Host "LM Compatibility Level set to 5 (Send NTLMv2 response only. Refuse L
 [Download Script: Get-NTLMv1Status.ps1](audit_scripts/Get-NTLMv1Status.ps1)
 
 ```powershell
-<a id="02-domain-controllers-disable-ntlmv1-md-get-ntlmv1statusps1"></a>
 # Get-NTLMv1Status.ps1
-<a id="02-domain-controllers-disable-ntlmv1-md-description-audits-the-lm-compatibility-level-setting-in-the-registry"></a>
 # Description: Audits the LM Compatibility Level setting in the registry.
 
 Write-Host "--- Auditing NTLMv1 Restriction ---" -ForegroundColor Cyan
@@ -2047,9 +1979,7 @@ Use this method to apply the setting locally.
 [Download Script: Configure-LDAPSigning.ps1](implementation_scripts/Configure-LDAPSigning.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enforce-ldap-signing-md-configure-ldapsigningps1"></a>
 # Configure-LDAPSigning.ps1
-<a id="02-domain-controllers-enforce-ldap-signing-md-description-configures-the-ldap-server-signing-requirement-to-require-signing"></a>
 # Description: Configures the LDAP server signing requirement to Require Signing.
 
 Write-Host "Applying hardening requirement: Enforce LDAP Server Signing..." -ForegroundColor Cyan
@@ -2067,9 +1997,7 @@ Write-Host "LDAP Server Integrity set to 2 (Require Signing)." -ForegroundColor 
 [Download Script: Get-LDAPSigningStatus.ps1](audit_scripts/Get-LDAPSigningStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enforce-ldap-signing-md-get-ldapsigningstatusps1"></a>
 # Get-LDAPSigningStatus.ps1
-<a id="02-domain-controllers-enforce-ldap-signing-md-description-audits-the-ldap-server-signing-configuration-in-the-registry"></a>
 # Description: Audits the LDAP server signing configuration in the registry.
 
 Write-Host "--- Auditing LDAP Server Signing ---" -ForegroundColor Cyan
@@ -2164,9 +2092,7 @@ Use this method to apply the setting locally.
 [Download Script: Configure-LDAPChannelBinding.ps1](implementation_scripts/Configure-LDAPChannelBinding.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-configure-ldapchannelbindingps1"></a>
 # Configure-LDAPChannelBinding.ps1
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-description-enforces-ldap-channel-binding-token-requirements-to-always"></a>
 # Description: Enforces LDAP Channel Binding Token requirements to Always.
 
 Write-Host "Applying hardening requirement: Enforce LDAP Channel Binding..." -ForegroundColor Cyan
@@ -2184,9 +2110,7 @@ Write-Host "LDAP Channel Binding requirements set to 2 (Always)." -ForegroundCol
 [Download Script: Get-LDAPChannelBindingStatus.ps1](audit_scripts/Get-LDAPChannelBindingStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-get-ldapchannelbindingstatusps1"></a>
 # Get-LDAPChannelBindingStatus.ps1
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-description-audits-the-ldap-channel-binding-token-configuration-in-the-registry"></a>
 # Description: Audits the LDAP Channel Binding Token configuration in the registry.
 
 Write-Host "--- Auditing LDAP Channel Binding ---" -ForegroundColor Cyan
@@ -2282,9 +2206,7 @@ Use this method to apply the setting locally.
 [Download Script: Configure-LSAProtection.ps1](implementation_scripts/Configure-LSAProtection.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enable-lsa-protection-md-configure-lsaprotectionps1"></a>
 # Configure-LSAProtection.ps1
-<a id="02-domain-controllers-enable-lsa-protection-md-description-enables-lsa-protection-runasppl-in-the-registry"></a>
 # Description: Enables LSA Protection (RunAsPPL) in the registry.
 
 Write-Host "Applying hardening requirement: Enable LSA Protection..." -ForegroundColor Cyan
@@ -2302,9 +2224,7 @@ Write-Host "LSA Protection registry configuration applied. A reboot is required 
 [Download Script: Get-LSAProtectionStatus.ps1](audit_scripts/Get-LSAProtectionStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enable-lsa-protection-md-get-lsaprotectionstatusps1"></a>
 # Get-LSAProtectionStatus.ps1
-<a id="02-domain-controllers-enable-lsa-protection-md-description-audits-lsa-protection-runasppl-in-the-registry"></a>
 # Description: Audits LSA Protection (RunAsPPL) in the registry.
 
 Write-Host "--- Auditing LSA Protection ---" -ForegroundColor Cyan
@@ -2413,14 +2333,11 @@ Use this method to apply the settings locally.
 [Download Script: Configure-CredentialGuard.ps1](implementation_scripts/Configure-CredentialGuard.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enable-credential-guard-md-configure-credentialguardps1"></a>
 # Configure-CredentialGuard.ps1
-<a id="02-domain-controllers-enable-credential-guard-md-description-enables-virtualization-based-security-vbs-and-credential-guard-in-the-registry"></a>
 # Description: Enables Virtualization-Based Security (VBS) and Credential Guard in the registry.
 
 Write-Host "Applying hardening requirement: Enable Credential Guard and VBS Baseline..." -ForegroundColor Cyan
 
-<a id="02-domain-controllers-enable-credential-guard-md-1-enable-virtualization-based-security-and-related-hypervisor-options"></a>
 # 1. Enable Virtualization-Based Security and related hypervisor options
 $vbsPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard"
 if (-not (Test-Path $vbsPath)) {
@@ -2440,7 +2357,6 @@ foreach ($Setting in $vbsSettings.Keys) {
 }
 Write-Host "Virtualization-Based Security parameters enabled in registry." -ForegroundColor Green
 
-<a id="02-domain-controllers-enable-credential-guard-md-2-configure-credential-guard-lsacfgflags-1-uefi-lock-2-no-uefi-lock"></a>
 # 2. Configure Credential Guard (LsaCfgFlags: 1 = UEFI Lock, 2 = No UEFI Lock)
 $lsaPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
 if (-not (Test-Path $lsaPath)) {
@@ -2456,15 +2372,12 @@ Write-Host "Hardening applied successfully. A system reboot is required." -Foreg
 [Download Script: Get-CredentialGuardStatus.ps1](audit_scripts/Get-CredentialGuardStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enable-credential-guard-md-get-credentialguardstatusps1"></a>
 # Get-CredentialGuardStatus.ps1
-<a id="02-domain-controllers-enable-credential-guard-md-description-audits-the-configuration-and-operational-status-of-credential-guard"></a>
 # Description: Audits the configuration and operational status of Credential Guard.
 
 Write-Host "--- Auditing Credential Guard ---" -ForegroundColor Cyan
 $vulnerable = $false
 
-<a id="02-domain-controllers-enable-credential-guard-md-1-audit-registry-settings"></a>
 # 1. Audit Registry Settings
 $vbsRegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard"
 $lsaReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa" -Name "LsaCfgFlags" -ErrorAction SilentlyContinue
@@ -2501,7 +2414,6 @@ if ($lsaReg -and ($lsaReg.LsaCfgFlags -eq 1 -or $lsaReg.LsaCfgFlags -eq 2)) {
     $vulnerable = $true
 }
 
-<a id="02-domain-controllers-enable-credential-guard-md-2-audit-wmi-operational-state-if-running"></a>
 # 2. Audit WMI Operational State (if running)
 $deviceGuard = Get-CimInstance -Namespace "root\cimv2" -ClassName "Win32_DeviceGuard" -ErrorAction SilentlyContinue
 if ($deviceGuard) {
@@ -2615,9 +2527,7 @@ Use this method to apply the setting locally.
 [Download Script: Configure-DisablePrintSpooler.ps1](implementation_scripts/Configure-DisablePrintSpooler.ps1)
 
 ```powershell
-<a id="02-domain-controllers-disable-print-spooler-md-configure-disableprintspoolerps1"></a>
 # Configure-DisablePrintSpooler.ps1
-<a id="02-domain-controllers-disable-print-spooler-md-description-stops-and-disables-the-print-spooler-service"></a>
 # Description: Stops and disables the Print Spooler service.
 
 Write-Host "Applying hardening requirement: Disable Print Spooler..." -ForegroundColor Cyan
@@ -2643,9 +2553,7 @@ if ($service) {
 [Download Script: Get-PrintSpoolerStatus.ps1](audit_scripts/Get-PrintSpoolerStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-disable-print-spooler-md-get-printspoolerstatusps1"></a>
 # Get-PrintSpoolerStatus.ps1
-<a id="02-domain-controllers-disable-print-spooler-md-description-audits-the-operational-status-and-startup-type-of-the-print-spooler-service"></a>
 # Description: Audits the operational status and startup type of the Print Spooler service.
 
 Write-Host "--- Auditing Print Spooler Service ---" -ForegroundColor Cyan
@@ -2750,14 +2658,11 @@ Use this method to apply the settings locally.
 [Download Script: Configure-SMBSigning.ps1](implementation_scripts/Configure-SMBSigning.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enforce-smb-signing-md-configure-smbsigningps1"></a>
 # Configure-SMBSigning.ps1
-<a id="02-domain-controllers-enforce-smb-signing-md-description-enforces-smb-signing-for-both-smb-server-and-client"></a>
 # Description: Enforces SMB signing for both SMB server and client.
 
 Write-Host "Applying hardening requirement: Enforce SMB Message Signing..." -ForegroundColor Cyan
 
-<a id="02-domain-controllers-enforce-smb-signing-md-1-enforce-server-smb-signing"></a>
 # 1. Enforce Server SMB Signing
 $srvRegPath = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
 if (-not (Test-Path $srvRegPath)) {
@@ -2766,7 +2671,6 @@ if (-not (Test-Path $srvRegPath)) {
 Set-ItemProperty -Path $srvRegPath -Name "RequireSecuritySignature" -Value 1 -Type DWord
 Write-Host "SMB Server signing (always) enabled." -ForegroundColor Green
 
-<a id="02-domain-controllers-enforce-smb-signing-md-2-enforce-client-smb-signing"></a>
 # 2. Enforce Client SMB Signing
 $cliRegPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
 if (-not (Test-Path $cliRegPath)) {
@@ -2780,15 +2684,12 @@ Write-Host "SMB Client signing (always) enabled." -ForegroundColor Green
 [Download Script: Get-SMBSigningStatus.ps1](audit_scripts/Get-SMBSigningStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enforce-smb-signing-md-get-smbsigningstatusps1"></a>
 # Get-SMBSigningStatus.ps1
-<a id="02-domain-controllers-enforce-smb-signing-md-description-audits-the-registry-settings-for-smb-server-and-client-signing"></a>
 # Description: Audits the registry settings for SMB server and client signing.
 
 Write-Host "--- Auditing SMB Message Signing ---" -ForegroundColor Cyan
 $vulnerable = $false
 
-<a id="02-domain-controllers-enforce-smb-signing-md-1-audit-server-side-smb-signing"></a>
 # 1. Audit Server-side SMB Signing
 $srvReg = Get-ItemProperty -Path "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters" -Name "RequireSecuritySignature" -ErrorAction SilentlyContinue
 if ($srvReg -and $srvReg.RequireSecuritySignature -eq 1) {
@@ -2798,7 +2699,6 @@ if ($srvReg -and $srvReg.RequireSecuritySignature -eq 1) {
     $vulnerable = $true
 }
 
-<a id="02-domain-controllers-enforce-smb-signing-md-2-audit-client-side-smb-signing"></a>
 # 2. Audit Client-side SMB Signing
 $cliReg = Get-ItemProperty -Path "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters" -Name "RequireSecuritySignature" -ErrorAction SilentlyContinue
 if ($cliReg -and $cliReg.RequireSecuritySignature -eq 1) {
@@ -2897,9 +2797,7 @@ Use this method to apply the setting locally.
 [Download Script: Configure-KerberosEncryptionTypes.ps1](implementation_scripts/Configure-KerberosEncryptionTypes.ps1)
 
 ```powershell
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-configure-kerberosencryptiontypesps1"></a>
 # Configure-KerberosEncryptionTypes.ps1
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-description-restricts-kerberos-encryption-types-to-aes128-aes256-and-future-types"></a>
 # Description: Restricts Kerberos encryption types to AES128, AES256, and Future types.
 
 Write-Host "Applying hardening requirement: Restrict Kerberos Encryption Types..." -ForegroundColor Cyan
@@ -2909,7 +2807,6 @@ if (-not (Test-Path $regPath)) {
     New-Item -Path $regPath -Force | Out-Null
 }
 
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-2147483640-0x7ffffff8-enables-aes128-aes256-and-future-encryption-types"></a>
 # 2147483640 (0x7FFFFFF8) enables AES128, AES256, and Future encryption types
 Set-ItemProperty -Path $regPath -Name "SupportedEncryptionTypes" -Value 2147483640 -Type DWord
 Write-Host "Kerberos encryption types restricted to AES and future types." -ForegroundColor Green
@@ -2919,9 +2816,7 @@ Write-Host "Kerberos encryption types restricted to AES and future types." -Fore
 [Download Script: Get-KerberosEncryptionStatus.ps1](audit_scripts/Get-KerberosEncryptionStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-get-kerberosencryptionstatusps1"></a>
 # Get-KerberosEncryptionStatus.ps1
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-description-audits-the-allowed-kerberos-encryption-types-in-the-registry"></a>
 # Description: Audits the allowed Kerberos encryption types in the registry.
 
 Write-Host "--- Auditing Kerberos Encryption Types ---" -ForegroundColor Cyan
@@ -3026,9 +2921,7 @@ Use this method to apply the setting locally.
 [Download Script: Configure-RestrictRemoteSAM.ps1](implementation_scripts/Configure-RestrictRemoteSAM.ps1)
 
 ```powershell
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-configure-restrictremotesamps1"></a>
 # Configure-RestrictRemoteSAM.ps1
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-description-restricts-remote-rpc-access-to-the-sam-database-to-local-administrators"></a>
 # Description: Restricts remote RPC access to the SAM database to local Administrators.
 
 Write-Host "Applying hardening requirement: Restrict Remote SAM API Access..." -ForegroundColor Cyan
@@ -3047,9 +2940,7 @@ Write-Host "SAM remote API access restricted to Administrators (SDDL applied)." 
 [Download Script: Get-RestrictRemoteSAMStatus.ps1](audit_scripts/Get-RestrictRemoteSAMStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-get-restrictremotesamstatusps1"></a>
 # Get-RestrictRemoteSAMStatus.ps1
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-description-audits-the-restrictremotesam-registry-value"></a>
 # Description: Audits the RestrictRemoteSAM registry value.
 
 Write-Host "--- Auditing RestrictRemoteSAM ---" -ForegroundColor Cyan
@@ -3268,9 +3159,7 @@ Run the following script to configure the registry settings and stop the service
 [Download Script: Configure-DisableUnnecessaryServices.ps1](implementation_scripts/Configure-DisableUnnecessaryServices.ps1)
 
 ```powershell
-<a id="02-domain-controllers-disable-unnecessary-services-md-configure-disableunnecessaryservicesps1"></a>
 # Configure-DisableUnnecessaryServices.ps1
-<a id="02-domain-controllers-disable-unnecessary-services-md-description-stops-and-disables-unnecessary-services-on-domain-controllers"></a>
 # Description: Stops and disables unnecessary services on Domain Controllers.
 
 Write-Host "Applying hardening requirement: Disable Unnecessary Services on Domain Controllers..." -ForegroundColor Cyan
@@ -3348,9 +3237,7 @@ Write-Host "Remediation completed successfully." -ForegroundColor Cyan
 [Download Script: Get-UnnecessaryServicesStatus.ps1](audit_scripts/Get-UnnecessaryServicesStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-disable-unnecessary-services-md-get-unnecessaryservicesstatusps1"></a>
 # Get-UnnecessaryServicesStatus.ps1
-<a id="02-domain-controllers-disable-unnecessary-services-md-description-audits-the-registry-startup-state-of-unnecessary-system-services"></a>
 # Description: Audits the registry startup state of unnecessary system services.
 
 Write-Host "--- Auditing Unnecessary Services on Domain Controllers ---" -ForegroundColor Cyan
@@ -3524,9 +3411,7 @@ Use this method to apply the setting locally (for testing or standalone systems)
 [Download Script: Configure-KerberosArmoring.ps1](implementation_scripts/Configure-KerberosArmoring.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enable-kerberos-armoring-md-configure-kerberosarmoringps1"></a>
 # Configure-KerberosArmoring.ps1
-<a id="02-domain-controllers-enable-kerberos-armoring-md-description-configures-kerberos-armoring-fast-registry-settings-on-domain-controllers-and-clients"></a>
 # Description: Configures Kerberos Armoring (FAST) registry settings on Domain Controllers and clients.
 
 Write-Host "Applying hardening requirement: Enable Kerberos Armoring (FAST)..." -ForegroundColor Cyan
@@ -3534,7 +3419,6 @@ Write-Host "Applying hardening requirement: Enable Kerberos Armoring (FAST)..." 
 $ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
 $KdcRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters"
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-configure-client-side-setting-applicable-to-all-systems-including-dcs"></a>
 # Configure client-side setting (applicable to all systems, including DCs)
 if (-not (Test-Path $ClientRegPath)) {
     New-Item -Path $ClientRegPath -Force | Out-Null
@@ -3542,7 +3426,6 @@ if (-not (Test-Path $ClientRegPath)) {
 Set-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -Value 1 -Type DWord
 Write-Host "Client-side Kerberos Armoring enabled successfully." -ForegroundColor Green
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-determine-if-the-host-is-a-domain-controller"></a>
 # Determine if the host is a Domain Controller
 $DomainRole = (Get-CimInstance -ClassName Win32_ComputerSystem).DomainRole
 $IsDC = ($DomainRole -eq 4) -or ($DomainRole -eq 5)
@@ -3564,9 +3447,7 @@ if ($IsDC) {
 [Download Script: Get-KerberosArmoringStatus.ps1](audit_scripts/Get-KerberosArmoringStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enable-kerberos-armoring-md-get-kerberosarmoringstatusps1"></a>
 # Get-KerberosArmoringStatus.ps1
-<a id="02-domain-controllers-enable-kerberos-armoring-md-description-audits-the-kerberos-armoring-fast-configuration-on-dcs-and-clients"></a>
 # Description: Audits the Kerberos Armoring (FAST) configuration on DCs and clients.
 
 Write-Host "--- Auditing Kerberos Armoring (FAST) Configuration ---" -ForegroundColor Cyan
@@ -3576,7 +3457,6 @@ $IsDC = ($DomainRole -eq 4) -or ($DomainRole -eq 5)
 $ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
 $KdcRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters"
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-1-audit-client-side-support"></a>
 # 1. Audit Client-side support
 $ClientValue = Get-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -ErrorAction SilentlyContinue
 
@@ -3591,7 +3471,6 @@ if ($null -ne $ClientValue) {
     Write-Host "[!] Client-side Kerberos Armoring configuration is MISSING (Disabled by default)." -ForegroundColor Red
 }
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-2-audit-kdc-support-if-domain-controller"></a>
 # 2. Audit KDC support if Domain Controller
 if ($IsDC) {
     Write-Host "Domain Controller detected. Auditing KDC support..." -ForegroundColor Cyan
@@ -3717,9 +3596,7 @@ Use this method to apply the setting locally (for testing or standalone systems)
 [Download Script: Configure-RestrictNTLM.ps1](implementation_scripts/Configure-RestrictNTLM.ps1)
 
 ```powershell
-<a id="02-domain-controllers-restrict-ntlm-md-configure-restrictntlmps1"></a>
 # Configure-RestrictNTLM.ps1
-<a id="02-domain-controllers-restrict-ntlm-md-description-configures-local-registry-values-to-enforce-ntlm-restrictions-and-auditing"></a>
 # Description: Configures local registry values to enforce NTLM restrictions and auditing.
 
 Write-Host "Applying hardening requirement: Restrict NTLM..." -ForegroundColor Cyan
@@ -3727,7 +3604,6 @@ Write-Host "Applying hardening requirement: Restrict NTLM..." -ForegroundColor C
 $LsaPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0"
 $NetlogonPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters"
 
-<a id="02-domain-controllers-restrict-ntlm-md-ensure-lsa-msv1-0-path-exists-and-apply-settings"></a>
 # Ensure LSA MSV1_0 path exists and apply settings
 if (-not (Test-Path $LsaPath)) {
     New-Item -Path $LsaPath -Force | Out-Null
@@ -3737,7 +3613,6 @@ Set-ItemProperty -Path $LsaPath -Name "AuditReceivingNTLMTraffic" -Value 2 -Type
 Set-ItemProperty -Path $LsaPath -Name "RestrictReceivingNTLMTraffic" -Value 2 -Type DWord
 Set-ItemProperty -Path $LsaPath -Name "RestrictSendingNTLMTraffic" -Value 2 -Type DWord
 
-<a id="02-domain-controllers-restrict-ntlm-md-ensure-netlogon-parameters-path-exists-and-apply-settings"></a>
 # Ensure Netlogon Parameters path exists and apply settings
 if (-not (Test-Path $NetlogonPath)) {
     New-Item -Path $NetlogonPath -Force | Out-Null
@@ -3753,9 +3628,7 @@ Write-Host "NTLM restriction registry configurations applied successfully." -For
 [Download Script: Get-RestrictNTLMStatus.ps1](audit_scripts/Get-RestrictNTLMStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-restrict-ntlm-md-get-restrictntlmstatusps1"></a>
 # Get-RestrictNTLMStatus.ps1
-<a id="02-domain-controllers-restrict-ntlm-md-description-audits-the-registry-configuration-for-ntlm-auditing-and-restrictions"></a>
 # Description: Audits the registry configuration for NTLM auditing and restrictions.
 
 Write-Host "--- Auditing NTLM Restrictions ---" -ForegroundColor Cyan
@@ -3908,16 +3781,13 @@ Use this PowerShell script to monitor the progress of the DFSR migration across 
 [Download Script: Get-SYSVOLDfsrMigrationStatus.ps1](audit_scripts/Get-SYSVOLDfsrMigrationStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-get-sysvoldfsrmigrationstatusps1"></a>
 # Get-SYSVOLDfsrMigrationStatus.ps1
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-description-checks-the-current-sysvol-replication-migration-state"></a>
 # Description: Checks the current SYSVOL replication migration state.
 
 Import-Module ActiveDirectory
 
 Write-Host "--- Auditing SYSVOL DFSR Migration Status ---" -ForegroundColor Cyan
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-check-if-the-frs-service-is-still-running-on-this-dc"></a>
 # Check if the FRS service is still running on this DC
 $FrsService = Get-Service -Name "NtFrs" -ErrorAction SilentlyContinue
 
@@ -3927,7 +3797,6 @@ if ($null -ne $FrsService) {
     Write-Host "[+] FRS Service is not installed (expected in modern server configurations)." -ForegroundColor Green
 }
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-run-dfsrmig-validation-checks"></a>
 # Run dfsrmig validation checks
 $DfsMigOutput = & dfsrmig.exe /getglobalstate 2>&1
 
@@ -3943,9 +3812,7 @@ if ($DfsMigOutput -like "*Eliminated*") {
 [Download Script: Get-DfsrHealthStatus.ps1](audit_scripts/Get-DfsrHealthStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-get-dfsrhealthstatusps1"></a>
 # Get-DfsrHealthStatus.ps1
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-description-checks-the-event-logs-for-dfsr-replication-errors"></a>
 # Description: Checks the event logs for DFSR replication errors.
 
 Write-Host "Checking DFSR replication event logs..." -ForegroundColor Cyan
@@ -4039,21 +3906,17 @@ Run the following script to audit and remediate unauthorized permissions on the 
 [Download Script: Harden-AdminSDHolder.ps1](implementation_scripts/Harden-AdminSDHolder.ps1)
 
 ```powershell
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-harden-adminsdholderps1"></a>
 # Harden-AdminSDHolder.ps1
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-description-hardens-the-adminsdholder-acl-by-auditing-permissions-and-removing-delegated-helpdesk-groups"></a>
 # Description: Hardens the adminSDHolder ACL by auditing permissions and removing delegated helpdesk groups.
 
 Import-Module ActiveDirectory
 
 Write-Host "Applying hardening requirement: Harden adminSDHolder Permissions..." -ForegroundColor Cyan
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-set-target-dn"></a>
 # Set target DN
 $DomainDN = (Get-ADRootDSE).defaultNamingContext
 $AdminSDPath = "AD:\CN=adminSDHolder,CN=System,$($DomainDN)"
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-define-allowed-high-privilege-built-in-identities-sids-or-names"></a>
 # Define allowed high-privilege built-in identities (SIDs or names)
 $AllowedTrustees = @(
     "SYSTEM",
@@ -4062,7 +3925,6 @@ $AllowedTrustees = @(
     "Administrators"
 )
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-fetch-acl"></a>
 # Fetch ACL
 $Acl = Get-Acl -Path $AdminSDPath
 $AclModified = $false
@@ -4102,9 +3964,7 @@ if ($AclModified) {
 [Download Script: Get-AdminSDHolderAudit.ps1](audit_scripts/Get-AdminSDHolderAudit.ps1)
 
 ```powershell
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-get-adminsdholderauditps1"></a>
 # Get-AdminSDHolderAudit.ps1
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-description-audits-and-prints-all-active-permission-entries-on-adminsdholder"></a>
 # Description: Audits and prints all active permission entries on adminSDHolder.
 
 Import-Module ActiveDirectory
@@ -4205,16 +4065,13 @@ Run the following script block to audit and remove the `ServerLevelPluginDll` re
 [Download Script: Harden-DnsServerConfiguration.ps1](implementation_scripts/Harden-DnsServerConfiguration.ps1)
 
 ```powershell
-<a id="02-domain-controllers-harden-dns-container-permissions-md-harden-dnsserverconfigurationps1"></a>
 # Harden-DnsServerConfiguration.ps1
-<a id="02-domain-controllers-harden-dns-container-permissions-md-description-deletes-any-serverlevelplugindll-entry-to-block-dns-dll-hijacking-and-checks-dnsadmins-group"></a>
 # Description: Deletes any ServerLevelPluginDll entry to block DNS DLL hijacking, and checks DnsAdmins group.
 
 Import-Module ActiveDirectory
 
 Write-Host "Applying hardening requirement: Harden Microsoft DNS AD Container..." -ForegroundColor Cyan
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-1-clean-up-serverlevelplugindll-registry-key"></a>
 # 1. Clean up ServerLevelPluginDll Registry Key
 $RegPath = "HKLM:\System\CurrentControlSet\Services\DNS\Parameters"
 $ValueName = "ServerLevelPluginDll"
@@ -4230,7 +4087,6 @@ if (Test-Path $RegPath) {
     }
 }
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-2-audit-dnsadmins-membership"></a>
 # 2. Audit DnsAdmins Membership
 $DnsAdminsGroup = Get-ADGroup -Filter "Name -eq 'DnsAdmins'" -ErrorAction SilentlyContinue
 
@@ -4251,16 +4107,13 @@ if ($null -ne $DnsAdminsGroup) {
 [Download Script: Get-DnsAuditStatus.ps1](audit_scripts/Get-DnsAuditStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-harden-dns-container-permissions-md-get-dnsauditstatusps1"></a>
 # Get-DnsAuditStatus.ps1
-<a id="02-domain-controllers-harden-dns-container-permissions-md-description-queries-the-dns-registry-parameter-settings-and-ad-container-acls"></a>
 # Description: Queries the DNS registry parameter settings and AD container ACLs.
 
 Import-Module ActiveDirectory
 
 Write-Host "--- Auditing DNS Security Parameters ---" -ForegroundColor Cyan
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-check-registry"></a>
 # Check Registry
 $RegPath = "HKLM:\System\CurrentControlSet\Services\DNS\Parameters"
 $ValueName = "ServerLevelPluginDll"
@@ -4274,7 +4127,6 @@ if (Test-Path $RegPath) {
     }
 }
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-check-ad-container-write-acls"></a>
 # Check AD Container Write ACLs
 $DomainDN = (Get-ADRootDSE).defaultNamingContext
 $DnsPath = "AD:\CN=MicrosoftDNS,CN=System,$($DomainDN)"
@@ -4367,14 +4219,11 @@ Run the following script block on a Domain Controller to determine if it is virt
 [Download Script: Get-DcVirtualizationStatus.ps1](audit_scripts/Get-DcVirtualizationStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-get-dcvirtualizationstatusps1"></a>
 # Get-DcVirtualizationStatus.ps1
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-description-audits-the-virtualization-environment-of-the-domain-controller"></a>
 # Description: Audits the virtualization environment of the Domain Controller.
 
 Write-Host "--- Auditing DC Virtualization Status ---" -ForegroundColor Cyan
 
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-1-determine-if-running-on-physical-or-virtual-hardware"></a>
 # 1. Determine if running on physical or virtual hardware
 $ComputerSystem = Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction Stop
 $Model = $ComputerSystem.Model
@@ -4536,14 +4385,11 @@ Run the following script to configure the local host registry to allow and enfor
 [Download Script: Set-RdpRestrictedAdmin.ps1](implementation_scripts/Set-RdpRestrictedAdmin.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-set-rdprestrictedadminps1"></a>
 # Set-RdpRestrictedAdmin.ps1
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-description-enables-rdp-restricted-admin-mode-support-and-hardens-rdp-session-options"></a>
 # Description: Enables RDP Restricted Admin mode support and hardens RDP session options.
 
 Write-Host "Applying hardening requirement: Enforce RDP Restricted Admin Mode and Session Controls..." -ForegroundColor Cyan
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-1-enable-restricted-admin-support"></a>
 # 1. Enable Restricted Admin support
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
 $ValueName = "DisableRestrictedAdmin"
@@ -4556,7 +4402,6 @@ if (Test-Path $LsaPath) {
     Write-Warning "LSA Registry path not found."
 }
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-2-harden-rdp-session-options-in-registry"></a>
 # 2. Harden RDP Session options in registry
 $RdpPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
 if (-not (Test-Path $RdpPolicyPath)) {
@@ -4581,9 +4426,7 @@ Write-Host "[+] RDP session security controls applied to registry." -ForegroundC
 [Download Script: Get-RdpRestrictedAdminStatus.ps1](audit_scripts/Get-RdpRestrictedAdminStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-get-rdprestrictedadminstatusps1"></a>
 # Get-RdpRestrictedAdminStatus.ps1
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-description-checks-the-configuration-state-of-rdp-restricted-admin-and-session-security-settings"></a>
 # Description: Checks the configuration state of RDP Restricted Admin and session security settings.
 
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
@@ -4842,14 +4685,11 @@ Run the following scripts locally on the Domain Controller to configure Windows 
 [Download Script: Set-DefenderDCBaseline.ps1](implementation_scripts/Set-DefenderDCBaseline.ps1)
 
 ```powershell
-<a id="02-domain-controllers-defender-antivirus-md-set-defenderdcbaselineps1"></a>
 # Set-DefenderDCBaseline.ps1
-<a id="02-domain-controllers-defender-antivirus-md-description-configures-windows-defender-antivirus-options-asr-rules-tamper-protection-and-sandbox-execution-on-dcs"></a>
 # Description: Configures Windows Defender Antivirus options, ASR rules, Tamper Protection, and Sandbox execution on DCs.
 
 Write-Host "Applying Windows Defender Domain Controller Baseline..." -ForegroundColor Cyan
 
-<a id="02-domain-controllers-defender-antivirus-md-1-core-defender-settings"></a>
 # 1. Core Defender settings
 if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Write-Host "Configuring baseline Defender parameters..." -ForegroundColor Gray
@@ -4875,7 +4715,6 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Write-Warning "Set-MpPreference cmdlet is not available."
 }
 
-<a id="02-domain-controllers-defender-antivirus-md-2-configure-exclusion-restrictions-and-local-merges-in-registry"></a>
 # 2. Configure Exclusion restrictions and Local Merges in Registry
 $DefenderPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
 if (-not (Test-Path $DefenderPath)) {
@@ -4894,7 +4733,6 @@ if (-not (Test-Path $ExclPath)) {
 Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord
 Set-ItemProperty -Path $ExclPath -Name "DisableAutoExclusions" -Value 0 -Type DWord
 
-<a id="02-domain-controllers-defender-antivirus-md-3-configure-nis-reporting-engine-and-scan-settings-in-registry"></a>
 # 3. Configure NIS, Reporting, Engine, and Scan Settings in Registry
 $FeaturesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
@@ -4952,7 +4790,6 @@ Set-ItemProperty -Path $SigPath -Name "ASSignatureDue" -Value 7 -Type DWord
 Set-ItemProperty -Path $SigPath -Name "AVSignatureDue" -Value 7 -Type DWord
 Set-ItemProperty -Path $SigPath -Name "ScheduleDay" -Value 0 -Type DWord
 
-<a id="02-domain-controllers-defender-antivirus-md-4-configure-server-compatible-asr-rules-in-registry"></a>
 # 4. Configure Server-Compatible ASR Rules in Registry
 $AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
 if (-not (Test-Path $AsrRulesPath)) {
@@ -4974,7 +4811,6 @@ foreach ($RuleId in $AsrRules.Keys) {
 }
 Write-Host "ASR rules configured in registry." -ForegroundColor Green
 
-<a id="02-domain-controllers-defender-antivirus-md-5-configure-threat-severity-default-quarantine-actions"></a>
 # 5. Configure Threat severity default quarantine actions
 $ThreatsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Threats"
 if (-not (Test-Path $ThreatsPath)) {
@@ -4997,7 +4833,6 @@ if (-not (Test-Path $FamilyPath)) {
 }
 Set-ItemProperty -Path $FamilyPath -Name "UILockdown" -Value 1 -Type DWord
 
-<a id="02-domain-controllers-defender-antivirus-md-6-configure-tamper-protection-in-registry"></a>
 # 6. Configure Tamper Protection in Registry
 $FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
@@ -5010,7 +4845,6 @@ try {
     Write-Warning "Failed to set Tamper Protection in registry. Access is typically restricted to TrustedInstaller. Use GPO or Defender portal management."
 }
 
-<a id="02-domain-controllers-defender-antivirus-md-7-configure-sandbox-execution-environment-variable"></a>
 # 7. Configure Sandbox Execution Environment Variable
 $EnvPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
 if (-not (Test-Path $EnvPath)) {
@@ -5026,14 +4860,11 @@ Write-Host "Defender Domain Controller baseline configuration completed. A reboo
 [Download Script: Get-DefenderDCStatus.ps1](audit_scripts/Get-DefenderDCStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-defender-antivirus-md-get-defenderdcstatusps1"></a>
 # Get-DefenderDCStatus.ps1
-<a id="02-domain-controllers-defender-antivirus-md-description-audits-the-registry-and-preferences-for-asr-tamper-protection-and-sandbox-status-on-domain-controllers"></a>
 # Description: Audits the registry and preferences for ASR, Tamper Protection, and Sandbox status on Domain Controllers.
 
 Write-Host "--- Auditing Domain Controller Windows Defender Hardening Status ---" -ForegroundColor Cyan
 
-<a id="02-domain-controllers-defender-antivirus-md-1-audit-core-preferences"></a>
 # 1. Audit core preferences
 if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     $Pref = Get-MpPreference
@@ -5063,7 +4894,6 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     Write-Warning "Get-MpPreference is not available."
 }
 
-<a id="02-domain-controllers-defender-antivirus-md-2-audit-sandbox-variable"></a>
 # 2. Audit Sandbox variable
 $EnvPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
 $SandboxVar = Get-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -ErrorAction SilentlyContinue
@@ -5073,7 +4903,6 @@ if ($SandboxVar -and $SandboxVar.MP_FORCE_USE_SANDBOX -eq "1") {
     Write-Host "    - Sandbox Execution: NOT ENABLED (Required: 1)" -ForegroundColor Red
 }
 
-<a id="02-domain-controllers-defender-antivirus-md-3-audit-tamper-protection-registry"></a>
 # 3. Audit Tamper Protection registry
 $FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
 $TamperVal = Get-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -ErrorAction SilentlyContinue
@@ -5083,7 +4912,6 @@ if ($TamperVal -and $TamperVal.TamperProtection -eq 5) {
     Write-Host "    - Tamper Protection: NOT ENABLED or Not Managed via Registry (Value: $($TamperVal.TamperProtection))" -ForegroundColor Yellow
 }
 
-<a id="02-domain-controllers-defender-antivirus-md-4-audit-asr-rules"></a>
 # 4. Audit ASR Rules
 $AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
 $ServerRules = @(
@@ -5113,7 +4941,6 @@ if (Test-Path $AsrRulesPath) {
 $AsrColor = if ($EnforcedCount -eq 5 -and $AuditCount -eq 1) { "Green" } else { "Yellow" }
 Write-Host "    - Attack Surface Reduction: $EnforcedCount Block rules / $AuditCount Audit rules enforced (Required: 5 Block / 1 Audit)" -ForegroundColor $AsrColor
 
-<a id="02-domain-controllers-defender-antivirus-md-5-audit-registry-based-stig-configurations"></a>
 # 5. Audit Registry-based STIG configurations
 Write-Host "    - Registry configuration checks:" -ForegroundColor Gray
 $DefenderPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
@@ -5294,14 +5121,11 @@ Run the following scripts locally to configure the Application Identity service 
 [Download Script: Set-AppLockerDCPolicy.ps1](implementation_scripts/Set-AppLockerDCPolicy.ps1)
 
 ```powershell
-<a id="02-domain-controllers-configure-applocker-policies-md-set-applockerdcpolicyps1"></a>
 # Set-AppLockerDCPolicy.ps1
-<a id="02-domain-controllers-configure-applocker-policies-md-description-configures-the-application-identity-service-and-imports-a-robust-local-applocker-xml-policy"></a>
 # Description: Configures the Application Identity service and imports a robust local AppLocker XML policy.
 
 Write-Host "Applying hardening requirement: Configure AppLocker on Domain Controllers..." -ForegroundColor Cyan
 
-<a id="02-domain-controllers-configure-applocker-policies-md-1-enable-application-identity-service-appidsvc"></a>
 # 1. Enable Application Identity service (AppIDSvc)
 $Service = Get-Service -Name AppIDSvc -ErrorAction SilentlyContinue
 if ($Service) {
@@ -5314,7 +5138,6 @@ if ($Service) {
     Write-Error "Application Identity service (AppIDSvc) is not present on this system."
 }
 
-<a id="02-domain-controllers-configure-applocker-policies-md-2-configure-local-applocker-policy-xml-content"></a>
 # 2. Configure local AppLocker policy XML content
 $AppLockerXml = @"
 <AppLockerPolicy Version="1">
@@ -5441,7 +5264,6 @@ $AppLockerXml = @"
 </AppLockerPolicy>
 "@
 
-<a id="02-domain-controllers-configure-applocker-policies-md-write-the-temporary-xml-and-import-it"></a>
 # Write the temporary XML and import it
 $TempPath = Join-Path -Path $env:TEMP -ChildPath "AppLockerDCPolicy.xml"
 $AppLockerXml | Out-File -FilePath $TempPath -Encoding UTF8 -Force
@@ -5458,7 +5280,6 @@ try {
     }
 }
 
-<a id="02-domain-controllers-configure-applocker-policies-md-3-disable-ntvdm-16-bit-compatibility-via-registry"></a>
 # 3. Disable NTVDM (16-bit compatibility) via Registry
 $NtvdmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
 if (-not (Test-Path $NtvdmPath)) {
@@ -5472,14 +5293,11 @@ Write-Host "[+] 16-bit NTVDM compatibility disabled in registry." -ForegroundCol
 [Download Script: Get-AppLockerDCStatus.ps1](audit_scripts/Get-AppLockerDCStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-configure-applocker-policies-md-get-applockerdcstatusps1"></a>
 # Get-AppLockerDCStatus.ps1
-<a id="02-domain-controllers-configure-applocker-policies-md-description-checks-the-configuration-state-of-the-appidsvc-service-and-applocker-registry-paths"></a>
 # Description: Checks the configuration state of the AppIDSvc service and AppLocker registry paths.
 
 Write-Host "--- Auditing AppLocker Configuration ---" -ForegroundColor Cyan
 
-<a id="02-domain-controllers-configure-applocker-policies-md-1-audit-service-state"></a>
 # 1. Audit service state
 $AppIDSvc = Get-Service -Name AppIDSvc -ErrorAction SilentlyContinue
 if ($AppIDSvc) {
@@ -5489,7 +5307,6 @@ if ($AppIDSvc) {
     Write-Host "    - Application Identity Service: NOT INSTALLED" -ForegroundColor Red
 }
 
-<a id="02-domain-controllers-configure-applocker-policies-md-2-audit-enforcement-registry-settings"></a>
 # 2. Audit enforcement registry settings
 $SrpPath = "HKLM:\Software\Policies\Microsoft\Windows\SrpV2"
 $Collections = @("Exe", "Msi", "Script", "Appx")
@@ -5514,7 +5331,6 @@ if (Test-Path $SrpPath) {
     Write-Host "[-] AppLocker registry base path (SrpV2) not found. Policy is not deployed." -ForegroundColor Red
 }
 
-<a id="02-domain-controllers-configure-applocker-policies-md-3-audit-ntvdm-disable-status"></a>
 # 3. Audit NTVDM Disable Status
 $NtvdmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
 if (Test-Path $NtvdmPath) {
@@ -5618,14 +5434,11 @@ Run the following scripts locally to enable the Vulnerable Driver Blocklist regi
 [Download Script: Configure-DriverBlocklist.ps1](implementation_scripts/Configure-DriverBlocklist.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-configure-driverblocklistps1"></a>
 # Configure-DriverBlocklist.ps1
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-description-enables-the-microsoft-vulnerable-driver-blocklist-in-the-registry-and-validates-vbshvci-settings"></a>
 # Description: Enables the Microsoft Vulnerable Driver Blocklist in the registry and validates VBS/HVCI settings.
 
 Write-Host "Applying hardening requirement: Enable WDAC Driver Blocklist..." -ForegroundColor Cyan
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-1-configure-the-registry-settings-to-enable-the-blocklist"></a>
 # 1. Configure the registry settings to enable the blocklist
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
 $ValueName = "VulnerableDriverBlocklistEnable"
@@ -5638,7 +5451,6 @@ if (-not (Test-Path $RegPath)) {
 Write-Host "[+] Setting registry value: $ValueName = 1" -ForegroundColor Gray
 Set-ItemProperty -Path $RegPath -Name $ValueName -Value 1 -Type DWord -ErrorAction Stop
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-2-validate-vbs-hvci-configuration"></a>
 # 2. Validate VBS / HVCI Configuration
 $ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
 if (Test-Path $ScenariosPath) {
@@ -5660,15 +5472,12 @@ Write-Host "[+] Configuration applied successfully. A reboot is required to acti
 [Download Script: Get-DriverBlocklistStatus.ps1](audit_scripts/Get-DriverBlocklistStatus.ps1)
 
 ```powershell
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-get-driverblockliststatusps1"></a>
 # Get-DriverBlocklistStatus.ps1
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-description-audits-the-configuration-of-the-microsoft-vulnerable-driver-blocklist-and-hvci-state"></a>
 # Description: Audits the configuration of the Microsoft Vulnerable Driver Blocklist and HVCI state.
 
 Write-Host "--- Auditing Vulnerable Driver Blocklist ---" -ForegroundColor Cyan
 $Vulnerable = $false
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-1-check-registry-value"></a>
 # 1. Check registry value
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
 $ValueName = "VulnerableDriverBlocklistEnable"
@@ -5686,7 +5495,6 @@ if (Test-Path $RegPath) {
     $Vulnerable = $true
 }
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-2-check-hvci-status"></a>
 # 2. Check HVCI Status
 $ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
 if (Test-Path $ScenariosPath) {
@@ -5702,7 +5510,6 @@ if (Test-Path $ScenariosPath) {
     $Vulnerable = $true
 }
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-3-final-verdict"></a>
 # 3. Final Verdict
 if ($Vulnerable) {
     Write-Host "`n[!] Verification FAILED: The Vulnerable Driver Blocklist is not fully secured." -ForegroundColor Red
@@ -5856,9 +5663,7 @@ Run the following script to create and apply the Fine-Grained Password Policy us
 [Download Script: Set-AdminPasswordPolicy.ps1](implementation_scripts/Set-AdminPasswordPolicy.ps1)
 
 ```powershell
-<a id="03-identities-services-enforce-fgpp-md-set-adminpasswordpolicyps1"></a>
 # Set-AdminPasswordPolicy.ps1
-<a id="03-identities-services-enforce-fgpp-md-description-creates-a-secure-fine-grained-password-policy-for-administrative-accounts"></a>
 # Description: Creates a secure Fine-Grained Password Policy for administrative accounts.
 
 Import-Module ActiveDirectory
@@ -5892,9 +5697,7 @@ if (-not $ExistingPSO) {
 [Download Script: Get-AdminPasswordPolicyStatus.ps1](audit_scripts/Get-AdminPasswordPolicyStatus.ps1)
 
 ```powershell
-<a id="03-identities-services-enforce-fgpp-md-get-adminpasswordpolicystatusps1"></a>
 # Get-AdminPasswordPolicyStatus.ps1
-<a id="03-identities-services-enforce-fgpp-md-description-audits-fine-grained-password-policies-in-the-active-directory-domain"></a>
 # Description: Audits Fine-Grained Password Policies in the Active Directory domain.
 
 Import-Module ActiveDirectory
@@ -6003,9 +5806,7 @@ Run the following script to configure Windows LAPS locally using the registry.
 [Download Script: Configure-LAPS.ps1](implementation_scripts/Configure-LAPS.ps1)
 
 ```powershell
-<a id="03-identities-services-enable-laps-md-configure-lapsps1"></a>
 # Configure-LAPS.ps1
-<a id="03-identities-services-enable-laps-md-description-configures-windows-laps-parameters-in-the-registry"></a>
 # Description: Configures Windows LAPS parameters in the registry.
 
 Write-Host "Applying hardening requirement: Enable Local Administrator Password Solution..." -ForegroundColor Cyan
@@ -6016,10 +5817,8 @@ if (-not (Test-Path $RegPath)) {
     New-Item -Path $RegPath -Force | Out-Null
 }
 
-<a id="03-identities-services-enable-laps-md-1-backup-to-active-directory"></a>
 # 1 = Backup to Active Directory
 Set-ItemProperty -Path $RegPath -Name "BackupDirectory" -Value 1 -Type DWord
-<a id="03-identities-services-enable-laps-md-4-letters-numbers-special-characters"></a>
 # 4 = Letters + numbers + special characters
 Set-ItemProperty -Path $RegPath -Name "PasswordComplexity" -Value 4 -Type DWord
 Set-ItemProperty -Path $RegPath -Name "PasswordLength" -Value 20 -Type DWord
@@ -6032,9 +5831,7 @@ Write-Host "Windows LAPS configuration registry settings applied successfully." 
 [Download Script: Get-LAPSStatus.ps1](audit_scripts/Get-LAPSStatus.ps1)
 
 ```powershell
-<a id="03-identities-services-enable-laps-md-get-lapsstatusps1"></a>
 # Get-LAPSStatus.ps1
-<a id="03-identities-services-enable-laps-md-description-checks-the-windows-laps-registry-parameters"></a>
 # Description: Checks the Windows LAPS registry parameters.
 
 Write-Host "--- Auditing LAPS Registry Configuration ---" -ForegroundColor Cyan
@@ -6130,20 +5927,15 @@ Use the following PowerShell script to initialize the KDS root key (if not alrea
 [Download Script: Set-gMSAServiceAccount.ps1](implementation_scripts/Set-gMSAServiceAccount.ps1)
 
 ```powershell
-<a id="03-identities-services-harden-service-accounts-md-set-gmsaserviceaccountps1"></a>
 # Set-gMSAServiceAccount.ps1
-<a id="03-identities-services-harden-service-accounts-md-description-generates-the-kds-root-key-and-registers-a-new-gmsa"></a>
 # Description: Generates the KDS root key and registers a new gMSA.
 
 Import-Module ActiveDirectory
 
 Write-Host "Applying hardening requirement: Implement Group Managed Service Accounts..." -ForegroundColor Cyan
 
-<a id="03-identities-services-harden-service-accounts-md-1-initialize-kds-root-key-required-once-in-the-forest"></a>
 # 1. Initialize KDS Root Key (Required once in the forest)
-<a id="03-identities-services-harden-service-accounts-md-in-standard-setups-there-is-a-10-hour-delay-for-propagation"></a>
 # In standard setups, there is a 10-hour delay for propagation.
-<a id="03-identities-services-harden-service-accounts-md-effectiveimmediately-is-used-for-lab-configurations"></a>
 # -EffectiveImmediately is used for lab configurations.
 try {
     Add-KdsRootKey -EffectiveImmediately -ErrorAction SilentlyContinue
@@ -6152,7 +5944,6 @@ try {
     Write-Warning "Could not configure KDS Root Key. It may already exist."
 }
 
-<a id="03-identities-services-harden-service-accounts-md-2-create-the-gmsa"></a>
 # 2. Create the gMSA
 $gMSAName = "gmsa-sqlservice"
 $existingMSA = Get-ADServiceAccount -Filter "Name -eq '$gMSAName'"
@@ -6174,9 +5965,7 @@ if (-not $existingMSA) {
 [Download Script: Get-gMSAStatus.ps1](audit_scripts/Get-gMSAStatus.ps1)
 
 ```powershell
-<a id="03-identities-services-harden-service-accounts-md-get-gmsastatusps1"></a>
 # Get-gMSAStatus.ps1
-<a id="03-identities-services-harden-service-accounts-md-description-lists-all-registered-gmsas-and-their-configuration-details"></a>
 # Description: Lists all registered gMSAs and their configuration details.
 
 Import-Module ActiveDirectory
@@ -6268,16 +6057,13 @@ Use the following PowerShell script to audit and disable unconstrained delegatio
 [Download Script: Set-RestrictDelegation.ps1](implementation_scripts/Set-RestrictDelegation.ps1)
 
 ```powershell
-<a id="03-identities-services-restrict-kerberos-delegation-md-set-restrictdelegationps1"></a>
 # Set-RestrictDelegation.ps1
-<a id="03-identities-services-restrict-kerberos-delegation-md-description-disables-unconstrained-delegation-on-computer-and-user-accounts"></a>
 # Description: Disables unconstrained delegation on computer and user accounts.
 
 Import-Module ActiveDirectory
 
 Write-Host "Applying hardening requirement: Restrict Kerberos Delegation..." -ForegroundColor Cyan
 
-<a id="03-identities-services-restrict-kerberos-delegation-md-find-all-computer-accounts-with-unconstrained-delegation"></a>
 # Find all computer accounts with Unconstrained Delegation
 $unconstrainedComputers = Get-ADComputer -Filter {TrustedForDelegation -eq $true}
 foreach ($comp in $unconstrainedComputers) {
@@ -6285,7 +6071,6 @@ foreach ($comp in $unconstrainedComputers) {
     Set-ADComputer -Identity $comp -TrustedForDelegation $false
 }
 
-<a id="03-identities-services-restrict-kerberos-delegation-md-find-all-user-accounts-with-unconstrained-delegation"></a>
 # Find all user accounts with Unconstrained Delegation
 $unconstrainedUsers = Get-ADUser -Filter {TrustedForDelegation -eq $true}
 foreach ($user in $unconstrainedUsers) {
@@ -6300,9 +6085,7 @@ Write-Host "Unconstrained delegation has been disabled on all identified account
 [Download Script: Get-KerberosDelegationStatus.ps1](audit_scripts/Get-KerberosDelegationStatus.ps1)
 
 ```powershell
-<a id="03-identities-services-restrict-kerberos-delegation-md-get-kerberosdelegationstatusps1"></a>
 # Get-KerberosDelegationStatus.ps1
-<a id="03-identities-services-restrict-kerberos-delegation-md-description-audits-accounts-with-unconstrained-delegation-in-the-active-directory-domain"></a>
 # Description: Audits accounts with unconstrained delegation in the Active Directory domain.
 
 Import-Module ActiveDirectory
@@ -6404,9 +6187,7 @@ Run the following script to add administrative accounts to the Protected Users s
 [Download Script: Set-ProtectedUsers.ps1](implementation_scripts/Set-ProtectedUsers.ps1)
 
 ```powershell
-<a id="03-identities-services-configure-protected-users-group-md-set-protectedusersps1"></a>
 # Set-ProtectedUsers.ps1
-<a id="03-identities-services-configure-protected-users-group-md-description-adds-privileged-accounts-to-the-protected-users-group"></a>
 # Description: Adds privileged accounts to the Protected Users group.
 
 Import-Module ActiveDirectory
@@ -6439,9 +6220,7 @@ foreach ($Admin in $TargetAdmins) {
 [Download Script: Get-ProtectedUsersStatus.ps1](audit_scripts/Get-ProtectedUsersStatus.ps1)
 
 ```powershell
-<a id="03-identities-services-configure-protected-users-group-md-get-protectedusersstatusps1"></a>
 # Get-ProtectedUsersStatus.ps1
-<a id="03-identities-services-configure-protected-users-group-md-description-lists-all-members-of-the-protected-users-security-group"></a>
 # Description: Lists all members of the Protected Users security group.
 
 Import-Module ActiveDirectory
@@ -6546,14 +6325,11 @@ Run the following script to disable the local Administrator and Guest accounts l
 [Download Script: Set-HardenDefaultAccounts.ps1](implementation_scripts/Set-HardenDefaultAccounts.ps1)
 
 ```powershell
-<a id="03-identities-services-harden-default-accounts-md-set-hardendefaultaccountsps1"></a>
 # Set-HardenDefaultAccounts.ps1
-<a id="03-identities-services-harden-default-accounts-md-description-disables-the-built-in-local-administrator-and-guest-accounts-locally"></a>
 # Description: Disables the built-in local Administrator and Guest accounts locally.
 
 Write-Host "Applying hardening requirement: Rename and Disable Default Accounts..." -ForegroundColor Cyan
 
-<a id="03-identities-services-harden-default-accounts-md-1-disable-built-in-local-administrator-account"></a>
 # 1. Disable built-in local Administrator account
 $adminAccount = Get-LocalUser -SID "S-1-5-32-544" | Where-Object { $_.SID -like "*-500" }
 if ($adminAccount) {
@@ -6567,10 +6343,8 @@ if ($adminAccount) {
     Write-Warning "Built-in local Administrator account not found."
 }
 
-<a id="03-identities-services-harden-default-accounts-md-2-disable-built-in-local-guest-account"></a>
 # 2. Disable built-in local Guest account
 $guestAccount = Get-LocalUser -SID "S-1-5-32-544" | Where-Object { $_.SID -like "*-501" }
-<a id="03-identities-services-harden-default-accounts-md-fallback-to-standard-check-if-sid-group-matches-local-guest"></a>
 # Fallback to standard check if SID group matches local guest
 if (-not $guestAccount) {
     $guestAccount = Get-LocalUser | Where-Object { $_.SID -like "*-501" }
@@ -6592,9 +6366,7 @@ if ($guestAccount) {
 [Download Script: Get-DefaultAccountsStatus.ps1](audit_scripts/Get-DefaultAccountsStatus.ps1)
 
 ```powershell
-<a id="03-identities-services-harden-default-accounts-md-get-defaultaccountsstatusps1"></a>
 # Get-DefaultAccountsStatus.ps1
-<a id="03-identities-services-harden-default-accounts-md-description-audits-the-enabled-status-of-the-built-in-local-administrator-and-guest-accounts"></a>
 # Description: Audits the enabled status of the built-in local Administrator and Guest accounts.
 
 Write-Host "--- Auditing Default Accounts Status ---" -ForegroundColor Cyan
@@ -6690,9 +6462,7 @@ Since User Rights Assignment is typically controlled by GPO or local security po
 [Download Script: Set-DenyServiceLogons.ps1](implementation_scripts/Set-DenyServiceLogons.ps1)
 
 ```powershell
-<a id="03-identities-services-restrict-service-account-logons-md-set-denyservicelogonsps1"></a>
 # Set-DenyServiceLogons.ps1
-<a id="03-identities-services-restrict-service-account-logons-md-description-configures-local-security-database-to-deny-interactive-logons-for-a-service-account-group"></a>
 # Description: Configures local security database to deny interactive logons for a service account group.
 
 Write-Host "Applying hardening requirement: Restrict Interactive Logons for Service Accounts..." -ForegroundColor Cyan
@@ -6701,20 +6471,16 @@ $SecDb = "$($env:temp)\localpolicy.sdb"
 $SecCfg = "$($env:temp)\localpolicy.inf"
 $GroupName = "Grp_ServiceAccounts" # Replace with the target security group name
 
-<a id="03-identities-services-restrict-service-account-logons-md-export-current-security-policy"></a>
 # Export current security policy
 secedit /export /cfg $SecCfg /quiet
 
-<a id="03-identities-services-restrict-service-account-logons-md-read-configuration-file"></a>
 # Read configuration file
 $cfgContent = Get-Content -Path $SecCfg
 
-<a id="03-identities-services-restrict-service-account-logons-md-define-logon-rights-lines"></a>
 # Define logon rights lines
 $DenyLocalLine = "SeDenyInteractiveLogonRight = $GroupName"
 $DenyRdpLine = "SeDenyRemoteInteractiveLogonRight = $GroupName"
 
-<a id="03-identities-services-restrict-service-account-logons-md-check-and-update-policy-lines"></a>
 # Check and update policy lines
 $hasDenyLocal = $false
 $hasDenyRdp = $false
@@ -6752,15 +6518,12 @@ if (-not $hasDenyRdp) {
     }
 }
 
-<a id="03-identities-services-restrict-service-account-logons-md-save-updated-configuration"></a>
 # Save updated configuration
 $newCfg | Set-Content -Path $SecCfg
 
-<a id="03-identities-services-restrict-service-account-logons-md-configure-local-security-policy"></a>
 # Configure local security policy
 secedit /configure /db $SecDb /cfg $SecCfg /areas USER_RIGHTS /quiet
 
-<a id="03-identities-services-restrict-service-account-logons-md-cleanup-temporary-files"></a>
 # Cleanup temporary files
 Remove-Item -Path $SecCfg -Force
 Remove-Item -Path $SecDb -Force
@@ -6772,9 +6535,7 @@ Write-Host "Local security policy updated: Deny log on locally/RDP applied to gr
 [Download Script: Get-DenyServiceLogonsStatus.ps1](audit_scripts/Get-DenyServiceLogonsStatus.ps1)
 
 ```powershell
-<a id="03-identities-services-restrict-service-account-logons-md-get-denyservicelogonsstatusps1"></a>
 # Get-DenyServiceLogonsStatus.ps1
-<a id="03-identities-services-restrict-service-account-logons-md-description-audits-the-deny-logon-rights-configurations-locally"></a>
 # Description: Audits the Deny logon rights configurations locally.
 
 Write-Host "--- Auditing Deny Logon Rights ---" -ForegroundColor Cyan
@@ -6873,16 +6634,13 @@ Run the following script to enforce AES-only encryption on active user accounts 
 [Download Script: Set-AccountAESEncryption.ps1](implementation_scripts/Set-AccountAESEncryption.ps1)
 
 ```powershell
-<a id="03-identities-services-enforce-user-aes-encryption-md-set-accountaesencryptionps1"></a>
 # Set-AccountAESEncryption.ps1
-<a id="03-identities-services-enforce-user-aes-encryption-md-description-configures-the-msds-supportedencryptiontypes-attribute-to-aes-only-24-on-active-user-accounts"></a>
 # Description: Configures the msDS-SupportedEncryptionTypes attribute to AES-only (24) on active user accounts.
 
 Import-Module ActiveDirectory
 
 Write-Host "Applying hardening requirement: Enforce AES-Only Kerberos Encryption on Accounts..." -ForegroundColor Cyan
 
-<a id="03-identities-services-enforce-user-aes-encryption-md-24-represents-aes128-8-aes256-16"></a>
 # 24 represents AES128 (8) + AES256 (16)
 $AESValue = 24
 $TargetUsers = Get-ADUser -Filter {Enabled -eq $true}
@@ -6905,9 +6663,7 @@ Write-Host "AES encryption has been successfully enforced on active accounts." -
 [Download Script: Get-AccountEncryptionStatus.ps1](audit_scripts/Get-AccountEncryptionStatus.ps1)
 
 ```powershell
-<a id="03-identities-services-enforce-user-aes-encryption-md-get-accountencryptionstatusps1"></a>
 # Get-AccountEncryptionStatus.ps1
-<a id="03-identities-services-enforce-user-aes-encryption-md-description-identifies-accounts-that-do-not-have-msds-supportedencryptiontypes-set-to-24-aes-only"></a>
 # Description: Identifies accounts that do not have msDS-SupportedEncryptionTypes set to 24 (AES-only).
 
 Import-Module ActiveDirectory
@@ -7003,9 +6759,7 @@ Run the following scripts to audit and remediate accounts in the forest.
 [Download Script: Audit-KerberosPreAuth.ps1](audit_scripts/Audit-KerberosPreAuth.ps1)
 
 ```powershell
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-audit-kerberospreauthps1"></a>
 # Audit-KerberosPreAuth.ps1
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-description-audits-active-user-accounts-to-find-any-with-pre-authentication-disabled"></a>
 # Description: Audits active user accounts to find any with pre-authentication disabled.
 
 Import-Module ActiveDirectory
@@ -7035,9 +6789,7 @@ try {
 [Download Script: Set-KerberosPreAuth.ps1](implementation_scripts/Set-KerberosPreAuth.ps1)
 
 ```powershell
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-set-kerberospreauthps1"></a>
 # Set-KerberosPreAuth.ps1
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-description-enforces-kerberos-pre-authentication-on-all-active-user-accounts"></a>
 # Description: Enforces Kerberos Pre-Authentication on all active user accounts.
 
 Import-Module ActiveDirectory
@@ -7144,9 +6896,7 @@ Run the following scripts to audit and clear the group membership.
 [Download Script: Audit-SchemaAdminsGroup.ps1](audit_scripts/Audit-SchemaAdminsGroup.ps1)
 
 ```powershell
-<a id="03-identities-services-restrict-schema-admins-md-audit-schemaadminsgroupps1"></a>
 # Audit-SchemaAdminsGroup.ps1
-<a id="03-identities-services-restrict-schema-admins-md-description-audits-the-schema-admins-group-membership"></a>
 # Description: Audits the Schema Admins group membership.
 
 Import-Module ActiveDirectory
@@ -7177,9 +6927,7 @@ try {
 [Download Script: Clear-SchemaAdminsGroup.ps1](implementation_scripts/Clear-SchemaAdminsGroup.ps1)
 
 ```powershell
-<a id="03-identities-services-restrict-schema-admins-md-clear-schemaadminsgroupps1"></a>
 # Clear-SchemaAdminsGroup.ps1
-<a id="03-identities-services-restrict-schema-admins-md-description-removes-all-members-from-the-schema-admins-group"></a>
 # Description: Removes all members from the Schema Admins group.
 
 Import-Module ActiveDirectory
@@ -7278,9 +7026,7 @@ Run the following scripts to audit and configure the setting domain-wide.
 [Download Script: Audit-OUAccidentalDeletion.ps1](audit_scripts/Audit-OUAccidentalDeletion.ps1)
 
 ```powershell
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-audit-ouaccidentaldeletionps1"></a>
 # Audit-OUAccidentalDeletion.ps1
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-description-audits-all-ous-to-find-any-without-accidental-deletion-protection"></a>
 # Description: Audits all OUs to find any without accidental deletion protection.
 
 Import-Module ActiveDirectory
@@ -7309,9 +7055,7 @@ try {
 [Download Script: Enforce-OUAccidentalDeletion.ps1](implementation_scripts/Enforce-OUAccidentalDeletion.ps1)
 
 ```powershell
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-enforce-ouaccidentaldeletionps1"></a>
 # Enforce-OUAccidentalDeletion.ps1
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-description-enables-accidental-deletion-protection-on-all-ous-in-the-domain"></a>
 # Description: Enables accidental deletion protection on all OUs in the domain.
 
 Import-Module ActiveDirectory
@@ -7429,9 +7173,7 @@ Run the following script block to programmatically define the Authentication Pol
 [Download Script: Set-ADAuthenticationSilo.ps1](implementation_scripts/Set-ADAuthenticationSilo.ps1)
 
 ```powershell
-<a id="03-identities-services-configure-authentication-silos-md-set-adauthenticationsilops1"></a>
 # Set-ADAuthenticationSilo.ps1
-<a id="03-identities-services-configure-authentication-silos-md-description-creates-a-tier-0-authentication-policy-silo-and-assigns-accounts"></a>
 # Description: Creates a Tier 0 Authentication Policy Silo and assigns accounts.
 
 Import-Module ActiveDirectory
@@ -7443,7 +7185,6 @@ $SiloName = "T0_Silo"
 $UserGroupName = "Grp_Tier0_Admins"   # AD group containing Tier 0 admin users
 $ComputerGroupName = "Grp_Tier0_PAWs" # AD group containing Tier 0 PAW computers
 
-<a id="03-identities-services-configure-authentication-silos-md-1-create-the-authentication-policy-if-it-does-not-exist"></a>
 # 1. Create the Authentication Policy if it does not exist
 $ExistPolicy = Get-ADAuthenticationPolicy -Filter "Name -eq '$PolicyName'" -ErrorAction SilentlyContinue
 
@@ -7460,7 +7201,6 @@ if (-not $ExistPolicy) {
     Write-Host "[*] Authentication Policy '$PolicyName' already exists." -ForegroundColor Yellow
 }
 
-<a id="03-identities-services-configure-authentication-silos-md-2-create-the-authentication-policy-silo"></a>
 # 2. Create the Authentication Policy Silo
 $ExistSilo = Get-ADAuthenticationPolicySilo -Filter "Name -eq '$SiloName'" -ErrorAction SilentlyContinue
 
@@ -7478,7 +7218,6 @@ if (-not $ExistSilo) {
     Write-Host "[*] Authentication Policy Silo '$SiloName' already exists." -ForegroundColor Yellow
 }
 
-<a id="03-identities-services-configure-authentication-silos-md-3-grant-silo-access-to-users-and-computers"></a>
 # 3. Grant Silo Access to Users and Computers
 Write-Host "Granting silo access to members of group '$UserGroupName'..." -ForegroundColor White
 $AdminUsers = Get-ADGroupMember -Identity $UserGroupName -Recursive | Where-Object { $_.objectClass -eq "user" }
@@ -7494,7 +7233,6 @@ foreach ($Comp in $PawComputers) {
     Set-ADAccountAuthenticationPolicySilo -Identity $Comp.DistinguishedName -AuthenticationPolicySilo $SiloName -ErrorAction SilentlyContinue
 }
 
-<a id="03-identities-services-configure-authentication-silos-md-4-grant-access-to-domain-controllers-writable-dcs-must-be-part-of-the-silo"></a>
 # 4. Grant access to Domain Controllers (writable DCs must be part of the silo)
 $DCs = Get-ADDomainController -Filter "IsReadOnly -eq `$false"
 foreach ($DC in $DCs) {
@@ -7510,9 +7248,7 @@ Write-Host "[+] Authentication Silo membership initialized." -ForegroundColor Gr
 [Download Script: Get-AuthSiloAuditStatus.ps1](audit_scripts/Get-AuthSiloAuditStatus.ps1)
 
 ```powershell
-<a id="03-identities-services-configure-authentication-silos-md-get-authsiloauditstatusps1"></a>
 # Get-AuthSiloAuditStatus.ps1
-<a id="03-identities-services-configure-authentication-silos-md-description-queries-the-active-authentication-silos-and-lists-their-configuration-settings"></a>
 # Description: Queries the active Authentication Silos and lists their configuration settings.
 
 Import-Module ActiveDirectory
@@ -7607,16 +7343,13 @@ Run the following script to automatically identify all user accounts with `admin
 [Download Script: Cleanup-AdminCountOrphans.ps1](implementation_scripts/Cleanup-AdminCountOrphans.ps1)
 
 ```powershell
-<a id="03-identities-services-cleanup-admincount-orphans-md-cleanup-admincountorphansps1"></a>
 # Cleanup-AdminCountOrphans.ps1
-<a id="03-identities-services-cleanup-admincount-orphans-md-description-resets-admincount-and-re-enables-inheritance-on-user-accounts-that-are-no-longer-in-protected-groups"></a>
 # Description: Resets adminCount and re-enables inheritance on user accounts that are no longer in protected groups.
 
 Import-Module ActiveDirectory
 
 Write-Host "Applying hardening requirement: Clean Up adminCount Attribute Orphans..." -ForegroundColor Cyan
 
-<a id="03-identities-services-cleanup-admincount-orphans-md-define-the-list-of-built-in-protected-ad-groups-samaccountnames"></a>
 # Define the list of built-in protected AD groups (sAMAccountNames)
 $ProtectedGroups = @(
     "Administrators",
@@ -7631,7 +7364,6 @@ $ProtectedGroups = @(
     "Group Policy Creator Owners"
 )
 
-<a id="03-identities-services-cleanup-admincount-orphans-md-fetch-all-user-objects-with-admincount-set-to-1"></a>
 # Fetch all user objects with adminCount set to 1
 Write-Host "Scanning domain for accounts with adminCount = 1..." -ForegroundColor White
 $Orphans = Get-ADUser -Filter "adminCount -eq 1" -Properties MemberOf, adminCount
@@ -7686,9 +7418,7 @@ Write-Host "[+] Cleanup complete. Total orphan accounts remediated: $($CleanedCo
 [Download Script: Get-AdminCountOrphansAudit.ps1](audit_scripts/Get-AdminCountOrphansAudit.ps1)
 
 ```powershell
-<a id="03-identities-services-cleanup-admincount-orphans-md-get-admincountorphansauditps1"></a>
 # Get-AdminCountOrphansAudit.ps1
-<a id="03-identities-services-cleanup-admincount-orphans-md-description-scans-the-domain-and-prints-all-orphan-admincount-accounts"></a>
 # Description: Scans the domain and prints all orphan adminCount accounts.
 
 Import-Module ActiveDirectory
@@ -7788,16 +7518,13 @@ Open an elevated PowerShell console on the PDC Emulator Domain Controller and ru
 [Download Script: New-KdsKey.ps1](implementation_scripts/New-KdsKey.ps1)
 
 ```powershell
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-new-kdskeyps1"></a>
 # New-KdsKey.ps1
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-description-generates-a-new-kds-root-key"></a>
 # Description: Generates a new KDS Root Key.
 
 Import-Module Kds
 
 Write-Host "Creating new KDS Root Key..." -ForegroundColor Cyan
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-create-new-kds-key-effective-immediately-backdated-by-10-hours-to-bypass-replication-delay"></a>
 # Create new KDS key effective immediately (backdated by 10 hours to bypass replication delay)
 $NewKey = Add-KdsRootKey -EffectiveTime ((Get-Date).AddHours(-10)) -ErrorAction Stop
 
@@ -7813,9 +7540,7 @@ Once the new root key is active, force password rotation for all gMSAs:
 [Download Script: Rotate-gMSAPasswords.ps1](implementation_scripts/Rotate-gMSAPasswords.ps1)
 
 ```powershell
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-rotate-gmsapasswordsps1"></a>
 # Rotate-gMSAPasswords.ps1
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-description-forces-password-rotation-for-all-gmsas"></a>
 # Description: Forces password rotation for all gMSAs.
 
 Import-Module ActiveDirectory
@@ -7848,9 +7573,7 @@ Use this PowerShell script to audit current KDS root keys and gMSA replication s
 [Download Script: Get-KdsAndGmsaAudit.ps1](audit_scripts/Get-KdsAndGmsaAudit.ps1)
 
 ```powershell
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-get-kdsandgmsaauditps1"></a>
 # Get-KdsAndGmsaAudit.ps1
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-description-audits-active-kds-root-keys-and-checks-gmsa-accounts"></a>
 # Description: Audits active KDS root keys and checks gMSA accounts.
 
 Import-Module ActiveDirectory
@@ -7979,9 +7702,7 @@ Run the following script block to audit active certificate templates for vulnera
 [Download Script: Get-ADCSTemplateAudit.ps1](audit_scripts/Get-ADCSTemplateAudit.ps1)
 
 ```powershell
-<a id="03-identities-services-harden-adcs-pki-md-get-adcstemplateauditps1"></a>
 # Get-ADCSTemplateAudit.ps1
-<a id="03-identities-services-harden-adcs-pki-md-description-audits-active-directory-certificate-templates-for-san-and-authentication-misconfigurations"></a>
 # Description: Audits Active Directory certificate templates for SAN and authentication misconfigurations.
 
 Import-Module ActiveDirectory
@@ -8145,14 +7866,11 @@ Run the following scripts locally to apply the printers, boot drivers, logon scr
 [Download Script: Set-EndpointDelegationAndBootHardening.ps1](implementation_scripts/Set-EndpointDelegationAndBootHardening.ps1)
 
 ```powershell
-<a id="03-identities-services-configure-point-and-print-md-set-endpointdelegationandboothardeningps1"></a>
 # Set-EndpointDelegationAndBootHardening.ps1
-<a id="03-identities-services-configure-point-and-print-md-description-hardens-point-and-print-restrictions-elam-policies-logon-screen-enumeration-and-credentials-delegation"></a>
 # Description: Hardens Point and Print restrictions, ELAM policies, logon screen enumeration, and credentials delegation.
 
 Write-Host "Applying printer, boot driver, logon screen, and delegation registry controls..." -ForegroundColor Cyan
 
-<a id="03-identities-services-configure-point-and-print-md-1-limit-print-driver-installation-to-administrators"></a>
 # 1. Limit Print Driver Installation to Administrators
 $PrinterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
 if (-not (Test-Path $PrinterPath)) {
@@ -8161,7 +7879,6 @@ if (-not (Test-Path $PrinterPath)) {
 Set-ItemProperty -Path $PrinterPath -Name "RestrictDriverInstallationToAdministrators" -Value 1 -Type DWord -ErrorAction Stop
 Write-Host "[+] Print driver installation restricted to Administrators." -ForegroundColor Green
 
-<a id="03-identities-services-configure-point-and-print-md-2-configure-elam-driver-load-policy"></a>
 # 2. Configure ELAM Driver Load Policy
 $ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
 if (-not (Test-Path $ElamPath)) {
@@ -8170,7 +7887,6 @@ if (-not (Test-Path $ElamPath)) {
 Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
 Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green
 
-<a id="03-identities-services-configure-point-and-print-md-3-disable-logon-screen-user-enumeration"></a>
 # 3. Disable Logon Screen User Enumeration
 $SystemPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
 if (-not (Test-Path $SystemPath)) {
@@ -8179,7 +7895,6 @@ if (-not (Test-Path $SystemPath)) {
 Set-ItemProperty -Path $SystemPath -Name "EnumerateLocalUsers" -Value 0 -Type DWord -ErrorAction Stop
 Write-Host "[+] Logon screen local user enumeration disabled." -ForegroundColor Green
 
-<a id="03-identities-services-configure-point-and-print-md-4-enforce-credssp-encryption-oracle-remediation"></a>
 # 4. Enforce CredSSP Encryption Oracle Remediation
 $CredSspPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\CredSSP\Parameters"
 if (-not (Test-Path $CredSspPath)) {
@@ -8188,7 +7903,6 @@ if (-not (Test-Path $CredSspPath)) {
 Set-ItemProperty -Path $CredSspPath -Name "AllowEncryptionOracle" -Value 0 -Type DWord -ErrorAction Stop
 Write-Host "[+] CredSSP Encryption Oracle Remediation configured to Force Updated Clients." -ForegroundColor Green
 
-<a id="03-identities-services-configure-point-and-print-md-5-remote-host-allows-delegation-of-non-exportable-credentials"></a>
 # 5. Remote Host Allows Delegation of Non-Exportable Credentials
 $DelegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation"
 if (-not (Test-Path $DelegPath)) {
@@ -8202,14 +7916,11 @@ Write-Host "[+] Delegation of non-exportable credentials enabled." -ForegroundCo
 [Download Script: Get-EndpointDelegationAndBootStatus.ps1](audit_scripts/Get-EndpointDelegationAndBootStatus.ps1)
 
 ```powershell
-<a id="03-identities-services-configure-point-and-print-md-get-endpointdelegationandbootstatusps1"></a>
 # Get-EndpointDelegationAndBootStatus.ps1
-<a id="03-identities-services-configure-point-and-print-md-description-audits-registry-configuration-of-point-and-print-elam-user-enumeration-and-delegation"></a>
 # Description: Audits registry configuration of Point and Print, ELAM, user enumeration, and delegation.
 
 Write-Host "--- Auditing Endpoint Delegation and Boot Settings ---" -ForegroundColor Cyan
 
-<a id="03-identities-services-configure-point-and-print-md-helper-function-to-check-registry-settings"></a>
 # Helper function to check registry settings
 function Confirm-RegValue ($Path, $Name, $Expected) {
     if (Test-Path $Path) {
@@ -8222,23 +7933,18 @@ function Confirm-RegValue ($Path, $Name, $Expected) {
     }
 }
 
-<a id="03-identities-services-configure-point-and-print-md-1-point-and-print"></a>
 # 1. Point and Print
 Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" "RestrictDriverInstallationToAdministrators" 1
 
-<a id="03-identities-services-configure-point-and-print-md-2-elam-policy"></a>
 # 2. ELAM Policy
 Confirm-RegValue "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch" "DriverLoadPolicy" 3
 
-<a id="03-identities-services-configure-point-and-print-md-3-user-enumeration"></a>
 # 3. User Enumeration
 Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" "EnumerateLocalUsers" 0
 
-<a id="03-identities-services-configure-point-and-print-md-4-credssp-allowencryptionoracle"></a>
 # 4. CredSSP AllowEncryptionOracle
 Confirm-RegValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\CredSSP\Parameters" "AllowEncryptionOracle" 0
 
-<a id="03-identities-services-configure-point-and-print-md-5-protected-credentials-delegation"></a>
 # 5. Protected Credentials Delegation
 Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation" "AllowProtectedCreds" 1
 ```
@@ -8340,16 +8046,13 @@ Run the following scripts to audit and remediate these settings.
 [Download Script: Audit-MachineAccountQuota.ps1](audit_scripts/Audit-MachineAccountQuota.ps1)
 
 ```powershell
-<a id="03-identities-services-disable-machine-account-quota-md-audit-machineaccountquotaps1"></a>
 # Audit-MachineAccountQuota.ps1
-<a id="03-identities-services-disable-machine-account-quota-md-description-audits-the-domain-wide-machine-account-quota-attribute-and-local-add-workstations-to-domain-user-right-assignment"></a>
 # Description: Audits the domain-wide machine account quota attribute and local Add workstations to domain user right assignment.
 
 Import-Module ActiveDirectory
 
 Write-Host "--- Auditing Machine Account Quota Settings ---" -ForegroundColor Cyan
 
-<a id="03-identities-services-disable-machine-account-quota-md-1-audit-domain-wide-ms-ds-machineaccountquota"></a>
 # 1. Audit domain-wide ms-DS-MachineAccountQuota
 try {
     $Domain = Get-ADDomain -ErrorAction Stop
@@ -8364,7 +8067,6 @@ try {
     Write-Host "VULNERABLE: Could not audit ms-DS-MachineAccountQuota. Error: $($_.Exception.Message)" -ForegroundColor Red
 }
 
-<a id="03-identities-services-disable-machine-account-quota-md-2-audit-local-user-rights-assignment-for-semachineaccountprivilege"></a>
 # 2. Audit local User Rights Assignment for SeMachineAccountPrivilege
 try {
     $SecCfg = "$($env:temp)\auditpolicy.inf"
@@ -8406,16 +8108,13 @@ try {
 [Download Script: Set-MachineAccountQuota.ps1](implementation_scripts/Set-MachineAccountQuota.ps1)
 
 ```powershell
-<a id="03-identities-services-disable-machine-account-quota-md-set-machineaccountquotaps1"></a>
 # Set-MachineAccountQuota.ps1
-<a id="03-identities-services-disable-machine-account-quota-md-description-sets-the-domain-wide-machine-account-quota-to-0-and-restricts-the-local-add-workstations-to-domain-user-right-to-administrators"></a>
 # Description: Sets the domain-wide machine account quota to 0 and restricts the local Add workstations to domain user right to Administrators.
 
 Import-Module ActiveDirectory
 
 Write-Host "Applying hardening requirement: Disable Machine Account Quota..." -ForegroundColor Cyan
 
-<a id="03-identities-services-disable-machine-account-quota-md-1-remediate-domain-wide-ms-ds-machineaccountquota"></a>
 # 1. Remediate domain-wide ms-DS-MachineAccountQuota
 try {
     $Domain = Get-ADDomain -ErrorAction Stop
@@ -8429,7 +8128,6 @@ try {
     Write-Error "Failed to set ms-DS-MachineAccountQuota. Error: $($_.Exception.Message)"
 }
 
-<a id="03-identities-services-disable-machine-account-quota-md-2-remediate-local-user-rights-assignment-semachineaccountprivilege"></a>
 # 2. Remediate local User Rights Assignment (SeMachineAccountPrivilege)
 try {
     $SecDb = "$($env:temp)\localpolicy.sdb"
@@ -8584,9 +8282,7 @@ Run the following scripts to audit and remediate these configurations.
 [Download Script: Audit-PreWin2000Group.ps1](audit_scripts/Audit-PreWin2000Group.ps1)
 
 ```powershell
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-audit-prewin2000groupps1"></a>
 # Audit-PreWin2000Group.ps1
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-description-audits-the-pre-windows-2000-compatible-access-group-membership-and-local-lsa-registry-configurations"></a>
 # Description: Audits the Pre-Windows 2000 Compatible Access group membership and local LSA registry configurations.
 
 Import-Module ActiveDirectory
@@ -8597,7 +8293,6 @@ $GroupSid = "S-1-5-32-554"
 $NonCompliantSids = @("S-1-1-0", "S-1-5-7", "S-1-5-11")
 $Vulnerable = $false
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-1-audit-group-membership"></a>
 # 1. Audit Group Membership
 try {
     $Group = Get-ADGroup -Identity $GroupSid -Properties Members -ErrorAction Stop
@@ -8629,7 +8324,6 @@ try {
     Write-Host "VULNERABLE: Could not query Pre-Windows 2000 Compatible Access group membership. Error: $($_.Exception.Message)" -ForegroundColor Red
 }
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-2-audit-lsa-registry-security-settings"></a>
 # 2. Audit LSA Registry Security Settings
 $LsaPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
 
@@ -8665,9 +8359,7 @@ foreach ($Key in $Settings.Keys) {
 [Download Script: Set-PreWin2000Group.ps1](implementation_scripts/Set-PreWin2000Group.ps1)
 
 ```powershell
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-set-prewin2000groupps1"></a>
 # Set-PreWin2000Group.ps1
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-description-restricts-pre-windows-2000-compatible-access-group-membership-and-configures-lsa-registry-security-keys"></a>
 # Description: Restricts Pre-Windows 2000 Compatible Access group membership and configures LSA registry security keys.
 
 Import-Module ActiveDirectory
@@ -8677,7 +8369,6 @@ Write-Host "Applying hardening requirement: Restrict Pre-Windows 2000 Compatible
 $GroupSid = "S-1-5-32-554"
 $NonCompliantSids = @("S-1-1-0", "S-1-5-7", "S-1-5-11")
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-1-remediate-group-membership"></a>
 # 1. Remediate Group Membership
 try {
     $Group = Get-ADGroup -Identity $GroupSid -Properties Members -ErrorAction Stop
@@ -8709,7 +8400,6 @@ try {
     Write-Error "Failed to remediate Pre-Windows 2000 Compatible Access group membership. Error: $($_.Exception.Message)"
 }
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-2-remediate-lsa-registry-settings"></a>
 # 2. Remediate LSA Registry Settings
 $LsaPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
 
@@ -8881,21 +8571,16 @@ Run the following scripts locally to audit and configure the firewall profiles a
 [Download Script: Set-ADPortMatrixRules.ps1](implementation_scripts/Set-ADPortMatrixRules.ps1)
 
 ```powershell
-<a id="04-network-firewall-configure-ad-port-matrix-md-set-adportmatrixrulesps1"></a>
 # Set-ADPortMatrixRules.ps1
-<a id="04-network-firewall-configure-ad-port-matrix-md-configures-local-windows-defender-firewall-profiles-and-applies-basic-ad-port-matrix-baseline-rules"></a>
 # Configures local Windows Defender Firewall profiles and applies basic AD port matrix baseline rules.
 
 Write-Host "Applying network firewall baseline policies..." -ForegroundColor Cyan
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-1-enable-firewall-and-set-default-block-inbound"></a>
 # 1. Enable firewall and set default block inbound
 Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True -DefaultInboundAction Block -DefaultOutboundAction Allow
 Write-Host "Firewall profiles enabled with Default Inbound Block." -ForegroundColor Green
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-2-configure-ad-port-matrix-inbound-rules-for-local-system-role-validation"></a>
 # 2. Configure AD Port Matrix inbound rules (for local system role validation)
-<a id="04-network-firewall-configure-ad-port-matrix-md-allow-critical-outbound-by-default-construct-rules-for-inbound"></a>
 # Allow critical outbound by default, construct rules for inbound
 $Rules = @(
     @{ Name = "AD-DNS-TCP"; Port = 53; Proto = "TCP" },
@@ -8943,14 +8628,11 @@ Write-Host "Firewall port matrix configuration completed successfully." -Foregro
 [Download Script: Test-ADPortMatrixRules.ps1](audit_scripts/Test-ADPortMatrixRules.ps1)
 
 ```powershell
-<a id="04-network-firewall-configure-ad-port-matrix-md-test-adportmatrixrulesps1"></a>
 # Test-ADPortMatrixRules.ps1
-<a id="04-network-firewall-configure-ad-port-matrix-md-audits-local-firewall-status-and-checks-if-default-inbound-traffic-is-blocked"></a>
 # Audits local firewall status and checks if default inbound traffic is blocked.
 
 Write-Host "Auditing local network firewall status..." -ForegroundColor Cyan
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-1-check-windows-defender-firewall-state"></a>
 # 1. Check Windows Defender Firewall State
 $Profiles = Get-NetFirewallProfile
 $AllProfilesSecure = $true
@@ -9085,14 +8767,11 @@ Run the following scripts locally to audit and restrict the RPC dynamic port con
 [Download Script: Set-RPCDynamicPorts.ps1](implementation_scripts/Set-RPCDynamicPorts.ps1)
 
 ```powershell
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-set-rpcdynamicportsps1"></a>
 # Set-RPCDynamicPorts.ps1
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-configures-static-rpc-ports-for-ntdsnetlogon-and-restricts-system-wide-ephemeral-range"></a>
 # Configures static RPC ports for NTDS/Netlogon and restricts system-wide ephemeral range.
 
 Write-Host "Configuring RPC dynamic port restrictions..." -ForegroundColor Cyan
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-1-if-domain-controller-configure-static-ports-for-ntds-and-netlogon"></a>
 # 1. If Domain Controller, configure static ports for NTDS and Netlogon
 $IsDC = (Get-CimInstance -ClassName Win32_ComputerSystem).Roles -contains "Primary_Domain_Controller"
 
@@ -9127,11 +8806,9 @@ if ($IsDC) {
     }
 }
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-2-restrict-system-wide-dynamic-rpc-port-range-50000---50100"></a>
 # 2. Restrict system-wide dynamic RPC port range (50000 - 50100)
 Write-Host "[+] Enforcing global dynamic RPC ports via Netsh..." -ForegroundColor Gray
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-configure-ipv4-dynamic-ports"></a>
 # Configure IPv4 Dynamic Ports
 $ProcV4 = Start-Process netsh -ArgumentList "int ipv4 set dynamicport tcp start=50000 num=100" -Wait -NoNewWindow -PassThru
 if ($ProcV4.ExitCode -eq 0) {
@@ -9140,7 +8817,6 @@ if ($ProcV4.ExitCode -eq 0) {
     Write-Error "    Failed to set IPv4 dynamic port range."
 }
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-configure-ipv6-dynamic-ports"></a>
 # Configure IPv6 Dynamic Ports
 $ProcV6 = Start-Process netsh -ArgumentList "int ipv6 set dynamicport tcp start=50000 num=100" -Wait -NoNewWindow -PassThru
 if ($ProcV6.ExitCode -eq 0) {
@@ -9157,9 +8833,7 @@ Write-Host "RPC Dynamic Port configuration applied successfully." -ForegroundCol
 [Download Script: Test-RPCDynamicPorts.ps1](audit_scripts/Test-RPCDynamicPorts.ps1)
 
 ```powershell
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-test-rpcdynamicportsps1"></a>
 # Test-RPCDynamicPorts.ps1
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-audits-dynamic-rpc-configurations-and-static-ports"></a>
 # Audits dynamic RPC configurations and static ports.
 
 Write-Host "Auditing dynamic RPC configurations..." -ForegroundColor Cyan
@@ -9196,14 +8870,12 @@ if ($IsDC) {
     }
 }
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-4-global-dynamic-port-audit-netsh-query"></a>
 # 4. Global Dynamic Port Audit (Netsh query)
 Write-Host "[+] Querying active TCP dynamic port settings..." -ForegroundColor Yellow
 
 $IPv4Ports = netsh int ipv4 show dynamicport tcp
 $IPv6Ports = netsh int ipv6 show dynamicport tcp
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-parse-netsh-output-look-for-start-port-or-number-of-ports"></a>
 # Parse netsh output (look for "Start Port" or number of ports)
 $IPv4Match = $IPv4Ports -join "`n"
 $IPv6Match = $IPv6Ports -join "`n"
@@ -9318,26 +8990,20 @@ Run the following scripts locally to audit and apply workstation/server isolatio
 [Download Script: Set-WorkstationIsolation.ps1](implementation_scripts/Set-WorkstationIsolation.ps1)
 
 ```powershell
-<a id="04-network-firewall-configure-workstation-isolation-md-set-workstationisolationps1"></a>
 # Set-WorkstationIsolation.ps1
-<a id="04-network-firewall-configure-workstation-isolation-md-configures-local-firewall-rules-to-block-inbound-smb-rpc-and-rdp-from-peer-subnets"></a>
 # Configures local firewall rules to block inbound SMB, RPC, and RDP from peer subnets.
-<a id="04-network-firewall-configure-workstation-isolation-md-allows-access-only-from-designated-domain-controller-and-admin-management-subnets"></a>
 # Allows access only from designated Domain Controller and Admin Management subnets.
 
-<a id="04-network-firewall-configure-workstation-isolation-md-adjust-subnets-for-your-local-environment"></a>
 # Adjust subnets for your local environment
 $AdminSubnet = "10.10.0.0/24"      # PAW / Jump Host / DC Subnet
 $PeerSubnet = "10.20.0.0/16"       # Local client/member peer subnet
 
 Write-Host "Applying Workstation and Server Isolation Firewall Rules..." -ForegroundColor Cyan
 
-<a id="04-network-firewall-configure-workstation-isolation-md-1-enable-firewall-profiles"></a>
 # 1. Enable firewall profiles
 Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True
 Write-Host "All firewall profiles enabled." -ForegroundColor Green
 
-<a id="04-network-firewall-configure-workstation-isolation-md-2-block-inbound-smb-tcp-445-from-peer-subnet"></a>
 # 2. Block Inbound SMB (TCP 445) from peer subnet
 New-NetFirewallRule -DisplayName "Hardening: Block Inbound SMB from Peers" `
     -Direction Inbound `
@@ -9349,7 +9015,6 @@ New-NetFirewallRule -DisplayName "Hardening: Block Inbound SMB from Peers" `
     -Enabled True | Out-Null
 Write-Host "SMB peer blocking rule created." -ForegroundColor Green
 
-<a id="04-network-firewall-configure-workstation-isolation-md-3-block-inbound-rdp-tcp-3389-from-peer-subnet"></a>
 # 3. Block Inbound RDP (TCP 3389) from peer subnet
 New-NetFirewallRule -DisplayName "Hardening: Block Inbound RDP from Peers" `
     -Direction Inbound `
@@ -9361,7 +9026,6 @@ New-NetFirewallRule -DisplayName "Hardening: Block Inbound RDP from Peers" `
     -Enabled True | Out-Null
 Write-Host "RDP peer blocking rule created." -ForegroundColor Green
 
-<a id="04-network-firewall-configure-workstation-isolation-md-4-block-inbound-winrm-tcp-5985-5986-from-peer-subnet"></a>
 # 4. Block Inbound WinRM (TCP 5985, 5986) from peer subnet
 New-NetFirewallRule -DisplayName "Hardening: Block Inbound WinRM from Peers" `
     -Direction Inbound `
@@ -9373,7 +9037,6 @@ New-NetFirewallRule -DisplayName "Hardening: Block Inbound WinRM from Peers" `
     -Enabled True | Out-Null
 Write-Host "WinRM peer blocking rule created." -ForegroundColor Green
 
-<a id="04-network-firewall-configure-workstation-isolation-md-5-block-inbound-rpc-tcp-135-from-peer-subnet"></a>
 # 5. Block Inbound RPC (TCP 135) from peer subnet
 New-NetFirewallRule -DisplayName "Hardening: Block Inbound RPC Mapper from Peers" `
     -Direction Inbound `
@@ -9385,7 +9048,6 @@ New-NetFirewallRule -DisplayName "Hardening: Block Inbound RPC Mapper from Peers
     -Enabled True | Out-Null
 Write-Host "RPC Endpoint Mapper peer blocking rule created." -ForegroundColor Green
 
-<a id="04-network-firewall-configure-workstation-isolation-md-6-allow-inbound-administration-from-management-subnet-rdp-winrm-smb"></a>
 # 6. Allow Inbound Administration from Management Subnet (RDP, WinRM, SMB)
 New-NetFirewallRule -DisplayName "Hardening: Allow Admin Management Inbound" `
     -Direction Inbound `
@@ -9405,9 +9067,7 @@ Write-Host "Workstation and Server isolation firewall rules applied successfully
 [Download Script: Test-WorkstationIsolation.ps1](audit_scripts/Test-WorkstationIsolation.ps1)
 
 ```powershell
-<a id="04-network-firewall-configure-workstation-isolation-md-test-workstationisolationps1"></a>
 # Test-WorkstationIsolation.ps1
-<a id="04-network-firewall-configure-workstation-isolation-md-audits-the-presence-of-isolation-blocking-rules-on-local-firewall-profiles"></a>
 # Audits the presence of isolation blocking rules on local firewall profiles.
 
 Write-Host "Auditing workstation and server peer isolation rules..." -ForegroundColor Cyan
@@ -9543,14 +9203,11 @@ Run the following scripts locally to audit and configure Connection Security Rul
 [Download Script: Set-IPsecDomainIsolation.ps1](implementation_scripts/Set-IPsecDomainIsolation.ps1)
 
 ```powershell
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-set-ipsecdomainisolationps1"></a>
 # Set-IPsecDomainIsolation.ps1
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-configures-local-ipsec-connection-security-rules-requesting-kerberos-v5-authentication"></a>
 # Configures local IPsec Connection Security Rules requesting Kerberos V5 authentication.
 
 Write-Host "Configuring IPsec Connection Security Rules..." -ForegroundColor Cyan
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-check-if-the-rule-already-exists"></a>
 # Check if the rule already exists
 $RuleName = "Hardening: IPsec Domain Isolation"
 $ExistingRule = Get-NetIPsecRule -DisplayName $RuleName -ErrorAction SilentlyContinue
@@ -9575,9 +9232,7 @@ if ($null -eq $ExistingRule) {
 [Download Script: Test-IPsecDomainIsolation.ps1](audit_scripts/Test-IPsecDomainIsolation.ps1)
 
 ```powershell
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-test-ipsecdomainisolationps1"></a>
 # Test-IPsecDomainIsolation.ps1
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-checks-the-state-of-local-ipsec-connection-security-rules"></a>
 # Checks the state of local IPsec Connection Security Rules.
 
 Write-Host "Auditing IPsec Connection Security Rules..." -ForegroundColor Cyan
@@ -9694,18 +9349,14 @@ Run the following scripts locally to audit and configure custom cryptographic se
 [Download Script: Set-IPsecCryptography.ps1](implementation_scripts/Set-IPsecCryptography.ps1)
 
 ```powershell
-<a id="04-network-firewall-harden-ipsec-cryptography-md-set-ipseccryptographyps1"></a>
 # Set-IPsecCryptography.ps1
-<a id="04-network-firewall-harden-ipsec-cryptography-md-description-configures-local-ipsec-main-mode-and-quick-mode-custom-cryptographic-configurations"></a>
 # Description: Configures local IPsec Main Mode and Quick Mode custom cryptographic configurations.
 
 Write-Host "Configuring hardened IPsec cryptographic settings..." -ForegroundColor Cyan
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-phase-1-define-main-mode-cryptographic-proposal"></a>
 # Phase 1: Define Main Mode cryptographic proposal
 $MMProposal = New-NetIPsecMainModeCryptoProposal -Encryption AES256 -Hash SHA256 -KeyExchange DH19
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-manage-main-mode-crypto-set"></a>
 # Manage Main Mode Crypto Set
 $MMSetName = "Hardened_MM_CryptoSet"
 $ExistingMM = Get-NetIPsecMainModeCryptoSet -DisplayName $MMSetName -ErrorAction SilentlyContinue
@@ -9718,11 +9369,9 @@ if ($null -eq $ExistingMM) {
     Write-Host "Updated Main Mode crypto set." -ForegroundColor Gray
 }
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-phase-2-define-quick-mode-cryptographic-proposal"></a>
 # Phase 2: Define Quick Mode cryptographic proposal
 $QMProposal = New-NetIPsecQuickModeCryptoProposal -Encapsulation ESP -Encryption AES256 -ESPHash SHA256
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-manage-quick-mode-crypto-set"></a>
 # Manage Quick Mode Crypto Set
 $QMSetName = "Hardened_QM_CryptoSet"
 $ExistingQM = Get-NetIPsecQuickModeCryptoSet -DisplayName $QMSetName -ErrorAction SilentlyContinue
@@ -9735,7 +9384,6 @@ if ($null -eq $ExistingQM) {
     Write-Host "Updated Quick Mode crypto set." -ForegroundColor Gray
 }
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-associate-sets-with-all-local-connection-security-rules-and-main-mode-rules"></a>
 # Associate sets with all local Connection Security Rules and Main Mode Rules
 $Rules = Get-NetIPsecRule -ErrorAction SilentlyContinue
 if ($null -ne $Rules) {
@@ -9759,9 +9407,7 @@ Write-Host "IPsec cryptography configuration applied." -ForegroundColor Green
 [Download Script: Test-IPsecCryptography.ps1](audit_scripts/Test-IPsecCryptography.ps1)
 
 ```powershell
-<a id="04-network-firewall-harden-ipsec-cryptography-md-test-ipseccryptographyps1"></a>
 # Test-IPsecCryptography.ps1
-<a id="04-network-firewall-harden-ipsec-cryptography-md-description-checks-that-ipsec-rules-only-utilize-strong-cryptographic-sets"></a>
 # Description: Checks that IPsec rules only utilize strong cryptographic sets.
 
 Write-Host "Auditing IPsec cryptographic configurations..." -ForegroundColor Cyan
@@ -9948,21 +9594,16 @@ Run the following scripts locally on testing hosts or non-GPO-managed systems.
 [Download Script: Set-TLSConfiguration.ps1](implementation_scripts/Set-TLSConfiguration.ps1)
 
 ```powershell
-<a id="04-network-firewall-harden-tls-configuration-md-set-tlsconfigurationps1"></a>
 # Set-TLSConfiguration.ps1
-<a id="04-network-firewall-harden-tls-configuration-md-description-hardens-tlsschannel-protocols-prioritizes-modern-cipher-suites-and-orders-ecc-curves"></a>
 # Description: Hardens TLS/Schannel protocols, prioritizes modern cipher suites, and orders ECC curves.
 
 Write-Host "Configuring Schannel protocols, cipher suites, and ECC curves..." -ForegroundColor Cyan
 
-<a id="04-network-firewall-harden-tls-configuration-md-define-protocols-to-disable"></a>
 # Define Protocols to disable
 $ProtocolsToDisable = @("SSL 2.0", "SSL 3.0", "TLS 1.0", "TLS 1.1")
-<a id="04-network-firewall-harden-tls-configuration-md-define-protocols-to-enable"></a>
 # Define Protocols to enable
 $ProtocolsToEnable = @("TLS 1.2", "TLS 1.3")
 
-<a id="04-network-firewall-harden-tls-configuration-md-1-configure-protocols"></a>
 # 1. Configure Protocols
 $SchannelRoot = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
 
@@ -9990,14 +9631,12 @@ foreach ($Proto in $ProtocolsToEnable) {
     }
 }
 
-<a id="04-network-firewall-harden-tls-configuration-md-2-configure-ssl-cipher-suite-order-and-ecc-curve-order-policy"></a>
 # 2. Configure SSL Cipher Suite Order and ECC Curve Order Policy
 $SSLConfigPath = "HKLM:\SOFTWARE\Policies\Microsoft\Cryptography\Configuration\SSL\00010002"
 if (-not (Test-Path $SSLConfigPath)) {
     New-Item -Path $SSLConfigPath -Force | Out-Null
 }
 
-<a id="04-network-firewall-harden-tls-configuration-md-define-cipher-suites-list"></a>
 # Define cipher suites list
 $CipherSuites = @(
     "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
@@ -10008,7 +9647,6 @@ $CipherSuites = @(
     "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"
 )
 
-<a id="04-network-firewall-harden-tls-configuration-md-define-ecc-curves-list"></a>
 # Define ECC curves list
 $EccCurves = @(
     "curve25519",
@@ -10016,12 +9654,10 @@ $EccCurves = @(
     "nistP256"
 )
 
-<a id="04-network-firewall-harden-tls-configuration-md-apply-policy-properties"></a>
 # Apply policy properties
 Set-ItemProperty -Path $SSLConfigPath -Name "Functions" -Value $CipherSuites -Type MultiString -Force | Out-Null
 Set-ItemProperty -Path $SSLConfigPath -Name "EccCurves" -Value $EccCurves -Type MultiString -Force | Out-Null
 
-<a id="04-network-firewall-harden-tls-configuration-md-3-configure-net-strong-cryptography-strong-name-bypass-and-winhttp-tls"></a>
 # 3. Configure .NET strong cryptography, strong-name bypass, and WinHTTP TLS
 $RegistryTargets = @(
     @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727"; Name = "SchUseStrongCrypto"; Value = 1; Type = "DWord" }
@@ -10056,9 +9692,7 @@ Write-Host "Schannel configuration applied. A system reboot is required to apply
 [Download Script: Test-TLSConfiguration.ps1](audit_scripts/Test-TLSConfiguration.ps1)
 
 ```powershell
-<a id="04-network-firewall-harden-tls-configuration-md-test-tlsconfigurationps1"></a>
 # Test-TLSConfiguration.ps1
-<a id="04-network-firewall-harden-tls-configuration-md-description-audits-tlsschannel-protocol-configuration-cipher-suites-and-ecc-curves"></a>
 # Description: Audits TLS/Schannel protocol configuration, cipher suites, and ECC curves.
 
 Write-Host "Auditing TLS and Cryptographic configurations..." -ForegroundColor Cyan
@@ -10066,7 +9700,6 @@ Write-Host "Auditing TLS and Cryptographic configurations..." -ForegroundColor C
 $NonCompliantCount = 0
 $SchannelRoot = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
 
-<a id="04-network-firewall-harden-tls-configuration-md-1-audit-protocols"></a>
 # 1. Audit Protocols
 $ProtocolsToDisable = @("SSL 2.0", "SSL 3.0", "TLS 1.0", "TLS 1.1")
 foreach ($Proto in $ProtocolsToDisable) {
@@ -10087,7 +9720,6 @@ foreach ($Proto in $ProtocolsToDisable) {
     }
 }
 
-<a id="04-network-firewall-harden-tls-configuration-md-2-audit-ssl-policy-and-ecc-curves"></a>
 # 2. Audit SSL Policy and ECC Curves
 $SSLConfigPath = "HKLM:\SOFTWARE\Policies\Microsoft\Cryptography\Configuration\SSL\00010002"
 if (Test-Path $SSLConfigPath) {
@@ -10122,7 +9754,6 @@ if (Test-Path $SSLConfigPath) {
     $NonCompliantCount++
 }
 
-<a id="04-network-firewall-harden-tls-configuration-md-3-audit-net-and-winhttp-registry-configurations"></a>
 # 3. Audit .NET and WinHTTP registry configurations
 $RegistryAudits = @(
     @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727"; Name = "SchUseStrongCrypto"; Value = 1 }
@@ -10280,19 +9911,15 @@ Run the following scripts locally to enforce SMBv3 standards.
 [Download Script: Set-SMBSecurity.ps1](implementation_scripts/Set-SMBSecurity.ps1)
 
 ```powershell
-<a id="04-network-firewall-enforce-smbv3-security-md-set-smbsecurityps1"></a>
 # Set-SMBSecurity.ps1
-<a id="04-network-firewall-enforce-smbv3-security-md-description-disables-smbv1-mandates-signing-sets-smbv3-as-minimum-dialect-and-enforces-encryption"></a>
 # Description: Disables SMBv1, mandates signing, sets SMBv3 as minimum dialect, and enforces encryption.
 
 Write-Host "Enforcing SMBv3 security settings..." -ForegroundColor Cyan
 
-<a id="04-network-firewall-enforce-smbv3-security-md-1-disable-smbv1-protocol-globally-server-side"></a>
 # 1. Disable SMBv1 Protocol globally (Server side)
 Set-SmbServerConfiguration -EnableSMB1Protocol $false -Confirm:$false | Out-Null
 Write-Host "SMBv1 server protocol disabled." -ForegroundColor Green
 
-<a id="04-network-firewall-enforce-smbv3-security-md-2-disable-smbv1-driver-windows-optional-feature"></a>
 # 2. Disable SMBv1 Driver (Windows Optional Feature)
 $SMB1Feature = Get-WindowsOptionalFeature -Online -FeatureName "SMB1Protocol" -ErrorAction SilentlyContinue
 if ($null -ne $SMB1Feature -and $SMB1Feature.State -eq "Enabled") {
@@ -10300,22 +9927,18 @@ if ($null -ne $SMB1Feature -and $SMB1Feature.State -eq "Enabled") {
     Write-Host "SMB1 optional feature disabled." -ForegroundColor Green
 }
 
-<a id="04-network-firewall-enforce-smbv3-security-md-3-configure-smb-signing-encryption-on-server"></a>
 # 3. Configure SMB Signing & Encryption on Server
 Set-SmbServerConfiguration -RequireSecuritySignature $true -EncryptData $true -Confirm:$false | Out-Null
 Write-Host "SMB Server signing and encryption mandated." -ForegroundColor Green
 
-<a id="04-network-firewall-enforce-smbv3-security-md-4-configure-smb-signing-encryption-on-client"></a>
 # 4. Configure SMB Signing & Encryption on Client
 Set-SmbClientConfiguration -RequireSecuritySignature $true -Confirm:$false | Out-Null
 Write-Host "SMB Client signing mandated." -ForegroundColor Green
 
-<a id="04-network-firewall-enforce-smbv3-security-md-5-enforce-minimum-dialects-in-registry-server-and-client"></a>
 # 5. Enforce Minimum Dialects in Registry (Server and Client)
 $ServerParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
 $ClientParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters"
 
-<a id="04-network-firewall-enforce-smbv3-security-md-write-minimum-dialect-version-0x00000300-smb-300"></a>
 # Write minimum dialect version 0x00000300 (SMB 3.0.0)
 if (-not (Test-Path $ServerParamsPath)) {
     New-Item -Path $ServerParamsPath -Force | Out-Null
@@ -10327,7 +9950,6 @@ if (-not (Test-Path $ClientParamsPath)) {
 }
 Set-ItemProperty -Path $ClientParamsPath -Name "MinSMB2Dialect" -Value 0x00000300 -Type DWord -Force | Out-Null
 
-<a id="04-network-firewall-enforce-smbv3-security-md-disable-legacy-fallback-protocols-eg-netbios-over-tcpip-if-possible-but-keep-focus-on-smbv3"></a>
 # Disable legacy fallback protocols (e.g. NetBIOS over TCP/IP) if possible, but keep focus on SMBv3
 Write-Host "SMBv3 minimum dialect rules configured." -ForegroundColor Green
 ```
@@ -10337,21 +9959,17 @@ Write-Host "SMBv3 minimum dialect rules configured." -ForegroundColor Green
 [Download Script: Test-SMBSecurity.ps1](audit_scripts/Test-SMBSecurity.ps1)
 
 ```powershell
-<a id="04-network-firewall-enforce-smbv3-security-md-test-smbsecurityps1"></a>
 # Test-SMBSecurity.ps1
-<a id="04-network-firewall-enforce-smbv3-security-md-description-audits-local-smb-configuration-for-signing-encryption-and-dialects"></a>
 # Description: Audits local SMB configuration for signing, encryption, and dialects.
 
 Write-Host "Auditing SMB security configuration..." -ForegroundColor Cyan
 
 $NonCompliantCount = 0
 
-<a id="04-network-firewall-enforce-smbv3-security-md-retrieve-configurations"></a>
 # Retrieve configurations
 $ServerConfig = Get-SmbServerConfiguration
 $ClientConfig = Get-SmbClientConfiguration
 
-<a id="04-network-firewall-enforce-smbv3-security-md-1-audit-smbv1-server-status"></a>
 # 1. Audit SMBv1 Server status
 if ($ServerConfig.EnableSMB1Protocol -eq $true) {
     Write-Host "    - SMBv1 Server protocol is enabled (Non-Compliant)." -ForegroundColor Red
@@ -10360,7 +9978,6 @@ if ($ServerConfig.EnableSMB1Protocol -eq $true) {
     Write-Host "    - SMBv1 Server protocol is disabled (Compliant)." -ForegroundColor Green
 }
 
-<a id="04-network-firewall-enforce-smbv3-security-md-2-audit-signing-requirements"></a>
 # 2. Audit Signing Requirements
 if ($ServerConfig.RequireSecuritySignature -ne $true) {
     Write-Host "    - SMB Server signing is not required (Non-Compliant)." -ForegroundColor Red
@@ -10376,7 +9993,6 @@ if ($ClientConfig.RequireSecuritySignature -ne $true) {
     Write-Host "    - SMB Client signing is mandated (Compliant)." -ForegroundColor Green
 }
 
-<a id="04-network-firewall-enforce-smbv3-security-md-3-audit-encryption-requirements"></a>
 # 3. Audit Encryption Requirements
 if ($ServerConfig.EncryptData -ne $true) {
     Write-Host "    - SMB Server global data encryption is not enforced (Non-Compliant)." -ForegroundColor Red
@@ -10385,7 +10001,6 @@ if ($ServerConfig.EncryptData -ne $true) {
     Write-Host "    - SMB Server global data encryption is enforced (Compliant)." -ForegroundColor Green
 }
 
-<a id="04-network-firewall-enforce-smbv3-security-md-4-audit-registry-dialects"></a>
 # 4. Audit Registry Dialects
 $ServerParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
 $ClientParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters"
@@ -10514,14 +10129,11 @@ Use this method to apply the setting locally (for testing or standalone systems)
 [Download Script: Set-FirewallLoggingAndSettings.ps1](implementation_scripts/Set-FirewallLoggingAndSettings.ps1)
 
 ```powershell
-<a id="04-network-firewall-configure-firewall-logging-md-set-firewallloggingandsettingsps1"></a>
 # Set-FirewallLoggingAndSettings.ps1
-<a id="04-network-firewall-configure-firewall-logging-md-description-configures-windows-defender-firewall-settings-log-size-and-log-permissions-for-all-profiles"></a>
 # Description: Configures Windows Defender Firewall settings, log size, and log permissions for all profiles.
 
 Write-Host "Applying Windows Defender Firewall hardening settings..." -ForegroundColor Cyan
 
-<a id="04-network-firewall-configure-firewall-logging-md-1-detect-if-the-local-system-is-a-domain-controller-producttype-2-is-domain-controller"></a>
 # 1. Detect if the local system is a Domain Controller (ProductType = 2 is Domain Controller)
 $IsDomainController = $false
 $OSInfo = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction SilentlyContinue
@@ -10531,7 +10143,6 @@ if ($null -ne $OSInfo) {
     }
 }
 
-<a id="04-network-firewall-configure-firewall-logging-md-2-configure-domain-private-and-public-profiles"></a>
 # 2. Configure Domain, Private, and Public profiles
 $Profiles = @("Domain", "Private", "Public")
 
@@ -10574,7 +10185,6 @@ Write-Host "Firewall logging and operational settings configuration completed su
 [Download Script: Get-FirewallLoggingAndSettingsStatus.ps1](audit_scripts/Get-FirewallLoggingAndSettingsStatus.ps1)
 
 ```powershell
-<a id="04-network-firewall-configure-firewall-logging-md-get-firewallloggingandsettingsstatusps1"></a>
 # Get-FirewallLoggingAndSettingsStatus.ps1
 Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, DefaultOutboundAction, NotifyOnListen, LogBlocked, LogAllowed, LogMaxSizeKilobytes, LogFileName, AllowLocalFirewallRules, AllowLocalIPsecRules
 ```
@@ -10679,14 +10289,11 @@ Run the following scripts locally to apply the hardened network provider, Lanman
 [Download Script: Set-HardenedUNCAndClientSigning.ps1](implementation_scripts/Set-HardenedUNCAndClientSigning.ps1)
 
 ```powershell
-<a id="04-network-firewall-configure-hardened-unc-paths-md-set-hardeneduncandclientsigningps1"></a>
 # Set-HardenedUNCAndClientSigning.ps1
-<a id="04-network-firewall-configure-hardened-unc-paths-md-description-configures-hardened-unc-paths-for-sysvolnetlogon-disables-insecure-guest-logons-and-enforces-ldap-client-signing"></a>
 # Description: Configures Hardened UNC Paths for SYSVOL/NETLOGON, disables insecure guest logons, and enforces LDAP client signing.
 
 Write-Host "Applying network provider and client channel hardening..." -ForegroundColor Cyan
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-1-hardened-unc-paths-configuration"></a>
 # 1. Hardened UNC Paths configuration
 $UNCPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths"
 if (-not (Test-Path $UNCPath)) {
@@ -10696,7 +10303,6 @@ Set-ItemProperty -Path $UNCPath -Name "\\*\NETLOGON" -Value "RequireIntegrity=1,
 Set-ItemProperty -Path $UNCPath -Name "\\*\SYSVOL" -Value "RequireIntegrity=1,RequireMutualAuthentication=1" -Type String -ErrorAction Stop
 Write-Host "[+] Hardened UNC Paths for NETLOGON and SYSVOL configured." -ForegroundColor Green
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-2-disable-insecure-guest-logons"></a>
 # 2. Disable Insecure Guest Logons
 $LanmanPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation"
 if (-not (Test-Path $LanmanPath)) {
@@ -10705,7 +10311,6 @@ if (-not (Test-Path $LanmanPath)) {
 Set-ItemProperty -Path $LanmanPath -Name "AllowInsecureGuestAuth" -Value 0 -Type DWord -ErrorAction Stop
 Write-Host "[+] Insecure guest logons disabled." -ForegroundColor Green
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-3-enforce-ldap-client-signing-requirements"></a>
 # 3. Enforce LDAP Client Signing Requirements
 $LdapPath = "HKLM:\System\CurrentControlSet\Services\LDAP"
 if (-not (Test-Path $LdapPath)) {
@@ -10719,14 +10324,11 @@ Write-Host "[+] LDAP Client signing requirement set to Negotiate signing." -Fore
 [Download Script: Get-HardenedUNCAndClientSigningStatus.ps1](audit_scripts/Get-HardenedUNCAndClientSigningStatus.ps1)
 
 ```powershell
-<a id="04-network-firewall-configure-hardened-unc-paths-md-get-hardeneduncandclientsigningstatusps1"></a>
 # Get-HardenedUNCAndClientSigningStatus.ps1
-<a id="04-network-firewall-configure-hardened-unc-paths-md-description-audits-the-registry-configuration-of-hardened-unc-paths-lanman-guest-authentication-and-ldap-client-signing"></a>
 # Description: Audits the registry configuration of Hardened UNC Paths, Lanman guest authentication, and LDAP Client signing.
 
 Write-Host "--- Auditing Hardened UNC Paths and Client Signing status ---" -ForegroundColor Cyan
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-1-audit-unc-paths"></a>
 # 1. Audit UNC Paths
 $UNCPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths"
 if (Test-Path $UNCPath) {
@@ -10742,7 +10344,6 @@ if (Test-Path $UNCPath) {
     Write-Host "    - Hardened UNC registry path: NOT FOUND" -ForegroundColor Red
 }
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-2-audit-guest-logons"></a>
 # 2. Audit Guest Logons
 $LanmanPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation"
 $GuestVal = Get-ItemProperty -Path $LanmanPath -Name "AllowInsecureGuestAuth" -ErrorAction SilentlyContinue
@@ -10750,7 +10351,6 @@ $GuestSetting = if ($GuestVal) { $GuestVal.AllowInsecureGuestAuth } else { 1 }
 $GuestColor = if ($GuestSetting -eq 0) { "Green" } else { "Red" }
 Write-Host "    - Allow Insecure Guest Logons: $GuestSetting (Expected: 0)" -ForegroundColor $GuestColor
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-3-audit-ldap-client-signing"></a>
 # 3. Audit LDAP Client Signing
 $LdapPath = "HKLM:\System\CurrentControlSet\Services\LDAP"
 $LdapVal = Get-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -ErrorAction SilentlyContinue
@@ -10871,14 +10471,11 @@ Run the following scripts locally to enforce WinRM client/service and RPC restri
 [Download Script: Set-WinRMAndRpcHardening.ps1](implementation_scripts/Set-WinRMAndRpcHardening.ps1)
 
 ```powershell
-<a id="04-network-firewall-harden-winrm-service-md-set-winrmandrpchardeningps1"></a>
 # Set-WinRMAndRpcHardening.ps1
-<a id="04-network-firewall-harden-winrm-service-md-description-hardens-winrm-clientservice-parameters-and-restricts-remote-rpc-clients"></a>
 # Description: Hardens WinRM client/service parameters and restricts remote RPC clients.
 
 Write-Host "Applying WinRM and RPC channel hardening settings..." -ForegroundColor Cyan
 
-<a id="04-network-firewall-harden-winrm-service-md-1-winrm-client-hardening"></a>
 # 1. WinRM Client Hardening
 $ClientPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client"
 if (-not (Test-Path $ClientPath)) {
@@ -10889,7 +10486,6 @@ Set-ItemProperty -Path $ClientPath -Name "AllowUnencryptedTraffic" -Value 0 -Typ
 Set-ItemProperty -Path $ClientPath -Name "AllowDigest" -Value 0 -Type DWord -ErrorAction Stop
 Write-Host "[+] WinRM Client parameters hardened." -ForegroundColor Green
 
-<a id="04-network-firewall-harden-winrm-service-md-2-winrm-service-hardening"></a>
 # 2. WinRM Service Hardening
 $ServicePath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service"
 if (-not (Test-Path $ServicePath)) {
@@ -10900,7 +10496,6 @@ Set-ItemProperty -Path $ServicePath -Name "AllowUnencryptedTraffic" -Value 0 -Ty
 Set-ItemProperty -Path $ServicePath -Name "DisableRunAs" -Value 1 -Type DWord -ErrorAction Stop
 Write-Host "[+] WinRM Service parameters hardened." -ForegroundColor Green
 
-<a id="04-network-firewall-harden-winrm-service-md-3-rpc-client-restrictions"></a>
 # 3. RPC Client Restrictions
 $RpcPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
 if (-not (Test-Path $RpcPath)) {
@@ -10914,14 +10509,11 @@ Write-Host "[+] Unauthenticated RPC client restrictions enforced (RestrictRemote
 [Download Script: Get-WinRMAndRpcHardeningStatus.ps1](audit_scripts/Get-WinRMAndRpcHardeningStatus.ps1)
 
 ```powershell
-<a id="04-network-firewall-harden-winrm-service-md-get-winrmandrpchardeningstatusps1"></a>
 # Get-WinRMAndRpcHardeningStatus.ps1
-<a id="04-network-firewall-harden-winrm-service-md-description-audits-registry-configuration-of-winrm-clientservice-options-and-rpc-client-restrictions"></a>
 # Description: Audits registry configuration of WinRM client/service options and RPC client restrictions.
 
 Write-Host "--- Auditing WinRM and RPC Hardening Settings ---" -ForegroundColor Cyan
 
-<a id="04-network-firewall-harden-winrm-service-md-1-audit-winrm-client"></a>
 # 1. Audit WinRM Client
 $ClientPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client"
 $ExpectedClient = @{
@@ -10941,7 +10533,6 @@ if (Test-Path $ClientPath) {
     Write-Host "    - WinRM Client Registry: NOT FOUND" -ForegroundColor Red
 }
 
-<a id="04-network-firewall-harden-winrm-service-md-2-audit-winrm-service"></a>
 # 2. Audit WinRM Service
 $ServicePath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service"
 $ExpectedService = @{
@@ -10961,7 +10552,6 @@ if (Test-Path $ServicePath) {
     Write-Host "    - WinRM Service Registry: NOT FOUND" -ForegroundColor Red
 }
 
-<a id="04-network-firewall-harden-winrm-service-md-3-audit-rpc-clients"></a>
 # 3. Audit RPC Clients
 $RpcPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
 $RpcVal = Get-ItemProperty -Path $RpcPath -Name "RestrictRemoteClients" -ErrorAction SilentlyContinue
@@ -11125,14 +10715,11 @@ Run the following scripts locally to query and enforce Advanced Security Audit P
 [Download Script: Set-AdvancedAuditPolicies.ps1](implementation_scripts/Set-AdvancedAuditPolicies.ps1)
 
 ```powershell
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-set-advancedauditpoliciesps1"></a>
 # Set-AdvancedAuditPolicies.ps1
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-configures-advanced-security-audit-policies-and-registry-override-values"></a>
 # Configures Advanced Security Audit Policies and registry override values.
 
 Write-Host "--- Applying Advanced Audit Policies Remediation ---" -ForegroundColor Cyan
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-1-enforce-force-audit-policy-override-scenoapplylegacyauditpolicy-1"></a>
 # 1. Enforce Force Audit Policy Override (SCENoApplyLegacyAuditPolicy = 1)
 Write-Host "[+] Enforcing Advanced Audit Policy Registry Override..." -ForegroundColor Gray
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
@@ -11142,7 +10729,6 @@ if (-not (Test-Path $LsaPath)) {
 Set-ItemProperty -Path $LsaPath -Name "SCENoApplyLegacyAuditPolicy" -Value 1 -Type DWord
 Write-Host "    Force advanced audit policy override enabled." -ForegroundColor Green
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-enforce-kerberos-debug-logging-disabled-loglevel-0"></a>
 # Enforce Kerberos Debug Logging disabled (LogLevel = 0)
 $KerbPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
 if (-not (Test-Path $KerbPath)) {
@@ -11151,7 +10737,6 @@ if (-not (Test-Path $KerbPath)) {
 Set-ItemProperty -Path $KerbPath -Name "LogLevel" -Value 0 -Type DWord -Force
 Write-Host "    Kerberos debug events logging disabled." -ForegroundColor Green
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-2-configure-advanced-audit-policy-subcategories"></a>
 # 2. Configure Advanced Audit Policy subcategories
 $Policies = @(
     @{ Subcategory = "Kerberos Authentication Service"; Success = "enable"; Failure = "enable" },
@@ -11207,14 +10792,11 @@ Write-Host "Advanced Audit Policies applied successfully." -ForegroundColor Cyan
 [Download Script: Test-AdvancedAuditPolicies.ps1](audit_scripts/Test-AdvancedAuditPolicies.ps1)
 
 ```powershell
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-test-advancedauditpoliciesps1"></a>
 # Test-AdvancedAuditPolicies.ps1
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-audits-advanced-audit-policy-settings-and-the-force-override-configuration"></a>
 # Audits Advanced Audit Policy settings and the force override configuration.
 
 Write-Host "--- Auditing Advanced Security Audit Policies ---" -ForegroundColor Cyan
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-1-audit-force-audit-policy-override-scenoapplylegacyauditpolicy"></a>
 # 1. Audit Force Audit Policy Override (SCENoApplyLegacyAuditPolicy)
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
 $OverrideVal = Get-ItemProperty -Path $LsaPath -Name "SCENoApplyLegacyAuditPolicy" -ErrorAction SilentlyContinue
@@ -11229,7 +10811,6 @@ if ($OverrideSetting -eq 1) {
 }
 Write-Host "    - Force Advanced Audit Policy Override: $($OverrideSetting) (Required = 1)" -ForegroundColor $OverrideColor
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-audit-kerberos-loglevel"></a>
 # Audit Kerberos LogLevel
 $KerbPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
 if (Test-Path $KerbPath) {
@@ -11241,7 +10822,6 @@ if (Test-Path $KerbPath) {
     Write-Host "    - Kerberos Debug LogLevel: Not Configured (Default/Compliant as it inherits disabled)" -ForegroundColor Green
 }
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-2-audit-specific-subcategories"></a>
 # 2. Audit specific subcategories
 $RequiredPolicies = @(
     @{ Subcategory = "Kerberos Authentication Service"; Expected = "Success and Failure" },
@@ -11418,14 +10998,11 @@ Run the following scripts locally to configure command line process creation, Po
 [Download Script: Set-PowerShellAuditing.ps1](implementation_scripts/Set-PowerShellAuditing.ps1)
 
 ```powershell
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-set-powershellauditingps1"></a>
 # Set-PowerShellAuditing.ps1
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-configures-command-line-auditing-powershell-logging-transcription-and-hardens-folder-acls"></a>
 # Configures command line auditing, PowerShell logging, transcription, and hardens folder ACLs.
 
 Write-Host "--- Applying PowerShell & Command Line Auditing Remediation ---" -ForegroundColor Cyan
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-1-enable-process-creation-command-line-auditing"></a>
 # 1. Enable Process Creation Command-Line Auditing
 Write-Host "[+] Configuring Command Line Process Auditing..." -ForegroundColor Gray
 $ProcAuditReg = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit"
@@ -11435,7 +11012,6 @@ if (-not (Test-Path $ProcAuditReg)) {
 Set-ItemProperty -Path $ProcAuditReg -Name "ProcessCreationIncludeCmdLine_Policy" -Value 1 -Type DWord
 Write-Host "    Command line process auditing enabled." -ForegroundColor Green
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-2-configure-powershell-script-block-logging"></a>
 # 2. Configure PowerShell Script Block Logging
 Write-Host "[+] Configuring PowerShell Script Block Logging..." -ForegroundColor Gray
 $ScriptBlockReg = "HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging"
@@ -11446,7 +11022,6 @@ Set-ItemProperty -Path $ScriptBlockReg -Name "EnableScriptBlockLogging" -Value 1
 Set-ItemProperty -Path $ScriptBlockReg -Name "EnableScriptBlockInvocationLogging" -Value 0 -Type DWord
 Write-Host "    PowerShell Script Block Logging enabled and invocation start/stop logging disabled." -ForegroundColor Green
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-3-configure-powershell-module-logging"></a>
 # 3. Configure PowerShell Module Logging
 Write-Host "[+] Configuring PowerShell Module Logging..." -ForegroundColor Gray
 $ModuleReg = "HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging"
@@ -11462,7 +11037,6 @@ if (-not (Test-Path $ModuleNamesReg)) {
 Set-ItemProperty -Path $ModuleNamesReg -Name "*" -Value "*" -Type String
 Write-Host "    PowerShell Module Logging enabled for all modules." -ForegroundColor Green
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-4-configure-powershell-transcription"></a>
 # 4. Configure PowerShell Transcription
 Write-Host "[+] Configuring PowerShell Transcription Registry settings..." -ForegroundColor Gray
 $TransReg = "HKLM:\Software\Policies\Microsoft\Windows\PowerShell\Transcription"
@@ -11475,20 +11049,17 @@ Set-ItemProperty -Path $TransReg -Name "EnableInvocationHeader" -Value 1 -Type D
 Set-ItemProperty -Path $TransReg -Name "OutputDirectory" -Value $TranscriptPath -Type String
 Write-Host "    PowerShell Transcription registry keys configured." -ForegroundColor Green
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-5-create-and-harden-powershell-transcript-folder"></a>
 # 5. Create and Harden PowerShell Transcript Folder
 Write-Host "[+] Setting up hardened NTFS permissions on $($TranscriptPath)..." -ForegroundColor Gray
 if (-not (Test-Path $TranscriptPath)) {
     New-Item -Path $TranscriptPath -ItemType Directory -Force | Out-Null
 }
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-fetch-acl-and-disable-inheritance-copying-existing-rules"></a>
 # Fetch ACL and disable inheritance, copying existing rules
 $Acl = Get-Acl -Path $TranscriptPath
 $Acl.SetAccessRuleProtection($true, $true)
 Set-Acl -Path $TranscriptPath -AclObject $Acl
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-refresh-acl-and-remove-userauthenticated-user-permissions"></a>
 # Refresh ACL and remove user/authenticated user permissions
 $Acl = Get-Acl -Path $TranscriptPath
 $Rules = $Acl.Access
@@ -11499,9 +11070,7 @@ foreach ($Rule in $Rules) {
     }
 }
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-define-write-only-permissions-for-authenticated-users"></a>
 # Define write-only permissions for Authenticated Users
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-createfilesappenddata-allows-logging-while-missing-listdirectoryreaddata-blocks-viewing-transcripts"></a>
 # CreateFiles/AppendData allows logging, while missing ListDirectory/ReadData blocks viewing transcripts.
 $WriteRights = [System.Security.AccessControl.FileSystemRights]("CreateFiles, AppendData, ReadAttributes, WriteAttributes")
 $InheritanceFlags = [System.Security.AccessControl.InheritanceFlags]("ContainerInherit, ObjectInherit")
@@ -11519,14 +11088,11 @@ Write-Host "    Hardened NTFS permissions applied to $($TranscriptPath) successf
 [Download Script: Test-PowerShellAuditing.ps1](audit_scripts/Test-PowerShellAuditing.ps1)
 
 ```powershell
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-test-powershellauditingps1"></a>
 # Test-PowerShellAuditing.ps1
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-audits-command-line-process-creation-powershell-logging-and-transcript-folder-permissions"></a>
 # Audits command line process creation, PowerShell logging, and transcript folder permissions.
 
 Write-Host "--- Auditing PowerShell & Command Line Auditing ---" -ForegroundColor Cyan
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-1-audit-process-command-line-logging"></a>
 # 1. Audit Process Command-Line Logging
 $ProcPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit"
 $CmdLineVal = Get-ItemProperty -Path $ProcPath -Name "ProcessCreationIncludeCmdLine_Policy" -ErrorAction SilentlyContinue
@@ -11540,7 +11106,6 @@ if ($CmdSetting -eq 1) {
 }
 Write-Host "    - Command Line Process Auditing: $($CmdSetting) (Required = 1)" -ForegroundColor $CmdColor
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-2-audit-script-block-logging"></a>
 # 2. Audit Script Block Logging
 $SBPath = "HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging"
 $SBVal = Get-ItemProperty -Path $SBPath -Name "EnableScriptBlockLogging" -ErrorAction SilentlyContinue
@@ -11565,7 +11130,6 @@ if ($SBInvSetting -eq 0) {
 }
 Write-Host "    - PowerShell Script Block Invocation Logging (Start/Stop): $($SBInvSetting) (Required = 0)" -ForegroundColor $SBInvColor
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-3-audit-module-logging"></a>
 # 3. Audit Module Logging
 $ModPath = "HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging"
 $ModVal = Get-ItemProperty -Path $ModPath -Name "EnableModuleLogging" -ErrorAction SilentlyContinue
@@ -11579,7 +11143,6 @@ if ($ModSetting -eq 1) {
 }
 Write-Host "    - PowerShell Module Logging: $($ModSetting) (Required = 1)" -ForegroundColor $ModColor
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-4-audit-transcription-setup"></a>
 # 4. Audit Transcription Setup
 $TransPath = "HKLM:\Software\Policies\Microsoft\Windows\PowerShell\Transcription"
 $TransVal = Get-ItemProperty -Path $TransPath -Name "EnableTranscripting" -ErrorAction SilentlyContinue
@@ -11600,7 +11163,6 @@ if ($TransDirVal) {
 }
 Write-Host "    - PowerShell Transcription Directory: $($TransDir)" -ForegroundColor (if ($TransDir) { "Green" } else { "Red" })
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-5-audit-transcript-folder-security-permissions"></a>
 # 5. Audit Transcript Folder Security Permissions
 if ($TransDir) {
     if (-not (Test-Path $TransDir)) {
@@ -11778,14 +11340,11 @@ Run the following scripts locally to deploy/configure Sysmon and verify its oper
 [Download Script: Set-SysmonHardening.ps1](implementation_scripts/Set-SysmonHardening.ps1)
 
 ```powershell
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-set-sysmonhardeningps1"></a>
 # Set-SysmonHardening.ps1
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-configures-sysmon-service-recovery-settings"></a>
 # Configures Sysmon service recovery settings.
 
 Write-Host "--- Hardening Sysmon Service Recovery Settings ---" -ForegroundColor Cyan
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-1-ensure-sysmon-service-is-installed-and-configured"></a>
 # 1. Ensure Sysmon Service is installed and configured
 $SysmonService = Get-Service -Name "Sysmon" -ErrorAction SilentlyContinue
 if (-not $SysmonService) {
@@ -11793,7 +11352,6 @@ if (-not $SysmonService) {
     exit 1
 }
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-2-configure-service-failure-recovery-options-via-scexe"></a>
 # 2. Configure Service Failure Recovery options via sc.exe
 Write-Host "[+] Configuring service failure recovery actions for Sysmon..." -ForegroundColor Gray
 $ScArgs = "failure Sysmon actions= restart/60000/restart/60000/restart/60000 reset= 86400"
@@ -11810,14 +11368,11 @@ if ($Process.ExitCode -eq 0) {
 [Download Script: Test-SysmonHardening.ps1](audit_scripts/Test-SysmonHardening.ps1)
 
 ```powershell
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-test-sysmonhardeningps1"></a>
 # Test-SysmonHardening.ps1
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-audits-sysmon-service-driver-execution-and-recovery-actions"></a>
 # Audits Sysmon service, driver execution, and recovery actions.
 
 Write-Host "--- Auditing Sysmon Hardening State ---" -ForegroundColor Cyan
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-1-verify-sysmon-service-status"></a>
 # 1. Verify Sysmon Service status
 $SysmonService = Get-Service -Name "Sysmon" -ErrorAction SilentlyContinue
 $ServiceStatus = "Stopped"
@@ -11827,7 +11382,6 @@ if ($SysmonService) {
 $ServiceColor = if ($ServiceStatus -eq "Running") { "Green" } else { "Red" }
 Write-Host "    - Sysmon Service Status: $($ServiceStatus) (Required = Running)" -ForegroundColor $ServiceColor
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-2-verify-sysmon-filter-driver-sysmondrv"></a>
 # 2. Verify Sysmon Filter Driver (SysmonDrv)
 $DriverRunning = $false
 $DriverCheck = fltmc.exe filters
@@ -11839,7 +11393,6 @@ foreach ($Line in $DriverCheck) {
 $DriverColor = if ($DriverRunning) { "Green" } else { "Red" }
 Write-Host "    - Sysmon Kernel Driver Loaded: $($DriverRunning) (Required = True)" -ForegroundColor $DriverColor
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-3-verify-service-failure-recovery-options"></a>
 # 3. Verify Service Failure Recovery Options
 $FailureInfo = sc.exe qfailure Sysmon
 $HasReset = $false
@@ -11926,14 +11479,12 @@ winlogbeat.event_logs:
   - name: Microsoft-Windows-Sysmon/Operational
   - name: Microsoft-Windows-PowerShell/Operational
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-enforce-disk-assisted-memory-queue-limits-to-prevent-memory-exhaustion"></a>
 # Enforce disk-assisted memory queue limits to prevent memory exhaustion
 queue.mem:
   events: 4096
   flush.min_events: 2048
   flush.timeout: 1s
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-output-to-logstashsiem-with-tls-settings"></a>
 # Output to Logstash/SIEM with TLS settings
 output.logstash:
   hosts: ["local-logstash.internal.local:5044"]
@@ -11998,9 +11549,7 @@ Run the following scripts locally to secure agent configuration files and verify
 [Download Script: Set-SiemLogShipping.ps1](implementation_scripts/Set-SiemLogShipping.ps1)
 
 ```powershell
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-set-siemlogshippingps1"></a>
 # Set-SiemLogShipping.ps1
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-secures-winlogbeat-and-wazuh-log-shipping-configuration-file-acls"></a>
 # Secures Winlogbeat and Wazuh log shipping configuration file ACLs.
 
 Write-Host "--- Hardening SIEM Shipping Agent Configurations ---" -ForegroundColor Cyan
@@ -12057,14 +11606,11 @@ foreach ($File in $ConfigFiles) {
 [Download Script: Test-SiemLogShipping.ps1](audit_scripts/Test-SiemLogShipping.ps1)
 
 ```powershell
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-test-siemlogshippingps1"></a>
 # Test-SiemLogShipping.ps1
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-audits-siem-shipping-agents-configuration-permissions-and-security"></a>
 # Audits SIEM shipping agents, configuration permissions, and security.
 
 Write-Host "--- Auditing SIEM Log Shipping Agents ---" -ForegroundColor Cyan
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-1-audit-agent-services"></a>
 # 1. Audit Agent Services
 $Services = @("winlogbeat", "WazuhSvc")
 foreach ($SvcName in $Services) {
@@ -12077,7 +11623,6 @@ foreach ($SvcName in $Services) {
     Write-Host "    - Agent Service '$($SvcName)': $($Status)" -ForegroundColor $Color
 }
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-2-audit-config-file-access-permissions"></a>
 # 2. Audit Config File Access Permissions
 $ConfigFiles = @(
     "C:\Program Files\Winlogbeat\winlogbeat.yml",
@@ -12271,16 +11816,13 @@ Run this script locally on a Domain Controller to query the status and location 
 [Download Script: Audit-ADBackupStatus.ps1](audit_scripts/Audit-ADBackupStatus.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-ops-and-maintenance-md-audit-adbackupstatusps1"></a>
 # Audit-ADBackupStatus.ps1
-<a id="06-operations-maintenance-ops-and-maintenance-md-audits-the-status-of-local-system-state-backups"></a>
 # Audits the status of local system state backups.
 
 Import-Module WindowsServerBackup -ErrorAction SilentlyContinue
 
 Write-Host "--- Auditing System State Backup Status ---" -ForegroundColor Cyan
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-check-if-windows-server-backup-feature-is-installed"></a>
 # Check if Windows Server Backup feature is installed
 $feature = Get-WindowsFeature -Name Windows-Server-Backup -ErrorAction SilentlyContinue
 if ($feature -and $feature.Installed -eq $false) {
@@ -12288,7 +11830,6 @@ if ($feature -and $feature.Installed -eq $false) {
     exit 1
 }
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-retrieve-history-of-local-backups"></a>
 # Retrieve history of local backups
 try {
     $backups = Get-WBBackupSet -ErrorAction Stop
@@ -12314,14 +11855,11 @@ Execute the following PowerShell script to install the Windows Server Backup fea
 [Download Script: Set-ADSystemStateBackup.ps1](implementation_scripts/Set-ADSystemStateBackup.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-ops-and-maintenance-md-set-adsystemstatebackupps1"></a>
 # Set-ADSystemStateBackup.ps1
-<a id="06-operations-maintenance-ops-and-maintenance-md-installs-windows-server-backup-and-executes-a-system-state-backup"></a>
 # Installs Windows Server Backup and executes a System State backup.
 
 Write-Host "--- Initializing System State Backup ---" -ForegroundColor Cyan
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-1-install-windows-server-backup-feature-if-missing"></a>
 # 1. Install Windows Server Backup feature if missing
 $feature = Get-WindowsFeature -Name Windows-Server-Backup
 if ($feature.Installed -eq $false) {
@@ -12332,11 +11870,9 @@ if ($feature.Installed -eq $false) {
     Write-Host "[+] Windows Server Backup feature is already installed." -ForegroundColor Green
 }
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-import-wsb-module"></a>
 # Import WSB module
 Import-Module WindowsServerBackup
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-2-define-backup-volume-target"></a>
 # 2. Define Backup Volume Target
 $BackupVolumePath = "E:\" # Replace with your designated offline backup storage disk
 if (-not (Test-Path $BackupVolumePath)) {
@@ -12344,7 +11880,6 @@ if (-not (Test-Path $BackupVolumePath)) {
     exit 1
 }
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-3-create-backup-policy"></a>
 # 3. Create Backup Policy
 Write-Host "[+] Configuring System State Backup Policy..." -ForegroundColor Gray
 $policy = New-WBPolicy
@@ -12355,12 +11890,10 @@ Add-WBBackupTarget -Policy $policy -Target $backupTarget | Out-Null
 
 Write-Host "    Backup Policy created (Target: $BackupVolumePath, Subject: SystemState)." -ForegroundColor Green
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-4-execute-backup-job"></a>
 # 4. Execute Backup Job
 Write-Host "[+] Starting System State Backup. This process can take several minutes..." -ForegroundColor Yellow
 $backupJob = Start-WBBackup -Policy $policy -Async
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-monitor-backup-job-status"></a>
 # Monitor backup job status
 while ($backupJob.State -eq "Running" -or $backupJob.State -eq "Verifying") {
     Write-Host "    - Backup Progress: $($backupJob.PercentComplete)% complete..." -ForegroundColor Gray
@@ -12369,7 +11902,6 @@ while ($backupJob.State -eq "Running" -or $backupJob.State -eq "Verifying") {
     $backupJob = Get-WBJob
 }
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-final-output"></a>
 # Final output
 $finalJob = Get-WBJob -Previous 1
 if ($finalJob.JobState -eq "Completed") {
@@ -12385,9 +11917,7 @@ if ($finalJob.JobState -eq "Completed") {
 [Download Script: Audit-CrashControl.ps1](audit_scripts/Audit-CrashControl.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-ops-and-maintenance-md-audit-crashcontrolps1"></a>
 # Audit-CrashControl.ps1
-<a id="06-operations-maintenance-ops-and-maintenance-md-description-audits-whether-detailed-bsod-parameters-are-enabled-in-the-registry"></a>
 # Description: Audits whether detailed BSOD parameters are enabled in the registry.
 
 Write-Host "--- Auditing Detailed BSOD Parameters ---" -ForegroundColor Cyan
@@ -12413,9 +11943,7 @@ if (Test-Path $Path) {
 [Download Script: Set-CrashControl.ps1](implementation_scripts/Set-CrashControl.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-ops-and-maintenance-md-set-crashcontrolps1"></a>
 # Set-CrashControl.ps1
-<a id="06-operations-maintenance-ops-and-maintenance-md-description-enables-detailed-bsod-parameters-in-the-registry"></a>
 # Description: Enables detailed BSOD parameters in the registry.
 
 Write-Host "--- Configuring Detailed BSOD Parameters ---" -ForegroundColor Cyan
@@ -12509,16 +12037,13 @@ Use the following scripts to audit the age of the `krbtgt` password and programm
 [Download Script: Reset-KrbtgtPassword.ps1](implementation_scripts/Reset-KrbtgtPassword.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-reset-krbtgtpasswordps1"></a>
 # Reset-KrbtgtPassword.ps1
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-description-resets-the-password-of-the-krbtgt-account-with-a-strong-random-password"></a>
 # Description: Resets the password of the krbtgt account with a strong, random password.
 
 Import-Module ActiveDirectory
 
 Write-Host "Applying hardening requirement: KRBTGT Password Rotation..." -ForegroundColor Cyan
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-1-retrieve-the-krbtgt-account"></a>
 # 1. Retrieve the krbtgt account
 $Krbtgt = Get-ADUser -Filter "Name -eq 'krbtgt'" -Properties PasswordLastSet, Enabled
 if (-not $Krbtgt) {
@@ -12528,7 +12053,6 @@ if (-not $Krbtgt) {
 
 Write-Host "Current KRBTGT Password Last Set: $($Krbtgt.PasswordLastSet)" -ForegroundColor White
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-2-generate-a-strong-random-password-128-characters"></a>
 # 2. Generate a strong random password (128 characters)
 $Length = 128
 $Chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-="
@@ -12539,7 +12063,6 @@ foreach ($Char in $RandomPassword.ToCharArray()) {
     $SecurePassword.AppendChar($Char)
 }
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-3-apply-the-password-change"></a>
 # 3. Apply the password change
 try {
     Set-ADAccountPassword -Identity $Krbtgt -NewPassword $SecurePassword -Reset -ErrorAction Stop
@@ -12557,9 +12080,7 @@ try {
 [Download Script: Get-KrbtgtRotationStatus.ps1](audit_scripts/Get-KrbtgtRotationStatus.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-get-krbtgtrotationstatusps1"></a>
 # Get-KrbtgtRotationStatus.ps1
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-description-audits-the-password-age-of-the-krbtgt-account"></a>
 # Description: Audits the password age of the krbtgt account.
 
 Import-Module ActiveDirectory
@@ -12668,9 +12189,7 @@ Run the following scripts to audit and activate the optional feature forest-wide
 [Download Script: Audit-ADRecycleBin.ps1](audit_scripts/Audit-ADRecycleBin.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-enable-recycle-bin-md-audit-adrecyclebinps1"></a>
 # Audit-ADRecycleBin.ps1
-<a id="06-operations-maintenance-enable-recycle-bin-md-description-audits-the-enablement-status-of-the-ad-recycle-bin"></a>
 # Description: Audits the enablement status of the AD Recycle Bin.
 
 Import-Module ActiveDirectory
@@ -12697,9 +12216,7 @@ try {
 [Download Script: Enable-ADRecycleBin.ps1](implementation_scripts/Enable-ADRecycleBin.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-enable-recycle-bin-md-enable-adrecyclebinps1"></a>
 # Enable-ADRecycleBin.ps1
-<a id="06-operations-maintenance-enable-recycle-bin-md-description-enables-the-active-directory-recycle-bin-optional-feature-forest-wide"></a>
 # Description: Enables the Active Directory Recycle Bin optional feature forest-wide.
 
 Import-Module ActiveDirectory
@@ -12799,9 +12316,7 @@ Run the following scripts to audit and initialize the Central Store folder struc
 [Download Script: Audit-GPOCentralStore.ps1](audit_scripts/Audit-GPOCentralStore.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-maintain-gpo-templates-md-audit-gpocentralstoreps1"></a>
 # Audit-GPOCentralStore.ps1
-<a id="06-operations-maintenance-maintain-gpo-templates-md-description-audits-the-existence-of-the-gpo-central-store-in-sysvol"></a>
 # Description: Audits the existence of the GPO Central Store in SYSVOL.
 
 Import-Module ActiveDirectory
@@ -12833,9 +12348,7 @@ try {
 [Download Script: Create-GPOCentralStore.ps1](implementation_scripts/Create-GPOCentralStore.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-maintain-gpo-templates-md-create-gpocentralstoreps1"></a>
 # Create-GPOCentralStore.ps1
-<a id="06-operations-maintenance-maintain-gpo-templates-md-description-initializes-the-central-store-directory-structure-in-sysvol"></a>
 # Description: Initializes the Central Store directory structure in SYSVOL.
 
 Import-Module ActiveDirectory
@@ -12937,9 +12450,7 @@ Run the following scripts to audit and import custom templates.
 [Download Script: Audit-ThirdPartyTemplates.ps1](audit_scripts/Audit-ThirdPartyTemplates.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-use-third-party-templates-md-audit-thirdpartytemplatesps1"></a>
 # Audit-ThirdPartyTemplates.ps1
-<a id="06-operations-maintenance-use-third-party-templates-md-description-checks-the-gpo-central-store-for-common-third-party-templates"></a>
 # Description: Checks the GPO Central Store for common third-party templates.
 
 Import-Module ActiveDirectory
@@ -12983,16 +12494,13 @@ try {
 [Download Script: Import-ThirdPartyTemplate.ps1](implementation_scripts/Import-ThirdPartyTemplate.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-use-third-party-templates-md-import-thirdpartytemplateps1"></a>
 # Import-ThirdPartyTemplate.ps1
-<a id="06-operations-maintenance-use-third-party-templates-md-description-copies-a-specified-admx-and-adml-template-to-the-central-store"></a>
 # Description: Copies a specified ADMX and ADML template to the Central Store.
 
 Import-Module ActiveDirectory
 
 Write-Host "Applying hardening requirement: Copy GPO Templates to Central Store..." -ForegroundColor Cyan
 
-<a id="06-operations-maintenance-use-third-party-templates-md-define-local-source-paths-for-templates-to-be-populated-by-administrator"></a>
 # Define local source paths for templates (to be populated by administrator)
 $SourceAdmx = "C:\SourceTemplates\msedge.admx"
 $SourceAdml = "C:\SourceTemplates\en-US\msedge.adml"
@@ -13119,9 +12627,7 @@ Run the following script block to apply the dedicated WSUS target server configu
 [Download Script: Set-LocalWsusServer.ps1](implementation_scripts/Set-LocalWsusServer.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-set-localwsusserverps1"></a>
 # Set-LocalWsusServer.ps1
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-description-configures-the-local-client-registry-to-utilize-the-dedicated-tier-0-wsus-over-https"></a>
 # Description: Configures the local client registry to utilize the dedicated Tier 0 WSUS over HTTPS.
 
 Write-Host "Applying hardening requirement: Configure Dedicated WSUS for Tier 0..." -ForegroundColor Cyan
@@ -13133,12 +12639,10 @@ if (-not (Test-Path $WsusRegPath)) {
     New-Item -Path $WsusRegPath -Force | Out-Null
 }
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-1-configure-target-wsus-server-values"></a>
 # 1. Configure target WSUS server values
 Set-ItemProperty -Path $WsusRegPath -Name "WUServer" -Value $WsusServerUrl -Type String -ErrorAction Stop
 Set-ItemProperty -Path $WsusRegPath -Name "WUStatusServer" -Value $WsusServerUrl -Type String -ErrorAction Stop
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-2-force-windows-update-configuration-to-use-local-settings"></a>
 # 2. Force Windows Update configuration to use local settings
 $UpdateAuPath = "HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU"
 if (-not (Test-Path $UpdateAuPath)) {
@@ -13153,9 +12657,7 @@ Write-Host "[+] Local system configured to use secure WSUS server: $WsusServerUr
 [Download Script: Get-WsusConfigStatus.ps1](audit_scripts/Get-WsusConfigStatus.ps1)
 
 ```powershell
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-get-wsusconfigstatusps1"></a>
 # Get-WsusConfigStatus.ps1
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-description-audits-local-wsus-configuration-settings"></a>
 # Description: Audits local WSUS configuration settings.
 
 $WsusRegPath = "HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate"
@@ -13361,14 +12863,11 @@ Configure the Application Identity service (`AppIDSvc`) and import the robust Ap
 [Download Script: Configure-PawAppLockerService.ps1](implementation_scripts/Configure-PawAppLockerService.ps1)
 
 ```powershell
-<a id="07-paws-configure-applocker-policies-md-configure-pawapplockerserviceps1"></a>
 # Configure-PawAppLockerService.ps1
-<a id="07-paws-configure-applocker-policies-md-description-configures-the-application-identity-service-appidsvc-to-start-automatically-and-imports-a-robust-applocker-xml-policy"></a>
 # Description: Configures the Application Identity service (AppIDSvc) to start automatically and imports a robust AppLocker XML policy.
 
 Write-Host "Applying AppLocker Identity service hardening..." -ForegroundColor Cyan
 
-<a id="07-paws-configure-applocker-policies-md-1-enable-application-identity-service-appidsvc"></a>
 # 1. Enable Application Identity service (AppIDSvc)
 $AppLockerService = Get-Service -Name AppIDSvc -ErrorAction SilentlyContinue
 if ($AppLockerService) {
@@ -13379,7 +12878,6 @@ if ($AppLockerService) {
     Write-Warning "[-] Application Identity Service not found on this machine."
 }
 
-<a id="07-paws-configure-applocker-policies-md-2-configure-local-applocker-policy-xml-content"></a>
 # 2. Configure local AppLocker policy XML content
 $AppLockerXml = @"
 <AppLockerPolicy Version="1">
@@ -13506,7 +13004,6 @@ $AppLockerXml = @"
 </AppLockerPolicy>
 "@
 
-<a id="07-paws-configure-applocker-policies-md-write-the-temporary-xml-and-import-it"></a>
 # Write the temporary XML and import it
 $TempPath = Join-Path -Path $env:TEMP -ChildPath "AppLockerPawPolicy.xml"
 $AppLockerXml | Out-File -FilePath $TempPath -Encoding UTF8 -Force
@@ -13523,7 +13020,6 @@ try {
     }
 }
 
-<a id="07-paws-configure-applocker-policies-md-3-disable-ntvdm-16-bit-compatibility-via-registry"></a>
 # 3. Disable NTVDM (16-bit compatibility) via Registry
 $NtvdmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
 if (-not (Test-Path $NtvdmPath)) {
@@ -13538,14 +13034,11 @@ Write-Host "[+] 16-bit NTVDM compatibility disabled in registry." -ForegroundCol
 [Download Script: Test-PawAppLockerStatus.ps1](audit_scripts/Test-PawAppLockerStatus.ps1)
 
 ```powershell
-<a id="07-paws-configure-applocker-policies-md-test-pawapplockerstatusps1"></a>
 # Test-PawAppLockerStatus.ps1
-<a id="07-paws-configure-applocker-policies-md-description-checks-the-current-configuration-and-operational-status-of-the-application-identity-service"></a>
 # Description: Checks the current configuration and operational status of the Application Identity service.
 
 Write-Host "--- Auditing AppLocker Service Status ---" -ForegroundColor Cyan
 
-<a id="07-paws-configure-applocker-policies-md-1-audit-service-state"></a>
 # 1. Audit service state
 $AppIDSvc = Get-Service -Name AppIDSvc -ErrorAction SilentlyContinue
 
@@ -13559,7 +13052,6 @@ if ($AppIDSvc) {
     Write-Host "    - VULNERABLE: Application Identity Service (AppIDSvc) is not installed." -ForegroundColor Red
 }
 
-<a id="07-paws-configure-applocker-policies-md-2-audit-enforcement-registry-settings"></a>
 # 2. Audit enforcement registry settings
 $SrpPath = "HKLM:\Software\Policies\Microsoft\Windows\SrpV2"
 $Collections = @("Exe", "Msi", "Script", "Appx")
@@ -13584,7 +13076,6 @@ if (Test-Path $SrpPath) {
     Write-Host "[-] AppLocker registry base path (SrpV2) not found. Policy is not deployed." -ForegroundColor Red
 }
 
-<a id="07-paws-configure-applocker-policies-md-3-audit-ntvdm-disable-status"></a>
 # 3. Audit NTVDM Disable Status
 $NtvdmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
 if (Test-Path $NtvdmPath) {
@@ -13678,9 +13169,7 @@ Configure the local registry key on the PAW to run LSASS as a protected process.
 [Download Script: Configure-PawLsaProtection.ps1](implementation_scripts/Configure-PawLsaProtection.ps1)
 
 ```powershell
-<a id="07-paws-enable-lsa-protection-md-configure-pawlsaprotectionps1"></a>
 # Configure-PawLsaProtection.ps1
-<a id="07-paws-enable-lsa-protection-md-description-configures-the-runasppl-registry-key-to-enable-lsa-protection-on-paws"></a>
 # Description: Configures the RunAsPPL registry key to enable LSA Protection on PAWs.
 
 Write-Host "Applying LSA Protection registry hardening..." -ForegroundColor Cyan
@@ -13700,9 +13189,7 @@ Write-Host "[+] LSA Protection (RunAsPPL) enabled in registry. (Reboot required)
 [Download Script: Test-PawLsaProtection.ps1](audit_scripts/Test-PawLsaProtection.ps1)
 
 ```powershell
-<a id="07-paws-enable-lsa-protection-md-test-pawlsaprotectionps1"></a>
 # Test-PawLsaProtection.ps1
-<a id="07-paws-enable-lsa-protection-md-description-checks-the-registry-settings-and-running-process-state-to-verify-lsa-protection-is-active"></a>
 # Description: Checks the registry settings and running process state to verify LSA Protection is active.
 
 Write-Host "--- Auditing LSA Protection Status ---" -ForegroundColor Cyan
@@ -13795,16 +13282,12 @@ Run the following scripts locally to audit and remediate unauthorized administra
 [Download Script: Clean-PawLocalAdministrators.ps1](implementation_scripts/Clean-PawLocalAdministrators.ps1)
 
 ```powershell
-<a id="07-paws-restrict-local-administrators-md-clean-pawlocaladministratorsps1"></a>
 # Clean-PawLocalAdministrators.ps1
-<a id="07-paws-restrict-local-administrators-md-description-removes-unauthorized-accounts-from-the-local-administrators-group-on-paws"></a>
 # Description: Removes unauthorized accounts from the local Administrators group on PAWs.
 
 Write-Host "--- Restricting Local Administrators Group on PAW ---" -ForegroundColor Cyan
 
-<a id="07-paws-restrict-local-administrators-md-define-the-list-of-authorized-members"></a>
 # Define the list of authorized members
-<a id="07-paws-restrict-local-administrators-md-built-in-administrator-and-tier-0-admin-groups"></a>
 # Built-in Administrator and Tier 0 admin groups
 $AuthorizedMembers = @("Administrator", "Tier0-Admins")
 
@@ -13842,14 +13325,11 @@ if ($LocalAdmins) {
 [Download Script: Test-PawLocalAdministrators.ps1](audit_scripts/Test-PawLocalAdministrators.ps1)
 
 ```powershell
-<a id="07-paws-restrict-local-administrators-md-test-pawlocaladministratorsps1"></a>
 # Test-PawLocalAdministrators.ps1
-<a id="07-paws-restrict-local-administrators-md-description-audits-local-administrators-group-memberships-to-ensure-only-authorized-tier-0-accounts-are-present"></a>
 # Description: Audits local Administrators group memberships to ensure only authorized Tier 0 accounts are present.
 
 Write-Host "--- Auditing PAW Local Administrators Group ---" -ForegroundColor Cyan
 
-<a id="07-paws-restrict-local-administrators-md-define-the-authorized-domainlocal-patterns"></a>
 # Define the authorized domain/local patterns
 $AuthorizedMembers = @("Administrator", "Tier0-Admins")
 
@@ -14014,14 +13494,11 @@ Run the following scripts locally on the PAW to apply registry configuration bas
 [Download Script: Set-PAWBitLockerEncryption.ps1](implementation_scripts/Set-PAWBitLockerEncryption.ps1)
 
 ```powershell
-<a id="07-paws-enable-bitlocker-md-set-pawbitlockerencryptionps1"></a>
 # Set-PAWBitLockerEncryption.ps1
-<a id="07-paws-enable-bitlocker-md-configures-registry-settings-for-paw-bitlocker-disables-sleep-states-and-enables-encryption"></a>
 # Configures registry settings for PAW BitLocker, disables sleep states, and enables encryption.
 
 Write-Host "--- Enforcing Stringent PAW BitLocker Baseline ---" -ForegroundColor Cyan
 
-<a id="07-paws-enable-bitlocker-md-1-enforce-encryption-strength-xts-aes-256-7"></a>
 # 1. Enforce encryption strength (XTS-AES 256 = 7)
 $FvePath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
 if (-not (Test-Path $FvePath)) {
@@ -14029,7 +13506,6 @@ if (-not (Test-Path $FvePath)) {
 }
 Set-ItemProperty -Path $FvePath -Name "EncryptionMethodWithXtsOs" -Value 7 -Type DWord
 
-<a id="07-paws-enable-bitlocker-md-2-configure-tpm-startup-pin-ad-backup-and-enhanced-pins-in-registry"></a>
 # 2. Configure TPM + Startup PIN, AD Backup, and Enhanced PINs in registry
 Set-ItemProperty -Path $FvePath -Name "UseAdvancedStartup" -Value 1 -Type DWord
 Set-ItemProperty -Path $FvePath -Name "EnableNonTpm" -Value 0 -Type DWord
@@ -14044,7 +13520,6 @@ Set-ItemProperty -Path $FvePath -Name "OSActiveDirectoryBackup" -Value 1 -Type D
 Set-ItemProperty -Path $FvePath -Name "OSRequireActiveDirectoryBackup" -Value 1 -Type DWord
 Set-ItemProperty -Path $FvePath -Name "OSRecoveryPasswordRotation" -Value 1 -Type DWord # 1 = Enforce rotation
 
-<a id="07-paws-enable-bitlocker-md-3-disable-sleep-states-s1-s3-via-gpo-registry-override"></a>
 # 3. Disable Sleep States S1-S3 via GPO Registry override
 $PowerSleepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc251b-215d-4f10-ae40-e226dbe3c6a3"
 if (-not (Test-Path $PowerSleepPath)) {
@@ -14053,12 +13528,10 @@ if (-not (Test-Path $PowerSleepPath)) {
 Set-ItemProperty -Path $PowerSleepPath -Name "ACSettingIndex" -Value 0 -Type DWord
 Set-ItemProperty -Path $PowerSleepPath -Name "DCSettingIndex" -Value 0 -Type DWord
 
-<a id="07-paws-enable-bitlocker-md-enforce-hibernate-locally-using-powercfg"></a>
 # Enforce hibernate locally using powercfg
 powercfg /hibernate on
 Write-Host "[+] Sleep states S1-S3 disabled, and Hibernation enabled." -ForegroundColor Green
 
-<a id="07-paws-enable-bitlocker-md-4-enable-kernel-dma-protection-in-registry"></a>
 # 4. Enable Kernel DMA Protection in registry
 $DmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 if (-not (Test-Path $DmaPath)) {
@@ -14067,7 +13540,6 @@ if (-not (Test-Path $DmaPath)) {
 Set-ItemProperty -Path $DmaPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
 Write-Host "[+] Kernel DMA Protection registry configuration applied." -ForegroundColor Green
 
-<a id="07-paws-enable-bitlocker-md-5-enable-bitlocker-on-c-drive-using-tpm-and-startup-pin"></a>
 # 5. Enable BitLocker on C: drive using TPM and Startup PIN
 $Volume = Get-BitLockerVolume -MountPoint "C:" -ErrorAction SilentlyContinue
 if ($Volume.ProtectionStatus -eq "Off") {
@@ -14098,14 +13570,11 @@ if ($Volume.ProtectionStatus -eq "Off") {
 [Download Script: Test-PAWBitLockerStatus.ps1](audit_scripts/Test-PAWBitLockerStatus.ps1)
 
 ```powershell
-<a id="07-paws-enable-bitlocker-md-test-pawbitlockerstatusps1"></a>
 # Test-PAWBitLockerStatus.ps1
-<a id="07-paws-enable-bitlocker-md-audits-current-bitlocker-configuration-active-protectors-sleep-state-and-dma-protection"></a>
 # Audits current BitLocker configuration, active protectors, sleep state, and DMA protection.
 
 Write-Host "--- Auditing PAW BitLocker Security Parameters ---" -ForegroundColor Cyan
 
-<a id="07-paws-enable-bitlocker-md-1-query-bitlocker-protection-and-key-protector-types"></a>
 # 1. Query BitLocker protection and key protector types
 $Volume = Get-BitLockerVolume -MountPoint "C:" -ErrorAction SilentlyContinue
 if ($Volume) {
@@ -14130,7 +13599,6 @@ if ($Volume) {
     Write-Error "BitLocker volume information could not be retrieved."
 }
 
-<a id="07-paws-enable-bitlocker-md-2-check-sleep-state-s1-s3-status"></a>
 # 2. Check Sleep State S1-S3 status
 $SleepVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc251b-215d-4f10-ae40-e226dbe3c6a3" -Name "ACSettingIndex" -ErrorAction SilentlyContinue
 if ($SleepVal -and $SleepVal.ACSettingIndex -eq 0) {
@@ -14139,7 +13607,6 @@ if ($SleepVal -and $SleepVal.ACSettingIndex -eq 0) {
     Write-Host "    [-] Standby Sleep States (S1-S3) are enabled (Risk of DMA attack)." -ForegroundColor Red
 }
 
-<a id="07-paws-enable-bitlocker-md-3-check-kernel-dma-protection"></a>
 # 3. Check Kernel DMA Protection
 $DmaVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection" -Name "DeviceEnumerationPolicy" -ErrorAction SilentlyContinue
 if ($DmaVal -and $DmaVal.DeviceEnumerationPolicy -eq 0) {
@@ -14247,14 +13714,11 @@ Run the following script to verify the native boot mode, Secure Boot support, an
 [Download Script: Audit-UEFISecurity.ps1](audit_scripts/Audit-UEFISecurity.ps1)
 
 ```powershell
-<a id="07-paws-configure-uefi-security-md-audit-uefisecurityps1"></a>
 # Audit-UEFISecurity.ps1
-<a id="07-paws-configure-uefi-security-md-description-audits-local-boot-environment-and-bios-firmware-properties"></a>
 # Description: Audits local boot environment and BIOS firmware properties.
 
 Write-Host "--- Auditing UEFI Security Baseline ---" -ForegroundColor Cyan
 
-<a id="07-paws-configure-uefi-security-md-1-verify-boot-environment-type"></a>
 # 1. Verify boot environment type
 $RegPath = "HKLM:\System\CurrentControlSet\Control"
 $FirmwareProperty = Get-ItemProperty -Path $RegPath -Name "PEFirmwareType" -ErrorAction SilentlyContinue
@@ -14270,7 +13734,6 @@ if ($FirmwareProperty) {
     Write-Host "VULNERABLE: Boot environment type could not be read from registry." -ForegroundColor Red
 }
 
-<a id="07-paws-configure-uefi-security-md-2-audit-secure-boot-status"></a>
 # 2. Audit Secure Boot status
 try {
     $SecureBootActive = Confirm-SecureBootUEFI -ErrorAction Stop
@@ -14285,7 +13748,6 @@ try {
     Write-Host "VULNERABLE: UEFI Secure Boot validation failed. Error: $($_.Exception.Message)" -ForegroundColor Red
 }
 
-<a id="07-paws-configure-uefi-security-md-3-retrieve-bios-details"></a>
 # 3. Retrieve BIOS details
 $BiosDetails = Get-CimInstance -ClassName Win32_Bios -ErrorAction SilentlyContinue
 if ($BiosDetails) {
@@ -14382,9 +13844,7 @@ Run the following script to enforce the DMA Protection policy locally:
 [Download Script: Configure-KernelDMAProtection.ps1](implementation_scripts/Configure-KernelDMAProtection.ps1)
 
 ```powershell
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-configure-kerneldmaprotectionps1"></a>
 # Configure-KernelDMAProtection.ps1
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-description-configures-registry-keys-to-enable-kernel-dma-protection"></a>
 # Description: Configures registry keys to enable Kernel DMA Protection.
 
 Write-Host "--- Enforcing Kernel DMA Protection ---" -ForegroundColor Cyan
@@ -14394,7 +13854,6 @@ if (-not (Test-Path $RegPath)) {
     New-Item -Path $RegPath -Force | Out-Null
 }
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-deviceenumerationpolicy-0-block-all-dma-until-user-logs-on"></a>
 # DeviceEnumerationPolicy = 0 (Block all DMA until user logs on)
 Set-ItemProperty -Path $RegPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
 Write-Host "Status: Kernel DMA Protection registry configuration applied." -ForegroundColor Green
@@ -14408,14 +13867,11 @@ Run the following script to audit the status of the required hardware security c
 [Download Script: Audit-HardwareSecurityFeatures.ps1](audit_scripts/Audit-HardwareSecurityFeatures.ps1)
 
 ```powershell
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-audit-hardwaresecurityfeaturesps1"></a>
 # Audit-HardwareSecurityFeatures.ps1
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-description-audits-tpm-20-cpu-virtualization-and-iommudma-status"></a>
 # Description: Audits TPM 2.0, CPU Virtualization, and IOMMU/DMA status.
 
 Write-Host "--- Auditing Hardware Security Features ---" -ForegroundColor Cyan
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-1-audit-tpm-20-status"></a>
 # 1. Audit TPM 2.0 Status
 $Tpm = Get-Tpm -ErrorAction SilentlyContinue
 if ($Tpm) {
@@ -14432,7 +13888,6 @@ if ($Tpm) {
     Write-Host "VULNERABLE: TPM verification cmdlet failed." -ForegroundColor Red
 }
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-2-audit-vbs-and-dma-status-via-win32-deviceguard"></a>
 # 2. Audit VBS and DMA Status via Win32_DeviceGuard
 try {
     $DG = Get-CimInstance -Namespace "Root\Microsoft\Windows\DeviceGuard" -ClassName "Win32_DeviceGuard" -ErrorAction Stop
@@ -14550,9 +14005,7 @@ Run the following script to configure the registry setting locally on the system
 [Download Script: Configure-DisableWpbt.ps1](implementation_scripts/Configure-DisableWpbt.ps1)
 
 ```powershell
-<a id="07-paws-disable-wpbt-md-configure-disablewpbtps1"></a>
 # Configure-DisableWpbt.ps1
-<a id="07-paws-disable-wpbt-md-description-disables-windows-platform-binary-table-wpbt-execution-in-the-registry"></a>
 # Description: Disables Windows Platform Binary Table (WPBT) execution in the registry.
 
 Write-Host "Applying hardening requirement: Disable WPBT Execution..." -ForegroundColor Cyan
@@ -14574,9 +14027,7 @@ Write-Host "Registry setting DisableWpbtExecution configured to 1." -ForegroundC
 [Download Script: Get-WpbtStatus.ps1](audit_scripts/Get-WpbtStatus.ps1)
 
 ```powershell
-<a id="07-paws-disable-wpbt-md-get-wpbtstatusps1"></a>
 # Get-WpbtStatus.ps1
-<a id="07-paws-disable-wpbt-md-description-audits-the-registry-state-for-wpbt-execution-prevention"></a>
 # Description: Audits the registry state for WPBT execution prevention.
 
 Write-Host "--- Auditing WPBT Security Posture ---" -ForegroundColor Cyan
@@ -14814,14 +14265,11 @@ Run the following scripts locally on the PAW to configure Windows Defender basel
 [Download Script: Set-DefenderPawBaseline.ps1](implementation_scripts/Set-DefenderPawBaseline.ps1)
 
 ```powershell
-<a id="07-paws-defender-antivirus-md-set-defenderpawbaselineps1"></a>
 # Set-DefenderPawBaseline.ps1
-<a id="07-paws-defender-antivirus-md-description-configures-windows-defender-antivirus-options-asr-rules-tamper-protection-and-sandbox-execution-on-paws"></a>
 # Description: Configures Windows Defender Antivirus options, ASR rules, Tamper Protection, and Sandbox execution on PAWs.
 
 Write-Host "Applying Windows Defender PAW Hardening Baseline..." -ForegroundColor Cyan
 
-<a id="07-paws-defender-antivirus-md-1-core-defender-settings"></a>
 # 1. Core Defender settings
 if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Write-Host "Configuring baseline Defender parameters..." -ForegroundColor Gray
@@ -14847,7 +14295,6 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Write-Warning "Set-MpPreference cmdlet is not available."
 }
 
-<a id="07-paws-defender-antivirus-md-2-configure-exclusion-restrictions-and-local-merges-in-registry"></a>
 # 2. Configure Exclusion restrictions and Local Merges in Registry
 $DefenderPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender"
 if (-not (Test-Path $DefenderPath)) {
@@ -14866,7 +14313,6 @@ if (-not (Test-Path $ExclPath)) {
 Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord
 Set-ItemProperty -Path $ExclPath -Name "DisableAutoExclusions" -Value 0 -Type DWord
 
-<a id="07-paws-defender-antivirus-md-3-configure-nis-reporting-engine-and-scan-settings-in-registry"></a>
 # 3. Configure NIS, Reporting, Engine, and Scan Settings in Registry
 $FeaturesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Features"
 if (-not (Test-Path $FeaturesPath)) {
@@ -14924,7 +14370,6 @@ Set-ItemProperty -Path $SigPath -Name "ASSignatureDue" -Value 7 -Type DWord
 Set-ItemProperty -Path $SigPath -Name "AVSignatureDue" -Value 7 -Type DWord
 Set-ItemProperty -Path $SigPath -Name "ScheduleDay" -Value 0 -Type DWord
 
-<a id="07-paws-defender-antivirus-md-4-configure-asr-rules-in-registry"></a>
 # 4. Configure ASR Rules in Registry
 $AsrPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR"
 if (-not (Test-Path $AsrPath)) {
@@ -14960,7 +14405,6 @@ foreach ($RuleId in $AsrRules.Keys) {
 }
 Write-Host "ASR rules configured in registry." -ForegroundColor Green
 
-<a id="07-paws-defender-antivirus-md-5-configure-threat-severity-default-quarantine-actions"></a>
 # 5. Configure Threat severity default quarantine actions
 $ThreatsPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Threats"
 if (-not (Test-Path $ThreatsPath)) {
@@ -14983,7 +14427,6 @@ if (-not (Test-Path $FamilyPath)) {
 }
 Set-ItemProperty -Path $FamilyPath -Name "UILockdown" -Value 1 -Type DWord
 
-<a id="07-paws-defender-antivirus-md-6-configure-tamper-protection-in-registry"></a>
 # 6. Configure Tamper Protection in Registry
 $FeaturesPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows Defender\\Features"
 if (-not (Test-Path $FeaturesPath)) {
@@ -14996,7 +14439,6 @@ try {
     Write-Warning "Failed to set Tamper Protection in registry. Access is typically restricted to TrustedInstaller. Use GPO or Defender portal management."
 }
 
-<a id="07-paws-defender-antivirus-md-7-configure-sandbox-execution-environment-variable"></a>
 # 7. Configure Sandbox Execution Environment Variable
 $EnvPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\Environment"
 if (-not (Test-Path $EnvPath)) {
@@ -15012,14 +14454,11 @@ Write-Host "Defender PAW baseline configuration completed. A reboot is required 
 [Download Script: Get-DefenderPawStatus.ps1](audit_scripts/Get-DefenderPawStatus.ps1)
 
 ```powershell
-<a id="07-paws-defender-antivirus-md-get-defenderpawstatusps1"></a>
 # Get-DefenderPawStatus.ps1
-<a id="07-paws-defender-antivirus-md-description-audits-the-registry-and-preferences-for-asr-tamper-protection-and-sandbox-status-on-paws"></a>
 # Description: Audits the registry and preferences for ASR, Tamper Protection, and Sandbox status on PAWs.
 
 Write-Host "--- Auditing PAW Windows Defender Hardening Status ---" -ForegroundColor Cyan
 
-<a id="07-paws-defender-antivirus-md-1-audit-core-preferences"></a>
 # 1. Audit core preferences
 if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     $Pref = Get-MpPreference
@@ -15049,7 +14488,6 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     Write-Warning "Get-MpPreference is not available."
 }
 
-<a id="07-paws-defender-antivirus-md-2-audit-sandbox-variable"></a>
 # 2. Audit Sandbox variable
 $EnvPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
 $SandboxVar = Get-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -ErrorAction SilentlyContinue
@@ -15059,7 +14497,6 @@ if ($SandboxVar -and $SandboxVar.MP_FORCE_USE_SANDBOX -eq "1") {
     Write-Host "    - Sandbox Execution: NOT ENABLED (Required: 1)" -ForegroundColor Red
 }
 
-<a id="07-paws-defender-antivirus-md-3-audit-tamper-protection-registry"></a>
 # 3. Audit Tamper Protection registry
 $FeaturesPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows Defender\\Features"
 $TamperVal = Get-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -ErrorAction SilentlyContinue
@@ -15069,7 +14506,6 @@ if ($TamperVal -and $TamperVal.TamperProtection -eq 5) {
     Write-Host "    - Tamper Protection: NOT ENABLED or Not Managed via Registry (Value: $($TamperVal.TamperProtection))" -ForegroundColor Yellow
 }
 
-<a id="07-paws-defender-antivirus-md-4-audit-asr-rules"></a>
 # 4. Audit ASR Rules
 $AsrRulesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules"
 $AsrRulesCount = 0
@@ -15089,7 +14525,6 @@ if (Test-Path $AsrRulesPath) {
 $AsrColor = if ($AsrBlockedCount -eq 16) { "Green" } else { "Red" }
 Write-Host "    - Attack Surface Reduction: $AsrBlockedCount of 16 rules enforced in Block mode" -ForegroundColor $AsrColor
 
-<a id="07-paws-defender-antivirus-md-5-audit-registry-based-stig-configurations"></a>
 # 5. Audit Registry-based STIG configurations
 Write-Host "    - Registry configuration checks:" -ForegroundColor Gray
 $DefenderPoliciesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender"
@@ -15227,14 +14662,11 @@ Configure User Rights Assignments locally on the PAW using `secedit.exe` and Pow
 [Download Script: Set-PawUserRightsAssignments.ps1](implementation_scripts/Set-PawUserRightsAssignments.ps1)
 
 ```powershell
-<a id="07-paws-configure-user-rights-assignments-md-set-pawuserrightsassignmentsps1"></a>
 # Set-PawUserRightsAssignments.ps1
-<a id="07-paws-configure-user-rights-assignments-md-description-enforces-the-paw-user-rights-assignments-baseline-configuration-using-secedit-templates"></a>
 # Description: Enforces the PAW user rights assignments baseline configuration using secedit templates.
 
 Write-Host "Applying PAW User Rights Assignments hardening..." -ForegroundColor Cyan
 
-<a id="07-paws-configure-user-rights-assignments-md-1-create-a-secure-temporary-path-for-security-templates"></a>
 # 1. Create a secure temporary path for security templates
 $SecTempDir = Join-Path $env:TEMP "PawSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
@@ -15245,7 +14677,6 @@ $CfgFile = Join-Path $SecTempDir "paw_user_rights.cfg"
 $LogFile = Join-Path $SecTempDir "secedit.log"
 $DbFile = Join-Path $SecTempDir "secedit.sdb"
 
-<a id="07-paws-configure-user-rights-assignments-md-2-export-current-security-configuration"></a>
 # 2. Export current security configuration
 Write-Host "[*] Exporting current security configuration..." -ForegroundColor Gray
 $Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
@@ -15254,7 +14685,6 @@ if ($Process.ExitCode -ne 0) {
     return
 }
 
-<a id="07-paws-configure-user-rights-assignments-md-3-read-and-modify-the-configuration-file"></a>
 # 3. Read and modify the configuration file
 $ConfigText = Get-Content -Path $CfgFile -Raw
 $HasPrivilegeSection = $ConfigText -match "\[Privilege Rights\]"
@@ -15263,7 +14693,6 @@ if (-not $HasPrivilegeSection) {
     $ConfigText += "`r`n[Privilege Rights]`r`n"
 }
 
-<a id="07-paws-configure-user-rights-assignments-md-define-the-baseline-user-rights-assignments-stricter-for-paws"></a>
 # Define the baseline User Rights Assignments (Stricter for PAWs)
 $BaselineRights = @{
     "SeTrustedCredManAccessPrivilege" = ""
@@ -15289,7 +14718,6 @@ $BaselineRights = @{
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
 }
 
-<a id="07-paws-configure-user-rights-assignments-md-re-build-privilege-rights-section-line-by-line"></a>
 # Re-build [Privilege Rights] section line-by-line
 $Lines = $ConfigText -split "`r?`n"
 $NewLines = @()
@@ -15323,7 +14751,6 @@ foreach ($Line in $Lines) {
     }
 }
 
-<a id="07-paws-configure-user-rights-assignments-md-append-our-managed-settings-into-the-privilege-section"></a>
 # Append our managed settings into the Privilege section
 $FinalLines = @()
 foreach ($Line in $NewLines) {
@@ -15338,7 +14765,6 @@ foreach ($Line in $NewLines) {
 
 $FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
 
-<a id="07-paws-configure-user-rights-assignments-md-4-import-the-modified-configuration-file"></a>
 # 4. Import the modified configuration file
 Write-Host "[*] Importing updated security configuration template..." -ForegroundColor Gray
 $Process = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas USER_RIGHTS /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
@@ -15348,7 +14774,6 @@ if ($Process.ExitCode -eq 0) {
     Write-Error "Failed to apply PAW user rights assignments. Exit Code: $($Process.ExitCode)"
 }
 
-<a id="07-paws-configure-user-rights-assignments-md-clean-up-temp-files"></a>
 # Clean up temp files
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 ```
@@ -15357,9 +14782,7 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 [Download Script: Test-PawUserRightsAssignments.ps1](audit_scripts/Test-PawUserRightsAssignments.ps1)
 
 ```powershell
-<a id="07-paws-configure-user-rights-assignments-md-test-pawuserrightsassignmentsps1"></a>
 # Test-PawUserRightsAssignments.ps1
-<a id="07-paws-configure-user-rights-assignments-md-description-exports-local-user-rights-assignments-and-checks-them-against-the-paw-baseline"></a>
 # Description: Exports local user rights assignments and checks them against the PAW baseline.
 
 Write-Host "--- Auditing PAW User Rights Assignments ---" -ForegroundColor Cyan
@@ -15504,9 +14927,7 @@ Configure the local registry parameters to activate VBS, Credential Guard, and S
 [Download Script: Enable-PawVBSCredentialGuard.ps1](implementation_scripts/Enable-PawVBSCredentialGuard.ps1)
 
 ```powershell
-<a id="07-paws-enable-vbs-credential-guard-md-enable-pawvbscredentialguardps1"></a>
 # Enable-PawVBSCredentialGuard.ps1
-<a id="07-paws-enable-vbs-credential-guard-md-description-configures-local-registry-keys-to-activate-vbs-and-credential-guard-on-paws"></a>
 # Description: Configures local registry keys to activate VBS and Credential Guard on PAWs.
 
 Write-Host "--- Enforcing VBS & Credential Guard for PAWs ---" -ForegroundColor Cyan
@@ -15517,22 +14938,16 @@ if (-not (Test-Path $DeviceGuardPath)) {
     New-Item -Path $DeviceGuardPath -Force | Out-Null
 }
 
-<a id="07-paws-enable-vbs-credential-guard-md-enable-virtualization-based-security-vbs"></a>
 # Enable Virtualization-Based Security (VBS)
 Set-ItemProperty -Path $DeviceGuardPath -Name "EnableVirtualizationBasedSecurity" -Value 1 -Type DWord
-<a id="07-paws-enable-vbs-credential-guard-md-requireplatformsecurityfeatures-1-secure-boot"></a>
 # RequirePlatformSecurityFeatures = 1 (Secure Boot)
 Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 1 -Type DWord
-<a id="07-paws-enable-vbs-credential-guard-md-hypervisorenforcedcodeintegrity-1-hvci-memory-integrity-enabled"></a>
 # HypervisorEnforcedCodeIntegrity = 1 (HVCI / Memory Integrity Enabled)
 Set-ItemProperty -Path $DeviceGuardPath -Name "HypervisorEnforcedCodeIntegrity" -Value 1 -Type DWord
-<a id="07-paws-enable-vbs-credential-guard-md-lsacfgflags-1-credential-guard-enabled-with-uefi-lock"></a>
 # LsaCfgFlags = 1 (Credential Guard Enabled with UEFI Lock)
 Set-ItemProperty -Path $DeviceGuardPath -Name "LsaCfgFlags" -Value 1 -Type DWord
-<a id="07-paws-enable-vbs-credential-guard-md-configuresystemguardlaunch-1-secure-launch-enabled"></a>
 # ConfigureSystemGuardLaunch = 1 (Secure Launch Enabled)
 Set-ItemProperty -Path $DeviceGuardPath -Name "ConfigureSystemGuardLaunch" -Value 1 -Type DWord
-<a id="07-paws-enable-vbs-credential-guard-md-hvcimatrequired-1-require-uefi-memory-attributes-table"></a>
 # HVCIMATRequired = 1 (Require UEFI Memory Attributes Table)
 Set-ItemProperty -Path $DeviceGuardPath -Name "HVCIMATRequired" -Value 1 -Type DWord
 
@@ -15543,9 +14958,7 @@ Write-Host "[+] PAW VBS and Credential Guard registry settings applied. (Reboot 
 [Download Script: Test-PawVBSCredentialGuard.ps1](audit_scripts/Test-PawVBSCredentialGuard.ps1)
 
 ```powershell
-<a id="07-paws-enable-vbs-credential-guard-md-test-pawvbscredentialguardps1"></a>
 # Test-PawVBSCredentialGuard.ps1
-<a id="07-paws-enable-vbs-credential-guard-md-description-queries-the-local-win32-deviceguard-class-and-registry-settings-to-verify-vbs-protection-states-on-paws"></a>
 # Description: Queries the local Win32_DeviceGuard class and registry settings to verify VBS protection states on PAWs.
 
 Write-Host "--- Auditing PAW Virtualization-Based Security Baseline ---" -ForegroundColor Cyan
@@ -15704,14 +15117,11 @@ Run the following scripts locally on the PAW to apply DMA, Sleep, and BitLocker 
 [Download Script: Set-PawDMAPhysicalSecurity.ps1](implementation_scripts/Set-PawDMAPhysicalSecurity.ps1)
 
 ```powershell
-<a id="07-paws-harden-dma-and-physical-security-md-set-pawdmaphysicalsecurityps1"></a>
 # Set-PawDMAPhysicalSecurity.ps1
-<a id="07-paws-harden-dma-and-physical-security-md-description-hardens-local-registry-keys-on-paws-to-mitigate-dma-attacks-disable-standby-sleep-states-and-restrict-unencrypted-usb-writing"></a>
 # Description: Hardens local registry keys on PAWs to mitigate DMA attacks, disable standby sleep states, and restrict unencrypted USB writing.
 
 Write-Host "Applying PAW DMA and physical security hardening..." -ForegroundColor Cyan
 
-<a id="07-paws-harden-dma-and-physical-security-md-1-disable-standby-sleep-states-s1-s3"></a>
 # 1. Disable Standby Sleep States (S1-S3)
 $SleepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab"
 if (-not (Test-Path $SleepPath)) {
@@ -15721,7 +15131,6 @@ Set-ItemProperty -Path $SleepPath -Name "ACSettingIndex" -Value 0 -Type DWord
 Set-ItemProperty -Path $SleepPath -Name "DCSettingIndex" -Value 0 -Type DWord
 Write-Host "[+] Standby sleep states (S1-S3) disabled." -ForegroundColor Green
 
-<a id="07-paws-harden-dma-and-physical-security-md-2-configure-wake-password-requirement"></a>
 # 2. Configure Wake Password Requirement
 $WakePath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51"
 if (-not (Test-Path $WakePath)) {
@@ -15731,7 +15140,6 @@ Set-ItemProperty -Path $WakePath -Name "ACSettingIndex" -Value 1 -Type DWord
 Set-ItemProperty -Path $WakePath -Name "DCSettingIndex" -Value 1 -Type DWord
 Write-Host "[+] Wake password requirement enforced." -ForegroundColor Green
 
-<a id="07-paws-harden-dma-and-physical-security-md-3-bitlocker-dma-and-removable-storage-settings"></a>
 # 3. BitLocker DMA and Removable Storage Settings
 $FvePath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
 if (-not (Test-Path $FvePath)) {
@@ -15747,7 +15155,6 @@ if (-not (Test-Path $FvePolicyPath)) {
 Set-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -Value 1 -Type DWord
 Write-Host "[+] BitLocker DMA under lock and unencrypted USB write blocks configured." -ForegroundColor Green
 
-<a id="07-paws-harden-dma-and-physical-security-md-4-device-installation-restrictions-block-sbp-2-class"></a>
 # 4. Device Installation Restrictions (Block SBP-2 class)
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 if (-not (Test-Path $RestrictPath)) {
@@ -15763,7 +15170,6 @@ if (-not (Test-Path $DenyClassPath)) {
 Set-ItemProperty -Path $DenyClassPath -Name "1" -Value "{d48179be-ec20-11d1-b6b8-00c04fa372a7}" -Type String
 Write-Host "[+] Device installation blocks for SBP-2 class enabled." -ForegroundColor Green
 
-<a id="07-paws-harden-dma-and-physical-security-md-5-kernel-dma-protection-block-all-external-dma-permanently-for-paws"></a>
 # 5. Kernel DMA Protection (Block all external DMA permanently for PAWs)
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 if (-not (Test-Path $KDmaPath)) {
@@ -15779,14 +15185,11 @@ Write-Host "PAW DMA and physical security settings applied successfully." -Foreg
 [Download Script: Test-PawDMAPhysicalSecurity.ps1](audit_scripts/Test-PawDMAPhysicalSecurity.ps1)
 
 ```powershell
-<a id="07-paws-harden-dma-and-physical-security-md-test-pawdmaphysicalsecurityps1"></a>
 # Test-PawDMAPhysicalSecurity.ps1
-<a id="07-paws-harden-dma-and-physical-security-md-description-audits-local-registry-configuration-for-standby-settings-dma-protection-under-lock-usb-restrictions-and-blocked-device-setup-classes-on-paws"></a>
 # Description: Audits local registry configuration for standby settings, DMA protection under lock, USB restrictions, and blocked device setup classes on PAWs.
 
 Write-Host "--- Auditing PAW DMA and Physical Security ---" -ForegroundColor Cyan
 
-<a id="07-paws-harden-dma-and-physical-security-md-1-audit-standby-settings"></a>
 # 1. Audit Standby Settings
 $SleepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab"
 $AcSleep = Get-ItemProperty -Path $SleepPath -Name "ACSettingIndex" -ErrorAction SilentlyContinue
@@ -15801,7 +15204,6 @@ $DcSleepColor = if ($DcSleepVal -eq 0) { "Green" } else { "Red" }
 Write-Host "    - Standby Sleep State (Plugged In) Setting: $AcSleepVal (Required = 0 [Disabled])" -ForegroundColor $AcSleepColor
 Write-Host "    - Standby Sleep State (On Battery) Setting: $DcSleepVal (Required = 0 [Disabled])" -ForegroundColor $DcSleepColor
 
-<a id="07-paws-harden-dma-and-physical-security-md-2-audit-bitlocker-settings"></a>
 # 2. Audit BitLocker Settings
 $FvePath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
 $DmaLock = Get-ItemProperty -Path $FvePath -Name "DisableExternalDMAUnderLock" -ErrorAction SilentlyContinue
@@ -15816,7 +15218,6 @@ $UsbWriteColor = if ($UsbWriteVal -eq 1) { "Green" } else { "Red" }
 Write-Host "    - Disable DMA Under Lock: $DmaLockVal (Required = 1)" -ForegroundColor $DmaLockColor
 Write-Host "    - USB Unencrypted Write Block: $UsbWriteVal (Required = 1)" -ForegroundColor $UsbWriteColor
 
-<a id="07-paws-harden-dma-and-physical-security-md-3-audit-device-restriction-settings"></a>
 # 3. Audit Device Restriction Settings
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 $DenyDev = Get-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -ErrorAction SilentlyContinue
@@ -15832,7 +15233,6 @@ $Sbp2Color = if ($Sbp2Val -eq "{d48179be-ec20-11d1-b6b8-00c04fa372a7}") { "Green
 
 Write-Host "    - Blocked SBP-2 Setup Class: '$Sbp2Val' (Required = '{d48179be-ec20-11d1-b6b8-00c04fa372a7}')" -ForegroundColor $Sbp2Color
 
-<a id="07-paws-harden-dma-and-physical-security-md-4-audit-kernel-dma-protection-setting-stricter-for-paws"></a>
 # 4. Audit Kernel DMA Protection Setting (Stricter for PAWs)
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 $EnumPol = Get-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -ErrorAction SilentlyContinue
@@ -15929,14 +15329,11 @@ Run the following scripts locally to enable the Vulnerable Driver Blocklist regi
 [Download Script: Configure-DriverBlocklist.ps1](implementation_scripts/Configure-DriverBlocklist.ps1)
 
 ```powershell
-<a id="07-paws-enable-wdac-driver-blocklist-md-configure-driverblocklistps1"></a>
 # Configure-DriverBlocklist.ps1
-<a id="07-paws-enable-wdac-driver-blocklist-md-description-enables-the-microsoft-vulnerable-driver-blocklist-in-the-registry-and-validates-vbshvci-settings"></a>
 # Description: Enables the Microsoft Vulnerable Driver Blocklist in the registry and validates VBS/HVCI settings.
 
 Write-Host "Applying hardening requirement: Enable WDAC Driver Blocklist..." -ForegroundColor Cyan
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-1-configure-the-registry-settings-to-enable-the-blocklist"></a>
 # 1. Configure the registry settings to enable the blocklist
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
 $ValueName = "VulnerableDriverBlocklistEnable"
@@ -15949,7 +15346,6 @@ if (-not (Test-Path $RegPath)) {
 Write-Host "[+] Setting registry value: $ValueName = 1" -ForegroundColor Gray
 Set-ItemProperty -Path $RegPath -Name $ValueName -Value 1 -Type DWord -ErrorAction Stop
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-2-validate-vbs-hvci-configuration"></a>
 # 2. Validate VBS / HVCI Configuration
 $ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
 if (Test-Path $ScenariosPath) {
@@ -15971,15 +15367,12 @@ Write-Host "[+] Configuration applied successfully. A reboot is required to acti
 [Download Script: Get-DriverBlocklistStatus.ps1](audit_scripts/Get-DriverBlocklistStatus.ps1)
 
 ```powershell
-<a id="07-paws-enable-wdac-driver-blocklist-md-get-driverblockliststatusps1"></a>
 # Get-DriverBlocklistStatus.ps1
-<a id="07-paws-enable-wdac-driver-blocklist-md-description-audits-the-configuration-of-the-microsoft-vulnerable-driver-blocklist-and-hvci-state"></a>
 # Description: Audits the configuration of the Microsoft Vulnerable Driver Blocklist and HVCI state.
 
 Write-Host "--- Auditing Vulnerable Driver Blocklist ---" -ForegroundColor Cyan
 $Vulnerable = $false
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-1-check-registry-value"></a>
 # 1. Check registry value
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
 $ValueName = "VulnerableDriverBlocklistEnable"
@@ -15997,7 +15390,6 @@ if (Test-Path $RegPath) {
     $Vulnerable = $true
 }
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-2-check-hvci-status"></a>
 # 2. Check HVCI Status
 $ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
 if (Test-Path $ScenariosPath) {
@@ -16013,7 +15405,6 @@ if (Test-Path $ScenariosPath) {
     $Vulnerable = $true
 }
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-3-final-verdict"></a>
 # 3. Final Verdict
 if ($Vulnerable) {
     Write-Host "`n[!] Verification FAILED: The Vulnerable Driver Blocklist is not fully secured." -ForegroundColor Red
@@ -16211,14 +15602,11 @@ Use this method to apply the settings locally (for testing or standalone PAW sys
 [Download Script: Set-PAWAccountPolicies.ps1](implementation_scripts/Set-PAWAccountPolicies.ps1)
 
 ```powershell
-<a id="07-paws-configure-account-policies-md-set-pawaccountpoliciesps1"></a>
 # Set-PAWAccountPolicies.ps1
-<a id="07-paws-configure-account-policies-md-configures-local-account-lockout-password-parameters-smart-card-removal-behavior-blank-password-blocks-hello-for-business-microsoft-accounts-secure-channel-options-and-ntlm-session-security-options-on-paws"></a>
 # Configures local account lockout, password parameters, smart card removal behavior, blank password blocks, Hello for Business, Microsoft accounts, secure channel options, and NTLM session security options on PAWs.
 
 Write-Host "Applying PAW account and password policies..." -ForegroundColor Cyan
 
-<a id="07-paws-configure-account-policies-md-1-enforce-local-security-options-via-registry"></a>
 # 1. Enforce local security options via Registry
 $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
 if (-not (Test-Path $WinlogonPath)) {
@@ -16236,7 +15624,6 @@ Set-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -Value 1 -Type DWo
 Set-ItemProperty -Path $LsaPath -Name "NoLMHash" -Value 1 -Type DWord -Force
 Write-Host "[+] Blank password restriction and NoLMHash options enforced." -ForegroundColor Green
 
-<a id="07-paws-configure-account-policies-md-lsass-wdigest-caching-block"></a>
 # LSASS WDigest caching block
 $WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
 if (-not (Test-Path $WDigestPath)) {
@@ -16245,7 +15632,6 @@ if (-not (Test-Path $WDigestPath)) {
 Set-ItemProperty -Path $WDigestPath -Name "UseLogonCredential" -Value 0 -Type DWord -Force
 Write-Host "[+] LSASS WDigest credential caching disabled." -ForegroundColor Green
 
-<a id="07-paws-configure-account-policies-md-pbkdf2-iterations-for-cached-logons"></a>
 # PBKDF2 Iterations for Cached Logons
 $CachePath = "HKLM:\SECURITY\Cache"
 if (-not (Test-Path $CachePath)) {
@@ -16254,7 +15640,6 @@ if (-not (Test-Path $CachePath)) {
 Set-ItemProperty -Path $CachePath -Name "NL`$IterationCount" -Value 1954 -Type DWord -Force
 Write-Host "[+] PBKDF2 cached credentials iteration count configured." -ForegroundColor Green
 
-<a id="07-paws-configure-account-policies-md-hello-for-business-pin-and-microsoft-account-policies"></a>
 # Hello for Business, PIN and Microsoft Account policies
 $SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
 if (-not (Test-Path $SystemPolicyPath)) {
@@ -16293,7 +15678,6 @@ if (-not (Test-Path $ExcludeDevicesPath)) {
 Set-ItemProperty -Path $ExcludeDevicesPath -Name "TPM12" -Value 0 -Type DWord -Force
 Write-Host "[+] Hello for Business, PIN and Microsoft Account options configured." -ForegroundColor Green
 
-<a id="07-paws-configure-account-policies-md-domain-member-secure-channel-netlogon-settings"></a>
 # Domain Member Secure Channel netlogon settings
 $NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
 if (-not (Test-Path $NetlogonPath)) {
@@ -16307,7 +15691,6 @@ Set-ItemProperty -Path $NetlogonPath -Name "MaximumPasswordAge" -Value 30 -Type 
 Set-ItemProperty -Path $NetlogonPath -Name "RequireStrongKey" -Value 1 -Type DWord -Force
 Write-Host "[+] Domain Member secure channel configurations applied." -ForegroundColor Green
 
-<a id="07-paws-configure-account-policies-md-lanmanworkstation-plain-text-passwords-block"></a>
 # LanmanWorkstation plain text passwords block
 $LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
 if (-not (Test-Path $LanmanWorkPath)) {
@@ -16315,7 +15698,6 @@ if (-not (Test-Path $LanmanWorkPath)) {
 }
 Set-ItemProperty -Path $LanmanWorkPath -Name "EnablePlainTextPassword" -Value 0 -Type DWord -Force
 
-<a id="07-paws-configure-account-policies-md-ntlm-ssp-client-server-security-and-null-session-fallback"></a>
 # NTLM SSP Client & Server security and Null Session Fallback
 $MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
 if (-not (Test-Path $MsvPath)) {
@@ -16326,7 +15708,6 @@ Set-ItemProperty -Path $MsvPath -Name "NTLMMinClientSec" -Value 537395200 -Type 
 Set-ItemProperty -Path $MsvPath -Name "NTLMMinServerSec" -Value 537395200 -Type DWord -Force
 Write-Host "[+] Network authentication security and NTLM session settings applied." -ForegroundColor Green
 
-<a id="07-paws-configure-account-policies-md-2-enforce-account-lockout-and-password-policy-via-secedit"></a>
 # 2. Enforce Account Lockout and Password Policy via secedit
 $SecTempDir = Join-Path $env:TEMP "PAWAccountSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
@@ -16337,7 +15718,6 @@ $CfgFile = Join-Path $SecTempDir "paw_account_sec.cfg"
 $LogFile = Join-Path $SecTempDir "secedit.log"
 $DbFile = Join-Path $SecTempDir "secedit.sdb"
 
-<a id="07-paws-configure-account-policies-md-export-current-db"></a>
 # Export current db
 $Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
 if ($Process.ExitCode -ne 0) {
@@ -16351,7 +15731,6 @@ if (-not $HasSystemAccess) {
     $ConfigText += "`r`n[System Access]`r`n"
 }
 
-<a id="07-paws-configure-account-policies-md-re-build-system-access-section-line-by-line"></a>
 # Re-build [System Access] section line-by-line
 $Lines = $ConfigText -split "`r?`n"
 $NewLines = @()
@@ -16397,7 +15776,6 @@ foreach ($Line in $Lines) {
     }
 }
 
-<a id="07-paws-configure-account-policies-md-append-our-settings"></a>
 # Append our settings
 $FinalLines = @()
 foreach ($Line in $NewLines) {
@@ -16412,7 +15790,6 @@ foreach ($Line in $NewLines) {
 
 $FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
 
-<a id="07-paws-configure-account-policies-md-import"></a>
 # Import
 $Process = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas SECURITYPOLICY /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
 if ($Process.ExitCode -eq 0) {
@@ -16429,16 +15806,13 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 [Download Script: Test-PAWAccountPolicies.ps1](audit_scripts/Test-PAWAccountPolicies.ps1)
 
 ```powershell
-<a id="07-paws-configure-account-policies-md-test-pawaccountpoliciesps1"></a>
 # Test-PAWAccountPolicies.ps1
-<a id="07-paws-configure-account-policies-md-checks-local-registry-and-secedit-settings-for-account-lockout-password-options-smart-card-removal-behavior-pin-parameters-hello-for-business-microsoft-account-settings-secure-channel-properties-and-ntlm-session-configuration-on-paws"></a>
 # Checks local registry and SecEdit settings for account lockout, password options, smart card removal behavior, PIN parameters, Hello for Business, Microsoft account settings, secure channel properties, and NTLM session configuration on PAWs.
 
 Write-Host "--- Auditing PAW Account and Password Policies ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
-<a id="07-paws-configure-account-policies-md-helper-function-to-audit-registry-properties"></a>
 # Helper function to audit registry properties
 function Test-RegistryValue ($path, $name, $expectedValue) {
     $val = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
@@ -16452,7 +15826,6 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
 
-<a id="07-paws-configure-account-policies-md-1-audit-registry-settings"></a>
 # 1. Audit Registry Settings
 $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
 Test-RegistryValue $WinlogonPath "ScRemoveOption" "1"
@@ -16502,7 +15875,6 @@ Test-RegistryValue $MsvPath "allownullsessionfallback" 0
 Test-RegistryValue $MsvPath "NTLMMinClientSec" 537395200
 Test-RegistryValue $MsvPath "NTLMMinServerSec" 537395200
 
-<a id="07-paws-configure-account-policies-md-2-audit-secedit-settings"></a>
 # 2. Audit SecEdit Settings
 $SecTempDir = Join-Path $env:TEMP "PAWAccountAuditSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
@@ -16850,14 +16222,11 @@ Run the following scripts locally to disable legacy resolution and enforce secur
 [Download Script: Set-NetworkHardeningSettings.ps1](implementation_scripts/Set-NetworkHardeningSettings.ps1)
 
 ```powershell
-<a id="08-endpoints-harden-network-and-name-resolution-md-set-networkhardeningsettingsps1"></a>
 # Set-NetworkHardeningSettings.ps1
-<a id="08-endpoints-harden-network-and-name-resolution-md-description-configures-local-registry-keys-to-disable-llmnrnetbios-harden-tcpip-stack-prevent-dual-homing-block-hotspot-auto-connect-print-driver-web-downloads-http-printing-and-limit-anonymous-share-access"></a>
 # Description: Configures local registry keys to disable LLMNR/NetBIOS, harden TCP/IP stack, prevent dual-homing, block hotspot auto-connect, print driver web downloads, HTTP printing, and limit anonymous share access.
 
 Write-Host "Applying network and name resolution hardening..." -ForegroundColor Cyan
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-helper-to-configure-registry-keys"></a>
 # Helper to configure registry keys
 function Set-RegDWord {
     [CmdletBinding(SupportsShouldProcess)]
@@ -16878,12 +16247,10 @@ function Set-RegDWord {
     }
 }
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-1-disable-llmnr"></a>
 # 1. Disable LLMNR
 Set-RegDWord "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" "EnableMulticast" 0
 Write-Host "[+] LLMNR (Multicast Name Resolution) disabled." -ForegroundColor Green
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-2-configure-netbios-parameters"></a>
 # 2. Configure NetBIOS Parameters
 $NetbtPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netbt\Parameters"
 if (-not (Test-Path $NetbtPath)) {
@@ -16893,7 +16260,6 @@ Set-ItemProperty -Path $NetbtPath -Name "NoNameReleaseOnDemand" -Value 1 -Type D
 Set-ItemProperty -Path $NetbtPath -Name "NodeType" -Value 2 -Type DWord
 Write-Host "[+] NetBIOS name release protection and P-node type configured." -ForegroundColor Green
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-3-disable-netbios-over-tcpip-on-all-active-adapters"></a>
 # 3. Disable NetBIOS over TCP/IP on all active adapters
 Write-Host "[+] Disabling NetBIOS on all active network adapters..." -ForegroundColor Gray
 $Adapters = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue | Where-Object { $_.IPEnabled -eq $true }
@@ -16904,7 +16270,6 @@ if ($Adapters) {
     Write-Host "    NetBIOS disabled on active network interfaces." -ForegroundColor Green
 }
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-4-harden-tcpip-parameters"></a>
 # 4. Harden TCP/IP Parameters
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" "EnableICMPRedirect" 0
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" "DisableIPSourceRouting" 2
@@ -16913,7 +16278,6 @@ Write-Host "[+] IPv4 TCP/IP parameter redirects and source routing disabled." -F
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" "DisableIPSourceRouting" 2
 Write-Host "[+] IPv6 TCP/IP parameter source routing disabled." -ForegroundColor Green
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-5-prevent-network-connection-sharing-and-dual-homing-bridging"></a>
 # 5. Prevent Network Connection Sharing and Dual-Homing Bridging
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_ShowSharedAccessUI" 0
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fMinimizeConnections" 3
@@ -16921,13 +16285,11 @@ Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fBl
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config" "AutoConnectAllowedOEM" 0
 Write-Host "[+] Network connections, sharing, and hotspot settings configured." -ForegroundColor Green
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-6-printing-spooler-web-downloads-and-http-printing-block"></a>
 # 6. Printing Spooler Web Downloads and HTTP printing block
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" "DisableWebPnPDownload" 1
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" "DisableHTTPPrinting" 1
 Write-Host "[+] Printing spooler HTTP and Web service options disabled." -ForegroundColor Green
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-7-restrict-anonymous-access-to-sam-and-named-pipesshares"></a>
 # 7. Restrict anonymous access to SAM and Named Pipes/Shares
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" "RestrictNullSessAccess" 1
 Write-Host "[+] Anonymous null session share access restricted." -ForegroundColor Green
@@ -16939,16 +16301,13 @@ Write-Host "Network and name resolution hardening applied successfully." -Foregr
 [Download Script: Test-NetworkHardeningStatus.ps1](audit_scripts/Test-NetworkHardeningStatus.ps1)
 
 ```powershell
-<a id="08-endpoints-harden-network-and-name-resolution-md-test-networkhardeningstatusps1"></a>
 # Test-NetworkHardeningStatus.ps1
-<a id="08-endpoints-harden-network-and-name-resolution-md-description-audits-llmnr-netbios-parameters-netbios-adapter-state-tcpip-parameters-and-stig-print-network-connection-options"></a>
 # Description: Audits LLMNR, NetBIOS parameters, NetBIOS adapter state, TCP/IP parameters, and STIG print / network connection options.
 
 Write-Host "--- Auditing Network and Name Resolution Baseline ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-helper-function-to-audit-registry-properties"></a>
 # Helper function to audit registry properties
 function Test-RegistryValue ($path, $name, $expectedValue) {
     $val = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
@@ -16962,18 +16321,15 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-1-audit-llmnr"></a>
 # 1. Audit LLMNR
 $DnsPath = "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient"
 Test-RegistryValue $DnsPath "EnableMulticast" 0
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-2-audit-netbios-parameters"></a>
 # 2. Audit NetBIOS Parameters
 $NetbtPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netbt\Parameters"
 Test-RegistryValue $NetbtPath "NoNameReleaseOnDemand" 1
 Test-RegistryValue $NetbtPath "NodeType" 2
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-3-audit-tcpip-parameters"></a>
 # 3. Audit TCP/IP Parameters
 $TcpipPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
 Test-RegistryValue $TcpipPath "EnableICMPRedirect" 0
@@ -16982,7 +16338,6 @@ Test-RegistryValue $TcpipPath "DisableIPSourceRouting" 2
 $Tcpip6Path = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
 Test-RegistryValue $Tcpip6Path "DisableIPSourceRouting" 2
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-4-audit-connection-sharing-dual-homing-settings"></a>
 # 4. Audit Connection Sharing & Dual-Homing Settings
 $NetConnPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections"
 Test-RegistryValue $NetConnPath "NC_ShowSharedAccessUI" 0
@@ -16994,13 +16349,11 @@ Test-RegistryValue $WcmPath "fBlockNonDomain" 1
 $WifiPath = "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config"
 Test-RegistryValue $WifiPath "AutoConnectAllowedOEM" 0
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-5-audit-http-print-options"></a>
 # 5. Audit HTTP Print Options
 $PrinterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
 Test-RegistryValue $PrinterPath "DisableWebPnPDownload" 1
 Test-RegistryValue $PrinterPath "DisableHTTPPrinting" 1
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-6-audit-null-session-share-restrict"></a>
 # 6. Audit Null Session Share Restrict
 $ServerPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
 Test-RegistryValue $ServerPath "RestrictNullSessAccess" 1
@@ -17099,9 +16452,7 @@ Run the following scripts locally to configure maximum security parameters for U
 [Download Script: Configure-UACPolicies.ps1](implementation_scripts/Configure-UACPolicies.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-uac-policies-md-configure-uacpoliciesps1"></a>
 # Configure-UACPolicies.ps1
-<a id="08-endpoints-configure-uac-policies-md-enforces-hardened-user-account-control-uac-registry-configuration-values"></a>
 # Enforces hardened User Account Control (UAC) registry configuration values.
 
 Write-Host "--- Hardening User Account Control Policies ---" -ForegroundColor Cyan
@@ -17112,20 +16463,15 @@ if (-not (Test-Path $SystemPath)) {
     New-Item -Path $SystemPath -Force | Out-Null
 }
 
-<a id="08-endpoints-configure-uac-policies-md-consentpromptbehavioradmin-1-prompt-for-credentials-on-secure-desktop"></a>
 # ConsentPromptBehaviorAdmin = 1 (Prompt for credentials on secure desktop)
 Set-ItemProperty -Path $SystemPath -Name "ConsentPromptBehaviorAdmin" -Value 1 -Type DWord
-<a id="08-endpoints-configure-uac-policies-md-consentpromptbehavioruser-0-automatically-deny-elevation-requests"></a>
 # ConsentPromptBehaviorUser = 0 (Automatically deny elevation requests)
 Set-ItemProperty -Path $SystemPath -Name "ConsentPromptBehaviorUser" -Value 0 -Type DWord
-<a id="08-endpoints-configure-uac-policies-md-enablelua-1-enable-user-account-control-admin-approval-mode"></a>
 # EnableLUA = 1 (Enable User Account Control / Admin Approval Mode)
 Set-ItemProperty -Path $SystemPath -Name "EnableLUA" -Value 1 -Type DWord
-<a id="08-endpoints-configure-uac-policies-md-promptonsecuredesktop-1-switch-to-secure-desktop-when-prompting"></a>
 # PromptOnSecureDesktop = 1 (Switch to secure desktop when prompting)
 Set-ItemProperty -Path $SystemPath -Name "PromptOnSecureDesktop" -Value 1 -Type DWord
 
-<a id="08-endpoints-configure-uac-policies-md-configure-windows-sudo-command-behavior-enabled-1-force-new-elevated-window"></a>
 # Configure Windows Sudo command behavior (Enabled = 1 [Force new elevated window])
 $SudoPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sudo"
 if (-not (Test-Path $SudoPath)) {
@@ -17140,9 +16486,7 @@ Write-Host "[+] UAC registry values configured successfully." -ForegroundColor G
 [Download Script: Test-UACPolicies.ps1](audit_scripts/Test-UACPolicies.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-uac-policies-md-test-uacpoliciesps1"></a>
 # Test-UACPolicies.ps1
-<a id="08-endpoints-configure-uac-policies-md-verifies-local-system-registry-settings-for-user-account-control"></a>
 # Verifies local system registry settings for User Account Control.
 
 Write-Host "--- Auditing User Account Control Policies ---" -ForegroundColor Cyan
@@ -17263,9 +16607,7 @@ Run the following scripts locally to configure Explorer registry keys to disable
 [Download Script: Disable-AutoPlay.ps1](implementation_scripts/Disable-AutoPlay.ps1)
 
 ```powershell
-<a id="08-endpoints-disable-autoplay-autorun-md-disable-autoplayps1"></a>
 # Disable-AutoPlay.ps1
-<a id="08-endpoints-disable-autoplay-autorun-md-disables-autoplayautorun-registry-settings-globally-on-all-drive-types-and-non-volume-devices"></a>
 # Disables AutoPlay/AutoRun registry settings globally on all drive types and non-volume devices.
 
 Write-Host "--- Disabling AutoPlay and AutoRun ---" -ForegroundColor Cyan
@@ -17276,15 +16618,12 @@ if (-not (Test-Path $ExplorerPath)) {
     New-Item -Path $ExplorerPath -Force | Out-Null
 }
 
-<a id="08-endpoints-disable-autoplay-autorun-md-nodrivetypeautorun-0xff-255-in-decimal-disables-autorun-on-all-types-of-drives"></a>
 # NoDriveTypeAutoRun = 0xFF (255 in decimal) disables AutoRun on all types of drives
 Set-ItemProperty -Path $ExplorerPath -Name "NoDriveTypeAutoRun" -Value 255 -Type DWord -Force
 
-<a id="08-endpoints-disable-autoplay-autorun-md-noautorun-1-disables-autorun-commands-in-inf-files"></a>
 # NoAutorun = 1 disables AutoRun commands in inf files
 Set-ItemProperty -Path $ExplorerPath -Name "NoAutorun" -Value 1 -Type DWord -Force
 
-<a id="08-endpoints-disable-autoplay-autorun-md-disallow-autoplay-for-non-volume-devices-noautoplayfornonvolume-1"></a>
 # Disallow Autoplay for non-volume devices (NoAutoplayfornonVolume = 1)
 $PolExplorerPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
 if (-not (Test-Path $PolExplorerPath)) {
@@ -17299,9 +16638,7 @@ Write-Host "[+] AutoPlay and AutoRun registry parameters set." -ForegroundColor 
 [Download Script: Test-AutoPlay.ps1](audit_scripts/Test-AutoPlay.ps1)
 
 ```powershell
-<a id="08-endpoints-disable-autoplay-autorun-md-test-autoplayps1"></a>
 # Test-AutoPlay.ps1
-<a id="08-endpoints-disable-autoplay-autorun-md-audits-local-system-registry-parameters-for-autoplay-status"></a>
 # Audits local system registry parameters for AutoPlay status.
 
 Write-Host "--- Auditing AutoPlay Configuration ---" -ForegroundColor Cyan
@@ -17401,9 +16738,7 @@ Run the following scripts locally to configure registry keys to block all remova
 [Download Script: Block-RemovableStorage.ps1](implementation_scripts/Block-RemovableStorage.ps1)
 
 ```powershell
-<a id="08-endpoints-block-removable-storage-md-block-removablestorageps1"></a>
 # Block-RemovableStorage.ps1
-<a id="08-endpoints-block-removable-storage-md-configures-local-registry-parameters-to-deny-access-to-all-removable-storage-classes"></a>
 # Configures local registry parameters to deny access to all removable storage classes.
 
 Write-Host "--- Restricting Removable Storage Devices ---" -ForegroundColor Cyan
@@ -17414,7 +16749,6 @@ if (-not (Test-Path $RemovableStoragePath)) {
     New-Item -Path $RemovableStoragePath -Force | Out-Null
 }
 
-<a id="08-endpoints-block-removable-storage-md-deny-all-1-blocks-all-removable-storage-classes"></a>
 # Deny_All = 1 blocks all removable storage classes
 Set-ItemProperty -Path $RemovableStoragePath -Name "Deny_All" -Value 1 -Type DWord
 
@@ -17425,9 +16759,7 @@ Write-Host "[+] Removable storage block configured." -ForegroundColor Green
 [Download Script: Test-RemovableStorage.ps1](audit_scripts/Test-RemovableStorage.ps1)
 
 ```powershell
-<a id="08-endpoints-block-removable-storage-md-test-removablestorageps1"></a>
 # Test-RemovableStorage.ps1
-<a id="08-endpoints-block-removable-storage-md-audits-registry-values-for-removable-storage-blocks"></a>
 # Audits registry values for removable storage blocks.
 
 Write-Host "--- Auditing Removable Storage Restrictions ---" -ForegroundColor Cyan
@@ -17553,21 +16885,17 @@ Run the following scripts locally to disable Remote Desktop and Remote Assistanc
 [Download Script: Disable-RemoteDesktop.ps1](implementation_scripts/Disable-RemoteDesktop.ps1)
 
 ```powershell
-<a id="08-endpoints-restrict-rdp-access-md-disable-remotedesktopps1"></a>
 # Disable-RemoteDesktop.ps1
-<a id="08-endpoints-restrict-rdp-access-md-disables-remote-desktop-and-solicited-remote-assistance-connections-sets-nla-requirements-and-cleans-parameters"></a>
 # Disables Remote Desktop and Solicited Remote Assistance connections, sets NLA requirements, and cleans parameters.
 
 Write-Host "--- Restricting Remote Desktop and Remote Assistance Access ---" -ForegroundColor Cyan
 
 $RdpPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server"
 
-<a id="08-endpoints-restrict-rdp-access-md-1-disable-rdp-connections-fdenytsconnections-1"></a>
 # 1. Disable RDP Connections (fDenyTSConnections = 1)
 Set-ItemProperty -Path $RdpPath -Name "fDenyTSConnections" -Value 1 -Type DWord -Force
 Write-Host "[+] Inbound Remote Desktop connections disabled." -ForegroundColor Green
 
-<a id="08-endpoints-restrict-rdp-access-md-2-enforce-network-level-authentication-userauthentication-1"></a>
 # 2. Enforce Network Level Authentication (UserAuthentication = 1)
 $RdpSecPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp"
 if (Test-Path $RdpSecPath) {
@@ -17575,11 +16903,9 @@ if (Test-Path $RdpSecPath) {
     Write-Host "[+] Network Level Authentication (NLA) enforced." -ForegroundColor Green
 }
 
-<a id="08-endpoints-restrict-rdp-access-md-3-disable-remote-assistance-fallowtogethelp-0"></a>
 # 3. Disable Remote Assistance (fAllowToGetHelp = 0)
 Set-ItemProperty -Path $RdpPath -Name "fAllowToGetHelp" -Value 0 -Type DWord -Force
 
-<a id="08-endpoints-restrict-rdp-access-md-4-disable-and-clean-solicited-remote-assistance-policies"></a>
 # 4. Disable and clean Solicited Remote Assistance Policies
 $TSPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services"
 if (-not (Test-Path $TSPoliciesPath)) {
@@ -17600,9 +16926,7 @@ Write-Host "[+] Solicited Remote Assistance policies disabled and cleaned." -For
 [Download Script: Test-RemoteDesktopStatus.ps1](audit_scripts/Test-RemoteDesktopStatus.ps1)
 
 ```powershell
-<a id="08-endpoints-restrict-rdp-access-md-test-remotedesktopstatusps1"></a>
 # Test-RemoteDesktopStatus.ps1
-<a id="08-endpoints-restrict-rdp-access-md-audits-local-rdp-remote-assistance-and-nla-registry-configuration-and-listening-firewall-ports"></a>
 # Audits local RDP, Remote Assistance, and NLA registry configuration and listening firewall ports.
 
 Write-Host "--- Auditing Remote Desktop Configuration ---" -ForegroundColor Cyan
@@ -17623,7 +16947,6 @@ $NlaColor = if ($NlaVal -eq 1) { "Green" } else { "Red" }
 Write-Host "    - fDenyTSConnections: $DenyVal (Recommended = 1 to block all)" -ForegroundColor $DenyColor
 Write-Host "    - UserAuthentication (NLA): $NlaVal (Required = 1 if RDP is enabled)" -ForegroundColor $NlaColor
 
-<a id="08-endpoints-restrict-rdp-access-md-check-if-port-3389-firewall-rule-is-active-and-enabled"></a>
 # Check if port 3389 firewall rule is active and enabled
 $RdpFirewall = Get-NetFirewallRule -Name "RemoteDesktop-UserMode-In-TCP" -ErrorAction SilentlyContinue
 if ($RdpFirewall) {
@@ -17631,14 +16954,12 @@ if ($RdpFirewall) {
     Write-Host "    - RDP Inbound Firewall Rule Active: $($RdpFirewall.Enabled)" -ForegroundColor $FirewallColor
 }
 
-<a id="08-endpoints-restrict-rdp-access-md-audit-remote-assistance"></a>
 # Audit Remote Assistance
 $GetHelpTS = Get-ItemProperty -Path $RdpPath -Name "fAllowToGetHelp" -ErrorAction SilentlyContinue
 $GetHelpTSVal = if ($GetHelpTS) { $GetHelpTS.fAllowToGetHelp } else { 0 }
 $HelpColor = if ($GetHelpTSVal -eq 0) { "Green" } else { "Red" }
 Write-Host "    - fAllowToGetHelp (Terminal Server): $GetHelpTSVal (Recommended = 0)" -ForegroundColor $HelpColor
 
-<a id="08-endpoints-restrict-rdp-access-md-audit-solicited-remote-assistance-policy"></a>
 # Audit Solicited Remote Assistance Policy
 if (Test-Path $TSPoliciesPath) {
     $PolGetHelp = Get-ItemProperty -Path $TSPoliciesPath -Name "fAllowToGetHelp" -ErrorAction SilentlyContinue
@@ -17750,16 +17071,12 @@ Run the following scripts locally to audit and remediate unauthorized administra
 [Download Script: Clean-LocalAdministrators.ps1](implementation_scripts/Clean-LocalAdministrators.ps1)
 
 ```powershell
-<a id="08-endpoints-restrict-local-admins-md-clean-localadministratorsps1"></a>
 # Clean-LocalAdministrators.ps1
-<a id="08-endpoints-restrict-local-admins-md-removes-unauthorized-domain-or-local-accounts-from-the-local-administrators-group-and-disables-local-account-remote-token-filtering-bypass"></a>
 # Removes unauthorized domain or local accounts from the local Administrators group and disables local account remote token filtering bypass.
 
 Write-Host "--- Restricting Local Administrators Group ---" -ForegroundColor Cyan
 
-<a id="08-endpoints-restrict-local-admins-md-define-the-list-of-authorized-members"></a>
 # Define the list of authorized members
-<a id="08-endpoints-restrict-local-admins-md-the-built-in-administrator-account-rid-500-and-authorized-domain-support-groups"></a>
 # The built-in Administrator account (RID 500) and authorized domain support groups.
 $AuthorizedMembers = @("Administrator", "Workstation-Support-Admins")
 
@@ -17793,7 +17110,6 @@ if ($LocalAdmins) {
     Write-Error "Could not retrieve members of local Administrators group."
 }
 
-<a id="08-endpoints-restrict-local-admins-md-enforce-localaccounttokenfilterpolicy-0"></a>
 # Enforce LocalAccountTokenFilterPolicy = 0
 $RegistryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
 $ValueName = "LocalAccountTokenFilterPolicy"
@@ -17813,9 +17129,7 @@ try {
 [Download Script: Test-LocalAdministrators.ps1](audit_scripts/Test-LocalAdministrators.ps1)
 
 ```powershell
-<a id="08-endpoints-restrict-local-admins-md-test-localadministratorsps1"></a>
 # Test-LocalAdministrators.ps1
-<a id="08-endpoints-restrict-local-admins-md-audits-membership-of-the-local-administrators-group-and-checks-local-account-remote-token-filtering-bypass-policy"></a>
 # Audits membership of the local Administrators group and checks local account remote token filtering bypass policy.
 
 Write-Host "--- Auditing Local Administrators Group ---" -ForegroundColor Cyan
@@ -17838,7 +17152,6 @@ if ($LocalAdmins) {
     Write-Error "Failed to retrieve local Administrators group members."
 }
 
-<a id="08-endpoints-restrict-local-admins-md-audit-localaccounttokenfilterpolicy"></a>
 # Audit LocalAccountTokenFilterPolicy
 $RegistryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
 $ValueName = "LocalAccountTokenFilterPolicy"
@@ -18105,14 +17418,11 @@ Run the following scripts locally to configure Windows Defender baseline protect
 [Download Script: Set-DefenderAdvancedBaseline.ps1](implementation_scripts/Set-DefenderAdvancedBaseline.ps1)
 
 ```powershell
-<a id="08-endpoints-defender-antivirus-md-set-defenderadvancedbaselineps1"></a>
 # Set-DefenderAdvancedBaseline.ps1
-<a id="08-endpoints-defender-antivirus-md-configures-advanced-windows-defender-antivirus-options-asr-rules-tamper-protection-smartscreen-and-sandbox-execution"></a>
 # Configures advanced Windows Defender Antivirus options, ASR rules, Tamper Protection, SmartScreen, and Sandbox execution.
 
 Write-Host "Applying Windows Defender Advanced Baseline..." -ForegroundColor Cyan
 
-<a id="08-endpoints-defender-antivirus-md-1-core-defender-settings"></a>
 # 1. Core Defender settings
 if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Write-Host "Configuring baseline Defender parameters..." -ForegroundColor Gray
@@ -18138,7 +17448,6 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Write-Warning "Set-MpPreference cmdlet is not available."
 }
 
-<a id="08-endpoints-defender-antivirus-md-2-configure-exclusion-restrictions-and-local-merges-in-registry"></a>
 # 2. Configure Exclusion restrictions and Local Merges in Registry
 $DefenderPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
 if (-not (Test-Path $DefenderPath)) {
@@ -18157,7 +17466,6 @@ if (-not (Test-Path $ExclPath)) {
 Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $ExclPath -Name "DisableAutoExclusions" -Value 0 -Type DWord -Force
 
-<a id="08-endpoints-defender-antivirus-md-3-configure-nis-reporting-engine-and-scan-settings-in-registry"></a>
 # 3. Configure NIS, Reporting, Engine, and Scan Settings in Registry
 $FeaturesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
@@ -18215,7 +17523,6 @@ Set-ItemProperty -Path $SigPath -Name "ASSignatureDue" -Value 7 -Type DWord -For
 Set-ItemProperty -Path $SigPath -Name "AVSignatureDue" -Value 7 -Type DWord -Force
 Set-ItemProperty -Path $SigPath -Name "ScheduleDay" -Value 0 -Type DWord -Force
 
-<a id="08-endpoints-defender-antivirus-md-4-configure-asr-rules-in-registry"></a>
 # 4. Configure ASR Rules in Registry
 $AsrPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR"
 if (-not (Test-Path $AsrPath)) {
@@ -18251,7 +17558,6 @@ foreach ($RuleId in $AsrRules.Keys) {
 }
 Write-Host "ASR rules configured in registry." -ForegroundColor Green
 
-<a id="08-endpoints-defender-antivirus-md-5-configure-threat-severity-default-quarantine-actions"></a>
 # 5. Configure Threat severity default quarantine actions
 $ThreatsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Threats"
 if (-not (Test-Path $ThreatsPath)) {
@@ -18274,7 +17580,6 @@ if (-not (Test-Path $FamilyPath)) {
 }
 Set-ItemProperty -Path $FamilyPath -Name "UILockdown" -Value 1 -Type DWord -Force
 
-<a id="08-endpoints-defender-antivirus-md-6-configure-tamper-protection-in-registry"></a>
 # 6. Configure Tamper Protection in Registry
 $FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
@@ -18287,7 +17592,6 @@ try {
     Write-Warning "Failed to set Tamper Protection in registry. Access is typically restricted to TrustedInstaller. Use GPO or Defender portal management."
 }
 
-<a id="08-endpoints-defender-antivirus-md-7-configure-sandbox-execution-environment-variable"></a>
 # 7. Configure Sandbox Execution Environment Variable
 $EnvPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
 if (-not (Test-Path $EnvPath)) {
@@ -18296,7 +17600,6 @@ if (-not (Test-Path $EnvPath)) {
 Set-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -Value "1" -Type String -Force
 Write-Host "Sandbox Execution environment variable configured." -ForegroundColor Green
 
-<a id="08-endpoints-defender-antivirus-md-8-configure-smartscreen-enablesmartscreen-1-shellsmartscreenlevel-block"></a>
 # 8. Configure SmartScreen (EnableSmartScreen = 1, ShellSmartScreenLevel = Block)
 $SmartScreenPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
 if (-not (Test-Path $SmartScreenPath)) {
@@ -18306,7 +17609,6 @@ Set-ItemProperty -Path $SmartScreenPath -Name "EnableSmartScreen" -Value 1 -Type
 Set-ItemProperty -Path $SmartScreenPath -Name "ShellSmartScreenLevel" -Value "Block" -Type String -Force
 Write-Host "[+] Windows Defender SmartScreen configured in registry." -ForegroundColor Green
 
-<a id="08-endpoints-defender-antivirus-md-9-configure-amsi-authenticode-signature-verification-featurebits-2"></a>
 # 9. Configure AMSI Authenticode Signature Verification (FeatureBits = 2)
 $AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
 if (-not (Test-Path $AmsiPath)) {
@@ -18322,14 +17624,11 @@ Write-Host "Defender advanced baseline configuration completed. A reboot is requ
 [Download Script: Get-DefenderAdvancedStatus.ps1](audit_scripts/Get-DefenderAdvancedStatus.ps1)
 
 ```powershell
-<a id="08-endpoints-defender-antivirus-md-get-defenderadvancedstatusps1"></a>
 # Get-DefenderAdvancedStatus.ps1
-<a id="08-endpoints-defender-antivirus-md-audits-the-registry-and-preferences-for-asr-tamper-protection-smartscreen-and-sandbox-status"></a>
 # Audits the registry and preferences for ASR, Tamper Protection, SmartScreen, and Sandbox status.
 
 Write-Host "--- Auditing Windows Defender Advanced Hardening Status ---" -ForegroundColor Cyan
 
-<a id="08-endpoints-defender-antivirus-md-1-audit-core-preferences"></a>
 # 1. Audit core preferences
 if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     $Pref = Get-MpPreference
@@ -18359,7 +17658,6 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     Write-Warning "Get-MpPreference is not available."
 }
 
-<a id="08-endpoints-defender-antivirus-md-2-audit-sandbox-variable"></a>
 # 2. Audit Sandbox variable
 $EnvPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
 $SandboxVar = Get-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -ErrorAction SilentlyContinue
@@ -18369,7 +17667,6 @@ if ($SandboxVar -and $SandboxVar.MP_FORCE_USE_SANDBOX -eq "1") {
     Write-Host "    - Sandbox Execution: NOT ENABLED (Required: 1)" -ForegroundColor Red
 }
 
-<a id="08-endpoints-defender-antivirus-md-3-audit-tamper-protection-registry"></a>
 # 3. Audit Tamper Protection registry
 $FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
 $TamperVal = Get-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -ErrorAction SilentlyContinue
@@ -18379,7 +17676,6 @@ if ($TamperVal -and $TamperVal.TamperProtection -eq 5) {
     Write-Host "    - Tamper Protection: NOT ENABLED or Not Managed via Registry (Value: $($TamperVal.TamperProtection))" -ForegroundColor Yellow
 }
 
-<a id="08-endpoints-defender-antivirus-md-4-audit-smartscreen-configurations"></a>
 # 4. Audit SmartScreen configurations
 $SmartScreenPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
 if (Test-Path $SmartScreenPath) {
@@ -18395,7 +17691,6 @@ if (Test-Path $SmartScreenPath) {
     Write-Host "    - SmartScreen Registry Path does not exist." -ForegroundColor Red
 }
 
-<a id="08-endpoints-defender-antivirus-md-5-audit-asr-rules"></a>
 # 5. Audit ASR Rules
 $AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
 $AsrRulesCount = 0
@@ -18415,7 +17710,6 @@ if (Test-Path $AsrRulesPath) {
 $AsrColor = if ($AsrBlockedCount -eq 16) { "Green" } else { "Red" }
 Write-Host "    - Attack Surface Reduction: $AsrBlockedCount of 16 rules enforced in Block mode" -ForegroundColor $AsrColor
 
-<a id="08-endpoints-defender-antivirus-md-6-audit-registry-based-stig-configurations"></a>
 # 6. Audit Registry-based STIG configurations
 Write-Host "    - Registry configuration checks:" -ForegroundColor Gray
 $DefenderPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
@@ -18455,7 +17749,6 @@ foreach ($KeyName in $CheckKeys.Keys) {
     }
 }
 
-<a id="08-endpoints-defender-antivirus-md-7-audit-amsi-authenticode-verification"></a>
 # 7. Audit AMSI Authenticode verification
 $AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
 if (Test-Path $AmsiPath) {
@@ -18571,9 +17864,7 @@ Run the following scripts locally to configure registry keys to enforce local WS
 [Download Script: Set-WSUSClientConfiguration.ps1](implementation_scripts/Set-WSUSClientConfiguration.ps1)
 
 ```powershell
-<a id="08-endpoints-wsus-client-config-md-set-wsusclientconfigurationps1"></a>
 # Set-WSUSClientConfiguration.ps1
-<a id="08-endpoints-wsus-client-config-md-configures-local-registry-keys-to-point-the-windows-update-client-to-the-intranet-wsus-server-and-enforces-do-group-mode"></a>
 # Configures local registry keys to point the Windows Update client to the intranet WSUS server and enforces DO Group mode.
 
 Write-Host "--- Configuring WSUS Client Settings ---" -ForegroundColor Cyan
@@ -18582,7 +17873,6 @@ $WUPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
 $WUAUPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
 $DOPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization"
 
-<a id="08-endpoints-wsus-client-config-md-1-create-keys-if-they-do-not-exist"></a>
 # 1. Create keys if they do not exist
 if (-not (Test-Path $WUPath)) {
     New-Item -Path $WUPath -Force | Out-Null
@@ -18594,23 +17884,19 @@ if (-not (Test-Path $DOPath)) {
     New-Item -Path $DOPath -Force | Out-Null
 }
 
-<a id="08-endpoints-wsus-client-config-md-define-intranet-wsus-url"></a>
 # Define intranet WSUS URL
 $WSUSServer = "http://local-wsus.domain.local:8530"
 
-<a id="08-endpoints-wsus-client-config-md-2-configure-update-location-and-statistics-server"></a>
 # 2. Configure update location and statistics server
 Set-ItemProperty -Path $WUPath -Name "WUServer" -Value $WSUSServer -Type String -Force
 Set-ItemProperty -Path $WUPath -Name "WUStatusServer" -Value $WSUSServer -Type String -Force
 Set-ItemProperty -Path $WUPath -Name "DoNotConnectToWindowsUpdateInternetLocations" -Value 1 -Type DWord -Force
 
-<a id="08-endpoints-wsus-client-config-md-3-configure-automatic-updates-behavior-auoptions-4-auto-download-schedule"></a>
 # 3. Configure Automatic Updates behavior (AUOptions = 4: Auto Download & Schedule)
 Set-ItemProperty -Path $WUAUPath -Name "NoAutoUpdate" -Value 0 -Type DWord -Force
 Set-ItemProperty -Path $WUAUPath -Name "AUOptions" -Value 4 -Type DWord -Force
 Set-ItemProperty -Path $WUAUPath -Name "UseWUServer" -Value 1 -Type DWord -Force
 
-<a id="08-endpoints-wsus-client-config-md-4-enforce-dodownloadmode-2-group"></a>
 # 4. Enforce DODownloadMode = 2 (Group)
 Set-ItemProperty -Path $DOPath -Name "DODownloadMode" -Value 2 -Type DWord -Force
 
@@ -18621,9 +17907,7 @@ Write-Host "[+] Local WSUS parameters and Delivery Optimization download mode ap
 [Download Script: Test-WSUSClientStatus.ps1](audit_scripts/Test-WSUSClientStatus.ps1)
 
 ```powershell
-<a id="08-endpoints-wsus-client-config-md-test-wsusclientstatusps1"></a>
 # Test-WSUSClientStatus.ps1
-<a id="08-endpoints-wsus-client-config-md-audits-registry-values-to-verify-wsus-server-assignment-and-delivery-optimization-configuration"></a>
 # Audits registry values to verify WSUS server assignment and Delivery Optimization configuration.
 
 Write-Host "--- Auditing WSUS Client Settings ---" -ForegroundColor Cyan
@@ -18647,7 +17931,6 @@ Write-Host "    - Intranet WUServer: $WUServerVal" -ForegroundColor $ServerColor
 Write-Host "    - Intranet WUStatusServer: $WUStatusVal" -ForegroundColor $ServerColor
 Write-Host "    - UseWUServer Active: $UseWUVal (Required = 1)" -ForegroundColor $UseColor
 
-<a id="08-endpoints-wsus-client-config-md-audit-delivery-optimization"></a>
 # Audit Delivery Optimization
 $DOVal = if (Test-Path $DOPath) { (Get-ItemProperty -Path $DOPath -Name "DODownloadMode" -ErrorAction SilentlyContinue).DODownloadMode } else { $null }
 $DOColor = if ($DOVal -eq 2) { "Green" } else { "Red" }
@@ -18748,9 +18031,7 @@ Run the following script to check the status of Secure Boot on the local machine
 [Download Script: Audit-SecureBoot.ps1](audit_scripts/Audit-SecureBoot.ps1)
 
 ```powershell
-<a id="08-endpoints-enable-secure-boot-md-audit-securebootps1"></a>
 # Audit-SecureBoot.ps1
-<a id="08-endpoints-enable-secure-boot-md-queries-uefi-secure-boot-parameters-and-audits-blacklotus-mitigation-registry-settings"></a>
 # Queries UEFI Secure Boot parameters and audits BlackLotus mitigation registry settings.
 
 Write-Host "--- Auditing UEFI Secure Boot & BlackLotus Mitigations ---" -ForegroundColor Cyan
@@ -18774,7 +18055,6 @@ try {
     $script:NonCompliant = $true
 }
 
-<a id="08-endpoints-enable-secure-boot-md-audit-availableupdates-registry-key"></a>
 # Audit AvailableUpdates registry key
 $Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
 if (Test-Path $Path) {
@@ -18800,7 +18080,6 @@ if ($script:NonCompliant) {
 
 *To verify platform boot style (UEFI vs Legacy BIOS):*
 ```powershell
-<a id="08-endpoints-enable-secure-boot-md-check-boot-type-environment-variable"></a>
 # Check boot type environment variable
 $BootType = Get-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control" -Name "PEFirmwareType" -ErrorAction SilentlyContinue
 if ($BootType) {
@@ -18822,9 +18101,7 @@ if ($BootType) {
 [Download Script: Set-SecureBoot.ps1](implementation_scripts/Set-SecureBoot.ps1)
 
 ```powershell
-<a id="08-endpoints-enable-secure-boot-md-set-securebootps1"></a>
 # Set-SecureBoot.ps1
-<a id="08-endpoints-enable-secure-boot-md-description-triggers-secure-boot-dbx-and-code-integrity-revocation-updates-for-blacklotus-mitigation"></a>
 # Description: Triggers Secure Boot DBX and Code Integrity revocation updates for BlackLotus mitigation.
 
 Write-Host "--- Configuring BlackLotus Secure Boot Mitigations ---" -ForegroundColor Cyan
@@ -18834,7 +18111,6 @@ if (-not (Test-Path $Path)) {
     New-Item -Path $Path -Force | Out-Null
 }
 
-<a id="08-endpoints-enable-secure-boot-md-trigger-dbx-update-phase-1-dbx-update-64"></a>
 # Trigger DBX Update (Phase 1 DBX Update = 64)
 Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
 Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green
@@ -18930,9 +18206,7 @@ Run the following scripts locally to configure registry keys to enable VBS and C
 [Download Script: Enable-VBSCredentialGuard.ps1](implementation_scripts/Enable-VBSCredentialGuard.ps1)
 
 ```powershell
-<a id="08-endpoints-enable-vbs-credential-guard-md-enable-vbscredentialguardps1"></a>
 # Enable-VBSCredentialGuard.ps1
-<a id="08-endpoints-enable-vbs-credential-guard-md-configures-local-registry-keys-to-activate-vbs-and-credential-guard"></a>
 # Configures local registry keys to activate VBS and Credential Guard.
 
 Write-Host "--- Enforcing VBS & Credential Guard ---" -ForegroundColor Cyan
@@ -18943,22 +18217,16 @@ if (-not (Test-Path $DeviceGuardPath)) {
     New-Item -Path $DeviceGuardPath -Force | Out-Null
 }
 
-<a id="08-endpoints-enable-vbs-credential-guard-md-enable-virtualization-based-security-vbs"></a>
 # Enable Virtualization-Based Security (VBS)
 Set-ItemProperty -Path $DeviceGuardPath -Name "EnableVirtualizationBasedSecurity" -Value 1 -Type DWord
-<a id="08-endpoints-enable-vbs-credential-guard-md-requireplatformsecurityfeatures-1-secure-boot"></a>
 # RequirePlatformSecurityFeatures = 1 (Secure Boot)
 Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 1 -Type DWord
-<a id="08-endpoints-enable-vbs-credential-guard-md-hypervisorenforcedcodeintegrity-1-hvci-memory-integrity-enabled"></a>
 # HypervisorEnforcedCodeIntegrity = 1 (HVCI / Memory Integrity Enabled)
 Set-ItemProperty -Path $DeviceGuardPath -Name "HypervisorEnforcedCodeIntegrity" -Value 1 -Type DWord
-<a id="08-endpoints-enable-vbs-credential-guard-md-lsacfgflags-1-credential-guard-enabled-with-uefi-lock"></a>
 # LsaCfgFlags = 1 (Credential Guard Enabled with UEFI Lock)
 Set-ItemProperty -Path $DeviceGuardPath -Name "LsaCfgFlags" -Value 1 -Type DWord
-<a id="08-endpoints-enable-vbs-credential-guard-md-configuresystemguardlaunch-1-secure-launch-enabled"></a>
 # ConfigureSystemGuardLaunch = 1 (Secure Launch Enabled)
 Set-ItemProperty -Path $DeviceGuardPath -Name "ConfigureSystemGuardLaunch" -Value 1 -Type DWord
-<a id="08-endpoints-enable-vbs-credential-guard-md-hvcimatrequired-1-require-uefi-memory-attributes-table"></a>
 # HVCIMATRequired = 1 (Require UEFI Memory Attributes Table)
 Set-ItemProperty -Path $DeviceGuardPath -Name "HVCIMATRequired" -Value 1 -Type DWord
 
@@ -18969,9 +18237,7 @@ Write-Host "[+] VBS and Credential Guard registry settings applied. (Reboot requ
 [Download Script: Test-VBSCredentialGuard.ps1](audit_scripts/Test-VBSCredentialGuard.ps1)
 
 ```powershell
-<a id="08-endpoints-enable-vbs-credential-guard-md-test-vbscredentialguardps1"></a>
 # Test-VBSCredentialGuard.ps1
-<a id="08-endpoints-enable-vbs-credential-guard-md-queries-the-local-win32-deviceguard-class-to-verify-active-protection-states"></a>
 # Queries the local Win32_DeviceGuard class to verify active protection states.
 
 Write-Host "--- Auditing Virtualization-Based Security Baseline ---" -ForegroundColor Cyan
@@ -19073,11 +18339,9 @@ To deploy WDAC via Group Policy, the policy XML must first be generated, compile
 #### 1. Generate and Compile the Policy (on a Reference Machine)
 Run the following PowerShell commands to generate the Microsoft Default Windows baseline policy:
 ```powershell
-<a id="08-endpoints-configure-wdac-md-generate-the-baseline-policy-xml"></a>
 # Generate the baseline policy XML
 New-CIPolicy -MultiplePolicyFormat -Level FilePublisher -FilePath "C:\WDAC\BaselinePolicy.xml" -UserPEs
 
-<a id="08-endpoints-configure-wdac-md-compile-the-xml-policy-into-a-binary-cip-file"></a>
 # Compile the XML policy into a binary CIP file
 ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\BaselinePolicy.xml" -BinaryFilePath "C:\WDAC\BaselinePolicy.cip"
 ```
@@ -19111,41 +18375,33 @@ Run the following scripts locally to generate a baseline WDAC policy, enable Aud
 [Download Script: Configure-WDACLocalPolicy.ps1](implementation_scripts/Configure-WDACLocalPolicy.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-wdac-md-configure-wdaclocalpolicyps1"></a>
 # Configure-WDACLocalPolicy.ps1
-<a id="08-endpoints-configure-wdac-md-generates-a-baseline-local-code-integrity-policy-sets-it-to-audit-mode-and-enables-the-vulnerable-driver-blocklist"></a>
 # Generates a baseline local Code Integrity policy, sets it to Audit Mode, and enables the Vulnerable Driver Blocklist.
 
 Write-Host "--- Configuring WDAC Local Policy Baseline ---" -ForegroundColor Cyan
 
-<a id="08-endpoints-configure-wdac-md-create-working-directories"></a>
 # Create working directories
 $WdacDir = "C:\Windows\System32\CodeIntegrity"
 if (-not (Test-Path $WdacDir)) {
     New-Item -Path $WdacDir -ItemType Directory -Force | Out-Null
 }
 
-<a id="08-endpoints-configure-wdac-md-1-generate-the-default-windows-policy"></a>
 # 1. Generate the Default Windows Policy
 Write-Host "[+] Generating Default Windows code integrity rules..." -ForegroundColor Gray
 $PolicyXml = "C:\Windows\Temp\DefaultWindows.xml"
 $PolicyBin = "$WdacDir\SIPolicy.p7b"
 
-<a id="08-endpoints-configure-wdac-md-create-a-policy-based-on-microsofts-default-rules-trusts-windows-store-and-driver-files"></a>
 # Create a policy based on Microsoft's default rules (trusts Windows, Store, and Driver files)
 New-CIPolicy -FilePath $PolicyXml -Level Windows -UserPEs -ErrorAction Stop
 
-<a id="08-endpoints-configure-wdac-md-2-set-policy-to-audit-mode-rule-option-3-represents-audit-mode"></a>
 # 2. Set Policy to Audit Mode (Rule Option 3 represents Audit Mode)
 Write-Host "[+] Setting WDAC policy to Audit Mode for baseline logging..." -ForegroundColor Gray
 Set-RuleOption -FilePath $PolicyXml -Option 3 -ErrorAction SilentlyContinue
 
-<a id="08-endpoints-configure-wdac-md-3-compile-the-xml-into-the-binary-policy-expected-by-the-bootloader"></a>
 # 3. Compile the XML into the binary policy expected by the bootloader
 Write-Host "[+] Compiling Code Integrity XML into SIPolicy.p7b..." -ForegroundColor Gray
 ConvertFrom-CIPolicy -XmlFilePath $PolicyXml -BinaryFilePath $PolicyBin -ErrorAction Stop
 
-<a id="08-endpoints-configure-wdac-md-4-enable-vulnerable-driver-blocklist-in-registry"></a>
 # 4. Enable Vulnerable Driver Blocklist in Registry
 Write-Host "[+] Enabling Vulnerable Driver Blocklist in registry..." -ForegroundColor Gray
 $ConfigPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
@@ -19154,7 +18410,6 @@ if (-not (Test-Path $ConfigPath)) {
 }
 Set-ItemProperty -Path $ConfigPath -Name "VulnerableDriverBlocklistEnable" -Value 1 -Type DWord -ErrorAction Stop
 
-<a id="08-endpoints-configure-wdac-md-cleanup-temp-files"></a>
 # Cleanup temp files
 if (Test-Path $PolicyXml) { Remove-Item $PolicyXml -Force }
 
@@ -19165,15 +18420,12 @@ Write-Host "[+] Local WDAC baseline policy and driver blocklist configured. Rebo
 [Download Script: Test-WDACStatus.ps1](audit_scripts/Test-WDACStatus.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-wdac-md-test-wdacstatusps1"></a>
 # Test-WDACStatus.ps1
-<a id="08-endpoints-configure-wdac-md-audits-the-local-system-to-check-if-code-integrity-policies-the-vulnerable-driver-blocklist-and-hvci-are-active"></a>
 # Audits the local system to check if Code Integrity policies, the Vulnerable Driver Blocklist, and HVCI are active.
 
 Write-Host "--- Auditing WDAC and Driver Blocklist State ---" -ForegroundColor Cyan
 $Vulnerable = $false
 
-<a id="08-endpoints-configure-wdac-md-1-query-wmi-class-for-code-integrity-status"></a>
 # 1. Query WMI class for Code Integrity status
 try {
     $CI = Get-CimInstance -Namespace "Root\Microsoft\Windows\CI" -ClassName "MSFT_Sipolicy" -ErrorAction Stop
@@ -19189,7 +18441,6 @@ try {
     Write-Host "`n[-] Could not query WMI MSFT_Sipolicy. This is expected if no WDAC policies are currently deployed." -ForegroundColor Gray
 }
 
-<a id="08-endpoints-configure-wdac-md-2-check-vulnerable-driver-blocklist-registry-configuration"></a>
 # 2. Check Vulnerable Driver Blocklist Registry configuration
 $ConfigPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
 $ValueName = "VulnerableDriverBlocklistEnable"
@@ -19206,7 +18457,6 @@ if (Test-Path $ConfigPath) {
     $Vulnerable = $true
 }
 
-<a id="08-endpoints-configure-wdac-md-3-check-memory-integrity-hvci-configuration"></a>
 # 3. Check Memory Integrity (HVCI) configuration
 $ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
 if (Test-Path $ScenariosPath) {
@@ -19222,7 +18472,6 @@ if (Test-Path $ScenariosPath) {
     $Vulnerable = $true
 }
 
-<a id="08-endpoints-configure-wdac-md-4-final-verdict"></a>
 # 4. Final Verdict
 if ($Vulnerable) {
     Write-Host "`n[!] Verification FAILED: One or more driver security controls are not configured." -ForegroundColor Red
@@ -19365,14 +18614,11 @@ Run the following scripts locally to audit and configure BitLocker parameters.
 [Download Script: Set-BitLockerEncryption.ps1](implementation_scripts/Set-BitLockerEncryption.ps1)
 
 ```powershell
-<a id="08-endpoints-enable-bitlocker-md-set-bitlockerencryptionps1"></a>
 # Set-BitLockerEncryption.ps1
-<a id="08-endpoints-enable-bitlocker-md-enables-bitlocker-encryption-locally-configures-startup-policiespin-lengths-and-backs-up-recovery-keys-to-ad"></a>
 # Enables BitLocker encryption locally, configures startup policies/PIN lengths, and backs up recovery keys to AD.
 
 Write-Host "--- Enforcing BitLocker Drive Encryption ---" -ForegroundColor Cyan
 
-<a id="08-endpoints-enable-bitlocker-md-1-configure-fve-registry-settings-for-startup-authentication"></a>
 # 1. Configure FVE Registry settings for startup authentication
 $FveRegPath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
 if (-not (Test-Path $FveRegPath)) {
@@ -19389,11 +18635,9 @@ Set-ItemProperty -Path $FveRegPath -Name "UseTPMKeyPIN" -Value 2 -Type DWord -Fo
 
 Write-Host "[+] BitLocker startup authentication registry keys configured." -ForegroundColor Green
 
-<a id="08-endpoints-enable-bitlocker-md-2-enable-bitlocker-on-c-drive-using-tpm-protection"></a>
 # 2. Enable BitLocker on C: drive using TPM protection
 $Volume = Get-BitLockerVolume -MountPoint "C:"
 
-<a id="08-endpoints-enable-bitlocker-md-check-if-protection-is-already-active"></a>
 # Check if protection is already active
 if ($Volume.ProtectionStatus -eq "Off") {
     Write-Host "[+] Activating BitLocker on C: drive using XTS-AES 256 encryption..." -ForegroundColor Gray
@@ -19415,14 +18659,11 @@ if ($Volume.ProtectionStatus -eq "Off") {
 [Download Script: Test-BitLockerStatus.ps1](audit_scripts/Test-BitLockerStatus.ps1)
 
 ```powershell
-<a id="08-endpoints-enable-bitlocker-md-test-bitlockerstatusps1"></a>
 # Test-BitLockerStatus.ps1
-<a id="08-endpoints-enable-bitlocker-md-audits-current-bitlocker-protection-state-key-protector-types-and-network-unlockstartup-pin-configuration"></a>
 # Audits current BitLocker protection state, key protector types, and Network Unlock/Startup PIN configuration.
 
 Write-Host "--- Auditing BitLocker Status ---" -ForegroundColor Cyan
 
-<a id="08-endpoints-enable-bitlocker-md-1-query-local-bitlocker-state"></a>
 # 1. Query local BitLocker state
 $Volume = Get-BitLockerVolume -MountPoint "C:" -ErrorAction SilentlyContinue
 if ($Volume) {
@@ -19438,7 +18679,6 @@ if ($Volume) {
     Write-Error "BitLocker volume information could not be retrieved."
 }
 
-<a id="08-endpoints-enable-bitlocker-md-2-check-network-unlock-and-startup-authentication-registry-configuration"></a>
 # 2. Check Network Unlock and Startup Authentication registry configuration
 $FveRegPath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
 $Params = @(
@@ -19560,18 +18800,14 @@ Run the following scripts locally to audit and configure BitLocker parameters.
 [Download Script: Set-BitLockerEncryption.ps1](implementation_scripts/Set-BitLockerEncryption.ps1)
 
 ```powershell
-<a id="08-endpoints-enable-bitlocker-md-set-bitlockerencryptionps1"></a>
 # Set-BitLockerEncryption.ps1
-<a id="08-endpoints-enable-bitlocker-md-enables-bitlocker-encryption-locally-and-backs-up-recovery-keys-to-ad"></a>
 # Enables BitLocker encryption locally and backs up recovery keys to AD.
 
 Write-Host "--- Enforcing BitLocker Drive Encryption ---" -ForegroundColor Cyan
 
-<a id="08-endpoints-enable-bitlocker-md-1-enable-bitlocker-on-c-drive-using-tpm-protection"></a>
 # 1. Enable BitLocker on C: drive using TPM protection
 $Volume = Get-BitLockerVolume -MountPoint "C:"
 
-<a id="08-endpoints-enable-bitlocker-md-check-if-protection-is-already-active"></a>
 # Check if protection is already active
 if ($Volume.ProtectionStatus -eq "Off") {
     Write-Host "[+] Activating BitLocker on C: drive using XTS-AES 256 encryption..." -ForegroundColor Gray
@@ -19593,14 +18829,11 @@ if ($Volume.ProtectionStatus -eq "Off") {
 [Download Script: Test-BitLockerStatus.ps1](audit_scripts/Test-BitLockerStatus.ps1)
 
 ```powershell
-<a id="08-endpoints-enable-bitlocker-md-test-bitlockerstatusps1"></a>
 # Test-BitLockerStatus.ps1
-<a id="08-endpoints-enable-bitlocker-md-audits-current-bitlocker-protection-state-key-protector-types-and-network-unlock-configuration"></a>
 # Audits current BitLocker protection state, key protector types, and Network Unlock configuration.
 
 Write-Host "--- Auditing BitLocker Status ---" -ForegroundColor Cyan
 
-<a id="08-endpoints-enable-bitlocker-md-1-query-local-bitlocker-state"></a>
 # 1. Query local BitLocker state
 $Volume = Get-BitLockerVolume -MountPoint "C:" -ErrorAction SilentlyContinue
 if ($Volume) {
@@ -19616,7 +18849,6 @@ if ($Volume) {
     Write-Error "BitLocker volume information could not be retrieved."
 }
 
-<a id="08-endpoints-enable-bitlocker-md-2-check-network-unlock-registry-configuration"></a>
 # 2. Check Network Unlock registry configuration
 $FveRegPath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
 $NetUnlockVal = Get-ItemProperty -Path $FveRegPath -Name "AllowNetworkUnlock" -ErrorAction SilentlyContinue
@@ -19747,14 +18979,11 @@ Run the following script to verify native UEFI boot, Secure Boot state, and retr
 [Download Script: Audit-UEFISecurity.ps1](audit_scripts/Audit-UEFISecurity.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-uefi-security-md-audit-uefisecurityps1"></a>
 # Audit-UEFISecurity.ps1
-<a id="08-endpoints-configure-uefi-security-md-description-audits-local-boot-environment-and-bios-firmware-properties"></a>
 # Description: Audits local boot environment and BIOS firmware properties.
 
 Write-Host "--- Auditing UEFI Security Baseline ---" -ForegroundColor Cyan
 
-<a id="08-endpoints-configure-uefi-security-md-1-verify-boot-environment-type"></a>
 # 1. Verify boot environment type
 $RegPath = "HKLM:\System\CurrentControlSet\Control"
 $FirmwareProperty = Get-ItemProperty -Path $RegPath -Name "PEFirmwareType" -ErrorAction SilentlyContinue
@@ -19770,7 +18999,6 @@ if ($FirmwareProperty) {
     Write-Host "VULNERABLE: Boot environment type could not be read from registry." -ForegroundColor Red
 }
 
-<a id="08-endpoints-configure-uefi-security-md-2-audit-secure-boot-status"></a>
 # 2. Audit Secure Boot status
 try {
     $SecureBootActive = Confirm-SecureBootUEFI -ErrorAction Stop
@@ -19785,7 +19013,6 @@ try {
     Write-Host "VULNERABLE: UEFI Secure Boot validation failed. Error: $($_.Exception.Message)" -ForegroundColor Red
 }
 
-<a id="08-endpoints-configure-uefi-security-md-3-retrieve-bios-details"></a>
 # 3. Retrieve BIOS details
 $BiosDetails = Get-CimInstance -ClassName Win32_Bios -ErrorAction SilentlyContinue
 if ($BiosDetails) {
@@ -19882,9 +19109,7 @@ Run the following script to configure the Kernel DMA Protection policy locally:
 [Download Script: Configure-KernelDMAProtection.ps1](implementation_scripts/Configure-KernelDMAProtection.ps1)
 
 ```powershell
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-configure-kerneldmaprotectionps1"></a>
 # Configure-KernelDMAProtection.ps1
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-description-configures-registry-keys-to-enable-kernel-dma-protection"></a>
 # Description: Configures registry keys to enable Kernel DMA Protection.
 
 Write-Host "--- Enforcing Kernel DMA Protection ---" -ForegroundColor Cyan
@@ -19894,9 +19119,7 @@ if (-not (Test-Path $RegPath)) {
     New-Item -Path $RegPath -Force | Out-Null
 }
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-deviceenumerationpolicy-1-block-all-external-dma-devices-until-a-user-logs-on"></a>
 # DeviceEnumerationPolicy = 1 (Block all external DMA devices until a user logs on)
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-note-for-maximum-security-set-to-0-block-all-value-1-is-standard-for-standard-endpoints"></a>
 # Note: For maximum security, set to 0 (Block all). Value 1 is standard for standard endpoints.
 Set-ItemProperty -Path $RegPath -Name "DeviceEnumerationPolicy" -Value 1 -Type DWord
 Write-Host "Status: Kernel DMA Protection registry configuration applied." -ForegroundColor Green
@@ -19910,14 +19133,11 @@ Run the following script to audit the status of the required hardware security c
 [Download Script: Audit-HardwareSecurityFeatures.ps1](audit_scripts/Audit-HardwareSecurityFeatures.ps1)
 
 ```powershell
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-audit-hardwaresecurityfeaturesps1"></a>
 # Audit-HardwareSecurityFeatures.ps1
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-description-audits-tpm-20-cpu-virtualization-and-iommudma-status"></a>
 # Description: Audits TPM 2.0, CPU Virtualization, and IOMMU/DMA status.
 
 Write-Host "--- Auditing Hardware Security Features ---" -ForegroundColor Cyan
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-1-audit-tpm-20-status"></a>
 # 1. Audit TPM 2.0 Status
 $Tpm = Get-Tpm -ErrorAction SilentlyContinue
 if ($Tpm) {
@@ -19934,7 +19154,6 @@ if ($Tpm) {
     Write-Host "VULNERABLE: TPM verification cmdlet failed." -ForegroundColor Red
 }
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-2-audit-vbs-and-dma-status-via-win32-deviceguard"></a>
 # 2. Audit VBS and DMA Status via Win32_DeviceGuard
 try {
     $DG = Get-CimInstance -Namespace "Root\Microsoft\Windows\DeviceGuard" -ClassName "Win32_DeviceGuard" -ErrorAction Stop
@@ -20052,9 +19271,7 @@ Run the following script to configure the registry setting locally on the system
 [Download Script: Configure-DisableWpbt.ps1](implementation_scripts/Configure-DisableWpbt.ps1)
 
 ```powershell
-<a id="08-endpoints-disable-wpbt-md-configure-disablewpbtps1"></a>
 # Configure-DisableWpbt.ps1
-<a id="08-endpoints-disable-wpbt-md-description-disables-windows-platform-binary-table-wpbt-execution-in-the-registry"></a>
 # Description: Disables Windows Platform Binary Table (WPBT) execution in the registry.
 
 Write-Host "Applying hardening requirement: Disable WPBT Execution..." -ForegroundColor Cyan
@@ -20076,9 +19293,7 @@ Write-Host "Registry setting DisableWpbtExecution configured to 1." -ForegroundC
 [Download Script: Get-WpbtStatus.ps1](audit_scripts/Get-WpbtStatus.ps1)
 
 ```powershell
-<a id="08-endpoints-disable-wpbt-md-get-wpbtstatusps1"></a>
 # Get-WpbtStatus.ps1
-<a id="08-endpoints-disable-wpbt-md-description-audits-the-registry-state-for-wpbt-execution-prevention"></a>
 # Description: Audits the registry state for WPBT execution prevention.
 
 Write-Host "--- Auditing WPBT Security Posture ---" -ForegroundColor Cyan
@@ -20199,14 +19414,11 @@ Configure User Rights Assignments locally using `secedit.exe` and PowerShell.
 [Download Script: Set-UserRightsAssignments.ps1](implementation_scripts/Set-UserRightsAssignments.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-user-rights-assignments-md-set-userrightsassignmentsps1"></a>
 # Set-UserRightsAssignments.ps1
-<a id="08-endpoints-configure-user-rights-assignments-md-enforces-the-local-user-rights-assignments-baseline-configuration-using-secedit-templates"></a>
 # Enforces the local user rights assignments baseline configuration using secedit templates.
 
 Write-Host "Applying User Rights Assignments hardening..." -ForegroundColor Cyan
 
-<a id="08-endpoints-configure-user-rights-assignments-md-1-create-a-secure-temporary-path-for-security-templates"></a>
 # 1. Create a secure temporary path for security templates
 $SecTempDir = Join-Path $env:TEMP "SecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
@@ -20217,7 +19429,6 @@ $CfgFile = Join-Path $SecTempDir "user_rights.cfg"
 $LogFile = Join-Path $SecTempDir "secedit.log"
 $DbFile = Join-Path $SecTempDir "secedit.sdb"
 
-<a id="08-endpoints-configure-user-rights-assignments-md-2-export-current-security-configuration"></a>
 # 2. Export current security configuration
 Write-Host "[*] Exporting current security configuration..." -ForegroundColor Gray
 $Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
@@ -20226,7 +19437,6 @@ if ($Process.ExitCode -ne 0) {
     return
 }
 
-<a id="08-endpoints-configure-user-rights-assignments-md-3-read-and-modify-the-configuration-file"></a>
 # 3. Read and modify the configuration file
 $ConfigText = Get-Content -Path $CfgFile -Raw
 $HasPrivilegeSection = $ConfigText -match "\[Privilege Rights\]"
@@ -20235,7 +19445,6 @@ if (-not $HasPrivilegeSection) {
     $ConfigText += "`r`n[Privilege Rights]`r`n"
 }
 
-<a id="08-endpoints-configure-user-rights-assignments-md-define-the-baseline-user-rights-assignments"></a>
 # Define the baseline User Rights Assignments
 $BaselineRights = @{
     "SeTrustedCredManAccessPrivilege" = ""
@@ -20263,7 +19472,6 @@ $BaselineRights = @{
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
 }
 
-<a id="08-endpoints-configure-user-rights-assignments-md-re-build-privilege-rights-section-line-by-line"></a>
 # Re-build [Privilege Rights] section line-by-line
 $Lines = $ConfigText -split "`r?`n"
 $NewLines = @()
@@ -20298,7 +19506,6 @@ foreach ($Line in $Lines) {
     }
 }
 
-<a id="08-endpoints-configure-user-rights-assignments-md-append-our-managed-settings-into-the-privilege-section"></a>
 # Append our managed settings into the Privilege section
 $FinalLines = @()
 foreach ($Line in $NewLines) {
@@ -20313,7 +19520,6 @@ foreach ($Line in $NewLines) {
 
 $FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
 
-<a id="08-endpoints-configure-user-rights-assignments-md-4-import-the-modified-configuration-file"></a>
 # 4. Import the modified configuration file
 Write-Host "[*] Importing updated security configuration template..." -ForegroundColor Gray
 $Process = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas USER_RIGHTS /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
@@ -20323,7 +19529,6 @@ if ($Process.ExitCode -eq 0) {
     Write-Error "Failed to apply user rights assignments. Exit Code: $($Process.ExitCode)"
 }
 
-<a id="08-endpoints-configure-user-rights-assignments-md-clean-up-temp-files"></a>
 # Clean up temp files
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 ```
@@ -20332,9 +19537,7 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 [Download Script: Test-UserRightsAssignments.ps1](audit_scripts/Test-UserRightsAssignments.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-user-rights-assignments-md-test-userrightsassignmentsps1"></a>
 # Test-UserRightsAssignments.ps1
-<a id="08-endpoints-configure-user-rights-assignments-md-exports-local-user-rights-assignments-and-checks-them-against-the-baseline"></a>
 # Exports local user rights assignments and checks them against the baseline.
 
 Write-Host "--- Auditing User Rights Assignments ---" -ForegroundColor Cyan
@@ -20525,14 +19728,11 @@ Run the following scripts locally to apply DMA, Sleep, and BitLocker USB registr
 [Download Script: Set-DMAPhysicalSecurity.ps1](implementation_scripts/Set-DMAPhysicalSecurity.ps1)
 
 ```powershell
-<a id="08-endpoints-harden-dma-and-physical-security-md-set-dmaphysicalsecurityps1"></a>
 # Set-DMAPhysicalSecurity.ps1
-<a id="08-endpoints-harden-dma-and-physical-security-md-description-hardens-local-registry-keys-to-mitigate-dma-attacks-disable-standby-sleep-states-and-restrict-unencrypted-usb-writing"></a>
 # Description: Hardens local registry keys to mitigate DMA attacks, disable standby sleep states, and restrict unencrypted USB writing.
 
 Write-Host "Applying DMA and physical security hardening..." -ForegroundColor Cyan
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-1-disable-standby-sleep-states-s1-s3"></a>
 # 1. Disable Standby Sleep States (S1-S3)
 $SleepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab"
 if (-not (Test-Path $SleepPath)) {
@@ -20542,7 +19742,6 @@ Set-ItemProperty -Path $SleepPath -Name "ACSettingIndex" -Value 0 -Type DWord
 Set-ItemProperty -Path $SleepPath -Name "DCSettingIndex" -Value 0 -Type DWord
 Write-Host "[+] Standby sleep states (S1-S3) disabled." -ForegroundColor Green
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-2-configure-wake-password-requirement"></a>
 # 2. Configure Wake Password Requirement
 $WakePath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51"
 if (-not (Test-Path $WakePath)) {
@@ -20552,7 +19751,6 @@ Set-ItemProperty -Path $WakePath -Name "ACSettingIndex" -Value 1 -Type DWord
 Set-ItemProperty -Path $WakePath -Name "DCSettingIndex" -Value 1 -Type DWord
 Write-Host "[+] Wake password requirement enforced." -ForegroundColor Green
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-3-bitlocker-dma-and-removable-storage-settings"></a>
 # 3. BitLocker DMA and Removable Storage Settings
 $FvePath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
 if (-not (Test-Path $FvePath)) {
@@ -20568,7 +19766,6 @@ if (-not (Test-Path $FvePolicyPath)) {
 Set-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -Value 1 -Type DWord
 Write-Host "[+] BitLocker DMA under lock and unencrypted USB write blocks configured." -ForegroundColor Green
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-4-device-installation-restrictions-block-sbp-2-class"></a>
 # 4. Device Installation Restrictions (Block SBP-2 class)
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 if (-not (Test-Path $RestrictPath)) {
@@ -20584,7 +19781,6 @@ if (-not (Test-Path $DenyClassPath)) {
 Set-ItemProperty -Path $DenyClassPath -Name "1" -Value "{d48179be-ec20-11d1-b6b8-00c04fa372a7}" -Type String
 Write-Host "[+] Device installation blocks for SBP-2 class enabled." -ForegroundColor Green
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-5-kernel-dma-protection-block-until-logon-for-standard-clients"></a>
 # 5. Kernel DMA Protection (Block until logon for standard clients)
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 if (-not (Test-Path $KDmaPath)) {
@@ -20600,14 +19796,11 @@ Write-Host "DMA and physical security settings applied successfully." -Foregroun
 [Download Script: Test-DMAPhysicalSecurity.ps1](audit_scripts/Test-DMAPhysicalSecurity.ps1)
 
 ```powershell
-<a id="08-endpoints-harden-dma-and-physical-security-md-test-dmaphysicalsecurityps1"></a>
 # Test-DMAPhysicalSecurity.ps1
-<a id="08-endpoints-harden-dma-and-physical-security-md-description-audits-local-registry-configuration-for-standby-settings-dma-protection-under-lock-usb-restrictions-and-blocked-device-setup-classes"></a>
 # Description: Audits local registry configuration for standby settings, DMA protection under lock, USB restrictions, and blocked device setup classes.
 
 Write-Host "--- Auditing DMA and Physical Security ---" -ForegroundColor Cyan
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-1-audit-standby-settings"></a>
 # 1. Audit Standby Settings
 $SleepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab"
 $AcSleep = Get-ItemProperty -Path $SleepPath -Name "ACSettingIndex" -ErrorAction SilentlyContinue
@@ -20622,7 +19815,6 @@ $DcSleepColor = if ($DcSleepVal -eq 0) { "Green" } else { "Red" }
 Write-Host "    - Standby Sleep State (Plugged In) Setting: $AcSleepVal (Required = 0 [Disabled])" -ForegroundColor $AcSleepColor
 Write-Host "    - Standby Sleep State (On Battery) Setting: $DcSleepVal (Required = 0 [Disabled])" -ForegroundColor $DcSleepColor
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-2-audit-bitlocker-settings"></a>
 # 2. Audit BitLocker Settings
 $FvePath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
 $DmaLock = Get-ItemProperty -Path $FvePath -Name "DisableExternalDMAUnderLock" -ErrorAction SilentlyContinue
@@ -20637,7 +19829,6 @@ $UsbWriteColor = if ($UsbWriteVal -eq 1) { "Green" } else { "Red" }
 Write-Host "    - Disable DMA Under Lock: $DmaLockVal (Required = 1)" -ForegroundColor $DmaLockColor
 Write-Host "    - USB Unencrypted Write Block: $UsbWriteVal (Required = 1)" -ForegroundColor $UsbWriteColor
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-3-audit-device-restriction-settings"></a>
 # 3. Audit Device Restriction Settings
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 $DenyDev = Get-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -ErrorAction SilentlyContinue
@@ -20653,7 +19844,6 @@ $Sbp2Color = if ($Sbp2Val -eq "{d48179be-ec20-11d1-b6b8-00c04fa372a7}") { "Green
 
 Write-Host "    - Blocked SBP-2 Setup Class: '$Sbp2Val' (Required = '{d48179be-ec20-11d1-b6b8-00c04fa372a7}')" -ForegroundColor $Sbp2Color
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-4-audit-kernel-dma-protection-setting"></a>
 # 4. Audit Kernel DMA Protection Setting
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 $EnumPol = Get-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -ErrorAction SilentlyContinue
@@ -20851,14 +20041,11 @@ Enforce the local security settings and SecEdit configuration locally.
 [Download Script: Set-AccountPolicies.ps1](implementation_scripts/Set-AccountPolicies.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-account-policies-md-set-accountpoliciesps1"></a>
 # Set-AccountPolicies.ps1
-<a id="08-endpoints-configure-account-policies-md-configures-local-account-lockout-password-parameters-smart-card-removal-behavior-blank-password-blocks-hello-for-business-microsoft-accounts-secure-channel-options-and-ntlm-session-security-options"></a>
 # Configures local account lockout, password parameters, smart card removal behavior, blank password blocks, Hello for Business, Microsoft accounts, secure channel options, and NTLM session security options.
 
 Write-Host "Applying account and password policies..." -ForegroundColor Cyan
 
-<a id="08-endpoints-configure-account-policies-md-1-enforce-local-security-options-via-registry"></a>
 # 1. Enforce local security options via Registry
 $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
 if (-not (Test-Path $WinlogonPath)) {
@@ -20876,7 +20063,6 @@ Set-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -Value 1 -Type DWo
 Set-ItemProperty -Path $LsaPath -Name "NoLMHash" -Value 1 -Type DWord -Force
 Write-Host "[+] Blank password restriction and NoLMHash options enforced." -ForegroundColor Green
 
-<a id="08-endpoints-configure-account-policies-md-lsass-wdigest-caching-block"></a>
 # LSASS WDigest caching block
 $WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
 if (-not (Test-Path $WDigestPath)) {
@@ -20885,7 +20071,6 @@ if (-not (Test-Path $WDigestPath)) {
 Set-ItemProperty -Path $WDigestPath -Name "UseLogonCredential" -Value 0 -Type DWord -Force
 Write-Host "[+] LSASS WDigest credential caching disabled." -ForegroundColor Green
 
-<a id="08-endpoints-configure-account-policies-md-pbkdf2-iterations-for-cached-logons"></a>
 # PBKDF2 Iterations for Cached Logons
 $CachePath = "HKLM:\SECURITY\Cache"
 if (-not (Test-Path $CachePath)) {
@@ -20894,7 +20079,6 @@ if (-not (Test-Path $CachePath)) {
 Set-ItemProperty -Path $CachePath -Name "NL`$IterationCount" -Value 1954 -Type DWord -Force
 Write-Host "[+] PBKDF2 cached credentials iteration count configured." -ForegroundColor Green
 
-<a id="08-endpoints-configure-account-policies-md-hello-for-business-pin-and-microsoft-account-policies"></a>
 # Hello for Business, PIN and Microsoft Account policies
 $SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
 if (-not (Test-Path $SystemPolicyPath)) {
@@ -20933,7 +20117,6 @@ if (-not (Test-Path $ExcludeDevicesPath)) {
 Set-ItemProperty -Path $ExcludeDevicesPath -Name "TPM12" -Value 0 -Type DWord -Force
 Write-Host "[+] Hello for Business, PIN and Microsoft Account options configured." -ForegroundColor Green
 
-<a id="08-endpoints-configure-account-policies-md-domain-member-secure-channel-netlogon-settings"></a>
 # Domain Member Secure Channel netlogon settings
 $NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
 if (-not (Test-Path $NetlogonPath)) {
@@ -20947,7 +20130,6 @@ Set-ItemProperty -Path $NetlogonPath -Name "MaximumPasswordAge" -Value 30 -Type 
 Set-ItemProperty -Path $NetlogonPath -Name "RequireStrongKey" -Value 1 -Type DWord -Force
 Write-Host "[+] Domain Member secure channel configurations applied." -ForegroundColor Green
 
-<a id="08-endpoints-configure-account-policies-md-lanmanworkstation-plain-text-passwords-block"></a>
 # LanmanWorkstation plain text passwords block
 $LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
 if (-not (Test-Path $LanmanWorkPath)) {
@@ -20955,7 +20137,6 @@ if (-not (Test-Path $LanmanWorkPath)) {
 }
 Set-ItemProperty -Path $LanmanWorkPath -Name "EnablePlainTextPassword" -Value 0 -Type DWord -Force
 
-<a id="08-endpoints-configure-account-policies-md-ntlm-ssp-client-server-security-and-null-session-fallback"></a>
 # NTLM SSP Client & Server security and Null Session Fallback
 $MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
 if (-not (Test-Path $MsvPath)) {
@@ -20966,7 +20147,6 @@ Set-ItemProperty -Path $MsvPath -Name "NTLMMinClientSec" -Value 537395200 -Type 
 Set-ItemProperty -Path $MsvPath -Name "NTLMMinServerSec" -Value 537395200 -Type DWord -Force
 Write-Host "[+] Network authentication security and NTLM session settings applied." -ForegroundColor Green
 
-<a id="08-endpoints-configure-account-policies-md-2-enforce-account-lockout-and-password-policy-via-secedit"></a>
 # 2. Enforce Account Lockout and Password Policy via secedit
 $SecTempDir = Join-Path $env:TEMP "AccountSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
@@ -20977,7 +20157,6 @@ $CfgFile = Join-Path $SecTempDir "account_sec.cfg"
 $LogFile = Join-Path $SecTempDir "secedit.log"
 $DbFile = Join-Path $SecTempDir "secedit.sdb"
 
-<a id="08-endpoints-configure-account-policies-md-export-current-db"></a>
 # Export current db
 $Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
 if ($Process.ExitCode -ne 0) {
@@ -20991,7 +20170,6 @@ if (-not $HasSystemAccess) {
     $ConfigText += "`r`n[System Access]`r`n"
 }
 
-<a id="08-endpoints-configure-account-policies-md-re-build-system-access-section-line-by-line"></a>
 # Re-build [System Access] section line-by-line
 $Lines = $ConfigText -split "`r?`n"
 $NewLines = @()
@@ -21037,7 +20215,6 @@ foreach ($Line in $Lines) {
     }
 }
 
-<a id="08-endpoints-configure-account-policies-md-append-our-settings"></a>
 # Append our settings
 $FinalLines = @()
 foreach ($Line in $NewLines) {
@@ -21052,7 +20229,6 @@ foreach ($Line in $NewLines) {
 
 $FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
 
-<a id="08-endpoints-configure-account-policies-md-import"></a>
 # Import
 $Process = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas SECURITYPOLICY /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
 if ($Process.ExitCode -eq 0) {
@@ -21068,16 +20244,13 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 [Download Script: Test-AccountPolicies.ps1](audit_scripts/Test-AccountPolicies.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-account-policies-md-test-accountpoliciesps1"></a>
 # Test-AccountPolicies.ps1
-<a id="08-endpoints-configure-account-policies-md-checks-local-registry-and-secedit-settings-for-account-lockout-password-options-smart-card-removal-behavior-pin-parameters-hello-for-business-microsoft-account-settings-secure-channel-properties-and-ntlm-session-configuration"></a>
 # Checks local registry and SecEdit settings for account lockout, password options, smart card removal behavior, PIN parameters, Hello for Business, Microsoft account settings, secure channel properties, and NTLM session configuration.
 
 Write-Host "--- Auditing Account and Password Policies ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
-<a id="08-endpoints-configure-account-policies-md-helper-function-to-audit-registry-properties"></a>
 # Helper function to audit registry properties
 function Test-RegistryValue ($path, $name, $expectedValue) {
     $val = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
@@ -21091,7 +20264,6 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
 
-<a id="08-endpoints-configure-account-policies-md-1-audit-registry-settings"></a>
 # 1. Audit Registry Settings
 $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
 Test-RegistryValue $WinlogonPath "ScRemoveOption" "1"
@@ -21141,7 +20313,6 @@ Test-RegistryValue $MsvPath "allownullsessionfallback" 0
 Test-RegistryValue $MsvPath "NTLMMinClientSec" 537395200
 Test-RegistryValue $MsvPath "NTLMMinServerSec" 537395200
 
-<a id="08-endpoints-configure-account-policies-md-2-audit-secedit-settings"></a>
 # 2. Audit SecEdit Settings
 $SecTempDir = Join-Path $env:TEMP "AccountAuditSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
@@ -21428,14 +20599,11 @@ Run the following script locally to configure user and system registry restricti
 [Download Script: Set-UserProfileRestrictions.ps1](implementation_scripts/Set-UserProfileRestrictions.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-user-profile-restrictions-md-set-userprofilerestrictionsps1"></a>
 # Set-UserProfileRestrictions.ps1
-<a id="08-endpoints-configure-user-profile-restrictions-md-description-configures-hklm-and-hkcu-registry-settings-for-user-profiles-shell-behaviors-diagnostic-data-installer-locks-inactivity-timeouts-and-security-policies"></a>
 # Description: Configures HKLM and HKCU registry settings for user profiles, shell behaviors, diagnostic data, installer locks, inactivity timeouts, and security policies.
 
 Write-Host "Applying User Profile and System Restrictions..." -ForegroundColor Cyan
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-helper-function-to-create-keys-and-set-values-safely"></a>
 # Helper function to create keys and set values safely
 function Set-RegDWord {
     [CmdletBinding(SupportsShouldProcess)]
@@ -21475,49 +20643,39 @@ function Set-RegString {
     }
 }
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-1-enforce-hklm-registry-hardening-settings"></a>
 # 1. Enforce HKLM Registry Hardening Settings
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-shell-runas-suppression-policies"></a>
 # Shell RunAs Suppression Policies
 Set-RegDWord "HKLM:\SOFTWARE\Classes\batfile\shell\runasuser" "SuppressionPolicy" 4096
 Set-RegDWord "HKLM:\SOFTWARE\Classes\cmdfile\shell\runasuser" "SuppressionPolicy" 4096
 Set-RegDWord "HKLM:\SOFTWARE\Classes\exefile\shell\runasuser" "SuppressionPolicy" 4096
 Set-RegDWord "HKLM:\SOFTWARE\Classes\mscfile\shell\runasuser" "SuppressionPolicy" 4096
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-kernel-sehop"></a>
 # Kernel SEHOP
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" "DisableExceptionChainValidation" 0
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-personalization"></a>
 # Personalization
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" "NoLockScreenCamera" 1
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" "NoLockScreenSlideshow" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-group-policy-behavior"></a>
 # Group Policy Behavior
 $GpKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}"
 Set-RegDWord $GpKey "NoBackgroundPolicy" 0
 Set-RegDWord $GpKey "NoGPOListChanges" 0
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-app-privacy"></a>
 # App Privacy
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" "LetAppsActivateWithVoiceAboveLock" 2
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-app-compatibility"></a>
 # App Compatibility
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat" "DisableInventory" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-cloud-content"></a>
 # Cloud Content
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" "DisableWindowsConsumerFeatures" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-data-collection-telemetry"></a>
 # Data Collection / Telemetry
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" "AllowTelemetry" 1
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" "LimitEnhancedDiagnosticDataWindowsAnalytics" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-explorer-and-security-controls"></a>
 # Explorer and Security Controls
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" "NoDataExecutionPrevention" 0
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" "NoHeapTerminationOnCorruption" 0
@@ -21528,75 +20686,59 @@ Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" "AllowB
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "DisableAutomaticRestartSignOn" 1
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "InactivityTimeoutSecs" 900
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-legal-notice-banner"></a>
 # Legal Notice Banner
 $LegalText = "You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only. By using this IS, you consent to routine monitoring."
 Set-RegString "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "LegalNoticeText" $LegalText
 Set-RegString "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "LegalNoticeCaption" "US Department of Defense Warning Statement"
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-installer-hardening"></a>
 # Installer Hardening
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer" "EnableUserControl" 0
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer" "AlwaysInstallElevated" 0
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer" "SafeForScripting" 0
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-game-dvr"></a>
 # Game DVR
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" "AllowGameDVR" 0
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-windows-ink-workspace"></a>
 # Windows Ink Workspace
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-system-objects-protection-mode"></a>
 # System Objects Protection Mode
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" "ProtectionMode" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-secondary-logon-service-disabled-4"></a>
 # Secondary Logon Service (Disabled = 4)
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\seclogon" "Start" 4
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-aslr-force-randomization"></a>
 # ASLR Force Randomization
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" 4294967295
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-strict-authenticode-cert-padding-check"></a>
 # Strict Authenticode Cert Padding Check
 Set-RegDWord "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
 Set-RegDWord "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-secure-batch-processing"></a>
 # Secure Batch Processing
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-disable-time-travel-debugging-ttd"></a>
 # Disable Time-Travel Debugging (TTD)
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\TTD" "RecordingPolicy" 2
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-prevent-standard-users-from-installing-root-certificates"></a>
 # Prevent standard users from installing root certificates
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-disable-appinit-dlls"></a>
 # Disable AppInit_DLLs
 Set-RegDWord "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" 0
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-block-driver-co-installers"></a>
 # Block driver co-installers
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" "DisableCoInstallers" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-spectremeltdown-speculative-execution-mitigations"></a>
 # Spectre/Meltdown speculative execution mitigations
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" 72
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" 3
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-kernel-level-shadow-stacks"></a>
 # Kernel-level Shadow Stacks
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
 Write-Host "[+] Local computer system restrictions applied." -ForegroundColor Green
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-2-enforce-hkcu-settings-on-current-user"></a>
 # 2. Enforce HKCU Settings on Current User
 $PushPath = "HKCU:\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
 $CloudPath = "HKCU:\Software\Policies\Microsoft\Windows\CloudContent"
@@ -21612,7 +20754,6 @@ if (-not (Test-Path $CloudPath)) {
 Set-ItemProperty -Path $CloudPath -Name "DisableThirdPartySuggestions" -Value 1 -Type DWord
 Write-Host "[+] Current user profile restrictions applied successfully." -ForegroundColor Green
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-3-enforce-hkcu-settings-on-default-user-hive-for-all-future-user-profiles-on-this-machine"></a>
 # 3. Enforce HKCU Settings on Default User Hive (For all future user profiles on this machine)
 Write-Host "[*] Configuring Default User profile registry keys..." -ForegroundColor Gray
 $DefaultHivePath = "C:\Users\Default\NTUSER.DAT"
@@ -21649,16 +20790,13 @@ if (Test-Path $DefaultHivePath) {
 [Download Script: Test-UserProfileRestrictions.ps1](audit_scripts/Test-UserProfileRestrictions.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-user-profile-restrictions-md-test-userprofilerestrictionsps1"></a>
 # Test-UserProfileRestrictions.ps1
-<a id="08-endpoints-configure-user-profile-restrictions-md-description-checks-hkcu-and-hklm-registry-settings-for-active-user-and-system-profile-restrictions"></a>
 # Description: Checks HKCU and HKLM registry settings for active user and system profile restrictions.
 
 Write-Host "--- Auditing User Profile Restrictions ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-helper-function-to-audit-registry-properties"></a>
 # Helper function to audit registry properties
 function Test-RegistryValue ($path, $name, $expectedValue) {
     $val = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
@@ -21672,14 +20810,12 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-1-audit-current-user-settings"></a>
 # 1. Audit Current User Settings
 $PushPath = "HKCU:\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
 $CloudPath = "HKCU:\Software\Policies\Microsoft\Windows\CloudContent"
 Test-RegistryValue $PushPath "NoToastApplicationNotificationOnLockScreen" 1
 Test-RegistryValue $CloudPath "DisableThirdPartySuggestions" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-2-audit-computer-hklm-settings"></a>
 # 2. Audit Computer HKLM Settings
 $ClassBat = "HKLM:\SOFTWARE\Classes\batfile\shell\runasuser"
 $ClassCmd = "HKLM:\SOFTWARE\Classes\cmdfile\shell\runasuser"
@@ -21750,39 +20886,31 @@ Test-RegistryValue $SessionMgr "ProtectionMode" 1
 $SecLogon = "HKLM:\SYSTEM\CurrentControlSet\Services\seclogon"
 Test-RegistryValue $SecLogon "Start" 4
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-aslr-and-speculative-mitigations"></a>
 # ASLR and Speculative mitigations
 $MemMgmt = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management"
 Test-RegistryValue $MemMgmt "MoveImages" 4294967295
 Test-RegistryValue $MemMgmt "FeatureSettingsOverride" 72
 Test-RegistryValue $MemMgmt "FeatureSettingsOverrideMask" 3
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-strict-authenticode-check"></a>
 # Strict Authenticode check
 Test-RegistryValue "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
 Test-RegistryValue "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-secure-batch-processing"></a>
 # Secure Batch processing
 Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-disable-time-travel-debugging"></a>
 # Disable Time-Travel Debugging
 Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\TTD" "RecordingPolicy" 2
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-prevent-standard-users-from-root-cert-installation"></a>
 # Prevent standard users from root cert installation
 Test-RegistryValue "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-disable-appinit-dlls"></a>
 # Disable AppInit_DLLs
 Test-RegistryValue "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" 0
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-block-driver-co-installers"></a>
 # Block driver co-installers
 Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" "DisableCoInstallers" 1
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-kernel-level-shadow-stacks"></a>
 # Kernel-level Shadow Stacks
 Test-RegistryValue "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
@@ -21906,14 +21034,11 @@ Use this method to apply the exploit protection profile locally on individual sy
 [Download Script: Configure-ExploitProtection.ps1](implementation_scripts/Configure-ExploitProtection.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-exploit-protection-md-configure-exploitprotectionps1"></a>
 # Configure-ExploitProtection.ps1
-<a id="08-endpoints-configure-exploit-protection-md-description-generates-the-system-wide-and-application-specific-exploit-protection-xml-profile-applies-it-locally-and-configures-the-policy-registry-keys"></a>
 # Description: Generates the system-wide and application-specific Exploit Protection XML profile, applies it locally, and configures the policy registry keys.
 
 Write-Host "Applying Exploit Protection Profile..." -ForegroundColor Cyan
 
-<a id="08-endpoints-configure-exploit-protection-md-1-define-the-xml-content-including-system-and-app-settings"></a>
 # 1. Define the XML content including System and App settings
 $XmlContent = @"
 <?xml version="1.0" encoding="utf-8"?>
@@ -22050,7 +21175,6 @@ $XmlContent = @"
 </MitigationPolicy>
 "@
 
-<a id="08-endpoints-configure-exploit-protection-md-2-create-the-target-directory-and-write-the-xml-file"></a>
 # 2. Create the target directory and write the XML file
 $TargetDir = "C:\ProgramData\ExploitProtection"
 if (-not (Test-Path $TargetDir)) {
@@ -22061,7 +21185,6 @@ $XmlPath = "$TargetDir\ExploitProtectionSettings.xml"
 Set-Content -Path $XmlPath -Value $XmlContent -Encoding UTF8
 Write-Host "Exploit Protection XML profile written to $($XmlPath)" -ForegroundColor Gray
 
-<a id="08-endpoints-configure-exploit-protection-md-3-apply-the-settings-locally-using-the-cmdlet"></a>
 # 3. Apply the settings locally using the cmdlet
 if (Get-Command Set-ProcessMitigation -ErrorAction SilentlyContinue) {
     Set-ProcessMitigation -PolicyFilePath $XmlPath
@@ -22070,7 +21193,6 @@ if (Get-Command Set-ProcessMitigation -ErrorAction SilentlyContinue) {
     Write-Warning "Set-ProcessMitigation cmdlet is not available. Please ensure you are running Windows 10/11 or Windows Server 2016+."
 }
 
-<a id="08-endpoints-configure-exploit-protection-md-4-configure-policy-registry-keys-to-point-to-the-xml-file"></a>
 # 4. Configure policy registry keys to point to the XML file
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection"
 if (-not (Test-Path $RegPath)) {
@@ -22088,9 +21210,7 @@ Write-Host "Exploit Protection Profile application completed successfully." -For
 [Download Script: Get-ExploitProtectionStatus.ps1](audit_scripts/Get-ExploitProtectionStatus.ps1)
 
 ```powershell
-<a id="08-endpoints-configure-exploit-protection-md-get-exploitprotectionstatusps1"></a>
 # Get-ExploitProtectionStatus.ps1
-<a id="08-endpoints-configure-exploit-protection-md-description-audits-the-system-wide-exploit-protection-settings-against-the-recommended-security-baseline"></a>
 # Description: Audits the system-wide Exploit Protection settings against the recommended security baseline.
 
 Write-Host "Auditing system-wide Exploit Protection mitigations..." -ForegroundColor Cyan
@@ -22098,7 +21218,6 @@ Write-Host "Auditing system-wide Exploit Protection mitigations..." -ForegroundC
 $BaselineFailed = $false
 $Mitigations = Get-ProcessMitigation -System
 
-<a id="08-endpoints-configure-exploit-protection-md-helper-function-to-evaluate-and-display-status"></a>
 # Helper function to evaluate and display status
 function Test-MitigationSetting {
     param(
@@ -22116,30 +21235,24 @@ function Test-MitigationSetting {
 
 Write-Host "`nSystem-wide Mitigations:" -ForegroundColor Gray
 
-<a id="08-endpoints-configure-exploit-protection-md-audit-dep"></a>
 # Audit DEP
 Test-MitigationSetting -MitigationName "DEP Enable" -CurrentValue $Mitigations.DEP.Enable -ExpectedValue "ON"
 Test-MitigationSetting -MitigationName "DEP EmulateAtlThunks" -CurrentValue $Mitigations.DEP.EmulateAtlThunks -ExpectedValue "OFF"
 
-<a id="08-endpoints-configure-exploit-protection-md-audit-aslr"></a>
 # Audit ASLR
 Test-MitigationSetting -MitigationName "ASLR ForceRelocateImages" -CurrentValue $Mitigations.ASLR.ForceRelocateImages -ExpectedValue "ON"
 Test-MitigationSetting -MitigationName "ASLR BottomUp" -CurrentValue $Mitigations.ASLR.BottomUp -ExpectedValue "ON"
 Test-MitigationSetting -MitigationName "ASLR HighEntropy" -CurrentValue $Mitigations.ASLR.HighEntropy -ExpectedValue "ON"
 
-<a id="08-endpoints-configure-exploit-protection-md-audit-cfg"></a>
 # Audit CFG
 Test-MitigationSetting -MitigationName "CFG Enable" -CurrentValue $Mitigations.CFG.Enable -ExpectedValue "ON"
 
-<a id="08-endpoints-configure-exploit-protection-md-audit-sehop"></a>
 # Audit SEHOP
 Test-MitigationSetting -MitigationName "SEHOP Enable" -CurrentValue $Mitigations.SEHOP.Enable -ExpectedValue "ON"
 
-<a id="08-endpoints-configure-exploit-protection-md-audit-heap"></a>
 # Audit Heap
 Test-MitigationSetting -MitigationName "Heap TerminateOnError" -CurrentValue $Mitigations.Heap.TerminateOnError -ExpectedValue "ON"
 
-<a id="08-endpoints-configure-exploit-protection-md-audit-registry-policy-and-xml-configuration"></a>
 # Audit Registry Policy and XML Configuration
 Write-Host "`nRegistry Policy and XML Configuration:" -ForegroundColor Gray
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection"
@@ -22286,9 +21399,7 @@ Use this method to apply the setting locally on standalone systems or during ref
 [Download Script: Configure-DisableSafeModeNonAdmins.ps1](implementation_scripts/Configure-DisableSafeModeNonAdmins.ps1)
 
 ```powershell
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-configure-disablesafemodenonadminsps1"></a>
 # Configure-DisableSafeModeNonAdmins.ps1
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-description-prevents-standard-users-from-logging-into-the-system-while-in-safe-mode-by-setting-safemodeblocknonadmins-to-1"></a>
 # Description: Prevents standard users from logging into the system while in Safe Mode by setting SafeModeBlockNonAdmins to 1.
 
 $RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
@@ -22310,9 +21421,7 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green
 [Download Script: Get-SafeModeNonAdminsStatus.ps1](audit_scripts/Get-SafeModeNonAdminsStatus.ps1)
 
 ```powershell
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-get-safemodenonadminsstatusps1"></a>
 # Get-SafeModeNonAdminsStatus.ps1
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-description-checks-the-current-configuration-state-of-safemodeblocknonadmins-registry-setting"></a>
 # Description: Checks the current configuration state of SafeModeBlockNonAdmins registry setting.
 
 $RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
@@ -22409,9 +21518,7 @@ Use this method to apply the rules locally on standalone systems or during refer
 [Download Script: Configure-BlockLOLBinsOutbound.ps1](implementation_scripts/Configure-BlockLOLBinsOutbound.ps1)
 
 ```powershell
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-configure-blocklolbinsoutboundps1"></a>
 # Configure-BlockLOLBinsOutbound.ps1
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-description-configures-local-outbound-windows-defender-firewall-rules-to-block-network-connections-from-known-lolbins"></a>
 # Description: Configures local outbound Windows Defender Firewall rules to block network connections from known LOLBins.
 
 $Lolbins = @(
@@ -22461,9 +21568,7 @@ Write-Host "Outbound firewall rules configured successfully." -ForegroundColor G
 [Download Script: Get-BlockedLOLBinsOutboundStatus.ps1](audit_scripts/Get-BlockedLOLBinsOutboundStatus.ps1)
 
 ```powershell
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-get-blockedlolbinsoutboundstatusps1"></a>
 # Get-BlockedLOLBinsOutboundStatus.ps1
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-description-audits-the-presence-and-configuration-of-outbound-firewall-rules-blocking-known-lolbins"></a>
 # Description: Audits the presence and configuration of outbound firewall rules blocking known LOLBins.
 
 $Lolbins = @(

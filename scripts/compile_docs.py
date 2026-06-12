@@ -48,27 +48,7 @@ def process_file(filepath, repo_root):
     # Prepend a target anchor for the top of this file
     processed = f'<a id="{file_id}"></a>\n\n'
     
-    # We will process line by line to inject header anchors
-    lines = content.split('\n')
-    header_regex = re.compile(r'^(#+)\s+(.+)$')
-    new_lines = []
-    
-    for line in lines:
-        header_match = header_regex.match(line)
-        if header_match:
-            level = header_match.group(1)
-            header_text = header_match.group(2)
-            header_slug = slugify(header_text)
-            # Prepend an HTML anchor for header cross-referencing
-            anchor = f'<a id="{file_id}-{header_slug}"></a>'
-            new_lines.append(f'{anchor}\n{line}')
-        else:
-            new_lines.append(line)
-            
-    content = '\n'.join(new_lines)
-    
-    # Rewrite relative markdown links to HTML anchors: [Text](path.md#anchor)
-    # Match links targeting .md files (exclude external, mailto, etc.)
+    # Helper match functions and regexes
     def link_replacer(match):
         text = match.group(1)
         target = match.group(2)
@@ -89,16 +69,8 @@ def process_file(filepath, repo_root):
         else:
             return f'[{text}](#{target_file_id})'
             
-    # Regex explanation:
-    # \[([^\]]+)\] : matches [Link Text]
-    # \(([^:#\s)]+\.md) : matches relative link target ending in .md, excluding colons or hash
-    # (#[^)]+)? : matches optional anchor segment like #implementation-steps
-    # \) : matches closing parenthesis
     md_link_regex = re.compile(r'\[([^\]]+)\]\(([^:#\s)]+\.md)(#[^)]+)?\)')
-    content = md_link_regex.sub(link_replacer, content)
     
-    # Rewrite internal page anchors (e.g. [Step](#step-1)) to make them unique
-    # Match any link starting with '#' where it is not already prefixed with a file ID
     def internal_link_replacer(match):
         text = match.group(1)
         anchor = match.group(2)
@@ -111,9 +83,7 @@ def process_file(filepath, repo_root):
         return f'[{text}](#{file_id}-{clean_anchor})'
         
     internal_link_regex = re.compile(r'\[([^\]]+)\]\((#[^)]+)\)')
-    content = internal_link_regex.sub(internal_link_replacer, content)
     
-    # Rewrite relative image paths: ![alt](images/pic.png)
     def img_replacer(match):
         alt_text = match.group(1)
         img_path = match.group(2)
@@ -126,17 +96,54 @@ def process_file(filepath, repo_root):
         return f'![{alt_text}]({resolved_img})'
         
     img_regex = re.compile(r'!\[([^\]]*)\]\(([^:\n)]+)\)')
-    content = img_regex.sub(img_replacer, content)
     
-    # Convert GitHub alert blockquotes to standard readable strong tags
-    # e.g., > [!NOTE] -> > **NOTE:**
     def alert_replacer(match):
         alert_type = match.group(1)
         return f'> **{alert_type}:**'
         
     alert_regex = re.compile(r'^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]', re.MULTILINE | re.IGNORECASE)
-    content = alert_regex.sub(alert_replacer, content)
     
+    header_regex = re.compile(r'^(#+)\s+(.+)$')
+    
+    # Split content by fenced code blocks to avoid modifying anything inside them
+    segments = re.split(r'(```[\s\S]*?```)', content)
+    
+    for i in range(len(segments)):
+        # If the index is even, it's normal markdown text (not inside a code block)
+        if i % 2 == 0:
+            segment = segments[i]
+            
+            # 1. Process line by line to inject header anchors
+            lines = segment.split('\n')
+            new_lines = []
+            for line in lines:
+                header_match = header_regex.match(line)
+                if header_match:
+                    level = header_match.group(1)
+                    header_text = header_match.group(2)
+                    header_slug = slugify(header_text)
+                    # Prepend an HTML anchor for header cross-referencing
+                    anchor = f'<a id="{file_id}-{header_slug}"></a>'
+                    new_lines.append(f'{anchor}\n{line}')
+                else:
+                    new_lines.append(line)
+            segment = '\n'.join(new_lines)
+            
+            # 2. Rewrite relative markdown links to HTML anchors: [Text](path.md#anchor)
+            segment = md_link_regex.sub(link_replacer, segment)
+            
+            # 3. Rewrite internal page anchors (e.g. [Step](#step-1)) to make them unique
+            segment = internal_link_regex.sub(internal_link_replacer, segment)
+            
+            # 4. Rewrite relative image paths: ![alt](images/pic.png)
+            segment = img_regex.sub(img_replacer, segment)
+            
+            # 5. Convert GitHub alert blockquotes to standard readable strong tags
+            segment = alert_regex.sub(alert_replacer, segment)
+            
+            segments[i] = segment
+            
+    content = ''.join(segments)
     processed += content
     return processed
 
