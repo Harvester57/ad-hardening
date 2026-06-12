@@ -1,4 +1,4 @@
-# Test-PawAppLockerStatus.ps1
+# Test-EndpointAppLockerStatus.ps1
 # Description: Checks the current configuration and operational status of the Application Identity service.
 
 Write-Host "--- Auditing AppLocker Service Status ---" -ForegroundColor Cyan

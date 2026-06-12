@@ -35,3 +35,16 @@ if (Test-Path $SrpPath) {
 } else {
     Write-Host "[-] AppLocker registry base path (SrpV2) not found. Policy is not deployed." -ForegroundColor Red
 }
+
+# 3. Audit NTVDM Disable Status
+$NtvdmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
+if (Test-Path $NtvdmPath) {
+    $AppCompatVal = Get-ItemProperty -Path $NtvdmPath -Name "Prevent16BitApp" -ErrorAction SilentlyContinue
+    if ($null -ne $AppCompatVal -and $AppCompatVal.Prevent16BitApp -eq 1) {
+        Write-Host "    - NTVDM (16-bit AppCompat): Disabled (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - NTVDM (16-bit AppCompat): Enabled or Not Configured (Expected: Disabled)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "    - NTVDM (16-bit AppCompat): Not Configured (Expected: Disabled)" -ForegroundColor Yellow
+}

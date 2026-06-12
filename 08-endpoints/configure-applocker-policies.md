@@ -1,36 +1,32 @@
-# Hardening Requirement: Configure AppLocker Policies on Domain Controllers
+# Hardening Requirement: Configure AppLocker Policies for Endpoints
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers.
-* **Operating Systems**: Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 Enterprise/Professional (and above), Windows 11 Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * **Service Configuration (GPO)**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Application Identity` -> Automatic
-  * **AppLocker Path (GPO)**: `Computer Configuration\Policies\Windows Settings\Security Settings\Application Control Policies\AppLocker`
-  * **Registry Location (Service)**: `HKLM\SYSTEM\CurrentControlSet\Services\AppIDSvc` -> `Start` = `2` (REG_DWORD)
-  * **Registry Location (Enforcement)**: `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
+* **GPO Path / Registry Location**: Computer Configuration\Policies\Windows Settings\Security Settings\Application Control Policies\AppLocker
 
 ---
 
 ## Rationale
-Domain Controllers are Tier 0 administrative assets and must never be used for general-purpose tasks like web browsing, document viewing, or running unapproved utilities. Attackers who compromise a Domain Controller or obtain administrative access often attempt to execute custom binaries, remote access tools (RATs), or script-based tools to pivot, establish persistence, or extract the Active Directory database (NTDS.dit).
+Endpoints and general member servers are the most common entry points for malware, ransomware, and administrative account compromise. Standard users running with non-administrative accounts can download and execute malicious executables or scripts in writeable directories (like `%TEMP%` or `%USERPROFILE%`) to bypass traditional signature-based antivirus solutions.
 
-Enforcing AppLocker policies on Domain Controllers provides the following defense-in-depth security benefits:
-1. **Restricts Execution to Authorized Software**: Prevents execution of unapproved software, preventing standard user directories (such as `C:\Users\` or `C:\Windows\Temp\`) from being used to launch malicious binaries or scripts.
-2. **Blocks Browser Execution**: Prevents administrative users from launching web browsers (Chrome, Edge, Firefox, Internet Explorer) directly on Domain Controllers, shutting down web-based drive-by downloads and browser-based credential leakage.
-3. **Restricts Windows Installer and Script Execution**: Prevents unauthorized `.msi` installations and unauthorized PowerShell or VBScript scripts from running, reducing the likelihood of successful exploitation via living-off-the-land techniques.
-4. **Defends Against AppLocker Bypasses**: Abusing trusted, signed Microsoft binaries (such as `msbuild.exe`, `installutil.exe`, `regasm.exe`, `regsvcs.exe`, `mshta.exe`, `regsvr32.exe`, `rundll32.exe`) allows attackers to execute arbitrary code bypassing default AppLocker rules. This control blocks these "Living off the Land" binaries (LOLBins) and prevents execution from user-writeable paths under `%WINDIR%` (such as `Tasks`, `Temp`, `tracing`, `spool\drivers\color`, etc.).
+Enforcing strict application control via AppLocker on endpoints ensures that:
+1. **Malware Prevention**: Standard users are blocked from executing unauthorized binaries and installers.
+2. **Defends Against AppLocker Bypasses**: Abusing trusted, signed Microsoft binaries (such as `msbuild.exe`, `installutil.exe`, `regasm.exe`, `regsvcs.exe`, `mshta.exe`, `regsvr32.exe`, `rundll32.exe`) allows attackers to execute arbitrary code bypassing default AppLocker rules. This control blocks these "Living off the Land" binaries (LOLBins) and prevents execution from user-writeable paths under `%WINDIR%` (such as `Tasks`, `Temp`, `tracing`, `spool\drivers\color`, etc.).
+3. **Restricts Interpreted Codes**: Block unauthorized execution of scripts (PowerShell, VBScript, Batch) from writeable locations.
+4. **Defense-in-Depth**: Limits the lateral movement of adversaries who pivot from one compromised endpoint to another.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Third-Party Administrative Tools**: Monitoring agents, backup orchestrators, and system management tools that run from custom directories (outside `%ProgramFiles%` or `%WinDir%`) will be blocked unless explicit path, publisher, or hash rules are created to whitelist them.
-* **Audit Mode Verification**: It is highly recommended to deploy AppLocker in **Audit Only** mode for a baseline period (e.g., 30 days) to identify all legitimate software and administrative scripts. Analyze the event log (`Applications and Services Logs\Microsoft\Windows\AppLocker`) to create the necessary whitelist rules before switching to **Enforce rules** mode.
-* **AppIDSvc Service**: AppLocker relies on the **Application Identity** service (`AppIDSvc`) to evaluate rule enforcement. If the service is not running, rules will not be enforced.
+* **Authorized Software Only**: Users will be unable to run arbitrary executables, portable apps, or custom scripts. Standard deployment mechanisms (like SCCM, Microsoft Intune, or active software deployment tools) must be used, or explicit rules must be maintained.
+* **Developer & Power User Impact**: Developers and power users who need to compile code locally or run custom utilities will be impacted. Dedicated whitelists or exceptions based on certificate publisher must be implemented.
+* **Audit Mode Deployment**: Due to the high potential for system disruption, the policy must first be deployed in **Audit Only** mode for a validation period to collect logs and verify that no legitimate applications are blocked.
 
 ---
 
@@ -38,29 +34,24 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-#### 1. Enable Application Identity Service
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Create or edit a GPO targeting Domain Controllers (e.g., `GPO_Hardening_DomainControllers`).
+2. Create or edit the GPO linked to the workstations/member servers Organizational Unit (OU) (e.g., `GPO_Hardening_Endpoints`).
 3. Navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
 4. Double-click **Application Identity**.
 5. Select **Define this policy setting** and configure the startup mode to **Automatic**.
-
-#### 2. Configure AppLocker Enforcement
-1. Navigate to:
+6. Navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\Application Control Policies\AppLocker`
-2. Right-click **AppLocker** and select **Properties**.
-3. Under the **Enforcement** tab, check **Configured** for the following rule collections:
-   * **Executable rules** -> Select **Enforce rules** (or **Audit only** for baseline testing)
-   * **Windows Installer rules** -> Select **Enforce rules** (or **Audit only**)
-   * **Script rules** -> Select **Enforce rules** (or **Audit only**)
-   * **Packaged app rules** -> Select **Enforce rules** (or **Audit only**)
-4. Click **OK**.
-
-#### 3. Create Default and Block Rules
-1. Expand **AppLocker** and select **Executable Rules**.
-2. Right-click **Executable Rules** and select **Create Default Rules** (allows all files in Windows and Program Files directories, and allows local Administrators to run all files).
-3. To block LOLBins and writeable directories, create explicit **Deny** rules for **Everyone**:
+7. Configure AppLocker Enforcement:
+   * Right-click **AppLocker** and select **Properties**.
+   * On the **Enforcement** tab, check **Configured** under:
+     * **Executable rules** -> Select **Enforce rules** (or **Audit only** for testing)
+     * **Windows Installer rules** -> Select **Enforce rules**
+     * **Script rules** -> Select **Enforce rules**
+     * **Packaged app rules** -> Select **Enforce rules**
+8. Right-click **Executable Rules** and select **Create Default Rules** (this permits Windows files and program files).
+9. Delete the default rule allowing "Everyone" to run files in all locations, and replace it with a rule allowing only authorized administrative groups (e.g., `Domain Admins`, `Local Administrators`) to run binaries outside the default system locations.
+10. To block LOLBins and writeable directories, create explicit **Deny** rules for **Everyone**:
    * **Writeable Directories (Path Rules)**:
      * Deny `%WINDIR%\Tasks\*`
      * Deny `%WINDIR%\Temp\*`
@@ -99,35 +90,34 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
      * Deny `*\te.exe`
      * Deny `*\tracker.exe`
      * Deny `*\xwizard.exe`
-4. Repeat the process for **Script Rules** by creating default rules and adding Deny rules for script execution from the same user-writeable paths (such as `%WINDIR%\Temp\*` and `%WINDIR%\Tasks\*`).
-5. Disable NTVDM (16-bit application support) to prevent AppLocker bypasses via 16-bit binaries:
+11. Repeat the process for **Script Rules** by creating default rules and adding Deny rules for script execution from the same user-writeable paths (such as `%WINDIR%\Temp\*` and `%WINDIR%\Tasks\*`).
+12. Disable NTVDM (16-bit application support) to prevent AppLocker bypasses via 16-bit binaries:
    * Navigate to: `Computer Configuration\Administrative Templates\System\16-bit Application Compatibility`
    * Configure **Prevent access to 16-bit applications** to **Enabled**.
+13. Link the GPO to the Endpoints Organizational Unit (OU).
 
 ---
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to configure the Application Identity service and import a robust local AppLocker policy.
+Configure the Application Identity service (`AppIDSvc`) and import the robust AppLocker policy locally.
 
-[Download Script: Set-AppLockerDCPolicy.ps1](implementation_scripts/Set-AppLockerDCPolicy.ps1)
+[Download Script: Configure-EndpointAppLocker.ps1](implementation_scripts/Configure-EndpointAppLocker.ps1)
 
 ```powershell
-# Set-AppLockerDCPolicy.ps1
-# Description: Configures the Application Identity service and imports a robust local AppLocker XML policy.
+# Configure-EndpointAppLocker.ps1
+# Description: Configures the Application Identity service (AppIDSvc) to start automatically and imports a robust AppLocker XML policy.
 
-Write-Host "Applying hardening requirement: Configure AppLocker on Domain Controllers..." -ForegroundColor Cyan
+Write-Host "Applying AppLocker Identity service hardening..." -ForegroundColor Cyan
 
 # 1. Enable Application Identity service (AppIDSvc)
-$Service = Get-Service -Name AppIDSvc -ErrorAction SilentlyContinue
-if ($Service) {
+$AppLockerService = Get-Service -Name AppIDSvc -ErrorAction SilentlyContinue
+if ($AppLockerService) {
     Set-Service -Name AppIDSvc -StartupType Automatic
-    if ($Service.Status -ne "Running") {
-        Start-Service -Name AppIDSvc
-    }
-    Write-Host "[+] Application Identity service configured to start automatically and is running." -ForegroundColor Green
+    Start-Service -Name AppIDSvc -ErrorAction SilentlyContinue
+    Write-Host "[+] Application Identity Service (AppIDSvc) set to Automatic and started." -ForegroundColor Green
 } else {
-    Write-Error "Application Identity service (AppIDSvc) is not present on this system."
+    Write-Warning "[-] Application Identity Service not found on this machine."
 }
 
 # 2. Configure local AppLocker policy XML content
@@ -257,7 +247,7 @@ $AppLockerXml = @"
 "@
 
 # Write the temporary XML and import it
-$TempPath = Join-Path -Path $env:TEMP -ChildPath "AppLockerDCPolicy.xml"
+$TempPath = Join-Path -Path $env:TEMP -ChildPath "AppLockerEndpointPolicy.xml"
 $AppLockerXml | Out-File -FilePath $TempPath -Encoding UTF8 -Force
 
 try {
@@ -281,22 +271,27 @@ Set-ItemProperty -Path $NtvdmPath -Name "Prevent16BitApp" -Value 1 -Type DWord
 Write-Host "[+] 16-bit NTVDM compatibility disabled in registry." -ForegroundColor Green
 ```
 
-*To audit the Application Identity service and AppLocker registry configuration:*
-[Download Script: Get-AppLockerDCStatus.ps1](audit_scripts/Get-AppLockerDCStatus.ps1)
+*To verify the AppLocker service status:*
+
+[Download Script: Test-EndpointAppLockerStatus.ps1](audit_scripts/Test-EndpointAppLockerStatus.ps1)
 
 ```powershell
-# Get-AppLockerDCStatus.ps1
-# Description: Checks the configuration state of the AppIDSvc service and AppLocker registry paths.
+# Test-EndpointAppLockerStatus.ps1
+# Description: Checks the current configuration and operational status of the Application Identity service.
 
-Write-Host "--- Auditing AppLocker Configuration ---" -ForegroundColor Cyan
+Write-Host "--- Auditing AppLocker Service Status ---" -ForegroundColor Cyan
 
 # 1. Audit service state
 $AppIDSvc = Get-Service -Name AppIDSvc -ErrorAction SilentlyContinue
+
 if ($AppIDSvc) {
-    $SvcColor = if ($AppIDSvc.Status -eq "Running" -and $AppIDSvc.StartType -eq "Automatic") { "Green" } else { "Yellow" }
-    Write-Host "    - Application Identity Service: $($AppIDSvc.Status) | Startup: $($AppIDSvc.StartType) (Expected: Running | Automatic)" -ForegroundColor $SvcColor
+    if ($AppIDSvc.Status -eq "Running" -and $AppIDSvc.StartType -eq "Automatic") {
+        Write-Host "    - AppLocker Service Status: Running | Startup: Automatic (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: AppLocker Service Status: $($AppIDSvc.Status) | Startup: $($AppIDSvc.StartType) (Should be Running/Automatic)" -ForegroundColor Red
+    }
 } else {
-    Write-Host "    - Application Identity Service: NOT INSTALLED" -ForegroundColor Red
+    Write-Host "    - VULNERABLE: Application Identity Service (AppIDSvc) is not installed." -ForegroundColor Red
 }
 
 # 2. Audit enforcement registry settings
@@ -340,7 +335,7 @@ if (Test-Path $NtvdmPath) {
 ---
 
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Recommendations Section 3.1.2 (System hardening and configuration baseline controls), DAT-NT-13 Note Technique (R8, R10, R15, R16, R20)
-* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9 (Application Control Policies / AppLocker)
-* **Microsoft Security Baseline Focus**: Domain Controller Security baseline - AppLocker configurations
+* **ANSSI AD Hardening Guide**: DAT-NT-13 Note Technique (R8, R10, R15, R16, R20)
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.9 (AppLocker Application Control)
+* **Microsoft Security Baselines**: AppLocker deployment guidance for client environments.
 * **Ultimate AppLocker Bypass List**: Generic & Verified AppLocker Bypasses

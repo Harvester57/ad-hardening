@@ -106,6 +106,7 @@
     * [Enable Secure Boot](08-endpoints/enable-secure-boot.md)
     * [Enable VBS and Credential Guard](08-endpoints/enable-vbs-credential-guard.md)
     * [Configure Windows Defender Application Control](08-endpoints/configure-wdac.md)
+    * [Configure AppLocker Policies](08-endpoints/configure-applocker-policies.md)
     * [Enable BitLocker and Network Unlock](08-endpoints/enable-bitlocker.md)
     * [UEFI Firmware Security Hardening](08-endpoints/configure-uefi-security.md)
     * [Hardware Virtualization and DMA Protection](08-endpoints/enable-hardware-virtualization-and-dma-protection.md)
