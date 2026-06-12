@@ -13,7 +13,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: d916749 | Generated: June 12, 2026</span>
+      <span>Commit: d3bf397 | Generated: June 12, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -4700,6 +4700,12 @@ This control establishes a server-optimized defense posture:
 4. Configure the following settings:
    * **Policy**: `Turn off Windows Defender Antivirus`
    * **Setting**: `Disabled` (ensures Defender is active)
+   * **Policy**: `Configure detection for potentially unwanted applications`
+   * **Setting**: `Enabled` (Select **Block** in options)
+   * **Policy**: `Configure local administrator merge behavior for lists`
+   * **Setting**: `Disabled` (prevents local list merging)
+   * **Policy**: `Randomize scheduled task times`
+   * **Setting**: `Enabled`
 5. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Real-time Protection`
 6. Configure the following settings:
@@ -4711,11 +4717,17 @@ This control establishes a server-optimized defense posture:
    * **Setting**: `Enabled`
    * **Policy**: `Turn on script scanning`
    * **Setting**: `Enabled`
+   * **Policy**: `Configure real-time protection and Security Intelligence Updates during OOBE`
+   * **Setting**: `Enabled`
 7. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Exclusions`
-8. Configure the setting:
+8. Configure the following settings:
    * **Policy**: `Prevent users from configuring exclusions`
    * **Setting**: `Enabled`
+   * **Policy**: `Control whether or not exclusions are visible to Local Admins`
+   * **Setting**: `Enabled`
+   * **Policy**: `Turn off Auto Exclusions`
+   * **Setting**: `Disabled` (ensures automatic Server role exclusions remain active)
 9. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MAPS`
 10. Configure the following settings:
@@ -4725,22 +4737,38 @@ This control establishes a server-optimized defense posture:
     * **Setting**: `Enabled` (Select `Send safe samples` in options)
 11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
-12. Configure the setting:
+12. Configure the following settings:
     * **Policy**: `Select cloud protection level`
     * **Setting**: `Enabled` (Select `High blocking level` in options)
+    * **Policy**: `Configure extended cloud check`
+    * **Setting**: `Enabled` (Select `50` seconds in options)
+    * **Policy**: `Enable file hash computation feature`
+    * **Setting**: `Enabled`
 13. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
-14. Configure the setting:
+14. Configure the following settings:
     * **Policy**: `Scan removable drives`
+    * **Setting**: `Enabled`
+    * **Policy**: `Scan excluded files and directories during quick scans`
+    * **Setting**: `Enabled`
+    * **Policy**: `Turn off scanning of packed executables`
+    * **Setting**: `Disabled` (ensures packed files are scanned)
+    * **Policy**: `Specify the day of the week to run a scheduled scan`
+    * **Setting**: `Enabled` (Select `Every day` or `0` in options)
+    * **Policy**: `Turn on e-mail scanning`
+    * **Setting**: `Enabled`
+    * **Policy**: `Turn on heuristics`
     * **Setting**: `Enabled`
 15. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Network Protection`
-16. Configure the setting:
+16. Configure the following settings:
     * **Policy**: `Prevent users and apps from accessing dangerous websites`
     * **Setting**: `Enabled` (Select `Block` in options)
+    * **Policy**: `This setting controls whether Network Protection is allowed to be configured into block or audit mode on Windows Server`
+    * **Setting**: `Enabled`
 17. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
-10. Configure the setting:
+18. Configure the setting:
     * **Policy**: `Configure Attack Surface Reduction rules`
     * **Setting**: `Enabled`
     * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block) or `2` (Audit) as detailed:
@@ -4750,15 +4778,51 @@ This control establishes a server-optimized defense posture:
       * `e6db77e5-3df2-4cf1-b95a-636979351e5b` (Block persistence through WMI event subscription) -> `1` (Block)
       * `d1e49aac-8f56-4280-b9ba-993a6d77406c` (Block process creations originating from PSExec and WMI commands) -> `2` (Audit) (Recommended for DCs to prevent remote management disruptions; configure to `1` only if orchestration is fully migrated to WinRM)
       * `c1db55ab-c21a-4637-bb3f-a12568109d35` (Use advanced protection against ransomware) -> `1` (Block)
-11. Navigate to:
+19. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Network Inspection System`
+20. Configure the following settings:
+    * **Policy**: `Convert warn verdict to block`
+    * **Setting**: `Enabled`
+    * **Policy**: `Turn on asynchronous inspection`
+    * **Setting**: `Enabled`
+21. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Reporting`
+22. Configure the setting:
+    * **Policy**: `Configure whether to report Dynamic Signature dropped events`
+    * **Setting**: `Enabled`
+23. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Security Intelligence Updates`
+24. Configure the following settings:
+    * **Policy**: `Define the number of days before spyware security intelligence is considered out of date`
+    * **Setting**: `Enabled` (Select `7` days in options)
+    * **Policy**: `Define the number of days before virus security intelligence is considered out of date`
+    * **Setting**: `Enabled` (Select `7` days in options)
+    * **Policy**: `Specify the day of the week to check for security intelligence updates`
+    * **Setting**: `Enabled` (Select `Every day` or `0` in options)
+25. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Threats`
+26. Configure the settings:
+    * **Policy**: `Specify threat alert levels at which default action should not be taken when detected`
+    * **Setting**: `Enabled`
+    * Click **Show...** and enter the following threat levels as Value Names, with Value set to `2` (Quarantine):
+      * `1` (Low severity) -> `2`
+      * `2` (Medium severity) -> `2`
+      * `4` (High severity) -> `2`
+      * `5` (Severe severity) -> `2`
+27. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Family options`
+28. Configure the setting:
+    * **Policy**: `Hide the Family options area`
+    * **Setting**: `Enabled`
+29. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
-12. Configure the setting:
+30. Configure the setting:
     * **Policy**: `Protect Windows Security settings from tampering`
     * **Setting**: `Enabled` (Select **Block** or **On** depending on ADMX version)
-13. Navigate to:
+31. Navigate to:
     `Computer Configuration\Preferences\Windows Settings\Environment`
-14. Right-click **Environment**, select **New -> Environment Variable**.
-15. Configure the following properties:
+32. Right-click **Environment**, select **New -> Environment Variable**.
+33. Configure the following properties:
     * **Action**: `Update`
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
@@ -4796,30 +4860,96 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Set-MpPreference -DisableRemovableDriveScanning $false
     Set-MpPreference -EnableNetworkProtection 1
     Set-MpPreference -DisableExclusionRestriction $false
+    Set-MpPreference -PUAProtection 1
+    Set-MpPreference -DisableLocalAdminMerge $true
+    Set-MpPreference -MpBafsExtendedTimeout 50
+    Set-MpPreference -EnableFileHashComputation $true
+    Set-MpPreference -DisablePackedExeScanning $false
+    Set-MpPreference -DisableEmailScanning $false
+    Set-MpPreference -DisableHeuristics $false
 } else {
     Write-Warning "Set-MpPreference cmdlet is not available."
 }
 
-<a id="02-domain-controllers-defender-antivirus-md-2-configure-exclusion-restrictions-in-registry"></a>
-# 2. Configure Exclusion restrictions in Registry
+<a id="02-domain-controllers-defender-antivirus-md-2-configure-exclusion-restrictions-and-local-merges-in-registry"></a>
+# 2. Configure Exclusion restrictions and Local Merges in Registry
 $DefenderPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
 if (-not (Test-Path $DefenderPath)) {
     New-Item -Path $DefenderPath -Force | Out-Null
 }
 Set-ItemProperty -Path $DefenderPath -Name "DisableAntiSpyware" -Value 0 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "PUAProtection" -Value 1 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "DisableLocalAdminMerge" -Value 1 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "HideExclusionsFromLocalAdmins" -Value 1 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "RandomizeScheduleTaskTimes" -Value 1 -Type DWord
 
 $ExclPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions"
 if (-not (Test-Path $ExclPath)) {
     New-Item -Path $ExclPath -Force | Out-Null
 }
 Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord
+Set-ItemProperty -Path $ExclPath -Name "DisableAutoExclusions" -Value 0 -Type DWord
 
-<a id="02-domain-controllers-defender-antivirus-md-3-configure-server-compatible-asr-rules-in-registry"></a>
-# 3. Configure Server-Compatible ASR Rules in Registry
-$AsrPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR"
-if (-not (Test-Path $AsrPath)) {
-    New-Item -Path $AsrPath -Force | Out-Null
+<a id="02-domain-controllers-defender-antivirus-md-3-configure-nis-reporting-engine-and-scan-settings-in-registry"></a>
+# 3. Configure NIS, Reporting, Engine, and Scan Settings in Registry
+$FeaturesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Features"
+if (-not (Test-Path $FeaturesPath)) {
+    New-Item -Path $FeaturesPath -Force | Out-Null
 }
+Set-ItemProperty -Path $FeaturesPath -Name "PassiveRemediation" -Value 1 -Type DWord
+
+$NetProtPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\Network Protection"
+if (-not (Test-Path $NetProtPath)) {
+    New-Item -Path $NetProtPath -Force | Out-Null
+}
+Set-ItemProperty -Path $NetProtPath -Name "AllowNetworkProtectionOnWinServer" -Value 1 -Type DWord
+
+$MpEnginePath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine"
+if (-not (Test-Path $MpEnginePath)) {
+    New-Item -Path $MpEnginePath -Force | Out-Null
+}
+Set-ItemProperty -Path $MpEnginePath -Name "MpBafsExtendedTimeout" -Value 50 -Type DWord
+Set-ItemProperty -Path $MpEnginePath -Name "EnableFileHashComputation" -Value 1 -Type DWord
+
+$NisPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\NIS"
+if (-not (Test-Path $NisPath)) {
+    New-Item -Path $NisPath -Force | Out-Null
+}
+Set-ItemProperty -Path $NisPath -Name "EnableConvertWarnToBlock" -Value 1 -Type DWord
+Set-ItemProperty -Path $NisPath -Name "AllowSwitchToAsyncInspection" -Value 1 -Type DWord
+
+$RtpPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"
+if (-not (Test-Path $RtpPath)) {
+    New-Item -Path $RtpPath -Force | Out-Null
+}
+Set-ItemProperty -Path $RtpPath -Name "OobeEnableRtpAndSigUpdate" -Value 1 -Type DWord
+
+$RepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Reporting"
+if (-not (Test-Path $RepPath)) {
+    New-Item -Path $RepPath -Force | Out-Null
+}
+Set-ItemProperty -Path $RepPath -Name "EnableDynamicSignatureDroppedEventReporting" -Value 1 -Type DWord
+
+$ScanPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
+if (-not (Test-Path $ScanPath)) {
+    New-Item -Path $ScanPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ScanPath -Name "QuickScanIncludeExclusions" -Value 1 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "DisablePackedExeScanning" -Value 0 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "ScheduleDay" -Value 0 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "DisableEmailScanning" -Value 0 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "DisableHeuristics" -Value 0 -Type DWord
+
+$SigPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates"
+if (-not (Test-Path $SigPath)) {
+    New-Item -Path $SigPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SigPath -Name "ASSignatureDue" -Value 7 -Type DWord
+Set-ItemProperty -Path $SigPath -Name "AVSignatureDue" -Value 7 -Type DWord
+Set-ItemProperty -Path $SigPath -Name "ScheduleDay" -Value 0 -Type DWord
+
+<a id="02-domain-controllers-defender-antivirus-md-4-configure-server-compatible-asr-rules-in-registry"></a>
+# 4. Configure Server-Compatible ASR Rules in Registry
 $AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
 if (-not (Test-Path $AsrRulesPath)) {
     New-Item -Path $AsrRulesPath -Force | Out-Null
@@ -4840,8 +4970,31 @@ foreach ($RuleId in $AsrRules.Keys) {
 }
 Write-Host "ASR rules configured in registry." -ForegroundColor Green
 
-<a id="02-domain-controllers-defender-antivirus-md-4-configure-tamper-protection-in-registry"></a>
-# 4. Configure Tamper Protection in Registry
+<a id="02-domain-controllers-defender-antivirus-md-5-configure-threat-severity-default-quarantine-actions"></a>
+# 5. Configure Threat severity default quarantine actions
+$ThreatsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Threats"
+if (-not (Test-Path $ThreatsPath)) {
+    New-Item -Path $ThreatsPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ThreatsPath -Name "Threats_ThreatSeverityDefaultAction" -Value 1 -Type DWord
+
+$ThreatsSevPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction"
+if (-not (Test-Path $ThreatsSevPath)) {
+    New-Item -Path $ThreatsSevPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ThreatsSevPath -Name "1" -Value 2 -Type DWord
+Set-ItemProperty -Path $ThreatsSevPath -Name "2" -Value 2 -Type DWord
+Set-ItemProperty -Path $ThreatsSevPath -Name "4" -Value 2 -Type DWord
+Set-ItemProperty -Path $ThreatsSevPath -Name "5" -Value 2 -Type DWord
+
+$FamilyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Family options"
+if (-not (Test-Path $FamilyPath)) {
+    New-Item -Path $FamilyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $FamilyPath -Name "UILockdown" -Value 1 -Type DWord
+
+<a id="02-domain-controllers-defender-antivirus-md-6-configure-tamper-protection-in-registry"></a>
+# 6. Configure Tamper Protection in Registry
 $FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
     New-Item -Path $FeaturesPath -Force | Out-Null
@@ -4853,8 +5006,8 @@ try {
     Write-Warning "Failed to set Tamper Protection in registry. Access is typically restricted to TrustedInstaller. Use GPO or Defender portal management."
 }
 
-<a id="02-domain-controllers-defender-antivirus-md-5-configure-sandbox-execution-environment-variable"></a>
-# 5. Configure Sandbox Execution Environment Variable
+<a id="02-domain-controllers-defender-antivirus-md-7-configure-sandbox-execution-environment-variable"></a>
+# 7. Configure Sandbox Execution Environment Variable
 $EnvPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
 if (-not (Test-Path $EnvPath)) {
     New-Item -Path $EnvPath -Force | Out-Null
@@ -4890,6 +5043,7 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     $ScriptColor = if ($Pref.DisableScriptScanning -eq $false) { "Green" } else { "Red" }
     $RemovableColor = if ($Pref.DisableRemovableDriveScanning -eq $false) { "Green" } else { "Red" }
     $NetProtColor = if ($Pref.EnableNetworkProtection -eq 1) { "Green" } else { "Red" }
+    $PuaColor = if ($Pref.PUAProtection -eq 1) { "Green" } else { "Red" }
     
     Write-Host "    - Real-Time Monitoring Active: $(!$Pref.DisableRealtimeMonitoring) (Required: True)" -ForegroundColor $RealtimeColor
     Write-Host "    - Behavior Monitoring Active: $(!$Pref.DisableBehaviorMonitoring) (Required: True)" -ForegroundColor $BehaviorColor
@@ -4900,6 +5054,7 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     Write-Host "    - Script Scanning: $(!$Pref.DisableScriptScanning) (Required: True)" -ForegroundColor $ScriptColor
     Write-Host "    - Removable Drive Scanning: $(!$Pref.DisableRemovableDriveScanning) (Required: True)" -ForegroundColor $RemovableColor
     Write-Host "    - Network Protection: $($Pref.EnableNetworkProtection) (Required: 1)" -ForegroundColor $NetProtColor
+    Write-Host "    - PUA Protection: $($Pref.PUAProtection) (Required: 1)" -ForegroundColor $PuaColor
 } else {
     Write-Warning "Get-MpPreference is not available."
 }
@@ -4953,6 +5108,46 @@ if (Test-Path $AsrRulesPath) {
 
 $AsrColor = if ($EnforcedCount -eq 5 -and $AuditCount -eq 1) { "Green" } else { "Yellow" }
 Write-Host "    - Attack Surface Reduction: $EnforcedCount Block rules / $AuditCount Audit rules enforced (Required: 5 Block / 1 Audit)" -ForegroundColor $AsrColor
+
+<a id="02-domain-controllers-defender-antivirus-md-5-audit-registry-based-stig-configurations"></a>
+# 5. Audit Registry-based STIG configurations
+Write-Host "    - Registry configuration checks:" -ForegroundColor Gray
+$DefenderPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
+
+$CheckKeys = @{
+    "DisableLocalAdminMerge" = @{ Path = $DefenderPoliciesPath; Expected = 1 }
+    "HideExclusionsFromLocalAdmins" = @{ Path = $DefenderPoliciesPath; Expected = 1 }
+    "RandomizeScheduleTaskTimes" = @{ Path = $DefenderPoliciesPath; Expected = 1 }
+    "DisableAutoExclusions" = @{ Path = "$DefenderPoliciesPath\Exclusions"; Expected = 0 }
+    "PassiveRemediation" = @{ Path = "$DefenderPoliciesPath\Features"; Expected = 1 }
+    "AllowNetworkProtectionOnWinServer" = @{ Path = "$DefenderPoliciesPath\Windows Defender Exploit Guard\Network Protection"; Expected = 1 }
+    "MpBafsExtendedTimeout" = @{ Path = "$DefenderPoliciesPath\MpEngine"; Expected = 50 }
+    "EnableFileHashComputation" = @{ Path = "$DefenderPoliciesPath\MpEngine"; Expected = 1 }
+    "EnableConvertWarnToBlock" = @{ Path = "$DefenderPoliciesPath\NIS"; Expected = 1 }
+    "AllowSwitchToAsyncInspection" = @{ Path = "$DefenderPoliciesPath\NIS"; Expected = 1 }
+    "OobeEnableRtpAndSigUpdate" = @{ Path = "$DefenderPoliciesPath\Real-Time Protection"; Expected = 1 }
+    "EnableDynamicSignatureDroppedEventReporting" = @{ Path = "$DefenderPoliciesPath\Reporting"; Expected = 1 }
+    "QuickScanIncludeExclusions" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 1 }
+    "DisablePackedExeScanning" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
+    "ScheduleDay" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
+    "DisableEmailScanning" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
+    "DisableHeuristics" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
+    "ASSignatureDue" = @{ Path = "$DefenderPoliciesPath\Signature Updates"; Expected = 7 }
+    "AVSignatureDue" = @{ Path = "$DefenderPoliciesPath\Signature Updates"; Expected = 7 }
+    "Threats_ThreatSeverityDefaultAction" = @{ Path = "$DefenderPoliciesPath\Threats"; Expected = 1 }
+    "UILockdown" = @{ Path = "$DefenderPoliciesPath\Windows Defender Security Center\Family options"; Expected = 1 }
+}
+
+foreach ($KeyName in $CheckKeys.Keys) {
+    $Target = $CheckKeys[$KeyName]
+    $Val = Get-ItemProperty -Path $Target.Path -Name $KeyName -ErrorAction SilentlyContinue
+    if ($Val -and $Val.$KeyName -eq $Target.Expected) {
+        # Validated
+    } else {
+        $Actual = if ($Val) { $Val.$KeyName } else { "Not Configured" }
+        Write-Host "      * Missing/Misconfigured: $KeyName (Expected: $($Target.Expected), Got: $Actual)" -ForegroundColor Yellow
+    }
+}
 ```
 
 ---
@@ -4961,6 +5156,8 @@ Write-Host "    - Attack Surface Reduction: $EnforcedCount Block rules / $AuditC
 ## Sources & Compliance References
 * **CIS Microsoft Windows Server Benchmark**: Section 18.9.47 (Exclusions restrictions), Section 18.9.30 (ASR Rules), Section 18.9.47.11 (Real-time protection)
 * **ANSSI Active Directory Hardening Guide**: Recommendations regarding protective controls on Domain Controllers
+* **DoD Microsoft Defender Antivirus STIG**: Baseline requirements for server and workstation operating systems
+
 
 
 <div style="page-break-before: always;"></div>
@@ -13620,7 +13817,13 @@ This control introduces a highly restrictive protective barrier on PAWs:
 4. Configure the following settings:
    * **Policy**: `Turn off Windows Defender Antivirus`
    * **Setting**: `Disabled` (ensures Defender is active)
-5. Navigation to:
+   * **Policy**: `Configure detection for potentially unwanted applications`
+   * **Setting**: `Enabled` (Select **Block** in options)
+   * **Policy**: `Configure local administrator merge behavior for lists`
+   * **Setting**: `Disabled` (prevents local list merging)
+   * **Policy**: `Randomize scheduled task times`
+   * **Setting**: `Enabled`
+5. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Real-time Protection`
 6. Configure the following settings:
    * **Policy**: `Turn off real-time protection`
@@ -13629,11 +13832,19 @@ This control introduces a highly restrictive protective barrier on PAWs:
    * **Setting**: `Enabled`
    * **Policy**: `Scan all downloaded files and attachments`
    * **Setting**: `Enabled`
+   * **Policy**: `Turn on script scanning`
+   * **Setting**: `Enabled`
+   * **Policy**: `Configure real-time protection and Security Intelligence Updates during OOBE`
+   * **Setting**: `Enabled`
 7. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Exclusions`
-8. Configure the setting:
+8. Configure the following settings:
    * **Policy**: `Prevent users from configuring exclusions`
    * **Setting**: `Enabled`
+   * **Policy**: `Control whether or not exclusions are visible to Local Admins`
+   * **Setting**: `Enabled`
+   * **Policy**: `Turn off Auto Exclusions`
+   * **Setting**: `Disabled` (ensures automatic exclusions remain active)
 9. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MAPS`
 10. Configure the following settings:
@@ -13643,27 +13854,38 @@ This control introduces a highly restrictive protective barrier on PAWs:
     * **Setting**: `Enabled` (Select `Send safe samples` in options)
 11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
-12. Configure the setting:
+12. Configure the following settings:
     * **Policy**: `Select cloud protection level`
     * **Setting**: `Enabled` (Select `High blocking level` in options)
+    * **Policy**: `Configure extended cloud check`
+    * **Setting**: `Enabled` (Select `50` seconds in options)
+    * **Policy**: `Enable file hash computation feature`
+    * **Setting**: `Enabled`
 13. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
-14. Configure the setting:
+14. Configure the following settings:
     * **Policy**: `Scan removable drives`
+    * **Setting**: `Enabled`
+    * **Policy**: `Scan excluded files and directories during quick scans`
+    * **Setting**: `Enabled`
+    * **Policy**: `Turn off scanning of packed executables`
+    * **Setting**: `Disabled` (ensures packed files are scanned)
+    * **Policy**: `Specify the day of the week to run a scheduled scan`
+    * **Setting**: `Enabled` (Select `Every day` or `0` in options)
+    * **Policy**: `Turn on e-mail scanning`
+    * **Setting**: `Enabled`
+    * **Policy**: `Turn on heuristics`
     * **Setting**: `Enabled`
 15. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Network Protection`
-16. Configure the setting:
+16. Configure the following settings:
     * **Policy**: `Prevent users and apps from accessing dangerous websites`
     * **Setting**: `Enabled` (Select `Block` in options)
+    * **Policy**: `This setting controls whether Network Protection is allowed to be configured into block or audit mode on Windows Server`
+    * **Setting**: `Enabled`
 17. Navigate to:
-    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus`
-18. Configure the setting:
-    * **Policy**: `Configure detection for potentially unwanted applications`
-    * **Setting**: `Enabled` (Select `Block` in options)
-19. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
-20. Configure the setting:
+18. Configure the setting:
     * **Policy**: `Configure Attack Surface Reduction rules`
     * **Setting**: `Enabled`
     * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block):
@@ -13672,7 +13894,7 @@ This control introduces a highly restrictive protective barrier on PAWs:
       * `d4f940ab-401b-4efc-aadc-ad5f3c50688a` (Block all Office applications from creating child processes)
       * `9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2` (Block credential stealing from the Windows Local Security Authority subsystem)
       * `be9ba2d9-53ea-4cdc-84e5-9b1eeee46550` (Block executable content from email client and webmail)
-      * `01443614-cd74-433a-b99e-2ecdc7777d85` (Block executable files from running unless they meet a prevalence, age, or trusted list criterion)
+      * `01443614-cd74-433a-b99e-2ecdc07bfc25` (Block executable files from running unless they meet a prevalence, age, or trusted list criterion)
       * `5beb7efe-fd9a-4556-801d-275e5ffc04cc` (Block execution of potentially obfuscated scripts)
       * `d3e037e1-3eb8-44c8-a917-57927947596d` (Block JavaScript or VBScript from launching downloaded executable content)
       * `3b576869-a4ec-4529-8536-b80a7769e899` (Block Office applications from creating executable content)
@@ -13683,15 +13905,51 @@ This control introduces a highly restrictive protective barrier on PAWs:
       * `b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4` (Block untrusted and unsigned processes that run from USB)
       * `92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b` (Block Win32 API calls from Office macros)
       * `c1db55ab-c21a-4637-bb3f-a12568109d35` (Use advanced protection against ransomware)
-11. Navigate to:
+19. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Network Inspection System`
+20. Configure the following settings:
+    * **Policy**: `Convert warn verdict to block`
+    * **Setting**: `Enabled`
+    * **Policy**: `Turn on asynchronous inspection`
+    * **Setting**: `Enabled`
+21. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Reporting`
+22. Configure the setting:
+    * **Policy**: `Configure whether to report Dynamic Signature dropped events`
+    * **Setting**: `Enabled`
+23. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Security Intelligence Updates`
+24. Configure the following settings:
+    * **Policy**: `Define the number of days before spyware security intelligence is considered out of date`
+    * **Setting**: `Enabled` (Select `7` days in options)
+    * **Policy**: `Define the number of days before virus security intelligence is considered out of date`
+    * **Setting**: `Enabled` (Select `7` days in options)
+    * **Policy**: `Specify the day of the week to check for security intelligence updates`
+    * **Setting**: `Enabled` (Select `Every day` or `0` in options)
+25. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Threats`
+26. Configure the settings:
+    * **Policy**: `Specify threat alert levels at which default action should not be taken when detected`
+    * **Setting**: `Enabled`
+    * Click **Show...** and enter the following threat levels as Value Names, with Value set to `2` (Quarantine):
+      * `1` (Low severity) -> `2`
+      * `2` (Medium severity) -> `2`
+      * `4` (High severity) -> `2`
+      * `5` (Severe severity) -> `2`
+27. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Family options`
+28. Configure the setting:
+    * **Policy**: `Hide the Family options area`
+    * **Setting**: `Enabled`
+29. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
-12. Configure the setting:
+30. Configure the setting:
     * **Policy**: `Protect Windows Security settings from tampering`
     * **Setting**: `Enabled` (Select **Block** or **On** depending on ADMX version)
-13. Navigate to:
+31. Navigate to:
     `Computer Configuration\Preferences\Windows Settings\Environment`
-14. Right-click **Environment**, select **New -> Environment Variable**.
-15. Configure the following properties:
+32. Right-click **Environment**, select **New -> Environment Variable**.
+33. Configure the following properties:
     * **Action**: `Update`
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
@@ -13725,36 +13983,105 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Set-MpPreference -MAPSReporting 2
     Set-MpPreference -SubmitSamplesConsent 1
     Set-MpPreference -MpCloudBlockLevel 2
+    Set-MpPreference -DisableScriptScanning $false
     Set-MpPreference -DisableRemovableDriveScanning $false
     Set-MpPreference -EnableNetworkProtection 1
     Set-MpPreference -PUAProtection 1
     Set-MpPreference -DisableExclusionRestriction $false
+    Set-MpPreference -DisableLocalAdminMerge $true
+    Set-MpPreference -MpBafsExtendedTimeout 50
+    Set-MpPreference -EnableFileHashComputation $true
+    Set-MpPreference -DisablePackedExeScanning $false
+    Set-MpPreference -DisableEmailScanning $false
+    Set-MpPreference -DisableHeuristics $false
 } else {
     Write-Warning "Set-MpPreference cmdlet is not available."
 }
 
-<a id="07-paws-defender-antivirus-md-2-configure-exclusion-restrictions-in-registry"></a>
-# 2. Configure Exclusion restrictions in Registry
-$DefenderPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
+<a id="07-paws-defender-antivirus-md-2-configure-exclusion-restrictions-and-local-merges-in-registry"></a>
+# 2. Configure Exclusion restrictions and Local Merges in Registry
+$DefenderPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender"
 if (-not (Test-Path $DefenderPath)) {
     New-Item -Path $DefenderPath -Force | Out-Null
 }
 Set-ItemProperty -Path $DefenderPath -Name "DisableAntiSpyware" -Value 0 -Type DWord
 Set-ItemProperty -Path $DefenderPath -Name "PUAProtection" -Value 1 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "DisableLocalAdminMerge" -Value 1 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "HideExclusionsFromLocalAdmins" -Value 1 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "RandomizeScheduleTaskTimes" -Value 1 -Type DWord
 
-$ExclPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions"
+$ExclPath = "HKLM:\\SOFTWARE\Policies\\Microsoft\\Windows Defender\\Exclusions"
 if (-not (Test-Path $ExclPath)) {
     New-Item -Path $ExclPath -Force | Out-Null
 }
 Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord
+Set-ItemProperty -Path $ExclPath -Name "DisableAutoExclusions" -Value 0 -Type DWord
 
-<a id="07-paws-defender-antivirus-md-3-configure-asr-rules-in-registry"></a>
-# 3. Configure ASR Rules in Registry
-$AsrPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR"
+<a id="07-paws-defender-antivirus-md-3-configure-nis-reporting-engine-and-scan-settings-in-registry"></a>
+# 3. Configure NIS, Reporting, Engine, and Scan Settings in Registry
+$FeaturesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Features"
+if (-not (Test-Path $FeaturesPath)) {
+    New-Item -Path $FeaturesPath -Force | Out-Null
+}
+Set-ItemProperty -Path $FeaturesPath -Name "PassiveRemediation" -Value 1 -Type DWord
+
+$NetProtPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\Network Protection"
+if (-not (Test-Path $NetProtPath)) {
+    New-Item -Path $NetProtPath -Force | Out-Null
+}
+Set-ItemProperty -Path $NetProtPath -Name "AllowNetworkProtectionOnWinServer" -Value 1 -Type DWord
+
+$MpEnginePath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\MpEngine"
+if (-not (Test-Path $MpEnginePath)) {
+    New-Item -Path $MpEnginePath -Force | Out-Null
+}
+Set-ItemProperty -Path $MpEnginePath -Name "MpBafsExtendedTimeout" -Value 50 -Type DWord
+Set-ItemProperty -Path $MpEnginePath -Name "EnableFileHashComputation" -Value 1 -Type DWord
+
+$NisPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\NIS"
+if (-not (Test-Path $NisPath)) {
+    New-Item -Path $NisPath -Force | Out-Null
+}
+Set-ItemProperty -Path $NisPath -Name "EnableConvertWarnToBlock" -Value 1 -Type DWord
+Set-ItemProperty -Path $NisPath -Name "AllowSwitchToAsyncInspection" -Value 1 -Type DWord
+
+$RtpPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection"
+if (-not (Test-Path $RtpPath)) {
+    New-Item -Path $RtpPath -Force | Out-Null
+}
+Set-ItemProperty -Path $RtpPath -Name "OobeEnableRtpAndSigUpdate" -Value 1 -Type DWord
+
+$RepPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Reporting"
+if (-not (Test-Path $RepPath)) {
+    New-Item -Path $RepPath -Force | Out-Null
+}
+Set-ItemProperty -Path $RepPath -Name "EnableDynamicSignatureDroppedEventReporting" -Value 1 -Type DWord
+
+$ScanPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Scan"
+if (-not (Test-Path $ScanPath)) {
+    New-Item -Path $ScanPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ScanPath -Name "QuickScanIncludeExclusions" -Value 1 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "DisablePackedExeScanning" -Value 0 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "ScheduleDay" -Value 0 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "DisableEmailScanning" -Value 0 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "DisableHeuristics" -Value 0 -Type DWord
+
+$SigPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Signature Updates"
+if (-not (Test-Path $SigPath)) {
+    New-Item -Path $SigPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SigPath -Name "ASSignatureDue" -Value 7 -Type DWord
+Set-ItemProperty -Path $SigPath -Name "AVSignatureDue" -Value 7 -Type DWord
+Set-ItemProperty -Path $SigPath -Name "ScheduleDay" -Value 0 -Type DWord
+
+<a id="07-paws-defender-antivirus-md-4-configure-asr-rules-in-registry"></a>
+# 4. Configure ASR Rules in Registry
+$AsrPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR"
 if (-not (Test-Path $AsrPath)) {
     New-Item -Path $AsrPath -Force | Out-Null
 }
-$AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
+$AsrRulesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\ASR\\Rules"
 if (-not (Test-Path $AsrRulesPath)) {
     New-Item -Path $AsrRulesPath -Force | Out-Null
 }
@@ -13765,7 +14092,7 @@ $AsrRules = @{
     "d4f940ab-401b-4efc-aadc-ad5f3c50688a" = "1"
     "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2" = "1"
     "be9ba2d9-53ea-4cdc-84e5-9b1eeee46550" = "1"
-    "01443614-cd74-433a-b99e-2ecdc7777d85" = "1"
+    "01443614-cd74-433a-b99e-2ecdc07bfc25" = "1"
     "5beb7efe-fd9a-4556-801d-275e5ffc04cc" = "1"
     "d3e037e1-3eb8-44c8-a917-57927947596d" = "1"
     "3b576869-a4ec-4529-8536-b80a7769e899" = "1"
@@ -13784,9 +14111,32 @@ foreach ($RuleId in $AsrRules.Keys) {
 }
 Write-Host "ASR rules configured in registry." -ForegroundColor Green
 
-<a id="07-paws-defender-antivirus-md-4-configure-tamper-protection-in-registry"></a>
-# 4. Configure Tamper Protection in Registry
-$FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
+<a id="07-paws-defender-antivirus-md-5-configure-threat-severity-default-quarantine-actions"></a>
+# 5. Configure Threat severity default quarantine actions
+$ThreatsPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Threats"
+if (-not (Test-Path $ThreatsPath)) {
+    New-Item -Path $ThreatsPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ThreatsPath -Name "Threats_ThreatSeverityDefaultAction" -Value 1 -Type DWord
+
+$ThreatsSevPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Threats\\ThreatSeverityDefaultAction"
+if (-not (Test-Path $ThreatsSevPath)) {
+    New-Item -Path $ThreatsSevPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ThreatsSevPath -Name "1" -Value 2 -Type DWord
+Set-ItemProperty -Path $ThreatsSevPath -Name "2" -Value 2 -Type DWord
+Set-ItemProperty -Path $ThreatsSevPath -Name "4" -Value 2 -Type DWord
+Set-ItemProperty -Path $ThreatsSevPath -Name "5" -Value 2 -Type DWord
+
+$FamilyPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender Security Center\\Family options"
+if (-not (Test-Path $FamilyPath)) {
+    New-Item -Path $FamilyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $FamilyPath -Name "UILockdown" -Value 1 -Type DWord
+
+<a id="07-paws-defender-antivirus-md-6-configure-tamper-protection-in-registry"></a>
+# 6. Configure Tamper Protection in Registry
+$FeaturesPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows Defender\\Features"
 if (-not (Test-Path $FeaturesPath)) {
     New-Item -Path $FeaturesPath -Force | Out-Null
 }
@@ -13797,9 +14147,9 @@ try {
     Write-Warning "Failed to set Tamper Protection in registry. Access is typically restricted to TrustedInstaller. Use GPO or Defender portal management."
 }
 
-<a id="07-paws-defender-antivirus-md-5-configure-sandbox-execution-environment-variable"></a>
-# 5. Configure Sandbox Execution Environment Variable
-$EnvPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+<a id="07-paws-defender-antivirus-md-7-configure-sandbox-execution-environment-variable"></a>
+# 7. Configure Sandbox Execution Environment Variable
+$EnvPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\Environment"
 if (-not (Test-Path $EnvPath)) {
     New-Item -Path $EnvPath -Force | Out-Null
 }
@@ -13834,6 +14184,7 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     $RemovableColor = if ($Pref.DisableRemovableDriveScanning -eq $false) { "Green" } else { "Red" }
     $NetProtColor = if ($Pref.EnableNetworkProtection -eq 1 -or $Pref.EnableNetworkProtection -eq $true) { "Green" } else { "Red" }
     $PuaColor = if ($Pref.PUAProtection -eq 1) { "Green" } else { "Red" }
+    $ScriptColor = if ($Pref.DisableScriptScanning -eq $false) { "Green" } else { "Red" }
     
     Write-Host "    - Real-Time Monitoring Active: $(!$Pref.DisableRealtimeMonitoring) (Required: True)" -ForegroundColor $RealtimeColor
     Write-Host "    - Behavior Monitoring Active: $(!$Pref.DisableBehaviorMonitoring) (Required: True)" -ForegroundColor $BehaviorColor
@@ -13844,13 +14195,14 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     Write-Host "    - Removable Drive Scanning: $(!$Pref.DisableRemovableDriveScanning) (Required: True)" -ForegroundColor $RemovableColor
     Write-Host "    - Network Protection: $($Pref.EnableNetworkProtection) (Required: 1)" -ForegroundColor $NetProtColor
     Write-Host "    - PUA Protection: $($Pref.PUAProtection) (Required: 1)" -ForegroundColor $PuaColor
+    Write-Host "    - Script Scanning: $(!$Pref.DisableScriptScanning) (Required: True)" -ForegroundColor $ScriptColor
 } else {
     Write-Warning "Get-MpPreference is not available."
 }
 
 <a id="07-paws-defender-antivirus-md-2-audit-sandbox-variable"></a>
 # 2. Audit Sandbox variable
-$EnvPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+$EnvPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
 $SandboxVar = Get-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -ErrorAction SilentlyContinue
 if ($SandboxVar -and $SandboxVar.MP_FORCE_USE_SANDBOX -eq "1") {
     Write-Host "    - Sandbox Execution: Enabled (MP_FORCE_USE_SANDBOX = 1)" -ForegroundColor Green
@@ -13860,7 +14212,7 @@ if ($SandboxVar -and $SandboxVar.MP_FORCE_USE_SANDBOX -eq "1") {
 
 <a id="07-paws-defender-antivirus-md-3-audit-tamper-protection-registry"></a>
 # 3. Audit Tamper Protection registry
-$FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
+$FeaturesPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows Defender\\Features"
 $TamperVal = Get-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -ErrorAction SilentlyContinue
 if ($TamperVal -and $TamperVal.TamperProtection -eq 5) {
     Write-Host "    - Tamper Protection: Enabled (TamperProtection = 5)" -ForegroundColor Green
@@ -13870,7 +14222,7 @@ if ($TamperVal -and $TamperVal.TamperProtection -eq 5) {
 
 <a id="07-paws-defender-antivirus-md-4-audit-asr-rules"></a>
 # 4. Audit ASR Rules
-$AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
+$AsrRulesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules"
 $AsrRulesCount = 0
 $AsrBlockedCount = 0
 
@@ -13887,6 +14239,46 @@ if (Test-Path $AsrRulesPath) {
 
 $AsrColor = if ($AsrBlockedCount -eq 16) { "Green" } else { "Red" }
 Write-Host "    - Attack Surface Reduction: $AsrBlockedCount of 16 rules enforced in Block mode" -ForegroundColor $AsrColor
+
+<a id="07-paws-defender-antivirus-md-5-audit-registry-based-stig-configurations"></a>
+# 5. Audit Registry-based STIG configurations
+Write-Host "    - Registry configuration checks:" -ForegroundColor Gray
+$DefenderPoliciesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender"
+
+$CheckKeys = @{
+    "DisableLocalAdminMerge" = @{ Path = $DefenderPoliciesPath; Expected = 1 }
+    "HideExclusionsFromLocalAdmins" = @{ Path = $DefenderPoliciesPath; Expected = 1 }
+    "RandomizeScheduleTaskTimes" = @{ Path = $DefenderPoliciesPath; Expected = 1 }
+    "DisableAutoExclusions" = @{ Path = "$DefenderPoliciesPath\\Exclusions"; Expected = 0 }
+    "PassiveRemediation" = @{ Path = "$DefenderPoliciesPath\\Features"; Expected = 1 }
+    "AllowNetworkProtectionOnWinServer" = @{ Path = "$DefenderPoliciesPath\\Windows Defender Exploit Guard\\Network Protection"; Expected = 1 }
+    "MpBafsExtendedTimeout" = @{ Path = "$DefenderPoliciesPath\\MpEngine"; Expected = 50 }
+    "EnableFileHashComputation" = @{ Path = "$DefenderPoliciesPath\\MpEngine"; Expected = 1 }
+    "EnableConvertWarnToBlock" = @{ Path = "$DefenderPoliciesPath\\NIS"; Expected = 1 }
+    "AllowSwitchToAsyncInspection" = @{ Path = "$DefenderPoliciesPath\\NIS"; Expected = 1 }
+    "OobeEnableRtpAndSigUpdate" = @{ Path = "$DefenderPoliciesPath\\Real-Time Protection"; Expected = 1 }
+    "EnableDynamicSignatureDroppedEventReporting" = @{ Path = "$DefenderPoliciesPath\\Reporting"; Expected = 1 }
+    "QuickScanIncludeExclusions" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 1 }
+    "DisablePackedExeScanning" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 0 }
+    "ScheduleDay" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 0 }
+    "DisableEmailScanning" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 0 }
+    "DisableHeuristics" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 0 }
+    "ASSignatureDue" = @{ Path = "$DefenderPoliciesPath\\Signature Updates"; Expected = 7 }
+    "AVSignatureDue" = @{ Path = "$DefenderPoliciesPath\\Signature Updates"; Expected = 7 }
+    "Threats_ThreatSeverityDefaultAction" = @{ Path = "$DefenderPoliciesPath\\Threats"; Expected = 1 }
+    "UILockdown" = @{ Path = "$DefenderPoliciesPath\\Windows Defender Security Center\\Family options"; Expected = 1 }
+}
+
+foreach ($KeyName in $CheckKeys.Keys) {
+    $Target = $CheckKeys[$KeyName]
+    $Val = Get-ItemProperty -Path $Target.Path -Name $KeyName -ErrorAction SilentlyContinue
+    if ($Val -and $Val.$KeyName -eq $Target.Expected) {
+        # Validated
+    } else {
+        $Actual = if ($Val) { $Val.$KeyName } else { "Not Configured" }
+        Write-Host "      * Missing/Misconfigured: $KeyName (Expected: $($Target.Expected), Got: $Actual)" -ForegroundColor Yellow
+    }
+}
 ```
 
 ---
@@ -13895,6 +14287,7 @@ Write-Host "    - Attack Surface Reduction: $AsrBlockedCount of 16 rules enforce
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.9.47 (Exclusions restrictions), Section 18.9.30 (ASR Rules), Section 18.9.47.11 (Real-time protection)
 * **ANSSI Active Directory Hardening Guide**: Recommendations regarding administrative workstation isolation and endpoint agent security
+* **DoD Microsoft Defender Antivirus STIG**: Baseline requirements for server and workstation operating systems
 
 
 <div style="page-break-before: always;"></div>
@@ -15681,6 +16074,12 @@ This control introduces three primary hardening mechanisms:
 4. Configure the following settings:
    * **Policy**: `Turn off Windows Defender Antivirus`
    * **Setting**: `Disabled` (ensures Defender is active)
+   * **Policy**: `Configure detection for potentially unwanted applications`
+   * **Setting**: `Enabled` (Select **Block** in options)
+   * **Policy**: `Configure local administrator merge behavior for lists`
+   * **Setting**: `Disabled` (prevents local list merging)
+   * **Policy**: `Randomize scheduled task times`
+   * **Setting**: `Enabled`
 5. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Real-time Protection`
 6. Configure the following settings:
@@ -15690,11 +16089,19 @@ This control introduces three primary hardening mechanisms:
    * **Setting**: `Enabled`
    * **Policy**: `Scan all downloaded files and attachments`
    * **Setting**: `Enabled`
+   * **Policy**: `Turn on script scanning`
+   * **Setting**: `Enabled`
+   * **Policy**: `Configure real-time protection and Security Intelligence Updates during OOBE`
+   * **Setting**: `Enabled`
 7. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Exclusions`
-8. Configure the setting:
+8. Configure the following settings:
    * **Policy**: `Prevent users from configuring exclusions`
    * **Setting**: `Enabled`
+   * **Policy**: `Control whether or not exclusions are visible to Local Admins`
+   * **Setting**: `Enabled`
+   * **Policy**: `Turn off Auto Exclusions`
+   * **Setting**: `Disabled` (ensures automatic exclusions remain active)
 9. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MAPS`
 10. Configure the following settings:
@@ -15704,27 +16111,38 @@ This control introduces three primary hardening mechanisms:
     * **Setting**: `Enabled` (Select `Send safe samples` in options)
 11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
-12. Configure the setting:
+12. Configure the following settings:
     * **Policy**: `Select cloud protection level`
     * **Setting**: `Enabled` (Select `High blocking level` in options)
+    * **Policy**: `Configure extended cloud check`
+    * **Setting**: `Enabled` (Select `50` seconds in options)
+    * **Policy**: `Enable file hash computation feature`
+    * **Setting**: `Enabled`
 13. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
-14. Configure the setting:
+14. Configure the following settings:
     * **Policy**: `Scan removable drives`
+    * **Setting**: `Enabled`
+    * **Policy**: `Scan excluded files and directories during quick scans`
+    * **Setting**: `Enabled`
+    * **Policy**: `Turn off scanning of packed executables`
+    * **Setting**: `Disabled` (ensures packed files are scanned)
+    * **Policy**: `Specify the day of the week to run a scheduled scan`
+    * **Setting**: `Enabled` (Select `Every day` or `0` in options)
+    * **Policy**: `Turn on e-mail scanning`
+    * **Setting**: `Enabled`
+    * **Policy**: `Turn on heuristics`
     * **Setting**: `Enabled`
 15. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Network Protection`
-16. Configure the setting:
+16. Configure the following settings:
     * **Policy**: `Prevent users and apps from accessing dangerous websites`
     * **Setting**: `Enabled` (Select `Block` in options)
+    * **Policy**: `This setting controls whether Network Protection is allowed to be configured into block or audit mode on Windows Server`
+    * **Setting**: `Enabled`
 17. Navigate to:
-    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus`
-18. Configure the setting:
-    * **Policy**: `Configure detection for potentially unwanted applications`
-    * **Setting**: `Enabled` (Select `Block` in options)
-19. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
-20. Configure the setting:
+18. Configure the setting:
     * **Policy**: `Configure Attack Surface Reduction rules`
     * **Setting**: `Enabled`
     * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block):
@@ -15733,7 +16151,7 @@ This control introduces three primary hardening mechanisms:
       * `d4f940ab-401b-4efc-aadc-ad5f3c50688a` (Block all Office applications from creating child processes)
       * `9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2` (Block credential stealing from the Windows Local Security Authority subsystem)
       * `be9ba2d9-53ea-4cdc-84e5-9b1eeee46550` (Block executable content from email client and webmail)
-      * `01443614-cd74-433a-b99e-2ecdc7777d85` (Block executable files from running unless they meet a prevalence, age, or trusted list criterion)
+      * `01443614-cd74-433a-b99e-2ecdc07bfc25` (Block executable files from running unless they meet a prevalence, age, or trusted list criterion)
       * `5beb7efe-fd9a-4556-801d-275e5ffc04cc` (Block execution of potentially obfuscated scripts)
       * `d3e037e1-3eb8-44c8-a917-57927947596d` (Block JavaScript or VBScript from launching downloaded executable content)
       * `3b576869-a4ec-4529-8536-b80a7769e899` (Block Office applications from creating executable content)
@@ -15744,15 +16162,51 @@ This control introduces three primary hardening mechanisms:
       * `b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4` (Block untrusted and unsigned processes that run from USB)
       * `92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b` (Block Win32 API calls from Office macros)
       * `c1db55ab-c21a-4637-bb3f-a12568109d35` (Use advanced protection against ransomware)
-11. Navigate to:
+19. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Network Inspection System`
+20. Configure the following settings:
+    * **Policy**: `Convert warn verdict to block`
+    * **Setting**: `Enabled`
+    * **Policy**: `Turn on asynchronous inspection`
+    * **Setting**: `Enabled`
+21. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Reporting`
+22. Configure the setting:
+    * **Policy**: `Configure whether to report Dynamic Signature dropped events`
+    * **Setting**: `Enabled`
+23. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Security Intelligence Updates`
+24. Configure the following settings:
+    * **Policy**: `Define the number of days before spyware security intelligence is considered out of date`
+    * **Setting**: `Enabled` (Select `7` days in options)
+    * **Policy**: `Define the number of days before virus security intelligence is considered out of date`
+    * **Setting**: `Enabled` (Select `7` days in options)
+    * **Policy**: `Specify the day of the week to check for security intelligence updates`
+    * **Setting**: `Enabled` (Select `Every day` or `0` in options)
+25. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Threats`
+26. Configure the settings:
+    * **Policy**: `Specify threat alert levels at which default action should not be taken when detected`
+    * **Setting**: `Enabled`
+    * Click **Show...** and enter the following threat levels as Value Names, with Value set to `2` (Quarantine):
+      * `1` (Low severity) -> `2`
+      * `2` (Medium severity) -> `2`
+      * `4` (High severity) -> `2`
+      * `5` (Severe severity) -> `2`
+27. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Family options`
+28. Configure the setting:
+    * **Policy**: `Hide the Family options area`
+    * **Setting**: `Enabled`
+29. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
-12. Configure the setting:
+30. Configure the setting:
     * **Policy**: `Protect Windows Security settings from tampering`
     * **Setting**: `Enabled` (Select **Block** or **On** depending on ADMX version)
-13. Navigate to:
+31. Navigate to:
     `Computer Configuration\Preferences\Windows Settings\Environment`
-14. Right-click **Environment**, select **New -> Environment Variable**.
-15. Configure the following properties:
+32. Right-click **Environment**, select **New -> Environment Variable**.
+33. Configure the following properties:
     * **Action**: `Update`
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
@@ -15786,36 +16240,105 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Set-MpPreference -MAPSReporting 2
     Set-MpPreference -SubmitSamplesConsent 1
     Set-MpPreference -MpCloudBlockLevel 2
+    Set-MpPreference -DisableScriptScanning $false
     Set-MpPreference -DisableRemovableDriveScanning $false
     Set-MpPreference -EnableNetworkProtection 1
     Set-MpPreference -PUAProtection 1
     Set-MpPreference -DisableExclusionRestriction $false
+    Set-MpPreference -DisableLocalAdminMerge $true
+    Set-MpPreference -MpBafsExtendedTimeout 50
+    Set-MpPreference -EnableFileHashComputation $true
+    Set-MpPreference -DisablePackedExeScanning $false
+    Set-MpPreference -DisableEmailScanning $false
+    Set-MpPreference -DisableHeuristics $false
 } else {
     Write-Warning "Set-MpPreference cmdlet is not available."
 }
 
-<a id="08-endpoints-defender-antivirus-md-2-configure-exclusion-restrictions-in-registry"></a>
-# 2. Configure Exclusion restrictions in Registry
-$DefenderPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
+<a id="08-endpoints-defender-antivirus-md-2-configure-exclusion-restrictions-and-local-merges-in-registry"></a>
+# 2. Configure Exclusion restrictions and Local Merges in Registry
+$DefenderPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender"
 if (-not (Test-Path $DefenderPath)) {
     New-Item -Path $DefenderPath -Force | Out-Null
 }
 Set-ItemProperty -Path $DefenderPath -Name "DisableAntiSpyware" -Value 0 -Type DWord
 Set-ItemProperty -Path $DefenderPath -Name "PUAProtection" -Value 1 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "DisableLocalAdminMerge" -Value 1 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "HideExclusionsFromLocalAdmins" -Value 1 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "RandomizeScheduleTaskTimes" -Value 1 -Type DWord
 
-$ExclPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions"
+$ExclPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Exclusions"
 if (-not (Test-Path $ExclPath)) {
     New-Item -Path $ExclPath -Force | Out-Null
 }
 Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord
+Set-ItemProperty -Path $ExclPath -Name "DisableAutoExclusions" -Value 0 -Type DWord
 
-<a id="08-endpoints-defender-antivirus-md-3-configure-asr-rules-in-registry"></a>
-# 3. Configure ASR Rules in Registry
-$AsrPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR"
+<a id="08-endpoints-defender-antivirus-md-3-configure-nis-reporting-engine-and-scan-settings-in-registry"></a>
+# 3. Configure NIS, Reporting, Engine, and Scan Settings in Registry
+$FeaturesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Features"
+if (-not (Test-Path $FeaturesPath)) {
+    New-Item -Path $FeaturesPath -Force | Out-Null
+}
+Set-ItemProperty -Path $FeaturesPath -Name "PassiveRemediation" -Value 1 -Type DWord
+
+$NetProtPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\Network Protection"
+if (-not (Test-Path $NetProtPath)) {
+    New-Item -Path $NetProtPath -Force | Out-Null
+}
+Set-ItemProperty -Path $NetProtPath -Name "AllowNetworkProtectionOnWinServer" -Value 1 -Type DWord
+
+$MpEnginePath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\MpEngine"
+if (-not (Test-Path $MpEnginePath)) {
+    New-Item -Path $MpEnginePath -Force | Out-Null
+}
+Set-ItemProperty -Path $MpEnginePath -Name "MpBafsExtendedTimeout" -Value 50 -Type DWord
+Set-ItemProperty -Path $MpEnginePath -Name "EnableFileHashComputation" -Value 1 -Type DWord
+
+$NisPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\NIS"
+if (-not (Test-Path $NisPath)) {
+    New-Item -Path $NisPath -Force | Out-Null
+}
+Set-ItemProperty -Path $NisPath -Name "EnableConvertWarnToBlock" -Value 1 -Type DWord
+Set-ItemProperty -Path $NisPath -Name "AllowSwitchToAsyncInspection" -Value 1 -Type DWord
+
+$RtpPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection"
+if (-not (Test-Path $RtpPath)) {
+    New-Item -Path $RtpPath -Force | Out-Null
+}
+Set-ItemProperty -Path $RtpPath -Name "OobeEnableRtpAndSigUpdate" -Value 1 -Type DWord
+
+$RepPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Reporting"
+if (-not (Test-Path $RepPath)) {
+    New-Item -Path $RepPath -Force | Out-Null
+}
+Set-ItemProperty -Path $RepPath -Name "EnableDynamicSignatureDroppedEventReporting" -Value 1 -Type DWord
+
+$ScanPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Scan"
+if (-not (Test-Path $ScanPath)) {
+    New-Item -Path $ScanPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ScanPath -Name "QuickScanIncludeExclusions" -Value 1 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "DisablePackedExeScanning" -Value 0 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "ScheduleDay" -Value 0 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "DisableEmailScanning" -Value 0 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "DisableHeuristics" -Value 0 -Type DWord
+
+$SigPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Signature Updates"
+if (-not (Test-Path $SigPath)) {
+    New-Item -Path $SigPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SigPath -Name "ASSignatureDue" -Value 7 -Type DWord
+Set-ItemProperty -Path $SigPath -Name "AVSignatureDue" -Value 7 -Type DWord
+Set-ItemProperty -Path $SigPath -Name "ScheduleDay" -Value 0 -Type DWord
+
+<a id="08-endpoints-defender-antivirus-md-4-configure-asr-rules-in-registry"></a>
+# 4. Configure ASR Rules in Registry
+$AsrPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR"
 if (-not (Test-Path $AsrPath)) {
     New-Item -Path $AsrPath -Force | Out-Null
 }
-$AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
+$AsrRulesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules"
 if (-not (Test-Path $AsrRulesPath)) {
     New-Item -Path $AsrRulesPath -Force | Out-Null
 }
@@ -15826,7 +16349,7 @@ $AsrRules = @{
     "d4f940ab-401b-4efc-aadc-ad5f3c50688a" = "1"
     "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2" = "1"
     "be9ba2d9-53ea-4cdc-84e5-9b1eeee46550" = "1"
-    "01443614-cd74-433a-b99e-2ecdc7777d85" = "1"
+    "01443614-cd74-433a-b99e-2ecdc07bfc25" = "1"
     "5beb7efe-fd9a-4556-801d-275e5ffc04cc" = "1"
     "d3e037e1-3eb8-44c8-a917-57927947596d" = "1"
     "3b576869-a4ec-4529-8536-b80a7769e899" = "1"
@@ -15845,16 +16368,35 @@ foreach ($RuleId in $AsrRules.Keys) {
 }
 Write-Host "ASR rules configured in registry." -ForegroundColor Green
 
-<a id="08-endpoints-defender-antivirus-md-4-configure-tamper-protection-in-registry"></a>
-# 4. Configure Tamper Protection in Registry
-$FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
+<a id="08-endpoints-defender-antivirus-md-5-configure-threat-severity-default-quarantine-actions"></a>
+# 5. Configure Threat severity default quarantine actions
+$ThreatsPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Threats"
+if (-not (Test-Path $ThreatsPath)) {
+    New-Item -Path $ThreatsPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ThreatsPath -Name "Threats_ThreatSeverityDefaultAction" -Value 1 -Type DWord
+
+$ThreatsSevPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Threats\\ThreatSeverityDefaultAction"
+if (-not (Test-Path $ThreatsSevPath)) {
+    New-Item -Path $ThreatsSevPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ThreatsSevPath -Name "1" -Value 2 -Type DWord
+Set-ItemProperty -Path $ThreatsSevPath -Name "2" -Value 2 -Type DWord
+Set-ItemProperty -Path $ThreatsSevPath -Name "4" -Value 2 -Type DWord
+Set-ItemProperty -Path $ThreatsSevPath -Name "5" -Value 2 -Type DWord
+
+$FamilyPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender Security Center\\Family options"
+if (-not (Test-Path $FamilyPath)) {
+    New-Item -Path $FamilyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $FamilyPath -Name "UILockdown" -Value 1 -Type DWord
+
+<a id="08-endpoints-defender-antivirus-md-6-configure-tamper-protection-in-registry"></a>
+# 6. Configure Tamper Protection in Registry
+$FeaturesPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows Defender\\Features"
 if (-not (Test-Path $FeaturesPath)) {
     New-Item -Path $FeaturesPath -Force | Out-Null
 }
-<a id="08-endpoints-defender-antivirus-md-setting-tamperprotection-value-to-5-enabled"></a>
-# Setting TamperProtection value to 5 (Enabled)
-<a id="08-endpoints-defender-antivirus-md-note-in-production-modifying-this-key-directly-requires-trustedinstaller-permissions"></a>
-# Note: In production, modifying this key directly requires TrustedInstaller permissions.
 try {
     Set-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -Value 5 -Type DWord -ErrorAction Stop
     Write-Host "Tamper Protection enabled in registry." -ForegroundColor Green
@@ -15862,9 +16404,9 @@ try {
     Write-Warning "Failed to set Tamper Protection in registry. Access is typically restricted to TrustedInstaller. Use GPO or Defender portal management."
 }
 
-<a id="08-endpoints-defender-antivirus-md-5-configure-sandbox-execution-environment-variable"></a>
-# 5. Configure Sandbox Execution Environment Variable
-$EnvPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+<a id="08-endpoints-defender-antivirus-md-7-configure-sandbox-execution-environment-variable"></a>
+# 7. Configure Sandbox Execution Environment Variable
+$EnvPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
 if (-not (Test-Path $EnvPath)) {
     New-Item -Path $EnvPath -Force | Out-Null
 }
@@ -15899,6 +16441,7 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     $RemovableColor = if ($Pref.DisableRemovableDriveScanning -eq $false) { "Green" } else { "Red" }
     $NetProtColor = if ($Pref.EnableNetworkProtection -eq 1 -or $Pref.EnableNetworkProtection -eq $true) { "Green" } else { "Red" }
     $PuaColor = if ($Pref.PUAProtection -eq 1) { "Green" } else { "Red" }
+    $ScriptColor = if ($Pref.DisableScriptScanning -eq $false) { "Green" } else { "Red" }
     
     Write-Host "    - Real-Time Monitoring Active: $(!$Pref.DisableRealtimeMonitoring) (Required: True)" -ForegroundColor $RealtimeColor
     Write-Host "    - Behavior Monitoring Active: $(!$Pref.DisableBehaviorMonitoring) (Required: True)" -ForegroundColor $BehaviorColor
@@ -15909,13 +16452,14 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     Write-Host "    - Removable Drive Scanning: $(!$Pref.DisableRemovableDriveScanning) (Required: True)" -ForegroundColor $RemovableColor
     Write-Host "    - Network Protection: $($Pref.EnableNetworkProtection) (Required: 1)" -ForegroundColor $NetProtColor
     Write-Host "    - PUA Protection: $($Pref.PUAProtection) (Required: 1)" -ForegroundColor $PuaColor
+    Write-Host "    - Script Scanning: $(!$Pref.DisableScriptScanning) (Required: True)" -ForegroundColor $ScriptColor
 } else {
     Write-Warning "Get-MpPreference is not available."
 }
 
 <a id="08-endpoints-defender-antivirus-md-2-audit-sandbox-variable"></a>
 # 2. Audit Sandbox variable
-$EnvPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+$EnvPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
 $SandboxVar = Get-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -ErrorAction SilentlyContinue
 if ($SandboxVar -and $SandboxVar.MP_FORCE_USE_SANDBOX -eq "1") {
     Write-Host "    - Sandbox Execution: Enabled (MP_FORCE_USE_SANDBOX = 1)" -ForegroundColor Green
@@ -15925,17 +16469,17 @@ if ($SandboxVar -and $SandboxVar.MP_FORCE_USE_SANDBOX -eq "1") {
 
 <a id="08-endpoints-defender-antivirus-md-3-audit-tamper-protection-registry"></a>
 # 3. Audit Tamper Protection registry
-$FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
+$FeaturesPath = "HKLM:\\SOFTWARE\\Microsoft\Windows Defender\\Features"
 $TamperVal = Get-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -ErrorAction SilentlyContinue
 if ($TamperVal -and $TamperVal.TamperProtection -eq 5) {
     Write-Host "    - Tamper Protection: Enabled (TamperProtection = 5)" -ForegroundColor Green
 } else {
-    Write-Host "    - Tamper Protection: NOT ENABLED or Not Managed via local Registry (Value: $($TamperVal.TamperProtection))" -ForegroundColor Yellow
+    Write-Host "    - Tamper Protection: NOT ENABLED or Not Managed via Registry (Value: $($TamperVal.TamperProtection))" -ForegroundColor Yellow
 }
 
 <a id="08-endpoints-defender-antivirus-md-4-audit-asr-rules"></a>
 # 4. Audit ASR Rules
-$AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
+$AsrRulesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules"
 $AsrRulesCount = 0
 $AsrBlockedCount = 0
 
@@ -15952,6 +16496,46 @@ if (Test-Path $AsrRulesPath) {
 
 $AsrColor = if ($AsrBlockedCount -eq 16) { "Green" } else { "Red" }
 Write-Host "    - Attack Surface Reduction: $AsrBlockedCount of 16 rules enforced in Block mode" -ForegroundColor $AsrColor
+
+<a id="08-endpoints-defender-antivirus-md-5-audit-registry-based-stig-configurations"></a>
+# 5. Audit Registry-based STIG configurations
+Write-Host "    - Registry configuration checks:" -ForegroundColor Gray
+$DefenderPoliciesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender"
+
+$CheckKeys = @{
+    "DisableLocalAdminMerge" = @{ Path = $DefenderPoliciesPath; Expected = 1 }
+    "HideExclusionsFromLocalAdmins" = @{ Path = $DefenderPoliciesPath; Expected = 1 }
+    "RandomizeScheduleTaskTimes" = @{ Path = $DefenderPoliciesPath; Expected = 1 }
+    "DisableAutoExclusions" = @{ Path = "$DefenderPoliciesPath\\Exclusions"; Expected = 0 }
+    "PassiveRemediation" = @{ Path = "$DefenderPoliciesPath\\Features"; Expected = 1 }
+    "AllowNetworkProtectionOnWinServer" = @{ Path = "$DefenderPoliciesPath\\Windows Defender Exploit Guard\\Network Protection"; Expected = 1 }
+    "MpBafsExtendedTimeout" = @{ Path = "$DefenderPoliciesPath\\MpEngine"; Expected = 50 }
+    "EnableFileHashComputation" = @{ Path = "$DefenderPoliciesPath\\MpEngine"; Expected = 1 }
+    "EnableConvertWarnToBlock" = @{ Path = "$DefenderPoliciesPath\\NIS"; Expected = 1 }
+    "AllowSwitchToAsyncInspection" = @{ Path = "$DefenderPoliciesPath\\NIS"; Expected = 1 }
+    "OobeEnableRtpAndSigUpdate" = @{ Path = "$DefenderPoliciesPath\\Real-Time Protection"; Expected = 1 }
+    "EnableDynamicSignatureDroppedEventReporting" = @{ Path = "$DefenderPoliciesPath\\Reporting"; Expected = 1 }
+    "QuickScanIncludeExclusions" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 1 }
+    "DisablePackedExeScanning" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 0 }
+    "ScheduleDay" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 0 }
+    "DisableEmailScanning" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 0 }
+    "DisableHeuristics" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 0 }
+    "ASSignatureDue" = @{ Path = "$DefenderPoliciesPath\\Signature Updates"; Expected = 7 }
+    "AVSignatureDue" = @{ Path = "$DefenderPoliciesPath\\Signature Updates"; Expected = 7 }
+    "Threats_ThreatSeverityDefaultAction" = @{ Path = "$DefenderPoliciesPath\\Threats"; Expected = 1 }
+    "UILockdown" = @{ Path = "$DefenderPoliciesPath\\Windows Defender Security Center\\Family options"; Expected = 1 }
+}
+
+foreach ($KeyName in $CheckKeys.Keys) {
+    $Target = $CheckKeys[$KeyName]
+    $Val = Get-ItemProperty -Path $Target.Path -Name $KeyName -ErrorAction SilentlyContinue
+    if ($Val -and $Val.$KeyName -eq $Target.Expected) {
+        # Validated
+    } else {
+        $Actual = if ($Val) { $Val.$KeyName } else { "Not Configured" }
+        Write-Host "      * Missing/Misconfigured: $KeyName (Expected: $($Target.Expected), Got: $Actual)" -ForegroundColor Yellow
+    }
+}
 ```
 
 ---
