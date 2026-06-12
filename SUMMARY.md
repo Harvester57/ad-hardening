@@ -34,6 +34,7 @@
     * [Enforce RDP Restricted Admin Mode](02-domain-controllers/enforce-rdp-restricted-admin.md)
     * [Windows Defender Antivirus DC Baseline and Exploit Guard](02-domain-controllers/defender-antivirus.md)
     * [Configure AppLocker Policies on Domain Controllers](02-domain-controllers/configure-applocker-policies.md)
+    * [Enable WDAC Driver Blocklist](02-domain-controllers/enable-wdac-driver-blocklist.md)
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)
@@ -93,6 +94,7 @@
     * [Configure User Rights Assignments for PAWs](07-paws/configure-user-rights-assignments.md)
     * [Enable VBS and Credential Guard for PAWs](07-paws/enable-vbs-credential-guard.md)
     * [Harden DMA and Physical Security for PAWs](07-paws/harden-dma-and-physical-security.md)
+    * [Enable WDAC Driver Blocklist](07-paws/enable-wdac-driver-blocklist.md)
 ## Module 8: Endpoint Hardening
 * [Module 8: Endpoint Hardening](08-endpoints/README.md)
     * [Harden Network and Name Resolution](08-endpoints/harden-network-and-name-resolution.md)
@@ -106,7 +108,6 @@
     * [Enable Secure Boot](08-endpoints/enable-secure-boot.md)
     * [Enable VBS and Credential Guard](08-endpoints/enable-vbs-credential-guard.md)
     * [Configure Windows Defender Application Control](08-endpoints/configure-wdac.md)
-    * [Configure AppLocker Policies](08-endpoints/configure-applocker-policies.md)
     * [Enable BitLocker and Network Unlock](08-endpoints/enable-bitlocker.md)
     * [UEFI Firmware Security Hardening](08-endpoints/configure-uefi-security.md)
     * [Hardware Virtualization and DMA Protection](08-endpoints/enable-hardware-virtualization-and-dma-protection.md)

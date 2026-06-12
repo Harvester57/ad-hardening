@@ -1,5 +1,5 @@
 # Configure-WDACLocalPolicy.ps1
-# Generates a baseline local Code Integrity policy and sets it to Audit Mode.
+# Generates a baseline local Code Integrity policy, sets it to Audit Mode, and enables the Vulnerable Driver Blocklist.
 
 Write-Host "--- Configuring WDAC Local Policy Baseline ---" -ForegroundColor Cyan
 
@@ -25,7 +25,15 @@ Set-RuleOption -FilePath $PolicyXml -Option 3 -ErrorAction SilentlyContinue
 Write-Host "[+] Compiling Code Integrity XML into SIPolicy.p7b..." -ForegroundColor Gray
 ConvertFrom-CIPolicy -XmlFilePath $PolicyXml -BinaryFilePath $PolicyBin -ErrorAction Stop
 
+# 4. Enable Vulnerable Driver Blocklist in Registry
+Write-Host "[+] Enabling Vulnerable Driver Blocklist in registry..." -ForegroundColor Gray
+$ConfigPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
+if (-not (Test-Path $ConfigPath)) {
+    New-Item -Path $ConfigPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ConfigPath -Name "VulnerableDriverBlocklistEnable" -Value 1 -Type DWord -ErrorAction Stop
+
 # Cleanup temp files
 if (Test-Path $PolicyXml) { Remove-Item $PolicyXml -Force }
 
-Write-Host "[+] Local WDAC baseline policy compiled and deployed to $PolicyBin." -ForegroundColor Green
+Write-Host "[+] Local WDAC baseline policy and driver blocklist configured. Reboot required." -ForegroundColor Green

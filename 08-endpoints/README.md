@@ -37,7 +37,7 @@ To prevent initial access and lateral movement, the following unitary technical 
     Activates Virtualization-Based Security (VBS) and Credential Guard to protect password hashes and Kerberos tickets in an isolated virtual container, mitigating LSASS dumping.
 
 11. **[Configure Windows Defender Application Control](configure-wdac.md)**
-    Deploys application control baselines to enforce code integrity policies, restricting the system to run only signed, authorized binaries and scripts.
+    Deploys application control baselines and the Microsoft Vulnerable Driver Blocklist to enforce code integrity policies, restricting the system to run only signed, authorized binaries, scripts, and secure drivers.
 
 12. **[Enable BitLocker and Network Unlock](enable-bitlocker.md)**
     Enforces full disk encryption with TPM and enables secure Network Unlock capabilities for standard client workstations.

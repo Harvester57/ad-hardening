@@ -35,7 +35,7 @@ Enforcing VBS and Credential Guard prevents in-memory credential harvesting, bre
 
 ## Legacy Impact & Compatibility
 * **Virtualization Conflicts**: Third-party virtualization software (such as legacy versions of VMware Workstation or VirtualBox) that do not support nested virtualization or integration with Windows Hyper-V will fail to run when VBS is active.
-* **Hardware Requirements**: Systems must support CPU virtualization (Intel VT-x or AMD-V), Second Level Address Translation (SLAT), and have secure firmware (UEFI, Secure Boot, IOMMU / DMA protection). Older client hardware that does not support these specifications cannot run Credential Guard.
+* **Hardware Requirements**: Systems must support CPU virtualization (Intel VT-x or AMD-V), Second Level Address Translation (SLAT), and have secure firmware (UEFI, Secure Boot, IOMMU / DMA protection) as strict pre-requisites. Refer to [UEFI Firmware Security Hardening](configure-uefi-security.md) and [Hardware Virtualization and DMA Protection](enable-hardware-virtualization-and-dma-protection.md) to ensure these platform security features are fully enabled in the firmware. Older client hardware that does not support these specifications cannot run Credential Guard.
 
 ---
 

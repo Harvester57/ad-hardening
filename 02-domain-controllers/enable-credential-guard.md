@@ -35,7 +35,7 @@ By running LSA in a secure container separate from the main LSASS process, Crede
 ---
 
 ## Legacy Impact & Compatibility
-* **Hardware Requirements**: Credential Guard requires UEFI firmware, Secure Boot, and CPU virtualization extensions (such as Intel VT-x / AMD-V and Second Level Address Translation - SLAT).
+* **Hardware Requirements**: Enabling UEFI Secure Boot and CPU virtualization features is a strict pre-requisite for Credential Guard. For physical systems, refer to [UEFI Firmware Security Hardening](../07-paws/configure-uefi-security.md) and [Hardware Virtualization and DMA Protection](../07-paws/enable-hardware-virtualization-and-dma-protection.md) to secure these configurations.
 * **Virtualization Support**: If the target server is a virtual machine, the hypervisor must support nested virtualization, and the virtual machine configuration must have VBS features enabled.
 * **Authentication Protocol Impact**: Enabling Credential Guard disables NTLMv1, MS-CHAPv2, CredSSP single sign-on, and unconstrained Kerberos delegation. Applications that rely on these insecure delegation or authentication methods will fail.
 * **Smart Card Requirement**: Kerberos authentication using smart cards is fully supported, but the smart card drivers must be compatible with VBS environment constraints.

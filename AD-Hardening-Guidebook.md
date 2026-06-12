@@ -13,7 +13,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 34618ef | Generated: June 12, 2026</span>
+      <span>Commit: 3612c0f | Generated: June 12, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1456,6 +1456,9 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure and harden Windows Defender Antivirus on Domain Controllers, enabling real-time scanning, preventing local exclusion modifications, enforcing server-compatible ASR rules (including LSASS protection), activating Tamper Protection, and sandboxing execution.
 * **[Configure AppLocker Policies on Domain Controllers](#02-domain-controllers-README-md-02-domain-controllers-configure-applocker-policies-md)**
   Requirement to configure strict AppLocker rules on Domain Controllers to prevent administrative users from executing unapproved binaries, scripts, installers, or web browsers on Tier 0 systems.
+* **[Enable WDAC Driver Blocklist](#02-domain-controllers-README-md-02-domain-controllers-enable-wdac-driver-blocklist-md)**
+  Requirement to configure the Windows Defender Application Control (WDAC) driver blocklist to protect kernel memory from Bring Your Own Vulnerable Driver (BYOVD) attacks.
+
 
 
 
@@ -2376,7 +2379,7 @@ By running LSA in a secure container separate from the main LSASS process, Crede
 
 <a id="02-domain-controllers-enable-credential-guard-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
-* **Hardware Requirements**: Credential Guard requires UEFI firmware, Secure Boot, and CPU virtualization extensions (such as Intel VT-x / AMD-V and Second Level Address Translation - SLAT).
+* **Hardware Requirements**: Enabling UEFI Secure Boot and CPU virtualization features is a strict pre-requisite for Credential Guard. For physical systems, refer to [UEFI Firmware Security Hardening](#02-domain-controllers-enable-credential-guard-md-07-paws-configure-uefi-security-md) and [Hardware Virtualization and DMA Protection](#02-domain-controllers-enable-credential-guard-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) to secure these configurations.
 * **Virtualization Support**: If the target server is a virtual machine, the hypervisor must support nested virtualization, and the virtual machine configuration must have VBS features enabled.
 * **Authentication Protocol Impact**: Enabling Credential Guard disables NTLMv1, MS-CHAPv2, CredSSP single sign-on, and unconstrained Kerberos delegation. Applications that rely on these insecure delegation or authentication methods will fail.
 * **Smart Card Requirement**: Kerberos authentication using smart cards is fully supported, but the smart card drivers must be compatible with VBS environment constraints.
@@ -5177,7 +5180,7 @@ foreach ($KeyName in $CheckKeys.Keys) {
 
 <a id="02-domain-controllers-configure-applocker-policies-md-implementation-details"></a>
 ## Implementation Details
-* **Priority**: Medium
+* **Priority**: High
 * **GPO Path / Registry Location**:
   * **Service Configuration (GPO)**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Application Identity` -> Automatic
   * **AppLocker Path (GPO)**: `Computer Configuration\Policies\Windows Settings\Security Settings\Application Control Policies\AppLocker`
@@ -5194,6 +5197,7 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
 1. **Restricts Execution to Authorized Software**: Prevents execution of unapproved software, preventing standard user directories (such as `C:\Users\` or `C:\Windows\Temp\`) from being used to launch malicious binaries or scripts.
 2. **Blocks Browser Execution**: Prevents administrative users from launching web browsers (Chrome, Edge, Firefox, Internet Explorer) directly on Domain Controllers, shutting down web-based drive-by downloads and browser-based credential leakage.
 3. **Restricts Windows Installer and Script Execution**: Prevents unauthorized `.msi` installations and unauthorized PowerShell or VBScript scripts from running, reducing the likelihood of successful exploitation via living-off-the-land techniques.
+4. **Defends Against AppLocker Bypasses**: Abusing trusted, signed Microsoft binaries (such as `msbuild.exe`, `installutil.exe`, `regasm.exe`, `regsvcs.exe`, `mshta.exe`, `regsvr32.exe`, `rundll32.exe`) allows attackers to execute arbitrary code bypassing default AppLocker rules. This control blocks these "Living off the Land" binaries (LOLBins) and prevents execution from user-writeable paths under `%WINDIR%` (such as `Tasks`, `Temp`, `tracing`, `spool\drivers\color`, etc.).
 
 ---
 
@@ -5236,26 +5240,64 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
 #### 3. Create Default and Block Rules
 1. Expand **AppLocker** and select **Executable Rules**.
 2. Right-click **Executable Rules** and select **Create Default Rules** (allows all files in Windows and Program Files directories, and allows local Administrators to run all files).
-3. To block web browsers on Domain Controllers, create a deny rule:
-   * Right-click **Executable Rules** and select **Create New Rule...**
-   * Action: **Deny** | User or Group: **Everyone**
-   * Publisher Rule: Browse and select the executable for Microsoft Edge (`msedge.exe`), Google Chrome (`chrome.exe`), Mozilla Firefox (`firefox.exe`), and Internet Explorer (`iexplore.exe`). Set rule to block all versions.
-4. Repeat the default rule creation process for **Windows Installer Rules**, **Script Rules**, and **Packaged App Rules**.
+3. To block LOLBins and writeable directories, create explicit **Deny** rules for **Everyone**:
+   * **Writeable Directories (Path Rules)**:
+     * Deny `%WINDIR%\Tasks\*`
+     * Deny `%WINDIR%\Temp\*`
+     * Deny `%WINDIR%\tracing\*`
+     * Deny `%WINDIR%\System32\spool\drivers\color\*`
+     * Deny `%WINDIR%\System32\Tasks\Microsoft\Windows\SyncCenter\*`
+     * Deny `%WINDIR%\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\*`
+   * **Bypass Binaries (Publisher or Path Rules)**:
+     * Deny `*\msbuild.exe`
+     * Deny `*\installutil.exe`
+     * Deny `*\mshta.exe`
+     * Deny `*\regasm.exe`
+     * Deny `*\regsvcs.exe`
+     * Deny `*\regsvr32.exe`
+     * Deny `*\rundll32.exe`
+     * Deny `*\bginfo.exe`
+     * Deny `*\cdb.exe`
+     * Deny `*\cmstp.exe`
+     * Deny `*\control.exe`
+     * Deny `*\csi.exe`
+     * Deny `*\dfsvc.exe`
+     * Deny `*\dnx.exe`
+     * Deny `*\fsi.exe`
+     * Deny `*\ie4unit.exe`
+     * Deny `*\ieexec.exe`
+     * Deny `*\infdefaultinstall.exe`
+     * Deny `*\mavinject.exe`
+     * Deny `*\msdeploy.exe`
+     * Deny `*\msdt.exe`
+     * Deny `*\msxsl.exe`
+     * Deny `*\odbcconf.exe`
+     * Deny `*\presentationhost.exe`
+     * Deny `*\rcsi.exe`
+     * Deny `*\rsi.exe`
+     * Deny `*\runscripthelper.exe`
+     * Deny `*\te.exe`
+     * Deny `*\tracker.exe`
+     * Deny `*\xwizard.exe`
+4. Repeat the process for **Script Rules** by creating default rules and adding Deny rules for script execution from the same user-writeable paths (such as `%WINDIR%\Temp\*` and `%WINDIR%\Tasks\*`).
+5. Disable NTVDM (16-bit application support) to prevent AppLocker bypasses via 16-bit binaries:
+   * Navigate to: `Computer Configuration\Administrative Templates\System\16-bit Application Compatibility`
+   * Configure **Prevent access to 16-bit applications** to **Enabled**.
 
 ---
 
 <a id="02-domain-controllers-configure-applocker-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to configure the Application Identity service and verify AppLocker configuration. Note that local AppLocker policies are typically managed by importing XML configurations.
+Run the following scripts locally to configure the Application Identity service and import a robust local AppLocker policy.
 
 [Download Script: Set-AppLockerDCPolicy.ps1](implementation_scripts/Set-AppLockerDCPolicy.ps1)
 
 ```powershell
 <a id="02-domain-controllers-configure-applocker-policies-md-set-applockerdcpolicyps1"></a>
 # Set-AppLockerDCPolicy.ps1
-<a id="02-domain-controllers-configure-applocker-policies-md-description-configures-the-application-identity-service-and-imports-a-basic-local-applocker-xml-policy"></a>
-# Description: Configures the Application Identity service and imports a basic local AppLocker XML policy.
+<a id="02-domain-controllers-configure-applocker-policies-md-description-configures-the-application-identity-service-and-imports-a-robust-local-applocker-xml-policy"></a>
+# Description: Configures the Application Identity service and imports a robust local AppLocker XML policy.
 
 Write-Host "Applying hardening requirement: Configure AppLocker on Domain Controllers..." -ForegroundColor Cyan
 
@@ -5272,25 +5314,158 @@ if ($Service) {
     Write-Error "Application Identity service (AppIDSvc) is not present on this system."
 }
 
-<a id="02-domain-controllers-configure-applocker-policies-md-2-configure-local-applocker-policy-example-enforces-executable-installer-script-and-packaged-app-rules"></a>
-# 2. Configure local AppLocker policy (Example: Enforces Executable, Installer, Script and Packaged App rules)
-<a id="02-domain-controllers-configure-applocker-policies-md-typically-an-applocker-xml-configuration-is-imported-below-is-the-registry-path-configuration-for-baseline"></a>
-# Typically, an AppLocker XML configuration is imported. Below is the registry path configuration for baseline.
-$SrpPath = "HKLM:\Software\Policies\Microsoft\Windows\SrpV2"
-if (-not (Test-Path $SrpPath)) {
-    New-Item -Path $SrpPath -Force | Out-Null
+<a id="02-domain-controllers-configure-applocker-policies-md-2-configure-local-applocker-policy-xml-content"></a>
+# 2. Configure local AppLocker policy XML content
+$AppLockerXml = @"
+<AppLockerPolicy Version="1">
+  <RuleCollection Type="Exe" EnforcementMode="Enabled">
+    <FilePathRule Id="921cc481-6e1e-453f-b3a5-bc4f4a38674d" Name="(Default Rule) All files located in the Program Files folder" Description="Allows members of the Everyone group to run applications that are located in the Program Files folder." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%PROGRAMFILES%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="a61c8b2c-6d8f-4ad9-acbc-467b78a7f7b4" Name="(Default Rule) All files located in the Windows folder" Description="Allows members of the Everyone group to run applications that are located in the Windows folder." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="fd686d83-a829-4351-8ff4-27c1de5732e9" Name="(Default Rule) All files" Description="Allows members of the local Administrators group to run all applications." UserOrGroupSid="S-1-5-32-544" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="1e8fa8b3-3a5e-4c7a-9cb8-b223ff9db261" Name="Block User Writeable Temp" Description="Block execution from Temp folder to prevent bypasses." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\Temp\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="2e8fa8b3-3a5e-4c7a-9cb8-b223ff9db262" Name="Block User Writeable Tasks" Description="Block execution from Tasks folder to prevent bypasses." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\Tasks\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="3e8fa8b3-3a5e-4c7a-9cb8-b223ff9db263" Name="Block User Writeable spool color" Description="Block execution from spool color folder." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\System32\spool\drivers\color\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="4e8fa8b3-3a5e-4c7a-9cb8-b223ff9db264" Name="Block Msbuild" Description="Block msbuild.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\msbuild.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="5e8fa8b3-3a5e-4c7a-9cb8-b223ff9db265" Name="Block Installutil" Description="Block installutil.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\installutil.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="6e8fa8b3-3a5e-4c7a-9cb8-b223ff9db266" Name="Block Mshta" Description="Block mshta.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\mshta.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="7e8fa8b3-3a5e-4c7a-9cb8-b223ff9db267" Name="Block Regasm" Description="Block regasm.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\regasm.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="8e8fa8b3-3a5e-4c7a-9cb8-b223ff9db268" Name="Block Regsvcs" Description="Block regsvcs.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\regsvcs.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="ae8fa8b3-3a5e-4c7a-9cb8-b223ff9db269" Name="Block Regsvr32" Description="Block regsvr32.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\regsvr32.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="be8fa8b3-3a5e-4c7a-9cb8-b223ff9db270" Name="Block Rundll32" Description="Block rundll32.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\rundll32.exe" />
+      </Conditions>
+    </FilePathRule>
+  </RuleCollection>
+  <RuleCollection Type="Msi" EnforcementMode="Enabled">
+    <FilePathRule Id="5b8fa8b3-3a5e-4c7a-9cb8-b223ff9db271" Name="(Default Rule) All Windows Installer files in Program Files" Description="Allows everyone to run Windows Installer files in Program Files." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%PROGRAMFILES%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="6b8fa8b3-3a5e-4c7a-9cb8-b223ff9db272" Name="(Default Rule) All Windows Installer files in Windows" Description="Allows everyone to run Windows Installer files in Windows." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="7b8fa8b3-3a5e-4c7a-9cb8-b223ff9db273" Name="(Default Rule) All Windows Installer files" Description="Allows administrators to run all Windows Installer files." UserOrGroupSid="S-1-5-32-544" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="*" />
+      </Conditions>
+    </FilePathRule>
+  </RuleCollection>
+  <RuleCollection Type="Script" EnforcementMode="Enabled">
+    <FilePathRule Id="1c8fa8b3-3a5e-4c7a-9cb8-b223ff9db274" Name="(Default Rule) All scripts located in the Program Files folder" Description="Allows everyone to run scripts in Program Files." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%PROGRAMFILES%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="2c8fa8b3-3a5e-4c7a-9cb8-b223ff9db275" Name="(Default Rule) All scripts located in the Windows folder" Description="Allows everyone to run scripts in Windows." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="3c8fa8b3-3a5e-4c7a-9cb8-b223ff9db276" Name="(Default Rule) All scripts" Description="Allows administrators to run all scripts." UserOrGroupSid="S-1-5-32-544" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="4c8fa8b3-3a5e-4c7a-9cb8-b223ff9db277" Name="Block scripts in Temp" Description="Block script execution from Temp." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\Temp\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="5c8fa8b3-3a5e-4c7a-9cb8-b223ff9db278" Name="Block scripts in Tasks" Description="Block script execution from Tasks." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\Tasks\*" />
+      </Conditions>
+    </FilePathRule>
+  </RuleCollection>
+  <RuleCollection Type="Appx" EnforcementMode="Enabled">
+    <FilePublisherRule Id="1d8fa8b3-3a5e-4c7a-9cb8-b223ff9db279" Name="(Default Rule) All signed packaged apps" Description="Allows everyone to run signed packaged apps." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePublisherCondition PublisherName="*" ProductName="*" BinaryName="*">
+          <BinaryVersionRange LowSection="0.0.0.0" HighSection="*" />
+        </FilePublisherCondition>
+      </Conditions>
+    </FilePublisherRule>
+  </RuleCollection>
+</AppLockerPolicy>
+"@
+
+<a id="02-domain-controllers-configure-applocker-policies-md-write-the-temporary-xml-and-import-it"></a>
+# Write the temporary XML and import it
+$TempPath = Join-Path -Path $env:TEMP -ChildPath "AppLockerDCPolicy.xml"
+$AppLockerXml | Out-File -FilePath $TempPath -Encoding UTF8 -Force
+
+try {
+    Import-Module AppLocker -ErrorAction Stop
+    Set-AppLockerPolicy -XmlPolicy $TempPath -ErrorAction Stop
+    Write-Host "[+] Local AppLocker policy imported and enforced successfully." -ForegroundColor Green
+} catch {
+    Write-Error "Failed to import AppLocker policy: $($_.Exception.Message)"
+} finally {
+    if (Test-Path $TempPath) {
+        Remove-Item -Path $TempPath -Force
+    }
 }
 
-$Collections = @("Exe", "Msi", "Script", "Appx")
-foreach ($Col in $Collections) {
-    $ColPath = "$SrpPath\$Col"
-    if (-not (Test-Path $ColPath)) {
-        New-Item -Path $ColPath -Force | Out-Null
-    }
-    # EnforcementMode: 1 = Enforce, 0 = Audit Only
-    Set-ItemProperty -Path $ColPath -Name "EnforcementMode" -Value 1 -Type DWord
+<a id="02-domain-controllers-configure-applocker-policies-md-3-disable-ntvdm-16-bit-compatibility-via-registry"></a>
+# 3. Disable NTVDM (16-bit compatibility) via Registry
+$NtvdmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
+if (-not (Test-Path $NtvdmPath)) {
+    New-Item -Path $NtvdmPath -Force | Out-Null
 }
-Write-Host "[+] AppLocker enforcement registry values configured." -ForegroundColor Green
+Set-ItemProperty -Path $NtvdmPath -Name "Prevent16BitApp" -Value 1 -Type DWord
+Write-Host "[+] 16-bit NTVDM compatibility disabled in registry." -ForegroundColor Green
 ```
 
 *To audit the Application Identity service and AppLocker registry configuration:*
@@ -5338,15 +5513,211 @@ if (Test-Path $SrpPath) {
 } else {
     Write-Host "[-] AppLocker registry base path (SrpV2) not found. Policy is not deployed." -ForegroundColor Red
 }
+
+<a id="02-domain-controllers-configure-applocker-policies-md-3-audit-ntvdm-disable-status"></a>
+# 3. Audit NTVDM Disable Status
+$NtvdmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
+if (Test-Path $NtvdmPath) {
+    $AppCompatVal = Get-ItemProperty -Path $NtvdmPath -Name "Prevent16BitApp" -ErrorAction SilentlyContinue
+    if ($null -ne $AppCompatVal -and $AppCompatVal.Prevent16BitApp -eq 1) {
+        Write-Host "    - NTVDM (16-bit AppCompat): Disabled (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - NTVDM (16-bit AppCompat): Enabled or Not Configured (Expected: Disabled)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "    - NTVDM (16-bit AppCompat): Not Configured (Expected: Disabled)" -ForegroundColor Yellow
+}
 ```
 
 ---
 
 <a id="02-domain-controllers-configure-applocker-policies-md-sources-compliance-references"></a>
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Section 3.1.2 (System hardening and configuration baseline controls)
+* **ANSSI AD Hardening Guide**: Recommendations Section 3.1.2 (System hardening and configuration baseline controls), DAT-NT-13 Note Technique (R8, R10, R15, R16, R20)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9 (Application Control Policies / AppLocker)
 * **Microsoft Security Baseline Focus**: Domain Controller Security baseline - AppLocker configurations
+* **Ultimate AppLocker Bypass List**: Generic & Verified AppLocker Bypasses
+
+
+<div style="page-break-before: always;"></div>
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md"></a>
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-hardening-requirement-enable-wdac-driver-blocklist"></a>
+# Hardening Requirement: Enable WDAC Driver Blocklist
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-target-scope"></a>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025
+
+---
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-implementation-details"></a>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Deploy Windows Defender Application Control
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\CI\Config` -> `VulnerableDriverBlocklistEnable` = `1` (REG_DWORD)
+
+---
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-rationale"></a>
+## Rationale
+Attackers frequently employ "Bring Your Own Vulnerable Driver" (BYOVD) attacks to bypass Windows kernel protections. In a BYOVD attack, an adversary with administrative privileges installs a legitimate, cryptographically signed third-party driver that contains a known, exploitable vulnerability. The attacker then exploits this vulnerability to execute arbitrary code with kernel privileges, allowing them to disable security agents, dump LSASS memory, or tamper with system integrity.
+
+Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender Application Control (WDAC) prevents known vulnerable or malicious drivers from loading in kernel space. By restricting the WDAC policy to **Kernel Mode Code Integrity (KMCI) only** (omitting user-mode enforcement), the control shields the system kernel from driver-based exploits without introducing administrative overhead or blocking standard user-mode server applications and utilities.
+
+---
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-legacy-impact-compatibility"></a>
+## Legacy Impact & Compatibility
+* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [Enable Credential Guard](#02-domain-controllers-enable-wdac-driver-blocklist-md-02-domain-controllers-enable-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Enabling Secure Boot and CPU virtualization features is a strict pre-requisite; refer to [UEFI Firmware Security Hardening](#02-domain-controllers-enable-wdac-driver-blocklist-md-07-paws-configure-uefi-security-md) and [Hardware Virtualization and DMA Protection](#02-domain-controllers-enable-wdac-driver-blocklist-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware settings.
+* **Compatibility with Legacy Drivers**: Third-party backup, monitoring, or hardware administration software running deprecated, vulnerable drivers may fail to load. All such software must be updated to use secure, modern drivers.
+* **Deployment Testing**: To prevent system instability, the WDAC blocklist policy should be deployed in **Audit Mode** initially to verify that no critical operational drivers are blocked in production before shifting to enforcement mode.
+
+---
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-implementation-steps"></a>
+## Implementation Steps
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+To enforce the driver blocklist across all Domain Controllers, you can deploy the Microsoft recommended block rules as a custom WDAC policy.
+
+1. Download the Microsoft recommended driver block rules XML from the official Microsoft documentation.
+2. Edit the XML to ensure it operates in **Audit Mode** first, then convert the XML configuration into a binary format:
+```powershell
+ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\DriverBlocklist.xml" -BinaryFilePath "C:\WDAC\SIPolicy.p7b"
+```
+3. Copy the compiled `SIPolicy.p7b` file to a secure local path on all target Domain Controllers (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b`) or a share.
+4. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain management host.
+5. Create or edit a GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
+6. Navigate to:
+   `Computer Configuration\Administrative Templates\System\Device Guard`
+7. Configure the following setting:
+   * **Policy**: `Deploy Windows Defender Application Control`
+   * **Setting**: `Enabled`
+   * **Code Integrity Policy File Path**: Enter the local or network path to the policy file (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b`).
+8. To ensure the built-in system driver blocklist is active on modern builds, configure the following registry setting via Group Policy Preferences:
+   * **Path**: `Computer Configuration\Preferences\Windows Settings\Registry`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Control\CI\Config`
+   * **Value Name**: `VulnerableDriverBlocklistEnable`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `1`
+
+---
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to enable the Vulnerable Driver Blocklist registry key and ensure proper configuration.
+
+[Download Script: Configure-DriverBlocklist.ps1](implementation_scripts/Configure-DriverBlocklist.ps1)
+
+```powershell
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-configure-driverblocklistps1"></a>
+# Configure-DriverBlocklist.ps1
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-description-enables-the-microsoft-vulnerable-driver-blocklist-in-the-registry-and-validates-vbshvci-settings"></a>
+# Description: Enables the Microsoft Vulnerable Driver Blocklist in the registry and validates VBS/HVCI settings.
+
+Write-Host "Applying hardening requirement: Enable WDAC Driver Blocklist..." -ForegroundColor Cyan
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-1-configure-the-registry-settings-to-enable-the-blocklist"></a>
+# 1. Configure the registry settings to enable the blocklist
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
+$ValueName = "VulnerableDriverBlocklistEnable"
+
+if (-not (Test-Path $RegPath)) {
+    Write-Host "[+] Creating registry path: $RegPath" -ForegroundColor Gray
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Write-Host "[+] Setting registry value: $ValueName = 1" -ForegroundColor Gray
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value 1 -Type DWord -ErrorAction Stop
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-2-validate-vbs-hvci-configuration"></a>
+# 2. Validate VBS / HVCI Configuration
+$ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
+if (Test-Path $ScenariosPath) {
+    $HvciStatus = Get-ItemProperty -Path $ScenariosPath -Name "Enabled" -ErrorAction SilentlyContinue
+    if ($null -ne $HvciStatus -and $HvciStatus.Enabled -eq 1) {
+        Write-Host "[+] Pre-requisite Check: Memory Integrity (HVCI) is enabled." -ForegroundColor Green
+    } else {
+        Write-Host "[!] Warning: Memory Integrity (HVCI) is disabled. The blocklist requires HVCI for hypervisor enforcement." -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[!] Warning: Memory Integrity scenario configuration not found. Check VBS settings." -ForegroundColor Yellow
+}
+
+Write-Host "[+] Configuration applied successfully. A reboot is required to activate the blocklist." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-DriverBlocklistStatus.ps1](audit_scripts/Get-DriverBlocklistStatus.ps1)
+
+```powershell
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-get-driverblockliststatusps1"></a>
+# Get-DriverBlocklistStatus.ps1
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-description-audits-the-configuration-of-the-microsoft-vulnerable-driver-blocklist-and-hvci-state"></a>
+# Description: Audits the configuration of the Microsoft Vulnerable Driver Blocklist and HVCI state.
+
+Write-Host "--- Auditing Vulnerable Driver Blocklist ---" -ForegroundColor Cyan
+$Vulnerable = $false
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-1-check-registry-value"></a>
+# 1. Check registry value
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
+$ValueName = "VulnerableDriverBlocklistEnable"
+
+if (Test-Path $RegPath) {
+    $RegValue = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $RegValue -and $RegValue.$ValueName -eq 1) {
+        Write-Host "[+] Vulnerable Driver Blocklist is enabled in the registry." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: Vulnerable Driver Blocklist is disabled or not set in the registry." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "[!] VULNERABLE: Code Integrity Config registry key does not exist." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-2-check-hvci-status"></a>
+# 2. Check HVCI Status
+$ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
+if (Test-Path $ScenariosPath) {
+    $HvciStatus = Get-ItemProperty -Path $ScenariosPath -Name "Enabled" -ErrorAction SilentlyContinue
+    if ($null -ne $HvciStatus -and $HvciStatus.Enabled -eq 1) {
+        Write-Host "[+] Memory Integrity (HVCI) is enabled." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: Memory Integrity (HVCI) is disabled in the registry." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "[!] VULNERABLE: Memory Integrity scenario registry path does not exist." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-3-final-verdict"></a>
+# 3. Final Verdict
+if ($Vulnerable) {
+    Write-Host "`n[!] Verification FAILED: The Vulnerable Driver Blocklist is not fully secured." -ForegroundColor Red
+} else {
+    Write-Host "`n[+] Verification PASSED: The Vulnerable Driver Blocklist and HVCI are correctly configured." -ForegroundColor Green
+}
+```
+
+---
+
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-sources-compliance-references"></a>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendations on system component code integrity and driver signature enforcement.
+* **CIS Microsoft Windows Server Benchmark**: Section 18.8.14.3 / 18.9.31.2 (Deploy Windows Defender Application Control / Memory Integrity).
+* **Microsoft Security Guidance**: Microsoft recommended driver block rules documentation.
 
 
 <div style="page-break-before: always;"></div>
@@ -12864,6 +13235,9 @@ This directory contains the physical isolation policies and operating system sec
 11. **[Harden DMA and Physical Security for PAWs](#07-paws-README-md-07-paws-harden-dma-and-physical-security-md)**
     Mitigates physical access threat vectors by disabling sleep standby states (S1-S3), disabling external DMA device enumeration under lock, enforcing a strict block-all device enumeration policy, and blocking legacy SBP-2 device classes.
 
+12. **[Enable WDAC Driver Blocklist](#07-paws-README-md-07-paws-enable-wdac-driver-blocklist-md)**
+    Enforces the Microsoft Vulnerable Driver Blocklist using Windows Defender Application Control (WDAC) to protect the kernel from Bring Your Own Vulnerable Driver (BYOVD) attacks.
+
 
 
 
@@ -12896,7 +13270,8 @@ Privileged Access Workstations (PAWs) host highly sensitive Tier 0 credentials. 
 Enforcing strict execution controls via AppLocker ensures that:
 1. **Execution Control**: Only signed operating system files, approved software binaries, and scripts are allowed to execute.
 2. **Standard User Restrictions**: Any standard users or unauthorized accounts cannot run executable files or installers from writeable directories (like `%TEMP%` or `%USERPROFILE%`).
-3. **Defense-in-Depth**: Even if an administrator is tricked into downloading a malicious file, AppLocker blocks the execution of the binary, preventing the compromise of the endpoint.
+3. **Defends Against AppLocker Bypasses**: Abusing trusted, signed Microsoft binaries (such as `msbuild.exe`, `installutil.exe`, `regasm.exe`, `regsvcs.exe`, `mshta.exe`, `regsvr32.exe`, `rundll32.exe`) allows attackers to execute arbitrary code bypassing default AppLocker rules. This control blocks these "Living off the Land" binaries (LOLBins) and prevents execution from user-writeable paths under `%WINDIR%` (such as `Tasks`, `Temp`, `tracing`, `spool\drivers\color`, etc.).
+4. **Defense-in-Depth**: Even if an administrator is tricked into downloading a malicious file, AppLocker blocks the execution of the binary, preventing the compromise of the endpoint.
 
 ---
 
@@ -12918,32 +13293,80 @@ Enforcing strict execution controls via AppLocker ensures that:
 2. Create or edit the GPO linked to the PAWs Organizational Unit (OU) (e.g., `GPO_Hardening_PAW`).
 3. Navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\Application Control Policies\AppLocker`
-4. Right-click **Executable Rules** and select **Create Default Rules** (this permits Windows files and program files).
-5. Delete the default rule allowing "Everyone" to run files in all locations, and replace it with a rule allowing only authorized administrative groups (e.g., `Tier0-Admins`) to run binaries outside the default system locations.
-6. Set AppLocker Enforcement:
+4. Configure AppLocker Enforcement:
    * Right-click **AppLocker** and select **Properties**.
-   * On the **Enforcement** tab, check **Configured** under **Executable rules** and select **Enforce rules**.
-7. Link the GPO to the PAWs Organizational Unit (OU).
+   * On the **Enforcement** tab, check **Configured** under:
+     * **Executable rules** -> Select **Enforce rules**
+     * **Windows Installer rules** -> Select **Enforce rules**
+     * **Script rules** -> Select **Enforce rules**
+     * **Packaged app rules** -> Select **Enforce rules**
+5. Right-click **Executable Rules** and select **Create Default Rules** (this permits Windows files and program files).
+6. Delete the default rule allowing "Everyone" to run files in all locations, and replace it with a rule allowing only authorized administrative groups (e.g., `Tier0-Admins`) to run binaries outside the default system locations.
+7. To block LOLBins and writeable directories, create explicit **Deny** rules for **Everyone**:
+   * **Writeable Directories (Path Rules)**:
+     * Deny `%WINDIR%\Tasks\*`
+     * Deny `%WINDIR%\Temp\*`
+     * Deny `%WINDIR%\tracing\*`
+     * Deny `%WINDIR%\System32\spool\drivers\color\*`
+     * Deny `%WINDIR%\System32\Tasks\Microsoft\Windows\SyncCenter\*`
+     * Deny `%WINDIR%\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\*`
+   * **Bypass Binaries (Publisher or Path Rules)**:
+     * Deny `*\msbuild.exe`
+     * Deny `*\installutil.exe`
+     * Deny `*\mshta.exe`
+     * Deny `*\regasm.exe`
+     * Deny `*\regsvcs.exe`
+     * Deny `*\regsvr32.exe`
+     * Deny `*\rundll32.exe`
+     * Deny `*\bginfo.exe`
+     * Deny `*\cdb.exe`
+     * Deny `*\cmstp.exe`
+     * Deny `*\control.exe`
+     * Deny `*\csi.exe`
+     * Deny `*\dfsvc.exe`
+     * Deny `*\dnx.exe`
+     * Deny `*\fsi.exe`
+     * Deny `*\ie4unit.exe`
+     * Deny `*\ieexec.exe`
+     * Deny `*\infdefaultinstall.exe`
+     * Deny `*\mavinject.exe`
+     * Deny `*\msdeploy.exe`
+     * Deny `*\msdt.exe`
+     * Deny `*\msxsl.exe`
+     * Deny `*\odbcconf.exe`
+     * Deny `*\presentationhost.exe`
+     * Deny `*\rcsi.exe`
+     * Deny `*\rsi.exe`
+     * Deny `*\runscripthelper.exe`
+     * Deny `*\te.exe`
+     * Deny `*\tracker.exe`
+     * Deny `*\xwizard.exe`
+8. Repeat the process for **Script Rules** by creating default rules and adding Deny rules for script execution from the same user-writeable paths (such as `%WINDIR%\Temp\*` and `%WINDIR%\Tasks\*`).
+9. Disable NTVDM (16-bit application support) to prevent AppLocker bypasses via 16-bit binaries:
+   * Navigate to: `Computer Configuration\Administrative Templates\System\16-bit Application Compatibility`
+   * Configure **Prevent access to 16-bit applications** to **Enabled**.
+10. Link the GPO to the PAWs Organizational Unit (OU).
 
 ---
 
 <a id="07-paws-configure-applocker-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Configure the Application Identity service (`AppIDSvc`) locally to ensure that AppLocker policies are actively enforced on the endpoint.
+Configure the Application Identity service (`AppIDSvc`) and import the robust AppLocker policy locally.
 
 [Download Script: Configure-PawAppLockerService.ps1](implementation_scripts/Configure-PawAppLockerService.ps1)
 
 ```powershell
 <a id="07-paws-configure-applocker-policies-md-configure-pawapplockerserviceps1"></a>
 # Configure-PawAppLockerService.ps1
-<a id="07-paws-configure-applocker-policies-md-description-configures-the-application-identity-service-appidsvc-to-start-automatically-and-run"></a>
-# Description: Configures the Application Identity service (AppIDSvc) to start automatically and run.
+<a id="07-paws-configure-applocker-policies-md-description-configures-the-application-identity-service-appidsvc-to-start-automatically-and-imports-a-robust-applocker-xml-policy"></a>
+# Description: Configures the Application Identity service (AppIDSvc) to start automatically and imports a robust AppLocker XML policy.
 
 Write-Host "Applying AppLocker Identity service hardening..." -ForegroundColor Cyan
 
+<a id="07-paws-configure-applocker-policies-md-1-enable-application-identity-service-appidsvc"></a>
+# 1. Enable Application Identity service (AppIDSvc)
 $AppLockerService = Get-Service -Name AppIDSvc -ErrorAction SilentlyContinue
-
 if ($AppLockerService) {
     Set-Service -Name AppIDSvc -StartupType Automatic
     Start-Service -Name AppIDSvc -ErrorAction SilentlyContinue
@@ -12951,6 +13374,159 @@ if ($AppLockerService) {
 } else {
     Write-Warning "[-] Application Identity Service not found on this machine."
 }
+
+<a id="07-paws-configure-applocker-policies-md-2-configure-local-applocker-policy-xml-content"></a>
+# 2. Configure local AppLocker policy XML content
+$AppLockerXml = @"
+<AppLockerPolicy Version="1">
+  <RuleCollection Type="Exe" EnforcementMode="Enabled">
+    <FilePathRule Id="921cc481-6e1e-453f-b3a5-bc4f4a38674d" Name="(Default Rule) All files located in the Program Files folder" Description="Allows members of the Everyone group to run applications that are located in the Program Files folder." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%PROGRAMFILES%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="a61c8b2c-6d8f-4ad9-acbc-467b78a7f7b4" Name="(Default Rule) All files located in the Windows folder" Description="Allows members of the Everyone group to run applications that are located in the Windows folder." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="fd686d83-a829-4351-8ff4-27c1de5732e9" Name="(Default Rule) All files" Description="Allows members of the local Administrators group to run all applications." UserOrGroupSid="S-1-5-32-544" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="1e8fa8b3-3a5e-4c7a-9cb8-b223ff9db261" Name="Block User Writeable Temp" Description="Block execution from Temp folder to prevent bypasses." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\Temp\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="2e8fa8b3-3a5e-4c7a-9cb8-b223ff9db262" Name="Block User Writeable Tasks" Description="Block execution from Tasks folder to prevent bypasses." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\Tasks\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="3e8fa8b3-3a5e-4c7a-9cb8-b223ff9db263" Name="Block User Writeable spool color" Description="Block execution from spool color folder." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\System32\spool\drivers\color\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="4e8fa8b3-3a5e-4c7a-9cb8-b223ff9db264" Name="Block Msbuild" Description="Block msbuild.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\msbuild.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="5e8fa8b3-3a5e-4c7a-9cb8-b223ff9db265" Name="Block Installutil" Description="Block installutil.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\installutil.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="6e8fa8b3-3a5e-4c7a-9cb8-b223ff9db266" Name="Block Mshta" Description="Block mshta.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\mshta.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="7e8fa8b3-3a5e-4c7a-9cb8-b223ff9db267" Name="Block Regasm" Description="Block regasm.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\regasm.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="8e8fa8b3-3a5e-4c7a-9cb8-b223ff9db268" Name="Block Regsvcs" Description="Block regsvcs.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\regsvcs.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="ae8fa8b3-3a5e-4c7a-9cb8-b223ff9db269" Name="Block Regsvr32" Description="Block regsvr32.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\regsvr32.exe" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="be8fa8b3-3a5e-4c7a-9cb8-b223ff9db270" Name="Block Rundll32" Description="Block rundll32.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="*\rundll32.exe" />
+      </Conditions>
+    </FilePathRule>
+  </RuleCollection>
+  <RuleCollection Type="Msi" EnforcementMode="Enabled">
+    <FilePathRule Id="5b8fa8b3-3a5e-4c7a-9cb8-b223ff9db271" Name="(Default Rule) All Windows Installer files in Program Files" Description="Allows everyone to run Windows Installer files in Program Files." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%PROGRAMFILES%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="6b8fa8b3-3a5e-4c7a-9cb8-b223ff9db272" Name="(Default Rule) All Windows Installer files in Windows" Description="Allows everyone to run Windows Installer files in Windows." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="7b8fa8b3-3a5e-4c7a-9cb8-b223ff9db273" Name="(Default Rule) All Windows Installer files" Description="Allows administrators to run all Windows Installer files." UserOrGroupSid="S-1-5-32-544" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="*" />
+      </Conditions>
+    </FilePathRule>
+  </RuleCollection>
+  <RuleCollection Type="Script" EnforcementMode="Enabled">
+    <FilePathRule Id="1c8fa8b3-3a5e-4c7a-9cb8-b223ff9db274" Name="(Default Rule) All scripts located in the Program Files folder" Description="Allows everyone to run scripts in Program Files." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%PROGRAMFILES%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="2c8fa8b3-3a5e-4c7a-9cb8-b223ff9db275" Name="(Default Rule) All scripts located in the Windows folder" Description="Allows everyone to run scripts in Windows." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="3c8fa8b3-3a5e-4c7a-9cb8-b223ff9db276" Name="(Default Rule) All scripts" Description="Allows administrators to run all scripts." UserOrGroupSid="S-1-5-32-544" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="4c8fa8b3-3a5e-4c7a-9cb8-b223ff9db277" Name="Block scripts in Temp" Description="Block script execution from Temp." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\Temp\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="5c8fa8b3-3a5e-4c7a-9cb8-b223ff9db278" Name="Block scripts in Tasks" Description="Block script execution from Tasks." UserOrGroupSid="S-1-1-0" Action="Deny">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\Tasks\*" />
+      </Conditions>
+    </FilePathRule>
+  </RuleCollection>
+  <RuleCollection Type="Appx" EnforcementMode="Enabled">
+    <FilePublisherRule Id="1d8fa8b3-3a5e-4c7a-9cb8-b223ff9db279" Name="(Default Rule) All signed packaged apps" Description="Allows everyone to run signed packaged apps." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePublisherCondition PublisherName="*" ProductName="*" BinaryName="*">
+          <BinaryVersionRange LowSection="0.0.0.0" HighSection="*" />
+        </FilePublisherCondition>
+      </Conditions>
+    </FilePublisherRule>
+  </RuleCollection>
+</AppLockerPolicy>
+"@
+
+<a id="07-paws-configure-applocker-policies-md-write-the-temporary-xml-and-import-it"></a>
+# Write the temporary XML and import it
+$TempPath = Join-Path -Path $env:TEMP -ChildPath "AppLockerPawPolicy.xml"
+$AppLockerXml | Out-File -FilePath $TempPath -Encoding UTF8 -Force
+
+try {
+    Import-Module AppLocker -ErrorAction Stop
+    Set-AppLockerPolicy -XmlPolicy $TempPath -ErrorAction Stop
+    Write-Host "[+] Local AppLocker policy imported and enforced successfully." -ForegroundColor Green
+} catch {
+    Write-Error "Failed to import AppLocker policy: $($_.Exception.Message)"
+} finally {
+    if (Test-Path $TempPath) {
+        Remove-Item -Path $TempPath -Force
+    }
+}
+
+<a id="07-paws-configure-applocker-policies-md-3-disable-ntvdm-16-bit-compatibility-via-registry"></a>
+# 3. Disable NTVDM (16-bit compatibility) via Registry
+$NtvdmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
+if (-not (Test-Path $NtvdmPath)) {
+    New-Item -Path $NtvdmPath -Force | Out-Null
+}
+Set-ItemProperty -Path $NtvdmPath -Name "Prevent16BitApp" -Value 1 -Type DWord
+Write-Host "[+] 16-bit NTVDM compatibility disabled in registry." -ForegroundColor Green
 ```
 
 *To verify the AppLocker service status:*
@@ -12965,6 +13541,8 @@ if ($AppLockerService) {
 
 Write-Host "--- Auditing AppLocker Service Status ---" -ForegroundColor Cyan
 
+<a id="07-paws-configure-applocker-policies-md-1-audit-service-state"></a>
+# 1. Audit service state
 $AppIDSvc = Get-Service -Name AppIDSvc -ErrorAction SilentlyContinue
 
 if ($AppIDSvc) {
@@ -12976,15 +13554,55 @@ if ($AppIDSvc) {
 } else {
     Write-Host "    - VULNERABLE: Application Identity Service (AppIDSvc) is not installed." -ForegroundColor Red
 }
+
+<a id="07-paws-configure-applocker-policies-md-2-audit-enforcement-registry-settings"></a>
+# 2. Audit enforcement registry settings
+$SrpPath = "HKLM:\Software\Policies\Microsoft\Windows\SrpV2"
+$Collections = @("Exe", "Msi", "Script", "Appx")
+
+if (Test-Path $SrpPath) {
+    foreach ($Col in $Collections) {
+        $ColPath = "$SrpPath\$Col"
+        if (Test-Path $ColPath) {
+            $Val = Get-ItemProperty -Path $ColPath -Name "EnforcementMode" -ErrorAction SilentlyContinue
+            if ($null -ne $Val) {
+                $Mode = if ($Val.EnforcementMode -eq 1) { "Enforced" } else { "Audit Only" }
+                $Color = if ($Val.EnforcementMode -eq 1) { "Green" } else { "Yellow" }
+                Write-Host "    - Collection $Col Enforcement: $Mode (Value: $($Val.EnforcementMode))" -ForegroundColor $Color
+            } else {
+                Write-Host "    - Collection $Col Enforcement: NOT CONFIGURED" -ForegroundColor Red
+            }
+        } else {
+            Write-Host "    - Collection $Col Path: NOT FOUND" -ForegroundColor Red
+        }
+    }
+} else {
+    Write-Host "[-] AppLocker registry base path (SrpV2) not found. Policy is not deployed." -ForegroundColor Red
+}
+
+<a id="07-paws-configure-applocker-policies-md-3-audit-ntvdm-disable-status"></a>
+# 3. Audit NTVDM Disable Status
+$NtvdmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
+if (Test-Path $NtvdmPath) {
+    $AppCompatVal = Get-ItemProperty -Path $NtvdmPath -Name "Prevent16BitApp" -ErrorAction SilentlyContinue
+    if ($null -ne $AppCompatVal -and $AppCompatVal.Prevent16BitApp -eq 1) {
+        Write-Host "    - NTVDM (16-bit AppCompat): Disabled (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - NTVDM (16-bit AppCompat): Enabled or Not Configured (Expected: Disabled)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "    - NTVDM (16-bit AppCompat): Not Configured (Expected: Disabled)" -ForegroundColor Yellow
+}
 ```
 
 ---
 
 <a id="07-paws-configure-applocker-policies-md-sources-compliance-references"></a>
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Recommendation R58 (Use of Privileged Access Workstations)
+* **ANSSI AD Hardening Guide**: Recommendation R58 (Use of Privileged Access Workstations), DAT-NT-13 Note Technique (R8, R10, R15, R16, R20)
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.9 (AppLocker Application Control)
 * **Microsoft Security Baselines**: AppLocker deployment guidance for high-security environments.
+* **Ultimate AppLocker Bypass List**: Generic & Verified AppLocker Bypasses
 
 
 <div style="page-break-before: always;"></div>
@@ -14847,7 +15465,7 @@ Privileged Access Workstations (PAWs) contain Tier 0 administrative tokens. A co
 
 <a id="07-paws-enable-vbs-credential-guard-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
-* **Firmware Requirements**: PAWs must use modern UEFI firmware, native UEFI boot (Legacy CSM disabled), Secure Boot, IOMMU (Intel VT-d or AMD-Vi), CPU Virtualization (Intel VT-x or AMD-V), and TPM 2.0. If physical hardware does not meet these criteria, it is unfit for use as a PAW.
+* **Firmware Requirements**: PAWs must use modern UEFI firmware, native UEFI boot (Legacy CSM disabled), Secure Boot, IOMMU (Intel VT-d or AMD-Vi), CPU Virtualization (Intel VT-x or AMD-V), and TPM 2.0. Enabling Secure Boot and virtualization functions is a strict pre-requisite. Refer to [UEFI Firmware Security Hardening](#07-paws-enable-vbs-credential-guard-md-07-paws-configure-uefi-security-md) and [Hardware Virtualization and DMA Protection](#07-paws-enable-vbs-credential-guard-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) to secure these features in the firmware. If physical hardware does not meet these criteria, it is unfit for use as a PAW.
 * **Hypervisor Conflicts**: Standard Windows virtualization layers will be required. Running non-compliant third-party hypervisors (such as older VirtualBox or VMware Workstation configurations) that do not support nested virtualization on Hyper-V will fail.
 
 ---
@@ -15230,6 +15848,187 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block
 
 <div style="page-break-before: always;"></div>
 
+<a id="07-paws-enable-wdac-driver-blocklist-md"></a>
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-hardening-requirement-enable-wdac-driver-blocklist"></a>
+# Hardening Requirement: Enable WDAC Driver Blocklist
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-target-scope"></a>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10, Windows 11 (Enterprise and Professional editions)
+
+---
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-implementation-details"></a>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Deploy Windows Defender Application Control
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\CI\Config` -> `VulnerableDriverBlocklistEnable` = `1` (REG_DWORD)
+
+---
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-rationale"></a>
+## Rationale
+Attackers frequently employ "Bring Your Own Vulnerable Driver" (BYOVD) attacks to bypass Windows kernel protections on high-value administrative assets like Privileged Access Workstations (PAWs). In a BYOVD attack, an adversary with administrative privileges installs a legitimate, cryptographically signed third-party driver that contains a known, exploitable vulnerability. The attacker then exploits this vulnerability to execute arbitrary code with kernel privileges, allowing them to disable security agents, dump LSASS memory, or tamper with system integrity.
+
+Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender Application Control (WDAC) prevents known vulnerable or malicious drivers from loading in kernel space. By restricting the WDAC policy to **Kernel Mode Code Integrity (KMCI) only** (omitting user-mode enforcement), the control shields the system kernel from driver-based exploits on administrative hosts without introducing administrative overhead or blocking standard user-mode admin applications.
+
+---
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-legacy-impact-compatibility"></a>
+## Legacy Impact & Compatibility
+* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [Enable VBS and Credential Guard for PAWs](#07-paws-enable-wdac-driver-blocklist-md-07-paws-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [UEFI Firmware Security Hardening](#07-paws-enable-wdac-driver-blocklist-md-07-paws-configure-uefi-security-md) and [Hardware Virtualization and DMA Protection](#07-paws-enable-wdac-driver-blocklist-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware configuration.
+* **Compatibility with Legacy Drivers**: Third-party backup, monitoring, or hardware administration software running deprecated, vulnerable drivers may fail to load. All such software must be updated to use secure, modern drivers.
+* **Deployment Testing**: To prevent system instability, the WDAC blocklist policy should be deployed in **Audit Mode** initially to verify that no critical operational drivers are blocked in production before shifting to enforcement mode.
+
+---
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-implementation-steps"></a>
+## Implementation Steps
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+To enforce the driver blocklist across all PAWs, you can deploy the Microsoft recommended block rules as a custom WDAC policy.
+
+1. Download the Microsoft recommended driver block rules XML from the official Microsoft documentation.
+2. Edit the XML to ensure it operates in **Audit Mode** first, then convert the XML configuration into a binary format:
+```powershell
+ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\DriverBlocklist.xml" -BinaryFilePath "C:\WDAC\SIPolicy.p7b"
+```
+3. Copy the compiled `SIPolicy.p7b` file to a secure local path on all target PAWs (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b`) or a share.
+4. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain management host.
+5. Create or edit a GPO linked to the PAWs OU (e.g., `GPO_Hardening_PAWs`).
+6. Navigate to:
+   `Computer Configuration\Administrative Templates\System\Device Guard`
+7. Configure the following setting:
+   * **Policy**: `Deploy Windows Defender Application Control`
+   * **Setting**: `Enabled`
+   * **Code Integrity Policy File Path**: Enter the local or network path to the policy file (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b`).
+8. To ensure the built-in system driver blocklist is active on modern builds, configure the following registry setting via Group Policy Preferences:
+   * **Path**: `Computer Configuration\Preferences\Windows Settings\Registry`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Control\CI\Config`
+   * **Value Name**: `VulnerableDriverBlocklistEnable`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `1`
+
+---
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to enable the Vulnerable Driver Blocklist registry key and ensure proper configuration.
+
+[Download Script: Configure-DriverBlocklist.ps1](implementation_scripts/Configure-DriverBlocklist.ps1)
+
+```powershell
+<a id="07-paws-enable-wdac-driver-blocklist-md-configure-driverblocklistps1"></a>
+# Configure-DriverBlocklist.ps1
+<a id="07-paws-enable-wdac-driver-blocklist-md-description-enables-the-microsoft-vulnerable-driver-blocklist-in-the-registry-and-validates-vbshvci-settings"></a>
+# Description: Enables the Microsoft Vulnerable Driver Blocklist in the registry and validates VBS/HVCI settings.
+
+Write-Host "Applying hardening requirement: Enable WDAC Driver Blocklist..." -ForegroundColor Cyan
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-1-configure-the-registry-settings-to-enable-the-blocklist"></a>
+# 1. Configure the registry settings to enable the blocklist
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
+$ValueName = "VulnerableDriverBlocklistEnable"
+
+if (-not (Test-Path $RegPath)) {
+    Write-Host "[+] Creating registry path: $RegPath" -ForegroundColor Gray
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Write-Host "[+] Setting registry value: $ValueName = 1" -ForegroundColor Gray
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value 1 -Type DWord -ErrorAction Stop
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-2-validate-vbs-hvci-configuration"></a>
+# 2. Validate VBS / HVCI Configuration
+$ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
+if (Test-Path $ScenariosPath) {
+    $HvciStatus = Get-ItemProperty -Path $ScenariosPath -Name "Enabled" -ErrorAction SilentlyContinue
+    if ($null -ne $HvciStatus -and $HvciStatus.Enabled -eq 1) {
+        Write-Host "[+] Pre-requisite Check: Memory Integrity (HVCI) is enabled." -ForegroundColor Green
+    } else {
+        Write-Host "[!] Warning: Memory Integrity (HVCI) is disabled. The blocklist requires HVCI for hypervisor enforcement." -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[!] Warning: Memory Integrity scenario configuration not found. Check VBS settings." -ForegroundColor Yellow
+}
+
+Write-Host "[+] Configuration applied successfully. A reboot is required to activate the blocklist." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-DriverBlocklistStatus.ps1](audit_scripts/Get-DriverBlocklistStatus.ps1)
+
+```powershell
+<a id="07-paws-enable-wdac-driver-blocklist-md-get-driverblockliststatusps1"></a>
+# Get-DriverBlocklistStatus.ps1
+<a id="07-paws-enable-wdac-driver-blocklist-md-description-audits-the-configuration-of-the-microsoft-vulnerable-driver-blocklist-and-hvci-state"></a>
+# Description: Audits the configuration of the Microsoft Vulnerable Driver Blocklist and HVCI state.
+
+Write-Host "--- Auditing Vulnerable Driver Blocklist ---" -ForegroundColor Cyan
+$Vulnerable = $false
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-1-check-registry-value"></a>
+# 1. Check registry value
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
+$ValueName = "VulnerableDriverBlocklistEnable"
+
+if (Test-Path $RegPath) {
+    $RegValue = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $RegValue -and $RegValue.$ValueName -eq 1) {
+        Write-Host "[+] Vulnerable Driver Blocklist is enabled in the registry." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: Vulnerable Driver Blocklist is disabled or not set in the registry." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "[!] VULNERABLE: Code Integrity Config registry key does not exist." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-2-check-hvci-status"></a>
+# 2. Check HVCI Status
+$ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
+if (Test-Path $ScenariosPath) {
+    $HvciStatus = Get-ItemProperty -Path $ScenariosPath -Name "Enabled" -ErrorAction SilentlyContinue
+    if ($null -ne $HvciStatus -and $HvciStatus.Enabled -eq 1) {
+        Write-Host "[+] Memory Integrity (HVCI) is enabled." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: Memory Integrity (HVCI) is disabled in the registry." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "[!] VULNERABLE: Memory Integrity scenario registry path does not exist." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-3-final-verdict"></a>
+# 3. Final Verdict
+if ($Vulnerable) {
+    Write-Host "`n[!] Verification FAILED: The Vulnerable Driver Blocklist is not fully secured." -ForegroundColor Red
+} else {
+    Write-Host "`n[+] Verification PASSED: The Vulnerable Driver Blocklist and HVCI are correctly configured." -ForegroundColor Green
+}
+```
+
+---
+
+<a id="07-paws-enable-wdac-driver-blocklist-md-sources-compliance-references"></a>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendations on system component code integrity and driver signature enforcement.
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.14.3 / 18.9.31.2 (Deploy Windows Defender Application Control / Memory Integrity).
+* **Microsoft Security Guidance**: Microsoft recommended driver block rules documentation.
+
+
+<div style="page-break-before: always;"></div>
+
 <a id="08-endpoints-README-md"></a>
 
 <a id="08-endpoints-README-md-module-8-endpoint-hardening"></a>
@@ -15273,7 +16072,7 @@ To prevent initial access and lateral movement, the following unitary technical 
     Activates Virtualization-Based Security (VBS) and Credential Guard to protect password hashes and Kerberos tickets in an isolated virtual container, mitigating LSASS dumping.
 
 11. **[Configure Windows Defender Application Control](#08-endpoints-README-md-08-endpoints-configure-wdac-md)**
-    Deploys application control baselines to enforce code integrity policies, restricting the system to run only signed, authorized binaries and scripts.
+    Deploys application control baselines and the Microsoft Vulnerable Driver Blocklist to enforce code integrity policies, restricting the system to run only signed, authorized binaries, scripts, and secure drivers.
 
 12. **[Enable BitLocker and Network Unlock](#08-endpoints-README-md-08-endpoints-enable-bitlocker-md)**
     Enforces full disk encryption with TPM and enables secure Network Unlock capabilities for standard client workstations.
@@ -17358,7 +18157,7 @@ If Secure Boot is disabled:
 
 <a id="08-endpoints-enable-secure-boot-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
-* **BIOS Mode Conversion**: Systems running in legacy BIOS mode (Compatibility Support Module - CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires changing partition styles from MBR to GPT (using tools like `MBR2GPT.exe`) and changing firmware settings, which can cause boot failures if not executed correctly.
+* **BIOS Mode Conversion**: Systems running in legacy BIOS mode (Compatibility Support Module - CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires changing partition styles from MBR to GPT (using tools like `MBR2GPT.exe`) and changing firmware settings; refer to [UEFI Firmware Security Hardening](#08-endpoints-enable-secure-boot-md-08-endpoints-configure-uefi-security-md) for firmware settings. Improper conversion can cause boot failures if not executed correctly.
 * **Dual-Boot Systems**: If the workstation dual-boots with unsigned Linux distributions or runs legacy recovery media, the firmware will reject the bootloader, preventing boot.
 * **BlackLotus Mitigation Risks**: Enforcing the BlackLotus DBX and SVN updates is a permanent, non-reversible action once written to the device firmware. If an administrator attempts to boot the machine using older, unpatched Windows installation media or recovery disks, the system will reject the boot manager and fail to boot. All recovery and deployment media must be updated with current security patches before applying these mitigations.
 
@@ -17551,7 +18350,7 @@ Enforcing VBS and Credential Guard prevents in-memory credential harvesting, bre
 <a id="08-endpoints-enable-vbs-credential-guard-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
 * **Virtualization Conflicts**: Third-party virtualization software (such as legacy versions of VMware Workstation or VirtualBox) that do not support nested virtualization or integration with Windows Hyper-V will fail to run when VBS is active.
-* **Hardware Requirements**: Systems must support CPU virtualization (Intel VT-x or AMD-V), Second Level Address Translation (SLAT), and have secure firmware (UEFI, Secure Boot, IOMMU / DMA protection). Older client hardware that does not support these specifications cannot run Credential Guard.
+* **Hardware Requirements**: Systems must support CPU virtualization (Intel VT-x or AMD-V), Second Level Address Translation (SLAT), and have secure firmware (UEFI, Secure Boot, IOMMU / DMA protection) as strict pre-requisites. Refer to [UEFI Firmware Security Hardening](#08-endpoints-enable-vbs-credential-guard-md-08-endpoints-configure-uefi-security-md) and [Hardware Virtualization and DMA Protection](#08-endpoints-enable-vbs-credential-guard-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md) to ensure these platform security features are fully enabled in the firmware. Older client hardware that does not support these specifications cannot run Credential Guard.
 
 ---
 
@@ -17689,6 +18488,7 @@ try {
 * **GPO Path / Registry Location**:
   * Computer Configuration\Administrative Templates\System\Device Guard\Deploy Windows Defender Application Control
   * HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard\CodeIntegrityPolicyPaths
+  * HKLM\SYSTEM\CurrentControlSet\Control\CI\Config\VulnerableDriverBlocklistEnable = 1 (REG_DWORD)
 
 ---
 
@@ -17701,13 +18501,15 @@ Traditional signature-based antivirus solutions scan for known malware patterns.
 If WDAC is not configured:
 1. **Payload Execution**: Standard users can execute downloaded scripts (e.g., PowerShell, VBScript) or binary files, facilitating initial access.
 2. **Antivirus Bypass**: Attackers can run obfuscated code, compile payloads on the target endpoint using built-in Windows compilers (e.g., `csc.exe`), or run memory injection scripts that standard antivirus signatures miss.
+3. **Driver Exploitation (BYOVD)**: Attackers can load vulnerable, cryptographically signed third-party drivers (Bring Your Own Vulnerable Driver) to execute arbitrary code in kernel space, disable security agents, or dump LSASS memory.
 
-Deploying a strict WDAC baseline ensures that only binaries and scripts signed by Microsoft, trusted system developers, or located in protected directories (such as Windows system folders) are allowed to execute.
+Deploying a strict WDAC baseline ensures that only binaries and scripts signed by Microsoft, trusted system developers, or located in protected directories (such as Windows system folders) are allowed to execute. Enforcing the Microsoft Vulnerable Driver Blocklist specifically mitigates BYOVD attacks in kernel space.
 
 ---
 
 <a id="08-endpoints-configure-wdac-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
+* **Pre-requisite (Memory Integrity/HVCI)**: Enforcing the vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [Enable VBS and Credential Guard](#08-endpoints-configure-wdac-md-08-endpoints-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [UEFI Firmware Security Hardening](#08-endpoints-configure-wdac-md-08-endpoints-configure-uefi-security-md) and [Hardware Virtualization and DMA Protection](#08-endpoints-configure-wdac-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md) for firmware setup.
 * **Administrative Overhead**: Any new enterprise software must be added to the code integrity trust policy (by digital signature or folder exceptions). Deploying unapproved third-party software will trigger blocks.
 * **User Script Blocks**: Administrators and power users cannot write and run custom PowerShell or VBS scripts locally unless the scripts are digitally signed by a trusted certificate in the WDAC policy or run in a directory excluded by the rules.
 * **Audit Phase Mandate**: To prevent severe business disruption, WDAC policies must always be deployed in **Audit Mode** first. This logs would-be blocks to the Event Viewer without interrupting execution, allowing administrators to gather a list of required applications and construct rules before shifting to **Enforced Mode**.
@@ -17746,6 +18548,13 @@ ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\BaselinePolicy.xml" -BinaryFilePath "
    * **Policy**: `Deploy Windows Defender Application Control`
    * **Setting**: `Enabled`
    * **Code Integrity Policy File Path**: Enter the path to the policy file (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b` or a UNC share path).
+6. To ensure the built-in system driver blocklist is active on modern builds, configure the following registry setting via Group Policy Preferences:
+   * **Path**: Computer Configuration\Preferences\Windows Settings\Registry
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Control\CI\Config`
+   * **Value Name**: `VulnerableDriverBlocklistEnable`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `1`
 
 ---
 
@@ -17759,8 +18568,8 @@ Run the following scripts locally to generate a baseline WDAC policy, enable Aud
 ```powershell
 <a id="08-endpoints-configure-wdac-md-configure-wdaclocalpolicyps1"></a>
 # Configure-WDACLocalPolicy.ps1
-<a id="08-endpoints-configure-wdac-md-generates-a-baseline-local-code-integrity-policy-and-sets-it-to-audit-mode"></a>
-# Generates a baseline local Code Integrity policy and sets it to Audit Mode.
+<a id="08-endpoints-configure-wdac-md-generates-a-baseline-local-code-integrity-policy-sets-it-to-audit-mode-and-enables-the-vulnerable-driver-blocklist"></a>
+# Generates a baseline local Code Integrity policy, sets it to Audit Mode, and enables the Vulnerable Driver Blocklist.
 
 Write-Host "--- Configuring WDAC Local Policy Baseline ---" -ForegroundColor Cyan
 
@@ -17791,11 +18600,20 @@ Set-RuleOption -FilePath $PolicyXml -Option 3 -ErrorAction SilentlyContinue
 Write-Host "[+] Compiling Code Integrity XML into SIPolicy.p7b..." -ForegroundColor Gray
 ConvertFrom-CIPolicy -XmlFilePath $PolicyXml -BinaryFilePath $PolicyBin -ErrorAction Stop
 
+<a id="08-endpoints-configure-wdac-md-4-enable-vulnerable-driver-blocklist-in-registry"></a>
+# 4. Enable Vulnerable Driver Blocklist in Registry
+Write-Host "[+] Enabling Vulnerable Driver Blocklist in registry..." -ForegroundColor Gray
+$ConfigPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
+if (-not (Test-Path $ConfigPath)) {
+    New-Item -Path $ConfigPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ConfigPath -Name "VulnerableDriverBlocklistEnable" -Value 1 -Type DWord -ErrorAction Stop
+
 <a id="08-endpoints-configure-wdac-md-cleanup-temp-files"></a>
 # Cleanup temp files
 if (Test-Path $PolicyXml) { Remove-Item $PolicyXml -Force }
 
-Write-Host "[+] Local WDAC baseline policy compiled and deployed to $PolicyBin." -ForegroundColor Green
+Write-Host "[+] Local WDAC baseline policy and driver blocklist configured. Reboot required." -ForegroundColor Green
 ```
 
 *To audit the running WDAC policy states:*
@@ -17804,23 +18622,67 @@ Write-Host "[+] Local WDAC baseline policy compiled and deployed to $PolicyBin."
 ```powershell
 <a id="08-endpoints-configure-wdac-md-test-wdacstatusps1"></a>
 # Test-WDACStatus.ps1
-<a id="08-endpoints-configure-wdac-md-audits-the-local-system-to-check-if-code-integrity-policies-are-active"></a>
-# Audits the local system to check if Code Integrity policies are active.
+<a id="08-endpoints-configure-wdac-md-audits-the-local-system-to-check-if-code-integrity-policies-the-vulnerable-driver-blocklist-and-hvci-are-active"></a>
+# Audits the local system to check if Code Integrity policies, the Vulnerable Driver Blocklist, and HVCI are active.
 
-Write-Host "--- Auditing WDAC Activation State ---" -ForegroundColor Cyan
+Write-Host "--- Auditing WDAC and Driver Blocklist State ---" -ForegroundColor Cyan
+$Vulnerable = $false
 
+<a id="08-endpoints-configure-wdac-md-1-query-wmi-class-for-code-integrity-status"></a>
+# 1. Query WMI class for Code Integrity status
 try {
-    # Query WMI class for Code Integrity status
     $CI = Get-CimInstance -Namespace "Root\Microsoft\Windows\CI" -ClassName "MSFT_Sipolicy" -ErrorAction Stop
-    Write-Host "`n[+] Found $($CI.Count) active Code Integrity policies." -ForegroundColor Yellow
-    
-    foreach ($Policy in $CI) {
-        # FriendlyName, PolicyID, Enforcer properties
-        # FriendlyName or PolicyName depending on OS build
-        Write-Host "    - Policy: $($Policy.FriendlyName) | ID: $($Policy.PolicyID) | Enforced: $($Policy.EnforcementMode)" -ForegroundColor Green
+    if ($null -ne $CI -and $CI.Count -gt 0) {
+        Write-Host "`n[+] Found $($CI.Count) active Code Integrity policies." -ForegroundColor Green
+        foreach ($Policy in $CI) {
+            Write-Host "    - Policy: $($Policy.FriendlyName) | ID: $($Policy.PolicyID) | Enforced: $($Policy.EnforcementMode)" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "`n[-] No active Code Integrity / WDAC policies detected via WMI." -ForegroundColor Yellow
     }
 } catch {
-    Write-Host "    - VULNERABLE: No active Code Integrity / WDAC policies detected on the local system." -ForegroundColor Red
+    Write-Host "`n[-] Could not query WMI MSFT_Sipolicy. This is expected if no WDAC policies are currently deployed." -ForegroundColor Gray
+}
+
+<a id="08-endpoints-configure-wdac-md-2-check-vulnerable-driver-blocklist-registry-configuration"></a>
+# 2. Check Vulnerable Driver Blocklist Registry configuration
+$ConfigPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
+$ValueName = "VulnerableDriverBlocklistEnable"
+if (Test-Path $ConfigPath) {
+    $RegValue = Get-ItemProperty -Path $ConfigPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $RegValue -and $RegValue.$ValueName -eq 1) {
+        Write-Host "[+] Vulnerable Driver Blocklist is enabled in the registry." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: Vulnerable Driver Blocklist is disabled or not set in the registry." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "[!] VULNERABLE: Code Integrity Config registry path does not exist." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+<a id="08-endpoints-configure-wdac-md-3-check-memory-integrity-hvci-configuration"></a>
+# 3. Check Memory Integrity (HVCI) configuration
+$ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
+if (Test-Path $ScenariosPath) {
+    $HvciStatus = Get-ItemProperty -Path $ScenariosPath -Name "Enabled" -ErrorAction SilentlyContinue
+    if ($null -ne $HvciStatus -and $HvciStatus.Enabled -eq 1) {
+        Write-Host "[+] Memory Integrity (HVCI) is enabled." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: Memory Integrity (HVCI) is disabled in the registry." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "[!] VULNERABLE: Memory Integrity scenario registry path does not exist." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+<a id="08-endpoints-configure-wdac-md-4-final-verdict"></a>
+# 4. Final Verdict
+if ($Vulnerable) {
+    Write-Host "`n[!] Verification FAILED: One or more driver security controls are not configured." -ForegroundColor Red
+} else {
+    Write-Host "`n[+] Verification PASSED: WDAC driver settings and HVCI are correctly configured." -ForegroundColor Green
 }
 ```
 

@@ -37,5 +37,8 @@ This directory contains the physical isolation policies and operating system sec
 11. **[Harden DMA and Physical Security for PAWs](harden-dma-and-physical-security.md)**
     Mitigates physical access threat vectors by disabling sleep standby states (S1-S3), disabling external DMA device enumeration under lock, enforcing a strict block-all device enumeration policy, and blocking legacy SBP-2 device classes.
 
+12. **[Enable WDAC Driver Blocklist](enable-wdac-driver-blocklist.md)**
+    Enforces the Microsoft Vulnerable Driver Blocklist using Windows Defender Application Control (WDAC) to protect the kernel from Bring Your Own Vulnerable Driver (BYOVD) attacks.
+
 
 

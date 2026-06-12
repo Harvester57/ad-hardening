@@ -1,18 +1,58 @@
 # Test-WDACStatus.ps1
-# Audits the local system to check if Code Integrity policies are active.
+# Audits the local system to check if Code Integrity policies, the Vulnerable Driver Blocklist, and HVCI are active.
 
-Write-Host "--- Auditing WDAC Activation State ---" -ForegroundColor Cyan
+Write-Host "--- Auditing WDAC and Driver Blocklist State ---" -ForegroundColor Cyan
+$Vulnerable = $false
 
+# 1. Query WMI class for Code Integrity status
 try {
-    # Query WMI class for Code Integrity status
     $CI = Get-CimInstance -Namespace "Root\Microsoft\Windows\CI" -ClassName "MSFT_Sipolicy" -ErrorAction Stop
-    Write-Host "`n[+] Found $($CI.Count) active Code Integrity policies." -ForegroundColor Yellow
-    
-    foreach ($Policy in $CI) {
-        # FriendlyName, PolicyID, Enforcer properties
-        # FriendlyName or PolicyName depending on OS build
-        Write-Host "    - Policy: $($Policy.FriendlyName) | ID: $($Policy.PolicyID) | Enforced: $($Policy.EnforcementMode)" -ForegroundColor Green
+    if ($null -ne $CI -and $CI.Count -gt 0) {
+        Write-Host "`n[+] Found $($CI.Count) active Code Integrity policies." -ForegroundColor Green
+        foreach ($Policy in $CI) {
+            Write-Host "    - Policy: $($Policy.FriendlyName) | ID: $($Policy.PolicyID) | Enforced: $($Policy.EnforcementMode)" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "`n[-] No active Code Integrity / WDAC policies detected via WMI." -ForegroundColor Yellow
     }
 } catch {
-    Write-Host "    - VULNERABLE: No active Code Integrity / WDAC policies detected on the local system." -ForegroundColor Red
+    Write-Host "`n[-] Could not query WMI MSFT_Sipolicy. This is expected if no WDAC policies are currently deployed." -ForegroundColor Gray
+}
+
+# 2. Check Vulnerable Driver Blocklist Registry configuration
+$ConfigPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
+$ValueName = "VulnerableDriverBlocklistEnable"
+if (Test-Path $ConfigPath) {
+    $RegValue = Get-ItemProperty -Path $ConfigPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $RegValue -and $RegValue.$ValueName -eq 1) {
+        Write-Host "[+] Vulnerable Driver Blocklist is enabled in the registry." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: Vulnerable Driver Blocklist is disabled or not set in the registry." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "[!] VULNERABLE: Code Integrity Config registry path does not exist." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+# 3. Check Memory Integrity (HVCI) configuration
+$ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
+if (Test-Path $ScenariosPath) {
+    $HvciStatus = Get-ItemProperty -Path $ScenariosPath -Name "Enabled" -ErrorAction SilentlyContinue
+    if ($null -ne $HvciStatus -and $HvciStatus.Enabled -eq 1) {
+        Write-Host "[+] Memory Integrity (HVCI) is enabled." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: Memory Integrity (HVCI) is disabled in the registry." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "[!] VULNERABLE: Memory Integrity scenario registry path does not exist." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+# 4. Final Verdict
+if ($Vulnerable) {
+    Write-Host "`n[!] Verification FAILED: One or more driver security controls are not configured." -ForegroundColor Red
+} else {
+    Write-Host "`n[+] Verification PASSED: WDAC driver settings and HVCI are correctly configured." -ForegroundColor Green
 }

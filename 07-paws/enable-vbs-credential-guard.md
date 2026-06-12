@@ -31,7 +31,7 @@ Privileged Access Workstations (PAWs) contain Tier 0 administrative tokens. A co
 ---
 
 ## Legacy Impact & Compatibility
-* **Firmware Requirements**: PAWs must use modern UEFI firmware, native UEFI boot (Legacy CSM disabled), Secure Boot, IOMMU (Intel VT-d or AMD-Vi), CPU Virtualization (Intel VT-x or AMD-V), and TPM 2.0. If physical hardware does not meet these criteria, it is unfit for use as a PAW.
+* **Firmware Requirements**: PAWs must use modern UEFI firmware, native UEFI boot (Legacy CSM disabled), Secure Boot, IOMMU (Intel VT-d or AMD-Vi), CPU Virtualization (Intel VT-x or AMD-V), and TPM 2.0. Enabling Secure Boot and virtualization functions is a strict pre-requisite. Refer to [UEFI Firmware Security Hardening](configure-uefi-security.md) and [Hardware Virtualization and DMA Protection](enable-hardware-virtualization-and-dma-protection.md) to secure these features in the firmware. If physical hardware does not meet these criteria, it is unfit for use as a PAW.
 * **Hypervisor Conflicts**: Standard Windows virtualization layers will be required. Running non-compliant third-party hypervisors (such as older VirtualBox or VMware Workstation configurations) that do not support nested virtualization on Hyper-V will fail.
 
 ---
