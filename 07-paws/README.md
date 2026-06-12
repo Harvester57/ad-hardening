@@ -40,5 +40,9 @@ This directory contains the physical isolation policies and operating system sec
 12. **[Enable WDAC Driver Blocklist](enable-wdac-driver-blocklist.md)**
     Enforces the Microsoft Vulnerable Driver Blocklist using Windows Defender Application Control (WDAC) to protect the kernel from Bring Your Own Vulnerable Driver (BYOVD) attacks.
 
+13. **[Configure Account and Password Policies for PAWs](configure-account-policies.md)**
+    Configures robust local account lockout, local password complexity, and 20-character minimum length policies, and references Active Directory Fine-Grained Password Policies (FGPP) for Tier 0 Administrators.
+
+
 
 

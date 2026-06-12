@@ -1,8 +1,8 @@
-# Hardening Requirement: Configure Account and Password Policies
+# Hardening Requirement: Configure Account and Password Policies for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
 
 ---
 
@@ -18,12 +18,15 @@
     * `Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
   * **Registry Locations**:
     * Configured via `GptTmpl.inf` (SecEdit System Access settings):
-      * `MinimumPasswordLength` = `14` (14 characters minimum)
+      * `MinimumPasswordLength` = `20` (20 characters minimum)
       * `PasswordComplexity` = `1` (Complexity enabled)
       * `PasswordHistorySize` = `24` (24 passwords remembered)
       * `MaxPasswordAge` = `0` (Password does not expire / disabled)
       * `MinPasswordAge` = `1` (1 day minimum)
       * `ClearTextPassword` = `0` (Reversible encryption disabled)
+      * `LockoutBadCount` = `5` (5 invalid logon attempts allowed)
+      * `ResetLockoutCount` = `30` (30 minutes lockout observation window)
+      * `LockoutDuration` = `30` (30 minutes lockout duration)
     * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon`
       * `ScRemoveOption` = `"1"` (REG_SZ, 1 = Lock Workstation)
       * `CachedLogonsCount` = `0` (REG_DWORD)
@@ -63,30 +66,27 @@
 ---
 
 ## Rationale
-Securing authentication parameters and account controls reduces the risk of password attacks and session hijackings:
+Securing authentication parameters and account controls reduces the risk of password attacks and session hijackings on high-value administrative endpoints:
 
-1. **Account Lockout Threshold (`LockoutBadCount`)**: Brute-force and password-spraying attacks target user accounts to discover credentials. If no lockout threshold is configured, an attacker can make infinite password attempts. Configuring a lockout threshold of 10 bad attempts mitigates online brute-force attacks.
-2. **Account Lockout Reset (`ResetLockoutCount`)**: This policy dictates how long the failed logon counter persists before resetting. Setting this to 15 minutes ensures that password attempts are restricted over time without introducing major helpdesk overhead.
-3. **Reversible Encryption (`ClearTextPassword`)**: Storing passwords using reversible encryption is equivalent to storing cleartext passwords in the directory database. This key option exists only for legacy application support (such as CHAP authentication) and must be disabled to prevent database dumping/credential recovery.
-4. **Local Password Complexity and Minimum Length (`MinimumPasswordLength`, `PasswordComplexity`)**: Setting the minimum password length to 14 characters and enabling complexity makes offline brute-force and dictionary attacks significantly harder. A length of 14 characters is the standard baseline recommended by ANSSI and CIS for general workstations.
-5. **Password History and Age (`PasswordHistorySize`, `MaxPasswordAge`, `MinPasswordAge`)**: Mandating a history of 24 prevents users from cycling between a few similar passwords. Disabling password expiration (`MaxPasswordAge = 0`) aligns with NIST SP 800-63B and modern ANSSI guidelines. Since 14-character complex passwords are sufficiently robust, forcing periodic changes is deprecated as it often leads users to write down passwords or choose predictable variations. A minimum age of 1 day prevents users from immediately bypassing the history requirement by changing their password 24 times in succession.
+1. **Stricter Lockout Threshold (`LockoutBadCount`)**: For PAWs, the lockout threshold is reduced to 5 attempts (compared to 10 for standard endpoints). This is necessary because PAWs are used exclusively by Tier 0 administrators, who are high-value targets. A stricter threshold prevents brute-force attempts on local fallback accounts.
+2. **Robust Local Password Settings (`MinimumPasswordLength`, `PasswordComplexity`)**: Local accounts on PAWs (such as fallback administrators) must use passwords of at least 20 characters with complexity enabled. This mitigates offline password cracking if database hashes or local SAM registries are dumped.
+3. **No Password Expiration (`MaxPasswordAge = 0`)**: Periodic password expiration is disabled. Setting the password expiration interval to 0 prevents users from cycling to weaker password variants or writing credentials down, as a 20-character complex password is mathematically robust against current brute-forcing capabilities.
 4. **Smart Card Removal Behavior (`ScRemoveOption`)**: In secure environments using Smart Card or token-based authentication, removing the card must automatically lock the desktop session (`1`). If disabled, a user leaving their workstation with the card removed leaves the session exposed.
 5. **Blank Passwords Limit (`LimitBlankPasswordUse`)**: Restricting the use of blank passwords to physical console logons prevents attackers from using empty-password accounts to authenticate remotely over network shares or RDP.
 6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, dramatically increasing resistance to offline brute-force and GPU-accelerated cracking attacks (like RTX 4090 models).
 7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
 8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
 9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, and requiring NTLMv2 and 128-bit encryption block legacy protocol exploitation.
+10. **Fine-Grained Password Policies (FGPP)**: While local accounts are secured on the machine, the Active Directory user accounts of the Tier 0 Administrators who logon to these PAWs must also be protected by a domain-level Fine-Grained Password Policy (FGPP / PSO) of at least 20 characters, as configured in [Enforce Fine-Grained Password Policies](../03-identities-services/enforce-fgpp.md).
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Account Lockouts**: Legitimate users who forget their passwords may lock themselves out. Standard procedures must exist for administrative reset of locked accounts.
-* **Smart Card Removal**: Users must be trained to carry their smart cards with them, which automatically locks the session. Re-authenticating requires inserting the card and entering the PIN.
-* **Reversible Encryption**: Disabling reversible encryption may break legacy applications that rely on reading cleartext password equivalents. These applications should be modernized to support modern Kerberos or SAML/OIDC federations.
-* **Minimum Password Length (14 characters)**: Users with short passwords will be forced to choose a longer password (at least 14 characters) during their next password change. Systems or service accounts with hardcoded shorter credentials must be updated before enforcing this policy.
-* **No Password Expiration (MaxPasswordAge = 0)**: Users will no longer be prompted to periodically change their passwords, reducing helpdesk calls related to expired password lockouts and discouraging the use of weak incremental password schemes.
-* **Logon Caching (CachedLogonsCount = 0)**: Workstations must have active, real-time connectivity to a Domain Controller to allow users to log on. Off-domain logons (e.g., users traveling or working offline without a pre-boot VPN connection) will fail. Remote users must use pre-boot VPN tunnels or alternate remote access architectures.
-* **PBKDF2 Iteration Overhead**: Increasing the iteration count raises the CPU processing time required during logons that use cached credentials. A value of 1954 may introduce a slight delay (typically under 1 second) during interactive logins on older hardware.
+* **Account Lockouts**: Legitimate administrators who forget their passwords may lock themselves out. Standard procedures must exist for administrative reset of locked accounts by another Tier 0 administrator.
+* **Smart Card Removal**: Administrators must be trained to carry their smart cards with them, which automatically locks the session. Re-authenticating requires inserting the card and entering the PIN.
+* **Reversible Encryption**: Disabling reversible encryption may break legacy applications that rely on reading cleartext password equivalents. These applications should not exist in the Tier 0 environment.
+* **Logon Caching (CachedLogonsCount = 0)**: PAWs must have active, real-time connectivity to a Domain Controller to allow users to log on. Off-domain logons (e.g., users traveling or working offline without a pre-boot VPN connection) will fail. Remote users must use pre-boot VPN tunnels or alternate remote access architectures.
+* **No Password Expiration**: Removing periodic password changes minimizes helpdesk tickets and stops administrators from choosing predictable increments. However, the organization must still enforce credential revocation and manual rotation protocols in the event of a suspected credential leak.
 
 ---
 
@@ -94,27 +94,27 @@ Securing authentication parameters and account controls reduces the risk of pass
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-#### Step 1: Configure Lockout and Password Policies (Domain-wide)
-These settings must be configured in the **Default Domain Policy** or a GPO linked to the Domain root to apply domain-wide:
+#### Step 1: Configure Lockout and Password Policies (Domain-wide or PAW GPO)
+These settings must be configured in a dedicated GPO linked to the PAW Organizational Unit (OU) (e.g., `GPO_Hardening_PAWs`):
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit the **Default Domain Policy**.
+2. Edit the PAW GPO.
 3. Navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies`
 4. Configure the settings:
    * **Account Lockout Policy**:
-     * **Account lockout threshold**: `10` invalid logon attempts
-     * **Reset account lockout counter after**: `15` minutes
-     * **Account lockout duration**: `15` minutes (Must be greater than or equal to reset time)
+     * **Account lockout threshold**: `5` invalid logon attempts
+     * **Reset account lockout counter after**: `30` minutes
+     * **Account lockout duration**: `30` minutes
    * **Password Policy**:
      * **Enforce password history**: `24` passwords remembered
      * **Maximum password age**: `0` days (never expire)
      * **Minimum password age**: `1` day
-     * **Minimum password length**: `14` characters
+     * **Minimum password length**: `20` characters
      * **Password must meet complexity requirements**: `Enabled`
      * **Store passwords using reversible encryption**: `Disabled`
 
 #### Step 2: Configure Local Security Options
-In the endpoints GPO (e.g., `GPO_Hardening_Workstations`), navigate to:
+In the PAW GPO, navigate to:
 `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
 * **Policy**: `Interactive logon: Smart card removal behavior` -> Set to **Lock Workstation** (value 1)
 * **Policy**: `Accounts: Limit local account use of blank passwords to console logon only` -> Set to **Enabled** (value 1)
@@ -142,7 +142,7 @@ Navigate to:
 
 #### Step 4: Configure PBKDF2 Iteration Count via GPO Preferences
 Since the PBKDF2 iteration count setting is not exposed in standard ADMX templates, deploy it via Registry GPO Preferences:
-1. Within the endpoints GPO, navigate to:
+1. Within the PAW GPO, navigate to:
    `Computer Configuration\Preferences\Windows Settings\Registry`
 2. Right-click **Registry**, select **New** -> **Registry Item**.
 3. Configure:
@@ -157,15 +157,15 @@ Since the PBKDF2 iteration count setting is not exposed in standard ADMX templat
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Enforce the local security settings and SecEdit configuration locally.
+Use this method to apply the settings locally (for testing or standalone PAW systems) or if the control is not manageable via standard GPO GUI interfaces.
 
-[Download Script: Set-AccountPolicies.ps1](implementation_scripts/Set-AccountPolicies.ps1)
+[Download Script: Set-PAWAccountPolicies.ps1](implementation_scripts/Set-PAWAccountPolicies.ps1)
 
 ```powershell
-# Set-AccountPolicies.ps1
-# Configures local account lockout, password parameters, smart card removal behavior, blank password blocks, Hello for Business, Microsoft accounts, secure channel options, and NTLM session security options.
+# Set-PAWAccountPolicies.ps1
+# Configures local account lockout, password parameters, smart card removal behavior, blank password blocks, Hello for Business, Microsoft accounts, secure channel options, and NTLM session security options on PAWs.
 
-Write-Host "Applying account and password policies..." -ForegroundColor Cyan
+Write-Host "Applying PAW account and password policies..." -ForegroundColor Cyan
 
 # 1. Enforce local security options via Registry
 $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
@@ -269,12 +269,12 @@ Set-ItemProperty -Path $MsvPath -Name "NTLMMinServerSec" -Value 537395200 -Type 
 Write-Host "[+] Network authentication security and NTLM session settings applied." -ForegroundColor Green
 
 # 2. Enforce Account Lockout and Password Policy via secedit
-$SecTempDir = Join-Path $env:TEMP "AccountSecurityTemplates"
+$SecTempDir = Join-Path $env:TEMP "PAWAccountSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
     New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
 }
 
-$CfgFile = Join-Path $SecTempDir "account_sec.cfg"
+$CfgFile = Join-Path $SecTempDir "paw_account_sec.cfg"
 $LogFile = Join-Path $SecTempDir "secedit.log"
 $DbFile = Join-Path $SecTempDir "secedit.sdb"
 
@@ -297,11 +297,11 @@ $NewLines = @()
 $InSystemAccess = $false
 
 $AccountSettings = @{
-    "LockoutBadCount"       = 10
-    "ResetLockoutCount"     = 15
-    "LockoutDuration"       = 15
+    "LockoutBadCount"       = 5
+    "ResetLockoutCount"     = 30
+    "LockoutDuration"       = 30
     "ClearTextPassword"     = 0
-    "MinimumPasswordLength" = 14
+    "MinimumPasswordLength" = 20
     "PasswordComplexity"    = 1
     "PasswordHistorySize"   = 24
     "MaxPasswordAge"        = 0
@@ -361,14 +361,15 @@ if ($Process.ExitCode -eq 0) {
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 ```
 
-*To audit local account and password policies:*
-[Download Script: Test-AccountPolicies.ps1](audit_scripts/Test-AccountPolicies.ps1)
+*To verify the settings have been applied:*
+
+[Download Script: Test-PAWAccountPolicies.ps1](audit_scripts/Test-PAWAccountPolicies.ps1)
 
 ```powershell
-# Test-AccountPolicies.ps1
-# Checks local registry and SecEdit settings for account lockout, password options, smart card removal behavior, PIN parameters, Hello for Business, Microsoft account settings, secure channel properties, and NTLM session configuration.
+# Test-PAWAccountPolicies.ps1
+# Checks local registry and SecEdit settings for account lockout, password options, smart card removal behavior, PIN parameters, Hello for Business, Microsoft account settings, secure channel properties, and NTLM session configuration on PAWs.
 
-Write-Host "--- Auditing Account and Password Policies ---" -ForegroundColor Cyan
+Write-Host "--- Auditing PAW Account and Password Policies ---" -ForegroundColor Cyan
 
 $Vulnerable = $false
 
@@ -435,12 +436,12 @@ Test-RegistryValue $MsvPath "NTLMMinClientSec" 537395200
 Test-RegistryValue $MsvPath "NTLMMinServerSec" 537395200
 
 # 2. Audit SecEdit Settings
-$SecTempDir = Join-Path $env:TEMP "AccountAuditSecurityTemplates"
+$SecTempDir = Join-Path $env:TEMP "PAWAccountAuditSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
     New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
 }
 
-$CfgFile = Join-Path $SecTempDir "account_audit.cfg"
+$CfgFile = Join-Path $SecTempDir "paw_account_audit.cfg"
 $Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
 if ($Process.ExitCode -ne 0) {
     Write-Error "Failed to export current database."
@@ -449,11 +450,11 @@ if ($Process.ExitCode -ne 0) {
 
 $ConfigContent = Get-Content -Path $CfgFile -Raw
 $AccountSettings = @{
-    "LockoutBadCount"       = 10
-    "ResetLockoutCount"     = 15
-    "LockoutDuration"       = 15
+    "LockoutBadCount"       = 5
+    "ResetLockoutCount"     = 30
+    "LockoutDuration"       = 30
     "ClearTextPassword"     = 0
-    "MinimumPasswordLength" = 14
+    "MinimumPasswordLength" = 20
     "PasswordComplexity"    = 1
     "PasswordHistorySize"   = 24
     "MaxPasswordAge"        = 0
@@ -489,6 +490,6 @@ if ($Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10/11 Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 2.3.7.3 (Accounts: Limit local account use of blank passwords...), Section 2.3.9.5 (Interactive logon: Smart card removal behavior), Section 2.3.10.2 (Microsoft network client: Send unencrypted password), Section 2.3.11.8 (Network access: Allow anonymous SID/Name translation), Section 2.3.11.10 (Network security: Allow LocalSystem NULL session fallback)
 * **ANSSI AD Hardening Guide**: Recommendations on password complexity, reversible encryption blocks, lockout management, and domain member secure channels.
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 2.3.7.3 (Accounts: Limit local account use of blank passwords...), Section 2.3.9.5 (Interactive logon: Smart card removal behavior), Section 2.3.10.2 (Microsoft network client: Send unencrypted password), Section 2.3.11.8 (Network access: Allow anonymous SID/Name translation), Section 2.3.11.10 (Network security: Allow LocalSystem NULL session fallback).
 * **DoD Windows 11 Computer STIG v2r6**: Various account policy, PIN complexity, Windows Hello for Business, Microsoft account restrictions, WDigest disabled, and Netlogon secure channel parameters.

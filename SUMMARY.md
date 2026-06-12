@@ -95,7 +95,9 @@
     * [Enable VBS and Credential Guard for PAWs](07-paws/enable-vbs-credential-guard.md)
     * [Harden DMA and Physical Security for PAWs](07-paws/harden-dma-and-physical-security.md)
     * [Enable WDAC Driver Blocklist](07-paws/enable-wdac-driver-blocklist.md)
+    * [Configure Account and Password Policies for PAWs](07-paws/configure-account-policies.md)
 ## Module 8: Endpoint Hardening
+
 * [Module 8: Endpoint Hardening](08-endpoints/README.md)
     * [Harden Network and Name Resolution](08-endpoints/harden-network-and-name-resolution.md)
     * [Configure User Account Control (UAC) Policies](08-endpoints/configure-uac-policies.md)

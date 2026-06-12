@@ -1,7 +1,7 @@
-# Test-AccountPolicies.ps1
-# Checks local registry and SecEdit settings for account lockout, password options, smart card removal behavior, PIN parameters, Hello for Business, Microsoft account settings, secure channel properties, and NTLM session configuration.
+# Test-PAWAccountPolicies.ps1
+# Checks local registry and SecEdit settings for account lockout, password options, smart card removal behavior, PIN parameters, Hello for Business, Microsoft account settings, secure channel properties, and NTLM session configuration on PAWs.
 
-Write-Host "--- Auditing Account and Password Policies ---" -ForegroundColor Cyan
+Write-Host "--- Auditing PAW Account and Password Policies ---" -ForegroundColor Cyan
 
 $Vulnerable = $false
 
@@ -68,12 +68,12 @@ Test-RegistryValue $MsvPath "NTLMMinClientSec" 537395200
 Test-RegistryValue $MsvPath "NTLMMinServerSec" 537395200
 
 # 2. Audit SecEdit Settings
-$SecTempDir = Join-Path $env:TEMP "AccountAuditSecurityTemplates"
+$SecTempDir = Join-Path $env:TEMP "PAWAccountAuditSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
     New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
 }
 
-$CfgFile = Join-Path $SecTempDir "account_audit.cfg"
+$CfgFile = Join-Path $SecTempDir "paw_account_audit.cfg"
 $Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
 if ($Process.ExitCode -ne 0) {
     Write-Error "Failed to export current database."
@@ -82,11 +82,11 @@ if ($Process.ExitCode -ne 0) {
 
 $ConfigContent = Get-Content -Path $CfgFile -Raw
 $AccountSettings = @{
-    "LockoutBadCount"       = 10
-    "ResetLockoutCount"     = 15
-    "LockoutDuration"       = 15
+    "LockoutBadCount"       = 5
+    "ResetLockoutCount"     = 30
+    "LockoutDuration"       = 30
     "ClearTextPassword"     = 0
-    "MinimumPasswordLength" = 14
+    "MinimumPasswordLength" = 20
     "PasswordComplexity"    = 1
     "PasswordHistorySize"   = 24
     "MaxPasswordAge"        = 0

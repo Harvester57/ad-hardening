@@ -1,7 +1,7 @@
-# Set-AccountPolicies.ps1
-# Configures local account lockout, password parameters, smart card removal behavior, blank password blocks, Hello for Business, Microsoft accounts, secure channel options, and NTLM session security options.
+# Set-PAWAccountPolicies.ps1
+# Configures local account lockout, password parameters, smart card removal behavior, blank password blocks, Hello for Business, Microsoft accounts, secure channel options, and NTLM session security options on PAWs.
 
-Write-Host "Applying account and password policies..." -ForegroundColor Cyan
+Write-Host "Applying PAW account and password policies..." -ForegroundColor Cyan
 
 # 1. Enforce local security options via Registry
 $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
@@ -105,12 +105,12 @@ Set-ItemProperty -Path $MsvPath -Name "NTLMMinServerSec" -Value 537395200 -Type 
 Write-Host "[+] Network authentication security and NTLM session settings applied." -ForegroundColor Green
 
 # 2. Enforce Account Lockout and Password Policy via secedit
-$SecTempDir = Join-Path $env:TEMP "AccountSecurityTemplates"
+$SecTempDir = Join-Path $env:TEMP "PAWAccountSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
     New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
 }
 
-$CfgFile = Join-Path $SecTempDir "account_sec.cfg"
+$CfgFile = Join-Path $SecTempDir "paw_account_sec.cfg"
 $LogFile = Join-Path $SecTempDir "secedit.log"
 $DbFile = Join-Path $SecTempDir "secedit.sdb"
 
@@ -133,11 +133,11 @@ $NewLines = @()
 $InSystemAccess = $false
 
 $AccountSettings = @{
-    "LockoutBadCount"       = 10
-    "ResetLockoutCount"     = 15
-    "LockoutDuration"       = 15
+    "LockoutBadCount"       = 5
+    "ResetLockoutCount"     = 30
+    "LockoutDuration"       = 30
     "ClearTextPassword"     = 0
-    "MinimumPasswordLength" = 14
+    "MinimumPasswordLength" = 20
     "PasswordComplexity"    = 1
     "PasswordHistorySize"   = 24
     "MaxPasswordAge"        = 0
