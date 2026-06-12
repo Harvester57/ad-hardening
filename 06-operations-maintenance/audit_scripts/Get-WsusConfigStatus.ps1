@@ -2,7 +2,6 @@
 # Description: Audits local WSUS configuration settings.
 
 $WsusRegPath = "HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate"
-$UpdateAuPath = "HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate\AU"
 
 Write-Host "Checking Windows Update registry parameters..." -ForegroundColor Cyan
 

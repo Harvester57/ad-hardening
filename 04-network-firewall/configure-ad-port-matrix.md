@@ -139,14 +139,14 @@ Write-Host "Auditing local network firewall status..." -ForegroundColor Cyan
 $Profiles = Get-NetFirewallProfile
 $AllProfilesSecure = $true
 
-foreach ($Profile in $Profiles) {
-    $Enabled = $Profile.Enabled
-    $InAction = $Profile.DefaultInboundAction
+foreach ($FwProfile in $Profiles) {
+    $Enabled = $FwProfile.Enabled
+    $InAction = $FwProfile.DefaultInboundAction
     
     if ($Enabled -eq $true -and $InAction -eq "Block") {
-        Write-Host "Profile: $($Profile.Name) | Enabled: True | InboundAction: Block" -ForegroundColor Green
+        Write-Host "Profile: $($FwProfile.Name) | Enabled: True | InboundAction: Block" -ForegroundColor Green
     } else {
-        Write-Host "Profile: $($Profile.Name) | Enabled: $($Enabled) | InboundAction: $($InAction) (INSECURE)" -ForegroundColor Red
+        Write-Host "Profile: $($FwProfile.Name) | Enabled: $($Enabled) | InboundAction: $($InAction) (INSECURE)" -ForegroundColor Red
         $AllProfilesSecure = $false
     }
 }

@@ -51,7 +51,11 @@ if ($Volume.ProtectionStatus -eq "Off") {
     
     # We must first define a temporary PIN to enable startup PIN protection programmatically
     # The administrator must change this PIN immediately on next reboot
-    $SecurePin = ConvertTo-SecureString "P@ssw0rdPIN1" -AsPlainText -Force
+    $TempPin = "P@ssw0rdPIN1"
+    $SecurePin = New-Object System.Security.SecureString
+    foreach ($Char in $TempPin.ToCharArray()) {
+        $SecurePin.AppendChar($Char)
+    }
     
     Enable-BitLocker -MountPoint "C:" `
         -EncryptionMethod XtsAes256 `

@@ -18,9 +18,9 @@ foreach ($file in $mdFiles) {
     # Matches [text](link) where link doesn't start with http, file, or mailto
     # Group 1: text, Group 2: link, Group 3: anchor (if any)
     $linkRegex = '\[([^\]]+)\]\(([^)#:\s]+)(#[^)]*)?\)'
-    $matches = [regex]::Matches($content, $linkRegex)
+    $linkMatches = [regex]::Matches($content, $linkRegex)
     
-    foreach ($match in $matches) {
+    foreach ($match in $linkMatches) {
         $linkPath = $match.Groups[2].Value
         # Decode URL-encoded characters (like %20)
         $decodedLinkPath = [System.Uri]::UnescapeDataString($linkPath)
@@ -49,7 +49,7 @@ foreach ($file in $mdFiles) {
         # Parse PowerShell code syntax
         $tokens = $null
         $parseErrors = $null
-        $ast = [System.Management.Automation.Language.Parser]::ParseInput($code, [ref]$tokens, [ref]$parseErrors)
+        $null = [System.Management.Automation.Language.Parser]::ParseInput($code, [ref]$tokens, [ref]$parseErrors)
         
         if ($parseErrors) {
             Write-Host "  PowerShell Code Block #$blockIndex syntax errors:" -ForegroundColor Red

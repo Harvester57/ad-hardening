@@ -126,8 +126,8 @@ if (-not $SysmonService) {
 
 # 2. Configure Service Failure Recovery options via sc.exe
 Write-Host "[+] Configuring service failure recovery actions for Sysmon..." -ForegroundColor Gray
-$Args = "failure Sysmon actions= restart/60000/restart/60000/restart/60000 reset= 86400"
-$Process = Start-Process sc.exe -ArgumentList $Args -Wait -NoNewWindow -PassThru
+$ScArgs = "failure Sysmon actions= restart/60000/restart/60000/restart/60000 reset= 86400"
+$Process = Start-Process sc.exe -ArgumentList $ScArgs -Wait -NoNewWindow -PassThru
 if ($Process.ExitCode -eq 0) {
     Write-Host "    Sysmon service recovery actions successfully set to auto-restart." -ForegroundColor Green
 } else {

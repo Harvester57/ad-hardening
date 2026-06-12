@@ -117,9 +117,9 @@ Write-Host "Checking DFSR replication event logs..." -ForegroundColor Cyan
 $DfsrEvents = Get-WinEvent -LogName "DFS Replication" -MaxEvents 10 -ErrorAction SilentlyContinue
 
 if ($DfsrEvents) {
-    foreach ($Event in $DfsrEvents) {
-        $EventColor = if ($Event.LevelDisplayName -eq "Error") { "Red" } else { "White" }
-        Write-Host "[$($Event.TimeCreated)] [$($Event.LevelDisplayName)] ID: $($Event.Id) - $($Event.Message)" -ForegroundColor $EventColor
+    foreach ($DfsrEvent in $DfsrEvents) {
+        $EventColor = if ($DfsrEvent.LevelDisplayName -eq "Error") { "Red" } else { "White" }
+        Write-Host "[$($DfsrEvent.TimeCreated)] [$($DfsrEvent.LevelDisplayName)] ID: $($DfsrEvent.Id) - $($DfsrEvent.Message)" -ForegroundColor $EventColor
     }
 } else {
     Write-Host "[+] No recent DFSR events or errors detected." -ForegroundColor Green

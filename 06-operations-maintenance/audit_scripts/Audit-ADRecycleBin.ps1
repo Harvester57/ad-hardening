@@ -7,7 +7,6 @@ Write-Host "--- Auditing Active Directory Recycle Bin ---" -ForegroundColor Cyan
 
 try {
     $Forest = Get-ADForest -ErrorAction Stop
-    $RecycleBinFeature = Get-ADOptionalFeature -Filter "Name -eq 'Recycle Bin Feature'" -ErrorAction Stop
     $EnabledFeatures = Get-ADOptionalFeature -Filter "Name -eq 'Recycle Bin Feature'" -Properties EnabledScopes | Select-Object -ExpandProperty EnabledScopes
     
     if ($EnabledFeatures) {

@@ -18,7 +18,11 @@ Write-Host "Current KRBTGT Password Last Set: $($Krbtgt.PasswordLastSet)" -Foreg
 $Length = 128
 $Chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-="
 $RandomPassword = -join (1..$Length | ForEach-Object { $Chars[(Get-Random -Maximum $Chars.Length)] })
-$SecurePassword = ConvertTo-SecureString $RandomPassword -AsPlainText -Force
+
+$SecurePassword = New-Object System.Security.SecureString
+foreach ($Char in $RandomPassword.ToCharArray()) {
+    $SecurePassword.AppendChar($Char)
+}
 
 # 3. Apply the password change
 try {

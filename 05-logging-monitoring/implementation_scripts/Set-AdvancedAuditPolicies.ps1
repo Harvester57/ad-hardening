@@ -45,8 +45,8 @@ foreach ($P in $Policies) {
     $Succ = $P.Success
     $Fail = $P.Failure
     
-    $Args = "/set /subcategory:`"$Sub`" /success:$Succ /failure:$fail"
-    $Process = Start-Process auditpol -ArgumentList $Args -Wait -NoNewWindow -PassThru
+    $AuditpolArgs = "/set /subcategory:`"$Sub`" /success:$Succ /failure:$fail"
+    $Process = Start-Process auditpol -ArgumentList $AuditpolArgs -Wait -NoNewWindow -PassThru
     if ($Process.ExitCode -eq 0) {
         Write-Host "    Audit policy '$($Sub)' set to Success:$($Succ) / Failure:$($Fail)." -ForegroundColor Green
     } else {
