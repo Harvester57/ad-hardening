@@ -13,7 +13,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: d3bf397 | Generated: June 12, 2026</span>
+      <span>Commit: 9d0b21a | Generated: June 12, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -9470,6 +9470,16 @@ if ($NonCompliantCount -eq 0) {
   * **Protocols**: `HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols`
   * **Cipher Suite Order**: `Computer Configuration\Administrative Templates\Network\SSL Configuration Settings` -> **SSL Cipher Suite Order** (Registry: `HKLM:\SOFTWARE\Policies\Microsoft\Cryptography\Configuration\SSL\00010002` -> `Functions`)
   * **ECC Curve Order**: `Computer Configuration\Administrative Templates\Network\SSL Configuration Settings` -> **ECC Curve Order** (Registry: `HKLM:\SOFTWARE\Policies\Microsoft\Cryptography\Configuration\SSL\00010002` -> `EccCurves`)
+  * **.NET strong cryptography support**:
+    * `HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727` and `v4.0.30319` (and Wow6432Node equivalents)
+      * `SchUseStrongCrypto` = `1` (REG_DWORD)
+      * `SystemDefaultTlsVersions` = `1` (REG_DWORD)
+  * **Disable .NET strong-name bypass**:
+    * `HKLM:\SOFTWARE\Microsoft\.NETFramework` (and Wow6432Node equivalent)
+      * `AllowStrongNameBypass` = `0` (REG_DWORD)
+  * **WinHTTP TLS 1.2 support**:
+    * `HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp` (and Wow6432Node equivalent)
+      * `DefaultSecureProtocols` = `2048` (REG_DWORD, 0x00000800)
 
 ---
 
@@ -9479,6 +9489,8 @@ Legacy versions of SSL (2.0 and 3.0) and TLS (1.0 and 1.1) are cryptographically
 
 In addition to disabling insecure protocol versions, the TLS cipher suites and Elliptic Curves must be restricted to modern, collision-resistant options. CBC (Cipher Block Chaining) mode and RC4 ciphers are prone to padding oracle attacks. Restricting configurations to AES-GCM (Galois/Counter Mode) authenticated encryption suites combined with strong Elliptic Curve Diffie-Hellman (ECDHE) curves (such as Curve25519 and NIST P-384) guarantees confidentiality, integrity, and perfect forward secrecy (PFS).
 
+By default, legacy .NET Framework applications (targeting .NET 3.5 or earlier) and WinHTTP-based APIs do not enforce TLS 1.2 or TLS 1.3, potentially defaulting to weak protocols like SSL 3.0 or TLS 1.0. Enabling `SchUseStrongCrypto` and `SystemDefaultTlsVersions` forces .NET to use the system default secure TLS versions. Restricting `DefaultSecureProtocols` forces WinHTTP clients to use TLS 1.2. Disabling the strong-name bypass (`AllowStrongNameBypass` = `0`) prevents full-trust assemblies from skipping signature validation, protecting the .NET runtime from loading tampered assemblies.
+
 ---
 
 <a id="04-network-firewall-harden-tls-configuration-md-legacy-impact-compatibility"></a>
@@ -9486,6 +9498,7 @@ In addition to disabling insecure protocol versions, the TLS cipher suites and E
 * **Legacy Clients**: Operating systems prior to Windows 7/Server 2008 R2 (without updates enabling TLS 1.2) or outdated third-party management agents, appliances, and legacy printers will fail to establish secure connections (LDAPS, HTTPS, RDP, WinRM) with hardened hosts.
 * **Domain Controller Reachability**: Active Directory replication between DCs remains unaffected as it relies on RPC (Kerberos) rather than TLS. However, client-facing services such as secure LDAP (LDAPS) require TLS; clients must support TLS 1.2.
 * **Administrative Access**: Admin connections (such as WinRM over HTTPS or RDP) will require TLS 1.2. Administrative machines (PAWs) must be configured to support the same cipher suites.
+* **.NET Framework Applications**: Forcing strong cryptography may break communication with legacy servers or web services that do not support TLS 1.2. Applications targeting .NET 3.5 or older should be tested for compatibility.
 
 ---
 
@@ -9528,6 +9541,28 @@ Since Schannel protocol versions (disabling TLS 1.0/1.1 and enabling TLS 1.2/1.3
      * Value Name: `DisabledByDefault` | Type: `REG_DWORD` | Value Data: `0`
 
 *Note: Systems must be rebooted for Schannel protocol and cipher settings to take effect.*
+
+<a id="04-network-firewall-harden-tls-configuration-md-3-deploy-net-and-winhttp-registry-settings-via-gpo-preferences"></a>
+#### 3. Deploy .NET and WinHTTP Registry Settings via GPO Preferences
+1. Within the same GPO, navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+2. Configure the following registry entries (as Registry Items):
+   * **.NET 4.0 (32-bit & 64-bit)**:
+     * Key: `HKLM\SOFTWARE\Microsoft\.NETFramework\v4.0.30319` | Value: `SchUseStrongCrypto` = `1` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Microsoft\.NETFramework\v4.0.30319` | Value: `SystemDefaultTlsVersions` = `1` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319` | Value: `SchUseStrongCrypto` = `1` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319` | Value: `SystemDefaultTlsVersions` = `1` (REG_DWORD)
+   * **.NET 2.0 (32-bit & 64-bit)**:
+     * Key: `HKLM\SOFTWARE\Microsoft\.NETFramework\v2.0.50727` | Value: `SchUseStrongCrypto` = `1` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Microsoft\.NETFramework\v2.0.50727` | Value: `SystemDefaultTlsVersions` = `1` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727` | Value: `SchUseStrongCrypto` = `1` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727` | Value: `SystemDefaultTlsVersions` = `1` (REG_DWORD)
+   * **.NET Strong-Name Bypass**:
+     * Key: `HKLM\SOFTWARE\Microsoft\.NETFramework` | Value: `AllowStrongNameBypass` = `0` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Wow6432Node\Microsoft\.NETFramework` | Value: `AllowStrongNameBypass` = `0` (REG_DWORD)
+   * **WinHTTP (32-bit & 64-bit)**:
+     * Key: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp` | Value: `DefaultSecureProtocols` = `2048` (REG_DWORD)
+     * Key: `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp` | Value: `DefaultSecureProtocols` = `2048` (REG_DWORD)
 
 ---
 
@@ -9614,6 +9649,33 @@ $EccCurves = @(
 Set-ItemProperty -Path $SSLConfigPath -Name "Functions" -Value $CipherSuites -Type MultiString -Force | Out-Null
 Set-ItemProperty -Path $SSLConfigPath -Name "EccCurves" -Value $EccCurves -Type MultiString -Force | Out-Null
 
+<a id="04-network-firewall-harden-tls-configuration-md-3-configure-net-strong-cryptography-strong-name-bypass-and-winhttp-tls"></a>
+# 3. Configure .NET strong cryptography, strong-name bypass, and WinHTTP TLS
+$RegistryTargets = @(
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727"; Name = "SchUseStrongCrypto"; Value = 1; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727"; Name = "SystemDefaultTlsVersions"; Value = 1; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727"; Name = "SchUseStrongCrypto"; Value = 1; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727"; Name = "SystemDefaultTlsVersions"; Value = 1; Type = "DWord" }
+    
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319"; Name = "SchUseStrongCrypto"; Value = 1; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319"; Name = "SystemDefaultTlsVersions"; Value = 1; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319"; Name = "SchUseStrongCrypto"; Value = 1; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319"; Name = "SystemDefaultTlsVersions"; Value = 1; Type = "DWord" }
+    
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework"; Name = "AllowStrongNameBypass"; Value = 0; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework"; Name = "AllowStrongNameBypass"; Value = 0; Type = "DWord" }
+    
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp"; Name = "DefaultSecureProtocols"; Value = 2048; Type = "DWord" }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp"; Name = "DefaultSecureProtocols"; Value = 2048; Type = "DWord" }
+)
+
+foreach ($target in $RegistryTargets) {
+    if (-not (Test-Path $target.Path)) {
+        New-Item -Path $target.Path -Force | Out-Null
+    }
+    Set-ItemProperty -Path $target.Path -Name $target.Name -Value $target.Value -Type $target.Type -Force | Out-Null
+}
+
 Write-Host "Schannel configuration applied. A system reboot is required to apply changes." -ForegroundColor Green
 ```
 
@@ -9686,6 +9748,41 @@ if (Test-Path $SSLConfigPath) {
 } else {
     Write-Host "    - Custom SSL configuration policies are not configured (Non-Compliant)." -ForegroundColor Red
     $NonCompliantCount++
+}
+
+<a id="04-network-firewall-harden-tls-configuration-md-3-audit-net-and-winhttp-registry-configurations"></a>
+# 3. Audit .NET and WinHTTP registry configurations
+$RegistryAudits = @(
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727"; Name = "SchUseStrongCrypto"; Value = 1 }
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v2.0.50727"; Name = "SystemDefaultTlsVersions"; Value = 1 }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727"; Name = "SchUseStrongCrypto"; Value = 1 }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727"; Name = "SystemDefaultTlsVersions"; Value = 1 }
+    
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319"; Name = "SchUseStrongCrypto"; Value = 1 }
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319"; Name = "SystemDefaultTlsVersions"; Value = 1 }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319"; Name = "SchUseStrongCrypto"; Value = 1 }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319"; Name = "SystemDefaultTlsVersions"; Value = 1 }
+    
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\.NETFramework"; Name = "AllowStrongNameBypass"; Value = 0 }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework"; Name = "AllowStrongNameBypass"; Value = 0 }
+    
+    @{ Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp"; Name = "DefaultSecureProtocols"; Value = 2048 }
+    @{ Path = "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp"; Name = "DefaultSecureProtocols"; Value = 2048 }
+)
+
+foreach ($target in $RegistryAudits) {
+    if (Test-Path $target.Path) {
+        $val = Get-ItemPropertyValue -Path $target.Path -Name $target.Name -ErrorAction SilentlyContinue
+        if ($val -eq $target.Value) {
+            Write-Host "    - Registry Setting: $($target.Path)\$($target.Name) is Compliant." -ForegroundColor Green
+        } else {
+            Write-Host "    - Registry Setting: $($target.Path)\$($target.Name) is Non-Compliant (Actual: '$val', Expected: '$($target.Value)')." -ForegroundColor Red
+            $NonCompliantCount++
+        }
+    } else {
+        Write-Host "    - Registry Key: $($target.Path) does not exist (Non-Compliant)." -ForegroundColor Red
+        $NonCompliantCount++
+    }
 }
 
 if ($NonCompliantCount -eq 0) {
@@ -10551,7 +10648,9 @@ This directory contains configuration policies for security log auditing, PowerS
 * **GPO Path / Registry Location**:
   * **Policy Override**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings` (Value: Enabled)
   * **Advanced Policies**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
-  * **Registry Location**: `HKLM\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy` (Value: 1)
+  * **Registry Locations**:
+    * `HKLM\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy` (Value: 1)
+    * `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\LogLevel` (Value: 0 [Disabled debug events])
 
 ---
 
@@ -10564,6 +10663,7 @@ Enforcing advanced auditing policies provides the following security coverages:
 2. **Account and Privilege Monitoring**: Audit User Account Management (Event IDs 4720, 4722, 4724) tracks creation and password resets. Audit Security Group Management (Event IDs 4728, 4732, 4756) detects unauthorized membership changes in highly privileged groups like Domain Admins.
 3. **Execution and Directory Access**: Process Creation (Event ID 4688) tracks executing binaries. Directory Service Changes (Event ID 5136) and Directory Service Access (Event ID 4662) log Active Directory object modifications and querying to discover reconnaissance activity.
 4. **Logon and Tampering Auditing**: Logon and Special Logon auditing (Event IDs 4624, 4625, 4672) tracks remote access, elevation events, and suspicious logons. Policy Change (Event ID 4719) detects when auditing configurations are disabled or altered by adversaries trying to hide their footprints.
+5. **Kerberos Debug Events Logging (`LogLevel`)**: By default, verbose debug logging for Kerberos protocol operations is disabled. Enforcing `LogLevel` = `0` under the Kerberos Parameters registry path prevents verbose debug events from flooding the System Event log in production. Logging of Kerberos debug events (value `1`) should only be enabled temporarily for troubleshooting purposes. Standard security auditing is handled by advanced subcategories like `Audit Kerberos Authentication Service` instead.
 
 ---
 
@@ -10571,6 +10671,7 @@ Enforcing advanced auditing policies provides the following security coverages:
 ## Legacy Impact & Compatibility
 * **Event Log Volume**: Enabling these detailed policies will increase log volume. The local Security Event Log size must be sized appropriately (minimum 1GB on Domain Controllers, 512MB on Member Servers and Workstations) to prevent logs from rotating out too quickly.
 * **Override Enforcement**: Forcing advanced policies to override legacy settings ensures that older group policies do not accidentally weaken system visibility. Ensure that this GPO setting is applied across all organizational units.
+* **Kerberos Events Logging**: Disabling verbose Kerberos debug logging ensures system performance and prevents event log exhaustion. It has no negative impact on standard Kerberos ticket generation or authentication operations.
 
 ---
 
@@ -10608,20 +10709,39 @@ Enforcing advanced auditing policies provides the following security coverages:
 | **DS Access** | `Audit Directory Service Changes` | Success and Failure |
 | **DS Access** | `Audit Directory Service Access` | Success and Failure |
 | **Logon/Logoff** | `Audit Logon` | Success and Failure |
+| **Logon/Logoff** | `Audit Logoff` | Success |
 | **Logon/Logoff** | `Audit Special Logon` | Success |
 | **Logon/Logoff** | `Audit Account Lockout` | Success and Failure |
 | **Logon/Logoff** | `Audit Other Logon/Logoff Events` | Success and Failure |
+| **Object Access** | `Audit Handle Manipulation` | Success and Failure |
+| **Object Access** | `Audit Registry` | Success and Failure |
 | **Object Access** | `Audit Detailed File Share` | Failure |
 | **Object Access** | `Audit Other Object Access Events` | Success and Failure |
 | **Policy Change** | `Audit Policy Change` | Success and Failure |
 | **Policy Change** | `Audit Authentication Policy Change` | Success |
+| **Policy Change** | `Audit Authorization Policy Change` | Success |
 | **Policy Change** | `Audit MPSSVC Rule-Level Policy Change` | Success and Failure |
 | **Policy Change** | `Audit Other Policy Change Events` | Failure |
 | **Privilege Use** | `Audit Sensitive Privilege Use` | Success and Failure |
+| **System** | `Audit IPsec Driver` | Failure |
 | **System** | `Audit Other System Events` | Success and Failure |
 | **System** | `Audit Security State Change` | Success |
 | **System** | `Audit Security System Extension` | Success |
 | **System** | `Audit System Integrity` | Success and Failure |
+
+<a id="05-logging-monitoring-configure-advanced-audit-policies-md-3-deploy-kerberos-loglevel-registry-settings-via-gpo-preferences"></a>
+#### 3. Deploy Kerberos LogLevel Registry Settings via GPO Preferences
+To ensure verbose Kerberos debug logging is disabled in production, deploy the setting via Registry GPO Preferences:
+1. Within the logging GPO, navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+2. Right-click **Registry**, select **New** -> **Registry Item**.
+3. Configure:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters`
+   * **Value name**: `LogLevel`
+   * **Value type**: `REG_DWORD`
+   * **Value data**: `0` (Decimal)
 
 ---
 
@@ -10650,6 +10770,15 @@ if (-not (Test-Path $LsaPath)) {
 Set-ItemProperty -Path $LsaPath -Name "SCENoApplyLegacyAuditPolicy" -Value 1 -Type DWord
 Write-Host "    Force advanced audit policy override enabled." -ForegroundColor Green
 
+<a id="05-logging-monitoring-configure-advanced-audit-policies-md-enforce-kerberos-debug-logging-disabled-loglevel-0"></a>
+# Enforce Kerberos Debug Logging disabled (LogLevel = 0)
+$KerbPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+if (-not (Test-Path $KerbPath)) {
+    New-Item -Path $KerbPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KerbPath -Name "LogLevel" -Value 0 -Type DWord -Force
+Write-Host "    Kerberos debug events logging disabled." -ForegroundColor Green
+
 <a id="05-logging-monitoring-configure-advanced-audit-policies-md-2-configure-advanced-audit-policy-subcategories"></a>
 # 2. Configure Advanced Audit Policy subcategories
 $Policies = @(
@@ -10663,16 +10792,21 @@ $Policies = @(
     @{ Subcategory = "Directory Service Changes"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Directory Service Access"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Logon"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "Logoff"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Special Logon"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Policy Change"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Account Lockout"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Other Logon/Logoff Events"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "Handle Manipulation"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "Registry"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Detailed File Share"; Success = "disable"; Failure = "enable" },
     @{ Subcategory = "Other Object Access Events"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Authentication Policy Change"; Success = "enable"; Failure = "disable" },
+    @{ Subcategory = "Authorization Policy Change"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "MPSSVC Rule-Level Policy Change"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Other Policy Change Events"; Success = "disable"; Failure = "enable" },
     @{ Subcategory = "Sensitive Privilege Use"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "IPsec Driver"; Success = "disable"; Failure = "enable" },
     @{ Subcategory = "Other System Events"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Security State Change"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Security System Extension"; Success = "enable"; Failure = "disable" },
@@ -10723,6 +10857,18 @@ if ($OverrideSetting -eq 1) {
 }
 Write-Host "    - Force Advanced Audit Policy Override: $($OverrideSetting) (Required = 1)" -ForegroundColor $OverrideColor
 
+<a id="05-logging-monitoring-configure-advanced-audit-policies-md-audit-kerberos-loglevel"></a>
+# Audit Kerberos LogLevel
+$KerbPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+if (Test-Path $KerbPath) {
+    $LogLevelVal = Get-ItemProperty -Path $KerbPath -Name "LogLevel" -ErrorAction SilentlyContinue
+    $LogLevelSetting = if ($LogLevelVal) { $LogLevelVal.LogLevel } else { 0 }
+    $LogLevelColor = if ($LogLevelSetting -eq 0) { "Green" } else { "Red" }
+    Write-Host "    - Kerberos Debug LogLevel: $($LogLevelSetting) (Required = 0)" -ForegroundColor $LogLevelColor
+} else {
+    Write-Host "    - Kerberos Debug LogLevel: Not Configured (Default/Compliant as it inherits disabled)" -ForegroundColor Green
+}
+
 <a id="05-logging-monitoring-configure-advanced-audit-policies-md-2-audit-specific-subcategories"></a>
 # 2. Audit specific subcategories
 $RequiredPolicies = @(
@@ -10736,16 +10882,21 @@ $RequiredPolicies = @(
     @{ Subcategory = "Directory Service Changes"; Expected = "Success and Failure" },
     @{ Subcategory = "Directory Service Access"; Expected = "Success and Failure" },
     @{ Subcategory = "Logon"; Expected = "Success and Failure" },
+    @{ Subcategory = "Logoff"; Expected = "Success" },
     @{ Subcategory = "Special Logon"; Expected = "Success" },
     @{ Subcategory = "Policy Change"; Expected = "Success and Failure" },
     @{ Subcategory = "Account Lockout"; Expected = "Success and Failure" },
     @{ Subcategory = "Other Logon/Logoff Events"; Expected = "Success and Failure" },
+    @{ Subcategory = "Handle Manipulation"; Expected = "Success and Failure" },
+    @{ Subcategory = "Registry"; Expected = "Success and Failure" },
     @{ Subcategory = "Detailed File Share"; Expected = "Failure" },
     @{ Subcategory = "Other Object Access Events"; Expected = "Success and Failure" },
     @{ Subcategory = "Authentication Policy Change"; Expected = "Success" },
+    @{ Subcategory = "Authorization Policy Change"; Expected = "Success" },
     @{ Subcategory = "MPSSVC Rule-Level Policy Change"; Expected = "Success and Failure" },
     @{ Subcategory = "Other Policy Change Events"; Expected = "Failure" },
     @{ Subcategory = "Sensitive Privilege Use"; Expected = "Success and Failure" },
+    @{ Subcategory = "IPsec Driver"; Expected = "Failure" },
     @{ Subcategory = "Other System Events"; Expected = "Success and Failure" },
     @{ Subcategory = "Security State Change"; Expected = "Success" },
     @{ Subcategory = "Security System Extension"; Expected = "Success" },
@@ -10823,6 +10974,7 @@ foreach ($Policy in $RequiredPolicies) {
     - Registry: `HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit\ProcessCreationIncludeCmdLine_Policy` (Value: 1)
   * **PowerShell Script Block Logging**: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows PowerShell\Turn on PowerShell Script Block Logging`
     - Registry: `HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\EnableScriptBlockLogging` (Value: 1)
+    - Registry: `HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\EnableScriptBlockInvocationLogging` (Value: 0)
   * **PowerShell Module Logging**: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows PowerShell\Turn on PowerShell Module Logging`
     - Registry: `HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging\EnableModuleLogging` (Value: 1)
     - Registry: `HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging\ModuleNames\*` (Value: "*")
@@ -10874,7 +11026,7 @@ Enforcing advanced execution logging mitigates these threat vectors:
    `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows PowerShell`
 2. Configure **Script Block Logging**:
    * **Policy**: `Turn on PowerShell Script Block Logging`
-   * **Setting**: `Enabled` (Check `Log script block invocation start / stop events`)
+   * **Setting**: `Enabled` (Ensure **Log script block invocation start / stop events** is **unchecked** / disabled to prevent operational log flooding)
 3. Configure **Module Logging**:
    * **Policy**: `Turn on PowerShell Module Logging`
    * **Setting**: `Enabled` -> Click **Show...** -> Add `*` under Value.
@@ -10919,7 +11071,8 @@ if (-not (Test-Path $ScriptBlockReg)) {
     New-Item -Path $ScriptBlockReg -Force | Out-Null
 }
 Set-ItemProperty -Path $ScriptBlockReg -Name "EnableScriptBlockLogging" -Value 1 -Type DWord
-Write-Host "    PowerShell Script Block Logging enabled." -ForegroundColor Green
+Set-ItemProperty -Path $ScriptBlockReg -Name "EnableScriptBlockInvocationLogging" -Value 0 -Type DWord
+Write-Host "    PowerShell Script Block Logging enabled and invocation start/stop logging disabled." -ForegroundColor Green
 
 <a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-3-configure-powershell-module-logging"></a>
 # 3. Configure PowerShell Module Logging
@@ -11028,6 +11181,17 @@ if ($SBSetting -eq 1) {
     $SBColor = "Green"
 }
 Write-Host "    - PowerShell Script Block Logging: $($SBSetting) (Required = 1)" -ForegroundColor $SBColor
+
+$SBInvVal = Get-ItemProperty -Path $SBPath -Name "EnableScriptBlockInvocationLogging" -ErrorAction SilentlyContinue
+$SBInvSetting = 0
+if ($SBInvVal) {
+    $SBInvSetting = $SBInvVal.EnableScriptBlockInvocationLogging
+}
+$SBInvColor = "Red"
+if ($SBInvSetting -eq 0) {
+    $SBInvColor = "Green"
+}
+Write-Host "    - PowerShell Script Block Invocation Logging (Start/Stop): $($SBInvSetting) (Required = 0)" -ForegroundColor $SBInvColor
 
 <a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-3-audit-module-logging"></a>
 # 3. Audit Module Logging
@@ -11714,6 +11878,16 @@ ORADAD allows administrators to perform offline analysis of Active Directory con
 
 ---
 
+<a id="06-operations-maintenance-ops-and-maintenance-md-4-crash-control-troubleshooting-bsod-detailed-display"></a>
+## 4. Crash Control & Troubleshooting (BSOD Detailed Display)
+
+During critical system failures, Windows by default displays a simplified Blue Screen of Death (BSOD) screen. Enabling detailed stop error parameters ensures that critical diagnostic information (such as the stop code and parameters) is immediately visible on the physical or virtual console screen. This is crucial for administrators in isolated, air-gapped environments who must troubleshoot system failures without access to online analysis tools or automatic crash dumps.
+
+* **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\CrashControl`
+* **Registry Value**: `DisplayParameters` (REG_DWORD = `1`)
+
+---
+
 <a id="06-operations-maintenance-ops-and-maintenance-md-powershell-implementation-guide"></a>
 ## PowerShell Implementation Guide
 
@@ -11831,6 +12005,57 @@ if ($finalJob.JobState -eq "Completed") {
 } else {
     Write-Error "`nBackup failed with status: $($finalJob.JobState). Error: $($finalJob.ErrorDescription)"
 }
+```
+
+<a id="06-operations-maintenance-ops-and-maintenance-md-3-auditing-crash-control-settings-audit"></a>
+### 3. Auditing Crash Control Settings (Audit)
+
+[Download Script: Audit-CrashControl.ps1](audit_scripts/Audit-CrashControl.ps1)
+
+```powershell
+<a id="06-operations-maintenance-ops-and-maintenance-md-audit-crashcontrolps1"></a>
+# Audit-CrashControl.ps1
+<a id="06-operations-maintenance-ops-and-maintenance-md-description-audits-whether-detailed-bsod-parameters-are-enabled-in-the-registry"></a>
+# Description: Audits whether detailed BSOD parameters are enabled in the registry.
+
+Write-Host "--- Auditing Detailed BSOD Parameters ---" -ForegroundColor Cyan
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl"
+if (Test-Path $Path) {
+    $Val = Get-ItemProperty -Path $Path -Name "DisplayParameters" -ErrorAction SilentlyContinue
+    if ($Val -and $Val.DisplayParameters -eq 1) {
+        Write-Host "[+] Detailed BSOD stop parameters are ENABLED (Compliant)." -ForegroundColor Green
+    } else {
+        Write-Host "[-] Detailed BSOD stop parameters are DISABLED (Non-Compliant)." -ForegroundColor Red
+        exit 1
+    }
+} else {
+    Write-Host "[-] Registry path HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl not found." -ForegroundColor Red
+    exit 1
+}
+```
+
+<a id="06-operations-maintenance-ops-and-maintenance-md-4-configuring-crash-control-settings-remediation"></a>
+### 4. Configuring Crash Control Settings (Remediation)
+
+[Download Script: Set-CrashControl.ps1](implementation_scripts/Set-CrashControl.ps1)
+
+```powershell
+<a id="06-operations-maintenance-ops-and-maintenance-md-set-crashcontrolps1"></a>
+# Set-CrashControl.ps1
+<a id="06-operations-maintenance-ops-and-maintenance-md-description-enables-detailed-bsod-parameters-in-the-registry"></a>
+# Description: Enables detailed BSOD parameters in the registry.
+
+Write-Host "--- Configuring Detailed BSOD Parameters ---" -ForegroundColor Cyan
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl"
+if (-not (Test-Path $Path)) {
+    New-Item -Path $Path -Force | Out-Null
+}
+
+Set-ItemProperty -Path $Path -Name "DisplayParameters" -Value 1 -Type DWord -Force | Out-Null
+Write-Host "[+] Detailed BSOD stop parameters configured successfully." -ForegroundColor Green
+```
 ```
 
 
@@ -12300,7 +12525,7 @@ Group Policy Objects (GPOs) natively manage core Windows operating system compon
 
 Implementing third-party and custom GPO templates provides the following benefits:
 1. **Centralized Configuration**: Administrators can enforce security configurations across all enterprise workstations and member servers (e.g. disabling insecure browser protocols, locking PDF execution properties) directly from the Group Policy Management Console.
-2. **Reduced Attack Surface**: Custom templates (such as Microsoft's Security-ADMX or the Microsoft Security Guide template) expose hidden or advanced registry configurations, allowing administrators to restrict features like WDigest authentication or LSA credential caching that are not exposed in standard out-of-the-box Windows templates.
+2. **Reduced Attack Surface**: Custom templates (such as [Security-ADMX GitHub Repository](https://github.com/Harvester57/Security-ADMX) or the Microsoft Security Guide template) expose hidden or advanced registry configurations, allowing administrators to restrict features like WDigest authentication or LSA credential caching that are not exposed in standard out-of-the-box Windows templates.
 3. **Consistency**: Linking COTS hardening GPOs ensures that third-party applications remain compliant with corporate security baselines, preventing local user overrides.
 
 ---
@@ -12433,6 +12658,7 @@ try {
 
 <a id="06-operations-maintenance-use-third-party-templates-md-sources-compliance-references"></a>
 ## Sources & Compliance References
+* **Security-ADMX Project**: Custom GPO templates for hardening Windows client and server environments. Available at the [Security-ADMX GitHub Repository](https://github.com/Harvester57/Security-ADMX).
 * **CIS Microsoft Windows Server Benchmarks**: Sections recommending the use of administrative templates to control third-party browser settings.
 * **ANSSI AD Hardening Guide**: Recommendations on secure configuration templates for operating systems and software.
 
@@ -14599,7 +14825,7 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
   * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Turn On Virtualization Based Security
   * **Registry Location**: HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard
     * `EnableVirtualizationBasedSecurity` = `1` (REG_DWORD)
-    * `RequirePlatformSecurityFeatures` = `3` (REG_DWORD, Secure Boot and DMA)
+    * `RequirePlatformSecurityFeatures` = `1` (REG_DWORD, Secure Boot)
     * `HypervisorEnforcedCodeIntegrity` = `1` (REG_DWORD)
     * `LsaCfgFlags` = `1` (REG_DWORD, Credential Guard Enabled with UEFI Lock)
     * `ConfigureSystemGuardLaunch` = `1` (REG_DWORD, Secure Launch Enabled)
@@ -14638,7 +14864,7 @@ Privileged Access Workstations (PAWs) contain Tier 0 administrative tokens. A co
 4. Configure the setting:
    * **Policy**: `Turn On Virtualization Based Security`
    * **Setting**: `Enabled`
-   * **Select Platform Security Level**: `Secure Boot and DMA Protection`
+   * **Select Platform Security Level**: `Secure Boot`
    * **Virtualization Based Protection of Code Integrity**: `Enabled with UEFI lock`
    * **Credential Guard Configuration**: `Enabled with UEFI lock`
    * **Secure Launch Configuration**: `Enabled`
@@ -14671,9 +14897,9 @@ if (-not (Test-Path $DeviceGuardPath)) {
 <a id="07-paws-enable-vbs-credential-guard-md-enable-virtualization-based-security-vbs"></a>
 # Enable Virtualization-Based Security (VBS)
 Set-ItemProperty -Path $DeviceGuardPath -Name "EnableVirtualizationBasedSecurity" -Value 1 -Type DWord
-<a id="07-paws-enable-vbs-credential-guard-md-requireplatformsecurityfeatures-3-secure-boot-and-dma-protection"></a>
-# RequirePlatformSecurityFeatures = 3 (Secure Boot and DMA Protection)
-Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 3 -Type DWord
+<a id="07-paws-enable-vbs-credential-guard-md-requireplatformsecurityfeatures-1-secure-boot"></a>
+# RequirePlatformSecurityFeatures = 1 (Secure Boot)
+Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 1 -Type DWord
 <a id="07-paws-enable-vbs-credential-guard-md-hypervisorenforcedcodeintegrity-1-hvci-memory-integrity-enabled"></a>
 # HypervisorEnforcedCodeIntegrity = 1 (HVCI / Memory Integrity Enabled)
 Set-ItemProperty -Path $DeviceGuardPath -Name "HypervisorEnforcedCodeIntegrity" -Value 1 -Type DWord
@@ -15072,7 +15298,11 @@ To prevent initial access and lateral movement, the following unitary technical 
 19. **[Configure User Profile Restrictions](#08-endpoints-README-md-08-endpoints-configure-user-profile-restrictions-md)**
     Locks down user profile registry settings (HKCU) to disable toast notifications on the lock screen and block third-party application suggestions.
 
+20. **[Configure Exploit Protection Profile](#08-endpoints-README-md-08-endpoints-configure-exploit-protection-md)**
+    Configures and enforces a system-wide Microsoft Defender Exploit Protection profile to apply advanced memory mitigations (DEP, ASLR, CFG, SEHOP, Heap Integrity) on all endpoints.
 
+21. **[Restrict Safe Mode Access to Administrators](#08-endpoints-README-md-08-endpoints-disable-safe-mode-for-standard-users-md)**
+    Prevents standard (non-administrative) users from logging into the system while in Safe Mode by setting SafeModeBlockNonAdmins to 1.
 
 
 <div style="page-break-before: always;"></div>
@@ -15096,6 +15326,11 @@ To prevent initial access and lateral movement, the following unitary technical 
   * **GPO Paths**:
     * Computer Configuration\Administrative Templates\Network\DNS Client\Turn off Multicast Name Resolution
     * Computer Configuration\Policies\Windows Settings\Security Settings\Windows Defender Firewall with Advanced Security
+    * Computer Configuration\Administrative Templates\Network\Network Connections
+    * Computer Configuration\Administrative Templates\Network\Windows Connection Manager
+    * Computer Configuration\Administrative Templates\Network\WLAN Service\WLAN Settings
+    * Computer Configuration\Administrative Templates\Printers
+    * Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options
   * **Registry Locations**:
     * HKLM\Software\Policies\Microsoft\Windows NT\DNSClient
       * `EnableMulticast` = `0` (REG_DWORD, Disables LLMNR)
@@ -15107,6 +15342,18 @@ To prevent initial access and lateral movement, the following unitary technical 
       * `DisableIPSourceRouting` = `2` (REG_DWORD)
     * HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters
       * `DisableIPSourceRouting` = `2` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\Network Connections
+      * `NC_ShowSharedAccessUI` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy
+      * `fMinimizeConnections` = `3` (REG_DWORD)
+      * `fBlockNonDomain` = `1` (REG_DWORD)
+    * HKLM\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config
+      * `AutoConnectAllowedOEM` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers
+      * `DisableWebPnPDownload` = `1` (REG_DWORD)
+      * `DisableHTTPPrinting` = `1` (REG_DWORD)
+    * HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
+      * `RestrictNullSessAccess` = `1` (REG_DWORD)
 
 ---
 
@@ -15194,7 +15441,63 @@ Legacy name resolution protocols and insecure default network configurations are
      * **Key Path**: `SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters`
      * **Value Name**: `DisableIPSourceRouting`
      * **Value Type**: `REG_DWORD`
-     * **Value Data**: `2`
+      * **Value Data**: `2`
+
+    * **Internet Connection Sharing Block**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\Network Connections`
+      * **Value Name**: `NC_ShowSharedAccessUI`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `0`
+
+    * **Minimize Connection Count**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy`
+      * **Value Name**: `fMinimizeConnections`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `3`
+
+    * **Block Non-Domain Networks**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy`
+      * **Value Name**: `fBlockNonDomain`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `1`
+
+    * **Disable Hotspot Auto-Connect**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config`
+      * **Value Name**: `AutoConnectAllowedOEM`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `0`
+
+    * **Disable Web print driver downloads**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows NT\Printers`
+      * **Value Name**: `DisableWebPnPDownload`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `1`
+
+    * **Disable HTTP printing**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows NT\Printers`
+      * **Value Name**: `DisableHTTPPrinting`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `1`
+
+    * **Restrict anonymous access to SAM and Named Pipes/Shares**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters`
+      * **Value Name**: `RestrictNullSessAccess`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `1`
 
 ---
 
@@ -15208,18 +15511,27 @@ Run the following scripts locally to disable legacy resolution and enforce secur
 ```powershell
 <a id="08-endpoints-harden-network-and-name-resolution-md-set-networkhardeningsettingsps1"></a>
 # Set-NetworkHardeningSettings.ps1
-<a id="08-endpoints-harden-network-and-name-resolution-md-description-configures-local-registry-keys-to-disable-llmnrnetbios-fallbacks-and-harden-tcpip-stack-against-redirectionsource-routing"></a>
-# Description: Configures local registry keys to disable LLMNR/NetBIOS fallbacks and harden TCP/IP stack against redirection/source routing.
+<a id="08-endpoints-harden-network-and-name-resolution-md-description-configures-local-registry-keys-to-disable-llmnrnetbios-harden-tcpip-stack-prevent-dual-homing-block-hotspot-auto-connect-print-driver-web-downloads-http-printing-and-limit-anonymous-share-access"></a>
+# Description: Configures local registry keys to disable LLMNR/NetBIOS, harden TCP/IP stack, prevent dual-homing, block hotspot auto-connect, print driver web downloads, HTTP printing, and limit anonymous share access.
 
 Write-Host "Applying network and name resolution hardening..." -ForegroundColor Cyan
 
+<a id="08-endpoints-harden-network-and-name-resolution-md-helper-to-configure-registry-keys"></a>
+# Helper to configure registry keys
+function Set-RegDWord ($path, $name, $value) {
+    $parent = Split-Path -Path $path
+    if (-not (Test-Path $parent)) {
+        New-Item -Path $parent -Force | Out-Null
+    }
+    if (-not (Test-Path $path)) {
+        New-Item -Path $path -Force | Out-Null
+    }
+    Set-ItemProperty -Path $path -Name $name -Value $value -Type DWord -Force
+}
+
 <a id="08-endpoints-harden-network-and-name-resolution-md-1-disable-llmnr"></a>
 # 1. Disable LLMNR
-$DnsPath = "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient"
-if (-not (Test-Path $DnsPath)) {
-    New-Item -Path $DnsPath -Force | Out-Null
-}
-Set-ItemProperty -Path $DnsPath -Name "EnableMulticast" -Value 0 -Type DWord
+Set-RegDWord "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" "EnableMulticast" 0
 Write-Host "[+] LLMNR (Multicast Name Resolution) disabled." -ForegroundColor Green
 
 <a id="08-endpoints-harden-network-and-name-resolution-md-2-configure-netbios-parameters"></a>
@@ -15235,28 +15547,41 @@ Write-Host "[+] NetBIOS name release protection and P-node type configured." -Fo
 <a id="08-endpoints-harden-network-and-name-resolution-md-3-disable-netbios-over-tcpip-on-all-active-adapters"></a>
 # 3. Disable NetBIOS over TCP/IP on all active adapters
 Write-Host "[+] Disabling NetBIOS on all active network adapters..." -ForegroundColor Gray
-$Adapters = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | Where-Object { $_.IPEnabled -eq $true }
-foreach ($Adapter in $Adapters) {
-    Invoke-CimMethod -InputObject $Adapter -MethodName SetTCPIPNetBIOS -Arguments @{ TcpipNetbiosOptions = 2 } | Out-Null
+$Adapters = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -ErrorAction SilentlyContinue | Where-Object { $_.IPEnabled -eq $true }
+if ($Adapters) {
+    foreach ($Adapter in $Adapters) {
+        Invoke-CimMethod -InputObject $Adapter -MethodName SetTCPIPNetBIOS -Arguments @{ TcpipNetbiosOptions = 2 } | Out-Null
+    }
+    Write-Host "    NetBIOS disabled on active network interfaces." -ForegroundColor Green
 }
-Write-Host "    NetBIOS disabled on active network interfaces." -ForegroundColor Green
 
 <a id="08-endpoints-harden-network-and-name-resolution-md-4-harden-tcpip-parameters"></a>
 # 4. Harden TCP/IP Parameters
-$TcpipPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
-if (-not (Test-Path $TcpipPath)) {
-    New-Item -Path $TcpipPath -Force | Out-Null
-}
-Set-ItemProperty -Path $TcpipPath -Name "EnableICMPRedirect" -Value 0 -Type DWord
-Set-ItemProperty -Path $TcpipPath -Name "DisableIPSourceRouting" -Value 2 -Type DWord
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" "EnableICMPRedirect" 0
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" "DisableIPSourceRouting" 2
 Write-Host "[+] IPv4 TCP/IP parameter redirects and source routing disabled." -ForegroundColor Green
 
-$Tcpip6Path = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
-if (-not (Test-Path $Tcpip6Path)) {
-    New-Item -Path $Tcpip6Path -Force | Out-Null
-}
-Set-ItemProperty -Path $Tcpip6Path -Name "DisableIPSourceRouting" -Value 2 -Type DWord
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" "DisableIPSourceRouting" 2
 Write-Host "[+] IPv6 TCP/IP parameter source routing disabled." -ForegroundColor Green
+
+<a id="08-endpoints-harden-network-and-name-resolution-md-5-prevent-network-connection-sharing-and-dual-homing-bridging"></a>
+# 5. Prevent Network Connection Sharing and Dual-Homing Bridging
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_ShowSharedAccessUI" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fMinimizeConnections" 3
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fBlockNonDomain" 1
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config" "AutoConnectAllowedOEM" 0
+Write-Host "[+] Network connections, sharing, and hotspot settings configured." -ForegroundColor Green
+
+<a id="08-endpoints-harden-network-and-name-resolution-md-6-printing-spooler-web-downloads-and-http-printing-block"></a>
+# 6. Printing Spooler Web Downloads and HTTP printing block
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" "DisableWebPnPDownload" 1
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" "DisableHTTPPrinting" 1
+Write-Host "[+] Printing spooler HTTP and Web service options disabled." -ForegroundColor Green
+
+<a id="08-endpoints-harden-network-and-name-resolution-md-7-restrict-anonymous-access-to-sam-and-named-pipesshares"></a>
+# 7. Restrict anonymous access to SAM and Named Pipes/Shares
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" "RestrictNullSessAccess" 1
+Write-Host "[+] Anonymous null session share access restricted." -ForegroundColor Green
 
 Write-Host "Network and name resolution hardening applied successfully." -ForegroundColor Green
 ```
@@ -15267,55 +15592,75 @@ Write-Host "Network and name resolution hardening applied successfully." -Foregr
 ```powershell
 <a id="08-endpoints-harden-network-and-name-resolution-md-test-networkhardeningstatusps1"></a>
 # Test-NetworkHardeningStatus.ps1
-<a id="08-endpoints-harden-network-and-name-resolution-md-description-audits-llmnr-netbios-parameters-netbios-adapter-state-and-tcpip-security-parameters"></a>
-# Description: Audits LLMNR, NetBIOS parameters, NetBIOS adapter state, and TCP/IP security parameters.
+<a id="08-endpoints-harden-network-and-name-resolution-md-description-audits-llmnr-netbios-parameters-netbios-adapter-state-tcpip-parameters-and-stig-print-network-connection-options"></a>
+# Description: Audits LLMNR, NetBIOS parameters, NetBIOS adapter state, TCP/IP parameters, and STIG print / network connection options.
 
 Write-Host "--- Auditing Network and Name Resolution Baseline ---" -ForegroundColor Cyan
+
+$Vulnerable = $false
+
+<a id="08-endpoints-harden-network-and-name-resolution-md-helper-function-to-audit-registry-properties"></a>
+# Helper function to audit registry properties
+function Test-RegistryValue ($path, $name, $expectedValue) {
+    $val = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
+    $actual = if ($val) { $val.$name } else { "" }
+    $color = "Red"
+    if ($actual -eq $expectedValue) {
+        $color = "Green"
+    } else {
+        $global:Vulnerable = $true
+    }
+    Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
+}
 
 <a id="08-endpoints-harden-network-and-name-resolution-md-1-audit-llmnr"></a>
 # 1. Audit LLMNR
 $DnsPath = "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient"
-$LlmnrVal = Get-ItemProperty -Path $DnsPath -Name "EnableMulticast" -ErrorAction SilentlyContinue
-$LlmnrSetting = if ($LlmnrVal) { $LlmnrVal.EnableMulticast } else { 1 }
-$LlmnrColor = if ($LlmnrSetting -eq 0) { "Green" } else { "Red" }
-Write-Host "    - LLMNR Enabled: $LlmnrSetting (Required = 0 [Disabled])" -ForegroundColor $LlmnrColor
+Test-RegistryValue $DnsPath "EnableMulticast" 0
 
 <a id="08-endpoints-harden-network-and-name-resolution-md-2-audit-netbios-parameters"></a>
 # 2. Audit NetBIOS Parameters
 $NetbtPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netbt\Parameters"
-$NoRelease = Get-ItemProperty -Path $NetbtPath -Name "NoNameReleaseOnDemand" -ErrorAction SilentlyContinue
-$Node = Get-ItemProperty -Path $NetbtPath -Name "NodeType" -ErrorAction SilentlyContinue
-
-$NoReleaseVal = if ($NoRelease) { $NoRelease.NoNameReleaseOnDemand } else { 0 }
-$NodeVal = if ($Node) { $Node.NodeType } else { 0 }
-
-$NoReleaseColor = if ($NoReleaseVal -eq 1) { "Green" } else { "Red" }
-$NodeColor = if ($NodeVal -eq 2) { "Green" } else { "Red" }
-
-Write-Host "    - NetBIOS NoNameReleaseOnDemand: $NoReleaseVal (Required = 1)" -ForegroundColor $NoReleaseColor
-Write-Host "    - NetBIOS NodeType (P-Node): $NodeVal (Required = 2)" -ForegroundColor $NodeColor
+Test-RegistryValue $NetbtPath "NoNameReleaseOnDemand" 1
+Test-RegistryValue $NetbtPath "NodeType" 2
 
 <a id="08-endpoints-harden-network-and-name-resolution-md-3-audit-tcpip-parameters"></a>
 # 3. Audit TCP/IP Parameters
 $TcpipPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
-$Icmp = Get-ItemProperty -Path $TcpipPath -Name "EnableICMPRedirect" -ErrorAction SilentlyContinue
-$RoutingV4 = Get-ItemProperty -Path $TcpipPath -Name "DisableIPSourceRouting" -ErrorAction SilentlyContinue
-
-$IcmpVal = if ($Icmp) { $Icmp.EnableICMPRedirect } else { 1 }
-$RoutingV4Val = if ($RoutingV4) { $RoutingV4.DisableIPSourceRouting } else { 0 }
-
-$IcmpColor = if ($IcmpVal -eq 0) { "Green" } else { "Red" }
-$RoutingV4Color = if ($RoutingV4Val -eq 2) { "Green" } else { "Red" }
-
-Write-Host "    - IPv4 EnableICMPRedirect: $IcmpVal (Required = 0)" -ForegroundColor $IcmpColor
-Write-Host "    - IPv4 DisableIPSourceRouting: $RoutingV4Val (Required = 2)" -ForegroundColor $RoutingV4Color
+Test-RegistryValue $TcpipPath "EnableICMPRedirect" 0
+Test-RegistryValue $TcpipPath "DisableIPSourceRouting" 2
 
 $Tcpip6Path = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
-$RoutingV6 = Get-ItemProperty -Path $Tcpip6Path -Name "DisableIPSourceRouting" -ErrorAction SilentlyContinue
-$RoutingV6Val = if ($RoutingV6) { $RoutingV6.DisableIPSourceRouting } else { 0 }
-$RoutingV6Color = if ($RoutingV6Val -eq 2) { "Green" } else { "Red" }
+Test-RegistryValue $Tcpip6Path "DisableIPSourceRouting" 2
 
-Write-Host "    - IPv6 DisableIPSourceRouting: $RoutingV6Val (Required = 2)" -ForegroundColor $RoutingV6Color
+<a id="08-endpoints-harden-network-and-name-resolution-md-4-audit-connection-sharing-dual-homing-settings"></a>
+# 4. Audit Connection Sharing & Dual-Homing Settings
+$NetConnPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections"
+Test-RegistryValue $NetConnPath "NC_ShowSharedAccessUI" 0
+
+$WcmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy"
+Test-RegistryValue $WcmPath "fMinimizeConnections" 3
+Test-RegistryValue $WcmPath "fBlockNonDomain" 1
+
+$WifiPath = "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config"
+Test-RegistryValue $WifiPath "AutoConnectAllowedOEM" 0
+
+<a id="08-endpoints-harden-network-and-name-resolution-md-5-audit-http-print-options"></a>
+# 5. Audit HTTP Print Options
+$PrinterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
+Test-RegistryValue $PrinterPath "DisableWebPnPDownload" 1
+Test-RegistryValue $PrinterPath "DisableHTTPPrinting" 1
+
+<a id="08-endpoints-harden-network-and-name-resolution-md-6-audit-null-session-share-restrict"></a>
+# 6. Audit Null Session Share Restrict
+$ServerPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
+Test-RegistryValue $ServerPath "RestrictNullSessAccess" 1
+
+if ($Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+}
 ```
 
 ---
@@ -15324,6 +15669,8 @@ Write-Host "    - IPv6 DisableIPSourceRouting: $RoutingV6Val (Required = 2)" -Fo
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 9.1 (Disable LLMNR), Section 18.8.44.1 (Configure EnableICMPRedirect), Section 18.8.44.2 (Configure DisableIPSourceRouting)
 * **ANSSI AD Hardening Guide**: Recommendation R19 (LDAP and name resolution security recommendations)
+* **DoD Windows 11 Computer STIG v2r6**: Various print driver download limits, HTTP printing blocks, internet connection sharing prohibitions, hotspot connection rules, and null session restrictions.
+
 
 
 <div style="page-break-before: always;"></div>
@@ -15346,6 +15693,7 @@ Write-Host "    - IPv6 DisableIPSourceRouting: $RoutingV6Val (Required = 2)" -Fo
 * **GPO Path / Registry Location**:
   * Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options
   * HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+  * **Windows Sudo Command**: `Computer Configuration\Administrative Templates\System` -> **Configure the behavior of the sudo command** (Registry: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sudo` -> `Enabled` = `1` [Force new elevated window] or `0` [Disabled])
 
 ---
 
@@ -15357,6 +15705,7 @@ Hardening UAC settings ensures:
 1. **Secure Desktop Enforcement**: The elevation prompt is displayed on a separate, secure desktop environment that isolated system threads run on. This prevents third-party malware running in user space from intercepting credentials or programmatically clicking "Yes" to elevate itself.
 2. **Auto-Denial of Standard User Elevation**: Standard users should not be allowed to request elevation. If a standard user triggers a task requiring administrative rights, the prompt should auto-deny rather than requesting an administrator password, preventing users from attempting to bypass controls or exposing local admin passwords on a non-secure user terminal.
 3. **Admin Approval Mode**: Forcing built-in administrators to run in Admin Approval Mode ensures that even administrative users do not run web browsers or document editors with administrative tokens by default.
+4. **Sudo Command Control**: The `sudo` command introduced in Windows 11 (24H2) allows users to run elevated commands from an unelevated console. Leaving this feature unconfigured or allowing execution within the current console session can expose elevated processes to command injection or token interception in the same console session. Restricting `sudo` to opening a new elevated window (`1`) or disabling it entirely (`0`) mitigates session hijacking risks.
 
 ---
 
@@ -15364,6 +15713,7 @@ Hardening UAC settings ensures:
 ## Legacy Impact & Compatibility
 * **User Experience**: Standard users will not be able to install software or change system settings that require administrative credentials. Support technicians must log on as local administrators to perform maintenance tasks or use remote tools.
 * **Script and Installer Behaviors**: Legacy scripts and administrative install tasks that run programmatically without secure-desktop awareness may fail or hang if they trigger elevation prompts that cannot be programmatically bypassed.
+* **Command Line Tools**: Disabling or restricting `sudo` means administrative users must explicitly open an elevated PowerShell or Cmd window to run administrative commands, which is the standard enterprise practice.
 
 ---
 
@@ -15384,8 +15734,11 @@ Hardening UAC settings ensures:
    * **Setting**: `Automatically deny elevation requests`
    * **Policy**: `User Account Control: Run all administrators in Admin Approval Mode`
    * **Setting**: `Enabled`
-   * **Policy**: `User Account Control: Switch to the secure desktop when prompting for elevation`
-   * **Setting**: `Enabled`
+    * **Policy**: `User Account Control: Switch to the secure desktop when prompting for elevation`
+    * **Setting**: `Enabled`
+  * Navigate to: `Computer Configuration\Administrative Templates\System`
+    * **Policy**: `Configure the behavior of the sudo command`
+    * **Setting**: `Enabled` with options set to **Force a new elevated window** (or **Disabled** to disable the feature entirely)
 
 ---
 
@@ -15423,6 +15776,14 @@ Set-ItemProperty -Path $SystemPath -Name "EnableLUA" -Value 1 -Type DWord
 # PromptOnSecureDesktop = 1 (Switch to secure desktop when prompting)
 Set-ItemProperty -Path $SystemPath -Name "PromptOnSecureDesktop" -Value 1 -Type DWord
 
+<a id="08-endpoints-configure-uac-policies-md-configure-windows-sudo-command-behavior-enabled-1-force-new-elevated-window"></a>
+# Configure Windows Sudo command behavior (Enabled = 1 [Force new elevated window])
+$SudoPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sudo"
+if (-not (Test-Path $SudoPath)) {
+    New-Item -Path $SudoPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SudoPath -Name "Enabled" -Value 1 -Type DWord -Force
+
 Write-Host "[+] UAC registry values configured successfully." -ForegroundColor Green
 ```
 
@@ -15458,6 +15819,16 @@ Write-Host "    - ConsentPromptBehaviorAdmin: $AdminVal (Required = 1 [Prompt fo
 Write-Host "    - ConsentPromptBehaviorUser: $UserVal (Required = 0 [Auto Deny])" -ForegroundColor $UserColor
 Write-Host "    - EnableLUA: $LuaVal (Required = 1)" -ForegroundColor $LuaColor
 Write-Host "    - PromptOnSecureDesktop: $SecureVal (Required = 1)" -ForegroundColor $SecureColor
+
+$SudoPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sudo"
+if (Test-Path $SudoPath) {
+    $SudoState = Get-ItemProperty -Path $SudoPath -Name "Enabled" -ErrorAction SilentlyContinue
+    $SudoVal = if ($SudoState) { $SudoState.Enabled } else { 0 }
+    $SudoColor = if ($SudoVal -eq 0 -or $SudoVal -eq 1) { "Green" } else { "Red" }
+    Write-Host "    - Sudo Command Enabled state: $SudoVal (Required = 1 [New Window] or 0 [Disabled])" -ForegroundColor $SudoColor
+} else {
+    Write-Host "    - Sudo Command Enabled state: Not Configured (Default/Compliant as it inherits disabled or default elevation window)." -ForegroundColor Green
+}
 ```
 
 ---
@@ -15486,8 +15857,13 @@ Write-Host "    - PromptOnSecureDesktop: $SecureVal (Required = 1)" -ForegroundC
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\Windows Components\AutoPlay Policies
-  * HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoDriveTypeAutoRun
+  * **GPO Path**: `Computer Configuration\Administrative Templates\Windows Components\AutoPlay Policies`
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer`
+      * `NoDriveTypeAutoRun` = `255` (0xFF, REG_DWORD)
+      * `NoAutorun` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer`
+      * `NoAutoplayfornonVolume` = `1` (REG_DWORD)
 
 ---
 
@@ -15496,6 +15872,8 @@ Write-Host "    - PromptOnSecureDesktop: $SecureVal (Required = 1)" -ForegroundC
 The AutoPlay and AutoRun features in Windows are designed to automatically execute programs or open media when a removable drive, network share, or CD-ROM is inserted or connected. 
 
 Attackers exploit these features by placing malicious scripts, payloads, or executables on USB drives or external storage media. If AutoPlay is enabled, connecting the drive triggers automatic execution of these scripts or programs without user interaction or approval, allowing malware to achieve immediate execution in the context of the logged-on user. Disabling AutoPlay across all drive types completely mitigates this physical transmission vector.
+
+Additionally, non-volume devices (such as mobile phones, cameras, or media players) can still trigger AutoPlay behavior. Disallowing AutoPlay for non-volume devices ensures these devices do not introduce unauthorized execution pathways when plugged into standard client machines.
 
 ---
 
@@ -15518,26 +15896,28 @@ Attackers exploit these features by placing malicious scripts, payloads, or exec
    `Computer Configuration\Administrative Templates\Windows Components\AutoPlay Policies`
 4. Configure the following settings:
    * **Policy**: `Turn off AutoPlay`
-   * **Setting**: `Enabled`
-   * **Select Options**: `All drives`
+     * **Setting**: `Enabled`
+     * **Select Options**: `All drives`
    * **Policy**: `Set the default behavior for AutoRun`
-   * **Setting**: `Enabled`
-   * **Select Options**: `Do not execute any autorun commands`
+     * **Setting**: `Enabled`
+     * **Select Options**: `Do not execute any autorun commands`
+   * **Policy**: `Disallow Autoplay for non-volume devices`
+     * **Setting**: `Enabled`
 
 ---
 
 <a id="08-endpoints-disable-autoplay-autorun-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to configure Explorer registry keys to disable AutoPlay and AutoRun on all drive types.
+Run the following scripts locally to configure Explorer registry keys to disable AutoPlay, AutoRun, and AutoPlay for non-volume devices.
 
 [Download Script: Disable-AutoPlay.ps1](implementation_scripts/Disable-AutoPlay.ps1)
 
 ```powershell
 <a id="08-endpoints-disable-autoplay-autorun-md-disable-autoplayps1"></a>
 # Disable-AutoPlay.ps1
-<a id="08-endpoints-disable-autoplay-autorun-md-disables-autoplayautorun-registry-settings-globally-on-all-drive-types"></a>
-# Disables AutoPlay/AutoRun registry settings globally on all drive types.
+<a id="08-endpoints-disable-autoplay-autorun-md-disables-autoplayautorun-registry-settings-globally-on-all-drive-types-and-non-volume-devices"></a>
+# Disables AutoPlay/AutoRun registry settings globally on all drive types and non-volume devices.
 
 Write-Host "--- Disabling AutoPlay and AutoRun ---" -ForegroundColor Cyan
 
@@ -15549,12 +15929,19 @@ if (-not (Test-Path $ExplorerPath)) {
 
 <a id="08-endpoints-disable-autoplay-autorun-md-nodrivetypeautorun-0xff-255-in-decimal-disables-autorun-on-all-types-of-drives"></a>
 # NoDriveTypeAutoRun = 0xFF (255 in decimal) disables AutoRun on all types of drives
-Set-ItemProperty -Path $ExplorerPath -Name "NoDriveTypeAutoRun" -Value 255 -Type DWord
+Set-ItemProperty -Path $ExplorerPath -Name "NoDriveTypeAutoRun" -Value 255 -Type DWord -Force
 
 <a id="08-endpoints-disable-autoplay-autorun-md-noautorun-1-disables-autorun-commands-in-inf-files"></a>
 # NoAutorun = 1 disables AutoRun commands in inf files
-$SystemExplorerPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
-Set-ItemProperty -Path $SystemExplorerPath -Name "NoAutorun" -Value 1 -Type DWord
+Set-ItemProperty -Path $ExplorerPath -Name "NoAutorun" -Value 1 -Type DWord -Force
+
+<a id="08-endpoints-disable-autoplay-autorun-md-disallow-autoplay-for-non-volume-devices-noautoplayfornonvolume-1"></a>
+# Disallow Autoplay for non-volume devices (NoAutoplayfornonVolume = 1)
+$PolExplorerPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
+if (-not (Test-Path $PolExplorerPath)) {
+    New-Item -Path $PolExplorerPath -Force | Out-Null
+}
+Set-ItemProperty -Path $PolExplorerPath -Name "NoAutoplayfornonVolume" -Value 1 -Type DWord -Force
 
 Write-Host "[+] AutoPlay and AutoRun registry parameters set." -ForegroundColor Green
 ```
@@ -15571,18 +15958,23 @@ Write-Host "[+] AutoPlay and AutoRun registry parameters set." -ForegroundColor 
 Write-Host "--- Auditing AutoPlay Configuration ---" -ForegroundColor Cyan
 
 $ExplorerPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+$PolExplorerPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
 
 $NoDriveAuto = Get-ItemProperty -Path $ExplorerPath -Name "NoDriveTypeAutoRun" -ErrorAction SilentlyContinue
 $NoAutoCmd = Get-ItemProperty -Path $ExplorerPath -Name "NoAutorun" -ErrorAction SilentlyContinue
+$NoNonVol = Get-ItemProperty -Path $PolExplorerPath -Name "NoAutoplayfornonVolume" -ErrorAction SilentlyContinue
 
 $NoDriveVal = if ($NoDriveAuto) { $NoDriveAuto.NoDriveTypeAutoRun } else { 0 }
 $NoAutoVal = if ($NoAutoCmd) { $NoAutoCmd.NoAutorun } else { 0 }
+$NoNonVolVal = if ($NoNonVol) { $NoNonVol.NoAutoplayfornonVolume } else { 0 }
 
 $NoDriveColor = if ($NoDriveVal -eq 255) { "Green" } else { "Red" }
 $NoAutoColor = if ($NoAutoVal -eq 1) { "Green" } else { "Red" }
+$NoNonVolColor = if ($NoNonVolVal -eq 1) { "Green" } else { "Red" }
 
 Write-Host "    - NoDriveTypeAutoRun: $NoDriveVal (Required = 255 to disable all drives)" -ForegroundColor $NoDriveColor
 Write-Host "    - NoAutorun: $NoAutoVal (Required = 1)" -ForegroundColor $NoAutoColor
+Write-Host "    - NoAutoplayfornonVolume: $NoNonVolVal (Required = 1)" -ForegroundColor $NoNonVolColor
 ```
 
 ---
@@ -15591,6 +15983,7 @@ Write-Host "    - NoAutorun: $NoAutoVal (Required = 1)" -ForegroundColor $NoAuto
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.3.1 (Turn off AutoPlay), Section 18.3.2 (Set the default behavior for AutoRun)
 * **Microsoft Security Baselines**: Windows Client Explorer configuration standards.
+* **DoD Windows 11 STIG**: Disallow Autoplay for non-volume devices requirements.
 
 
 <div style="page-break-before: always;"></div>
@@ -15725,9 +16118,21 @@ Write-Host "    - Removable Storage Deny_All: $DenyAllVal (Required = 1)" -Foreg
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Connections
-  * Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Security
-  * HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server
+  * **GPO Paths**:
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Connections`
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Security`
+    * `Computer Configuration\Administrative Templates\System\Remote Assistance`
+  * **Registry Locations**:
+    * `HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server`
+      * `fDenyTSConnections` = `1` (REG_DWORD, Disabled)
+    * `HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp`
+      * `UserAuthentication` = `1` (REG_DWORD, NLA Enabled)
+    * `HKLM\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services`
+      * `fAllowToGetHelp` = `0` (REG_DWORD, Solicited Remote Assistance Disabled)
+      * `MaxTicketExpiryUnits` = (Delete / Not Configured)
+      * `MaxTicketExpiry` = (Delete / Not Configured)
+      * `fUseMailto` = (Delete / Not Configured)
+      * `fAllowFullControl` = (Delete / Not Configured)
 
 ---
 
@@ -15738,14 +16143,16 @@ Remote Desktop Protocol (RDP) is one of the primary mechanisms used by attackers
 2. **Session Hijacking**: Attackers can hijack existing administrative RDP sessions using built-in command-line tools (such as `tscon.exe`) if they obtain administrator privileges on the system.
 3. **Password Spraying**: Open RDP ports allow attackers to attempt password spraying or brute-force attacks against local administrative accounts.
 
-The safest configuration is to disable Remote Desktop Services entirely on all Tier 2 workstations. If RDP is strictly necessary for remote technical support, it must require Network Level Authentication (NLA) and the listening firewall rules must restrict access to authorized management subnets only.
+Furthermore, Windows **Remote Assistance** allows helper connections that can lead to remote code execution or unauthorized access if not properly restricted. Disabling Solicited Remote Assistance and removing any legacy configuration values limits the workstation's attack surface.
+
+The safest configuration is to disable Remote Desktop Services and Remote Assistance entirely on all Tier 2 workstations. If RDP is strictly necessary for remote technical support, it must require Network Level Authentication (NLA) and the listening firewall rules must restrict access to authorized management subnets only.
 
 ---
 
 <a id="08-endpoints-restrict-rdp-access-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
 * **Remote Administration**: Support technicians cannot connect to workstations via RDP unless they connect from an IP address inside the authorized administrative subnet (e.g., from a PAW or Jump Host).
-* **User Assistance**: Standard users cannot use Remote Desktop to share screens or assist one another. Alternate secure remote assistance tools (which require local user approval and do not open listener ports) must be used.
+* **User Assistance**: Standard users cannot use Remote Desktop or Remote Assistance to share screens or assist one another. Alternate secure remote assistance tools (which require local user approval and do not open listener ports) must be used.
 
 ---
 
@@ -15779,58 +16186,81 @@ If RDP is strictly required, enable it but restrict it using the following setti
    * **Setting**: `Enabled` (Select `High Level` in the options dropdown)
 4. Deploy local firewall rules via GPO to restrict TCP port 3389 inbound to administrative subnet ranges only.
 
+<a id="08-endpoints-restrict-rdp-access-md-3-disable-solicited-remote-assistance"></a>
+#### 3. Disable Solicited Remote Assistance
+1. Navigate to:
+   `Computer Configuration\Administrative Templates\System\Remote Assistance`
+2. Configure the setting:
+   * **Policy**: `Configure Solicited Remote Assistance`
+   * **Setting**: `Disabled`
+
 ---
 
 <a id="08-endpoints-restrict-rdp-access-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to disable Remote Desktop or enforce NLA and secure registry keys.
+Run the following scripts locally to disable Remote Desktop and Remote Assistance, and enforce NLA and secure registry keys.
 
 [Download Script: Disable-RemoteDesktop.ps1](implementation_scripts/Disable-RemoteDesktop.ps1)
 
 ```powershell
 <a id="08-endpoints-restrict-rdp-access-md-disable-remotedesktopps1"></a>
 # Disable-RemoteDesktop.ps1
-<a id="08-endpoints-restrict-rdp-access-md-disables-remote-desktop-connection-requests-and-sets-nla-requirements-locally"></a>
-# Disables Remote Desktop connection requests and sets NLA requirements locally.
+<a id="08-endpoints-restrict-rdp-access-md-disables-remote-desktop-and-solicited-remote-assistance-connections-sets-nla-requirements-and-cleans-parameters"></a>
+# Disables Remote Desktop and Solicited Remote Assistance connections, sets NLA requirements, and cleans parameters.
 
-Write-Host "--- Restricting Remote Desktop Access ---" -ForegroundColor Cyan
+Write-Host "--- Restricting Remote Desktop and Remote Assistance Access ---" -ForegroundColor Cyan
 
 $RdpPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server"
 
 <a id="08-endpoints-restrict-rdp-access-md-1-disable-rdp-connections-fdenytsconnections-1"></a>
 # 1. Disable RDP Connections (fDenyTSConnections = 1)
-Set-ItemProperty -Path $RdpPath -Name "fDenyTSConnections" -Value 1 -Type DWord
+Set-ItemProperty -Path $RdpPath -Name "fDenyTSConnections" -Value 1 -Type DWord -Force
 Write-Host "[+] Inbound Remote Desktop connections disabled." -ForegroundColor Green
 
 <a id="08-endpoints-restrict-rdp-access-md-2-enforce-network-level-authentication-userauthentication-1"></a>
 # 2. Enforce Network Level Authentication (UserAuthentication = 1)
 $RdpSecPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp"
 if (Test-Path $RdpSecPath) {
-    Set-ItemProperty -Path $RdpSecPath -Name "UserAuthentication" -Value 1 -Type DWord
+    Set-ItemProperty -Path $RdpSecPath -Name "UserAuthentication" -Value 1 -Type DWord -Force
     Write-Host "[+] Network Level Authentication (NLA) enforced." -ForegroundColor Green
 }
 
-<a id="08-endpoints-restrict-rdp-access-md-3-disable-remote-assistance-connections"></a>
-# 3. Disable Remote Assistance Connections
-$RAPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server"
-Set-ItemProperty -Path $RAPath -Name "fAllowToGetHelp" -Value 0 -Type DWord
-Write-Host "[+] Remote Assistance connection requests disabled." -ForegroundColor Green
+<a id="08-endpoints-restrict-rdp-access-md-3-disable-remote-assistance-fallowtogethelp-0"></a>
+# 3. Disable Remote Assistance (fAllowToGetHelp = 0)
+Set-ItemProperty -Path $RdpPath -Name "fAllowToGetHelp" -Value 0 -Type DWord -Force
+
+<a id="08-endpoints-restrict-rdp-access-md-4-disable-and-clean-solicited-remote-assistance-policies"></a>
+# 4. Disable and clean Solicited Remote Assistance Policies
+$TSPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services"
+if (-not (Test-Path $TSPoliciesPath)) {
+    New-Item -Path $TSPoliciesPath -Force | Out-Null
+}
+Set-ItemProperty -Path $TSPoliciesPath -Name "fAllowToGetHelp" -Value 0 -Type DWord -Force
+
+$ParamsToDelete = @("MaxTicketExpiryUnits", "MaxTicketExpiry", "fUseMailto", "fAllowFullControl")
+foreach ($Param in $ParamsToDelete) {
+    if (Get-ItemProperty -Path $TSPoliciesPath -Name $Param -ErrorAction SilentlyContinue) {
+        Remove-ItemProperty -Path $TSPoliciesPath -Name $Param -Force -ErrorAction SilentlyContinue
+    }
+}
+Write-Host "[+] Solicited Remote Assistance policies disabled and cleaned." -ForegroundColor Green
 ```
 
-*To audit Remote Desktop and NLA status:*
+*To audit Remote Desktop and Remote Assistance status:*
 [Download Script: Test-RemoteDesktopStatus.ps1](audit_scripts/Test-RemoteDesktopStatus.ps1)
 
 ```powershell
 <a id="08-endpoints-restrict-rdp-access-md-test-remotedesktopstatusps1"></a>
 # Test-RemoteDesktopStatus.ps1
-<a id="08-endpoints-restrict-rdp-access-md-audits-local-rdp-registry-configuration-and-listening-firewall-ports"></a>
-# Audits local RDP registry configuration and listening firewall ports.
+<a id="08-endpoints-restrict-rdp-access-md-audits-local-rdp-remote-assistance-and-nla-registry-configuration-and-listening-firewall-ports"></a>
+# Audits local RDP, Remote Assistance, and NLA registry configuration and listening firewall ports.
 
 Write-Host "--- Auditing Remote Desktop Configuration ---" -ForegroundColor Cyan
 
 $RdpPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server"
 $RdpSecPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp"
+$TSPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services"
 
 $DenyTS = Get-ItemProperty -Path $RdpPath -Name "fDenyTSConnections" -ErrorAction SilentlyContinue
 $DenyVal = if ($DenyTS) { $DenyTS.fDenyTSConnections } else { 1 }
@@ -15851,6 +16281,35 @@ if ($RdpFirewall) {
     $FirewallColor = if ($RdpFirewall.Enabled -eq $true) { "Yellow" } else { "Green" }
     Write-Host "    - RDP Inbound Firewall Rule Active: $($RdpFirewall.Enabled)" -ForegroundColor $FirewallColor
 }
+
+<a id="08-endpoints-restrict-rdp-access-md-audit-remote-assistance"></a>
+# Audit Remote Assistance
+$GetHelpTS = Get-ItemProperty -Path $RdpPath -Name "fAllowToGetHelp" -ErrorAction SilentlyContinue
+$GetHelpTSVal = if ($GetHelpTS) { $GetHelpTS.fAllowToGetHelp } else { 0 }
+$HelpColor = if ($GetHelpTSVal -eq 0) { "Green" } else { "Red" }
+Write-Host "    - fAllowToGetHelp (Terminal Server): $GetHelpTSVal (Recommended = 0)" -ForegroundColor $HelpColor
+
+<a id="08-endpoints-restrict-rdp-access-md-audit-solicited-remote-assistance-policy"></a>
+# Audit Solicited Remote Assistance Policy
+if (Test-Path $TSPoliciesPath) {
+    $PolGetHelp = Get-ItemProperty -Path $TSPoliciesPath -Name "fAllowToGetHelp" -ErrorAction SilentlyContinue
+    $PolGetHelpVal = if ($PolGetHelp) { $PolGetHelp.fAllowToGetHelp } else { $null }
+    
+    $PolHelpColor = if ($PolGetHelpVal -eq 0) { "Green" } else { "Red" }
+    Write-Host "    - fAllowToGetHelp (Policies): $($PolGetHelpVal | Out-String).Trim() (Recommended = 0)" -ForegroundColor $PolHelpColor
+    
+    $Params = @("MaxTicketExpiryUnits", "MaxTicketExpiry", "fUseMailto", "fAllowFullControl")
+    foreach ($Param in $Params) {
+        $Val = (Get-ItemProperty -Path $TSPoliciesPath -Name $Param -ErrorAction SilentlyContinue).$Param
+        if ($null -ne $Val) {
+            Write-Host "    - VULNERABLE: Solicited Remote Assistance parameter '$Param' is set to '$Val' (Expected: Deleted/Not Configured)" -ForegroundColor Red
+        } else {
+            Write-Host "    - Parameter '$Param': Not Configured (Correct)" -ForegroundColor Green
+        }
+    }
+} else {
+    Write-Host "    - Solicited Remote Assistance Policy Path does not exist (Expected fAllowToGetHelp = 0)" -ForegroundColor Red
+}
 ```
 
 ---
@@ -15859,6 +16318,7 @@ if ($RdpFirewall) {
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.2.1 (Require user authentication for remote connections by using Network Level Authentication)
 * **ANSSI AD Hardening Guide**: Security guidelines regarding Remote Desktop access and management protocols.
+* **DoD Windows 11 STIG**: Solicited Remote Assistance requirements.
 
 
 <div style="page-break-before: always;"></div>
@@ -15879,8 +16339,9 @@ if ($RdpFirewall) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Policies\Windows Settings\Security Settings\Restricted Groups
-  * Computer Configuration\Preferences\Control Panel Settings\Local Users and Groups
+  * **GPO Path**: Computer Configuration\Policies\Windows Settings\Security Settings\Restricted Groups
+  * **Registry Location**: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+    * `LocalAccountTokenFilterPolicy` = `0` (REG_DWORD, Disabled)
 
 ---
 
@@ -15908,33 +16369,42 @@ Securing the local Administrators group ensures only local security accounts (li
 <a id="08-endpoints-restrict-local-admins-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-Deploy Restricted Groups via GPO to enforce local administrators group memberships:
+Enforce local Administrators group membership and restrict remote execution via local accounts (UAC remote restrictions):
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
-3. Navigate to:
-   `Computer Configuration\Policies\Windows Settings\Security Settings\Restricted Groups`
-4. Right-click **Restricted Groups** and select **Add Group**.
-5. Type `Administrators` (or click Browse to find the local group).
-6. Under **Members of this group**, define the allowed members:
-   * `Administrator` (the built-in local administrator account)
-   * `DomainName\Workstation-Support-Admins` (dedicated Tier 2 support team group, if used)
-   * *Leave out `Domain Users` or any other general domain accounts.*
-7. Applying this GPO will overwrite the membership of the local Administrators group, immediately removing any account not explicitly listed.
+3. **Configure Restricted Groups**:
+   * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Restricted Groups`
+   * Right-click **Restricted Groups** and select **Add Group**.
+   * Type `Administrators` (or click Browse to find the local group).
+   * Under **Members of this group**, define the allowed members:
+     * `Administrator` (the built-in local administrator account)
+     * `DomainName\Workstation-Support-Admins` (dedicated Tier 2 support team group, if used)
+     * *Leave out `Domain Users` or any other general domain accounts.*
+   * Applying this GPO will overwrite the membership of the local Administrators group, immediately removing any account not explicitly listed.
+4. **Configure Local Account Token Filter Policy**:
+   * Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+   * Right-click **Registry** and select **New** -> **Registry Item**.
+   * Set **Action**: `Update`
+   * Set **Hive**: `HKEY_LOCAL_MACHINE`
+   * Set **Key Path**: `SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
+   * Set **Value name**: `LocalAccountTokenFilterPolicy`
+   * Set **Value type**: `REG_DWORD`
+   * Set **Value data**: `0`
 
 ---
 
 <a id="08-endpoints-restrict-local-admins-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to audit and remediate unauthorized administrative accounts in the local Administrators group.
+Run the following scripts locally to audit and remediate unauthorized administrative accounts in the local Administrators group and enforce local account remote token restrictions.
 
 [Download Script: Clean-LocalAdministrators.ps1](implementation_scripts/Clean-LocalAdministrators.ps1)
 
 ```powershell
 <a id="08-endpoints-restrict-local-admins-md-clean-localadministratorsps1"></a>
 # Clean-LocalAdministrators.ps1
-<a id="08-endpoints-restrict-local-admins-md-removes-unauthorized-domain-or-local-accounts-from-the-local-administrators-group"></a>
-# Removes unauthorized domain or local accounts from the local Administrators group.
+<a id="08-endpoints-restrict-local-admins-md-removes-unauthorized-domain-or-local-accounts-from-the-local-administrators-group-and-disables-local-account-remote-token-filtering-bypass"></a>
+# Removes unauthorized domain or local accounts from the local Administrators group and disables local account remote token filtering bypass.
 
 Write-Host "--- Restricting Local Administrators Group ---" -ForegroundColor Cyan
 
@@ -15973,16 +16443,31 @@ if ($LocalAdmins) {
 } else {
     Write-Error "Could not retrieve members of local Administrators group."
 }
+
+<a id="08-endpoints-restrict-local-admins-md-enforce-localaccounttokenfilterpolicy-0"></a>
+# Enforce LocalAccountTokenFilterPolicy = 0
+$RegistryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "LocalAccountTokenFilterPolicy"
+
+try {
+    if (-not (Test-Path $RegistryPath)) {
+        New-Item -Path $RegistryPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegistryPath -Name $ValueName -Value 0 -Type DWord -Force | Out-Null
+    Write-Host "[+] LocalAccountTokenFilterPolicy configured to 0." -ForegroundColor Green
+} catch {
+    Write-Error "Failed to configure LocalAccountTokenFilterPolicy. Error: $($_.Exception.Message)"
+}
 ```
 
-*To audit local Administrators group memberships:*
+*To audit local Administrators group memberships and UAC token filtering policy:*
 [Download Script: Test-LocalAdministrators.ps1](audit_scripts/Test-LocalAdministrators.ps1)
 
 ```powershell
 <a id="08-endpoints-restrict-local-admins-md-test-localadministratorsps1"></a>
 # Test-LocalAdministrators.ps1
-<a id="08-endpoints-restrict-local-admins-md-audits-membership-of-the-local-administrators-group-to-find-unauthorized-domain-accounts"></a>
-# Audits membership of the local Administrators group to find unauthorized domain accounts.
+<a id="08-endpoints-restrict-local-admins-md-audits-membership-of-the-local-administrators-group-and-checks-local-account-remote-token-filtering-bypass-policy"></a>
+# Audits membership of the local Administrators group and checks local account remote token filtering bypass policy.
 
 Write-Host "--- Auditing Local Administrators Group ---" -ForegroundColor Cyan
 
@@ -16002,6 +16487,24 @@ if ($LocalAdmins) {
     }
 } else {
     Write-Error "Failed to retrieve local Administrators group members."
+}
+
+<a id="08-endpoints-restrict-local-admins-md-audit-localaccounttokenfilterpolicy"></a>
+# Audit LocalAccountTokenFilterPolicy
+$RegistryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "LocalAccountTokenFilterPolicy"
+
+if (Test-Path $RegistryPath) {
+    $Val = (Get-ItemProperty -Path $RegistryPath -Name $ValueName -ErrorAction SilentlyContinue).$ValueName
+    if ($Val -eq 0) {
+        Write-Host "[+] LocalAccountTokenFilterPolicy is configured correctly (0)." -ForegroundColor Green
+    } elseif ($null -eq $Val) {
+        Write-Host "[-] LocalAccountTokenFilterPolicy is not explicitly set (Expected: 0)." -ForegroundColor Red
+    } else {
+        Write-Host "[-] LocalAccountTokenFilterPolicy is vulnerable: $Val (Expected: 0)." -ForegroundColor Red
+    }
+} else {
+    Write-Host "[-] LocalAccountTokenFilterPolicy is not configured (Expected: 0)." -ForegroundColor Red
 }
 ```
 
@@ -16031,25 +16534,34 @@ if ($LocalAdmins) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection
-  * Computer Configuration\Preferences\Windows Settings\Environment
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR
-  * HKLM\SOFTWARE\Microsoft\Windows Defender\Features
-  * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
+  * **GPO Paths**:
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus`
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
+    * `Computer Configuration\Administrative Templates\Windows Components\File Explorer`
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender`
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR`
+    * `HKLM\SOFTWARE\Microsoft\Windows Defender\Features`
+    * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment`
+    * `HKLM\SOFTWARE\Microsoft\AMSI`
+      * `FeatureBits` = `2` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+      * `EnableSmartScreen` = `1` (REG_DWORD)
+      * `ShellSmartScreenLevel` = `Block` (REG_SZ)
 
 ---
 
 <a id="08-endpoints-defender-antivirus-md-rationale"></a>
 ## Rationale
-Windows Defender Antivirus is the primary endpoint protection suite on Windows platforms. To establish a robust defense-in-depth posture against modern endpoint threat vectors, the basic protection must be augmented with Exploit Guard, Tamper Protection, and process isolation.
+Windows Defender Antivirus is the primary endpoint protection suite on Windows platforms. To establish a robust defense-in-depth posture against modern endpoint threat vectors, the basic protection must be augmented with Exploit Guard, Tamper Protection, SmartScreen, and process isolation.
 
-This control introduces three primary hardening mechanisms:
+This control introduces four primary hardening mechanisms:
 1. **Attack Surface Reduction (ASR) Rules**: Restricts behaviors commonly exploited by malware. By blocking the execution of obfuscated scripts, restricting child process creation from Office/Adobe products, protecting the LSASS process from credential dumping, and limiting unsafe process execution from USB drives, ASR severely curtails the initial access and lateral movement capabilities of threat actors.
 2. **Tamper Protection**: Secures the Defender Antivirus services and registry keys. Without this control, an administrative account compromised via lateral movement could disable Defender or add exclusions to permit payload execution.
 3. **Sandbox Execution (AppContainer)**: Forces the Defender service (MsMpEng.exe) to run in a restricted AppContainer sandbox. Since antimalware engines parse untrusted, potentially malicious file structures, a zero-day vulnerability in the parsing engine could lead to system compromise. Sandbox execution mitigates this by containing any exploit inside the AppContainer, preventing privilege escalation.
+4. **Windows Defender SmartScreen**: Protects against phishing and malware by warning or blocking users before running unrecognized software or visiting potentially dangerous sites. Enforcing a SmartScreen level of "Block" prevents users from bypassing security warnings and executing unauthorized applications.
+5. **AMSI Authenticode Signature Verification (`FeatureBits`)**: The Antimalware Scan Interface (AMSI) allows applications to integrate with the installed antivirus product to scan script content and buffers. Attackers may attempt to register rogue AMSI providers to intercept or bypass scans. Enforcing Authenticode signature checks on registered AMSI providers (`FeatureBits` = `2`) ensures that only signed and trusted AMSI provider DLLs are loaded by applications.
 
 ---
 
@@ -16058,6 +16570,8 @@ This control introduces three primary hardening mechanisms:
 * **ASR Administrative Impact**: Enabling ASR rules can block legacy administrative scripts or third-party orchestration tools that rely on WMI/PSExec or execute obfuscated administrative wrappers. Extensive audit testing is recommended prior to broad enforcement.
 * **Office Application Rules**: Rules related to Microsoft Office (e.g., blocking child processes) apply only to endpoints where productivity suites are installed. They will have no impact on member servers without Office.
 * **Sandbox Boot Overhead**: Setting `MP_FORCE_USE_SANDBOX` requires a reboot to initialize the scanning process within the AppContainer sandbox. There is negligible performance overhead once initialized.
+* **SmartScreen Impact**: Standard users will be blocked from launching unrecognized software. Support staff must assist with authorizing internal or uncertified custom business applications.
+* **AMSI Provider Signatures**: Any third-party antimalware software that registers itself as an AMSI provider must possess a valid, trusted Authenticode signature. Unsigned or self-signed providers will be blocked from loading.
 
 ---
 
@@ -16073,136 +16587,136 @@ This control introduces three primary hardening mechanisms:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus`
 4. Configure the following settings:
    * **Policy**: `Turn off Windows Defender Antivirus`
-   * **Setting**: `Disabled` (ensures Defender is active)
+     * **Setting**: `Disabled` (ensures Defender is active)
    * **Policy**: `Configure detection for potentially unwanted applications`
-   * **Setting**: `Enabled` (Select **Block** in options)
+     * **Setting**: `Enabled` (Select **Block** in options)
    * **Policy**: `Configure local administrator merge behavior for lists`
-   * **Setting**: `Disabled` (prevents local list merging)
+     * **Setting**: `Disabled` (prevents local list merging)
    * **Policy**: `Randomize scheduled task times`
-   * **Setting**: `Enabled`
+     * **Setting**: `Enabled`
 5. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Real-time Protection`
 6. Configure the following settings:
    * **Policy**: `Turn off real-time protection`
-   * **Setting**: `Disabled`
+     * **Setting**: `Disabled`
    * **Policy**: `Turn on behavior monitoring`
-   * **Setting**: `Enabled`
+     * **Setting**: `Enabled`
    * **Policy**: `Scan all downloaded files and attachments`
-   * **Setting**: `Enabled`
+     * **Setting**: `Enabled`
    * **Policy**: `Turn on script scanning`
-   * **Setting**: `Enabled`
+     * **Setting**: `Enabled`
    * **Policy**: `Configure real-time protection and Security Intelligence Updates during OOBE`
-   * **Setting**: `Enabled`
+     * **Setting**: `Enabled`
 7. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Exclusions`
 8. Configure the following settings:
    * **Policy**: `Prevent users from configuring exclusions`
-   * **Setting**: `Enabled`
+     * **Setting**: `Enabled`
    * **Policy**: `Control whether or not exclusions are visible to Local Admins`
-   * **Setting**: `Enabled`
+     * **Setting**: `Enabled`
    * **Policy**: `Turn off Auto Exclusions`
-   * **Setting**: `Disabled` (ensures automatic exclusions remain active)
+     * **Setting**: `Disabled` (ensures automatic exclusions remain active)
 9. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MAPS`
 10. Configure the following settings:
     * **Policy**: `Join Microsoft MAPS`
-    * **Setting**: `Enabled` (Select `Advanced MAPS` in options)
+      * **Setting**: `Enabled` (Select `Advanced MAPS` in options)
     * **Policy**: `Send file samples when further analysis is required`
-    * **Setting**: `Enabled` (Select `Send safe samples` in options)
+      * **Setting**: `Enabled` (Select `Send safe samples` in options)
 11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
 12. Configure the following settings:
     * **Policy**: `Select cloud protection level`
-    * **Setting**: `Enabled` (Select `High blocking level` in options)
+      * **Setting**: `Enabled` (Select `High blocking level` in options)
     * **Policy**: `Configure extended cloud check`
-    * **Setting**: `Enabled` (Select `50` seconds in options)
+      * **Setting**: `Enabled` (Select `50` seconds in options)
     * **Policy**: `Enable file hash computation feature`
-    * **Setting**: `Enabled`
+      * **Setting**: `Enabled`
 13. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
 14. Configure the following settings:
     * **Policy**: `Scan removable drives`
-    * **Setting**: `Enabled`
+      * **Setting**: `Enabled`
     * **Policy**: `Scan excluded files and directories during quick scans`
-    * **Setting**: `Enabled`
+      * **Setting**: `Enabled`
     * **Policy**: `Turn off scanning of packed executables`
-    * **Setting**: `Disabled` (ensures packed files are scanned)
+      * **Setting**: `Disabled` (ensures packed files are scanned)
     * **Policy**: `Specify the day of the week to run a scheduled scan`
-    * **Setting**: `Enabled` (Select `Every day` or `0` in options)
+      * **Setting**: `Enabled` (Select `Every day` or `0` in options)
     * **Policy**: `Turn on e-mail scanning`
-    * **Setting**: `Enabled`
+      * **Setting**: `Enabled`
     * **Policy**: `Turn on heuristics`
-    * **Setting**: `Enabled`
+      * **Setting**: `Enabled`
 15. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Network Protection`
 16. Configure the following settings:
     * **Policy**: `Prevent users and apps from accessing dangerous websites`
-    * **Setting**: `Enabled` (Select `Block` in options)
+      * **Setting**: `Enabled` (Select `Block` in options)
     * **Policy**: `This setting controls whether Network Protection is allowed to be configured into block or audit mode on Windows Server`
-    * **Setting**: `Enabled`
+      * **Setting**: `Enabled`
 17. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
 18. Configure the setting:
     * **Policy**: `Configure Attack Surface Reduction rules`
-    * **Setting**: `Enabled`
-    * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block):
-      * `56a863a9-875e-4185-98a7-b882c64b5ce5` (Block abuse of exploited vulnerable signed drivers)
-      * `7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c` (Block Adobe Reader from creating child processes)
-      * `d4f940ab-401b-4efc-aadc-ad5f3c50688a` (Block all Office applications from creating child processes)
-      * `9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2` (Block credential stealing from the Windows Local Security Authority subsystem)
-      * `be9ba2d9-53ea-4cdc-84e5-9b1eeee46550` (Block executable content from email client and webmail)
-      * `01443614-cd74-433a-b99e-2ecdc07bfc25` (Block executable files from running unless they meet a prevalence, age, or trusted list criterion)
-      * `5beb7efe-fd9a-4556-801d-275e5ffc04cc` (Block execution of potentially obfuscated scripts)
-      * `d3e037e1-3eb8-44c8-a917-57927947596d` (Block JavaScript or VBScript from launching downloaded executable content)
-      * `3b576869-a4ec-4529-8536-b80a7769e899` (Block Office applications from creating executable content)
-      * `75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84` (Block Office applications from injecting code into other processes)
-      * `26190899-1602-49e8-8b27-eb1d0a1ce869` (Block Office communication application from creating child processes)
-      * `e6db77e5-3df2-4cf1-b95a-636979351e5b` (Block persistence through WMI event subscription)
-      * `d1e49aac-8f56-4280-b9ba-993a6d77406c` (Block process creations originating from PSExec and WMI commands)
-      * `b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4` (Block untrusted and unsigned processes that run from USB)
-      * `92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b` (Block Win32 API calls from Office macros)
-      * `c1db55ab-c21a-4637-bb3f-a12568109d35` (Use advanced protection against ransomware)
+      * **Setting**: `Enabled`
+      * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block):
+        * `56a863a9-875e-4185-98a7-b882c64b5ce5` (Block abuse of exploited vulnerable signed drivers)
+        * `7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c` (Block Adobe Reader from creating child processes)
+        * `d4f940ab-401b-4efc-aadc-ad5f3c50688a` (Block all Office applications from creating child processes)
+        * `9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2` (Block credential stealing from the Windows Local Security Authority subsystem)
+        * `be9ba2d9-53ea-4cdc-84e5-9b1eeee46550` (Block executable content from email client and webmail)
+        * `01443614-cd74-433a-b99e-2ecdc07bfc25` (Block executable files from running unless they meet a prevalence, age, or trusted list criterion)
+        * `5beb7efe-fd9a-4556-801d-275e5ffc04cc` (Block execution of potentially obfuscated scripts)
+        * `d3e037e1-3eb8-44c8-a917-57927947596d` (Block JavaScript or VBScript from launching downloaded executable content)
+        * `3b576869-a4ec-4529-8536-b80a7769e899` (Block Office applications from creating executable content)
+        * `75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84` (Block Office applications from injecting code into other processes)
+        * `26190899-1602-49e8-8b27-eb1d0a1ce869` (Block Office communication application from creating child processes)
+        * `e6db77e5-3df2-4cf1-b95a-636979351e5b` (Block persistence through WMI event subscription)
+        * `d1e49aac-8f56-4280-b9ba-993a6d77406c` (Block process creations originating from PSExec and WMI commands)
+        * `b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4` (Block untrusted and unsigned processes that run from USB)
+        * `92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b` (Block Win32 API calls from Office macros)
+        * `c1db55ab-c21a-4637-bb3f-a12568109d35` (Use advanced protection against ransomware)
 19. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Network Inspection System`
 20. Configure the following settings:
     * **Policy**: `Convert warn verdict to block`
-    * **Setting**: `Enabled`
+      * **Setting**: `Enabled`
     * **Policy**: `Turn on asynchronous inspection`
-    * **Setting**: `Enabled`
+      * **Setting**: `Enabled`
 21. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Reporting`
 22. Configure the setting:
     * **Policy**: `Configure whether to report Dynamic Signature dropped events`
-    * **Setting**: `Enabled`
+      * **Setting**: `Enabled`
 23. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Security Intelligence Updates`
 24. Configure the following settings:
     * **Policy**: `Define the number of days before spyware security intelligence is considered out of date`
-    * **Setting**: `Enabled` (Select `7` days in options)
+      * **Setting**: `Enabled` (Select `7` days in options)
     * **Policy**: `Define the number of days before virus security intelligence is considered out of date`
-    * **Setting**: `Enabled` (Select `7` days in options)
+      * **Setting**: `Enabled` (Select `7` days in options)
     * **Policy**: `Specify the day of the week to check for security intelligence updates`
-    * **Setting**: `Enabled` (Select `Every day` or `0` in options)
+      * **Setting**: `Enabled` (Select `Every day` or `0` in options)
 25. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Threats`
 26. Configure the settings:
     * **Policy**: `Specify threat alert levels at which default action should not be taken when detected`
-    * **Setting**: `Enabled`
-    * Click **Show...** and enter the following threat levels as Value Names, with Value set to `2` (Quarantine):
-      * `1` (Low severity) -> `2`
-      * `2` (Medium severity) -> `2`
-      * `4` (High severity) -> `2`
-      * `5` (Severe severity) -> `2`
+      * **Setting**: `Enabled`
+      * Click **Show...** and enter the following threat levels as Value Names, with Value set to `2` (Quarantine):
+        * `1` (Low severity) -> `2`
+        * `2` (Medium severity) -> `2`
+        * `4` (High severity) -> `2`
+        * `5` (Severe severity) -> `2`
 27. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Family options`
 28. Configure the setting:
     * **Policy**: `Hide the Family options area`
-    * **Setting**: `Enabled`
+      * **Setting**: `Enabled`
 29. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
 30. Configure the setting:
     * **Policy**: `Protect Windows Security settings from tampering`
-    * **Setting**: `Enabled` (Select **Block** or **On** depending on ADMX version)
+      * **Setting**: `Enabled` (Select **Block** or **On** depending on ADMX version)
 31. Navigate to:
     `Computer Configuration\Preferences\Windows Settings\Environment`
 32. Right-click **Environment**, select **New -> Environment Variable**.
@@ -16211,21 +16725,41 @@ This control introduces three primary hardening mechanisms:
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
     * **Value**: `1`
+34. Navigate to:
+   `Computer Configuration\Administrative Templates\Windows Components\File Explorer`
+35. Configure the following setting:
+   * **Policy**: `Configure Windows Defender SmartScreen`
+     * **Setting**: `Enabled`
+     * **Options**: Select `Require approval from an administrator before running unrecognized software` (forces `ShellSmartScreenLevel` to `Block` and `EnableSmartScreen` to `1`)
+
+<a id="08-endpoints-defender-antivirus-md-step-36-deploy-amsi-authenticode-verification-via-gpo-preferences"></a>
+#### Step 36: Deploy AMSI Authenticode Verification via GPO Preferences
+Since AMSI provider signature verification is not exposed in standard ADMX templates, deploy it via Registry GPO Preferences:
+1. Within the endpoints GPO, navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+2. Right-click **Registry**, select **New** -> **Registry Item**.
+3. Configure:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\Microsoft\AMSI`
+   * **Value name**: `FeatureBits`
+   * **Value type**: `REG_DWORD`
+   * **Value data**: `2` (Decimal)
 
 ---
 
 <a id="08-endpoints-defender-antivirus-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to configure Windows Defender baseline protection, Attack Surface Reduction rules, Tamper Protection, and Sandbox execution.
+Run the following scripts locally to configure Windows Defender baseline protection, Attack Surface Reduction rules, Tamper Protection, SmartScreen, and Sandbox execution.
 
 [Download Script: Set-DefenderAdvancedBaseline.ps1](implementation_scripts/Set-DefenderAdvancedBaseline.ps1)
 
 ```powershell
 <a id="08-endpoints-defender-antivirus-md-set-defenderadvancedbaselineps1"></a>
 # Set-DefenderAdvancedBaseline.ps1
-<a id="08-endpoints-defender-antivirus-md-description-configures-advanced-windows-defender-antivirus-options-asr-rules-tamper-protection-and-sandbox-execution"></a>
-# Description: Configures advanced Windows Defender Antivirus options, ASR rules, Tamper Protection, and Sandbox execution.
+<a id="08-endpoints-defender-antivirus-md-configures-advanced-windows-defender-antivirus-options-asr-rules-tamper-protection-smartscreen-and-sandbox-execution"></a>
+# Configures advanced Windows Defender Antivirus options, ASR rules, Tamper Protection, SmartScreen, and Sandbox execution.
 
 Write-Host "Applying Windows Defender Advanced Baseline..." -ForegroundColor Cyan
 
@@ -16257,88 +16791,88 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
 
 <a id="08-endpoints-defender-antivirus-md-2-configure-exclusion-restrictions-and-local-merges-in-registry"></a>
 # 2. Configure Exclusion restrictions and Local Merges in Registry
-$DefenderPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender"
+$DefenderPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
 if (-not (Test-Path $DefenderPath)) {
     New-Item -Path $DefenderPath -Force | Out-Null
 }
-Set-ItemProperty -Path $DefenderPath -Name "DisableAntiSpyware" -Value 0 -Type DWord
-Set-ItemProperty -Path $DefenderPath -Name "PUAProtection" -Value 1 -Type DWord
-Set-ItemProperty -Path $DefenderPath -Name "DisableLocalAdminMerge" -Value 1 -Type DWord
-Set-ItemProperty -Path $DefenderPath -Name "HideExclusionsFromLocalAdmins" -Value 1 -Type DWord
-Set-ItemProperty -Path $DefenderPath -Name "RandomizeScheduleTaskTimes" -Value 1 -Type DWord
+Set-ItemProperty -Path $DefenderPath -Name "DisableAntiSpyware" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $DefenderPath -Name "PUAProtection" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $DefenderPath -Name "DisableLocalAdminMerge" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $DefenderPath -Name "HideExclusionsFromLocalAdmins" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $DefenderPath -Name "RandomizeScheduleTaskTimes" -Value 1 -Type DWord -Force
 
-$ExclPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Exclusions"
+$ExclPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions"
 if (-not (Test-Path $ExclPath)) {
     New-Item -Path $ExclPath -Force | Out-Null
 }
-Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord
-Set-ItemProperty -Path $ExclPath -Name "DisableAutoExclusions" -Value 0 -Type DWord
+Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $ExclPath -Name "DisableAutoExclusions" -Value 0 -Type DWord -Force
 
 <a id="08-endpoints-defender-antivirus-md-3-configure-nis-reporting-engine-and-scan-settings-in-registry"></a>
 # 3. Configure NIS, Reporting, Engine, and Scan Settings in Registry
-$FeaturesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Features"
+$FeaturesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
     New-Item -Path $FeaturesPath -Force | Out-Null
 }
-Set-ItemProperty -Path $FeaturesPath -Name "PassiveRemediation" -Value 1 -Type DWord
+Set-ItemProperty -Path $FeaturesPath -Name "PassiveRemediation" -Value 1 -Type DWord -Force
 
-$NetProtPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\Network Protection"
+$NetProtPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\Network Protection"
 if (-not (Test-Path $NetProtPath)) {
     New-Item -Path $NetProtPath -Force | Out-Null
 }
-Set-ItemProperty -Path $NetProtPath -Name "AllowNetworkProtectionOnWinServer" -Value 1 -Type DWord
+Set-ItemProperty -Path $NetProtPath -Name "AllowNetworkProtectionOnWinServer" -Value 1 -Type DWord -Force
 
-$MpEnginePath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\MpEngine"
+$MpEnginePath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine"
 if (-not (Test-Path $MpEnginePath)) {
     New-Item -Path $MpEnginePath -Force | Out-Null
 }
-Set-ItemProperty -Path $MpEnginePath -Name "MpBafsExtendedTimeout" -Value 50 -Type DWord
-Set-ItemProperty -Path $MpEnginePath -Name "EnableFileHashComputation" -Value 1 -Type DWord
+Set-ItemProperty -Path $MpEnginePath -Name "MpBafsExtendedTimeout" -Value 50 -Type DWord -Force
+Set-ItemProperty -Path $MpEnginePath -Name "EnableFileHashComputation" -Value 1 -Type DWord -Force
 
-$NisPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\NIS"
+$NisPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\NIS"
 if (-not (Test-Path $NisPath)) {
     New-Item -Path $NisPath -Force | Out-Null
 }
-Set-ItemProperty -Path $NisPath -Name "EnableConvertWarnToBlock" -Value 1 -Type DWord
-Set-ItemProperty -Path $NisPath -Name "AllowSwitchToAsyncInspection" -Value 1 -Type DWord
+Set-ItemProperty -Path $NisPath -Name "EnableConvertWarnToBlock" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $NisPath -Name "AllowSwitchToAsyncInspection" -Value 1 -Type DWord -Force
 
-$RtpPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection"
+$RtpPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"
 if (-not (Test-Path $RtpPath)) {
     New-Item -Path $RtpPath -Force | Out-Null
 }
-Set-ItemProperty -Path $RtpPath -Name "OobeEnableRtpAndSigUpdate" -Value 1 -Type DWord
+Set-ItemProperty -Path $RtpPath -Name "OobeEnableRtpAndSigUpdate" -Value 1 -Type DWord -Force
 
-$RepPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Reporting"
+$RepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Reporting"
 if (-not (Test-Path $RepPath)) {
     New-Item -Path $RepPath -Force | Out-Null
 }
-Set-ItemProperty -Path $RepPath -Name "EnableDynamicSignatureDroppedEventReporting" -Value 1 -Type DWord
+Set-ItemProperty -Path $RepPath -Name "EnableDynamicSignatureDroppedEventReporting" -Value 1 -Type DWord -Force
 
-$ScanPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Scan"
+$ScanPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
 if (-not (Test-Path $ScanPath)) {
     New-Item -Path $ScanPath -Force | Out-Null
 }
-Set-ItemProperty -Path $ScanPath -Name "QuickScanIncludeExclusions" -Value 1 -Type DWord
-Set-ItemProperty -Path $ScanPath -Name "DisablePackedExeScanning" -Value 0 -Type DWord
-Set-ItemProperty -Path $ScanPath -Name "ScheduleDay" -Value 0 -Type DWord
-Set-ItemProperty -Path $ScanPath -Name "DisableEmailScanning" -Value 0 -Type DWord
-Set-ItemProperty -Path $ScanPath -Name "DisableHeuristics" -Value 0 -Type DWord
+Set-ItemProperty -Path $ScanPath -Name "QuickScanIncludeExclusions" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $ScanPath -Name "DisablePackedExeScanning" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $ScanPath -Name "ScheduleDay" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $ScanPath -Name "DisableEmailScanning" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $ScanPath -Name "DisableHeuristics" -Value 0 -Type DWord -Force
 
-$SigPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Signature Updates"
+$SigPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates"
 if (-not (Test-Path $SigPath)) {
     New-Item -Path $SigPath -Force | Out-Null
 }
-Set-ItemProperty -Path $SigPath -Name "ASSignatureDue" -Value 7 -Type DWord
-Set-ItemProperty -Path $SigPath -Name "AVSignatureDue" -Value 7 -Type DWord
-Set-ItemProperty -Path $SigPath -Name "ScheduleDay" -Value 0 -Type DWord
+Set-ItemProperty -Path $SigPath -Name "ASSignatureDue" -Value 7 -Type DWord -Force
+Set-ItemProperty -Path $SigPath -Name "AVSignatureDue" -Value 7 -Type DWord -Force
+Set-ItemProperty -Path $SigPath -Name "ScheduleDay" -Value 0 -Type DWord -Force
 
 <a id="08-endpoints-defender-antivirus-md-4-configure-asr-rules-in-registry"></a>
 # 4. Configure ASR Rules in Registry
-$AsrPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR"
+$AsrPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR"
 if (-not (Test-Path $AsrPath)) {
     New-Item -Path $AsrPath -Force | Out-Null
 }
-$AsrRulesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules"
+$AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
 if (-not (Test-Path $AsrRulesPath)) {
     New-Item -Path $AsrRulesPath -Force | Out-Null
 }
@@ -16364,41 +16898,41 @@ $AsrRules = @{
 
 foreach ($RuleId in $AsrRules.Keys) {
     $ActionValue = $AsrRules[$RuleId]
-    Set-ItemProperty -Path $AsrRulesPath -Name $RuleId -Value $ActionValue -Type String
+    Set-ItemProperty -Path $AsrRulesPath -Name $RuleId -Value $ActionValue -Type String -Force
 }
 Write-Host "ASR rules configured in registry." -ForegroundColor Green
 
 <a id="08-endpoints-defender-antivirus-md-5-configure-threat-severity-default-quarantine-actions"></a>
 # 5. Configure Threat severity default quarantine actions
-$ThreatsPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Threats"
+$ThreatsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Threats"
 if (-not (Test-Path $ThreatsPath)) {
     New-Item -Path $ThreatsPath -Force | Out-Null
 }
-Set-ItemProperty -Path $ThreatsPath -Name "Threats_ThreatSeverityDefaultAction" -Value 1 -Type DWord
+Set-ItemProperty -Path $ThreatsPath -Name "Threats_ThreatSeverityDefaultAction" -Value 1 -Type DWord -Force
 
-$ThreatsSevPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Threats\\ThreatSeverityDefaultAction"
+$ThreatsSevPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction"
 if (-not (Test-Path $ThreatsSevPath)) {
     New-Item -Path $ThreatsSevPath -Force | Out-Null
 }
-Set-ItemProperty -Path $ThreatsSevPath -Name "1" -Value 2 -Type DWord
-Set-ItemProperty -Path $ThreatsSevPath -Name "2" -Value 2 -Type DWord
-Set-ItemProperty -Path $ThreatsSevPath -Name "4" -Value 2 -Type DWord
-Set-ItemProperty -Path $ThreatsSevPath -Name "5" -Value 2 -Type DWord
+Set-ItemProperty -Path $ThreatsSevPath -Name "1" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $ThreatsSevPath -Name "2" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $ThreatsSevPath -Name "4" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $ThreatsSevPath -Name "5" -Value 2 -Type DWord -Force
 
-$FamilyPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender Security Center\\Family options"
+$FamilyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Family options"
 if (-not (Test-Path $FamilyPath)) {
     New-Item -Path $FamilyPath -Force | Out-Null
 }
-Set-ItemProperty -Path $FamilyPath -Name "UILockdown" -Value 1 -Type DWord
+Set-ItemProperty -Path $FamilyPath -Name "UILockdown" -Value 1 -Type DWord -Force
 
 <a id="08-endpoints-defender-antivirus-md-6-configure-tamper-protection-in-registry"></a>
 # 6. Configure Tamper Protection in Registry
-$FeaturesPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows Defender\\Features"
+$FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
     New-Item -Path $FeaturesPath -Force | Out-Null
 }
 try {
-    Set-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -Value 5 -Type DWord -ErrorAction Stop
+    Set-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -Value 5 -Type DWord -ErrorAction Stop -Force
     Write-Host "Tamper Protection enabled in registry." -ForegroundColor Green
 } catch {
     Write-Warning "Failed to set Tamper Protection in registry. Access is typically restricted to TrustedInstaller. Use GPO or Defender portal management."
@@ -16406,12 +16940,31 @@ try {
 
 <a id="08-endpoints-defender-antivirus-md-7-configure-sandbox-execution-environment-variable"></a>
 # 7. Configure Sandbox Execution Environment Variable
-$EnvPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
+$EnvPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
 if (-not (Test-Path $EnvPath)) {
     New-Item -Path $EnvPath -Force | Out-Null
 }
-Set-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -Value "1" -Type String
+Set-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -Value "1" -Type String -Force
 Write-Host "Sandbox Execution environment variable configured." -ForegroundColor Green
+
+<a id="08-endpoints-defender-antivirus-md-8-configure-smartscreen-enablesmartscreen-1-shellsmartscreenlevel-block"></a>
+# 8. Configure SmartScreen (EnableSmartScreen = 1, ShellSmartScreenLevel = Block)
+$SmartScreenPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+if (-not (Test-Path $SmartScreenPath)) {
+    New-Item -Path $SmartScreenPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SmartScreenPath -Name "EnableSmartScreen" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $SmartScreenPath -Name "ShellSmartScreenLevel" -Value "Block" -Type String -Force
+Write-Host "[+] Windows Defender SmartScreen configured in registry." -ForegroundColor Green
+
+<a id="08-endpoints-defender-antivirus-md-9-configure-amsi-authenticode-signature-verification-featurebits-2"></a>
+# 9. Configure AMSI Authenticode Signature Verification (FeatureBits = 2)
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (-not (Test-Path $AmsiPath)) {
+    New-Item -Path $AmsiPath -Force | Out-Null
+}
+Set-ItemProperty -Path $AmsiPath -Name "FeatureBits" -Value 2 -Type DWord -Force
+Write-Host "[+] AMSI Authenticode signature verification enabled." -ForegroundColor Green
 
 Write-Host "Defender advanced baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan
 ```
@@ -16422,8 +16975,8 @@ Write-Host "Defender advanced baseline configuration completed. A reboot is requ
 ```powershell
 <a id="08-endpoints-defender-antivirus-md-get-defenderadvancedstatusps1"></a>
 # Get-DefenderAdvancedStatus.ps1
-<a id="08-endpoints-defender-antivirus-md-description-audits-the-registry-and-preferences-for-asr-tamper-protection-and-sandbox-status"></a>
-# Description: Audits the registry and preferences for ASR, Tamper Protection, and Sandbox status.
+<a id="08-endpoints-defender-antivirus-md-audits-the-registry-and-preferences-for-asr-tamper-protection-smartscreen-and-sandbox-status"></a>
+# Audits the registry and preferences for ASR, Tamper Protection, SmartScreen, and Sandbox status.
 
 Write-Host "--- Auditing Windows Defender Advanced Hardening Status ---" -ForegroundColor Cyan
 
@@ -16459,7 +17012,7 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
 
 <a id="08-endpoints-defender-antivirus-md-2-audit-sandbox-variable"></a>
 # 2. Audit Sandbox variable
-$EnvPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
+$EnvPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
 $SandboxVar = Get-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -ErrorAction SilentlyContinue
 if ($SandboxVar -and $SandboxVar.MP_FORCE_USE_SANDBOX -eq "1") {
     Write-Host "    - Sandbox Execution: Enabled (MP_FORCE_USE_SANDBOX = 1)" -ForegroundColor Green
@@ -16469,7 +17022,7 @@ if ($SandboxVar -and $SandboxVar.MP_FORCE_USE_SANDBOX -eq "1") {
 
 <a id="08-endpoints-defender-antivirus-md-3-audit-tamper-protection-registry"></a>
 # 3. Audit Tamper Protection registry
-$FeaturesPath = "HKLM:\\SOFTWARE\\Microsoft\Windows Defender\\Features"
+$FeaturesPath = "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features"
 $TamperVal = Get-ItemProperty -Path $FeaturesPath -Name "TamperProtection" -ErrorAction SilentlyContinue
 if ($TamperVal -and $TamperVal.TamperProtection -eq 5) {
     Write-Host "    - Tamper Protection: Enabled (TamperProtection = 5)" -ForegroundColor Green
@@ -16477,9 +17030,25 @@ if ($TamperVal -and $TamperVal.TamperProtection -eq 5) {
     Write-Host "    - Tamper Protection: NOT ENABLED or Not Managed via Registry (Value: $($TamperVal.TamperProtection))" -ForegroundColor Yellow
 }
 
-<a id="08-endpoints-defender-antivirus-md-4-audit-asr-rules"></a>
-# 4. Audit ASR Rules
-$AsrRulesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules"
+<a id="08-endpoints-defender-antivirus-md-4-audit-smartscreen-configurations"></a>
+# 4. Audit SmartScreen configurations
+$SmartScreenPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+if (Test-Path $SmartScreenPath) {
+    $EnableSS = Get-ItemProperty -Path $SmartScreenPath -Name "EnableSmartScreen" -ErrorAction SilentlyContinue
+    $SSLevel = Get-ItemProperty -Path $SmartScreenPath -Name "ShellSmartScreenLevel" -ErrorAction SilentlyContinue
+    
+    $EnableSSVal = if ($EnableSS) { $EnableSS.EnableSmartScreen } else { $null }
+    $SSLevelVal = if ($SSLevel) { $SSLevel.ShellSmartScreenLevel } else { $null }
+    
+    $SSColor = if ($EnableSSVal -eq 1 -and $SSLevelVal -eq "Block") { "Green" } else { "Red" }
+    Write-Host "    - SmartScreen Enable: $EnableSSVal (Expected: 1) | Level: $SSLevelVal (Expected: Block)" -ForegroundColor $SSColor
+} else {
+    Write-Host "    - SmartScreen Registry Path does not exist." -ForegroundColor Red
+}
+
+<a id="08-endpoints-defender-antivirus-md-5-audit-asr-rules"></a>
+# 5. Audit ASR Rules
+$AsrRulesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
 $AsrRulesCount = 0
 $AsrBlockedCount = 0
 
@@ -16497,33 +17066,33 @@ if (Test-Path $AsrRulesPath) {
 $AsrColor = if ($AsrBlockedCount -eq 16) { "Green" } else { "Red" }
 Write-Host "    - Attack Surface Reduction: $AsrBlockedCount of 16 rules enforced in Block mode" -ForegroundColor $AsrColor
 
-<a id="08-endpoints-defender-antivirus-md-5-audit-registry-based-stig-configurations"></a>
-# 5. Audit Registry-based STIG configurations
+<a id="08-endpoints-defender-antivirus-md-6-audit-registry-based-stig-configurations"></a>
+# 6. Audit Registry-based STIG configurations
 Write-Host "    - Registry configuration checks:" -ForegroundColor Gray
-$DefenderPoliciesPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender"
+$DefenderPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
 
 $CheckKeys = @{
     "DisableLocalAdminMerge" = @{ Path = $DefenderPoliciesPath; Expected = 1 }
     "HideExclusionsFromLocalAdmins" = @{ Path = $DefenderPoliciesPath; Expected = 1 }
     "RandomizeScheduleTaskTimes" = @{ Path = $DefenderPoliciesPath; Expected = 1 }
-    "DisableAutoExclusions" = @{ Path = "$DefenderPoliciesPath\\Exclusions"; Expected = 0 }
-    "PassiveRemediation" = @{ Path = "$DefenderPoliciesPath\\Features"; Expected = 1 }
-    "AllowNetworkProtectionOnWinServer" = @{ Path = "$DefenderPoliciesPath\\Windows Defender Exploit Guard\\Network Protection"; Expected = 1 }
-    "MpBafsExtendedTimeout" = @{ Path = "$DefenderPoliciesPath\\MpEngine"; Expected = 50 }
-    "EnableFileHashComputation" = @{ Path = "$DefenderPoliciesPath\\MpEngine"; Expected = 1 }
-    "EnableConvertWarnToBlock" = @{ Path = "$DefenderPoliciesPath\\NIS"; Expected = 1 }
-    "AllowSwitchToAsyncInspection" = @{ Path = "$DefenderPoliciesPath\\NIS"; Expected = 1 }
-    "OobeEnableRtpAndSigUpdate" = @{ Path = "$DefenderPoliciesPath\\Real-Time Protection"; Expected = 1 }
-    "EnableDynamicSignatureDroppedEventReporting" = @{ Path = "$DefenderPoliciesPath\\Reporting"; Expected = 1 }
-    "QuickScanIncludeExclusions" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 1 }
-    "DisablePackedExeScanning" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 0 }
-    "ScheduleDay" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 0 }
-    "DisableEmailScanning" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 0 }
-    "DisableHeuristics" = @{ Path = "$DefenderPoliciesPath\\Scan"; Expected = 0 }
-    "ASSignatureDue" = @{ Path = "$DefenderPoliciesPath\\Signature Updates"; Expected = 7 }
-    "AVSignatureDue" = @{ Path = "$DefenderPoliciesPath\\Signature Updates"; Expected = 7 }
-    "Threats_ThreatSeverityDefaultAction" = @{ Path = "$DefenderPoliciesPath\\Threats"; Expected = 1 }
-    "UILockdown" = @{ Path = "$DefenderPoliciesPath\\Windows Defender Security Center\\Family options"; Expected = 1 }
+    "DisableAutoExclusions" = @{ Path = "$DefenderPoliciesPath\Exclusions"; Expected = 0 }
+    "PassiveRemediation" = @{ Path = "$DefenderPoliciesPath\Features"; Expected = 1 }
+    "AllowNetworkProtectionOnWinServer" = @{ Path = "$DefenderPoliciesPath\Windows Defender Exploit Guard\Network Protection"; Expected = 1 }
+    "MpBafsExtendedTimeout" = @{ Path = "$DefenderPoliciesPath\MpEngine"; Expected = 50 }
+    "EnableFileHashComputation" = @{ Path = "$DefenderPoliciesPath\MpEngine"; Expected = 1 }
+    "EnableConvertWarnToBlock" = @{ Path = "$DefenderPoliciesPath\NIS"; Expected = 1 }
+    "AllowSwitchToAsyncInspection" = @{ Path = "$DefenderPoliciesPath\NIS"; Expected = 1 }
+    "OobeEnableRtpAndSigUpdate" = @{ Path = "$DefenderPoliciesPath\Real-Time Protection"; Expected = 1 }
+    "EnableDynamicSignatureDroppedEventReporting" = @{ Path = "$DefenderPoliciesPath\Reporting"; Expected = 1 }
+    "QuickScanIncludeExclusions" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 1 }
+    "DisablePackedExeScanning" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
+    "ScheduleDay" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
+    "DisableEmailScanning" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
+    "DisableHeuristics" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
+    "ASSignatureDue" = @{ Path = "$DefenderPoliciesPath\Signature Updates"; Expected = 7 }
+    "AVSignatureDue" = @{ Path = "$DefenderPoliciesPath\Signature Updates"; Expected = 7 }
+    "Threats_ThreatSeverityDefaultAction" = @{ Path = "$DefenderPoliciesPath\Threats"; Expected = 1 }
+    "UILockdown" = @{ Path = "$DefenderPoliciesPath\Windows Defender Security Center\Family options"; Expected = 1 }
 }
 
 foreach ($KeyName in $CheckKeys.Keys) {
@@ -16536,15 +17105,28 @@ foreach ($KeyName in $CheckKeys.Keys) {
         Write-Host "      * Missing/Misconfigured: $KeyName (Expected: $($Target.Expected), Got: $Actual)" -ForegroundColor Yellow
     }
 }
+
+<a id="08-endpoints-defender-antivirus-md-7-audit-amsi-authenticode-verification"></a>
+# 7. Audit AMSI Authenticode verification
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (Test-Path $AmsiPath) {
+    $AmsiBits = Get-ItemProperty -Path $AmsiPath -Name "FeatureBits" -ErrorAction SilentlyContinue
+    $AmsiVal = if ($AmsiBits) { $AmsiBits.FeatureBits } else { 0 }
+    $AmsiColor = if ($AmsiVal -eq 2) { "Green" } else { "Red" }
+    Write-Host "    - AMSI Authenticode verification (FeatureBits): $AmsiVal (Expected: 2)" -ForegroundColor $AmsiColor
+} else {
+    Write-Host "    - AMSI Authenticode verification (FeatureBits): NOT ENABLED" -ForegroundColor Red
+}
 ```
 
 ---
 
 <a id="08-endpoints-defender-antivirus-md-sources-compliance-references"></a>
-## Sources & Compliance References
+## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.9.47 (Exclusions restrictions), Section 18.9.30 (ASR Rules), Section 18.9.47.11 (Real-time protection)
 * **Microsoft Security Baselines**: Windows Defender Exploit Guard deployment guide
 * **ANSSI Active Directory Hardening Guide**: Recommendations regarding endpoint protective controls
+* **DoD Windows 11 STIG**: Windows Defender SmartScreen file explorer requirements.
 
 
 <div style="page-break-before: always;"></div>
@@ -16565,8 +17147,20 @@ foreach ($KeyName in $CheckKeys.Keys) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Update
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate
+  * **GPO Paths**:
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Update`
+    * `Computer Configuration\Administrative Templates\Windows Components\Delivery Optimization`
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate`
+      * `WUServer` (REG_SZ)
+      * `WUStatusServer` (REG_SZ)
+      * `DoNotConnectToWindowsUpdateInternetLocations` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU`
+      * `NoAutoUpdate` = `0` (REG_DWORD)
+      * `AUOptions` = `4` (REG_DWORD)
+      * `UseWUServer` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization`
+      * `DODownloadMode` = `2` (REG_DWORD)
 
 ---
 
@@ -16577,7 +17171,7 @@ In an isolated, air-gapped network, workstations cannot connect directly to Micr
 2. **Missing Updates**: Workstations will fail to receive security patches, critical updates, and Windows Defender definitions.
 3. **Control Bypass**: Attackers or unapproved software could attempt to install out-of-band features or packages if update routes are not explicitly locked to internal sources.
 
-Enforcing the intranet update service location redirects all system update queries to the local WSUS server.
+Enforcing the intranet update service location redirects all system update queries to the local WSUS server. Furthermore, enforcing Windows **Delivery Optimization** download mode to `Group (2)` limits peer-to-peer update sharing strictly to computers within the same active directory domain/group or local subnet boundaries, reducing bandwidth constraints on WAN/intranet segments and preventing unmanaged peer sharing.
 
 ---
 
@@ -16585,6 +17179,7 @@ Enforcing the intranet update service location redirects all system update queri
 ## Legacy Impact & Compatibility
 * **WSUS Dependency**: The local Windows Server Update Services (WSUS) server must remain online and functional. If the WSUS server is unreachable, workstations will be unable to query, download, or apply security patches.
 * **Administrative Burden**: Enterprise administrators must manually synchronize the WSUS database (sneakernet transfer of metadata and updates) to ensure new patches are made available to clients.
+* **Delivery Optimization limits**: Group mode restricts Delivery Optimization cache sharing to standard networks. If endpoints span multiple separated sites without route aggregation, update replication times could increase slightly.
 
 ---
 
@@ -16600,36 +17195,43 @@ Enforcing the intranet update service location redirects all system update queri
    `Computer Configuration\Administrative Templates\Windows Components\Windows Update`
 4. Configure the following settings:
    * **Policy**: `Configure Automatic Updates`
-   * **Setting**: `Enabled`
-   * **Configure automatic updating**: `4 - Auto download and schedule the install`
+     * **Setting**: `Enabled`
+     * **Configure automatic updating**: `4 - Auto download and schedule the install`
 5. Configure the service location:
    * **Policy**: `Specify intranet Microsoft update service location`
-   * **Setting**: `Enabled`
-   * **Set the intranet update service for detecting updates**: `http://local-wsus.domain.local:8530` (Replace with your internal WSUS FQDN or IP)
-   * **Set the intranet statistics server**: `http://local-wsus.domain.local:8530`
+     * **Setting**: `Enabled`
+     * **Set the intranet update service for detecting updates**: `http://local-wsus.domain.local:8530` (Replace with your internal WSUS FQDN or IP)
+     * **Set the intranet statistics server**: `http://local-wsus.domain.local:8530`
 6. Navigate to:
    * **Policy**: `Do not connect to any Windows Update Internet locations`
-   * **Setting**: `Enabled` (blocks fallback to public servers)
+     * **Setting**: `Enabled` (blocks fallback to public servers)
+7. Navigate to:
+   `Computer Configuration\Administrative Templates\Windows Components\Delivery Optimization`
+8. Configure the following settings:
+   * **Policy**: `Download Mode`
+     * **Setting**: `Enabled`
+     * **Download Mode**: `Group (2)`
 
 ---
 
 <a id="08-endpoints-wsus-client-config-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to configure registry keys to enforce local WSUS parameters.
+Run the following scripts locally to configure registry keys to enforce local WSUS parameters and Delivery Optimization download mode.
 
 [Download Script: Set-WSUSClientConfiguration.ps1](implementation_scripts/Set-WSUSClientConfiguration.ps1)
 
 ```powershell
 <a id="08-endpoints-wsus-client-config-md-set-wsusclientconfigurationps1"></a>
 # Set-WSUSClientConfiguration.ps1
-<a id="08-endpoints-wsus-client-config-md-configures-local-registry-keys-to-point-the-windows-update-client-to-the-intranet-wsus-server"></a>
-# Configures local registry keys to point the Windows Update client to the intranet WSUS server.
+<a id="08-endpoints-wsus-client-config-md-configures-local-registry-keys-to-point-the-windows-update-client-to-the-intranet-wsus-server-and-enforces-do-group-mode"></a>
+# Configures local registry keys to point the Windows Update client to the intranet WSUS server and enforces DO Group mode.
 
 Write-Host "--- Configuring WSUS Client Settings ---" -ForegroundColor Cyan
 
 $WUPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
 $WUAUPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+$DOPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization"
 
 <a id="08-endpoints-wsus-client-config-md-1-create-keys-if-they-do-not-exist"></a>
 # 1. Create keys if they do not exist
@@ -16639,6 +17241,9 @@ if (-not (Test-Path $WUPath)) {
 if (-not (Test-Path $WUAUPath)) {
     New-Item -Path $WUAUPath -Force | Out-Null
 }
+if (-not (Test-Path $DOPath)) {
+    New-Item -Path $DOPath -Force | Out-Null
+}
 
 <a id="08-endpoints-wsus-client-config-md-define-intranet-wsus-url"></a>
 # Define intranet WSUS URL
@@ -16646,17 +17251,21 @@ $WSUSServer = "http://local-wsus.domain.local:8530"
 
 <a id="08-endpoints-wsus-client-config-md-2-configure-update-location-and-statistics-server"></a>
 # 2. Configure update location and statistics server
-Set-ItemProperty -Path $WUPath -Name "WUServer" -Value $WSUSServer -Type String
-Set-ItemProperty -Path $WUPath -Name "WUStatusServer" -Value $WSUSServer -Type String
-Set-ItemProperty -Path $WUPath -Name "DoNotConnectToWindowsUpdateInternetLocations" -Value 1 -Type DWord
+Set-ItemProperty -Path $WUPath -Name "WUServer" -Value $WSUSServer -Type String -Force
+Set-ItemProperty -Path $WUPath -Name "WUStatusServer" -Value $WSUSServer -Type String -Force
+Set-ItemProperty -Path $WUPath -Name "DoNotConnectToWindowsUpdateInternetLocations" -Value 1 -Type DWord -Force
 
 <a id="08-endpoints-wsus-client-config-md-3-configure-automatic-updates-behavior-auoptions-4-auto-download-schedule"></a>
 # 3. Configure Automatic Updates behavior (AUOptions = 4: Auto Download & Schedule)
-Set-ItemProperty -Path $WUAUPath -Name "NoAutoUpdate" -Value 0 -Type DWord
-Set-ItemProperty -Path $WUAUPath -Name "AUOptions" -Value 4 -Type DWord
-Set-ItemProperty -Path $WUAUPath -Name "UseWUServer" -Value 1 -Type DWord
+Set-ItemProperty -Path $WUAUPath -Name "NoAutoUpdate" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $WUAUPath -Name "AUOptions" -Value 4 -Type DWord -Force
+Set-ItemProperty -Path $WUAUPath -Name "UseWUServer" -Value 1 -Type DWord -Force
 
-Write-Host "[+] Local WSUS parameters applied." -ForegroundColor Green
+<a id="08-endpoints-wsus-client-config-md-4-enforce-dodownloadmode-2-group"></a>
+# 4. Enforce DODownloadMode = 2 (Group)
+Set-ItemProperty -Path $DOPath -Name "DODownloadMode" -Value 2 -Type DWord -Force
+
+Write-Host "[+] Local WSUS parameters and Delivery Optimization download mode applied." -ForegroundColor Green
 ```
 
 *To audit the WSUS client configuration status:*
@@ -16665,13 +17274,14 @@ Write-Host "[+] Local WSUS parameters applied." -ForegroundColor Green
 ```powershell
 <a id="08-endpoints-wsus-client-config-md-test-wsusclientstatusps1"></a>
 # Test-WSUSClientStatus.ps1
-<a id="08-endpoints-wsus-client-config-md-audits-registry-values-to-verify-wsus-server-assignment"></a>
-# Audits registry values to verify WSUS server assignment.
+<a id="08-endpoints-wsus-client-config-md-audits-registry-values-to-verify-wsus-server-assignment-and-delivery-optimization-configuration"></a>
+# Audits registry values to verify WSUS server assignment and Delivery Optimization configuration.
 
 Write-Host "--- Auditing WSUS Client Settings ---" -ForegroundColor Cyan
 
 $WUPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
 $WUAUPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+$DOPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization"
 
 $WUServerProp = Get-ItemProperty -Path $WUPath -Name "WUServer" -ErrorAction SilentlyContinue
 $WUStatusProp = Get-ItemProperty -Path $WUPath -Name "WUStatusServer" -ErrorAction SilentlyContinue
@@ -16687,6 +17297,12 @@ $UseColor = if ($UseWUVal -eq 1) { "Green" } else { "Red" }
 Write-Host "    - Intranet WUServer: $WUServerVal" -ForegroundColor $ServerColor
 Write-Host "    - Intranet WUStatusServer: $WUStatusVal" -ForegroundColor $ServerColor
 Write-Host "    - UseWUServer Active: $UseWUVal (Required = 1)" -ForegroundColor $UseColor
+
+<a id="08-endpoints-wsus-client-config-md-audit-delivery-optimization"></a>
+# Audit Delivery Optimization
+$DOVal = if (Test-Path $DOPath) { (Get-ItemProperty -Path $DOPath -Name "DODownloadMode" -ErrorAction SilentlyContinue).DODownloadMode } else { $null }
+$DOColor = if ($DOVal -eq 2) { "Green" } else { "Red" }
+Write-Host "    - Delivery Optimization DODownloadMode: $($DOVal | Out-String).Trim() (Expected = 2)" -ForegroundColor $DOColor
 ```
 
 ---
@@ -16695,6 +17311,7 @@ Write-Host "    - UseWUServer Active: $UseWUVal (Required = 1)" -ForegroundColor
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.2.2 (Specify intranet Microsoft update service location), Section 18.2.3 (Do not connect to any Windows Update Internet locations)
 * **Microsoft Security Baselines**: Windows Update client baseline policies.
+* **DoD Windows 11 STIG**: Delivery Optimization DODownloadMode configuration requirements.
 
 
 <div style="page-break-before: always;"></div>
@@ -16717,6 +17334,7 @@ Write-Host "    - UseWUServer Active: $UseWUVal (Required = 1)" -ForegroundColor
 * **GPO Path / Registry Location**:
   * UEFI Firmware configuration (Hardware/BIOS level)
   * Computer Configuration\Administrative Templates\System\Device Guard\Turn On Virtualization Based Security
+  * **BlackLotus Revocation Updates (CVE-2023-24932)**: `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot` -> `AvailableUpdates` (REG_DWORD = `64` | `256` | `128` | `512` dependent on mitigation phase)
 
 ---
 
@@ -16729,6 +17347,7 @@ When the PC starts, the firmware checks the signature of each piece of boot soft
 If Secure Boot is disabled:
 1. **Bootkits & Rootkits**: Attackers with physical access or local administrator privileges can replace the system bootloader with a malicious bootloader (bootkit). This bootkit executes before the Windows operating system loads, allowing it to bypass all Windows security controls, disable antivirus software, and run completely undetected.
 2. **Virtualization-Based Security**: Advanced Windows defenses (like Credential Guard and Device Guard) depend on hardware-rooted trust. If Secure Boot is disabled, Virtualization-Based Security (VBS) cannot verify platform integrity, rendering these protections ineffective.
+3. **BlackLotus Bootkit Bypass Mitigations (CVE-2023-24932)**: A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit). To fully mitigate this threat, Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.
 
 ---
 
@@ -16736,6 +17355,7 @@ If Secure Boot is disabled:
 ## Legacy Impact & Compatibility
 * **BIOS Mode Conversion**: Systems running in legacy BIOS mode (Compatibility Support Module - CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires changing partition styles from MBR to GPT (using tools like `MBR2GPT.exe`) and changing firmware settings, which can cause boot failures if not executed correctly.
 * **Dual-Boot Systems**: If the workstation dual-boots with unsigned Linux distributions or runs legacy recovery media, the firmware will reject the bootloader, preventing boot.
+* **BlackLotus Mitigation Risks**: Enforcing the BlackLotus DBX and SVN updates is a permanent, non-reversible action once written to the device firmware. If an administrator attempts to boot the machine using older, unpatched Windows installation media or recovery disks, the system will reject the boot manager and fail to boot. All recovery and deployment media must be updated with current security patches before applying these mitigations.
 
 ---
 
@@ -16754,7 +17374,16 @@ UEFI Secure Boot must be enabled in the hardware firmware menu directly (BIOS se
 4. Configure the setting:
    * **Policy**: `Turn On Virtualization Based Security`
    * **Setting**: `Enabled`
-   * **Select Platform Security Level**: Select `Secure Boot` or `Secure Boot and DMA Protection` in the dropdown menu.
+    * **Select Platform Security Level**: Select `Secure Boot` or `Secure Boot and DMA Protection` in the dropdown menu.
+
+<a id="08-endpoints-enable-secure-boot-md-2-deploy-blacklotus-revocation-registry-keys-via-gpo-preferences"></a>
+#### 2. Deploy BlackLotus Revocation Registry Keys via GPO Preferences
+To configure the update triggers for the DBX and Code Integrity boot manager revocations, define Registry GPO Preferences inside the endpoints GPO:
+1. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+2. Create registry items to deploy the `AvailableUpdates` DWORD under `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`.
+   * *Phase 1 (Apply DBX Update)*: Set `AvailableUpdates` = `64` (REG_DWORD)
+   * *Phase 2 (Apply SVN and DB Updates)*: Set `AvailableUpdates` = `384` (REG_DWORD, sum of 256 and 128)
+   * *Phase 3 (Enforce Code Integrity Boot Policy)*: Set `AvailableUpdates` = `512` (REG_DWORD)
 
 *Note: Enforcing this policy ensures Windows will refuse to enable Virtualization-Based Security unless the local firmware has UEFI Secure Boot successfully active.*
 
@@ -16772,10 +17401,12 @@ Run the following script to check the status of Secure Boot on the local machine
 ```powershell
 <a id="08-endpoints-enable-secure-boot-md-audit-securebootps1"></a>
 # Audit-SecureBoot.ps1
-<a id="08-endpoints-enable-secure-boot-md-queries-uefi-secure-boot-parameters-using-native-cmdlets"></a>
-# Queries UEFI Secure Boot parameters using native cmdlets.
+<a id="08-endpoints-enable-secure-boot-md-queries-uefi-secure-boot-parameters-and-audits-blacklotus-mitigation-registry-settings"></a>
+# Queries UEFI Secure Boot parameters and audits BlackLotus mitigation registry settings.
 
-Write-Host "--- Auditing UEFI Secure Boot ---" -ForegroundColor Cyan
+Write-Host "--- Auditing UEFI Secure Boot & BlackLotus Mitigations ---" -ForegroundColor Cyan
+
+$NonCompliant = $false
 
 try {
     # Confirm-SecureBootUEFI returns $true if Secure Boot is active, $false if disabled,
@@ -16784,11 +17415,37 @@ try {
     
     $Color = if ($SecureBootState -eq $true) { "Green" } else { "Red" }
     Write-Host "    - Secure Boot Active: $SecureBootState" -ForegroundColor $Color
+    if ($SecureBootState -eq $false) { $global:NonCompliant = $true }
 } catch [System.PlatformNotSupportedException] {
     Write-Host "    - VULNERABLE: UEFI Secure Boot is not supported on this platform (Legacy BIOS mode)." -ForegroundColor Red
+    $global:NonCompliant = $true
 } catch {
     # If cmdlet throws unauthorized access or not enabled error
     Write-Host "    - VULNERABLE: Secure Boot is disabled in firmware or cannot be verified. Error: $($_.Exception.Message)" -ForegroundColor Red
+    $global:NonCompliant = $true
+}
+
+<a id="08-endpoints-enable-secure-boot-md-audit-availableupdates-registry-key"></a>
+# Audit AvailableUpdates registry key
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
+if (Test-Path $Path) {
+    $Val = Get-ItemProperty -Path $Path -Name "AvailableUpdates" -ErrorAction SilentlyContinue
+    $UpdateVal = if ($Val) { $Val.AvailableUpdates } else { 0 }
+    
+    # Check if at least DBX update (64) is enabled
+    if ($UpdateVal -ge 64) {
+        Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Compliant)" -ForegroundColor Green
+    } else {
+        Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
+        $global:NonCompliant = $true
+    }
+} else {
+    Write-Host "    - BlackLotus Revocation Updates: Registry path not found (Non-Compliant)" -ForegroundColor Red
+    $global:NonCompliant = $true
+}
+
+if ($NonCompliant) {
+    exit 1
 }
 ```
 
@@ -16806,6 +17463,33 @@ if ($BootType) {
 } else {
     Write-Host "    - Boot Environment Type could not be read from registry." -ForegroundColor Yellow
 }
+```
+
+---
+
+<a id="08-endpoints-enable-secure-boot-md-remediation-script"></a>
+### Remediation Script
+
+[Download Script: Set-SecureBoot.ps1](implementation_scripts/Set-SecureBoot.ps1)
+
+```powershell
+<a id="08-endpoints-enable-secure-boot-md-set-securebootps1"></a>
+# Set-SecureBoot.ps1
+<a id="08-endpoints-enable-secure-boot-md-description-triggers-secure-boot-dbx-and-code-integrity-revocation-updates-for-blacklotus-mitigation"></a>
+# Description: Triggers Secure Boot DBX and Code Integrity revocation updates for BlackLotus mitigation.
+
+Write-Host "--- Configuring BlackLotus Secure Boot Mitigations ---" -ForegroundColor Cyan
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
+if (-not (Test-Path $Path)) {
+    New-Item -Path $Path -Force | Out-Null
+}
+
+<a id="08-endpoints-enable-secure-boot-md-trigger-dbx-update-phase-1-dbx-update-64"></a>
+# Trigger DBX Update (Phase 1 DBX Update = 64)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green
+```
 ```
 
 ---
@@ -16837,7 +17521,7 @@ if ($BootType) {
   * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Turn On Virtualization Based Security
   * **Registry Location**: HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard
     * `EnableVirtualizationBasedSecurity` = `1` (REG_DWORD)
-    * `RequirePlatformSecurityFeatures` = `3` (REG_DWORD, Secure Boot and DMA)
+    * `RequirePlatformSecurityFeatures` = `1` (REG_DWORD, Secure Boot)
     * `HypervisorEnforcedCodeIntegrity` = `1` (REG_DWORD)
     * `LsaCfgFlags` = `1` (REG_DWORD, Credential Guard Enabled with UEFI Lock)
     * `ConfigureSystemGuardLaunch` = `1` (REG_DWORD, Secure Launch Enabled)
@@ -16879,7 +17563,7 @@ Enforcing VBS and Credential Guard prevents in-memory credential harvesting, bre
 4. Configure the setting:
     * **Policy**: `Turn On Virtualization Based Security`
     * **Setting**: `Enabled`
-    * **Select Platform Security Level**: `Secure Boot and DMA Protection`
+    * **Select Platform Security Level**: `Secure Boot`
     * **Virtualization Based Protection of Code Integrity**: `Enabled with UEFI lock`
     * **Credential Guard Configuration**: `Enabled with UEFI lock`
     * **Secure Launch Configuration**: `Enabled`
@@ -16913,9 +17597,9 @@ if (-not (Test-Path $DeviceGuardPath)) {
 <a id="08-endpoints-enable-vbs-credential-guard-md-enable-virtualization-based-security-vbs"></a>
 # Enable Virtualization-Based Security (VBS)
 Set-ItemProperty -Path $DeviceGuardPath -Name "EnableVirtualizationBasedSecurity" -Value 1 -Type DWord
-<a id="08-endpoints-enable-vbs-credential-guard-md-requireplatformsecurityfeatures-3-secure-boot-and-dma-protection"></a>
-# RequirePlatformSecurityFeatures = 3 (Secure Boot and DMA Protection)
-Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 3 -Type DWord
+<a id="08-endpoints-enable-vbs-credential-guard-md-requireplatformsecurityfeatures-1-secure-boot"></a>
+# RequirePlatformSecurityFeatures = 1 (Secure Boot)
+Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 1 -Type DWord
 <a id="08-endpoints-enable-vbs-credential-guard-md-hypervisorenforcedcodeintegrity-1-hvci-memory-integrity-enabled"></a>
 # HypervisorEnforcedCodeIntegrity = 1 (HVCI / Memory Integrity Enabled)
 Set-ItemProperty -Path $DeviceGuardPath -Name "HypervisorEnforcedCodeIntegrity" -Value 1 -Type DWord
@@ -17161,9 +17845,220 @@ try {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption\Operating System Drives
-  * Computer Configuration\Policies\Windows Settings\Security Settings\Public Key Policies\BitLocker Network Unlock
-  * HKLM\SOFTWARE\Policies\Microsoft\FVE
+  * **GPO Paths**:
+    * `Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption\Operating System Drives`
+    * `Computer Configuration\Policies\Windows Settings\Security Settings\Public Key Policies\BitLocker Network Unlock`
+  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\FVE`
+    * `AllowNetworkUnlock` = `1` (REG_DWORD)
+    * `MinimumPIN` = `6` (REG_DWORD)
+    * `EnableBDEWithNoTPM` = `1` (REG_DWORD)
+    * `UseTPM` = `2` (REG_DWORD, Allowed / Required depending on baseline)
+    * `UseTPMPIN` = `2` (REG_DWORD, Allowed)
+    * `UseTPMKey` = `2` (REG_DWORD, Allowed)
+    * `UseTPMKeyPIN` = `2` (REG_DWORD, Allowed)
+
+---
+
+<a id="08-endpoints-enable-bitlocker-md-rationale"></a>
+## Rationale
+BitLocker Drive Encryption protects the operating system volume from offline attacks, data tampering, and data theft when the device is powered off or stolen. Without full disk encryption, an attacker with physical access to a workstation can extract the hard drive, mount it on a non-secure system, bypass operating system security controls, dump local password databases (SAM), and access cached domain credentials.
+
+Enforcing specific BitLocker startup parameters, such as a minimum PIN length of at least 6 characters, ensures that if a startup PIN is used, it cannot be easily brute-forced. Restricting how the TPM, startup keys, and PINs are configured ensures consistent security policy application.
+
+To maximize security, standard endpoints (Tier 2) should use **BitLocker Network Unlock** to prevent operational overhead in managing startup PINs for thousands of workstations. 
+
+<a id="08-endpoints-enable-bitlocker-md-how-bitlocker-network-unlock-works"></a>
+### How BitLocker Network Unlock Works
+BitLocker Network Unlock allows domain-joined workstations connected to the wired corporate LAN to automatically unlock their OS drives on reboot, while still requiring a backup PIN or recovery key when disconnected from the corporate network.
+
+```text
+[Client PC Boot (UEFI)]
+  |
+  +-- Sends DHCP Request + Encrypted Key Payload (via Wired Ethernet)
+        |
+        v
+[WDS Server (Network Unlock Role)]
+  |
+  +-- Decrypts Payload using Network Unlock Certificate Private Key
+  +-- Sends Decryption Key back via DHCP Reply Option
+        |
+        v
+[Client PC]
+  |
+  +-- Automatically Unlocks OS Volume & Boots Windows
+```
+
+If the workstation is stolen or boots outside the local LAN (e.g., on a public network, Wi-Fi, or offline), the DHCP payload request goes unanswered, the Network Unlock fails, and the workstation falls back to prompting the user for a Startup PIN or Recovery Key.
+
+---
+
+<a id="08-endpoints-enable-bitlocker-md-legacy-impact-compatibility"></a>
+## Legacy Impact & Compatibility
+* **Wired Network Required**: Network Unlock operates in the pre-boot UEFI phase. Wireless network adapters are not active at this stage; workstations must be connected to the physical corporate switch via an Ethernet cable.
+* **UEFI and TPM Requirements**: Client computers must support UEFI DHCP drivers, native UEFI boot (Legacy CSM disabled), and have an active TPM 1.2 or 2.0 chip.
+* **PKI Infrastructure**: Deploying Network Unlock requires a functioning Active Directory Certificate Services (AD CS) instance to issue and manage the Network Unlock certificate.
+
+---
+
+<a id="08-endpoints-enable-bitlocker-md-implementation-steps"></a>
+## Implementation Steps
+
+<a id="08-endpoints-enable-bitlocker-md-option-a-group-policy-and-server-configuration-preferred"></a>
+### Option A: Group Policy and Server Configuration (Preferred)
+
+<a id="08-endpoints-enable-bitlocker-md-step-1-configure-the-wds-server-for-network-unlock"></a>
+#### Step 1: Configure the WDS Server for Network Unlock
+1. Install the **Windows Deployment Services (WDS)** role on an internal Windows Server.
+2. In Server Manager, select **Add Roles and Features** and check **BitLocker Network Unlock** under Features.
+3. Open the Local PKI CA console (`certsrv.msc`) and issue a certificate using the **BitLocker Network Unlock** template.
+4. Export the certificate public key (`.cer` file) and export the private key (`.pfx` file).
+5. Import the `.pfx` private key certificate into the local WDS server's **Local Computer\Personal** certificate store.
+6. Restart the WDS service (`wdssvc`).
+
+<a id="08-endpoints-enable-bitlocker-md-step-2-distribute-the-network-unlock-certificate-via-gpo"></a>
+#### Step 2: Distribute the Network Unlock Certificate via GPO
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit your GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Public Key Policies`
+4. Right-click **BitLocker Network Unlock** and select **Add Network Unlock Certificate**.
+5. Import the public `.cer` file exported in Step 1.
+
+<a id="08-endpoints-enable-bitlocker-md-step-3-enforce-gpo-bitlocker-settings"></a>
+#### Step 3: Enforce GPO BitLocker Settings
+1. Navigate to:
+   `Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption\Operating System Drives`
+2. Configure the following settings:
+   * **Policy**: `Require additional authentication at startup`
+     * **Setting**: `Enabled`
+     * **Configure Options**:
+       * Set `Configure TPM startup`: `Require TPM` (or `Allow TPM`).
+       * Set `Configure TPM startup PIN`: `Allow startup PIN with TPM` (or `Require startup PIN with TPM` based on risk assessment).
+       * Set `Configure TPM startup key`: `Allow startup key with TPM`.
+       * Set `Configure TPM startup key and PIN`: `Allow startup key and PIN with TPM`.
+       * Check `Allow BitLocker without a compatible TPM` to `Disabled` (or `Enabled` if required by hardware compatibility).
+   * **Policy**: `Allow Network Unlock at startup`
+     * **Setting**: `Enabled`
+   * **Policy**: `Configure minimum PIN length for startup`
+     * **Setting**: `Enabled`
+     * **Minimum characters**: `6`
+
+---
+
+<a id="08-endpoints-enable-bitlocker-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to audit and configure BitLocker parameters.
+
+[Download Script: Set-BitLockerEncryption.ps1](implementation_scripts/Set-BitLockerEncryption.ps1)
+
+```powershell
+<a id="08-endpoints-enable-bitlocker-md-set-bitlockerencryptionps1"></a>
+# Set-BitLockerEncryption.ps1
+<a id="08-endpoints-enable-bitlocker-md-enables-bitlocker-encryption-locally-configures-startup-policiespin-lengths-and-backs-up-recovery-keys-to-ad"></a>
+# Enables BitLocker encryption locally, configures startup policies/PIN lengths, and backs up recovery keys to AD.
+
+Write-Host "--- Enforcing BitLocker Drive Encryption ---" -ForegroundColor Cyan
+
+<a id="08-endpoints-enable-bitlocker-md-1-configure-fve-registry-settings-for-startup-authentication"></a>
+# 1. Configure FVE Registry settings for startup authentication
+$FveRegPath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
+if (-not (Test-Path $FveRegPath)) {
+    New-Item -Path $FveRegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $FveRegPath -Name "AllowNetworkUnlock" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "MinimumPIN" -Value 6 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "EnableBDEWithNoTPM" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "UseTPM" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "UseTPMPIN" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "UseTPMKey" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "UseTPMKeyPIN" -Value 2 -Type DWord -Force
+
+Write-Host "[+] BitLocker startup authentication registry keys configured." -ForegroundColor Green
+
+<a id="08-endpoints-enable-bitlocker-md-2-enable-bitlocker-on-c-drive-using-tpm-protection"></a>
+# 2. Enable BitLocker on C: drive using TPM protection
+$Volume = Get-BitLockerVolume -MountPoint "C:"
+
+<a id="08-endpoints-enable-bitlocker-md-check-if-protection-is-already-active"></a>
+# Check if protection is already active
+if ($Volume.ProtectionStatus -eq "Off") {
+    Write-Host "[+] Activating BitLocker on C: drive using XTS-AES 256 encryption..." -ForegroundColor Gray
+    
+    # Enable BitLocker and backup recovery password protector to Active Directory
+    Enable-BitLocker -MountPoint "C:" `
+        -EncryptionMethod XtsAes256 `
+        -UsedSpaceOnly `
+        -TpmProtector `
+        -AdBackupRequired
+        
+    Write-Host "[+] BitLocker encryption initiated. Recovery key backed up to AD." -ForegroundColor Green
+} else {
+    Write-Host "[+] BitLocker is already enabled on C: (Protection Status: $($Volume.ProtectionStatus))." -ForegroundColor Green
+}
+```
+
+*To audit local BitLocker and Network Unlock registry settings:*
+[Download Script: Test-BitLockerStatus.ps1](audit_scripts/Test-BitLockerStatus.ps1)
+
+```powershell
+<a id="08-endpoints-enable-bitlocker-md-test-bitlockerstatusps1"></a>
+# Test-BitLockerStatus.ps1
+<a id="08-endpoints-enable-bitlocker-md-audits-current-bitlocker-protection-state-key-protector-types-and-network-unlockstartup-pin-configuration"></a>
+# Audits current BitLocker protection state, key protector types, and Network Unlock/Startup PIN configuration.
+
+Write-Host "--- Auditing BitLocker Status ---" -ForegroundColor Cyan
+
+<a id="08-endpoints-enable-bitlocker-md-1-query-local-bitlocker-state"></a>
+# 1. Query local BitLocker state
+$Volume = Get-BitLockerVolume -MountPoint "C:" -ErrorAction SilentlyContinue
+if ($Volume) {
+    $StatusColor = if ($Volume.ProtectionStatus -eq "On") { "Green" } else { "Red" }
+    Write-Host "    - Protection Status: $($Volume.ProtectionStatus)" -ForegroundColor $StatusColor
+    Write-Host "    - Encryption Method: $($Volume.EncryptionMethod)" -ForegroundColor White
+    
+    Write-Host "`n[+] Active Key Protectors:" -ForegroundColor Yellow
+    foreach ($Protector in $Volume.KeyProtector) {
+        Write-Host "    - Type: $($Protector.KeyProtectorType) | ID: $($Protector.KeyProtectorId)" -ForegroundColor White
+    }
+} else {
+    Write-Error "BitLocker volume information could not be retrieved."
+}
+
+<a id="08-endpoints-enable-bitlocker-md-2-check-network-unlock-and-startup-authentication-registry-configuration"></a>
+# 2. Check Network Unlock and Startup Authentication registry configuration
+$FveRegPath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
+$Params = @(
+    @{ Name = "AllowNetworkUnlock"; Expected = 1 },
+    @{ Name = "MinimumPIN"; Expected = 6 },
+    @{ Name = "EnableBDEWithNoTPM"; Expected = 1 },
+    @{ Name = "UseTPM"; Expected = 2 },
+    @{ Name = "UseTPMPIN"; Expected = 2 },
+    @{ Name = "UseTPMKey"; Expected = 2 },
+    @{ Name = "UseTPMKeyPIN"; Expected = 2 }
+)
+
+Write-Host "`n[*] Auditing Startup Authentication & PIN parameters:" -ForegroundColor Yellow
+if (Test-Path $FveRegPath) {
+    foreach ($Param in $Params) {
+        $Val = Get-ItemProperty -Path $FveRegPath -Name $Param.Name -ErrorAction SilentlyContinue
+        $ActualVal = if ($Val) { $Val.$($Param.Name) } else { $null }
+        $Color = if ($ActualVal -eq $Param.Expected) { "Green" } else { "Red" }
+        Write-Host "    - $($Param.Name): $ActualVal (Expected = $($Param.Expected))" -ForegroundColor $Color
+    }
+} else {
+    Write-Host "    - FVE Registry Policies key does not exist." -ForegroundColor Red
+}
+```
+
+---
+
+<a id="08-endpoints-enable-bitlocker-md-sources-compliance-references"></a>
+## 🔗 Sources & Compliance References
+* **CIS Microsoft Windows 10 Benchmark**: Section 18.2.1.1 (Require additional authentication at startup), Section 18.2.1.5 (Allow Network Unlock at startup)
+* **ANSSI AD Hardening Guide**: Recommendations regarding endpoint encryption and physical key storage security.
+* **DoD Windows 11 STIG**: BitLocker startup option requirements.
 
 ---
 
@@ -17861,10 +18756,12 @@ User Rights Assignments (URAs) govern the specific actions that security princip
 | **Act as part of the operating system** | No one (Empty) |
 | **Allow log on locally** | `BUILTIN\Administrators`, `BUILTIN\Users` |
 | **Back up files and directories** | `BUILTIN\Administrators` |
+| **Change the system time** | `BUILTIN\Administrators`, `NT SERVICE\LocalService` |
 | **Create a pagefile** | `BUILTIN\Administrators` |
 | **Create a token object** | No one (Empty) |
 | **Create global objects** | `Administrators`, `LOCAL SERVICE`, `NETWORK SERVICE`, `SERVICE` |
 | **Create permanent shared objects** | No one (Empty) |
+| **Create symbolic links** | `BUILTIN\Administrators` |
 | **Debug programs** | `BUILTIN\Administrators` |
 | **Enable computer and user accounts to be trusted for delegation** | No one (Empty) |
 | **Force shutdown from a remote system** | `BUILTIN\Administrators` |
@@ -17892,8 +18789,8 @@ Configure User Rights Assignments locally using `secedit.exe` and PowerShell.
 ```powershell
 <a id="08-endpoints-configure-user-rights-assignments-md-set-userrightsassignmentsps1"></a>
 # Set-UserRightsAssignments.ps1
-<a id="08-endpoints-configure-user-rights-assignments-md-description-enforces-the-local-user-rights-assignments-baseline-configuration-using-secedit-templates"></a>
-# Description: Enforces the local user rights assignments baseline configuration using secedit templates.
+<a id="08-endpoints-configure-user-rights-assignments-md-enforces-the-local-user-rights-assignments-baseline-configuration-using-secedit-templates"></a>
+# Enforces the local user rights assignments baseline configuration using secedit templates.
 
 Write-Host "Applying User Rights Assignments hardening..." -ForegroundColor Cyan
 
@@ -17934,10 +18831,12 @@ $BaselineRights = @{
     "SeTcbPrivilege"                  = ""
     "SeInteractiveLogonRight"         = "*S-1-5-32-544,*S-1-5-32-545"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
+    "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
     "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
     "SeCreateTokenPrivilege"          = ""
     "SeCreateGlobalPrivilege"         = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
     "SeCreatePermanentPrivilege"      = ""
+    "SeCreateSymbolicLinkPrivilege"   = "*S-1-5-32-544"
     "SeDebugPrivilege"                = "*S-1-5-32-544"
     "SeEnableDelegationPrivilege"     = ""
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
@@ -18023,8 +18922,8 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 ```powershell
 <a id="08-endpoints-configure-user-rights-assignments-md-test-userrightsassignmentsps1"></a>
 # Test-UserRightsAssignments.ps1
-<a id="08-endpoints-configure-user-rights-assignments-md-description-exports-local-user-rights-assignments-and-checks-them-against-the-baseline"></a>
-# Description: Exports local user rights assignments and checks them against the baseline.
+<a id="08-endpoints-configure-user-rights-assignments-md-exports-local-user-rights-assignments-and-checks-them-against-the-baseline"></a>
+# Exports local user rights assignments and checks them against the baseline.
 
 Write-Host "--- Auditing User Rights Assignments ---" -ForegroundColor Cyan
 
@@ -18047,10 +18946,12 @@ $BaselineRights = @{
     "SeTcbPrivilege"                  = ""
     "SeInteractiveLogonRight"         = "*S-1-5-32-544,*S-1-5-32-545"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
+    "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
     "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
     "SeCreateTokenPrivilege"          = ""
     "SeCreateGlobalPrivilege"         = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
     "SeCreatePermanentPrivilege"      = ""
+    "SeCreateSymbolicLinkPrivilege"   = "*S-1-5-32-544"
     "SeDebugPrivilege"                = "*S-1-5-32-544"
     "SeEnableDelegationPrivilege"     = ""
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
@@ -18090,9 +18991,10 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 ---
 
 <a id="08-endpoints-configure-user-rights-assignments-md-sources-compliance-references"></a>
-## Sources & Compliance References
+## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 2.2 (User Rights Assignment)
 * **ANSSI AD Hardening Guide**: Recommendations on restricting privileged capabilities and limiting local privileges on administrative workstations
+* **DoD Windows 11 STIG**: User Rights Assignment settings for SeSystemtimePrivilege and SeCreateSymbolicLinkPrivilege.
 
 
 <div style="page-break-before: always;"></div>
@@ -18376,15 +19278,49 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 1 [Block
 * **Priority**: High
 * **GPO Paths / Registry Locations**:
   * **GPO Paths**:
-    * Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Account Lockout Policy
-    * Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Password Policy
-    * Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options
+    * `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Account Lockout Policy`
+    * `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Password Policy`
+    * `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+    * `Computer Configuration\Administrative Templates\System\PIN Complexity`
+    * `Computer Configuration\Administrative Templates\Windows Components\Microsoft Account`
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
   * **Registry Locations**:
-    * Configured via GptTmpl.inf (SecEdit System Access settings)
-    * HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon
+    * Configured via `GptTmpl.inf` (SecEdit System Access settings)
+    * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon`
       * `ScRemoveOption` = `"1"` (REG_SZ, 1 = Lock Workstation)
-    * HKLM\System\CurrentControlSet\Control\Lsa
+      * `CachedLogonsCount` = `0` (REG_DWORD)
+    * `HKLM\SECURITY\Cache`
+      * `NL$IterationCount` = `1954` (REG_DWORD, 1954 = 2,000,896 rounds of PBKDF2-SHA1)
+    * `HKLM\System\CurrentControlSet\Control\Lsa`
       * `LimitBlankPasswordUse` = `1` (REG_DWORD)
+      * `NoLMHash` = `1` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Control\SecurityProviders\WDigest`
+      * `UseLogonCredential` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+      * `AllowDomainPINLogon` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity`
+      * `MinimumPINLength` = `6` (REG_DWORD)
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
+      * `MSAOptional` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\MicrosoftAccount`
+      * `DisableUserAuth` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork`
+      * `RequireSecurityDevice` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices`
+      * `TPM12` = `0` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters`
+      * `RequireSignOrSeal` = `1` (REG_DWORD)
+      * `SealSecureChannel` = `1` (REG_DWORD)
+      * `SignSecureChannel` = `1` (REG_DWORD)
+      * `DisablePasswordChange` = `0` (REG_DWORD)
+      * `MaximumPasswordAge` = `30` (REG_DWORD)
+      * `RequireStrongKey` = `1` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\LanmanWorkstation\Parameters`
+      * `EnablePlainTextPassword` = `0` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\MSV1_0`
+      * `allownullsessionfallback` = `0` (REG_DWORD)
+      * `NTLMMinClientSec` = `537395200` (REG_DWORD)
+      * `NTLMMinServerSec` = `537395200` (REG_DWORD)
 
 ---
 
@@ -18397,6 +19333,10 @@ Securing authentication parameters and account controls reduces the risk of pass
 3. **Reversible Encryption (`ClearTextPassword`)**: Storing passwords using reversible encryption is equivalent to storing cleartext passwords in the directory database. This key option exists only for legacy application support (such as CHAP authentication) and must be disabled to prevent database dumping/credential recovery.
 4. **Smart Card Removal Behavior (`ScRemoveOption`)**: In secure environments using Smart Card or token-based authentication, removing the card must automatically lock the desktop session (`1`). If disabled, a user leaving their workstation with the card removed leaves the session exposed.
 5. **Blank Passwords Limit (`LimitBlankPasswordUse`)**: Restricting the use of blank passwords to physical console logons prevents attackers from using empty-password accounts to authenticate remotely over network shares or RDP.
+6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, dramatically increasing resistance to offline brute-force and GPU-accelerated cracking attacks (like RTX 4090 models).
+7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
+8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
+9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, and requiring NTLMv2 and 128-bit encryption block legacy protocol exploitation.
 
 ---
 
@@ -18405,6 +19345,8 @@ Securing authentication parameters and account controls reduces the risk of pass
 * **Account Lockouts**: Legitimate users who forget their passwords may lock themselves out. Standard procedures must exist for administrative reset of locked accounts.
 * **Smart Card Removal**: Users must be trained to carry their smart cards with them, which automatically locks the session. Re-authenticating requires inserting the card and entering the PIN.
 * **Reversible Encryption**: Disabling reversible encryption may break legacy applications that rely on reading cleartext password equivalents. These applications should be modernized to support modern Kerberos or SAML/OIDC federations.
+* **Logon Caching (CachedLogonsCount = 0)**: Workstations must have active, real-time connectivity to a Domain Controller to allow users to log on. Off-domain logons (e.g., users traveling or working offline without a pre-boot VPN connection) will fail. Remote users must use pre-boot VPN tunnels or alternate remote access architectures.
+* **PBKDF2 Iteration Overhead**: Increasing the iteration count raises the CPU processing time required during logons that use cached credentials. A value of 1954 may introduce a slight delay (typically under 1 second) during interactive logins on older hardware.
 
 ---
 
@@ -18435,6 +19377,42 @@ In the endpoints GPO (e.g., `GPO_Hardening_Workstations`), navigate to:
 `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
 * **Policy**: `Interactive logon: Smart card removal behavior` -> Set to **Lock Workstation** (value 1)
 * **Policy**: `Accounts: Limit local account use of blank passwords to console logon only` -> Set to **Enabled** (value 1)
+* **Policy**: `Network security: Do not store LAN Manager hash value on next password change` -> Set to **Enabled** (value 1)
+* **Policy**: `Interactive logon: Number of previous logons to cache (in case domain controller is not available)` -> Set to **0**
+* **Policy**: `Network security: Minimum session security for NTLM SSP based (including secure RPC) clients` -> Set to **Require NTLMv2 session security, Require 128-bit encryption** (value 537395200)
+* **Policy**: `Network security: Minimum session security for NTLM SSP based (including secure RPC) servers` -> Set to **Require NTLMv2 session security, Require 128-bit encryption** (value 537395200)
+* **Policy**: `Network access: Allow anonymous SID/Name translation` -> Set to **Disabled** (value 0)
+* **Policy**: `Network security: Allow LocalSystem NULL session fallback` -> Set to **Disabled** (value 0)
+
+<a id="08-endpoints-configure-account-policies-md-step-3-configure-hello-for-business-pin-and-microsoft-account-policies"></a>
+#### Step 3: Configure Hello for Business, PIN and Microsoft Account Policies
+Navigate to:
+`Computer Configuration\Administrative Templates\System\PIN Complexity`
+* **Policy**: `Minimum PIN length` -> Set to **Enabled** with value **6**
+
+Navigate to:
+`Computer Configuration\Administrative Templates\Windows Components\Microsoft Account`
+* **Policy**: `Block all consumer Microsoft account user authentication` -> Set to **Enabled**
+
+Navigate to:
+`Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
+* **Policy**: `Use a hardware security device` -> Set to **Enabled**
+* **Policy**: `Use convenience PIN sign-in` -> Set to **Disabled** (value 0)
+* **Policy**: `Allow Microsoft accounts to be optional` -> Set to **Enabled** (value 1)
+
+<a id="08-endpoints-configure-account-policies-md-step-4-configure-pbkdf2-iteration-count-via-gpo-preferences"></a>
+#### Step 4: Configure PBKDF2 Iteration Count via GPO Preferences
+Since the PBKDF2 iteration count setting is not exposed in standard ADMX templates, deploy it via Registry GPO Preferences:
+1. Within the endpoints GPO, navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+2. Right-click **Registry**, select **New** -> **Registry Item**.
+3. Configure:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SECURITY\Cache`
+   * **Value name**: `NL$IterationCount`
+   * **Value type**: `REG_DWORD`
+   * **Value data**: `1954` (Decimal)
 
 ---
 
@@ -18448,8 +19426,8 @@ Enforce the local security settings and SecEdit configuration locally.
 ```powershell
 <a id="08-endpoints-configure-account-policies-md-set-accountpoliciesps1"></a>
 # Set-AccountPolicies.ps1
-<a id="08-endpoints-configure-account-policies-md-description-configures-local-account-lockout-password-parameters-via-secedit-smart-card-behavior-and-blank-password-blocks"></a>
-# Description: Configures local account lockout, password parameters (via secedit), smart card behavior, and blank password blocks.
+<a id="08-endpoints-configure-account-policies-md-configures-local-account-lockout-password-parameters-smart-card-removal-behavior-blank-password-blocks-hello-for-business-microsoft-accounts-secure-channel-options-and-ntlm-session-security-options"></a>
+# Configures local account lockout, password parameters, smart card removal behavior, blank password blocks, Hello for Business, Microsoft accounts, secure channel options, and NTLM session security options.
 
 Write-Host "Applying account and password policies..." -ForegroundColor Cyan
 
@@ -18459,17 +19437,107 @@ $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
 if (-not (Test-Path $WinlogonPath)) {
     New-Item -Path $WinlogonPath -Force | Out-Null
 }
-<a id="08-endpoints-configure-account-policies-md-scremoveoption-1-lock-workstation-2-force-logoff"></a>
-# ScRemoveOption: "1" = Lock Workstation, "2" = Force Logoff
-Set-ItemProperty -Path $WinlogonPath -Name "ScRemoveOption" -Value "1" -Type String
-Write-Host "[+] Smart card removal behavior set to Lock Workstation." -ForegroundColor Green
+Set-ItemProperty -Path $WinlogonPath -Name "ScRemoveOption" -Value "1" -Type String -Force
+Set-ItemProperty -Path $WinlogonPath -Name "CachedLogonsCount" -Value 0 -Type DWord -Force
+Write-Host "[+] Smart card removal behavior and logon caching configured." -ForegroundColor Green
 
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
 if (-not (Test-Path $LsaPath)) {
     New-Item -Path $LsaPath -Force | Out-Null
 }
-Set-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -Value 1 -Type DWord
-Write-Host "[+] Blank password restriction enforced." -ForegroundColor Green
+Set-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "NoLMHash" -Value 1 -Type DWord -Force
+Write-Host "[+] Blank password restriction and NoLMHash options enforced." -ForegroundColor Green
+
+<a id="08-endpoints-configure-account-policies-md-lsass-wdigest-caching-block"></a>
+# LSASS WDigest caching block
+$WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
+if (-not (Test-Path $WDigestPath)) {
+    New-Item -Path $WDigestPath -Force | Out-Null
+}
+Set-ItemProperty -Path $WDigestPath -Name "UseLogonCredential" -Value 0 -Type DWord -Force
+Write-Host "[+] LSASS WDigest credential caching disabled." -ForegroundColor Green
+
+<a id="08-endpoints-configure-account-policies-md-pbkdf2-iterations-for-cached-logons"></a>
+# PBKDF2 Iterations for Cached Logons
+$CachePath = "HKLM:\SECURITY\Cache"
+if (-not (Test-Path $CachePath)) {
+    New-Item -Path $CachePath -Force | Out-Null
+}
+Set-ItemProperty -Path $CachePath -Name "NL`$IterationCount" -Value 1954 -Type DWord -Force
+Write-Host "[+] PBKDF2 cached credentials iteration count configured." -ForegroundColor Green
+
+<a id="08-endpoints-configure-account-policies-md-hello-for-business-pin-and-microsoft-account-policies"></a>
+# Hello for Business, PIN and Microsoft Account policies
+$SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+if (-not (Test-Path $SystemPolicyPath)) {
+    New-Item -Path $SystemPolicyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SystemPolicyPath -Name "AllowDomainPINLogon" -Value 0 -Type DWord -Force
+
+$PinComplexityPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity"
+if (-not (Test-Path $PinComplexityPath)) {
+    New-Item -Path $PinComplexityPath -Force | Out-Null
+}
+Set-ItemProperty -Path $PinComplexityPath -Name "MinimumPINLength" -Value 6 -Type DWord -Force
+
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+if (-not (Test-Path $SystemPath)) {
+    New-Item -Path $SystemPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SystemPath -Name "MSAOptional" -Value 1 -Type DWord -Force
+
+$MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
+if (-not (Test-Path $MsaPath)) {
+    New-Item -Path $MsaPath -Force | Out-Null
+}
+Set-ItemProperty -Path $MsaPath -Name "DisableUserAuth" -Value 1 -Type DWord -Force
+
+$PassportPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork"
+if (-not (Test-Path $PassportPath)) {
+    New-Item -Path $PassportPath -Force | Out-Null
+}
+Set-ItemProperty -Path $PassportPath -Name "RequireSecurityDevice" -Value 1 -Type DWord -Force
+
+$ExcludeDevicesPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices"
+if (-not (Test-Path $ExcludeDevicesPath)) {
+    New-Item -Path $ExcludeDevicesPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ExcludeDevicesPath -Name "TPM12" -Value 0 -Type DWord -Force
+Write-Host "[+] Hello for Business, PIN and Microsoft Account options configured." -ForegroundColor Green
+
+<a id="08-endpoints-configure-account-policies-md-domain-member-secure-channel-netlogon-settings"></a>
+# Domain Member Secure Channel netlogon settings
+$NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
+if (-not (Test-Path $NetlogonPath)) {
+    New-Item -Path $NetlogonPath -Force | Out-Null
+}
+Set-ItemProperty -Path $NetlogonPath -Name "RequireSignOrSeal" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $NetlogonPath -Name "SealSecureChannel" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $NetlogonPath -Name "SignSecureChannel" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $NetlogonPath -Name "DisablePasswordChange" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $NetlogonPath -Name "MaximumPasswordAge" -Value 30 -Type DWord -Force
+Set-ItemProperty -Path $NetlogonPath -Name "RequireStrongKey" -Value 1 -Type DWord -Force
+Write-Host "[+] Domain Member secure channel configurations applied." -ForegroundColor Green
+
+<a id="08-endpoints-configure-account-policies-md-lanmanworkstation-plain-text-passwords-block"></a>
+# LanmanWorkstation plain text passwords block
+$LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
+if (-not (Test-Path $LanmanWorkPath)) {
+    New-Item -Path $LanmanWorkPath -Force | Out-Null
+}
+Set-ItemProperty -Path $LanmanWorkPath -Name "EnablePlainTextPassword" -Value 0 -Type DWord -Force
+
+<a id="08-endpoints-configure-account-policies-md-ntlm-ssp-client-server-security-and-null-session-fallback"></a>
+# NTLM SSP Client & Server security and Null Session Fallback
+$MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
+if (-not (Test-Path $MsvPath)) {
+    New-Item -Path $MsvPath -Force | Out-Null
+}
+Set-ItemProperty -Path $MsvPath -Name "allownullsessionfallback" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $MsvPath -Name "NTLMMinClientSec" -Value 537395200 -Type DWord -Force
+Set-ItemProperty -Path $MsvPath -Name "NTLMMinServerSec" -Value 537395200 -Type DWord -Force
+Write-Host "[+] Network authentication security and NTLM session settings applied." -ForegroundColor Green
 
 <a id="08-endpoints-configure-account-policies-md-2-enforce-account-lockout-and-password-policy-via-secedit"></a>
 # 2. Enforce Account Lockout and Password Policy via secedit
@@ -18570,24 +19638,76 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 ```powershell
 <a id="08-endpoints-configure-account-policies-md-test-accountpoliciesps1"></a>
 # Test-AccountPolicies.ps1
-<a id="08-endpoints-configure-account-policies-md-description-checks-the-local-registry-and-secedit-settings-for-account-lockout-password-options-and-smart-card-removal-behavior"></a>
-# Description: Checks the local registry and SecEdit settings for account lockout, password options, and smart card removal behavior.
+<a id="08-endpoints-configure-account-policies-md-checks-local-registry-and-secedit-settings-for-account-lockout-password-options-smart-card-removal-behavior-pin-parameters-hello-for-business-microsoft-account-settings-secure-channel-properties-and-ntlm-session-configuration"></a>
+# Checks local registry and SecEdit settings for account lockout, password options, smart card removal behavior, PIN parameters, Hello for Business, Microsoft account settings, secure channel properties, and NTLM session configuration.
 
 Write-Host "--- Auditing Account and Password Policies ---" -ForegroundColor Cyan
+
+$Vulnerable = $false
+
+<a id="08-endpoints-configure-account-policies-md-helper-function-to-audit-registry-properties"></a>
+# Helper function to audit registry properties
+function Test-RegistryValue ($path, $name, $expectedValue) {
+    $val = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
+    $actual = if ($val) { $val.$name } else { "" }
+    $color = "Red"
+    if ($actual -eq $expectedValue) {
+        $color = "Green"
+    } else {
+        $global:Vulnerable = $true
+    }
+    Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
+}
 
 <a id="08-endpoints-configure-account-policies-md-1-audit-registry-settings"></a>
 # 1. Audit Registry Settings
 $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
-$ScRemove = Get-ItemProperty -Path $WinlogonPath -Name "ScRemoveOption" -ErrorAction SilentlyContinue
-$ScRemoveVal = if ($ScRemove) { $ScRemove.ScRemoveOption } else { "" }
-$ScRemoveColor = if ($ScRemoveVal -eq "1") { "Green" } else { "Red" }
-Write-Host "    - Smart Card Removal Behavior: '$ScRemoveVal' (Required = '1' [Lock])" -ForegroundColor $ScRemoveColor
+Test-RegistryValue $WinlogonPath "ScRemoveOption" "1"
+Test-RegistryValue $WinlogonPath "CachedLogonsCount" 0
 
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
-$BlankPwd = Get-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -ErrorAction SilentlyContinue
-$BlankPwdVal = if ($BlankPwd) { $BlankPwd.LimitBlankPasswordUse } else { 0 }
-$BlankPwdColor = if ($BlankPwdVal -eq 1) { "Green" } else { "Red" }
-Write-Host "    - Limit Blank Password Use: $BlankPwdVal (Required = 1)" -ForegroundColor $BlankPwdColor
+Test-RegistryValue $LsaPath "LimitBlankPasswordUse" 1
+Test-RegistryValue $LsaPath "NoLMHash" 1
+
+$WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
+Test-RegistryValue $WDigestPath "UseLogonCredential" 0
+
+$CachePath = "HKLM:\SECURITY\Cache"
+Test-RegistryValue $CachePath "NL`$IterationCount" 1954
+
+$SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+Test-RegistryValue $SystemPolicyPath "AllowDomainPINLogon" 0
+
+$PinComplexityPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity"
+Test-RegistryValue $PinComplexityPath "MinimumPINLength" 6
+
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+Test-RegistryValue $SystemPath "MSAOptional" 1
+
+$MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
+Test-RegistryValue $MsaPath "DisableUserAuth" 1
+
+$PassportPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork"
+Test-RegistryValue $PassportPath "RequireSecurityDevice" 1
+
+$ExcludeDevicesPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices"
+Test-RegistryValue $ExcludeDevicesPath "TPM12" 0
+
+$NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
+Test-RegistryValue $NetlogonPath "RequireSignOrSeal" 1
+Test-RegistryValue $NetlogonPath "SealSecureChannel" 1
+Test-RegistryValue $NetlogonPath "SignSecureChannel" 1
+Test-RegistryValue $NetlogonPath "DisablePasswordChange" 0
+Test-RegistryValue $NetlogonPath "MaximumPasswordAge" 30
+Test-RegistryValue $NetlogonPath "RequireStrongKey" 1
+
+$LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
+Test-RegistryValue $LanmanWorkPath "EnablePlainTextPassword" 0
+
+$MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
+Test-RegistryValue $MsvPath "allownullsessionfallback" 0
+Test-RegistryValue $MsvPath "NTLMMinClientSec" 537395200
+Test-RegistryValue $MsvPath "NTLMMinServerSec" 537395200
 
 <a id="08-endpoints-configure-account-policies-md-2-audit-secedit-settings"></a>
 # 2. Audit SecEdit Settings
@@ -18622,19 +19742,28 @@ foreach ($Key in $AccountSettings.Keys) {
     $Color = "Red"
     if ($Actual -eq [string]$Expected) {
         $Color = "Green"
+    } else {
+        $Vulnerable = $true
     }
     Write-Host "    - System Access Setting: $($Key) | Actual: '$($Actual)' (Expected: '$($Expected)')" -ForegroundColor $Color
 }
 
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+
+if ($Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+}
 ```
 
 ---
 
 <a id="08-endpoints-configure-account-policies-md-sources-compliance-references"></a>
-## Sources & Compliance References
-* **CIS Microsoft Windows 10/11 Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 2.3.7.3 (Accounts: Limit local account use of blank passwords...), Section 2.3.9.5 (Interactive logon: Smart card removal behavior)
-* **ANSSI AD Hardening Guide**: Recommendations on password complexity, reversible encryption blocks, and lockout management
+## 🔗 Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 2.3.7.3 (Accounts: Limit local account use of blank passwords...), Section 2.3.9.5 (Interactive logon: Smart card removal behavior), Section 2.3.10.2 (Microsoft network client: Send unencrypted password), Section 2.3.11.8 (Network access: Allow anonymous SID/Name translation), Section 2.3.11.10 (Network security: Allow LocalSystem NULL session fallback)
+* **ANSSI AD Hardening Guide**: Recommendations on password complexity, reversible encryption blocks, lockout management, and domain member secure channels.
+* **DoD Windows 11 Computer STIG v2r6**: Various account policy, PIN complexity, Windows Hello for Business, Microsoft account restrictions, WDigest disabled, and Netlogon secure channel parameters.
 
 
 <div style="page-break-before: always;"></div>
@@ -18658,27 +19787,118 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
   * **GPO Paths**:
     * User Configuration\Policies\Administrative Templates\Start Menu and Taskbar\Notifications
     * User Configuration\Policies\Administrative Templates\Windows Components\Cloud Content
+    * Computer Configuration\Administrative Templates\Control Panel\Personalization
+    * Computer Configuration\Administrative Templates\System\Group Policy
+    * Computer Configuration\Administrative Templates\Windows Components\App Privacy
+    * Computer Configuration\Administrative Templates\Windows Components\Application Compatibility
+    * Computer Configuration\Administrative Templates\Windows Components\Data Collection and Preview Builds
+    * Computer Configuration\Administrative Templates\Windows Components\Explorer
+    * Computer Configuration\Administrative Templates\Windows Components\Game DVR
+    * Computer Configuration\Administrative Templates\Windows Components\Windows Ink Workspace
+    * Computer Configuration\Administrative Templates\Windows Components\Windows Installer
+    * Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options
   * **Registry Locations**:
     * HKCU\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications
       * `NoToastApplicationNotificationOnLockScreen` = `1` (REG_DWORD)
     * HKCU\Software\Policies\Microsoft\Windows\CloudContent
       * `DisableThirdPartySuggestions` = `1` (REG_DWORD)
+    * HKLM\SOFTWARE\Classes\batfile\shell\runasuser, cmdfile\shell\runasuser, exefile\shell\runasuser, mscfile\shell\runasuser
+      * `SuppressionPolicy` = `4096` (REG_DWORD)
+    * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel
+      * `DisableExceptionChainValidation` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\Personalization
+      * `NoLockScreenCamera` = `1` (REG_DWORD)
+      * `NoLockScreenSlideshow` = `1` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}
+      * `NoBackgroundPolicy` = `0` (REG_DWORD)
+      * `NoGPOListChanges` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy
+      * `LetAppsActivateWithVoiceAboveLock` = `2` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat
+      * `DisableInventory` = `1` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent
+      * `DisableWindowsConsumerFeatures` = `1` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection
+      * `AllowTelemetry` = `1` (REG_DWORD)
+      * `LimitEnhancedDiagnosticDataWindowsAnalytics` = `1` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer
+      * `NoDataExecutionPrevention` = `0` (REG_DWORD)
+      * `NoHeapTerminationOnCorruption` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
+      * `PreXPSP2ShellProtocolBehavior` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main
+      * `NotifyDisableIEOptions` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds
+      * `DisableEnclosureDownload` = `1` (REG_DWORD)
+      * `AllowBasicAuthInClear` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+      * `DisableAutomaticRestartSignOn` = `1` (REG_DWORD)
+      * `InactivityTimeoutSecs` = `900` (REG_DWORD)
+      * `LegalNoticeText` = `"You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only. By using this IS, you consent to routine monitoring."` (REG_SZ)
+      * `LegalNoticeCaption` = `"US Department of Defense Warning Statement"` (REG_SZ)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer
+      * `EnableUserControl` = `0` (REG_DWORD)
+      * `AlwaysInstallElevated` = `0` (REG_DWORD)
+      * `SafeForScripting` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR
+      * `AllowGameDVR` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace
+      * `AllowWindowsInkWorkspace` = `1` (REG_DWORD)
+    * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager
+      * `ProtectionMode` = `1` (REG_DWORD)
+    * HKLM\SYSTEM\CurrentControlSet\Services\seclogon
+      * `Start` = `4` (REG_DWORD, Disabled)
+    * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management
+      * `MoveImages` = `0xFFFFFFFF` (REG_DWORD, force ASLR for relocatable images)
+      * `FeatureSettingsOverride` = `72` (REG_DWORD, enable speculative execution mitigations)
+      * `FeatureSettingsOverrideMask` = `3` (REG_DWORD, mask for mitigations)
+    * HKLM\Software\Microsoft\Cryptography\Wintrust\Config (and Wow6432Node equivalent)
+      * `EnableCertPaddingCheck` = `1` (REG_DWORD, strict Authenticode cert padding verification)
+    * HKLM\SOFTWARE\Microsoft\Command Processor
+      * `LockBatchFilesWhenInUse` = `1` (REG_DWORD, secure mode for batch file processing)
+    * HKLM\SOFTWARE\Microsoft\TTD
+      * `RecordingPolicy` = `2` (REG_DWORD, disable Time-Travel Debugging)
+    * HKLM\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots
+      * `Flags` = `1` (REG_DWORD, prevent standard users from installing root certificates)
+    * HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows
+      * `LoadAppInit_DLLs` = `0` (REG_DWORD, disable custom DLL loading list)
+    * HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer
+      * `DisableCoInstallers` = `1` (REG_DWORD, block driver co-installer execution)
+    * HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks
+      * `Enabled` = `1` (REG_DWORD, enable hardware-enforced stack protection)
 
 ---
 
 <a id="08-endpoints-configure-user-profile-restrictions-md-rationale"></a>
 ## Rationale
-Securing user profile characteristics prevents exposure of sensitive information and blocks unapproved telemetry/consumer features:
+Securing user profile characteristics and administrative explorer behaviors prevents exposure of sensitive information, restricts arbitrary file execution pathways, disables unapproved telemetry/consumer features, and locks down potential privilege escalation points:
 
 1. **Lock Screen Toast Notifications (`NoToastApplicationNotificationOnLockScreen`)**: By default, Windows displays application notifications (toasts) on the lock screen. This includes email snippets, messaging notifications, or Multi-Factor Authentication (MFA) codes. If a workstation is left locked, anyone with physical sight of the screen can read these notifications, leaking corporate secrets or bypassing authentication challenges. Disabling these toasts on the lock screen prevents this exposure.
-2. **Third-Party Consumer Experiences (`DisableThirdPartySuggestions`)**: Windows Spotlight frequently recommends third-party software, applications, or advertising on the lock screen and Start menu. Disabling third-party content prevents telemetry generation, unapproved software installation prompts, and social-engineering entry points.
+2. **Third-Party Consumer Experiences (`DisableThirdPartySuggestions` & `DisableWindowsConsumerFeatures`)**: Windows Spotlight frequently recommends third-party software, applications, or advertising on the lock screen and Start menu. Disabling third-party content prevents telemetry generation, unapproved software installation prompts, and social-engineering entry points.
+3. **Shell Context Menu runasuser Bypass (`SuppressionPolicy`)**: Restricting the "Run as different user" shell context menus prevents standard users from attempting to launch executables under different identities without triggering formal security validation or UAC controls.
+4. **Kernel SEHOP (`DisableExceptionChainValidation`)**: Structured Exception Handler Overwrite Protection (SEHOP) detects and blocks stack-based buffer overflow exploit redirection techniques at the OS level.
+5. **Explorer and Installer Hardening (`AlwaysInstallElevated`, `EnableUserControl`)**: Forcing standard user installer locks and disabling elevated installations prevents users from escalating privileges using crafted installer files.
+6. **Inactivity Timeout (`InactivityTimeoutSecs`)**: Automatically locking idle workstations after 15 minutes of inactivity (900 seconds) prevents physical session hijacking.
+7. **Memory Protection & ASLR Enforcement (`MoveImages`)**: Address Space Layout Randomization (ASLR) makes it difficult for exploit payloads to find precise memory locations of APIs or system functions. Forcing ASLR on relocatable images ensures binary mitigation compliance.
+8. **Strict Authenticode Signature Verification (`EnableCertPaddingCheck`)**: Prevents signature manipulation by enforcing strict padding validation, blocking attempts to append malicious payloads to signed binaries without invalidating the signature.
+9. **Secure Batch processing (`LockBatchFilesWhenInUse`)**: Holds an opportunistic lock on batch/cmd scripts during execution to prevent files from being modified on-the-fly, which mitigates race conditions and statement-modification exploits.
+10. **Disable Debugging & Telemetry abuse (`RecordingPolicy`, `DisableCoInstallers`, `LoadAppInit_DLLs`)**: Disabling Time-Travel Debugging prevents adversaries from dumping memory or executing arbitrary binaries. Disabling custom DLL loading (AppInit_DLLs) blocks persistent user-mode DLL injection. Disabling driver co-installers prevents unauthorized executable downloads during peripheral plugin.
+11. **Standard User Root Certificate Restriction (`Flags` under `ProtectedRoots`)**: Restricting certificate store installation to administrators prevents standard users from importing rogue root certificate authorities into their personal store, which blocks internal MitM or code-signing forgery attacks.
+12. **Spectre & Meltdown CPU Mitigations (`FeatureSettingsOverride`)**: Hardware-level speculative execution vulnerabilities can allow a malicious process to leak kernel memory. Enforcing modern speculative execution overrides blocks these side-channel exploitation paths.
+13. **Kernel-Level Shadow Stacks (`Enabled` under `KernelShadowStacks`)**: Enforces hardware-backed control flow integrity (Intel CET/AMD Shadow Stack) to prevent Return-Oriented Programming (ROP) execution hijacks.
 
 ---
 
 <a id="08-endpoints-configure-user-profile-restrictions-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
-* **User Notifications**: Users will still receive notifications while logged in and unlocked. However, when the workstation is locked, they will only see system status indicators, not detailed content banners.
+* **User Experience**: Users will still receive notifications while logged in and unlocked. However, when the workstation is locked, they will only see system status indicators, not detailed content banners.
 * **Spotlight Aesthetics**: The lock screen background can still show administrative wallpaper choices, but will not query online Microsoft consumer recommendations.
+* **Installer Failures**: Administrators will need to perform standard GPO-based software distribution or elevate installers manually, since "AlwaysInstallElevated" is securely disabled.
+* **Driver Installations**: Blocking co-installers means manufacturer companion software for USB devices (gaming mouses, keyboards, headsets) must be downloaded and installed manually by an administrator.
+* **Legacy Application Compatibility**:
+  * Some legacy software relying on custom DLL injection via AppInit_DLLs will fail to load their helper libraries.
+  * Forcing ASLR or enabling Kernel Shadow Stacks may cause stability issues in older 32-bit executables or unsigned drivers. Proper sandbox verification is required.
+  * Batch files that are dynamically self-modifying during runtime will fail when secure batch processing is enabled due to opportunistic file locks.
 
 ---
 
@@ -18688,48 +19908,246 @@ Securing user profile characteristics prevents exposure of sensitive information
 <a id="08-endpoints-configure-user-profile-restrictions-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-To apply user configuration settings, ensure they are linked to the OUs containing user accounts (not computer accounts), or enable Loopback Processing on the computer GPO.
+To apply user configuration settings, link the GPO to OUs containing user accounts (or enable GPO Loopback Processing on the computer policy).
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Create or edit a GPO targeting the User accounts OU (e.g., `GPO_Hardening_UserProfile_Restrictions`).
-3. Configure the following settings under **User Configuration**:
+2. Edit the appropriate endpoint GPO (e.g., `GPO_Hardening_UserProfile_Restrictions`).
+3. Configure the following settings:
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-1-turn-off-lock-screen-toasts"></a>
-#### 1. Turn Off Lock Screen Toasts
-Navigate to:
-`User Configuration\Policies\Administrative Templates\Start Menu and Taskbar\Notifications`
-* **Policy**: `Turn off toast notifications on the lock screen`
-* **Setting**: `Enabled`
+<a id="08-endpoints-configure-user-profile-restrictions-md-1-user-configuration"></a>
+#### 1. User Configuration
+Navigate to: `User Configuration\Policies\Administrative Templates\Start Menu and Taskbar\Notifications`
+* **Policy**: `Turn off toast notifications on the lock screen` -> Set to **Enabled**
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-2-disable-cloud-spotlight-suggestions"></a>
-#### 2. Disable Cloud Spotlight Suggestions
-Navigate to:
-`User Configuration\Policies\Administrative Templates\Windows Components\Cloud Content`
-* **Policy**: `Do not suggest third-party content in Windows spotlight`
-* **Setting**: `Enabled`
+Navigate to: `User Configuration\Policies\Administrative Templates\Windows Components\Cloud Content`
+* **Policy**: `Do not suggest third-party content in Windows spotlight` -> Set to **Enabled**
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-2-computer-configuration-personalization-system-restrictions"></a>
+#### 2. Computer Configuration (Personalization & System Restrictions)
+Navigate to: `Computer Configuration\Administrative Templates\Control Panel\Personalization`
+* **Policy**: `Prevent enabling lock screen camera` -> Set to **Enabled**
+* **Policy**: `Prevent enabling lock screen slide show` -> Set to **Enabled**
+
+Navigate to: `Computer Configuration\Administrative Templates\System\Group Policy`
+* **Policy**: `Configure registry policy processing` -> Set to **Enabled**
+  * Check **Process even if the Group Policy objects have not changed** -> Set to **Enabled** (value 1)
+  * Check **Do not apply during periodic background processing** -> Set to **Disabled** (value 0)
+
+Navigate to: `Computer Configuration\Administrative Templates\Windows Components\App Privacy`
+* **Policy**: `Let Windows apps activate with voice while the system is locked` -> Set to **Enabled: Force Deny**
+
+Navigate to: `Computer Configuration\Administrative Templates\Windows Components\Application Compatibility`
+* **Policy**: `Turn off Inventory Collector` -> Set to **Enabled**
+
+Navigate to: `Computer Configuration\Administrative Templates\Windows Components\Cloud Content`
+* **Policy**: `Turn off Microsoft consumer experiences` -> Set to **Enabled**
+
+Navigate to: `Computer Configuration\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+* **Policy**: `Allow Diagnostic Data` -> Set to **Enabled: Send required diagnostic data** (value 1)
+* **Policy**: `Limit optional diagnostic data for Desktop Analytics` -> Set to **Enabled** (value 1)
+
+Navigate to: `Computer Configuration\Administrative Templates\Windows Components\Explorer`
+* **Policy**: `Turn off Data Execution Prevention for Explorer` -> Set to **Disabled** (value 0)
+* **Policy**: `Turn off heap termination on corruption` -> Set to **Disabled** (value 0)
+
+Navigate to: `Computer Configuration\Administrative Templates\Windows Components\Game DVR`
+* **Policy**: `Enables or disables Windows Game Recording and Broadcasting` -> Set to **Disabled** (value 0)
+
+Navigate to: `Computer Configuration\Administrative Templates\Windows Components\Windows Ink Workspace`
+* **Policy**: `Allow Windows Ink Workspace` -> Set to **Enabled: On, but disallow access above lock** (value 1)
+
+Navigate to: `Computer Configuration\Administrative Templates\Windows Components\Windows Installer`
+* **Policy**: `Allow user control over installs` -> Set to **Disabled** (value 0)
+* **Policy**: `Always install with elevated privileges` -> Set to **Disabled** (value 0)
+* **Policy**: `Prevent Internet Explorer security prompt for Windows Installer scripts` -> Set to **Disabled** (value 0)
+
+Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+* **Policy**: `Interactive logon: Machine inactivity limit` -> Set to **900 seconds** (15 minutes)
+* **Policy**: `Interactive logon: Message text for users attempting to log on` -> Set to warning message text
+* **Policy**: `Interactive logon: Message title for users attempting to log on` -> Set to **US Department of Defense Warning Statement**
+* **Policy**: `System objects: Strengthen default permissions of internal system objects (e.g. Symbolic Links)` -> Set to **Enabled**
+* **Policy**: `Devices: Allowed to format and eject removable media` -> Set to **Administrators**
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-3-deploy-custom-settings-via-gpo-preferences-and-system-mitigations"></a>
+#### 3. Deploy Custom Settings via GPO Preferences and System Mitigations
+Configure GPO Preferences registry items or Administrative Templates for the remaining custom settings:
+* **ASLR Force Randomization**: Enable in Exploit Guard mitigation policies or set registry `MoveImages` = `4294967295` (0xFFFFFFFF).
+* **Kernel Shadow Stacks**: Navigate to: `Computer Configuration\Administrative Templates\System\Device Guard` -> `Turn on Virtualization-Based Security` -> Set **Kernel-level shadow stacks** to **Enabled** (or set registry `Enabled` = `1`).
+* **Spectre & Meltdown CPU Mitigations**: Configure registry `FeatureSettingsOverride` = `72` and `FeatureSettingsOverrideMask` = `3`.
+* **LockBatchFilesWhenInUse**: Configure registry `LockBatchFilesWhenInUse` = `1` under `HKLM\SOFTWARE\Microsoft\Command Processor`.
+* **EnableCertPaddingCheck**: Configure registry `EnableCertPaddingCheck` = `1` under `HKLM\Software\Microsoft\Cryptography\Wintrust\Config` (and Wow6432Node).
+* **RecordingPolicy**: Configure registry `RecordingPolicy` = `2` under `HKLM\SOFTWARE\Microsoft\TTD`.
+* **Root Cert Flags**: Configure registry `Flags` = `1` under `HKLM\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots`.
+* **LoadAppInit_DLLs**: Configure registry `LoadAppInit_DLLs` = `0` under `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows`.
+* **DisableCoInstallers**: Configure registry `DisableCoInstallers` = `1` under `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer`.
 
 ---
 
 <a id="08-endpoints-configure-user-profile-restrictions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Since user configurations reside in `HKEY_CURRENT_USER` (HKCU), remediation scripts must run in the context of the logged-on user. To apply these configurations machine-wide for all future profiles, the script can load the Default User hive (`NTUSER.DAT`) and apply the keys.
+Run the following script locally to configure user and system registry restrictions.
 
 [Download Script: Set-UserProfileRestrictions.ps1](implementation_scripts/Set-UserProfileRestrictions.ps1)
 
 ```powershell
 <a id="08-endpoints-configure-user-profile-restrictions-md-set-userprofilerestrictionsps1"></a>
 # Set-UserProfileRestrictions.ps1
-<a id="08-endpoints-configure-user-profile-restrictions-md-description-configures-hkcu-registry-parameters-for-the-active-user-and-sets-them-in-the-default-user-hive-for-new-profiles"></a>
-# Description: Configures HKCU registry parameters for the active user, and sets them in the Default User hive for new profiles.
+<a id="08-endpoints-configure-user-profile-restrictions-md-description-configures-hklm-and-hkcu-registry-settings-for-user-profiles-shell-behaviors-diagnostic-data-installer-locks-inactivity-timeouts-and-security-policies"></a>
+# Description: Configures HKLM and HKCU registry settings for user profiles, shell behaviors, diagnostic data, installer locks, inactivity timeouts, and security policies.
 
-Write-Host "Applying User Profile Restrictions..." -ForegroundColor Cyan
+Write-Host "Applying User Profile and System Restrictions..." -ForegroundColor Cyan
 
+<a id="08-endpoints-configure-user-profile-restrictions-md-helper-function-to-create-keys-and-set-values-safely"></a>
+# Helper function to create keys and set values safely
+function Set-RegDWord ($path, $name, $value) {
+    $parent = Split-Path -Path $path
+    if (-not (Test-Path $parent)) {
+        New-Item -Path $parent -Force | Out-Null
+    }
+    if (-not (Test-Path $path)) {
+        New-Item -Path $path -Force | Out-Null
+    }
+    Set-ItemProperty -Path $path -Name $name -Value $value -Type DWord -Force
+}
+
+function Set-RegString ($path, $name, $value) {
+    $parent = Split-Path -Path $path
+    if (-not (Test-Path $parent)) {
+        New-Item -Path $parent -Force | Out-Null
+    }
+    if (-not (Test-Path $path)) {
+        New-Item -Path $path -Force | Out-Null
+    }
+    Set-ItemProperty -Path $path -Name $name -Value $value -Type String -Force
+}
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-1-enforce-hklm-registry-hardening-settings"></a>
+# 1. Enforce HKLM Registry Hardening Settings
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-shell-runas-suppression-policies"></a>
+# Shell RunAs Suppression Policies
+Set-RegDWord "HKLM:\SOFTWARE\Classes\batfile\shell\runasuser" "SuppressionPolicy" 4096
+Set-RegDWord "HKLM:\SOFTWARE\Classes\cmdfile\shell\runasuser" "SuppressionPolicy" 4096
+Set-RegDWord "HKLM:\SOFTWARE\Classes\exefile\shell\runasuser" "SuppressionPolicy" 4096
+Set-RegDWord "HKLM:\SOFTWARE\Classes\mscfile\shell\runasuser" "SuppressionPolicy" 4096
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-kernel-sehop"></a>
+# Kernel SEHOP
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" "DisableExceptionChainValidation" 0
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-personalization"></a>
+# Personalization
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" "NoLockScreenCamera" 1
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" "NoLockScreenSlideshow" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-group-policy-behavior"></a>
+# Group Policy Behavior
+$GpKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}"
+Set-RegDWord $GpKey "NoBackgroundPolicy" 0
+Set-RegDWord $GpKey "NoGPOListChanges" 0
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-app-privacy"></a>
+# App Privacy
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" "LetAppsActivateWithVoiceAboveLock" 2
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-app-compatibility"></a>
+# App Compatibility
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat" "DisableInventory" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-cloud-content"></a>
+# Cloud Content
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" "DisableWindowsConsumerFeatures" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-data-collection-telemetry"></a>
+# Data Collection / Telemetry
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" "AllowTelemetry" 1
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" "LimitEnhancedDiagnosticDataWindowsAnalytics" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-explorer-and-security-controls"></a>
+# Explorer and Security Controls
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" "NoDataExecutionPrevention" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" "NoHeapTerminationOnCorruption" 0
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" "PreXPSP2ShellProtocolBehavior" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" "NotifyDisableIEOptions" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" "DisableEnclosureDownload" 1
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" "AllowBasicAuthInClear" 0
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "DisableAutomaticRestartSignOn" 1
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "InactivityTimeoutSecs" 900
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-legal-notice-banner"></a>
+# Legal Notice Banner
+$LegalText = "You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only. By using this IS, you consent to routine monitoring."
+Set-RegString "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "LegalNoticeText" $LegalText
+Set-RegString "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "LegalNoticeCaption" "US Department of Defense Warning Statement"
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-installer-hardening"></a>
+# Installer Hardening
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer" "EnableUserControl" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer" "AlwaysInstallElevated" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer" "SafeForScripting" 0
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-game-dvr"></a>
+# Game DVR
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" "AllowGameDVR" 0
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-windows-ink-workspace"></a>
+# Windows Ink Workspace
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-system-objects-protection-mode"></a>
+# System Objects Protection Mode
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" "ProtectionMode" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-secondary-logon-service-disabled-4"></a>
+# Secondary Logon Service (Disabled = 4)
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\seclogon" "Start" 4
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-aslr-force-randomization"></a>
+# ASLR Force Randomization
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" 4294967295
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-strict-authenticode-cert-padding-check"></a>
+# Strict Authenticode Cert Padding Check
+Set-RegDWord "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
+Set-RegDWord "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-secure-batch-processing"></a>
+# Secure Batch Processing
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-disable-time-travel-debugging-ttd"></a>
+# Disable Time-Travel Debugging (TTD)
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\TTD" "RecordingPolicy" 2
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-prevent-standard-users-from-installing-root-certificates"></a>
+# Prevent standard users from installing root certificates
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-disable-appinit-dlls"></a>
+# Disable AppInit_DLLs
+Set-RegDWord "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" 0
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-block-driver-co-installers"></a>
+# Block driver co-installers
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" "DisableCoInstallers" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-spectremeltdown-speculative-execution-mitigations"></a>
+# Spectre/Meltdown speculative execution mitigations
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" 72
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" 3
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-kernel-level-shadow-stacks"></a>
+# Kernel-level Shadow Stacks
+Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
+
+Write-Host "[+] Local computer system restrictions applied." -ForegroundColor Green
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-2-enforce-hkcu-settings-on-current-user"></a>
+# 2. Enforce HKCU Settings on Current User
 $PushPath = "HKCU:\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
 $CloudPath = "HKCU:\Software\Policies\Microsoft\Windows\CloudContent"
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-1-enforce-on-current-user"></a>
-# 1. Enforce on Current User
 if (-not (Test-Path $PushPath)) {
     New-Item -Path $PushPath -Force | Out-Null
 }
@@ -18741,8 +20159,8 @@ if (-not (Test-Path $CloudPath)) {
 Set-ItemProperty -Path $CloudPath -Name "DisableThirdPartySuggestions" -Value 1 -Type DWord
 Write-Host "[+] Current user profile restrictions applied successfully." -ForegroundColor Green
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-2-enforce-on-default-user-hive-for-all-future-user-profiles-on-this-machine"></a>
-# 2. Enforce on Default User Hive (For all future user profiles on this machine)
+<a id="08-endpoints-configure-user-profile-restrictions-md-3-enforce-hkcu-settings-on-default-user-hive-for-all-future-user-profiles-on-this-machine"></a>
+# 3. Enforce HKCU Settings on Default User Hive (For all future user profiles on this machine)
 Write-Host "[*] Configuring Default User profile registry keys..." -ForegroundColor Gray
 $DefaultHivePath = "C:\Users\Default\NTUSER.DAT"
 
@@ -18780,30 +20198,690 @@ if (Test-Path $DefaultHivePath) {
 ```powershell
 <a id="08-endpoints-configure-user-profile-restrictions-md-test-userprofilerestrictionsps1"></a>
 # Test-UserProfileRestrictions.ps1
-<a id="08-endpoints-configure-user-profile-restrictions-md-description-checks-the-hkcu-registry-settings-of-the-active-user-for-profile-restrictions"></a>
-# Description: Checks the HKCU registry settings of the active user for profile restrictions.
+<a id="08-endpoints-configure-user-profile-restrictions-md-description-checks-hkcu-and-hklm-registry-settings-for-active-user-and-system-profile-restrictions"></a>
+# Description: Checks HKCU and HKLM registry settings for active user and system profile restrictions.
 
 Write-Host "--- Auditing User Profile Restrictions ---" -ForegroundColor Cyan
 
+$Vulnerable = $false
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-helper-function-to-audit-registry-properties"></a>
+# Helper function to audit registry properties
+function Test-RegistryValue ($path, $name, $expectedValue) {
+    $val = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
+    $actual = if ($val) { $val.$name } else { "" }
+    $color = "Red"
+    if ($actual -eq $expectedValue) {
+        $color = "Green"
+    } else {
+        $global:Vulnerable = $true
+    }
+    Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
+}
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-1-audit-current-user-settings"></a>
+# 1. Audit Current User Settings
 $PushPath = "HKCU:\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
 $CloudPath = "HKCU:\Software\Policies\Microsoft\Windows\CloudContent"
+Test-RegistryValue $PushPath "NoToastApplicationNotificationOnLockScreen" 1
+Test-RegistryValue $CloudPath "DisableThirdPartySuggestions" 1
 
-$Toast = Get-ItemProperty -Path $PushPath -Name "NoToastApplicationNotificationOnLockScreen" -ErrorAction SilentlyContinue
-$Spotlight = Get-ItemProperty -Path $CloudPath -Name "DisableThirdPartySuggestions" -ErrorAction SilentlyContinue
+<a id="08-endpoints-configure-user-profile-restrictions-md-2-audit-computer-hklm-settings"></a>
+# 2. Audit Computer HKLM Settings
+$ClassBat = "HKLM:\SOFTWARE\Classes\batfile\shell\runasuser"
+$ClassCmd = "HKLM:\SOFTWARE\Classes\cmdfile\shell\runasuser"
+$ClassExe = "HKLM:\SOFTWARE\Classes\exefile\shell\runasuser"
+$ClassMsc = "HKLM:\SOFTWARE\Classes\mscfile\shell\runasuser"
+Test-RegistryValue $ClassBat "SuppressionPolicy" 4096
+Test-RegistryValue $ClassCmd "SuppressionPolicy" 4096
+Test-RegistryValue $ClassExe "SuppressionPolicy" 4096
+Test-RegistryValue $ClassMsc "SuppressionPolicy" 4096
 
-$ToastVal = if ($Toast) { $Toast.NoToastApplicationNotificationOnLockScreen } else { 0 }
-$SpotlightVal = if ($Spotlight) { $Spotlight.DisableThirdPartySuggestions } else { 0 }
+$SessionKernel = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel"
+Test-RegistryValue $SessionKernel "DisableExceptionChainValidation" 0
 
-$ToastColor = if ($ToastVal -eq 1) { "Green" } else { "Red" }
-$SpotlightColor = if ($SpotlightVal -eq 1) { "Green" } else { "Red" }
+$Personalization = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization"
+Test-RegistryValue $Personalization "NoLockScreenCamera" 1
+Test-RegistryValue $Personalization "NoLockScreenSlideshow" 1
 
-Write-Host "    - Turn Off Toast Notifications on Lock Screen: $ToastVal (Required = 1)" -ForegroundColor $ToastColor
-Write-Host "    - Disable Spotlight Suggestions: $SpotlightVal (Required = 1)" -ForegroundColor $SpotlightColor
+$GpKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}"
+Test-RegistryValue $GpKey "NoBackgroundPolicy" 0
+Test-RegistryValue $GpKey "NoGPOListChanges" 0
+
+$AppPrivacy = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy"
+Test-RegistryValue $AppPrivacy "LetAppsActivateWithVoiceAboveLock" 2
+
+$AppCompat = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
+Test-RegistryValue $AppCompat "DisableInventory" 1
+
+$CloudContent = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
+Test-RegistryValue $CloudContent "DisableWindowsConsumerFeatures" 1
+
+$DataCollection = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+Test-RegistryValue $DataCollection "AllowTelemetry" 1
+Test-RegistryValue $DataCollection "LimitEnhancedDiagnosticDataWindowsAnalytics" 1
+
+$Explorer = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
+Test-RegistryValue $Explorer "NoDataExecutionPrevention" 0
+Test-RegistryValue $Explorer "NoHeapTerminationOnCorruption" 0
+
+$ExplorerPolicies = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+Test-RegistryValue $ExplorerPolicies "PreXPSP2ShellProtocolBehavior" 0
+
+$IEMain = "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main"
+Test-RegistryValue $IEMain "NotifyDisableIEOptions" 0
+
+$IEFeeds = "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds"
+Test-RegistryValue $IEFeeds "DisableEnclosureDownload" 1
+Test-RegistryValue $IEFeeds "AllowBasicAuthInClear" 0
+
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+Test-RegistryValue $SystemPath "DisableAutomaticRestartSignOn" 1
+Test-RegistryValue $SystemPath "InactivityTimeoutSecs" 900
+Test-RegistryValue $SystemPath "LegalNoticeCaption" "US Department of Defense Warning Statement"
+
+$Installer = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer"
+Test-RegistryValue $Installer "EnableUserControl" 0
+Test-RegistryValue $Installer "AlwaysInstallElevated" 0
+Test-RegistryValue $Installer "SafeForScripting" 0
+
+$GameDVR = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR"
+Test-RegistryValue $GameDVR "AllowGameDVR" 0
+
+$InkWorkspace = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace"
+Test-RegistryValue $InkWorkspace "AllowWindowsInkWorkspace" 1
+
+$SessionMgr = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager"
+Test-RegistryValue $SessionMgr "ProtectionMode" 1
+
+$SecLogon = "HKLM:\SYSTEM\CurrentControlSet\Services\seclogon"
+Test-RegistryValue $SecLogon "Start" 4
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-aslr-and-speculative-mitigations"></a>
+# ASLR and Speculative mitigations
+$MemMgmt = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management"
+Test-RegistryValue $MemMgmt "MoveImages" 4294967295
+Test-RegistryValue $MemMgmt "FeatureSettingsOverride" 72
+Test-RegistryValue $MemMgmt "FeatureSettingsOverrideMask" 3
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-strict-authenticode-check"></a>
+# Strict Authenticode check
+Test-RegistryValue "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
+Test-RegistryValue "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-secure-batch-processing"></a>
+# Secure Batch processing
+Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-disable-time-travel-debugging"></a>
+# Disable Time-Travel Debugging
+Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\TTD" "RecordingPolicy" 2
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-prevent-standard-users-from-root-cert-installation"></a>
+# Prevent standard users from root cert installation
+Test-RegistryValue "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-disable-appinit-dlls"></a>
+# Disable AppInit_DLLs
+Test-RegistryValue "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" 0
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-block-driver-co-installers"></a>
+# Block driver co-installers
+Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" "DisableCoInstallers" 1
+
+<a id="08-endpoints-configure-user-profile-restrictions-md-kernel-level-shadow-stacks"></a>
+# Kernel-level Shadow Stacks
+Test-RegistryValue "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
+
+if ($Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+}
 ```
 
 ---
 
 <a id="08-endpoints-configure-user-profile-restrictions-md-sources-compliance-references"></a>
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.2.1 (Ensure 'Turn off toast notifications on the lock screen' is set to 'Enabled'), Section 18.8.3.1 (Ensure 'Do not suggest third-party content in Windows spotlight' is set to 'Enabled')
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.2.1 (Ensure 'Turn off toast notifications on the lock screen' is set to 'Enabled'), Section 18.8.3.1 (Ensure 'Do not suggest third-party content in Windows spotlight' is set to 'Enabled'), Section 18.8.21.1 (Ensure 'Always install with elevated privileges' is set to 'Disabled')
 * **Microsoft Windows Security Baselines**: User configuration guidelines
+* **DoD Windows 11 Computer STIG v2r6**: Various lock screen personalization, telemetry, Internet Explorer, Windows Installer, inactivity timeouts, and legal warning banner settings.
+
+
+
+<div style="page-break-before: always;"></div>
+
+<a id="08-endpoints-configure-exploit-protection-md"></a>
+
+<a id="08-endpoints-configure-exploit-protection-md-hardening-requirement-configure-exploit-protection-profile"></a>
+# Hardening Requirement: Configure Exploit Protection Profile
+
+<a id="08-endpoints-configure-exploit-protection-md-target-scope"></a>
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<a id="08-endpoints-configure-exploit-protection-md-implementation-details"></a>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Exploit Guard\Exploit Protection`
+  * **Policy**: `Use a common set of exploit protection settings`
+  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection`
+    * **Value Name**: `ExploitProtectionSettings`
+    * **Value Type**: `REG_SZ`
+    * **Value Data**: `C:\ProgramData\ExploitProtection\ExploitProtectionSettings.xml`
+
+---
+
+<a id="08-endpoints-configure-exploit-protection-md-rationale"></a>
+## Rationale
+Exploit Protection (the successor to the Enhanced Mitigation Experience Toolkit, or EMET) provides a set of advanced memory and vulnerability mitigations. These mitigations protect both the operating system and applications from memory corruption, buffer overflows, execution redirection, and process hijack attempts. 
+
+By enforcing system-wide mitigations:
+1. **Data Execution Prevention (DEP)**: Enforces non-executable memory pages, preventing attackers from executing shellcode injected into data-only memory regions (such as the stack or heap).
+2. **Address Space Layout Randomization (ASLR)**: Randomizes the locations where system components, executable code, and memory allocations are loaded. Enabling Mandatory ASLR (Force Relocate Images), Bottom-Up ASLR, and High Entropy ASLR makes memory structures unpredictable, thwarting return-oriented programming (ROP) exploits.
+3. **Control Flow Guard (CFG)**: Verifies control flow integrity for indirect call targets at compile time, preventing attackers from hijacking indirect jumps to point to arbitrary payloads.
+4. **Structured Exception Handler Overwrite Protection (SEHOP)**: Blocks exploits that overwrite Structured Exception Handlers (SEH) to gain control of execution paths during error handling.
+5. **Heap Termination on Corruption**: Immediately terminates a process if corruption is detected in its heap. This blocks heap-based buffer overflow exploitation before execution control can be seized.
+
+<a id="08-endpoints-configure-exploit-protection-md-application-specific-hardening"></a>
+### Application-Specific Hardening
+In addition to global default policies, specific security mitigations are applied to common productivity applications, browsers, document viewers, and scripting runtimes that represent the primary initial access target vectors:
+* **Microsoft Office (Word, Excel, PowerPoint, Outlook, Access, Publisher, Visio, Lync/Skype)**: High-risk entry points. Enabling advanced Payload protections (Export/Import Address Filtering and Return-Oriented Programming mitigations) prevents memory bypass techniques used in malicious macro files and document exploits. Image loading policies are hardened to block loading of remote libraries from UNC shares.
+* **Adobe Acrobat and Reader**: Document parsing vulnerability targets. Applies EAF, IAF, and ROP mitigations to block malicious PDF parsing exploits.
+* **Web Browsers (Chrome, Edge, Firefox)**: Standard workspace web execution clients. Applies core DEP, ASLR, and CFG mitigations to secure dynamic code execution and sandbox interfaces without interfering with dynamic browser script generation engines.
+* **Scripting Engines and Utilities (wscript.exe, cscript.exe, powershell.exe)**: Common execution mechanisms for malicious scripts. Applies strict memory relocation, code verification, and ROP defenses to prevent execution hijacking.
+* **Java Runtime Environment (java.exe, javaw.exe, javaws.exe)**: Frequently targeted by older or legacy JIT exploits. Applies ROP mitigations to validate runtime stack operations.
+
+---
+
+<a id="08-endpoints-configure-exploit-protection-md-legacy-impact-compatibility"></a>
+## Legacy Impact & Compatibility
+* **Application Crashes**: Strict system-wide mitigations, particularly Mandatory ASLR (`ForceRelocateImages`) and DEP, can cause legacy, proprietary, or unsigned applications that are not compiled to support dynamic base relocations to crash upon launching.
+* **Orchestration/Agent Conflicts**: Certain older monitoring agents or custom management wrappers that perform memory hook injections may fail when CFG or strict memory mitigations are enforced.
+* **Staged Deployment**: It is critical to pilot configurations on a representative sample of workstations and member servers to identify application compatibility issues. If a specific critical business application is incompatible, administrators can define application-specific bypasses (`<AppConfig>`) within the XML configuration rather than disabling system-wide protections.
+
+---
+
+<a id="08-endpoints-configure-exploit-protection-md-implementation-steps"></a>
+## Implementation Steps
+
+<a id="08-endpoints-configure-exploit-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+<a id="08-endpoints-configure-exploit-protection-md-step-1-generate-the-reference-xml-configuration-file"></a>
+#### Step 1: Generate the Reference XML Configuration File
+Before configuring the GPO, you must create a reference XML file containing the desired Exploit Protection mitigations:
+1. On a reference workstation, open the **Windows Security** app.
+2. Select **App & browser control** and click **Exploit protection settings**.
+3. Under the **System settings** tab, configure the following:
+   * **Control Flow Guard (CFG)**: On by default
+   * **Data Execution Prevention (DEP)**: On by default
+   * **Force randomization for images (Mandatory ASLR)**: On by default
+   * **Randomize memory allocations (Bottom-up ASLR)**: On by default
+   * **High-entropy ASLR**: On by default
+   * **Validate exception chains (SEHOP)**: On by default
+   * **Validate heap integrity**: On by default
+4. Select the **Program settings** tab and configure application-specific overrides for Microsoft Office (`winword.exe`, `excel.exe`, etc.), Web Browsers, and PDF viewers to apply EAF, IAF, and ROP mitigations.
+5. Scroll to the bottom of the page and click **Export settings**.
+6. Save the file as `ExploitProtectionSettings.xml`.
+7. Copy this XML file to a location accessible by target endpoints, or distribute it to local target directories (e.g., `C:\ProgramData\ExploitProtection\ExploitProtectionSettings.xml`) via Group Policy Preferences (Files).
+
+<a id="08-endpoints-configure-exploit-protection-md-step-2-configure-the-group-policy-setting"></a>
+#### Step 2: Configure the Group Policy Setting
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management workstation.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to:
+   `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Exploit Guard\Exploit Protection`
+4. Configure the following setting:
+   * **Policy**: `Use a common set of exploit protection settings`
+   * **Setting**: `Enabled`
+   * **Options**: Under the *Path* or *Url* field, enter the full path to the XML file (e.g., `C:\ProgramData\ExploitProtection\ExploitProtectionSettings.xml` or a UNC share path).
+5. Link the GPO to the appropriate Organizational Unit (OU) containing the target client endpoints and member servers.
+
+---
+
+<a id="08-endpoints-configure-exploit-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the exploit protection profile locally on individual systems or standalone hosts.
+
+[Download Script: Configure-ExploitProtection.ps1](implementation_scripts/Configure-ExploitProtection.ps1)
+
+```powershell
+<a id="08-endpoints-configure-exploit-protection-md-configure-exploitprotectionps1"></a>
+# Configure-ExploitProtection.ps1
+<a id="08-endpoints-configure-exploit-protection-md-description-generates-the-system-wide-and-application-specific-exploit-protection-xml-profile-applies-it-locally-and-configures-the-policy-registry-keys"></a>
+# Description: Generates the system-wide and application-specific Exploit Protection XML profile, applies it locally, and configures the policy registry keys.
+
+Write-Host "Applying Exploit Protection Profile..." -ForegroundColor Cyan
+
+<a id="08-endpoints-configure-exploit-protection-md-1-define-the-xml-content-including-system-and-app-settings"></a>
+# 1. Define the XML content including System and App settings
+$XmlContent = @"
+<?xml version="1.0" encoding="utf-8"?>
+<MitigationPolicy>
+  <SystemConfig>
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <SEHOP Enable="true" TelemetryOnly="false" />
+    <Heap TerminateOnError="true" />
+  </SystemConfig>
+  <AppConfig Executable="WINWORD.EXE">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableExportAddressFilter="true" AuditEnableExportAddressFilter="false" EnableExportAddressFilterPlus="true" AuditEnableExportAddressFilterPlus="false" EnableImportAddressFilter="true" AuditEnableImportAddressFilter="false" EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+    <ImageLoad BlockRemoteImageLoads="true" AuditBlockRemoteImageLoads="false" PreferSystem32="true" AuditPreferSystem32="false" />
+  </AppConfig>
+  <AppConfig Executable="EXCEL.EXE">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableExportAddressFilter="true" AuditEnableExportAddressFilter="false" EnableExportAddressFilterPlus="true" AuditEnableExportAddressFilterPlus="false" EnableImportAddressFilter="true" AuditEnableImportAddressFilter="false" EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+    <ImageLoad BlockRemoteImageLoads="true" AuditBlockRemoteImageLoads="false" PreferSystem32="true" AuditPreferSystem32="false" />
+  </AppConfig>
+  <AppConfig Executable="POWERPNT.EXE">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableExportAddressFilter="true" AuditEnableExportAddressFilter="false" EnableExportAddressFilterPlus="true" AuditEnableExportAddressFilterPlus="false" EnableImportAddressFilter="true" AuditEnableImportAddressFilter="false" EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+    <ImageLoad BlockRemoteImageLoads="true" AuditBlockRemoteImageLoads="false" PreferSystem32="true" AuditPreferSystem32="false" />
+  </AppConfig>
+  <AppConfig Executable="OUTLOOK.EXE">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableExportAddressFilter="true" AuditEnableExportAddressFilter="false" EnableExportAddressFilterPlus="true" AuditEnableExportAddressFilterPlus="false" EnableImportAddressFilter="true" AuditEnableImportAddressFilter="false" EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+    <ImageLoad BlockRemoteImageLoads="true" AuditBlockRemoteImageLoads="false" PreferSystem32="true" AuditPreferSystem32="false" />
+  </AppConfig>
+  <AppConfig Executable="MSACCESS.EXE">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableExportAddressFilter="true" AuditEnableExportAddressFilter="false" EnableExportAddressFilterPlus="true" AuditEnableExportAddressFilterPlus="false" EnableImportAddressFilter="true" AuditEnableImportAddressFilter="false" EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+    <ImageLoad BlockRemoteImageLoads="true" AuditBlockRemoteImageLoads="false" PreferSystem32="true" AuditPreferSystem32="false" />
+  </AppConfig>
+  <AppConfig Executable="MSPUB.EXE">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableExportAddressFilter="true" AuditEnableExportAddressFilter="false" EnableExportAddressFilterPlus="true" AuditEnableExportAddressFilterPlus="false" EnableImportAddressFilter="true" AuditEnableImportAddressFilter="false" EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+    <ImageLoad BlockRemoteImageLoads="true" AuditBlockRemoteImageLoads="false" PreferSystem32="true" AuditPreferSystem32="false" />
+  </AppConfig>
+  <AppConfig Executable="VISIO.EXE">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableExportAddressFilter="true" AuditEnableExportAddressFilter="false" EnableExportAddressFilterPlus="true" AuditEnableExportAddressFilterPlus="false" EnableImportAddressFilter="true" AuditEnableImportAddressFilter="false" EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+    <ImageLoad BlockRemoteImageLoads="true" AuditBlockRemoteImageLoads="false" PreferSystem32="true" AuditPreferSystem32="false" />
+  </AppConfig>
+  <AppConfig Executable="LYNC.EXE">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableExportAddressFilter="true" AuditEnableExportAddressFilter="false" EnableExportAddressFilterPlus="true" AuditEnableExportAddressFilterPlus="false" EnableImportAddressFilter="true" AuditEnableImportAddressFilter="false" EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+    <ImageLoad BlockRemoteImageLoads="true" AuditBlockRemoteImageLoads="false" PreferSystem32="true" AuditPreferSystem32="false" />
+  </AppConfig>
+  <AppConfig Executable="AcroRd32.exe">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableExportAddressFilter="true" AuditEnableExportAddressFilter="false" EnableExportAddressFilterPlus="true" AuditEnableExportAddressFilterPlus="false" EnableImportAddressFilter="true" AuditEnableImportAddressFilter="false" EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+    <ImageLoad BlockRemoteImageLoads="true" AuditBlockRemoteImageLoads="false" PreferSystem32="true" AuditPreferSystem32="false" />
+  </AppConfig>
+  <AppConfig Executable="Acrobat.exe">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableExportAddressFilter="true" AuditEnableExportAddressFilter="false" EnableExportAddressFilterPlus="true" AuditEnableExportAddressFilterPlus="false" EnableImportAddressFilter="true" AuditEnableImportAddressFilter="false" EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+    <ImageLoad BlockRemoteImageLoads="true" AuditBlockRemoteImageLoads="false" PreferSystem32="true" AuditPreferSystem32="false" />
+  </AppConfig>
+  <AppConfig Executable="chrome.exe">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+  </AppConfig>
+  <AppConfig Executable="msedge.exe">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+  </AppConfig>
+  <AppConfig Executable="firefox.exe">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+  </AppConfig>
+  <AppConfig Executable="wscript.exe">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableExportAddressFilter="true" AuditEnableExportAddressFilter="false" EnableExportAddressFilterPlus="true" AuditEnableExportAddressFilterPlus="false" EnableImportAddressFilter="true" AuditEnableImportAddressFilter="false" EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+    <ImageLoad BlockRemoteImageLoads="true" AuditBlockRemoteImageLoads="false" PreferSystem32="true" AuditPreferSystem32="false" />
+  </AppConfig>
+  <AppConfig Executable="cscript.exe">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableExportAddressFilter="true" AuditEnableExportAddressFilter="false" EnableExportAddressFilterPlus="true" AuditEnableExportAddressFilterPlus="false" EnableImportAddressFilter="true" AuditEnableImportAddressFilter="false" EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+    <ImageLoad BlockRemoteImageLoads="true" AuditBlockRemoteImageLoads="false" PreferSystem32="true" AuditPreferSystem32="false" />
+  </AppConfig>
+  <AppConfig Executable="powershell.exe">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+  </AppConfig>
+  <AppConfig Executable="java.exe">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+  </AppConfig>
+  <AppConfig Executable="javaw.exe">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+  </AppConfig>
+  <AppConfig Executable="javaws.exe">
+    <DEP Enable="true" EmulateAtlThunks="false" />
+    <ASLR ForceRelocateImages="true" RequireInfo="false" BottomUp="true" HighEntropy="true" />
+    <ControlFlowGuard Enable="true" SuppressExports="false" />
+    <Payload EnableRopStackPivot="true" AuditEnableRopStackPivot="false" EnableRopCallerCheck="true" AuditEnableRopCallerCheck="false" EnableRopSimExec="true" AuditEnableRopSimExec="false" />
+  </AppConfig>
+</MitigationPolicy>
+"@
+
+<a id="08-endpoints-configure-exploit-protection-md-2-create-the-target-directory-and-write-the-xml-file"></a>
+# 2. Create the target directory and write the XML file
+$TargetDir = "C:\ProgramData\ExploitProtection"
+if (-not (Test-Path $TargetDir)) {
+    New-Item -Path $TargetDir -ItemType Directory -Force | Out-Null
+}
+
+$XmlPath = "$TargetDir\ExploitProtectionSettings.xml"
+Set-Content -Path $XmlPath -Value $XmlContent -Encoding UTF8
+Write-Host "Exploit Protection XML profile written to $($XmlPath)" -ForegroundColor Gray
+
+<a id="08-endpoints-configure-exploit-protection-md-3-apply-the-settings-locally-using-the-cmdlet"></a>
+# 3. Apply the settings locally using the cmdlet
+if (Get-Command Set-ProcessMitigation -ErrorAction SilentlyContinue) {
+    Set-ProcessMitigation -PolicyFilePath $XmlPath
+    Write-Host "[+] Exploit protection system settings applied locally." -ForegroundColor Green
+} else {
+    Write-Warning "Set-ProcessMitigation cmdlet is not available. Please ensure you are running Windows 10/11 or Windows Server 2016+."
+}
+
+<a id="08-endpoints-configure-exploit-protection-md-4-configure-policy-registry-keys-to-point-to-the-xml-file"></a>
+# 4. Configure policy registry keys to point to the XML file
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection"
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name "ExploitProtectionSettings" -Value $XmlPath -Type String -Force
+Write-Host "[+] GPO policy registry values configured." -ForegroundColor Green
+
+Write-Host "Exploit Protection Profile application completed successfully." -ForegroundColor Cyan
+```
+
+*To verify the settings have been applied:*
+
+[Download Script: Get-ExploitProtectionStatus.ps1](audit_scripts/Get-ExploitProtectionStatus.ps1)
+
+```powershell
+<a id="08-endpoints-configure-exploit-protection-md-get-exploitprotectionstatusps1"></a>
+# Get-ExploitProtectionStatus.ps1
+<a id="08-endpoints-configure-exploit-protection-md-description-audits-the-system-wide-exploit-protection-settings-against-the-recommended-security-baseline"></a>
+# Description: Audits the system-wide Exploit Protection settings against the recommended security baseline.
+
+Write-Host "Auditing system-wide Exploit Protection mitigations..." -ForegroundColor Cyan
+
+$BaselineFailed = $false
+$Mitigations = Get-ProcessMitigation -System
+
+<a id="08-endpoints-configure-exploit-protection-md-helper-function-to-evaluate-and-display-status"></a>
+# Helper function to evaluate and display status
+function Test-MitigationSetting {
+    param(
+        [string]$MitigationName,
+        [string]$CurrentValue,
+        [string]$ExpectedValue
+    )
+    if ($CurrentValue -eq $ExpectedValue) {
+        Write-Host "  [PASS] $($MitigationName): $($CurrentValue)" -ForegroundColor Green
+    } else {
+        Write-Host "  [FAIL] $($MitigationName): $($CurrentValue) (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:BaselineFailed = $true
+    }
+}
+
+Write-Host "`nSystem-wide Mitigations:" -ForegroundColor Gray
+
+<a id="08-endpoints-configure-exploit-protection-md-audit-dep"></a>
+# Audit DEP
+Test-MitigationSetting -MitigationName "DEP Enable" -CurrentValue $Mitigations.DEP.Enable -ExpectedValue "ON"
+Test-MitigationSetting -MitigationName "DEP EmulateAtlThunks" -CurrentValue $Mitigations.DEP.EmulateAtlThunks -ExpectedValue "OFF"
+
+<a id="08-endpoints-configure-exploit-protection-md-audit-aslr"></a>
+# Audit ASLR
+Test-MitigationSetting -MitigationName "ASLR ForceRelocateImages" -CurrentValue $Mitigations.ASLR.ForceRelocateImages -ExpectedValue "ON"
+Test-MitigationSetting -MitigationName "ASLR BottomUp" -CurrentValue $Mitigations.ASLR.BottomUp -ExpectedValue "ON"
+Test-MitigationSetting -MitigationName "ASLR HighEntropy" -CurrentValue $Mitigations.ASLR.HighEntropy -ExpectedValue "ON"
+
+<a id="08-endpoints-configure-exploit-protection-md-audit-cfg"></a>
+# Audit CFG
+Test-MitigationSetting -MitigationName "CFG Enable" -CurrentValue $Mitigations.CFG.Enable -ExpectedValue "ON"
+
+<a id="08-endpoints-configure-exploit-protection-md-audit-sehop"></a>
+# Audit SEHOP
+Test-MitigationSetting -MitigationName "SEHOP Enable" -CurrentValue $Mitigations.SEHOP.Enable -ExpectedValue "ON"
+
+<a id="08-endpoints-configure-exploit-protection-md-audit-heap"></a>
+# Audit Heap
+Test-MitigationSetting -MitigationName "Heap TerminateOnError" -CurrentValue $Mitigations.Heap.TerminateOnError -ExpectedValue "ON"
+
+<a id="08-endpoints-configure-exploit-protection-md-audit-registry-policy-and-xml-configuration"></a>
+# Audit Registry Policy and XML Configuration
+Write-Host "`nRegistry Policy and XML Configuration:" -ForegroundColor Gray
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection"
+if (Test-Path $RegPath) {
+    $SettingsValue = Get-ItemProperty -Path $RegPath -Name "ExploitProtectionSettings" -ErrorAction SilentlyContinue
+    if ($SettingsValue -and $SettingsValue.ExploitProtectionSettings -ne "") {
+        $XmlPath = $SettingsValue.ExploitProtectionSettings
+        Write-Host "  [PASS] Exploit Protection Policy registry key is configured." -ForegroundColor Green
+        Write-Host "         Path: $XmlPath" -ForegroundColor Gray
+        
+        if (Test-Path $XmlPath) {
+            Write-Host "  [PASS] Exploit Protection XML file exists." -ForegroundColor Green
+            try {
+                [xml]$xml = Get-Content -Path $XmlPath -Raw -ErrorAction Stop
+                
+                # Verify SystemConfig block
+                if ($xml.MitigationPolicy.SystemConfig) {
+                    Write-Host "  [PASS] XML contains SystemConfig block." -ForegroundColor Green
+                } else {
+                    Write-Host "  [FAIL] XML is missing SystemConfig block." -ForegroundColor Red
+                    $BaselineFailed = $true
+                }
+                
+                # Verify major AppConfigs
+                $ExpectedApps = @("WINWORD.EXE", "EXCEL.EXE", "chrome.exe", "msedge.exe", "AcroRd32.exe", "java.exe")
+                $ConfiguredApps = $xml.MitigationPolicy.AppConfig | ForEach-Object { $_.Executable }
+                
+                foreach ($app in $ExpectedApps) {
+                    if ($ConfiguredApps -contains $app) {
+                        Write-Host "  [PASS] XML contains application profile for: $app" -ForegroundColor Green
+                    } else {
+                        Write-Host "  [FAIL] XML is missing application profile for: $app" -ForegroundColor Red
+                        $BaselineFailed = $true
+                    }
+                }
+            } catch {
+                Write-Host "  [FAIL] Failed to parse Exploit Protection XML. Error: $($_.Exception.Message)" -ForegroundColor Red
+                $BaselineFailed = $true
+            }
+        } else {
+            Write-Host "  [FAIL] Exploit Protection XML file does not exist at specified path." -ForegroundColor Red
+            $BaselineFailed = $true
+        }
+    } else {
+        Write-Host "  [FAIL] Exploit Protection Policy registry key is empty or missing." -ForegroundColor Red
+        $BaselineFailed = $true
+    }
+} else {
+    Write-Host "  [FAIL] Exploit Protection Policy registry path does not exist." -ForegroundColor Red
+    $BaselineFailed = $true
+}
+
+Write-Host ""
+if ($BaselineFailed) {
+    Write-Host "Auditing FAILED: One or more configurations do not match the secure baseline." -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Auditing PASSED: All configurations match the secure baseline." -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<a id="08-endpoints-configure-exploit-protection-md-sources-compliance-references"></a>
+## Sources & Compliance References
+* **CIS Microsoft Windows 10 Benchmark**: Section 18.9.30 (ASR/Exploit Guard Mitigation Policy configurations)
+* **CIS Microsoft Windows 11 Benchmark**: Section 18.9.30 (ASR/Exploit Guard Mitigation Policy configurations)
+* **Microsoft Security Baselines**: Exploit Protection baseline templates and application configurations
+* **ANSSI Active Directory Hardening Guide**: Recommendations regarding endpoint protective controls
+
+
+<div style="page-break-before: always;"></div>
+
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md"></a>
+
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-hardening-requirement-restrict-safe-mode-access-to-administrators"></a>
+# Hardening Requirement: Restrict Safe Mode Access to Administrators
+
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-target-scope"></a>
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-implementation-details"></a>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Preferences\Windows Settings\Registry`
+  * **Registry Location**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
+    * **Value Name**: `SafeModeBlockNonAdmins`
+    * **Value Type**: `REG_DWORD`
+    * **Value Data**: `1`
+
+---
+
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-rationale"></a>
+## Rationale
+Malicious actors with standard user credentials can potentially bypass local security policies, local endpoint detection and response (EDR) agents, and group policy restrictions by booting the system into Safe Mode. In Safe Mode, many security agents and services do not load, creating an environment where local controls can be circumvented.
+
+By configuring `SafeModeBlockNonAdmins = 1`:
+1. **Prevent Credential Bypass**: Standard users are blocked from logging in during Safe Mode, ensuring they cannot exploit the disabled security agents to execute unauthorized programs or extract system information.
+2. **Maintenance Integrity**: Safe Mode remains accessible exclusively to system administrators for debugging and recovery, ensuring administrative capability is preserved while mitigating standard user risk.
+
+---
+
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-legacy-impact-compatibility"></a>
+## Legacy Impact & Compatibility
+* **Administrative Operations**: This setting does not affect local or domain administrative accounts, which can still log in normally to perform repairs.
+* **Troubleshooting Availability**: If a standard user experiences system issues that require Safe Mode, an administrator must log in to the workstation to troubleshoot, which may slightly increase administrative overhead.
+
+---
+
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-implementation-steps"></a>
+## Implementation Steps
+
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+Because there is no native Administrative Template (ADMX) policy for this setting, it must be deployed using Group Policy Preferences (GPP) to configure the registry directly.
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Right-click in the right pane, select **New** > **Registry Item**, and configure:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
+   * **Value Name**: `SafeModeBlockNonAdmins`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `1`
+5. Link the GPO to the appropriate Organizational Unit (OU) containing the target client endpoints and member servers.
+
+---
+
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-DisableSafeModeNonAdmins.ps1](implementation_scripts/Configure-DisableSafeModeNonAdmins.ps1)
+
+```powershell
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-configure-disablesafemodenonadminsps1"></a>
+# Configure-DisableSafeModeNonAdmins.ps1
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-description-prevents-standard-users-from-logging-into-the-system-while-in-safe-mode-by-setting-safemodeblocknonadmins-to-1"></a>
+# Description: Prevents standard users from logging into the system while in Safe Mode by setting SafeModeBlockNonAdmins to 1.
+
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "SafeModeBlockNonAdmins"
+$ValueData = 1
+
+Write-Host "Applying hardening requirement: Restrict Safe Mode access to administrators..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
+Write-Host "Hardening applied successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-SafeModeNonAdminsStatus.ps1](audit_scripts/Get-SafeModeNonAdminsStatus.ps1)
+
+```powershell
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-get-safemodenonadminsstatusps1"></a>
+# Get-SafeModeNonAdminsStatus.ps1
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-description-checks-the-current-configuration-state-of-safemodeblocknonadmins-registry-setting"></a>
+# Description: Checks the current configuration state of SafeModeBlockNonAdmins registry setting.
+
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "SafeModeBlockNonAdmins"
+
+Write-Host "Auditing hardening requirement: Restrict Safe Mode access to administrators..." -ForegroundColor Cyan
+
+if (Test-Path $RegPath) {
+    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $value -and $value.$ValueName -eq 1) {
+        Write-Host "Audit Result: Compliant. Standard users are blocked from logging in during Safe Mode ($ValueName = 1)." -ForegroundColor Green
+        exit 0
+    }
+}
+
+Write-Host "Audit Result: Non-Compliant. Standard users are allowed to log in during Safe Mode." -ForegroundColor Red
+exit 1
+```
+
+---
+
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-sources-compliance-references"></a>
+## Sources & Compliance References
+* **Australian Cyber Security Centre (ACSC) / ASD**: Windows Hardening Guidelines (SafeModeBlockNonAdmins configuration).
+* **Microsoft Learn**: Windows policies and registry-based mitigations.

@@ -51,3 +51,20 @@ Standard workstations represent the largest attack surface in the Active Directo
 15. **[Disable Windows Platform Binary Table (WPBT)](disable-wpbt.md)**
     Disables execution of binaries supplied by the Windows Platform Binary Table (WPBT) ACPI firmware table to mitigate boot-level security bypasses.
 
+16. **[Configure User Rights Assignments](configure-user-rights-assignments.md)**
+    Restricts critical user rights assignments (URAs) such as debugging programs, token impersonation, and local logon permissions on standard client endpoints.
+
+17. **[Harden DMA and Physical Security](harden-dma-and-physical-security.md)**
+    Mitigates physical access threat vectors by disabling standby sleep states (S1-S3), disabling external DMA device enumeration under lock, blocking legacy SBP-2 device classes, and denying write access to removable drives without BitLocker protection.
+
+18. **[Configure Account Policies](configure-account-policies.md)**
+    Enforces local and domain-wide account settings, including account lockout thresholds, lockout observation windows, smart card removal actions, and disabling reversible password encryption.
+
+19. **[Configure User Profile Restrictions](configure-user-profile-restrictions.md)**
+    Locks down user profile registry settings (HKCU) to disable toast notifications on the lock screen and block third-party application suggestions.
+
+20. **[Configure Exploit Protection Profile](configure-exploit-protection.md)**
+    Configures and enforces a system-wide Microsoft Defender Exploit Protection profile to apply advanced memory mitigations (DEP, ASLR, CFG, SEHOP, Heap Integrity) on all endpoints.
+
+21. **[Restrict Safe Mode Access to Administrators](disable-safe-mode-for-standard-users.md)**
+    Prevents standard (non-administrative) users from logging into the system while in Safe Mode by setting SafeModeBlockNonAdmins to 1.

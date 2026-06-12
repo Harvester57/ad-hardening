@@ -63,4 +63,8 @@ To prevent initial access and lateral movement, the following unitary technical 
 19. **[Configure User Profile Restrictions](configure-user-profile-restrictions.md)**
     Locks down user profile registry settings (HKCU) to disable toast notifications on the lock screen and block third-party application suggestions.
 
+20. **[Configure Exploit Protection Profile](configure-exploit-protection.md)**
+    Configures and enforces a system-wide Microsoft Defender Exploit Protection profile to apply advanced memory mitigations (DEP, ASLR, CFG, SEHOP, Heap Integrity) on all endpoints.
 
+21. **[Restrict Safe Mode Access to Administrators](disable-safe-mode-for-standard-users.md)**
+    Prevents standard (non-administrative) users from logging into the system while in Safe Mode by setting SafeModeBlockNonAdmins to 1.

@@ -114,6 +114,8 @@
     * [Harden DMA and Physical Security](08-endpoints/harden-dma-and-physical-security.md)
     * [Configure Account Policies](08-endpoints/configure-account-policies.md)
     * [Configure User Profile Restrictions](08-endpoints/configure-user-profile-restrictions.md)
+    * [Configure Exploit Protection Profile](08-endpoints/configure-exploit-protection.md)
+    * [Restrict Safe Mode Access to Administrators](08-endpoints/disable-safe-mode-for-standard-users.md)
 
 ## Appendix
 * [Hardening Template](TEMPLATE.md)
