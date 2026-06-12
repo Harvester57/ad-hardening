@@ -82,7 +82,9 @@
     * [Configure Dedicated WSUS for Tier 0](06-operations-maintenance/configure-dedicated-tier0-wsus.md)
 ## Module 7: Privileged Access Workstations (PAWs) Hardening
 * [Module 7: Privileged Access Workstations (PAWs) Hardening](07-paws/README.md)
-    * [PAW Isolation and Base Hardening](07-paws/paw-hardening.md)
+    * [Configure AppLocker Policies for PAWs](07-paws/configure-applocker-policies.md)
+    * [Enable LSA Protection for PAWs](07-paws/enable-lsa-protection.md)
+    * [Restrict Local Administrators Group for PAWs](07-paws/restrict-local-administrators.md)
     * [Enable BitLocker for PAWs](07-paws/enable-bitlocker.md)
     * [UEFI Firmware Security Hardening](07-paws/configure-uefi-security.md)
     * [Hardware Virtualization and DMA Protection](07-paws/enable-hardware-virtualization-and-dma-protection.md)
