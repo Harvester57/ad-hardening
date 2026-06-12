@@ -36,7 +36,7 @@ jobs:
           node-version: '24'
 
       - name: Install dependencies
-        run: npm clean-install
+        run: npm install
 
       - name: Build GitBook
         run: npm run gitbook:build
