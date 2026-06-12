@@ -68,3 +68,7 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 21. **[Restrict Safe Mode Access to Administrators](disable-safe-mode-for-standard-users.md)**
     Prevents standard (non-administrative) users from logging into the system while in Safe Mode by setting SafeModeBlockNonAdmins to 1.
+
+22. **[Block Outbound Traffic for Known LOLBins](block-lolbins-outbound-traffic.md)**
+    Enforces Windows Defender Firewall outbound rules to block known Living Off the Land Binaries (LOLBins) from initiating outgoing network connections.
+

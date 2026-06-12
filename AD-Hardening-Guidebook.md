@@ -13,7 +13,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 9d0b21a | Generated: June 12, 2026</span>
+      <span>Commit: 34618ef | Generated: June 12, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -180,6 +180,7 @@ The guidebook is organized into eight functional modules:
      * [Harden DMA and Physical Security](#README-md-08-endpoints-harden-dma-and-physical-security-md)
      * [Configure Account Policies](#README-md-08-endpoints-configure-account-policies-md)
      * [Configure User Profile Restrictions](#README-md-08-endpoints-configure-user-profile-restrictions-md)
+     * [Block Outbound Traffic for Known LOLBins](#README-md-08-endpoints-block-lolbins-outbound-traffic-md)
 
 ---
 
@@ -197,7 +198,7 @@ Below is a cross-reference matrix mapping each guidebook module to specific guid
 | **[M5: Logging & SIEM](#README-md-05-logging-monitoring-readme-md)**<br>- [Configure Advanced Security Audit Policies](#README-md-05-logging-monitoring-configure-advanced-audit-policies-md)<br>- [Configure PowerShell and Command-Line Auditing](#README-md-05-logging-monitoring-configure-powershell-and-command-line-auditing-md)<br>- [Deploy and Harden Microsoft Sysmon](#README-md-05-logging-monitoring-deploy-and-harden-sysmon-md)<br>- [Configure Secure SIEM Log Shipping](#README-md-05-logging-monitoring-configure-siem-log-shipping-md) | R48 (Audit Policy), R50 (PowerShell Log), R52 (Sysmon/WEC) | Section 9 (Audit Policy), Section 18.8 (PowerShell Logging) | Advanced Audit Policy, Transcription, Command Line Logs |
 | **[M6: Ops & Maintenance](#README-md-06-operations-maintenance-readme-md)**<br>- [Secure Operations and Maintenance Baseline](#README-md-06-operations-maintenance-ops-and-maintenance-md)<br>- [Enforce KRBTGT Password Rotation](#README-md-06-operations-maintenance-enforce-krbtgt-password-rotation-md)<br>- [Enable and Configure AD Recycle Bin](#README-md-06-operations-maintenance-enable-recycle-bin-md)<br>- [Establish and Maintain Group Policy ADMX Central Store](#README-md-06-operations-maintenance-maintain-gpo-templates-md)<br>- [Implement Third-Party/Custom GPO Templates](#README-md-06-operations-maintenance-use-third-party-templates-md)<br>- [Configure Dedicated WSUS for Tier 0](#README-md-06-operations-maintenance-configure-dedicated-tier0-wsus-md) | R54 (AD Backup), R57 (Vulnerability Assessment) | Section 18.3 (System/Recovery Options) | Patch Management, Offline Disaster Recovery |
 | **[M7: PAWs Hardening](#README-md-07-paws-readme-md)**<br>- [Configure AppLocker Policies for PAWs](#README-md-07-paws-configure-applocker-policies-md)<br>- [Enable LSA Protection for PAWs](#README-md-07-paws-enable-lsa-protection-md)<br>- [Restrict Local Administrators Group for PAWs](#README-md-07-paws-restrict-local-administrators-md)<br>- [Enable BitLocker for PAWs](#README-md-07-paws-enable-bitlocker-md)<br>- [UEFI Firmware Security](#README-md-07-paws-configure-uefi-security-md)<br>- [Hardware Virtualization](#README-md-07-paws-enable-hardware-virtualization-and-dma-protection-md)<br>- [Disable WPBT](#README-md-07-paws-disable-wpbt-md)<br>- [Windows Defender Antivirus PAW Baseline](#README-md-07-paws-defender-antivirus-md)<br>- [Configure User Rights Assignments for PAWs](#README-md-07-paws-configure-user-rights-assignments-md)<br>- [Enable VBS and Credential Guard for PAWs](#README-md-07-paws-enable-vbs-credential-guard-md)<br>- [Harden DMA and Physical Security for PAWs](#README-md-07-paws-harden-dma-and-physical-security-md) | R58 (Use of PAWs) | Section 18.2.1 (LSA Protection), Section 18.8 (Device Guard/HVCI), Section 18.2.1.1 (BitLocker Startup Auth), Section 18.2.1.2 (Enhanced PINs), Section 18.2.1.3 (PIN Length) | VBS, AppLocker, Device Guard, and secure BitLocker disk encryption with Startup PIN. |
-| **[M8: Endpoint Hardening](#README-md-08-endpoints-readme-md)**<br>- [Harden Network and Name Resolution](#README-md-08-endpoints-harden-network-and-name-resolution-md)<br>- [UAC Policies](#README-md-08-endpoints-configure-uac-policies-md)<br>- [Disable AutoPlay](#README-md-08-endpoints-disable-autoplay-autorun-md)<br>- [Block Removable Storage](#README-md-08-endpoints-block-removable-storage-md)<br>- [Restrict RDP](#README-md-08-endpoints-restrict-rdp-access-md)<br>- [Restrict Local Admins](#README-md-08-endpoints-restrict-local-admins-md)<br>- [Defender Antivirus](#README-md-08-endpoints-defender-antivirus-md)<br>- [WSUS Configuration](#README-md-08-endpoints-wsus-client-config-md)<br>- [Enable Secure Boot](#README-md-08-endpoints-enable-secure-boot-md)<br>- [Enable VBS and Credential Guard](#README-md-08-endpoints-enable-vbs-credential-guard-md)<br>- [Configure WDAC](#README-md-08-endpoints-configure-wdac-md)<br>- [Enable BitLocker and Network Unlock](#README-md-08-endpoints-enable-bitlocker-md)<br>- [UEFI Firmware Security](#README-md-08-endpoints-configure-uefi-security-md)<br>- [Hardware Virtualization](#README-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md)<br>- [Disable WPBT](#README-md-08-endpoints-disable-wpbt-md)<br>- [Configure User Rights Assignments](#README-md-08-endpoints-configure-user-rights-assignments-md)<br>- [Harden DMA and Physical Security](#README-md-08-endpoints-harden-dma-and-physical-security-md)<br>- [Configure Account Policies](#README-md-08-endpoints-configure-account-policies-md)<br>- [Configure User Profile Restrictions](#README-md-08-endpoints-configure-user-profile-restrictions-md) | ANSSI R19 (Client signing)<br>ANSSI R9 (LAPS context)<br>ANSSI R58 (PAW / Endpoint encryption) | Section 9.1 (LLMNR)<br>Section 2.3.17 (UAC)<br>Section 18.3.1 (AutoPlay)<br>Section 18.9.82 (USB)<br>Section 18.2.1 (NLA)<br>Section 5.5 (Admins)<br>Section 18.9.47 (Defender)<br>Section 18.2.2 (WSUS)<br>Section 18.8.14.1 (Secure Boot/VBS)<br>Section 18.8.14.2 (Credential Guard)<br>Section 18.8.14.3 (WDAC)<br>Section 18.2.1.1 (Startup Auth)<br>Section 18.2.1.5 (Network Unlock) | Comprehensive Tier 2 workstation security configurations, network resolution controls, offline defense settings, and disk encryption. |
+| **[M8: Endpoint Hardening](#README-md-08-endpoints-readme-md)**<br>- [Harden Network and Name Resolution](#README-md-08-endpoints-harden-network-and-name-resolution-md)<br>- [UAC Policies](#README-md-08-endpoints-configure-uac-policies-md)<br>- [Disable AutoPlay](#README-md-08-endpoints-disable-autoplay-autorun-md)<br>- [Block Removable Storage](#README-md-08-endpoints-block-removable-storage-md)<br>- [Restrict RDP](#README-md-08-endpoints-restrict-rdp-access-md)<br>- [Restrict Local Admins](#README-md-08-endpoints-restrict-local-admins-md)<br>- [Defender Antivirus](#README-md-08-endpoints-defender-antivirus-md)<br>- [WSUS Configuration](#README-md-08-endpoints-wsus-client-config-md)<br>- [Enable Secure Boot](#README-md-08-endpoints-enable-secure-boot-md)<br>- [Enable VBS and Credential Guard](#README-md-08-endpoints-enable-vbs-credential-guard-md)<br>- [Configure WDAC](#README-md-08-endpoints-configure-wdac-md)<br>- [Enable BitLocker and Network Unlock](#README-md-08-endpoints-enable-bitlocker-md)<br>- [UEFI Firmware Security](#README-md-08-endpoints-configure-uefi-security-md)<br>- [Hardware Virtualization](#README-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md)<br>- [Disable WPBT](#README-md-08-endpoints-disable-wpbt-md)<br>- [Configure User Rights Assignments](#README-md-08-endpoints-configure-user-rights-assignments-md)<br>- [Harden DMA and Physical Security](#README-md-08-endpoints-harden-dma-and-physical-security-md)<br>- [Configure Account Policies](#README-md-08-endpoints-configure-account-policies-md)<br>- [Configure User Profile Restrictions](#README-md-08-endpoints-configure-user-profile-restrictions-md)<br>- [Block Outbound Traffic for Known LOLBins](#README-md-08-endpoints-block-lolbins-outbound-traffic-md) | ANSSI R19 (Client signing)<br>ANSSI R9 (LAPS context)<br>ANSSI R58 (PAW / Endpoint encryption) | Section 9.1 (LLMNR)<br>Section 2.3.17 (UAC)<br>Section 18.3.1 (AutoPlay)<br>Section 18.9.82 (USB)<br>Section 18.2.1 (NLA)<br>Section 5.5 (Admins)<br>Section 18.9.47 (Defender)<br>Section 18.2.2 (WSUS)<br>Section 18.8.14.1 (Secure Boot/VBS)<br>Section 18.8.14.2 (Credential Guard)<br>Section 18.8.14.3 (WDAC)<br>Section 18.2.1.1 (Startup Auth)<br>Section 18.2.1.5 (Network Unlock) | Comprehensive Tier 2 workstation security configurations, network resolution controls, offline defense settings, disk encryption, and outbound firewall block rules. |
 
 ---
 
@@ -15304,6 +15305,10 @@ To prevent initial access and lateral movement, the following unitary technical 
 21. **[Restrict Safe Mode Access to Administrators](#08-endpoints-README-md-08-endpoints-disable-safe-mode-for-standard-users-md)**
     Prevents standard (non-administrative) users from logging into the system while in Safe Mode by setting SafeModeBlockNonAdmins to 1.
 
+22. **[Block Outbound Traffic for Known LOLBins](#08-endpoints-README-md-08-endpoints-block-lolbins-outbound-traffic-md)**
+    Enforces Windows Defender Firewall outbound rules to block known Living Off the Land Binaries (LOLBins) from initiating outgoing network connections.
+
+
 
 <div style="page-break-before: always;"></div>
 
@@ -20885,3 +20890,196 @@ exit 1
 ## Sources & Compliance References
 * **Australian Cyber Security Centre (ACSC) / ASD**: Windows Hardening Guidelines (SafeModeBlockNonAdmins configuration).
 * **Microsoft Learn**: Windows policies and registry-based mitigations.
+
+
+<div style="page-break-before: always;"></div>
+
+<a id="08-endpoints-block-lolbins-outbound-traffic-md"></a>
+
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-hardening-requirement-block-outbound-traffic-for-known-lolbins"></a>
+# Hardening Requirement: Block Outbound Traffic for Known LOLBins
+
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-target-scope"></a>
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-implementation-details"></a>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Windows Defender Firewall with Advanced Security\Windows Defender Firewall with Advanced Security\Outbound Rules`
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\FirewallRules`
+
+---
+
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-rationale"></a>
+## Rationale
+Malicious actors frequently abuse built-in Windows administrative utilities (known as Living Off the Land Binaries, or LOLBins) to download malicious payloads, exfiltrate sensitive data, and communicate with external command-and-control (C2) servers. Because these binaries are digitally signed by Microsoft and native to the operating system, they bypass traditional application control and endpoint detection solutions.
+
+Blocking outbound network communication for binaries that have no legitimate business requirement to connect to external networks (such as `mshta.exe`, `certutil.exe`, `bitsadmin.exe`, `regsvr32.exe`, `rundll32.exe`, `cscript.exe`, `wscript.exe`, and `hh.exe`) significantly mitigates the risk of command-and-control communication and data exfiltration.
+
+---
+
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-legacy-impact-compatibility"></a>
+## Legacy Impact & Compatibility
+* **Legitimate Scripts**: Administrative scripts, third-party software deployment installers, or internal software update tools that execute using `cscript.exe`, `wscript.exe`, or `mshta.exe` and require access to network shares or intranet servers will be blocked.
+* **Testing Phase**: Prior to deployment across the entire active domain, organizations must perform audit-mode or scoped pilot-group testing to identify any line-of-business applications requiring exclusions for these binaries. If exclusions are necessary, they should be restricted to specific destination IP addresses, ports, or authorized AD user groups.
+
+---
+
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-implementation-steps"></a>
+## Implementation Steps
+
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+Configure outbound firewall rules under a Group Policy Object to block outbound traffic from the designated LOLBins.
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management workstation.
+2. Edit the target endpoints GPO (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Windows Defender Firewall with Advanced Security\Windows Defender Firewall with Advanced Security\Outbound Rules`
+4. For each target LOLBin binary, create a new rule:
+   * Right-click **Outbound Rules** and select **New Rule...**
+   * **Rule Type**: `Program`
+   * **Program**: Choose `This program path` and enter the path matching the binary (both x64 and x86 paths if applicable, e.g., `%SystemRoot%\System32\mshta.exe` and `%SystemRoot%\SysWOW64\mshta.exe`).
+   * **Action**: `Block the connection`
+   * **Profile**: Select `Domain`, `Private`, and `Public`.
+   * **Name**: Specify a descriptive name (e.g., `Hardening: Block Outbound mshta.exe (x64)`).
+5. Link the GPO to the appropriate Organizational Unit (OU) containing the target client endpoints and member servers.
+
+---
+
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the rules locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-BlockLOLBinsOutbound.ps1](implementation_scripts/Configure-BlockLOLBinsOutbound.ps1)
+
+```powershell
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-configure-blocklolbinsoutboundps1"></a>
+# Configure-BlockLOLBinsOutbound.ps1
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-description-configures-local-outbound-windows-defender-firewall-rules-to-block-network-connections-from-known-lolbins"></a>
+# Description: Configures local outbound Windows Defender Firewall rules to block network connections from known LOLBins.
+
+$Lolbins = @(
+    @{ Name = "mshta.exe (x64)"; Path = "%SystemRoot%\System32\mshta.exe" },
+    @{ Name = "mshta.exe (x86)"; Path = "%SystemRoot%\SysWOW64\mshta.exe" },
+    @{ Name = "certutil.exe (x64)"; Path = "%SystemRoot%\System32\certutil.exe" },
+    @{ Name = "certutil.exe (x86)"; Path = "%SystemRoot%\SysWOW64\certutil.exe" },
+    @{ Name = "bitsadmin.exe (x64)"; Path = "%SystemRoot%\System32\bitsadmin.exe" },
+    @{ Name = "bitsadmin.exe (x86)"; Path = "%SystemRoot%\SysWOW64\bitsadmin.exe" },
+    @{ Name = "regsvr32.exe (x64)"; Path = "%SystemRoot%\System32\regsvr32.exe" },
+    @{ Name = "regsvr32.exe (x86)"; Path = "%SystemRoot%\SysWOW64\regsvr32.exe" },
+    @{ Name = "rundll32.exe (x64)"; Path = "%SystemRoot%\System32\rundll32.exe" },
+    @{ Name = "rundll32.exe (x86)"; Path = "%SystemRoot%\SysWOW64\rundll32.exe" },
+    @{ Name = "cscript.exe (x64)"; Path = "%SystemRoot%\System32\cscript.exe" },
+    @{ Name = "cscript.exe (x86)"; Path = "%SystemRoot%\SysWOW64\cscript.exe" },
+    @{ Name = "wscript.exe (x64)"; Path = "%SystemRoot%\System32\wscript.exe" },
+    @{ Name = "wscript.exe (x86)"; Path = "%SystemRoot%\SysWOW64\wscript.exe" },
+    @{ Name = "hh.exe (x64)"; Path = "%SystemRoot%\hh.exe" },
+    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" }
+)
+
+Write-Host "Applying outbound firewall block rules for known LOLBins..." -ForegroundColor Cyan
+
+foreach ($Bin in $Lolbins) {
+    $DisplayName = "Hardening: Block Outbound $($Bin.Name)"
+    $Existing = Get-NetFirewallRule -DisplayName $DisplayName -ErrorAction SilentlyContinue
+    if ($null -eq $Existing) {
+        New-NetFirewallRule -DisplayName $DisplayName `
+            -Name $DisplayName `
+            -Direction Outbound `
+            -Action Block `
+            -Program $Bin.Path `
+            -Profile Any `
+            -Enabled True | Out-Null
+        Write-Host "[+] Outbound block rule created for $($Bin.Name)." -ForegroundColor Green
+    } else {
+        Set-NetFirewallRule -DisplayName $DisplayName -Action Block -Enabled True | Out-Null
+        Write-Host "[~] Outbound block rule for $($Bin.Name) already exists, updated state to Enabled/Block." -ForegroundColor Gray
+    }
+}
+
+Write-Host "Outbound firewall rules configured successfully." -ForegroundColor Green
+```
+
+*To verify the settings have been applied:*
+
+[Download Script: Get-BlockedLOLBinsOutboundStatus.ps1](audit_scripts/Get-BlockedLOLBinsOutboundStatus.ps1)
+
+```powershell
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-get-blockedlolbinsoutboundstatusps1"></a>
+# Get-BlockedLOLBinsOutboundStatus.ps1
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-description-audits-the-presence-and-configuration-of-outbound-firewall-rules-blocking-known-lolbins"></a>
+# Description: Audits the presence and configuration of outbound firewall rules blocking known LOLBins.
+
+$Lolbins = @(
+    @{ Name = "mshta.exe (x64)"; Path = "%SystemRoot%\System32\mshta.exe" },
+    @{ Name = "mshta.exe (x86)"; Path = "%SystemRoot%\SysWOW64\mshta.exe" },
+    @{ Name = "certutil.exe (x64)"; Path = "%SystemRoot%\System32\certutil.exe" },
+    @{ Name = "certutil.exe (x86)"; Path = "%SystemRoot%\SysWOW64\certutil.exe" },
+    @{ Name = "bitsadmin.exe (x64)"; Path = "%SystemRoot%\System32\bitsadmin.exe" },
+    @{ Name = "bitsadmin.exe (x86)"; Path = "%SystemRoot%\SysWOW64\bitsadmin.exe" },
+    @{ Name = "regsvr32.exe (x64)"; Path = "%SystemRoot%\System32\regsvr32.exe" },
+    @{ Name = "regsvr32.exe (x86)"; Path = "%SystemRoot%\SysWOW64\regsvr32.exe" },
+    @{ Name = "rundll32.exe (x64)"; Path = "%SystemRoot%\System32\rundll32.exe" },
+    @{ Name = "rundll32.exe (x86)"; Path = "%SystemRoot%\SysWOW64\rundll32.exe" },
+    @{ Name = "cscript.exe (x64)"; Path = "%SystemRoot%\System32\cscript.exe" },
+    @{ Name = "cscript.exe (x86)"; Path = "%SystemRoot%\SysWOW64\cscript.exe" },
+    @{ Name = "wscript.exe (x64)"; Path = "%SystemRoot%\System32\wscript.exe" },
+    @{ Name = "wscript.exe (x86)"; Path = "%SystemRoot%\SysWOW64\wscript.exe" },
+    @{ Name = "hh.exe (x64)"; Path = "%SystemRoot%\hh.exe" },
+    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" }
+)
+
+Write-Host "Auditing outbound firewall rules for known LOLBins..." -ForegroundColor Cyan
+
+$Vulnerable = $false
+
+foreach ($Bin in $Lolbins) {
+    $DisplayName = "Hardening: Block Outbound $($Bin.Name)"
+    $Rule = Get-NetFirewallRule -DisplayName $DisplayName -ErrorAction SilentlyContinue
+    $Color = "Red"
+    
+    if ($null -ne $Rule) {
+        $ProgFilter = Get-NetFirewallApplicationFilter -AssociatedNetFirewallRule $Rule -ErrorAction SilentlyContinue
+        $ProgPath = "None"
+        if ($null -ne $ProgFilter) {
+            $ProgPath = $ProgFilter.Program
+        }
+        
+        if ($Rule.Enabled -eq $true -and $Rule.Direction -eq "Outbound" -and $Rule.Action -eq "Block" -and $ProgPath -eq $Bin.Path) {
+            $Color = "Green"
+            Write-Host "    - Firewall Rule: $($DisplayName) | Enabled: True | Action: Block | Program: $($ProgPath) (Compliant)" -ForegroundColor $Color
+        } else {
+            $Vulnerable = $true
+            Write-Host "    - Firewall Rule: $($DisplayName) | Enabled: $($Rule.Enabled) | Action: $($Rule.Action) | Program: $($ProgPath) (Non-Compliant)" -ForegroundColor $Color
+        }
+    } else {
+        $Vulnerable = $true
+        Write-Host "    - Firewall Rule: $($DisplayName) | NOT FOUND (Non-Compliant)" -ForegroundColor $Color
+    }
+}
+
+if ($Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-sources-compliance-references"></a>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R8 (Administration network subnets), Recommendation R19 (LDAP and name resolution security recommendations)
+* **CIS Microsoft Windows Server 2016 Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
+* **CIS Microsoft Windows 10 Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
+* **Microsoft Learn**: Windows Defender Firewall with Advanced Security Design Guide

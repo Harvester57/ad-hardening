@@ -116,6 +116,7 @@
     * [Configure User Profile Restrictions](08-endpoints/configure-user-profile-restrictions.md)
     * [Configure Exploit Protection Profile](08-endpoints/configure-exploit-protection.md)
     * [Restrict Safe Mode Access to Administrators](08-endpoints/disable-safe-mode-for-standard-users.md)
+    * [Block Outbound Traffic for Known LOLBins](08-endpoints/block-lolbins-outbound-traffic.md)
 
 ## Appendix
 * [Hardening Template](TEMPLATE.md)
