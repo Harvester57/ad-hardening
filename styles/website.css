@@ -410,6 +410,13 @@
   white-space: pre !important;
 }
 
+/* Remove default Prism text shadow to ensure crisp, readable code text on all backgrounds */
+code[class*="language-"],
+pre[class*="language-"],
+.token {
+  text-shadow: none !important;
+}
+
 /* Pre scrollbar custom styling */
 .markdown-section pre::-webkit-scrollbar {
   height: 6px !important;
