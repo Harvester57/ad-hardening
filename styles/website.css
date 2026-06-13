@@ -284,9 +284,13 @@
 }
 
 /* Markdown Reading Panel Content */
+.page-inner {
+  max-width: 1050px !important;
+}
+
 .markdown-section {
   padding: 30px 15px !important;
-  max-width: 800px !important;
+  max-width: 1050px !important;
   margin: 0 auto !important;
   color: var(--text-primary) !important;
   line-height: 1.7 !important;
