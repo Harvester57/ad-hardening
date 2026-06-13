@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict Local Administrators Group for PAWs
+# [REQ-PAW-003] Restrict Local Administrators Group for PAWs
 
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.

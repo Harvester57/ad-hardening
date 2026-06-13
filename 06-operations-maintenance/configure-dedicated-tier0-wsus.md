@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure Dedicated WSUS for Tier 0
+# [REQ-OPS-005] Configure Dedicated WSUS for Tier 0
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Tier 0 Administration Workstations (PAWs)

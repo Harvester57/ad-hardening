@@ -1,4 +1,4 @@
-# Hardening Requirement: Disable Windows Platform Binary Table (WPBT)
+# [REQ-END-015] Disable Windows Platform Binary Table (WPBT)
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.

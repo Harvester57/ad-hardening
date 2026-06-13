@@ -1,4 +1,4 @@
-# Hardening Requirement: Disable Unnecessary Services on Domain Controllers
+# [REQ-DC-012] Disable Unnecessary Services on Domain Controllers
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers (DCs) running Windows Server.

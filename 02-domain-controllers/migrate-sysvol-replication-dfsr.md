@@ -1,4 +1,4 @@
-# Hardening Requirement: Migrate SYSVOL Replication to DFSR
+# [REQ-DC-015] Migrate SYSVOL Replication to DFSR
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers

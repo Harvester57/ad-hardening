@@ -1,4 +1,4 @@
-# Hardening Requirement: Harden TLS Protocols, Cipher Suites, and Elliptic Curves
+# [REQ-NET-006] Harden TLS Protocols, Cipher Suites, and Elliptic Curves
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.

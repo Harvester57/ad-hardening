@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure User Rights Assignments for PAWs
+# [REQ-PAW-009] Configure User Rights Assignments for PAWs
 
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.

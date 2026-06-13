@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure Advanced Security Audit Policies
+# [REQ-LOG-001] Configure Advanced Security Audit Policies
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.

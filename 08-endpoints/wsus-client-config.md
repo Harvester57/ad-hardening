@@ -1,4 +1,4 @@
-# Hardening Requirement: WSUS Client Configuration
+# [REQ-END-008] WSUS Client Configuration
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.

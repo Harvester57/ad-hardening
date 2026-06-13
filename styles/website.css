@@ -185,6 +185,7 @@
 }
 
 /* Sidebar Chapter Links */
+.book-summary ul.summary li a,
 .book-summary ul.summary li.chapter a {
   padding: 8px 15px 8px 20px !important;
   margin: 3px 10px !important;
@@ -196,6 +197,11 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   text-decoration: none !important;
   border-left: 3px solid transparent !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+  overflow: visible !important;
+  word-wrap: break-word !important;
+  line-height: 1.4 !important;
 }
 
 .book-summary ul.summary li.chapter a:hover {

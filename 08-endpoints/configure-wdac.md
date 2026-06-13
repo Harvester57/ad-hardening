@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure Windows Defender Application Control
+# [REQ-END-011] Configure Windows Defender Application Control
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations.
@@ -30,7 +30,7 @@ Deploying a strict WDAC baseline ensures that only binaries and scripts signed b
 ---
 
 ## Legacy Impact & Compatibility
-* **Pre-requisite (Memory Integrity/HVCI)**: Enforcing the vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [Enable VBS and Credential Guard](enable-vbs-credential-guard.md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [UEFI Firmware Security Hardening](configure-uefi-security.md) and [Hardware Virtualization and DMA Protection](enable-hardware-virtualization-and-dma-protection.md) for firmware setup.
+* **Pre-requisite (Memory Integrity/HVCI)**: Enforcing the vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-END-010 - Enable VBS and Credential Guard](enable-vbs-credential-guard.md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [REQ-END-013 - UEFI Firmware Security Hardening](configure-uefi-security.md) and [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](enable-hardware-virtualization-and-dma-protection.md) for firmware setup.
 * **Administrative Overhead**: Any new enterprise software must be added to the code integrity trust policy (by digital signature or folder exceptions). Deploying unapproved third-party software will trigger blocks.
 * **User Script Blocks**: Administrators and power users cannot write and run custom PowerShell or VBS scripts locally unless the scripts are digitally signed by a trusted certificate in the WDAC policy or run in a directory excluded by the rules.
 * **Audit Phase Mandate**: To prevent severe business disruption, WDAC policies must always be deployed in **Audit Mode** first. This logs would-be blocks to the Event Viewer without interrupting execution, allowing administrators to gather a list of required applications and construct rules before shifting to **Enforced Mode**.

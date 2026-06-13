@@ -1,4 +1,4 @@
-# Hardening Requirement: Clean Up adminCount Attribute Orphans
+# [REQ-ID-013] Clean Up adminCount Attribute Orphans
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Identity Management

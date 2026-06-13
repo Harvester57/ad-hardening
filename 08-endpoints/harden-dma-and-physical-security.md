@@ -1,4 +1,4 @@
-# Hardening Requirement: Harden DMA and Physical Security
+# [REQ-END-017] Harden DMA and Physical Security
 
 ## Target Scope
 * **Applicable Systems**: Member Servers, Tier 2 Clients (Workstations / Laptops)

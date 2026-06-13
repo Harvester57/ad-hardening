@@ -34,8 +34,9 @@ All new technical hardening requirements must use the structure defined in **[TE
 ---
 
 ## Formatting Rules
-
+ 
 * **No Emojis**: Emojis are strictly prohibited anywhere in this project. Do not use emojis in headers, list items, description text, or comments.
+* **Requirement IDs**: Every technical control must start with a unique, sequential ID in its header, e.g., `# [REQ-LOG-001] Configure Advanced Security Audit Policies`. The ID uses the prefix `REQ-` followed by the module abbreviation (`ARCH`, `DC`, `ID`, `NET`, `LOG`, `OPS`, `PAW`, `END`) and a sequential three-digit number.
 
 ---
 

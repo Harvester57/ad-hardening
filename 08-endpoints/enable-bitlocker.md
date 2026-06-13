@@ -1,4 +1,4 @@
-# Hardening Requirement: Enable BitLocker and Network Unlock
+# [REQ-END-012] Enable BitLocker and Network Unlock
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations.

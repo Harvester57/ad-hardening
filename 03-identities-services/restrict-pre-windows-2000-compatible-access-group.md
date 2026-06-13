@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict Pre-Windows 2000 Compatible Access Group
+# [REQ-ID-018] Restrict Pre-Windows 2000 Compatible Access Group
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Domain Environment

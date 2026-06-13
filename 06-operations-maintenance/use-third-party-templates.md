@@ -1,4 +1,4 @@
-# Hardening Requirement: Implement Third-Party and Custom GPO Templates for COTS Hardening
+# [REQ-OPS-004] Implement Third-Party and Custom GPO Templates for COTS Hardening
 
 ## Target Scope
 * **Applicable Systems**: Domain Members (Clients and Servers)

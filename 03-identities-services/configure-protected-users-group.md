@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure and Populate Protected Users Group
+# [REQ-ID-005] Configure and Populate Protected Users Group
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients

@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure User Account Control Policies
+# [REQ-END-002] Configure User Account Control Policies
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.

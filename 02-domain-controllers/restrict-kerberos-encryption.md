@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict Kerberos Encryption Types
+# [REQ-DC-010] Restrict Kerberos Encryption Types
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients

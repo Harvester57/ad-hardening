@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure Active Directory Authentication Silos and Policies
+# [REQ-ID-012] Configure Active Directory Authentication Silos and Policies
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Tier 0 Administration Workstations (PAWs), Tier 0 Administrator Accounts

@@ -1,4 +1,4 @@
-# Hardening Requirement: Enable Hardware Virtualization and DMA Protection
+# [REQ-END-014] Enable Hardware Virtualization and DMA Protection
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.

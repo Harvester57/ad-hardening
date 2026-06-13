@@ -1,4 +1,4 @@
-# Hardening Requirement: Keep Domain and Forest Functional Levels Up-To-Date
+# [REQ-ARCH-004] Keep Domain and Forest Functional Levels Up-To-Date
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers (Forest-wide configuration)

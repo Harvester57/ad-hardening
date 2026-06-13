@@ -1,4 +1,4 @@
-# Hardening Requirement: Windows Defender Antivirus Baseline and Exploit Guard
+# [REQ-END-007] Windows Defender Antivirus Baseline and Exploit Guard
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.

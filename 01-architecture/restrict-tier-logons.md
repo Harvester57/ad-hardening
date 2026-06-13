@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict Tier Logons
+# [REQ-ARCH-001] Restrict Tier Logons
 
 ## Target Scope
 * **Applicable Systems**: Tier 1 member servers and Tier 2 client workstations.

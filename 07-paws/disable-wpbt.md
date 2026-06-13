@@ -1,4 +1,4 @@
-# Hardening Requirement: Disable Windows Platform Binary Table (WPBT)
+# [REQ-PAW-007] Disable Windows Platform Binary Table (WPBT)
 
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.

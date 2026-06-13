@@ -1,4 +1,4 @@
-# Hardening Requirement: Enforce SMB Message Signing
+# [REQ-DC-009] Enforce SMB Message Signing
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients

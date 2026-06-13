@@ -1,4 +1,4 @@
-# Hardening Requirement: Harden Active Directory Certificate Services (ADCS) and PKI
+# [REQ-ID-015] Harden Active Directory Certificate Services (ADCS) and PKI
 
 ## Target Scope
 * **Applicable Systems**: Member Servers (Certification Authorities), Domain Controllers

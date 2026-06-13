@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict Remote SAM API Access
+# [REQ-DC-011] Restrict Remote SAM API Access
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers

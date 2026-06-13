@@ -1,4 +1,4 @@
-# Hardening Requirement: Harden WinRM Service and Restrict Remote RPC Clients
+# [REQ-NET-010] Harden WinRM Service and Restrict Remote RPC Clients
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients.

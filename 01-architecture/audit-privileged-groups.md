@@ -1,4 +1,4 @@
-# Hardening Requirement: Audit Privileged Groups
+# [REQ-ARCH-003] Audit Privileged Groups
 
 ## Target Scope
 * **Applicable Systems**: Active Directory Domain.

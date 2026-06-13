@@ -1,4 +1,4 @@
-# Hardening Requirement: Disable Print Spooler Service
+# [REQ-DC-008] Disable Print Spooler Service
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers

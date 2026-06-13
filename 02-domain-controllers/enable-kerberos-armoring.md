@@ -1,4 +1,4 @@
-# Hardening Requirement: Enable Kerberos Armoring
+# [REQ-DC-013] Enable Kerberos Armoring
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients

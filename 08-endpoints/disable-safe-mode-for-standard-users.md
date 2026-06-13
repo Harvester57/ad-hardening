@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict Safe Mode Access to Administrators
+# [REQ-END-021] Restrict Safe Mode Access to Administrators
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.

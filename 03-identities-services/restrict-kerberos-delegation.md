@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict Kerberos Delegation
+# [REQ-ID-004] Restrict Kerberos Delegation
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers

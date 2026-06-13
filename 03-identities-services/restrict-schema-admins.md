@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict Schema Administrators Group Membership
+# [REQ-ID-010] Restrict Schema Administrators Group Membership
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers

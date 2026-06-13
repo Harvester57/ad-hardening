@@ -1,4 +1,4 @@
-# Hardening Requirement: Disable AutoPlay and AutoRun
+# [REQ-END-003] Disable AutoPlay and AutoRun
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.

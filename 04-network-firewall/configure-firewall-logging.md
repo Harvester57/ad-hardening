@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure Firewall Logging and Operational Settings
+# [REQ-NET-008] Configure Firewall Logging and Operational Settings
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.

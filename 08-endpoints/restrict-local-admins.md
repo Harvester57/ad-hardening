@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict Local Administrators Group
+# [REQ-END-006] Restrict Local Administrators Group
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations.

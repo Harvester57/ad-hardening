@@ -1,4 +1,4 @@
-# Hardening Requirement: Establish and Maintain Group Policy ADMX Central Store
+# [REQ-OPS-003] Establish and Maintain Group Policy ADMX Central Store
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers (SYSVOL Share)

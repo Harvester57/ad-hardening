@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure PowerShell and Command-Line Auditing
+# [REQ-LOG-002] Configure PowerShell and Command-Line Auditing
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.

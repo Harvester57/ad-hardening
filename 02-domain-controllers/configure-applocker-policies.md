@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure AppLocker Policies on Domain Controllers
+# [REQ-DC-021] Configure AppLocker Policies on Domain Controllers
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers.

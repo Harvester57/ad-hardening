@@ -1,4 +1,4 @@
-# Hardening Requirement: Enforce SMBv3 Security and Digitally Sign/Encrypt Communications
+# [REQ-NET-007] Enforce SMBv3 Security and Digitally Sign/Encrypt Communications
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.

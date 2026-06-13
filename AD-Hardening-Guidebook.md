@@ -13,7 +13,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: cec9754 | Generated: June 12, 2026</span>
+      <span>Commit: 79673f5 | Generated: June 13, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -34,7 +34,7 @@ pdf_options:
     <li>Tier 2 Client Workstations: Windows 10 and above</li>
   </ul>
   <hr>
-  <p><em>Generated dynamically on: June 12, 2026</em></p>
+  <p><em>Generated dynamically on: June 13, 2026</em></p>
 </div>
 
 <a id="README-md"></a>
@@ -64,123 +64,123 @@ The guidebook is organized into eight functional modules:
 1. **[Module 1: Architecture & Administrative Tiering](#README-md-01-architecture-readme-md)**
    * Entry point index and technical treatise on Active Directory tiering and administrative boundaries.
    * Hardening controls:
-     * [Restrict Tier Logons](#README-md-01-architecture-restrict-tier-logons-md)
-     * [Restrict Administrative Management Protocols](#README-md-01-architecture-restrict-mgmt-protocols-md)
-     * [Audit Privileged Groups](#README-md-01-architecture-audit-privileged-groups-md)
-     * [Keep Functional Levels Up-To-Date](#README-md-01-architecture-keep-functional-levels-up-to-date-md)
-     * [Default Domain and Domain Controllers Policies Management](#README-md-01-architecture-default-policies-recommendations-md)
-     * [Harden Active Directory Domain Trusts](#README-md-01-architecture-harden-domain-trusts-md)
+     * [REQ-ARCH-001 - Restrict Tier Logons](#README-md-01-architecture-restrict-tier-logons-md)
+     * [REQ-ARCH-002 - Restrict Administrative Management Protocols](#README-md-01-architecture-restrict-mgmt-protocols-md)
+     * [REQ-ARCH-003 - Audit Privileged Groups](#README-md-01-architecture-audit-privileged-groups-md)
+     * [REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](#README-md-01-architecture-keep-functional-levels-up-to-date-md)
+     * [REQ-ARCH-005 - Default Domain and Domain Controllers Policies Management](#README-md-01-architecture-default-policies-recommendations-md)
+     * [REQ-ARCH-006 - Harden Active Directory Domain Trusts](#README-md-01-architecture-harden-domain-trusts-md)
 2. **[Module 2: Domain Controller Hardening](#README-md-02-domain-controllers-readme-md)**
    * Operating system-level DC security configuration.
    * Hardening controls:
-     * [Disable SMBv1](#README-md-02-domain-controllers-disable-smbv1-md)
-     * [Disable Multicast Name Resolution](#README-md-02-domain-controllers-disable-multicast-name-resolution-md)
-     * [Disable NTLMv1](#README-md-02-domain-controllers-disable-ntlmv1-md)
-     * [Enforce LDAP Server Signing](#README-md-02-domain-controllers-enforce-ldap-signing-md)
-     * [Enforce LDAP Channel Binding](#README-md-02-domain-controllers-enforce-ldap-channel-binding-md)
-     * [Enable LSA Protection](#README-md-02-domain-controllers-enable-lsa-protection-md)
-     * [Enable Credential Guard](#README-md-02-domain-controllers-enable-credential-guard-md)
-     * [Disable Print Spooler Service](#README-md-02-domain-controllers-disable-print-spooler-md)
-     * [Enforce SMB Message Signing](#README-md-02-domain-controllers-enforce-smb-signing-md)
-     * [Restrict Kerberos Encryption Types](#README-md-02-domain-controllers-restrict-kerberos-encryption-md)
-     * [Restrict Remote SAM API Access](#README-md-02-domain-controllers-restrict-ntds-sam-api-md)
-     * [Disable Unnecessary Services](#README-md-02-domain-controllers-disable-unnecessary-services-md)
-     * [Enable Kerberos Armoring](#README-md-02-domain-controllers-enable-kerberos-armoring-md)
-     * [Restrict NTLM](#README-md-02-domain-controllers-restrict-ntlm-md)
-     * [Migrate SYSVOL Replication to DFSR](#README-md-02-domain-controllers-migrate-sysvol-replication-dfsr-md)
-     * [Harden adminSDHolder Permissions](#README-md-02-domain-controllers-harden-adminsdholder-permissions-md)
-     * [Harden Microsoft DNS AD Container Permissions](#README-md-02-domain-controllers-harden-dns-container-permissions-md)
-     * [Harden Virtualization Hosts for Domain Controllers](#README-md-02-domain-controllers-harden-dc-virtualization-hosts-md)
-     * [Enforce RDP Restricted Admin Mode](#README-md-02-domain-controllers-enforce-rdp-restricted-admin-md)
-     * [Windows Defender Antivirus DC Baseline and Exploit Guard](#README-md-02-domain-controllers-defender-antivirus-md)
-     * [Configure AppLocker Policies on Domain Controllers](#README-md-02-domain-controllers-configure-applocker-policies-md)
+     * [REQ-DC-001 - Disable SMBv1](#README-md-02-domain-controllers-disable-smbv1-md)
+     * [REQ-DC-002 - Disable Multicast Name Resolution](#README-md-02-domain-controllers-disable-multicast-name-resolution-md)
+     * [REQ-DC-003 - Disable NTLMv1](#README-md-02-domain-controllers-disable-ntlmv1-md)
+     * [REQ-DC-004 - Enforce LDAP Server Signing](#README-md-02-domain-controllers-enforce-ldap-signing-md)
+     * [REQ-DC-005 - Enforce LDAP Channel Binding](#README-md-02-domain-controllers-enforce-ldap-channel-binding-md)
+     * [REQ-DC-006 - Enable LSA Protection](#README-md-02-domain-controllers-enable-lsa-protection-md)
+     * [REQ-DC-007 - Enable Credential Guard](#README-md-02-domain-controllers-enable-credential-guard-md)
+     * [REQ-DC-008 - Disable Print Spooler Service](#README-md-02-domain-controllers-disable-print-spooler-md)
+     * [REQ-DC-009 - Enforce SMB Message Signing](#README-md-02-domain-controllers-enforce-smb-signing-md)
+     * [REQ-DC-010 - Restrict Kerberos Encryption Types](#README-md-02-domain-controllers-restrict-kerberos-encryption-md)
+     * [REQ-DC-011 - Restrict Remote SAM API Access](#README-md-02-domain-controllers-restrict-ntds-sam-api-md)
+     * [REQ-DC-012 - Disable Unnecessary Services on Domain Controllers](#README-md-02-domain-controllers-disable-unnecessary-services-md)
+     * [REQ-DC-013 - Enable Kerberos Armoring](#README-md-02-domain-controllers-enable-kerberos-armoring-md)
+     * [REQ-DC-014 - Restrict NTLM](#README-md-02-domain-controllers-restrict-ntlm-md)
+     * [REQ-DC-015 - Migrate SYSVOL Replication to DFSR](#README-md-02-domain-controllers-migrate-sysvol-replication-dfsr-md)
+     * [REQ-DC-016 - Harden adminSDHolder Permissions](#README-md-02-domain-controllers-harden-adminsdholder-permissions-md)
+     * [REQ-DC-017 - Harden Microsoft DNS AD Container Permissions](#README-md-02-domain-controllers-harden-dns-container-permissions-md)
+     * [REQ-DC-018 - Harden Virtualization Hosts for Domain Controllers](#README-md-02-domain-controllers-harden-dc-virtualization-hosts-md)
+     * [REQ-DC-019 - Enforce RDP Restricted Admin Mode](#README-md-02-domain-controllers-enforce-rdp-restricted-admin-md)
+     * [REQ-DC-020 - Windows Defender Antivirus Domain Controller Baseline and Exploit Guard](#README-md-02-domain-controllers-defender-antivirus-md)
+     * [REQ-DC-021 - Configure AppLocker Policies on Domain Controllers](#README-md-02-domain-controllers-configure-applocker-policies-md)
 3. **[Module 3: Identities & Services Hardening](#README-md-03-identities-services-readme-md)**
    * Administrative identity protection, credential hygiene, and service account hardening.
    * Hardening controls:
-     * [Enforce Fine-Grained Password Policies](#README-md-03-identities-services-enforce-fgpp-md)
-     * [Enable Local Administrator Password Solution (LAPS)](#README-md-03-identities-services-enable-laps-md)
-     * [Implement Group Managed Service Accounts (gMSA)](#README-md-03-identities-services-harden-service-accounts-md)
-     * [Restrict Kerberos Delegation](#README-md-03-identities-services-restrict-kerberos-delegation-md)
-     * [Configure and Populate Protected Users Group](#README-md-03-identities-services-configure-protected-users-group-md)
-     * [Rename and Disable Default Administrator and Guest Accounts](#README-md-03-identities-services-harden-default-accounts-md)
-     * [Restrict Interactive Logons for Service Accounts](#README-md-03-identities-services-restrict-service-account-logons-md)
-     * [Enforce User and Service Account Kerberos Encryption (AES-Only)](#README-md-03-identities-services-enforce-user-aes-encryption-md)
-     * [Enforce Kerberos Pre-Authentication](#README-md-03-identities-services-enforce-kerberos-preauthentication-md)
-     * [Restrict Schema Administrators Group Membership](#README-md-03-identities-services-restrict-schema-admins-md)
-     * [Enforce Accidental Deletion Protection on Organizational Units](#README-md-03-identities-services-prevent-accidental-deletion-ous-md)
-     * [Configure Active Directory Authentication Silos](#README-md-03-identities-services-configure-authentication-silos-md)
-     * [Clean Up adminCount Attribute Orphans](#README-md-03-identities-services-cleanup-admincount-orphans-md)
-     * [Renew KDS Root Keys and gMSA Secrets](#README-md-03-identities-services-renew-kds-keys-gmsa-secrets-md)
-     * [Harden Active Directory Certificate Services (ADCS)](#README-md-03-identities-services-harden-adcs-pki-md)
-     * [Configure Point and Print Restrictions](#README-md-03-identities-services-configure-point-and-print-md)
-     * [Disable Machine Account Quota](#README-md-03-identities-services-disable-machine-account-quota-md)
-     * [Restrict Pre-Windows 2000 Compatible Access Group](#README-md-03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)
+     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](#README-md-03-identities-services-enforce-fgpp-md)
+     * [REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](#README-md-03-identities-services-enable-laps-md)
+     * [REQ-ID-003 - Implement Group Managed Service Accounts (gMSA)](#README-md-03-identities-services-harden-service-accounts-md)
+     * [REQ-ID-004 - Restrict Kerberos Delegation](#README-md-03-identities-services-restrict-kerberos-delegation-md)
+     * [REQ-ID-005 - Configure and Populate Protected Users Group](#README-md-03-identities-services-configure-protected-users-group-md)
+     * [REQ-ID-006 - Rename and Disable Default Administrator and Guest Accounts](#README-md-03-identities-services-harden-default-accounts-md)
+     * [REQ-ID-007 - Restrict Interactive Logons for Service Accounts](#README-md-03-identities-services-restrict-service-account-logons-md)
+     * [REQ-ID-008 - Enforce User and Service Account Kerberos Encryption (AES-Only)](#README-md-03-identities-services-enforce-user-aes-encryption-md)
+     * [REQ-ID-009 - Enforce Kerberos Pre-Authentication](#README-md-03-identities-services-enforce-kerberos-preauthentication-md)
+     * [REQ-ID-010 - Restrict Schema Administrators Group Membership](#README-md-03-identities-services-restrict-schema-admins-md)
+     * [REQ-ID-011 - Enforce Accidental Deletion Protection on Organizational Units](#README-md-03-identities-services-prevent-accidental-deletion-ous-md)
+     * [REQ-ID-012 - Configure Active Directory Authentication Silos and Policies](#README-md-03-identities-services-configure-authentication-silos-md)
+     * [REQ-ID-013 - Clean Up adminCount Attribute Orphans](#README-md-03-identities-services-cleanup-admincount-orphans-md)
+     * [REQ-ID-014 - Renew KDS Root Keys and gMSA Secrets](#README-md-03-identities-services-renew-kds-keys-gmsa-secrets-md)
+     * [REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#README-md-03-identities-services-harden-adcs-pki-md)
+     * [REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](#README-md-03-identities-services-configure-point-and-print-md)
+     * [REQ-ID-017 - Disable Machine Account Quota](#README-md-03-identities-services-disable-machine-account-quota-md)
+     * [REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#README-md-03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)
 4. **[Module 4: Network Configuration & Firewalling](#README-md-04-network-firewall-readme-md)**
    * Active Directory network boundaries, port configurations, and encryption/authentication configurations.
    * Hardening controls:
-     * [Configure Active Directory Port Matrix](#README-md-04-network-firewall-configure-ad-port-matrix-md)
-     * [Restrict RPC Dynamic Ports](#README-md-04-network-firewall-restrict-rpc-dynamic-ports-md)
-     * [Configure Workstation and Server Isolation](#README-md-04-network-firewall-configure-workstation-isolation-md)
-     * [Configure IPsec Domain Isolation](#README-md-04-network-firewall-configure-ipsec-domain-isolation-md)
-     * [Harden IPsec Cryptographic Configurations](#README-md-04-network-firewall-harden-ipsec-cryptography-md)
-     * [Harden TLS Protocols, Cipher Suites, and Elliptic Curves](#README-md-04-network-firewall-harden-tls-configuration-md)
-     * [Enforce SMBv3 Security and Digitally Sign/Encrypt Communications](#README-md-04-network-firewall-enforce-smbv3-security-md)
-     * [Configure Firewall Logging and Operational Settings](#README-md-04-network-firewall-configure-firewall-logging-md)
-     * [Configure Hardened UNC Paths](#README-md-04-network-firewall-configure-hardened-unc-paths-md)
-     * [Harden WinRM Service and Restrict RPC Clients](#README-md-04-network-firewall-harden-winrm-service-md)
+     * [REQ-NET-001 - Configure Active Directory Port Matrix](#README-md-04-network-firewall-configure-ad-port-matrix-md)
+     * [REQ-NET-002 - Restrict RPC Dynamic Ports](#README-md-04-network-firewall-restrict-rpc-dynamic-ports-md)
+     * [REQ-NET-003 - Configure Workstation and Server Isolation](#README-md-04-network-firewall-configure-workstation-isolation-md)
+     * [REQ-NET-004 - Configure IPsec Domain Isolation](#README-md-04-network-firewall-configure-ipsec-domain-isolation-md)
+     * [REQ-NET-005 - Harden IPsec Cryptographic Configurations](#README-md-04-network-firewall-harden-ipsec-cryptography-md)
+     * [REQ-NET-006 - Harden TLS Protocols, Cipher Suites, and Elliptic Curves](#README-md-04-network-firewall-harden-tls-configuration-md)
+     * [REQ-NET-007 - Enforce SMBv3 Security and Digitally Sign/Encrypt Communications](#README-md-04-network-firewall-enforce-smbv3-security-md)
+     * [REQ-NET-008 - Configure Firewall Logging and Operational Settings](#README-md-04-network-firewall-configure-firewall-logging-md)
+     * [REQ-NET-009 - Configure Hardened UNC Paths and LDAP Client Signing](#README-md-04-network-firewall-configure-hardened-unc-paths-md)
+     * [REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](#README-md-04-network-firewall-harden-winrm-service-md)
 5. **[Module 5: Logging, Monitoring & SIEM](#README-md-05-logging-monitoring-readme-md)**
    * Entry point index for security log auditing, host monitoring, and centralized SIEM ingestion.
    * Hardening controls:
-     * [Configure Advanced Security Audit Policies](#README-md-05-logging-monitoring-configure-advanced-audit-policies-md)
-     * [Configure PowerShell and Command-Line Auditing](#README-md-05-logging-monitoring-configure-powershell-and-command-line-auditing-md)
-     * [Deploy and Harden Microsoft Sysmon](#README-md-05-logging-monitoring-deploy-and-harden-sysmon-md)
-     * [Configure Secure SIEM Log Shipping](#README-md-05-logging-monitoring-configure-siem-log-shipping-md)
+     * [REQ-LOG-001 - Configure Advanced Security Audit Policies](#README-md-05-logging-monitoring-configure-advanced-audit-policies-md)
+     * [REQ-LOG-002 - Configure PowerShell and Command-Line Auditing](#README-md-05-logging-monitoring-configure-powershell-and-command-line-auditing-md)
+     * [REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](#README-md-05-logging-monitoring-deploy-and-harden-sysmon-md)
+     * [REQ-LOG-004 - Configure Secure SIEM Log Shipping](#README-md-05-logging-monitoring-configure-siem-log-shipping-md)
 6. **[Module 6: Secure Operations & Maintenance](#README-md-06-operations-maintenance-readme-md)**
    * AD System State backup, restore, and offline immutable storage.
    * Hardening controls:
      * [Secure Operations and Maintenance Baseline](#README-md-06-operations-maintenance-ops-and-maintenance-md)
-     * [Enforce KRBTGT Password Rotation](#README-md-06-operations-maintenance-enforce-krbtgt-password-rotation-md)
-     * [Enable and Configure Active Directory Recycle Bin](#README-md-06-operations-maintenance-enable-recycle-bin-md)
-     * [Establish and Maintain Group Policy ADMX Central Store](#README-md-06-operations-maintenance-maintain-gpo-templates-md)
-     * [Implement Third-Party and Custom GPO Templates for COTS Hardening](#README-md-06-operations-maintenance-use-third-party-templates-md)
-     * [Configure Dedicated WSUS for Tier 0](#README-md-06-operations-maintenance-configure-dedicated-tier0-wsus-md)
+     * [REQ-OPS-001 - Enforce KRBTGT Password Rotation](#README-md-06-operations-maintenance-enforce-krbtgt-password-rotation-md)
+     * [REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](#README-md-06-operations-maintenance-enable-recycle-bin-md)
+     * [REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#README-md-06-operations-maintenance-maintain-gpo-templates-md)
+     * [REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](#README-md-06-operations-maintenance-use-third-party-templates-md)
+     * [REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#README-md-06-operations-maintenance-configure-dedicated-tier0-wsus-md)
 7. **[Module 7: Privileged Access Workstations (PAWs) Hardening](#README-md-07-paws-readme-md)**
    * Physical and operating system isolation rules for administration devices.
    * Hardening controls:
-     * [Configure AppLocker Policies for PAWs](#README-md-07-paws-configure-applocker-policies-md)
-     * [Enable LSA Protection for PAWs](#README-md-07-paws-enable-lsa-protection-md)
-     * [Restrict Local Administrators Group for PAWs](#README-md-07-paws-restrict-local-administrators-md)
-     * [Enable BitLocker for PAWs](#README-md-07-paws-enable-bitlocker-md)
-     * [UEFI Firmware Security Hardening](#README-md-07-paws-configure-uefi-security-md)
-     * [Hardware Virtualization and DMA Protection](#README-md-07-paws-enable-hardware-virtualization-and-dma-protection-md)
-     * [Disable Windows Platform Binary Table (WPBT)](#README-md-07-paws-disable-wpbt-md)
-     * [Windows Defender Antivirus PAW Baseline and Exploit Guard](#README-md-07-paws-defender-antivirus-md)
-     * [Configure User Rights Assignments for PAWs](#README-md-07-paws-configure-user-rights-assignments-md)
-     * [Enable VBS and Credential Guard for PAWs](#README-md-07-paws-enable-vbs-credential-guard-md)
-     * [Harden DMA and Physical Security for PAWs](#README-md-07-paws-harden-dma-and-physical-security-md)
+     * [REQ-PAW-001 - Configure AppLocker Policies for PAWs](#README-md-07-paws-configure-applocker-policies-md)
+     * [REQ-PAW-002 - Enable LSA Protection for PAWs](#README-md-07-paws-enable-lsa-protection-md)
+     * [REQ-PAW-003 - Restrict Local Administrators Group for PAWs](#README-md-07-paws-restrict-local-administrators-md)
+     * [REQ-PAW-004 - Enforce BitLocker with TPM and Startup PIN for PAWs](#README-md-07-paws-enable-bitlocker-md)
+     * [REQ-PAW-005 - UEFI Firmware Security Hardening](#README-md-07-paws-configure-uefi-security-md)
+     * [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#README-md-07-paws-enable-hardware-virtualization-and-dma-protection-md)
+     * [REQ-PAW-007 - Disable Windows Platform Binary Table (WPBT)](#README-md-07-paws-disable-wpbt-md)
+     * [REQ-PAW-008 - Windows Defender Antivirus PAW Baseline and Exploit Guard](#README-md-07-paws-defender-antivirus-md)
+     * [REQ-PAW-009 - Configure User Rights Assignments for PAWs](#README-md-07-paws-configure-user-rights-assignments-md)
+     * [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#README-md-07-paws-enable-vbs-credential-guard-md)
+     * [REQ-PAW-011 - Harden DMA and Physical Security for PAWs](#README-md-07-paws-harden-dma-and-physical-security-md)
 8. **[Module 8: Endpoint Hardening](#README-md-08-endpoints-readme-md)**
    * Entry point index for Tier 2 workstation security.
    * Hardening controls:
-     * [Harden Network and Name Resolution](#README-md-08-endpoints-harden-network-and-name-resolution-md)
-     * [Configure UAC Policies](#README-md-08-endpoints-configure-uac-policies-md)
-     * [Disable AutoPlay and AutoRun](#README-md-08-endpoints-disable-autoplay-autorun-md)
-     * [Block Removable Storage](#README-md-08-endpoints-block-removable-storage-md)
-     * [Restrict Remote Desktop (RDP) Access](#README-md-08-endpoints-restrict-rdp-access-md)
-     * [Restrict Local Administrators Group](#README-md-08-endpoints-restrict-local-admins-md)
-     * [Windows Defender Antivirus Offline Baseline](#README-md-08-endpoints-defender-antivirus-md)
-     * [WSUS Client Configuration](#README-md-08-endpoints-wsus-client-config-md)
-     * [Enable Secure Boot](#README-md-08-endpoints-enable-secure-boot-md)
-     * [Enable VBS and Credential Guard](#README-md-08-endpoints-enable-vbs-credential-guard-md)
-     * [Configure Windows Defender Application Control](#README-md-08-endpoints-configure-wdac-md)
-     * [Enable BitLocker and Network Unlock](#README-md-08-endpoints-enable-bitlocker-md)
-     * [UEFI Firmware Security Hardening](#README-md-08-endpoints-configure-uefi-security-md)
-     * [Hardware Virtualization and DMA Protection](#README-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md)
-     * [Disable Windows Platform Binary Table (WPBT)](#README-md-08-endpoints-disable-wpbt-md)
-     * [Configure User Rights Assignments](#README-md-08-endpoints-configure-user-rights-assignments-md)
-     * [Harden DMA and Physical Security](#README-md-08-endpoints-harden-dma-and-physical-security-md)
-     * [Configure Account Policies](#README-md-08-endpoints-configure-account-policies-md)
-     * [Configure User Profile Restrictions](#README-md-08-endpoints-configure-user-profile-restrictions-md)
-     * [Block Outbound Traffic for Known LOLBins](#README-md-08-endpoints-block-lolbins-outbound-traffic-md)
+     * [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](#README-md-08-endpoints-harden-network-and-name-resolution-md)
+     * [REQ-END-002 - Configure User Account Control Policies](#README-md-08-endpoints-configure-uac-policies-md)
+     * [REQ-END-003 - Disable AutoPlay and AutoRun](#README-md-08-endpoints-disable-autoplay-autorun-md)
+     * [REQ-END-004 - Block Removable Storage](#README-md-08-endpoints-block-removable-storage-md)
+     * [REQ-END-005 - Restrict Remote Desktop Access](#README-md-08-endpoints-restrict-rdp-access-md)
+     * [REQ-END-006 - Restrict Local Administrators Group](#README-md-08-endpoints-restrict-local-admins-md)
+     * [REQ-END-007 - Windows Defender Antivirus Baseline and Exploit Guard](#README-md-08-endpoints-defender-antivirus-md)
+     * [REQ-END-008 - WSUS Client Configuration](#README-md-08-endpoints-wsus-client-config-md)
+     * [REQ-END-009 - Enable Secure Boot](#README-md-08-endpoints-enable-secure-boot-md)
+     * [REQ-END-010 - Enable VBS and Credential Guard](#README-md-08-endpoints-enable-vbs-credential-guard-md)
+     * [REQ-END-011 - Configure Windows Defender Application Control](#README-md-08-endpoints-configure-wdac-md)
+     * [REQ-END-012 - Enable BitLocker and Network Unlock](#README-md-08-endpoints-enable-bitlocker-md)
+     * [REQ-END-013 - UEFI Firmware Security Hardening](#README-md-08-endpoints-configure-uefi-security-md)
+     * [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#README-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md)
+     * [REQ-END-015 - Disable Windows Platform Binary Table (WPBT)](#README-md-08-endpoints-disable-wpbt-md)
+     * [REQ-END-016 - Configure User Rights Assignments](#README-md-08-endpoints-configure-user-rights-assignments-md)
+     * [REQ-END-017 - Harden DMA and Physical Security](#README-md-08-endpoints-harden-dma-and-physical-security-md)
+     * [REQ-END-018 - Configure Account and Password Policies](#README-md-08-endpoints-configure-account-policies-md)
+     * [REQ-END-019 - Configure User Profile Restrictions](#README-md-08-endpoints-configure-user-profile-restrictions-md)
+     * [REQ-END-022 - Block Outbound Traffic for Known LOLBins](#README-md-08-endpoints-block-lolbins-outbound-traffic-md)
 
 ---
 
@@ -191,14 +191,14 @@ Below is a cross-reference matrix mapping each guidebook module to specific guid
 
 | Module | ANSSI AD Guide Recommendation | CIS Windows Server/10 Benchmark | Microsoft Security Baseline Focus |
 | :--- | :--- | :--- | :--- |
-| **[M1: Architecture](#README-md-01-architecture-readme-md)**<br>- [Restrict Tier Logons](#README-md-01-architecture-restrict-tier-logons-md)<br>- [Restrict Management Protocols](#README-md-01-architecture-restrict-mgmt-protocols-md)<br>- [Audit Privileged Groups](#README-md-01-architecture-audit-privileged-groups-md)<br>- [Keep Functional Levels Up-To-Date](#README-md-01-architecture-keep-functional-levels-up-to-date-md)<br>- [Default Policies Management](#README-md-01-architecture-default-policies-recommendations-md)<br>- [Harden Domain Trusts](#README-md-01-architecture-harden-domain-trusts-md) | ANSSI R1, R2, R3 (Tiering Model)<br>ANSSI R8 (Management subnets) | Section 18.2 (User Rights)<br>Section 19 (Windows Defender Firewall) | Privileged access boundaries, logon blocks, and management protocol restrictions. |
-| **[M2: Domain Controllers](#README-md-02-domain-controllers-readme-md)**<br>- [Disable SMBv1](#README-md-02-domain-controllers-disable-smbv1-md)<br>- [Disable Multicast Name Resolution](#README-md-02-domain-controllers-disable-multicast-name-resolution-md)<br>- [Disable NTLMv1](#README-md-02-domain-controllers-disable-ntlmv1-md)<br>- [Enforce LDAP Server Signing](#README-md-02-domain-controllers-enforce-ldap-signing-md)<br>- [Enforce LDAP Channel Binding](#README-md-02-domain-controllers-enforce-ldap-channel-binding-md)<br>- [Enable LSA Protection](#README-md-02-domain-controllers-enable-lsa-protection-md)<br>- [Enable Credential Guard](#README-md-02-domain-controllers-enable-credential-guard-md)<br>- [Disable Print Spooler Service](#README-md-02-domain-controllers-disable-print-spooler-md)<br>- [Enforce SMB Message Signing](#README-md-02-domain-controllers-enforce-smb-signing-md)<br>- [Restrict Kerberos Encryption Types](#README-md-02-domain-controllers-restrict-kerberos-encryption-md)<br>- [Restrict Remote SAM API Access](#README-md-02-domain-controllers-restrict-ntds-sam-api-md)<br>- [Disable Unnecessary Services](#README-md-02-domain-controllers-disable-unnecessary-services-md)<br>- [Enable Kerberos Armoring](#README-md-02-domain-controllers-enable-kerberos-armoring-md)<br>- [Restrict NTLM](#README-md-02-domain-controllers-restrict-ntlm-md)<br>- [Migrate SYSVOL Replication to DFSR](#README-md-02-domain-controllers-migrate-sysvol-replication-dfsr-md)<br>- [Harden adminSDHolder Permissions](#README-md-02-domain-controllers-harden-adminsdholder-permissions-md)<br>- [Harden Microsoft DNS AD Container Permissions](#README-md-02-domain-controllers-harden-dns-container-permissions-md)<br>- [Harden Virtualization Hosts for Domain Controllers](#README-md-02-domain-controllers-harden-dc-virtualization-hosts-md)<br>- [Enforce RDP Restricted Admin Mode](#README-md-02-domain-controllers-enforce-rdp-restricted-admin-md)<br>- [Windows Defender Antivirus DC Baseline](#README-md-02-domain-controllers-defender-antivirus-md)<br>- [Configure AppLocker Policies on Domain Controllers](#README-md-02-domain-controllers-configure-applocker-policies-md) | R19, R20 (LDAP Signing/Channel Binding), R22 (Spooler), R14 (LSA) | Section 2.3 (Security Options), Section 18.9 (System Services) | Credential Guard, Device Guard, Protocol Deprecation, AppLocker |
-| **[M3: Identities & Services](#README-md-03-identities-services-readme-md)**<br>- [Enforce Fine-Grained Password Policies](#README-md-03-identities-services-enforce-fgpp-md)<br>- [Enable LAPS](#README-md-03-identities-services-enable-laps-md)<br>- [Implement Group Managed Service Accounts (gMSA)](#README-md-03-identities-services-harden-service-accounts-md)<br>- [Restrict Kerberos Delegation](#README-md-03-identities-services-restrict-kerberos-delegation-md)<br>- [Configure and Populate Protected Users Group](#README-md-03-identities-services-configure-protected-users-group-md)<br>- [Rename and Disable Default Accounts](#README-md-03-identities-services-harden-default-accounts-md)<br>- [Restrict Interactive Logons for Service Accounts](#README-md-03-identities-services-restrict-service-account-logons-md)<br>- [Enforce User/Service Account Kerberos Encryption](#README-md-03-identities-services-enforce-user-aes-encryption-md)<br>- [Enforce Kerberos Pre-Authentication](#README-md-03-identities-services-enforce-kerberos-preauthentication-md)<br>- [Restrict Schema Administrators Group Membership](#README-md-03-identities-services-restrict-schema-admins-md)<br>- [Enforce Accidental Deletion Protection on OUs](#README-md-03-identities-services-prevent-accidental-deletion-ous-md)<br>- [Configure AD Authentication Silos](#README-md-03-identities-services-configure-authentication-silos-md)<br>- [Clean Up adminCount Attribute Orphans](#README-md-03-identities-services-cleanup-admincount-orphans-md)<br>- [Renew KDS Root Keys and gMSA Secrets](#README-md-03-identities-services-renew-kds-keys-gmsa-secrets-md)<br>- [Harden ADCS PKI](#README-md-03-identities-services-harden-adcs-pki-md)<br>- [Configure Point and Print Restrictions](#README-md-03-identities-services-configure-point-and-print-md)<br>- [Disable Machine Account Quota](#README-md-03-identities-services-disable-machine-account-quota-md)<br>- [Restrict Pre-Windows 2000 Compatible Access Group](#README-md-03-identities-services-restrict-pre-windows-2000-compatible-access-group-md) | R9 (LAPS), R35 (gMSA), R15, R16 (Kerberos Delegation), R14 | Section 1.1 (Account Policies), Section 2.2.4 (User Rights), Section 2.3.10 (Network Security) | Password Complexity, Kerberos Encryption, LAPS Configuration, Point and Print restrictions, Machine Account Quota restriction, anonymous access restrictions |
-| **[M4: Network & Firewall](#README-md-04-network-firewall-readme-md)**<br>- [Configure AD Port Matrix](#README-md-04-network-firewall-configure-ad-port-matrix-md)<br>- [Restrict RPC Dynamic Ports](#README-md-04-network-firewall-restrict-rpc-dynamic-ports-md)<br>- [Configure Workstation and Server Isolation](#README-md-04-network-firewall-configure-workstation-isolation-md)<br>- [Configure IPsec Domain Isolation](#README-md-04-network-firewall-configure-ipsec-domain-isolation-md)<br>- [Harden IPsec Cryptographic Configurations](#README-md-04-network-firewall-harden-ipsec-cryptography-md)<br>- [Harden TLS Protocols, Cipher Suites, and Elliptic Curves](#README-md-04-network-firewall-harden-tls-configuration-md)<br>- [Enforce SMBv3 Security](#README-md-04-network-firewall-enforce-smbv3-security-md)<br>- [Configure Firewall Logging](#README-md-04-network-firewall-configure-firewall-logging-md)<br>- [Configure Hardened UNC Paths](#README-md-04-network-firewall-configure-hardened-unc-paths-md)<br>- [Harden WinRM Service and Restrict RPC Clients](#README-md-04-network-firewall-harden-winrm-service-md) | R7 (IPsec), R8 (Administration subnets), R19 (Hardened UNC Paths) | Section 19 (Windows Defender Firewall) | Network Isolation, IPsec Domain Security, WinRM and RPC Client Hardening |
-| **[M5: Logging & SIEM](#README-md-05-logging-monitoring-readme-md)**<br>- [Configure Advanced Security Audit Policies](#README-md-05-logging-monitoring-configure-advanced-audit-policies-md)<br>- [Configure PowerShell and Command-Line Auditing](#README-md-05-logging-monitoring-configure-powershell-and-command-line-auditing-md)<br>- [Deploy and Harden Microsoft Sysmon](#README-md-05-logging-monitoring-deploy-and-harden-sysmon-md)<br>- [Configure Secure SIEM Log Shipping](#README-md-05-logging-monitoring-configure-siem-log-shipping-md) | R48 (Audit Policy), R50 (PowerShell Log), R52 (Sysmon/WEC) | Section 9 (Audit Policy), Section 18.8 (PowerShell Logging) | Advanced Audit Policy, Transcription, Command Line Logs |
-| **[M6: Ops & Maintenance](#README-md-06-operations-maintenance-readme-md)**<br>- [Secure Operations and Maintenance Baseline](#README-md-06-operations-maintenance-ops-and-maintenance-md)<br>- [Enforce KRBTGT Password Rotation](#README-md-06-operations-maintenance-enforce-krbtgt-password-rotation-md)<br>- [Enable and Configure AD Recycle Bin](#README-md-06-operations-maintenance-enable-recycle-bin-md)<br>- [Establish and Maintain Group Policy ADMX Central Store](#README-md-06-operations-maintenance-maintain-gpo-templates-md)<br>- [Implement Third-Party/Custom GPO Templates](#README-md-06-operations-maintenance-use-third-party-templates-md)<br>- [Configure Dedicated WSUS for Tier 0](#README-md-06-operations-maintenance-configure-dedicated-tier0-wsus-md) | R54 (AD Backup), R57 (Vulnerability Assessment) | Section 18.3 (System/Recovery Options) | Patch Management, Offline Disaster Recovery |
-| **[M7: PAWs Hardening](#README-md-07-paws-readme-md)**<br>- [Configure AppLocker Policies for PAWs](#README-md-07-paws-configure-applocker-policies-md)<br>- [Enable LSA Protection for PAWs](#README-md-07-paws-enable-lsa-protection-md)<br>- [Restrict Local Administrators Group for PAWs](#README-md-07-paws-restrict-local-administrators-md)<br>- [Enable BitLocker for PAWs](#README-md-07-paws-enable-bitlocker-md)<br>- [UEFI Firmware Security](#README-md-07-paws-configure-uefi-security-md)<br>- [Hardware Virtualization](#README-md-07-paws-enable-hardware-virtualization-and-dma-protection-md)<br>- [Disable WPBT](#README-md-07-paws-disable-wpbt-md)<br>- [Windows Defender Antivirus PAW Baseline](#README-md-07-paws-defender-antivirus-md)<br>- [Configure User Rights Assignments for PAWs](#README-md-07-paws-configure-user-rights-assignments-md)<br>- [Enable VBS and Credential Guard for PAWs](#README-md-07-paws-enable-vbs-credential-guard-md)<br>- [Harden DMA and Physical Security for PAWs](#README-md-07-paws-harden-dma-and-physical-security-md) | R58 (Use of PAWs) | Section 18.2.1 (LSA Protection), Section 18.8 (Device Guard/HVCI), Section 18.2.1.1 (BitLocker Startup Auth), Section 18.2.1.2 (Enhanced PINs), Section 18.2.1.3 (PIN Length) | VBS, AppLocker, Device Guard, and secure BitLocker disk encryption with Startup PIN. |
-| **[M8: Endpoint Hardening](#README-md-08-endpoints-readme-md)**<br>- [Harden Network and Name Resolution](#README-md-08-endpoints-harden-network-and-name-resolution-md)<br>- [UAC Policies](#README-md-08-endpoints-configure-uac-policies-md)<br>- [Disable AutoPlay](#README-md-08-endpoints-disable-autoplay-autorun-md)<br>- [Block Removable Storage](#README-md-08-endpoints-block-removable-storage-md)<br>- [Restrict RDP](#README-md-08-endpoints-restrict-rdp-access-md)<br>- [Restrict Local Admins](#README-md-08-endpoints-restrict-local-admins-md)<br>- [Defender Antivirus](#README-md-08-endpoints-defender-antivirus-md)<br>- [WSUS Configuration](#README-md-08-endpoints-wsus-client-config-md)<br>- [Enable Secure Boot](#README-md-08-endpoints-enable-secure-boot-md)<br>- [Enable VBS and Credential Guard](#README-md-08-endpoints-enable-vbs-credential-guard-md)<br>- [Configure WDAC](#README-md-08-endpoints-configure-wdac-md)<br>- [Enable BitLocker and Network Unlock](#README-md-08-endpoints-enable-bitlocker-md)<br>- [UEFI Firmware Security](#README-md-08-endpoints-configure-uefi-security-md)<br>- [Hardware Virtualization](#README-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md)<br>- [Disable WPBT](#README-md-08-endpoints-disable-wpbt-md)<br>- [Configure User Rights Assignments](#README-md-08-endpoints-configure-user-rights-assignments-md)<br>- [Harden DMA and Physical Security](#README-md-08-endpoints-harden-dma-and-physical-security-md)<br>- [Configure Account Policies](#README-md-08-endpoints-configure-account-policies-md)<br>- [Configure User Profile Restrictions](#README-md-08-endpoints-configure-user-profile-restrictions-md)<br>- [Block Outbound Traffic for Known LOLBins](#README-md-08-endpoints-block-lolbins-outbound-traffic-md) | ANSSI R19 (Client signing)<br>ANSSI R9 (LAPS context)<br>ANSSI R58 (PAW / Endpoint encryption) | Section 9.1 (LLMNR)<br>Section 2.3.17 (UAC)<br>Section 18.3.1 (AutoPlay)<br>Section 18.9.82 (USB)<br>Section 18.2.1 (NLA)<br>Section 5.5 (Admins)<br>Section 18.9.47 (Defender)<br>Section 18.2.2 (WSUS)<br>Section 18.8.14.1 (Secure Boot/VBS)<br>Section 18.8.14.2 (Credential Guard)<br>Section 18.8.14.3 (WDAC)<br>Section 18.2.1.1 (Startup Auth)<br>Section 18.2.1.5 (Network Unlock) | Comprehensive Tier 2 workstation security configurations, network resolution controls, offline defense settings, disk encryption, and outbound firewall block rules. |
+| **[M1: Architecture](#README-md-01-architecture-readme-md)**<br>- [REQ-ARCH-001 - Restrict Tier Logons](#README-md-01-architecture-restrict-tier-logons-md)<br>- [REQ-ARCH-002 - Restrict Administrative Management Protocols](#README-md-01-architecture-restrict-mgmt-protocols-md)<br>- [REQ-ARCH-003 - Audit Privileged Groups](#README-md-01-architecture-audit-privileged-groups-md)<br>- [REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](#README-md-01-architecture-keep-functional-levels-up-to-date-md)<br>- [REQ-ARCH-005 - Default Domain and Domain Controllers Policies Management](#README-md-01-architecture-default-policies-recommendations-md)<br>- [REQ-ARCH-006 - Harden Active Directory Domain Trusts](#README-md-01-architecture-harden-domain-trusts-md) | ANSSI R1, R2, R3 (Tiering Model)<br>ANSSI R8 (Management subnets) | Section 18.2 (User Rights)<br>Section 19 (Windows Defender Firewall) | Privileged access boundaries, logon blocks, and management protocol restrictions. |
+| **[M2: Domain Controllers](#README-md-02-domain-controllers-readme-md)**<br>- [REQ-DC-001 - Disable SMBv1](#README-md-02-domain-controllers-disable-smbv1-md)<br>- [REQ-DC-002 - Disable Multicast Name Resolution](#README-md-02-domain-controllers-disable-multicast-name-resolution-md)<br>- [REQ-DC-003 - Disable NTLMv1](#README-md-02-domain-controllers-disable-ntlmv1-md)<br>- [REQ-DC-004 - Enforce LDAP Server Signing](#README-md-02-domain-controllers-enforce-ldap-signing-md)<br>- [REQ-DC-005 - Enforce LDAP Channel Binding](#README-md-02-domain-controllers-enforce-ldap-channel-binding-md)<br>- [REQ-DC-006 - Enable LSA Protection](#README-md-02-domain-controllers-enable-lsa-protection-md)<br>- [REQ-DC-007 - Enable Credential Guard](#README-md-02-domain-controllers-enable-credential-guard-md)<br>- [REQ-DC-008 - Disable Print Spooler Service](#README-md-02-domain-controllers-disable-print-spooler-md)<br>- [REQ-DC-009 - Enforce SMB Message Signing](#README-md-02-domain-controllers-enforce-smb-signing-md)<br>- [REQ-DC-010 - Restrict Kerberos Encryption Types](#README-md-02-domain-controllers-restrict-kerberos-encryption-md)<br>- [REQ-DC-011 - Restrict Remote SAM API Access](#README-md-02-domain-controllers-restrict-ntds-sam-api-md)<br>- [REQ-DC-012 - Disable Unnecessary Services on Domain Controllers](#README-md-02-domain-controllers-disable-unnecessary-services-md)<br>- [REQ-DC-013 - Enable Kerberos Armoring](#README-md-02-domain-controllers-enable-kerberos-armoring-md)<br>- [REQ-DC-014 - Restrict NTLM](#README-md-02-domain-controllers-restrict-ntlm-md)<br>- [REQ-DC-015 - Migrate SYSVOL Replication to DFSR](#README-md-02-domain-controllers-migrate-sysvol-replication-dfsr-md)<br>- [REQ-DC-016 - Harden adminSDHolder Permissions](#README-md-02-domain-controllers-harden-adminsdholder-permissions-md)<br>- [REQ-DC-017 - Harden Microsoft DNS AD Container Permissions](#README-md-02-domain-controllers-harden-dns-container-permissions-md)<br>- [REQ-DC-018 - Harden Virtualization Hosts for Domain Controllers](#README-md-02-domain-controllers-harden-dc-virtualization-hosts-md)<br>- [REQ-DC-019 - Enforce RDP Restricted Admin Mode](#README-md-02-domain-controllers-enforce-rdp-restricted-admin-md)<br>- [REQ-DC-020 - Windows Defender Antivirus Domain Controller Baseline and Exploit Guard](#README-md-02-domain-controllers-defender-antivirus-md)<br>- [REQ-DC-021 - Configure AppLocker Policies on Domain Controllers](#README-md-02-domain-controllers-configure-applocker-policies-md) | R19, R20 (LDAP Signing/Channel Binding), R22 (Spooler), R14 (LSA) | Section 2.3 (Security Options), Section 18.9 (System Services) | Credential Guard, Device Guard, Protocol Deprecation, AppLocker |
+| **[M3: Identities & Services](#README-md-03-identities-services-readme-md)**<br>- [REQ-ID-001 - Enforce Fine-Grained Password Policies](#README-md-03-identities-services-enforce-fgpp-md)<br>- [REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](#README-md-03-identities-services-enable-laps-md)<br>- [REQ-ID-003 - Implement Group Managed Service Accounts (gMSA)](#README-md-03-identities-services-harden-service-accounts-md)<br>- [REQ-ID-004 - Restrict Kerberos Delegation](#README-md-03-identities-services-restrict-kerberos-delegation-md)<br>- [REQ-ID-005 - Configure and Populate Protected Users Group](#README-md-03-identities-services-configure-protected-users-group-md)<br>- [REQ-ID-006 - Rename and Disable Default Administrator and Guest Accounts](#README-md-03-identities-services-harden-default-accounts-md)<br>- [REQ-ID-007 - Restrict Interactive Logons for Service Accounts](#README-md-03-identities-services-restrict-service-account-logons-md)<br>- [REQ-ID-008 - Enforce User and Service Account Kerberos Encryption (AES-Only)](#README-md-03-identities-services-enforce-user-aes-encryption-md)<br>- [REQ-ID-009 - Enforce Kerberos Pre-Authentication](#README-md-03-identities-services-enforce-kerberos-preauthentication-md)<br>- [REQ-ID-010 - Restrict Schema Administrators Group Membership](#README-md-03-identities-services-restrict-schema-admins-md)<br>- [REQ-ID-011 - Enforce Accidental Deletion Protection on Organizational Units](#README-md-03-identities-services-prevent-accidental-deletion-ous-md)<br>- [REQ-ID-012 - Configure Active Directory Authentication Silos and Policies](#README-md-03-identities-services-configure-authentication-silos-md)<br>- [REQ-ID-013 - Clean Up adminCount Attribute Orphans](#README-md-03-identities-services-cleanup-admincount-orphans-md)<br>- [REQ-ID-014 - Renew KDS Root Keys and gMSA Secrets](#README-md-03-identities-services-renew-kds-keys-gmsa-secrets-md)<br>- [REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#README-md-03-identities-services-harden-adcs-pki-md)<br>- [REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](#README-md-03-identities-services-configure-point-and-print-md)<br>- [REQ-ID-017 - Disable Machine Account Quota](#README-md-03-identities-services-disable-machine-account-quota-md)<br>- [REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#README-md-03-identities-services-restrict-pre-windows-2000-compatible-access-group-md) | R9 (LAPS), R35 (gMSA), R15, R16 (Kerberos Delegation), R14 | Section 1.1 (Account Policies), Section 2.2.4 (User Rights), Section 2.3.10 (Network Security) | Password Complexity, Kerberos Encryption, LAPS Configuration, Point and Print restrictions, Machine Account Quota restriction, anonymous access restrictions |
+| **[M4: Network & Firewall](#README-md-04-network-firewall-readme-md)**<br>- [REQ-NET-001 - Configure Active Directory Port Matrix](#README-md-04-network-firewall-configure-ad-port-matrix-md)<br>- [REQ-NET-002 - Restrict RPC Dynamic Ports](#README-md-04-network-firewall-restrict-rpc-dynamic-ports-md)<br>- [REQ-NET-003 - Configure Workstation and Server Isolation](#README-md-04-network-firewall-configure-workstation-isolation-md)<br>- [REQ-NET-004 - Configure IPsec Domain Isolation](#README-md-04-network-firewall-configure-ipsec-domain-isolation-md)<br>- [REQ-NET-005 - Harden IPsec Cryptographic Configurations](#README-md-04-network-firewall-harden-ipsec-cryptography-md)<br>- [REQ-NET-006 - Harden TLS Protocols, Cipher Suites, and Elliptic Curves](#README-md-04-network-firewall-harden-tls-configuration-md)<br>- [REQ-NET-007 - Enforce SMBv3 Security and Digitally Sign/Encrypt Communications](#README-md-04-network-firewall-enforce-smbv3-security-md)<br>- [REQ-NET-008 - Configure Firewall Logging and Operational Settings](#README-md-04-network-firewall-configure-firewall-logging-md)<br>- [REQ-NET-009 - Configure Hardened UNC Paths and LDAP Client Signing](#README-md-04-network-firewall-configure-hardened-unc-paths-md)<br>- [REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](#README-md-04-network-firewall-harden-winrm-service-md) | R7 (IPsec), R8 (Administration subnets), R19 (Hardened UNC Paths) | Section 19 (Windows Defender Firewall) | Network Isolation, IPsec Domain Security, WinRM and RPC Client Hardening |
+| **[M5: Logging & SIEM](#README-md-05-logging-monitoring-readme-md)**<br>- [REQ-LOG-001 - Configure Advanced Security Audit Policies](#README-md-05-logging-monitoring-configure-advanced-audit-policies-md)<br>- [REQ-LOG-002 - Configure PowerShell and Command-Line Auditing](#README-md-05-logging-monitoring-configure-powershell-and-command-line-auditing-md)<br>- [REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](#README-md-05-logging-monitoring-deploy-and-harden-sysmon-md)<br>- [REQ-LOG-004 - Configure Secure SIEM Log Shipping](#README-md-05-logging-monitoring-configure-siem-log-shipping-md) | R48 (Audit Policy), R50 (PowerShell Log), R52 (Sysmon/WEC) | Section 9 (Audit Policy), Section 18.8 (PowerShell Logging) | Advanced Audit Policy, Transcription, Command Line Logs |
+| **[M6: Ops & Maintenance](#README-md-06-operations-maintenance-readme-md)**<br>- [Secure Operations and Maintenance Baseline](#README-md-06-operations-maintenance-ops-and-maintenance-md)<br>- [REQ-OPS-001 - Enforce KRBTGT Password Rotation](#README-md-06-operations-maintenance-enforce-krbtgt-password-rotation-md)<br>- [REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](#README-md-06-operations-maintenance-enable-recycle-bin-md)<br>- [REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#README-md-06-operations-maintenance-maintain-gpo-templates-md)<br>- [REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](#README-md-06-operations-maintenance-use-third-party-templates-md)<br>- [REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#README-md-06-operations-maintenance-configure-dedicated-tier0-wsus-md) | R54 (AD Backup), R57 (Vulnerability Assessment) | Section 18.3 (System/Recovery Options) | Patch Management, Offline Disaster Recovery |
+| **[M7: PAWs Hardening](#README-md-07-paws-readme-md)**<br>- [REQ-PAW-001 - Configure AppLocker Policies for PAWs](#README-md-07-paws-configure-applocker-policies-md)<br>- [REQ-PAW-002 - Enable LSA Protection for PAWs](#README-md-07-paws-enable-lsa-protection-md)<br>- [REQ-PAW-003 - Restrict Local Administrators Group for PAWs](#README-md-07-paws-restrict-local-administrators-md)<br>- [REQ-PAW-004 - Enforce BitLocker with TPM and Startup PIN for PAWs](#README-md-07-paws-enable-bitlocker-md)<br>- [REQ-PAW-005 - UEFI Firmware Security Hardening](#README-md-07-paws-configure-uefi-security-md)<br>- [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#README-md-07-paws-enable-hardware-virtualization-and-dma-protection-md)<br>- [REQ-PAW-007 - Disable Windows Platform Binary Table (WPBT)](#README-md-07-paws-disable-wpbt-md)<br>- [REQ-PAW-008 - Windows Defender Antivirus PAW Baseline and Exploit Guard](#README-md-07-paws-defender-antivirus-md)<br>- [REQ-PAW-009 - Configure User Rights Assignments for PAWs](#README-md-07-paws-configure-user-rights-assignments-md)<br>- [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#README-md-07-paws-enable-vbs-credential-guard-md)<br>- [REQ-PAW-011 - Harden DMA and Physical Security for PAWs](#README-md-07-paws-harden-dma-and-physical-security-md) | R58 (Use of PAWs) | Section 18.2.1 (LSA Protection), Section 18.8 (Device Guard/HVCI), Section 18.2.1.1 (BitLocker Startup Auth), Section 18.2.1.2 (Enhanced PINs), Section 18.2.1.3 (PIN Length) | VBS, AppLocker, Device Guard, and secure BitLocker disk encryption with Startup PIN. |
+| **[M8: Endpoint Hardening](#README-md-08-endpoints-readme-md)**<br>- [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](#README-md-08-endpoints-harden-network-and-name-resolution-md)<br>- [REQ-END-002 - Configure User Account Control Policies](#README-md-08-endpoints-configure-uac-policies-md)<br>- [REQ-END-003 - Disable AutoPlay and AutoRun](#README-md-08-endpoints-disable-autoplay-autorun-md)<br>- [REQ-END-004 - Block Removable Storage](#README-md-08-endpoints-block-removable-storage-md)<br>- [REQ-END-005 - Restrict Remote Desktop Access](#README-md-08-endpoints-restrict-rdp-access-md)<br>- [REQ-END-006 - Restrict Local Administrators Group](#README-md-08-endpoints-restrict-local-admins-md)<br>- [REQ-END-007 - Windows Defender Antivirus Baseline and Exploit Guard](#README-md-08-endpoints-defender-antivirus-md)<br>- [REQ-END-008 - WSUS Client Configuration](#README-md-08-endpoints-wsus-client-config-md)<br>- [REQ-END-009 - Enable Secure Boot](#README-md-08-endpoints-enable-secure-boot-md)<br>- [REQ-END-010 - Enable VBS and Credential Guard](#README-md-08-endpoints-enable-vbs-credential-guard-md)<br>- [REQ-END-011 - Configure Windows Defender Application Control](#README-md-08-endpoints-configure-wdac-md)<br>- [REQ-END-012 - Enable BitLocker and Network Unlock](#README-md-08-endpoints-enable-bitlocker-md)<br>- [REQ-END-013 - UEFI Firmware Security Hardening](#README-md-08-endpoints-configure-uefi-security-md)<br>- [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#README-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md)<br>- [REQ-END-015 - Disable Windows Platform Binary Table (WPBT)](#README-md-08-endpoints-disable-wpbt-md)<br>- [REQ-END-016 - Configure User Rights Assignments](#README-md-08-endpoints-configure-user-rights-assignments-md)<br>- [REQ-END-017 - Harden DMA and Physical Security](#README-md-08-endpoints-harden-dma-and-physical-security-md)<br>- [REQ-END-018 - Configure Account and Password Policies](#README-md-08-endpoints-configure-account-policies-md)<br>- [REQ-END-019 - Configure User Profile Restrictions](#README-md-08-endpoints-configure-user-profile-restrictions-md)<br>- [REQ-END-022 - Block Outbound Traffic for Known LOLBins](#README-md-08-endpoints-block-lolbins-outbound-traffic-md) | ANSSI R19 (Client signing)<br>ANSSI R9 (LAPS context)<br>ANSSI R58 (PAW / Endpoint encryption) | Section 9.1 (LLMNR)<br>Section 2.3.17 (UAC)<br>Section 18.3.1 (AutoPlay)<br>Section 18.9.82 (USB)<br>Section 18.2.1 (NLA)<br>Section 5.5 (Admins)<br>Section 18.9.47 (Defender)<br>Section 18.2.2 (WSUS)<br>Section 18.8.14.1 (Secure Boot/VBS)<br>Section 18.8.14.2 (Credential Guard)<br>Section 18.8.14.3 (WDAC)<br>Section 18.2.1.1 (Startup Auth)<br>Section 18.2.1.5 (Network Unlock) | Comprehensive Tier 2 workstation security configurations, network resolution controls, offline defense settings, disk encryption, and outbound firewall block rules. |
 
 ---
 
@@ -237,22 +237,22 @@ This directory contains the Active Directory Administrative Tiering Model defini
 <a id="01-architecture-README-md-technical-hardening-controls"></a>
 ## Technical Hardening Controls
 
-1. **[Restrict Tier Logons](#01-architecture-README-md-01-architecture-restrict-tier-logons-md)**
+1. **[REQ-ARCH-001 - Restrict Tier Logons](#01-architecture-README-md-01-architecture-restrict-tier-logons-md)**
    Enforces User Rights Assignment GPOs to block high-privilege administrators (Tier 0/1) from authenticating interactively or via network logon on lower-tier computers (Tier 1/2), preventing credential exposure in LSASS memory.
 
-2. **[Restrict Administrative Management Protocols](#01-architecture-README-md-01-architecture-restrict-mgmt-protocols-md)**
+2. **[REQ-ARCH-002 - Restrict Administrative Management Protocols](#01-architecture-README-md-01-architecture-restrict-mgmt-protocols-md)**
    Restricts inbound Remote Desktop (RDP) and Windows Remote Management (WinRM) administrative protocols to dedicated, secure administrative subnets and jump hosts.
 
-3. **[Audit Privileged Groups](#01-architecture-README-md-01-architecture-audit-privileged-groups-md)**
+3. **[REQ-ARCH-003 - Audit Privileged Groups](#01-architecture-README-md-01-architecture-audit-privileged-groups-md)**
    Implements automated auditing of Tier 0 administrative Active Directory groups to detect nested memberships and unauthorized additions.
 
-4. **[Keep Functional Levels Up-To-Date](#01-architecture-README-md-01-architecture-keep-functional-levels-up-to-date-md)**
+4. **[REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](#01-architecture-README-md-01-architecture-keep-functional-levels-up-to-date-md)**
    Recommends migrating Domain and Forest Functional Levels to Windows Server 2016 or higher to unlock critical security features like the Protected Users group, gMSAs, and Kerberos Armoring.
 
-5. **[Default Domain and Domain Controllers Policies Management](#01-architecture-README-md-01-architecture-default-policies-recommendations-md)**
+5. **[REQ-ARCH-005 - Default Domain and Domain Controllers Policies Management](#01-architecture-README-md-01-architecture-default-policies-recommendations-md)**
    Provides structural guidelines to separate custom hardening policies into dedicated, modular GPOs rather than directly editing Default Domain/DC policies, protecting the forest baseline.
 
-6. **[Harden Active Directory Domain Trusts](#01-architecture-README-md-01-architecture-harden-domain-trusts-md)**
+6. **[REQ-ARCH-006 - Harden Active Directory Domain Trusts](#01-architecture-README-md-01-architecture-harden-domain-trusts-md)**
    Hardens trust relationships across forest and external boundaries by disabling SID History, enabling Quarantine (SID filtering), enforcing Selective Authentication, and blocking Kerberos TGT Delegation.
 
 
@@ -377,13 +377,13 @@ Administrators must never connect directly to Domain Controllers from standard w
 
 To enforce this theoretical architecture on Domain Controllers and client computers, you must configure the following technical controls:
 
-1. **[Restrict Tier Logons](#01-architecture-tiering-and-architecture-md-01-architecture-restrict-tier-logons-md)**
+1. **[REQ-ARCH-001 - Restrict Tier Logons](#01-architecture-tiering-and-architecture-md-01-architecture-restrict-tier-logons-md)**
    Enforces User Rights Assignment GPOs to deny Tier 0 administrative accounts from logging on to Tier 1 and Tier 2 machines, and Tier 1 administrative accounts from logging on to Tier 2 machines.
 
-2. **[Restrict Administrative Management Protocols](#01-architecture-tiering-and-architecture-md-01-architecture-restrict-mgmt-protocols-md)**
+2. **[REQ-ARCH-002 - Restrict Administrative Management Protocols](#01-architecture-tiering-and-architecture-md-01-architecture-restrict-mgmt-protocols-md)**
    Enforces network-level restriction of RDP (TCP 3389) and WinRM (TCP 5985/5986) management traffic to specific administrative IP ranges and Jump Host IP addresses.
 
-3. **[Audit Privileged Groups](#01-architecture-tiering-and-architecture-md-01-architecture-audit-privileged-groups-md)**
+3. **[REQ-ARCH-003 - Audit Privileged Groups](#01-architecture-tiering-and-architecture-md-01-architecture-audit-privileged-groups-md)**
    Enforces regular automated checks on domain administrative groups to ensure no nested memberships or unapproved accounts are assigned Tier 0 rights.
 
 
@@ -391,8 +391,8 @@ To enforce this theoretical architecture on Domain Controllers and client comput
 
 <a id="01-architecture-restrict-tier-logons-md"></a>
 
-<a id="01-architecture-restrict-tier-logons-md-hardening-requirement-restrict-tier-logons"></a>
-# Hardening Requirement: Restrict Tier Logons
+<a id="01-architecture-restrict-tier-logons-md-req-arch-001-restrict-tier-logons"></a>
+# [REQ-ARCH-001] Restrict Tier Logons
 
 <a id="01-architecture-restrict-tier-logons-md-target-scope"></a>
 ## Target Scope
@@ -609,8 +609,8 @@ if (Test-Path $secConfigPath) { Remove-Item $secConfigPath -Force }
 
 <a id="01-architecture-restrict-mgmt-protocols-md"></a>
 
-<a id="01-architecture-restrict-mgmt-protocols-md-hardening-requirement-restrict-administrative-management-protocols"></a>
-# Hardening Requirement: Restrict Administrative Management Protocols
+<a id="01-architecture-restrict-mgmt-protocols-md-req-arch-002-restrict-administrative-management-protocols"></a>
+# [REQ-ARCH-002] Restrict Administrative Management Protocols
 
 <a id="01-architecture-restrict-mgmt-protocols-md-target-scope"></a>
 ## Target Scope
@@ -755,8 +755,8 @@ foreach ($RuleName in $Rules) {
 
 <a id="01-architecture-audit-privileged-groups-md"></a>
 
-<a id="01-architecture-audit-privileged-groups-md-hardening-requirement-audit-privileged-groups"></a>
-# Hardening Requirement: Audit Privileged Groups
+<a id="01-architecture-audit-privileged-groups-md-req-arch-003-audit-privileged-groups"></a>
+# [REQ-ARCH-003] Audit Privileged Groups
 
 <a id="01-architecture-audit-privileged-groups-md-target-scope"></a>
 ## Target Scope
@@ -897,8 +897,8 @@ if ($rawOutput -match "^.+,Directory Service Changes,.+,(.+)$") {
 
 <a id="01-architecture-keep-functional-levels-up-to-date-md"></a>
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-hardening-requirement-keep-domain-and-forest-functional-levels-up-to-date"></a>
-# Hardening Requirement: Keep Domain and Forest Functional Levels Up-To-Date
+<a id="01-architecture-keep-functional-levels-up-to-date-md-req-arch-004-keep-domain-and-forest-functional-levels-up-to-date"></a>
+# [REQ-ARCH-004] Keep Domain and Forest Functional Levels Up-To-Date
 
 <a id="01-architecture-keep-functional-levels-up-to-date-md-target-scope"></a>
 ## Target Scope
@@ -1058,8 +1058,8 @@ if ($Forest.ForestMode -lt [Microsoft.ActiveDirectory.Management.ADForestMode]::
 
 <a id="01-architecture-default-policies-recommendations-md"></a>
 
-<a id="01-architecture-default-policies-recommendations-md-hardening-requirement-default-domain-and-domain-controllers-policies-management"></a>
-# Hardening Requirement: Default Domain and Domain Controllers Policies Management
+<a id="01-architecture-default-policies-recommendations-md-req-arch-005-default-domain-and-domain-controllers-policies-management"></a>
+# [REQ-ARCH-005] Default Domain and Domain Controllers Policies Management
 
 <a id="01-architecture-default-policies-recommendations-md-target-scope"></a>
 ## Target Scope
@@ -1233,8 +1233,8 @@ try {
 
 <a id="01-architecture-harden-domain-trusts-md"></a>
 
-<a id="01-architecture-harden-domain-trusts-md-hardening-requirement-harden-active-directory-domain-trusts"></a>
-# Hardening Requirement: Harden Active Directory Domain Trusts
+<a id="01-architecture-harden-domain-trusts-md-req-arch-006-harden-active-directory-domain-trusts"></a>
+# [REQ-ARCH-006] Harden Active Directory Domain Trusts
 
 <a id="01-architecture-harden-domain-trusts-md-target-scope"></a>
 ## Target Scope
@@ -1369,49 +1369,49 @@ This directory contains security baselines for Domain Controllers running Window
 <a id="02-domain-controllers-README-md-technical-hardening-controls"></a>
 ## Technical Hardening Controls
 
-* **[Disable SMBv1](#02-domain-controllers-README-md-02-domain-controllers-disable-smbv1-md)**
+* **[REQ-DC-001 - Disable SMBv1](#02-domain-controllers-README-md-02-domain-controllers-disable-smbv1-md)**
   Requirement to disable the legacy SMBv1 protocol and its associated client-side driver to prevent remote code execution and spoofing vulnerabilities.
-* **[Disable Multicast Name Resolution](#02-domain-controllers-README-md-02-domain-controllers-disable-multicast-name-resolution-md)**
+* **[REQ-DC-002 - Disable Multicast Name Resolution](#02-domain-controllers-README-md-02-domain-controllers-disable-multicast-name-resolution-md)**
   Requirement to disable LLMNR, NetBIOS (NBT-NS), and mDNS to prevent local name resolution spoofing and credential harvesting.
-* **[Disable NTLMv1](#02-domain-controllers-README-md-02-domain-controllers-disable-ntlmv1-md)**
+* **[REQ-DC-003 - Disable NTLMv1](#02-domain-controllers-README-md-02-domain-controllers-disable-ntlmv1-md)**
   Requirement to restrict NTLM authentication to NTLMv2 or Kerberos to protect credentials from offline brute-force cracking.
-* **[Enforce LDAP Server Signing](#02-domain-controllers-README-md-02-domain-controllers-enforce-ldap-signing-md)**
+* **[REQ-DC-004 - Enforce LDAP Server Signing](#02-domain-controllers-README-md-02-domain-controllers-enforce-ldap-signing-md)**
   Requirement to enforce packet signing on LDAP cleartext traffic to protect directory transactions from man-in-the-middle attacks.
-* **[Enforce LDAP Channel Binding](#02-domain-controllers-README-md-02-domain-controllers-enforce-ldap-channel-binding-md)**
+* **[REQ-DC-005 - Enforce LDAP Channel Binding](#02-domain-controllers-README-md-02-domain-controllers-enforce-ldap-channel-binding-md)**
   Requirement to enforce LDAP Channel Binding Tokens (CBT) over secure LDAPS connections to prevent authentication relay attacks.
-* **[Enable LSA Protection](#02-domain-controllers-README-md-02-domain-controllers-enable-lsa-protection-md)**
+* **[REQ-DC-006 - Enable LSA Protection](#02-domain-controllers-README-md-02-domain-controllers-enable-lsa-protection-md)**
   Requirement to configure the Local Security Authority (LSA) process to run as a Protected Process Light (PPL) to protect credential secrets from LSASS memory dumps.
-* **[Enable Credential Guard](#02-domain-controllers-README-md-02-domain-controllers-enable-credential-guard-md)**
+* **[REQ-DC-007 - Enable Credential Guard](#02-domain-controllers-README-md-02-domain-controllers-enable-credential-guard-md)**
   Requirement to enable Windows Defender Credential Guard using Virtualization-Based Security (VBS) to hardware-isolate credential secrets.
-* **[Disable Print Spooler Service](#02-domain-controllers-README-md-02-domain-controllers-disable-print-spooler-md)**
+* **[REQ-DC-008 - Disable Print Spooler Service](#02-domain-controllers-README-md-02-domain-controllers-disable-print-spooler-md)**
   Requirement to stop and disable the Print Spooler service on Domain Controllers to prevent remote execution and coercive authentication attacks.
-* **[Enforce SMB Message Signing](#02-domain-controllers-README-md-02-domain-controllers-enforce-smb-signing-md)**
+* **[REQ-DC-009 - Enforce SMB Message Signing](#02-domain-controllers-README-md-02-domain-controllers-enforce-smb-signing-md)**
   Requirement to enforce SMB client and server signing to protect file transfer data and block SMB relay attacks.
-* **[Restrict Kerberos Encryption Types](#02-domain-controllers-README-md-02-domain-controllers-restrict-kerberos-encryption-md)**
+* **[REQ-DC-010 - Restrict Kerberos Encryption Types](#02-domain-controllers-README-md-02-domain-controllers-restrict-kerberos-encryption-md)**
   Requirement to configure allowed Kerberos encryption types, restricting to AES128/AES256 and disabling legacy DES and RC4 to prevent Kerberoasting.
-* **[Restrict Remote SAM API Access](#02-domain-controllers-README-md-02-domain-controllers-restrict-ntds-sam-api-md)**
+* **[REQ-DC-011 - Restrict Remote SAM API Access](#02-domain-controllers-README-md-02-domain-controllers-restrict-ntds-sam-api-md)**
   Requirement to restrict remote RPC access to the SAM database to local Administrators, preventing remote recon and user enumeration.
-* **[Disable Unnecessary Services](#02-domain-controllers-README-md-02-domain-controllers-disable-unnecessary-services-md)**
+* **[REQ-DC-012 - Disable Unnecessary Services on Domain Controllers](#02-domain-controllers-README-md-02-domain-controllers-disable-unnecessary-services-md)**
   Requirement to disable unnecessary system services (such as Xbox services and other non-essential services) on Domain Controllers to minimize the attack surface.
-* **[Enable Kerberos Armoring](#02-domain-controllers-README-md-02-domain-controllers-enable-kerberos-armoring-md)**
+* **[REQ-DC-013 - Enable Kerberos Armoring](#02-domain-controllers-README-md-02-domain-controllers-enable-kerberos-armoring-md)**
   Requirement to enable Kerberos Armoring (FAST) on Domain Controllers and client endpoints to encrypt pre-authentication exchanges and protect credentials from offline brute-force attacks.
-* **[Restrict NTLM](#02-domain-controllers-README-md-02-domain-controllers-restrict-ntlm-md)**
+* **[REQ-DC-014 - Restrict NTLM](#02-domain-controllers-README-md-02-domain-controllers-restrict-ntlm-md)**
   Requirement to audit and restrict NTLMv2 and domain-wide NTLM authentication to prevent credential relaying and force the transition to Kerberos.
-* **[Migrate SYSVOL Replication to DFSR](#02-domain-controllers-README-md-02-domain-controllers-migrate-sysvol-replication-dfsr-md)**
+* **[REQ-DC-015 - Migrate SYSVOL Replication to DFSR](#02-domain-controllers-README-md-02-domain-controllers-migrate-sysvol-replication-dfsr-md)**
   Requirement to migrate SYSVOL folder replication from legacy FRS to secure DFSR to ensure replication integrity and disable deprecated services.
-* **[Harden adminSDHolder Permissions](#02-domain-controllers-README-md-02-domain-controllers-harden-adminsdholder-permissions-md)**
+* **[REQ-DC-016 - Harden adminSDHolder Permissions](#02-domain-controllers-README-md-02-domain-controllers-harden-adminsdholder-permissions-md)**
   Requirement to secure the adminSDHolder object's Access Control List to prevent privilege escalation backdoors on protected accounts.
-* **[Harden Microsoft DNS AD Container Permissions](#02-domain-controllers-README-md-02-domain-controllers-harden-dns-container-permissions-md)**
+* **[REQ-DC-017 - Harden Microsoft DNS AD Container Permissions](#02-domain-controllers-README-md-02-domain-controllers-harden-dns-container-permissions-md)**
   Requirement to secure CN=MicrosoftDNS,CN=System container permissions and block DNS service DLL hijacking (ServerLevelPluginDll).
-* **[Harden Virtualization Hosts for Domain Controllers](#02-domain-controllers-README-md-02-domain-controllers-harden-dc-virtualization-hosts-md)**
+* **[REQ-DC-018 - Harden Virtualization Hosts for Domain Controllers](#02-domain-controllers-README-md-02-domain-controllers-harden-dc-virtualization-hosts-md)**
   Requirement to treat virtualization hypervisors hosting Domain Controllers as Tier 0 systems, separating host hardware and enforcing VM encryption.
-* **[Enforce RDP Restricted Admin Mode](#02-domain-controllers-README-md-02-domain-controllers-enforce-rdp-restricted-admin-md)**
+* **[REQ-DC-019 - Enforce RDP Restricted Admin Mode](#02-domain-controllers-README-md-02-domain-controllers-enforce-rdp-restricted-admin-md)**
   Requirement to configure and require RDP Restricted Admin Mode on administrative clients and servers to protect credentials in host memory.
-* **[Windows Defender Antivirus DC Baseline and Exploit Guard](#02-domain-controllers-README-md-02-domain-controllers-defender-antivirus-md)**
+* **[REQ-DC-020 - Windows Defender Antivirus Domain Controller Baseline and Exploit Guard](#02-domain-controllers-README-md-02-domain-controllers-defender-antivirus-md)**
   Requirement to configure and harden Windows Defender Antivirus on Domain Controllers, enabling real-time scanning, preventing local exclusion modifications, enforcing server-compatible ASR rules (including LSASS protection), activating Tamper Protection, and sandboxing execution.
-* **[Configure AppLocker Policies on Domain Controllers](#02-domain-controllers-README-md-02-domain-controllers-configure-applocker-policies-md)**
+* **[REQ-DC-021 - Configure AppLocker Policies on Domain Controllers](#02-domain-controllers-README-md-02-domain-controllers-configure-applocker-policies-md)**
   Requirement to configure strict AppLocker rules on Domain Controllers to prevent administrative users from executing unapproved binaries, scripts, installers, or web browsers on Tier 0 systems.
-* **[Enable WDAC Driver Blocklist](#02-domain-controllers-README-md-02-domain-controllers-enable-wdac-driver-blocklist-md)**
+* **[REQ-DC-022 - Enable WDAC Driver Blocklist](#02-domain-controllers-README-md-02-domain-controllers-enable-wdac-driver-blocklist-md)**
   Requirement to configure the Windows Defender Application Control (WDAC) driver blocklist to protect kernel memory from Bring Your Own Vulnerable Driver (BYOVD) attacks.
 
 
@@ -1422,8 +1422,8 @@ This directory contains security baselines for Domain Controllers running Window
 
 <a id="02-domain-controllers-disable-smbv1-md"></a>
 
-<a id="02-domain-controllers-disable-smbv1-md-hardening-requirement-disable-smbv1"></a>
-# Hardening Requirement: Disable SMBv1
+<a id="02-domain-controllers-disable-smbv1-md-req-dc-001-disable-smbv1"></a>
+# [REQ-DC-001] Disable SMBv1
 
 <a id="02-domain-controllers-disable-smbv1-md-target-scope"></a>
 ## Target Scope
@@ -1593,8 +1593,8 @@ if ($vulnerable) {
 
 <a id="02-domain-controllers-disable-multicast-name-resolution-md"></a>
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-hardening-requirement-disable-multicast-name-resolution"></a>
-# Hardening Requirement: Disable Multicast Name Resolution
+<a id="02-domain-controllers-disable-multicast-name-resolution-md-req-dc-002-disable-multicast-name-resolution"></a>
+# [REQ-DC-002] Disable Multicast Name Resolution
 
 <a id="02-domain-controllers-disable-multicast-name-resolution-md-target-scope"></a>
 ## Target Scope
@@ -1805,8 +1805,8 @@ if ($vulnerable) {
 
 <a id="02-domain-controllers-disable-ntlmv1-md"></a>
 
-<a id="02-domain-controllers-disable-ntlmv1-md-hardening-requirement-disable-ntlmv1"></a>
-# Hardening Requirement: Disable NTLMv1
+<a id="02-domain-controllers-disable-ntlmv1-md-req-dc-003-disable-ntlmv1"></a>
+# [REQ-DC-003] Disable NTLMv1
 
 <a id="02-domain-controllers-disable-ntlmv1-md-target-scope"></a>
 ## Target Scope
@@ -1917,8 +1917,8 @@ if ($lsaReg) {
 
 <a id="02-domain-controllers-enforce-ldap-signing-md"></a>
 
-<a id="02-domain-controllers-enforce-ldap-signing-md-hardening-requirement-enforce-ldap-server-signing"></a>
-# Hardening Requirement: Enforce LDAP Server Signing
+<a id="02-domain-controllers-enforce-ldap-signing-md-req-dc-004-enforce-ldap-server-signing"></a>
+# [REQ-DC-004] Enforce LDAP Server Signing
 
 <a id="02-domain-controllers-enforce-ldap-signing-md-target-scope"></a>
 ## Target Scope
@@ -2030,8 +2030,8 @@ if ($ntdsReg) {
 
 <a id="02-domain-controllers-enforce-ldap-channel-binding-md"></a>
 
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-hardening-requirement-enforce-ldap-channel-binding"></a>
-# Hardening Requirement: Enforce LDAP Channel Binding
+<a id="02-domain-controllers-enforce-ldap-channel-binding-md-req-dc-005-enforce-ldap-channel-binding"></a>
+# [REQ-DC-005] Enforce LDAP Channel Binding
 
 <a id="02-domain-controllers-enforce-ldap-channel-binding-md-target-scope"></a>
 ## Target Scope
@@ -2143,8 +2143,8 @@ if ($ntdsReg) {
 
 <a id="02-domain-controllers-enable-lsa-protection-md"></a>
 
-<a id="02-domain-controllers-enable-lsa-protection-md-hardening-requirement-enable-lsa-protection"></a>
-# Hardening Requirement: Enable LSA Protection
+<a id="02-domain-controllers-enable-lsa-protection-md-req-dc-006-enable-lsa-protection"></a>
+# [REQ-DC-006] Enable LSA Protection
 
 <a id="02-domain-controllers-enable-lsa-protection-md-target-scope"></a>
 ## Target Scope
@@ -2257,8 +2257,8 @@ if ($lsaReg) {
 
 <a id="02-domain-controllers-enable-credential-guard-md"></a>
 
-<a id="02-domain-controllers-enable-credential-guard-md-hardening-requirement-enable-credential-guard"></a>
-# Hardening Requirement: Enable Credential Guard
+<a id="02-domain-controllers-enable-credential-guard-md-req-dc-007-enable-credential-guard"></a>
+# [REQ-DC-007] Enable Credential Guard
 
 <a id="02-domain-controllers-enable-credential-guard-md-target-scope"></a>
 ## Target Scope
@@ -2299,7 +2299,7 @@ By running LSA in a secure container separate from the main LSASS process, Crede
 
 <a id="02-domain-controllers-enable-credential-guard-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
-* **Hardware Requirements**: Enabling UEFI Secure Boot and CPU virtualization features is a strict pre-requisite for Credential Guard. For physical systems, refer to [UEFI Firmware Security Hardening](#02-domain-controllers-enable-credential-guard-md-07-paws-configure-uefi-security-md) and [Hardware Virtualization and DMA Protection](#02-domain-controllers-enable-credential-guard-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) to secure these configurations.
+* **Hardware Requirements**: Enabling UEFI Secure Boot and CPU virtualization features is a strict pre-requisite for Credential Guard. For physical systems, refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#02-domain-controllers-enable-credential-guard-md-07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#02-domain-controllers-enable-credential-guard-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) to secure these configurations.
 * **Virtualization Support**: If the target server is a virtual machine, the hypervisor must support nested virtualization, and the virtual machine configuration must have VBS features enabled.
 * **Authentication Protocol Impact**: Enabling Credential Guard disables NTLMv1, MS-CHAPv2, CredSSP single sign-on, and unconstrained Kerberos delegation. Applications that rely on these insecure delegation or authentication methods will fail.
 * **Smart Card Requirement**: Kerberos authentication using smart cards is fully supported, but the smart card drivers must be compatible with VBS environment constraints.
@@ -2467,8 +2467,8 @@ if ($vulnerable) {
 
 <a id="02-domain-controllers-disable-print-spooler-md"></a>
 
-<a id="02-domain-controllers-disable-print-spooler-md-hardening-requirement-disable-print-spooler-service"></a>
-# Hardening Requirement: Disable Print Spooler Service
+<a id="02-domain-controllers-disable-print-spooler-md-req-dc-008-disable-print-spooler-service"></a>
+# [REQ-DC-008] Disable Print Spooler Service
 
 <a id="02-domain-controllers-disable-print-spooler-md-target-scope"></a>
 ## Target Scope
@@ -2589,8 +2589,8 @@ if ($service) {
 
 <a id="02-domain-controllers-enforce-smb-signing-md"></a>
 
-<a id="02-domain-controllers-enforce-smb-signing-md-hardening-requirement-enforce-smb-message-signing"></a>
-# Hardening Requirement: Enforce SMB Message Signing
+<a id="02-domain-controllers-enforce-smb-signing-md-req-dc-009-enforce-smb-message-signing"></a>
+# [REQ-DC-009] Enforce SMB Message Signing
 
 <a id="02-domain-controllers-enforce-smb-signing-md-target-scope"></a>
 ## Target Scope
@@ -2728,8 +2728,8 @@ if ($vulnerable) {
 
 <a id="02-domain-controllers-restrict-kerberos-encryption-md"></a>
 
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-hardening-requirement-restrict-kerberos-encryption-types"></a>
-# Hardening Requirement: Restrict Kerberos Encryption Types
+<a id="02-domain-controllers-restrict-kerberos-encryption-md-req-dc-010-restrict-kerberos-encryption-types"></a>
+# [REQ-DC-010] Restrict Kerberos Encryption Types
 
 <a id="02-domain-controllers-restrict-kerberos-encryption-md-target-scope"></a>
 ## Target Scope
@@ -2860,8 +2860,8 @@ if ($regVal) {
 
 <a id="02-domain-controllers-restrict-ntds-sam-api-md"></a>
 
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-hardening-requirement-restrict-remote-sam-api-access"></a>
-# Hardening Requirement: Restrict Remote SAM API Access
+<a id="02-domain-controllers-restrict-ntds-sam-api-md-req-dc-011-restrict-remote-sam-api-access"></a>
+# [REQ-DC-011] Restrict Remote SAM API Access
 
 <a id="02-domain-controllers-restrict-ntds-sam-api-md-target-scope"></a>
 ## Target Scope
@@ -2973,8 +2973,8 @@ if ($lsaReg) {
 
 <a id="02-domain-controllers-disable-unnecessary-services-md"></a>
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-hardening-requirement-disable-unnecessary-services-on-domain-controllers"></a>
-# Hardening Requirement: Disable Unnecessary Services on Domain Controllers
+<a id="02-domain-controllers-disable-unnecessary-services-md-req-dc-012-disable-unnecessary-services-on-domain-controllers"></a>
+# [REQ-DC-012] Disable Unnecessary Services on Domain Controllers
 
 <a id="02-domain-controllers-disable-unnecessary-services-md-target-scope"></a>
 ## Target Scope
@@ -3328,8 +3328,8 @@ if ($vulnerableCount -gt 0) {
 
 <a id="02-domain-controllers-enable-kerberos-armoring-md"></a>
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-hardening-requirement-enable-kerberos-armoring"></a>
-# Hardening Requirement: Enable Kerberos Armoring
+<a id="02-domain-controllers-enable-kerberos-armoring-md-req-dc-013-enable-kerberos-armoring"></a>
+# [REQ-DC-013] Enable Kerberos Armoring
 
 <a id="02-domain-controllers-enable-kerberos-armoring-md-target-scope"></a>
 ## Target Scope
@@ -3505,8 +3505,8 @@ if ($IsDC) {
 
 <a id="02-domain-controllers-restrict-ntlm-md"></a>
 
-<a id="02-domain-controllers-restrict-ntlm-md-hardening-requirement-restrict-ntlm"></a>
-# Hardening Requirement: Restrict NTLM
+<a id="02-domain-controllers-restrict-ntlm-md-req-dc-014-restrict-ntlm"></a>
+# [REQ-DC-014] Restrict NTLM
 
 <a id="02-domain-controllers-restrict-ntlm-md-target-scope"></a>
 ## Target Scope
@@ -3693,8 +3693,8 @@ if (Test-Path $NetlogonPath) {
 
 <a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md"></a>
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-hardening-requirement-migrate-sysvol-replication-to-dfsr"></a>
-# Hardening Requirement: Migrate SYSVOL Replication to DFSR
+<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-req-dc-015-migrate-sysvol-replication-to-dfsr"></a>
+# [REQ-DC-015] Migrate SYSVOL Replication to DFSR
 
 <a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-target-scope"></a>
 ## Target Scope
@@ -3842,8 +3842,8 @@ if ($DfsrEvents) {
 
 <a id="02-domain-controllers-harden-adminsdholder-permissions-md"></a>
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-hardening-requirement-harden-adminsdholder-permissions"></a>
-# Hardening Requirement: Harden adminSDHolder Permissions
+<a id="02-domain-controllers-harden-adminsdholder-permissions-md-req-dc-016-harden-adminsdholder-permissions"></a>
+# [REQ-DC-016] Harden adminSDHolder Permissions
 
 <a id="02-domain-controllers-harden-adminsdholder-permissions-md-target-scope"></a>
 ## Target Scope
@@ -4002,8 +4002,8 @@ foreach ($Rule in $Acl.Access) {
 
 <a id="02-domain-controllers-harden-dns-container-permissions-md"></a>
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-hardening-requirement-harden-microsoft-dns-ad-container-permissions"></a>
-# Hardening Requirement: Harden Microsoft DNS AD Container Permissions
+<a id="02-domain-controllers-harden-dns-container-permissions-md-req-dc-017-harden-microsoft-dns-ad-container-permissions"></a>
+# [REQ-DC-017] Harden Microsoft DNS AD Container Permissions
 
 <a id="02-domain-controllers-harden-dns-container-permissions-md-target-scope"></a>
 ## Target Scope
@@ -4154,8 +4154,8 @@ foreach ($Rule in $Acl.Access) {
 
 <a id="02-domain-controllers-harden-dc-virtualization-hosts-md"></a>
 
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-hardening-requirement-harden-virtualization-hosts-for-domain-controllers"></a>
-# Hardening Requirement: Harden Virtualization Hosts for Domain Controllers
+<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-req-dc-018-harden-virtualization-hosts-for-domain-controllers"></a>
+# [REQ-DC-018] Harden Virtualization Hosts for Domain Controllers
 
 <a id="02-domain-controllers-harden-dc-virtualization-hosts-md-target-scope"></a>
 ## Target Scope
@@ -4274,8 +4274,8 @@ if ($IsVirtual) {
 
 <a id="02-domain-controllers-enforce-rdp-restricted-admin-md"></a>
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-hardening-requirement-enforce-rdp-restricted-admin-mode"></a>
-# Hardening Requirement: Enforce RDP Restricted Admin Mode
+<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-req-dc-019-enforce-rdp-restricted-admin-mode"></a>
+# [REQ-DC-019] Enforce RDP Restricted Admin Mode
 
 <a id="02-domain-controllers-enforce-rdp-restricted-admin-md-target-scope"></a>
 ## Target Scope
@@ -4490,8 +4490,8 @@ mstsc.exe /RestrictedAdmin
 
 <a id="02-domain-controllers-defender-antivirus-md"></a>
 
-<a id="02-domain-controllers-defender-antivirus-md-hardening-requirement-windows-defender-antivirus-domain-controller-baseline-and-exploit-guard"></a>
-# Hardening Requirement: Windows Defender Antivirus Domain Controller Baseline and Exploit Guard
+<a id="02-domain-controllers-defender-antivirus-md-req-dc-020-windows-defender-antivirus-domain-controller-baseline-and-exploit-guard"></a>
+# [REQ-DC-020] Windows Defender Antivirus Domain Controller Baseline and Exploit Guard
 
 <a id="02-domain-controllers-defender-antivirus-md-target-scope"></a>
 ## Target Scope
@@ -4995,8 +4995,8 @@ foreach ($KeyName in $CheckKeys.Keys) {
 
 <a id="02-domain-controllers-configure-applocker-policies-md"></a>
 
-<a id="02-domain-controllers-configure-applocker-policies-md-hardening-requirement-configure-applocker-policies-on-domain-controllers"></a>
-# Hardening Requirement: Configure AppLocker Policies on Domain Controllers
+<a id="02-domain-controllers-configure-applocker-policies-md-req-dc-021-configure-applocker-policies-on-domain-controllers"></a>
+# [REQ-DC-021] Configure AppLocker Policies on Domain Controllers
 
 <a id="02-domain-controllers-configure-applocker-policies-md-target-scope"></a>
 ## Target Scope
@@ -5359,8 +5359,8 @@ if (Test-Path $NtvdmPath) {
 
 <a id="02-domain-controllers-enable-wdac-driver-blocklist-md"></a>
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-hardening-requirement-enable-wdac-driver-blocklist"></a>
-# Hardening Requirement: Enable WDAC Driver Blocklist
+<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-req-dc-022-enable-wdac-driver-blocklist"></a>
+# [REQ-DC-022] Enable WDAC Driver Blocklist
 
 <a id="02-domain-controllers-enable-wdac-driver-blocklist-md-target-scope"></a>
 ## Target Scope
@@ -5388,7 +5388,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
 
 <a id="02-domain-controllers-enable-wdac-driver-blocklist-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
-* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [Enable Credential Guard](#02-domain-controllers-enable-wdac-driver-blocklist-md-02-domain-controllers-enable-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Enabling Secure Boot and CPU virtualization features is a strict pre-requisite; refer to [UEFI Firmware Security Hardening](#02-domain-controllers-enable-wdac-driver-blocklist-md-07-paws-configure-uefi-security-md) and [Hardware Virtualization and DMA Protection](#02-domain-controllers-enable-wdac-driver-blocklist-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware settings.
+* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-DC-007 - Enable Credential Guard](#02-domain-controllers-enable-wdac-driver-blocklist-md-02-domain-controllers-enable-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Enabling Secure Boot and CPU virtualization features is a strict pre-requisite; refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#02-domain-controllers-enable-wdac-driver-blocklist-md-07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#02-domain-controllers-enable-wdac-driver-blocklist-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware settings.
 * **Compatibility with Legacy Drivers**: Third-party backup, monitoring, or hardware administration software running deprecated, vulnerable drivers may fail to load. All such software must be updated to use secure, modern drivers.
 * **Deployment Testing**: To prevent system instability, the WDAC blocklist policy should be deployed in **Audit Mode** initially to verify that no critical operational drivers are blocked in production before shifting to enforcement mode.
 
@@ -5539,58 +5539,58 @@ This directory contains security requirements and policies designed to protect a
 <a id="03-identities-services-README-md-technical-hardening-controls"></a>
 ## Technical Hardening Controls
 
-1. **[Enforce Fine-Grained Password Policies](#03-identities-services-README-md-03-identities-services-enforce-fgpp-md)**
+1. **[REQ-ID-001 - Enforce Fine-Grained Password Policies](#03-identities-services-README-md-03-identities-services-enforce-fgpp-md)**
    Enforces Password Settings Objects (PSOs) with strong password length and lockout settings for administrative groups.
 
-2. **[Enable Local Administrator Password Solution (LAPS)](#03-identities-services-README-md-03-identities-services-enable-laps-md)**
+2. **[REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](#03-identities-services-README-md-03-identities-services-enable-laps-md)**
    Implements Windows LAPS or Classic LAPS to rotate local administrator passwords periodically.
 
-3. **[Implement Group Managed Service Accounts (gMSA)](#03-identities-services-README-md-03-identities-services-harden-service-accounts-md)**
+3. **[REQ-ID-003 - Implement Group Managed Service Accounts (gMSA)](#03-identities-services-README-md-03-identities-services-harden-service-accounts-md)**
    Replaces static passwords with auto-managed complex service account credentials.
 
-4. **[Restrict Kerberos Delegation](#03-identities-services-README-md-03-identities-services-restrict-kerberos-delegation-md)**
+4. **[REQ-ID-004 - Restrict Kerberos Delegation](#03-identities-services-README-md-03-identities-services-restrict-kerberos-delegation-md)**
    Bans unconstrained delegation and mandates constrained/resource-based constrained delegation.
 
-5. **[Configure and Populate Protected Users Group](#03-identities-services-README-md-03-identities-services-configure-protected-users-group-md)**
+5. **[REQ-ID-005 - Configure and Populate Protected Users Group](#03-identities-services-README-md-03-identities-services-configure-protected-users-group-md)**
    Enforces strict caching and authentication restrictions on high-privilege identities to prevent credential theft.
 
-6. **[Rename and Disable Default Administrator and Guest Accounts](#03-identities-services-README-md-03-identities-services-harden-default-accounts-md)**
+6. **[REQ-ID-006 - Rename and Disable Default Administrator and Guest Accounts](#03-identities-services-README-md-03-identities-services-harden-default-accounts-md)**
    Mitigates automated scanning and brute-force attempts on built-in OS accounts.
 
-7. **[Restrict Interactive Logons for Service Accounts](#03-identities-services-README-md-03-identities-services-restrict-service-account-logons-md)**
+7. **[REQ-ID-007 - Restrict Interactive Logons for Service Accounts](#03-identities-services-README-md-03-identities-services-restrict-service-account-logons-md)**
    Blocks interactive local and remote desktop logons for service accounts via User Rights Assignment GPOs.
 
-8. **[Enforce User and Service Account Kerberos Encryption (AES-Only)](#03-identities-services-README-md-03-identities-services-enforce-user-aes-encryption-md)**
+8. **[REQ-ID-008 - Enforce User and Service Account Kerberos Encryption (AES-Only)](#03-identities-services-README-md-03-identities-services-enforce-user-aes-encryption-md)**
    Sets the msDS-SupportedEncryptionTypes attribute to AES-only to mitigate Kerberoasting and session hijacking.
 
-9. **[Enforce Kerberos Pre-Authentication](#03-identities-services-README-md-03-identities-services-enforce-kerberos-preauthentication-md)**
+9. **[REQ-ID-009 - Enforce Kerberos Pre-Authentication](#03-identities-services-README-md-03-identities-services-enforce-kerberos-preauthentication-md)**
    Mandates Kerberos pre-authentication on all active user accounts to mitigate AS-REP Roasting attacks.
 
-10. **[Restrict Schema Administrators Group Membership](#03-identities-services-README-md-03-identities-services-restrict-schema-admins-md)**
+10. **[REQ-ID-010 - Restrict Schema Administrators Group Membership](#03-identities-services-README-md-03-identities-services-restrict-schema-admins-md)**
     Automates Schema Admins membership audit and locking using Restricted Groups GPO to minimize the attack surface.
 
-11. **[Enforce Accidental Deletion Protection on Organizational Units](#03-identities-services-README-md-03-identities-services-prevent-accidental-deletion-ous-md)**
+11. **[REQ-ID-011 - Enforce Accidental Deletion Protection on Organizational Units](#03-identities-services-README-md-03-identities-services-prevent-accidental-deletion-ous-md)**
     Safeguards OUs from deletion errors or malicious administrative actions via the `ProtectedFromAccidentalDeletion` attribute.
 
-12. **[Configure Active Directory Authentication Silos](#03-identities-services-README-md-03-identities-services-configure-authentication-silos-md)**
+12. **[REQ-ID-012 - Configure Active Directory Authentication Silos and Policies](#03-identities-services-README-md-03-identities-services-configure-authentication-silos-md)**
     Enforces logical boundaries restricting where Tier 0 administrator and host accounts can authenticate, preventing credential theft.
 
-13. **[Clean Up adminCount Attribute Orphans](#03-identities-services-README-md-03-identities-services-cleanup-admincount-orphans-md)**
+13. **[REQ-ID-013 - Clean Up adminCount Attribute Orphans](#03-identities-services-README-md-03-identities-services-cleanup-admincount-orphans-md)**
     Identifies and remediates orphan accounts with disabled security descriptor inheritance, resetting adminCount to 0 and re-enabling inheritance.
 
-14. **[Renew KDS Root Keys and gMSA Secrets](#03-identities-services-README-md-03-identities-services-renew-kds-keys-gmsa-secrets-md)**
+14. **[REQ-ID-014 - Renew KDS Root Keys and gMSA Secrets](#03-identities-services-README-md-03-identities-services-renew-kds-keys-gmsa-secrets-md)**
     Enforces KDS root key rotation and triggers password regeneration for Group Managed Service Accounts to mitigate exfiltration backdoors.
 
-15. **[Harden Active Directory Certificate Services (ADCS)](#03-identities-services-README-md-03-identities-services-harden-adcs-pki-md)**
+15. **[REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#03-identities-services-README-md-03-identities-services-harden-adcs-pki-md)**
     Hardens ADCS templates to block ESC1 SAN enrollment bypasses, mandates manager approval, and secures CA Web Enrollment endpoints.
 
-16. **[Configure Point and Print Restrictions](#03-identities-services-README-md-03-identities-services-configure-point-and-print-md)**
+16. **[REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](#03-identities-services-README-md-03-identities-services-configure-point-and-print-md)**
     Restricts printer driver installation to administrators, configures Early Launch Antimalware driver policy, disables logon screen user enumeration, and hardens CredSSP/credentials delegation.
 
-17. **[Disable Machine Account Quota](#03-identities-services-README-md-03-identities-services-disable-machine-account-quota-md)**
+17. **[REQ-ID-017 - Disable Machine Account Quota](#03-identities-services-README-md-03-identities-services-disable-machine-account-quota-md)**
     Restricts the ms-DS-MachineAccountQuota attribute to 0 and limits the SeMachineAccountPrivilege user right to prevent unauthorized computer object creation by standard domain users.
 
-18. **[Restrict Pre-Windows 2000 Compatible Access Group](#03-identities-services-README-md-03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)**
+18. **[REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#03-identities-services-README-md-03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)**
     Limits the memberships of the legacy "Pre-Windows 2000 Compatible Access" group and restricts anonymous query options to prevent directory enumeration.
 
 
@@ -5598,8 +5598,8 @@ This directory contains security requirements and policies designed to protect a
 
 <a id="03-identities-services-enforce-fgpp-md"></a>
 
-<a id="03-identities-services-enforce-fgpp-md-hardening-requirement-enforce-fine-grained-password-policies"></a>
-# Hardening Requirement: Enforce Fine-Grained Password Policies
+<a id="03-identities-services-enforce-fgpp-md-req-id-001-enforce-fine-grained-password-policies"></a>
+# [REQ-ID-001] Enforce Fine-Grained Password Policies
 
 <a id="03-identities-services-enforce-fgpp-md-target-scope"></a>
 ## Target Scope
@@ -5732,8 +5732,8 @@ if ($psoList) {
 
 <a id="03-identities-services-enable-laps-md"></a>
 
-<a id="03-identities-services-enable-laps-md-hardening-requirement-enable-local-administrator-password-solution-laps"></a>
-# Hardening Requirement: Enable Local Administrator Password Solution (LAPS)
+<a id="03-identities-services-enable-laps-md-req-id-002-enable-local-administrator-password-solution-laps"></a>
+# [REQ-ID-002] Enable Local Administrator Password Solution (LAPS)
 
 <a id="03-identities-services-enable-laps-md-target-scope"></a>
 ## Target Scope
@@ -5867,8 +5867,8 @@ if (Test-Path $RegPath) {
 
 <a id="03-identities-services-harden-service-accounts-md"></a>
 
-<a id="03-identities-services-harden-service-accounts-md-hardening-requirement-implement-group-managed-service-accounts-gmsa"></a>
-# Hardening Requirement: Implement Group Managed Service Accounts (gMSA)
+<a id="03-identities-services-harden-service-accounts-md-req-id-003-implement-group-managed-service-accounts-gmsa"></a>
+# [REQ-ID-003] Implement Group Managed Service Accounts (gMSA)
 
 <a id="03-identities-services-harden-service-accounts-md-target-scope"></a>
 ## Target Scope
@@ -5998,8 +5998,8 @@ if ($gMSAs) {
 
 <a id="03-identities-services-restrict-kerberos-delegation-md"></a>
 
-<a id="03-identities-services-restrict-kerberos-delegation-md-hardening-requirement-restrict-kerberos-delegation"></a>
-# Hardening Requirement: Restrict Kerberos Delegation
+<a id="03-identities-services-restrict-kerberos-delegation-md-req-id-004-restrict-kerberos-delegation"></a>
+# [REQ-ID-004] Restrict Kerberos Delegation
 
 <a id="03-identities-services-restrict-kerberos-delegation-md-target-scope"></a>
 ## Target Scope
@@ -6122,8 +6122,8 @@ if ($totalUnconstrained -eq 0) {
 
 <a id="03-identities-services-configure-protected-users-group-md"></a>
 
-<a id="03-identities-services-configure-protected-users-group-md-hardening-requirement-configure-and-populate-protected-users-group"></a>
-# Hardening Requirement: Configure and Populate Protected Users Group
+<a id="03-identities-services-configure-protected-users-group-md-req-id-005-configure-and-populate-protected-users-group"></a>
+# [REQ-ID-005] Configure and Populate Protected Users Group
 
 <a id="03-identities-services-configure-protected-users-group-md-target-scope"></a>
 ## Target Scope
@@ -6253,8 +6253,8 @@ if ($Members) {
 
 <a id="03-identities-services-harden-default-accounts-md"></a>
 
-<a id="03-identities-services-harden-default-accounts-md-hardening-requirement-rename-and-disable-default-administrator-and-guest-accounts"></a>
-# Hardening Requirement: Rename and Disable Default Administrator and Guest Accounts
+<a id="03-identities-services-harden-default-accounts-md-req-id-006-rename-and-disable-default-administrator-and-guest-accounts"></a>
+# [REQ-ID-006] Rename and Disable Default Administrator and Guest Accounts
 
 <a id="03-identities-services-harden-default-accounts-md-target-scope"></a>
 ## Target Scope
@@ -6398,8 +6398,8 @@ if ($guestAccount) {
 
 <a id="03-identities-services-restrict-service-account-logons-md"></a>
 
-<a id="03-identities-services-restrict-service-account-logons-md-hardening-requirement-restrict-interactive-logons-for-service-accounts"></a>
-# Hardening Requirement: Restrict Interactive Logons for Service Accounts
+<a id="03-identities-services-restrict-service-account-logons-md-req-id-007-restrict-interactive-logons-for-service-accounts"></a>
+# [REQ-ID-007] Restrict Interactive Logons for Service Accounts
 
 <a id="03-identities-services-restrict-service-account-logons-md-target-scope"></a>
 ## Target Scope
@@ -6576,8 +6576,8 @@ Remove-Item -Path $SecCfg -Force
 
 <a id="03-identities-services-enforce-user-aes-encryption-md"></a>
 
-<a id="03-identities-services-enforce-user-aes-encryption-md-hardening-requirement-enforce-user-and-service-account-kerberos-encryption-aes-only"></a>
-# Hardening Requirement: Enforce User and Service Account Kerberos Encryption (AES-Only)
+<a id="03-identities-services-enforce-user-aes-encryption-md-req-id-008-enforce-user-and-service-account-kerberos-encryption-aes-only"></a>
+# [REQ-ID-008] Enforce User and Service Account Kerberos Encryption (AES-Only)
 
 <a id="03-identities-services-enforce-user-aes-encryption-md-target-scope"></a>
 ## Target Scope
@@ -6697,8 +6697,8 @@ if ($VulnerableAccounts) {
 
 <a id="03-identities-services-enforce-kerberos-preauthentication-md"></a>
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-hardening-requirement-enforce-kerberos-pre-authentication"></a>
-# Hardening Requirement: Enforce Kerberos Pre-Authentication
+<a id="03-identities-services-enforce-kerberos-preauthentication-md-req-id-009-enforce-kerberos-pre-authentication"></a>
+# [REQ-ID-009] Enforce Kerberos Pre-Authentication
 
 <a id="03-identities-services-enforce-kerberos-preauthentication-md-target-scope"></a>
 ## Target Scope
@@ -6827,8 +6827,8 @@ try {
 
 <a id="03-identities-services-restrict-schema-admins-md"></a>
 
-<a id="03-identities-services-restrict-schema-admins-md-hardening-requirement-restrict-schema-administrators-group-membership"></a>
-# Hardening Requirement: Restrict Schema Administrators Group Membership
+<a id="03-identities-services-restrict-schema-admins-md-req-id-010-restrict-schema-administrators-group-membership"></a>
+# [REQ-ID-010] Restrict Schema Administrators Group Membership
 
 <a id="03-identities-services-restrict-schema-admins-md-target-scope"></a>
 ## Target Scope
@@ -6965,8 +6965,8 @@ try {
 
 <a id="03-identities-services-prevent-accidental-deletion-ous-md"></a>
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-hardening-requirement-enforce-accidental-deletion-protection-on-organizational-units"></a>
-# Hardening Requirement: Enforce Accidental Deletion Protection on Organizational Units
+<a id="03-identities-services-prevent-accidental-deletion-ous-md-req-id-011-enforce-accidental-deletion-protection-on-organizational-units"></a>
+# [REQ-ID-011] Enforce Accidental Deletion Protection on Organizational Units
 
 <a id="03-identities-services-prevent-accidental-deletion-ous-md-target-scope"></a>
 ## Target Scope
@@ -7092,8 +7092,8 @@ try {
 
 <a id="03-identities-services-configure-authentication-silos-md"></a>
 
-<a id="03-identities-services-configure-authentication-silos-md-hardening-requirement-configure-active-directory-authentication-silos-and-policies"></a>
-# Hardening Requirement: Configure Active Directory Authentication Silos and Policies
+<a id="03-identities-services-configure-authentication-silos-md-req-id-012-configure-active-directory-authentication-silos-and-policies"></a>
+# [REQ-ID-012] Configure Active Directory Authentication Silos and Policies
 
 <a id="03-identities-services-configure-authentication-silos-md-target-scope"></a>
 ## Target Scope
@@ -7282,8 +7282,8 @@ if ($Silos) {
 
 <a id="03-identities-services-cleanup-admincount-orphans-md"></a>
 
-<a id="03-identities-services-cleanup-admincount-orphans-md-hardening-requirement-clean-up-admincount-attribute-orphans"></a>
-# Hardening Requirement: Clean Up adminCount Attribute Orphans
+<a id="03-identities-services-cleanup-admincount-orphans-md-req-id-013-clean-up-admincount-attribute-orphans"></a>
+# [REQ-ID-013] Clean Up adminCount Attribute Orphans
 
 <a id="03-identities-services-cleanup-admincount-orphans-md-target-scope"></a>
 ## Target Scope
@@ -7465,8 +7465,8 @@ Write-Host "[*] Total adminCount orphans detected: $($OrphanCount)." -Foreground
 
 <a id="03-identities-services-renew-kds-keys-gmsa-secrets-md"></a>
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-hardening-requirement-renew-kds-root-keys-and-gmsa-secrets"></a>
-# Hardening Requirement: Renew KDS Root Keys and gMSA Secrets
+<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-req-id-014-renew-kds-root-keys-and-gmsa-secrets"></a>
+# [REQ-ID-014] Renew KDS Root Keys and gMSA Secrets
 
 <a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-target-scope"></a>
 ## Target Scope
@@ -7620,8 +7620,8 @@ if ($Accounts) {
 
 <a id="03-identities-services-harden-adcs-pki-md"></a>
 
-<a id="03-identities-services-harden-adcs-pki-md-hardening-requirement-harden-active-directory-certificate-services-adcs-and-pki"></a>
-# Hardening Requirement: Harden Active Directory Certificate Services (ADCS) and PKI
+<a id="03-identities-services-harden-adcs-pki-md-req-id-015-harden-active-directory-certificate-services-adcs-and-pki"></a>
+# [REQ-ID-015] Harden Active Directory Certificate Services (ADCS) and PKI
 
 <a id="03-identities-services-harden-adcs-pki-md-target-scope"></a>
 ## Target Scope
@@ -7768,8 +7768,8 @@ if ($VulnerableCount -eq 0) {
 
 <a id="03-identities-services-configure-point-and-print-md"></a>
 
-<a id="03-identities-services-configure-point-and-print-md-hardening-requirement-configure-point-and-print-elam-logon-screen-and-credentials-delegation"></a>
-# Hardening Requirement: Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation
+<a id="03-identities-services-configure-point-and-print-md-req-id-016-configure-point-and-print-elam-logon-screen-and-credentials-delegation"></a>
+# [REQ-ID-016] Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation
 
 <a id="03-identities-services-configure-point-and-print-md-target-scope"></a>
 ## Target Scope
@@ -7962,8 +7962,8 @@ Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegatio
 
 <a id="03-identities-services-disable-machine-account-quota-md"></a>
 
-<a id="03-identities-services-disable-machine-account-quota-md-hardening-requirement-disable-machine-account-quota"></a>
-# Hardening Requirement: Disable Machine Account Quota
+<a id="03-identities-services-disable-machine-account-quota-md-req-id-017-disable-machine-account-quota"></a>
+# [REQ-ID-017] Disable Machine Account Quota
 
 <a id="03-identities-services-disable-machine-account-quota-md-target-scope"></a>
 ## Target Scope
@@ -8193,8 +8193,8 @@ try {
 
 <a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md"></a>
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-hardening-requirement-restrict-pre-windows-2000-compatible-access-group"></a>
-# Hardening Requirement: Restrict Pre-Windows 2000 Compatible Access Group
+<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-req-id-018-restrict-pre-windows-2000-compatible-access-group"></a>
+# [REQ-ID-018] Restrict Pre-Windows 2000 Compatible Access Group
 
 <a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-target-scope"></a>
 ## Target Scope
@@ -8448,34 +8448,34 @@ This directory contains network security architectures, active directory port co
 <a id="04-network-firewall-README-md-technical-hardening-controls"></a>
 ## Technical Hardening Controls
 
-1. **[Configure Active Directory Port Matrix](#04-network-firewall-README-md-04-network-firewall-configure-ad-port-matrix-md)**
+1. **[REQ-NET-001 - Configure Active Directory Port Matrix](#04-network-firewall-README-md-04-network-firewall-configure-ad-port-matrix-md)**
    Establishes the minimum permitted ports for Domain Controllers, Member Servers, and Client Workstations, ensuring perimeter and local firewalls block unauthorized inbound traffic.
 
-2. **[Restrict RPC Dynamic Ports](#04-network-firewall-README-md-04-network-firewall-restrict-rpc-dynamic-ports-md)**
+2. **[REQ-NET-002 - Restrict RPC Dynamic Ports](#04-network-firewall-README-md-04-network-firewall-restrict-rpc-dynamic-ports-md)**
    Restricts default dynamic RPC ports from a massive range (TCP 49152-65535) to a predictable restricted range (e.g., TCP 50000-50100) or static ports to simplify firewall policies.
 
-3. **[Configure Workstation and Server Isolation](#04-network-firewall-README-md-04-network-firewall-configure-workstation-isolation-md)**
+3. **[REQ-NET-003 - Configure Workstation and Server Isolation](#04-network-firewall-README-md-04-network-firewall-configure-workstation-isolation-md)**
    Configures local firewall rules on workstations and servers to block inbound SMB, RPC, RDP, and WinRM from peer systems to prevent lateral movement.
 
-4. **[Configure IPsec Domain Isolation](#04-network-firewall-README-md-04-network-firewall-configure-ipsec-domain-isolation-md)**
+4. **[REQ-NET-004 - Configure IPsec Domain Isolation](#04-network-firewall-README-md-04-network-firewall-configure-ipsec-domain-isolation-md)**
    Enforces IPsec Connection Security Rules to authenticate and encrypt traffic within the domain boundary.
 
-5. **[Harden IPsec Cryptographic Configurations](#04-network-firewall-README-md-04-network-firewall-harden-ipsec-cryptography-md)**
+5. **[REQ-NET-005 - Harden IPsec Cryptographic Configurations](#04-network-firewall-README-md-04-network-firewall-harden-ipsec-cryptography-md)**
    Restricts permitted IPsec cryptography suites to secure options (AES-256 and DH Group 19/20) for Phase 1 and Phase 2 negotiations.
 
-6. **[Harden TLS Protocols, Cipher Suites, and Elliptic Curves](#04-network-firewall-README-md-04-network-firewall-harden-tls-configuration-md)**
+6. **[REQ-NET-006 - Harden TLS Protocols, Cipher Suites, and Elliptic Curves](#04-network-firewall-README-md-04-network-firewall-harden-tls-configuration-md)**
    Disables legacy SSL/TLS versions, enforces TLS 1.2/1.3, orders strong cipher suites, and prioritizes secure elliptic curves.
 
-7. **[Enforce SMBv3 Security and Digitally Sign/Encrypt Communications](#04-network-firewall-README-md-04-network-firewall-enforce-smbv3-security-md)**
+7. **[REQ-NET-007 - Enforce SMBv3 Security and Digitally Sign/Encrypt Communications](#04-network-firewall-README-md-04-network-firewall-enforce-smbv3-security-md)**
    Disables legacy SMB dialects, enforces SMBv3, and mandates message signing and encryption to protect communications and prevent relay attacks.
 
-8. **[Configure Firewall Logging and Operational Settings](#04-network-firewall-README-md-04-network-firewall-configure-firewall-logging-md)**
+8. **[REQ-NET-008 - Configure Firewall Logging and Operational Settings](#04-network-firewall-README-md-04-network-firewall-configure-firewall-logging-md)**
    Enforces Windows Defender Firewall state, sets default inbound block policies, disables local rule merging on Domain Controllers, and configures detailed dropped packet logging to improve security visibility and forensic capabilities.
 
-9. **[Configure Hardened UNC Paths](#04-network-firewall-README-md-04-network-firewall-configure-hardened-unc-paths-md)**
+9. **[REQ-NET-009 - Configure Hardened UNC Paths and LDAP Client Signing](#04-network-firewall-README-md-04-network-firewall-configure-hardened-unc-paths-md)**
    Enforces mutual authentication and SMB signing for GPO folder structures (SYSVOL/NETLOGON), restricts workstation guest logons, and requires outgoing LDAP client signing.
 
-10. **[Harden WinRM Service and Restrict RPC Clients](#04-network-firewall-README-md-04-network-firewall-harden-winrm-service-md)**
+10. **[REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](#04-network-firewall-README-md-04-network-firewall-harden-winrm-service-md)**
     Disables Basic and Digest authentication, forces encrypted WinRM communications, restricts WinRM credential caching, and blocks anonymous RPC connections.
 
 
@@ -8484,8 +8484,8 @@ This directory contains network security architectures, active directory port co
 
 <a id="04-network-firewall-configure-ad-port-matrix-md"></a>
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-hardening-requirement-configure-active-directory-port-matrix"></a>
-# Hardening Requirement: Configure Active Directory Port Matrix
+<a id="04-network-firewall-configure-ad-port-matrix-md-req-net-001-configure-active-directory-port-matrix"></a>
+# [REQ-NET-001] Configure Active Directory Port Matrix
 
 <a id="04-network-firewall-configure-ad-port-matrix-md-target-scope"></a>
 ## Target Scope
@@ -8669,8 +8669,8 @@ if ($AllProfilesSecure) {
 
 <a id="04-network-firewall-restrict-rpc-dynamic-ports-md"></a>
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-hardening-requirement-restrict-rpc-dynamic-ports"></a>
-# Hardening Requirement: Restrict RPC Dynamic Ports
+<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-req-net-002-restrict-rpc-dynamic-ports"></a>
+# [REQ-NET-002] Restrict RPC Dynamic Ports
 
 <a id="04-network-firewall-restrict-rpc-dynamic-ports-md-target-scope"></a>
 ## Target Scope
@@ -8899,8 +8899,8 @@ Write-Host $IPv6Match -ForegroundColor DarkGray
 
 <a id="04-network-firewall-configure-workstation-isolation-md"></a>
 
-<a id="04-network-firewall-configure-workstation-isolation-md-hardening-requirement-configure-workstation-and-server-isolation"></a>
-# Hardening Requirement: Configure Workstation and Server Isolation
+<a id="04-network-firewall-configure-workstation-isolation-md-req-net-003-configure-workstation-and-server-isolation"></a>
+# [REQ-NET-003] Configure Workstation and Server Isolation
 
 <a id="04-network-firewall-configure-workstation-isolation-md-target-scope"></a>
 ## Target Scope
@@ -9120,8 +9120,8 @@ if ($FailedChecks -eq 0) {
 
 <a id="04-network-firewall-configure-ipsec-domain-isolation-md"></a>
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-hardening-requirement-configure-ipsec-domain-isolation"></a>
-# Hardening Requirement: Configure IPsec Domain Isolation
+<a id="04-network-firewall-configure-ipsec-domain-isolation-md-req-net-004-configure-ipsec-domain-isolation"></a>
+# [REQ-NET-004] Configure IPsec Domain Isolation
 
 <a id="04-network-firewall-configure-ipsec-domain-isolation-md-target-scope"></a>
 ## Target Scope
@@ -9271,8 +9271,8 @@ if ($null -eq $Rules -or $Rules.Count -eq 0) {
 
 <a id="04-network-firewall-harden-ipsec-cryptography-md"></a>
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-hardening-requirement-harden-ipsec-cryptographic-configurations"></a>
-# Hardening Requirement: Harden IPsec Cryptographic Configurations
+<a id="04-network-firewall-harden-ipsec-cryptography-md-req-net-005-harden-ipsec-cryptographic-configurations"></a>
+# [REQ-NET-005] Harden IPsec Cryptographic Configurations
 
 <a id="04-network-firewall-harden-ipsec-cryptography-md-target-scope"></a>
 ## Target Scope
@@ -9471,8 +9471,8 @@ if ($NonCompliantCount -eq 0) {
 
 <a id="04-network-firewall-harden-tls-configuration-md"></a>
 
-<a id="04-network-firewall-harden-tls-configuration-md-hardening-requirement-harden-tls-protocols-cipher-suites-and-elliptic-curves"></a>
-# Hardening Requirement: Harden TLS Protocols, Cipher Suites, and Elliptic Curves
+<a id="04-network-firewall-harden-tls-configuration-md-req-net-006-harden-tls-protocols-cipher-suites-and-elliptic-curves"></a>
+# [REQ-NET-006] Harden TLS Protocols, Cipher Suites, and Elliptic Curves
 
 <a id="04-network-firewall-harden-tls-configuration-md-target-scope"></a>
 ## Target Scope
@@ -9809,8 +9809,8 @@ if ($NonCompliantCount -eq 0) {
 
 <a id="04-network-firewall-enforce-smbv3-security-md"></a>
 
-<a id="04-network-firewall-enforce-smbv3-security-md-hardening-requirement-enforce-smbv3-security-and-digitally-signencrypt-communications"></a>
-# Hardening Requirement: Enforce SMBv3 Security and Digitally Sign/Encrypt Communications
+<a id="04-network-firewall-enforce-smbv3-security-md-req-net-007-enforce-smbv3-security-and-digitally-signencrypt-communications"></a>
+# [REQ-NET-007] Enforce SMBv3 Security and Digitally Sign/Encrypt Communications
 
 <a id="04-network-firewall-enforce-smbv3-security-md-target-scope"></a>
 ## Target Scope
@@ -10051,8 +10051,8 @@ if ($NonCompliantCount -eq 0) {
 
 <a id="04-network-firewall-configure-firewall-logging-md"></a>
 
-<a id="04-network-firewall-configure-firewall-logging-md-hardening-requirement-configure-firewall-logging-and-operational-settings"></a>
-# Hardening Requirement: Configure Firewall Logging and Operational Settings
+<a id="04-network-firewall-configure-firewall-logging-md-req-net-008-configure-firewall-logging-and-operational-settings"></a>
+# [REQ-NET-008] Configure Firewall Logging and Operational Settings
 
 <a id="04-network-firewall-configure-firewall-logging-md-target-scope"></a>
 ## Target Scope
@@ -10202,8 +10202,8 @@ Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, Defa
 
 <a id="04-network-firewall-configure-hardened-unc-paths-md"></a>
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-hardening-requirement-configure-hardened-unc-paths-and-ldap-client-signing"></a>
-# Hardening Requirement: Configure Hardened UNC Paths and LDAP Client Signing
+<a id="04-network-firewall-configure-hardened-unc-paths-md-req-net-009-configure-hardened-unc-paths-and-ldap-client-signing"></a>
+# [REQ-NET-009] Configure Hardened UNC Paths and LDAP Client Signing
 
 <a id="04-network-firewall-configure-hardened-unc-paths-md-target-scope"></a>
 ## Target Scope
@@ -10372,8 +10372,8 @@ Write-Host "    - LDAP Client Integrity (Signing): $LdapSetting (Expected: 1 - N
 
 <a id="04-network-firewall-harden-winrm-service-md"></a>
 
-<a id="04-network-firewall-harden-winrm-service-md-hardening-requirement-harden-winrm-service-and-restrict-remote-rpc-clients"></a>
-# Hardening Requirement: Harden WinRM Service and Restrict Remote RPC Clients
+<a id="04-network-firewall-harden-winrm-service-md-req-net-010-harden-winrm-service-and-restrict-remote-rpc-clients"></a>
+# [REQ-NET-010] Harden WinRM Service and Restrict Remote RPC Clients
 
 <a id="04-network-firewall-harden-winrm-service-md-target-scope"></a>
 ## Target Scope
@@ -10577,16 +10577,16 @@ Write-Host "    - RPC RestrictRemoteClients: $RpcSetting (Expected: 1)" -Foregro
 
 This directory contains configuration policies for security log auditing, PowerShell transcription, and host monitoring for detection systems in isolated networks.
 
-1. **[Configure Advanced Security Audit Policies](#05-logging-monitoring-README-md-05-logging-monitoring-configure-advanced-audit-policies-md)**
+1. **[REQ-LOG-001 - Configure Advanced Security Audit Policies](#05-logging-monitoring-README-md-05-logging-monitoring-configure-advanced-audit-policies-md)**
    Enforces granular Windows security audit policies (including logons, Kerberos authentication operations, group memberships, policy changes, and process execution) to log critical threat telemetry.
 
-2. **[Configure PowerShell and Command-Line Auditing](#05-logging-monitoring-README-md-05-logging-monitoring-configure-powershell-and-command-line-auditing-md)**
+2. **[REQ-LOG-002 - Configure PowerShell and Command-Line Auditing](#05-logging-monitoring-README-md-05-logging-monitoring-configure-powershell-and-command-line-auditing-md)**
    Enforces process command-line argument auditing and verbose PowerShell logging (Script Block, Module, and Transcription logging) with a write-only, hardened transcript folder.
 
-3. **[Deploy and Harden Microsoft Sysmon](#05-logging-monitoring-README-md-05-logging-monitoring-deploy-and-harden-sysmon-md)**
+3. **[REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](#05-logging-monitoring-README-md-05-logging-monitoring-deploy-and-harden-sysmon-md)**
    Deploys Sysmon with a hardened telemetry configuration and configures aggressive service recovery settings to auto-restart the service if stopped by adversaries.
 
-4. **[Configure Secure SIEM Log Shipping](#05-logging-monitoring-README-md-05-logging-monitoring-configure-siem-log-shipping-md)**
+4. **[REQ-LOG-004 - Configure Secure SIEM Log Shipping](#05-logging-monitoring-README-md-05-logging-monitoring-configure-siem-log-shipping-md)**
    Configures secured log shipping agents (Winlogbeat and Wazuh) utilizing TLS encryption, authenticated CA checks, local configuration file ACL protections, and buffer queue size limits to prevent local disk space exhaustion.
 
 
@@ -10594,8 +10594,8 @@ This directory contains configuration policies for security log auditing, PowerS
 
 <a id="05-logging-monitoring-configure-advanced-audit-policies-md"></a>
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-hardening-requirement-configure-advanced-security-audit-policies"></a>
-# Hardening Requirement: Configure Advanced Security Audit Policies
+<a id="05-logging-monitoring-configure-advanced-audit-policies-md-req-log-001-configure-advanced-security-audit-policies"></a>
+# [REQ-LOG-001] Configure Advanced Security Audit Policies
 
 <a id="05-logging-monitoring-configure-advanced-audit-policies-md-target-scope"></a>
 ## Target Scope
@@ -10908,8 +10908,8 @@ foreach ($Policy in $RequiredPolicies) {
 
 <a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md"></a>
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-hardening-requirement-configure-powershell-and-command-line-auditing"></a>
-# Hardening Requirement: Configure PowerShell and Command-Line Auditing
+<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-req-log-002-configure-powershell-and-command-line-auditing"></a>
+# [REQ-LOG-002] Configure PowerShell and Command-Line Auditing
 
 <a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-target-scope"></a>
 ## Target Scope
@@ -11216,8 +11216,8 @@ if ($TransDir) {
 
 <a id="05-logging-monitoring-deploy-and-harden-sysmon-md"></a>
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-hardening-requirement-deploy-and-harden-microsoft-sysmon"></a>
-# Hardening Requirement: Deploy and Harden Microsoft Sysmon
+<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-req-log-003-deploy-and-harden-microsoft-sysmon"></a>
+# [REQ-LOG-003] Deploy and Harden Microsoft Sysmon
 
 <a id="05-logging-monitoring-deploy-and-harden-sysmon-md-target-scope"></a>
 ## Target Scope
@@ -11423,8 +11423,8 @@ Write-Host "    - Recovery Configuration: ResetConfigured=$($HasReset), RestartA
 
 <a id="05-logging-monitoring-configure-siem-log-shipping-md"></a>
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-hardening-requirement-configure-secure-siem-log-shipping"></a>
-# Hardening Requirement: Configure Secure SIEM Log Shipping
+<a id="05-logging-monitoring-configure-siem-log-shipping-md-req-log-004-configure-secure-siem-log-shipping"></a>
+# [REQ-LOG-004] Configure Secure SIEM Log Shipping
 
 <a id="05-logging-monitoring-configure-siem-log-shipping-md-target-scope"></a>
 ## Target Scope
@@ -11677,19 +11677,19 @@ This directory contains operational procedures and configuration baselines for s
 1. **[Secure Operations and Maintenance Baseline](#06-operations-maintenance-README-md-06-operations-maintenance-ops-and-maintenance-md)**
    Detailed requirement documenting Active Directory System State Backup and bare-metal restoration workflows, offline WSUS patch synchronization ("sneakernet" imports/exports), and continuous security analysis using offline tools (such as PingCastle and ADRecon).
 
-2. **[Enforce KRBTGT Password Rotation](#06-operations-maintenance-README-md-06-operations-maintenance-enforce-krbtgt-password-rotation-md)**
+2. **[REQ-OPS-001 - Enforce KRBTGT Password Rotation](#06-operations-maintenance-README-md-06-operations-maintenance-enforce-krbtgt-password-rotation-md)**
    Enforces and audits periodic rotation of the domain KRBTGT account password to prevent Golden Ticket attacks.
 
-3. **[Enable and Configure Active Directory Recycle Bin](#06-operations-maintenance-README-md-06-operations-maintenance-enable-recycle-bin-md)**
+3. **[REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](#06-operations-maintenance-README-md-06-operations-maintenance-enable-recycle-bin-md)**
    Enables the forest-wide Recycle Bin optional feature to preserve all link-valued attributes and permit rapid recovery of deleted objects.
 
-4. **[Establish and Maintain Group Policy ADMX Central Store](#06-operations-maintenance-README-md-06-operations-maintenance-maintain-gpo-templates-md)**
+4. **[REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#06-operations-maintenance-README-md-06-operations-maintenance-maintain-gpo-templates-md)**
    Centralizes ADMX administrative templates within the SYSVOL share to prevent console drift and version mismatches.
 
-5. **[Implement Third-Party and Custom GPO Templates for COTS Hardening](#06-operations-maintenance-README-md-06-operations-maintenance-use-third-party-templates-md)**
+5. **[REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](#06-operations-maintenance-README-md-06-operations-maintenance-use-third-party-templates-md)**
    Enforces standardized configuration templates to lock down third-party application configurations (browsers, reader software, security guides).
 
-6. **[Configure Dedicated WSUS for Tier 0](#06-operations-maintenance-README-md-06-operations-maintenance-configure-dedicated-tier0-wsus-md)**
+6. **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#06-operations-maintenance-README-md-06-operations-maintenance-configure-dedicated-tier0-wsus-md)**
    Establishes and secures dedicated WSUS update server endpoints for Tier 0 assets to prevent cross-tier update spoofing.
 
 
@@ -11963,8 +11963,8 @@ Write-Host "[+] Detailed BSOD stop parameters configured successfully." -Foregro
 
 <a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md"></a>
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-hardening-requirement-enforce-krbtgt-password-rotation"></a>
-# Hardening Requirement: Enforce KRBTGT Password Rotation
+<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-req-ops-001-enforce-krbtgt-password-rotation"></a>
+# [REQ-OPS-001] Enforce KRBTGT Password Rotation
 
 <a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-target-scope"></a>
 ## Target Scope
@@ -12126,8 +12126,8 @@ if ($Krbtgt) {
 
 <a id="06-operations-maintenance-enable-recycle-bin-md"></a>
 
-<a id="06-operations-maintenance-enable-recycle-bin-md-hardening-requirement-enable-and-configure-the-active-directory-recycle-bin"></a>
-# Hardening Requirement: Enable and Configure the Active Directory Recycle Bin
+<a id="06-operations-maintenance-enable-recycle-bin-md-req-ops-002-enable-and-configure-the-active-directory-recycle-bin"></a>
+# [REQ-OPS-002] Enable and Configure the Active Directory Recycle Bin
 
 <a id="06-operations-maintenance-enable-recycle-bin-md-target-scope"></a>
 ## Target Scope
@@ -12252,8 +12252,8 @@ try {
 
 <a id="06-operations-maintenance-maintain-gpo-templates-md"></a>
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md-hardening-requirement-establish-and-maintain-group-policy-admx-central-store"></a>
-# Hardening Requirement: Establish and Maintain Group Policy ADMX Central Store
+<a id="06-operations-maintenance-maintain-gpo-templates-md-req-ops-003-establish-and-maintain-group-policy-admx-central-store"></a>
+# [REQ-OPS-003] Establish and Maintain Group Policy ADMX Central Store
 
 <a id="06-operations-maintenance-maintain-gpo-templates-md-target-scope"></a>
 ## Target Scope
@@ -12387,8 +12387,8 @@ try {
 
 <a id="06-operations-maintenance-use-third-party-templates-md"></a>
 
-<a id="06-operations-maintenance-use-third-party-templates-md-hardening-requirement-implement-third-party-and-custom-gpo-templates-for-cots-hardening"></a>
-# Hardening Requirement: Implement Third-Party and Custom GPO Templates for COTS Hardening
+<a id="06-operations-maintenance-use-third-party-templates-md-req-ops-004-implement-third-party-and-custom-gpo-templates-for-cots-hardening"></a>
+# [REQ-OPS-004] Implement Third-Party and Custom GPO Templates for COTS Hardening
 
 <a id="06-operations-maintenance-use-third-party-templates-md-target-scope"></a>
 ## Target Scope
@@ -12547,8 +12547,8 @@ try {
 
 <a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md"></a>
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-hardening-requirement-configure-dedicated-wsus-for-tier-0"></a>
-# Hardening Requirement: Configure Dedicated WSUS for Tier 0
+<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-req-ops-005-configure-dedicated-wsus-for-tier-0"></a>
+# [REQ-OPS-005] Configure Dedicated WSUS for Tier 0
 
 <a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-target-scope"></a>
 ## Target Scope
@@ -12704,43 +12704,43 @@ This directory contains the physical isolation policies and operating system sec
 <a id="07-paws-README-md-technical-hardening-controls"></a>
 ## Technical Hardening Controls
 
-1. **[Configure AppLocker Policies for PAWs](#07-paws-README-md-07-paws-configure-applocker-policies-md)**
+1. **[REQ-PAW-001 - Configure AppLocker Policies for PAWs](#07-paws-README-md-07-paws-configure-applocker-policies-md)**
    Enforces strict AppLocker application control policies, restricting execution of unauthorized binaries to approved administrative groups.
 
-2. **[Enable LSA Protection for PAWs](#07-paws-README-md-07-paws-enable-lsa-protection-md)**
+2. **[REQ-PAW-002 - Enable LSA Protection for PAWs](#07-paws-README-md-07-paws-enable-lsa-protection-md)**
    Configures LSASS to run as a protected process (PPL) to block credential dumping tools from harvesting secrets from LSA memory.
 
-3. **[Restrict Local Administrators Group for PAWs](#07-paws-README-md-07-paws-restrict-local-administrators-md)**
+3. **[REQ-PAW-003 - Restrict Local Administrators Group for PAWs](#07-paws-README-md-07-paws-restrict-local-administrators-md)**
    Restricts and audits membership in the local Administrators group on PAWs to prevent unauthorized local administrative access.
 
-4. **[Enable BitLocker for PAWs](#07-paws-README-md-07-paws-enable-bitlocker-md)**
+4. **[REQ-PAW-004 - Enforce BitLocker with TPM and Startup PIN for PAWs](#07-paws-README-md-07-paws-enable-bitlocker-md)**
    Configures highly stringent BitLocker policies specifically for PAWs, requiring TPM + pre-boot Startup PIN (no Network Unlock allowed), disabling sleep/standby states (S1-S3) to prevent DMA attacks, enabling Kernel DMA Protection, and enforcing enhanced PIN rules and automatic AD recovery password rotation.
 
-5. **[UEFI Firmware Security Hardening](#07-paws-README-md-07-paws-configure-uefi-security-md)**
+5. **[REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-README-md-07-paws-configure-uefi-security-md)**
    Enforces UEFI firmware locking, setting a strong BIOS administrator password, disabling CSM/Legacy boot, locking the boot order, and protecting against BIOS rollbacks.
 
-6. **[Hardware Virtualization and DMA Protection](#07-paws-README-md-07-paws-enable-hardware-virtualization-and-dma-protection-md)**
+6. **[REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-README-md-07-paws-enable-hardware-virtualization-and-dma-protection-md)**
    Enables hardware CPU virtualization, IOMMU/DMA protection at the firmware level, and TPM 2.0 to provide the necessary platform integrity foundation for Virtualization-Based Security (VBS).
 
-7. **[Disable Windows Platform Binary Table (WPBT)](#07-paws-README-md-07-paws-disable-wpbt-md)**
+7. **[REQ-PAW-007 - Disable Windows Platform Binary Table (WPBT)](#07-paws-README-md-07-paws-disable-wpbt-md)**
    Disables execution of binaries supplied by the Windows Platform Binary Table (WPBT) ACPI firmware table to mitigate boot-level security bypasses.
 
-8. **[Windows Defender Antivirus PAW Baseline and Exploit Guard](#07-paws-README-md-07-paws-defender-antivirus-md)**
+8. **[REQ-PAW-008 - Windows Defender Antivirus PAW Baseline and Exploit Guard](#07-paws-README-md-07-paws-defender-antivirus-md)**
    Configures Windows Defender Antivirus on PAWs, enabling real-time scanning, behavioral monitoring, preventing local exclusion modifications, enforcing all ASR rules in strict Block mode, activating Tamper Protection, and enabling AppContainer sandbox isolation.
 
-9. **[Configure User Rights Assignments for PAWs](#07-paws-README-md-07-paws-configure-user-rights-assignments-md)**
+9. **[REQ-PAW-009 - Configure User Rights Assignments for PAWs](#07-paws-README-md-07-paws-configure-user-rights-assignments-md)**
    Restricts critical user rights assignments (URAs) such as debugging programs, token impersonation, and denying network/interactive logon permissions for standard accounts on PAWs.
 
-10. **[Enable VBS and Credential Guard for PAWs](#07-paws-README-md-07-paws-enable-vbs-credential-guard-md)**
+10. **[REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#07-paws-README-md-07-paws-enable-vbs-credential-guard-md)**
     Configures Virtualization-Based Security (VBS), Credential Guard (with UEFI Lock), System Guard Secure Launch, and memory protections to shield LSASS from credential dumping attacks on PAWs.
 
-11. **[Harden DMA and Physical Security for PAWs](#07-paws-README-md-07-paws-harden-dma-and-physical-security-md)**
+11. **[REQ-PAW-011 - Harden DMA and Physical Security for PAWs](#07-paws-README-md-07-paws-harden-dma-and-physical-security-md)**
     Mitigates physical access threat vectors by disabling sleep standby states (S1-S3), disabling external DMA device enumeration under lock, enforcing a strict block-all device enumeration policy, and blocking legacy SBP-2 device classes.
 
-12. **[Enable WDAC Driver Blocklist](#07-paws-README-md-07-paws-enable-wdac-driver-blocklist-md)**
+12. **[REQ-PAW-012 - Enable WDAC Driver Blocklist](#07-paws-README-md-07-paws-enable-wdac-driver-blocklist-md)**
     Enforces the Microsoft Vulnerable Driver Blocklist using Windows Defender Application Control (WDAC) to protect the kernel from Bring Your Own Vulnerable Driver (BYOVD) attacks.
 
-13. **[Configure Account and Password Policies for PAWs](#07-paws-README-md-07-paws-configure-account-policies-md)**
+13. **[REQ-PAW-013 - Configure Account and Password Policies for PAWs](#07-paws-README-md-07-paws-configure-account-policies-md)**
     Configures robust local account lockout, local password complexity, and 20-character minimum length policies, and references Active Directory Fine-Grained Password Policies (FGPP) for Tier 0 Administrators.
 
 
@@ -12752,8 +12752,8 @@ This directory contains the physical isolation policies and operating system sec
 
 <a id="07-paws-configure-applocker-policies-md"></a>
 
-<a id="07-paws-configure-applocker-policies-md-hardening-requirement-configure-applocker-policies-for-paws"></a>
-# Hardening Requirement: Configure AppLocker Policies for PAWs
+<a id="07-paws-configure-applocker-policies-md-req-paw-001-configure-applocker-policies-for-paws"></a>
+# [REQ-PAW-001] Configure AppLocker Policies for PAWs
 
 <a id="07-paws-configure-applocker-policies-md-target-scope"></a>
 ## Target Scope
@@ -13104,8 +13104,8 @@ if (Test-Path $NtvdmPath) {
 
 <a id="07-paws-enable-lsa-protection-md"></a>
 
-<a id="07-paws-enable-lsa-protection-md-hardening-requirement-enable-lsa-protection-for-paws"></a>
-# Hardening Requirement: Enable LSA Protection for PAWs
+<a id="07-paws-enable-lsa-protection-md-req-paw-002-enable-lsa-protection-for-paws"></a>
+# [REQ-PAW-002] Enable LSA Protection for PAWs
 
 <a id="07-paws-enable-lsa-protection-md-target-scope"></a>
 ## Target Scope
@@ -13217,8 +13217,8 @@ if ($RunAsPPL -eq 1) {
 
 <a id="07-paws-restrict-local-administrators-md"></a>
 
-<a id="07-paws-restrict-local-administrators-md-hardening-requirement-restrict-local-administrators-group-for-paws"></a>
-# Hardening Requirement: Restrict Local Administrators Group for PAWs
+<a id="07-paws-restrict-local-administrators-md-req-paw-003-restrict-local-administrators-group-for-paws"></a>
+# [REQ-PAW-003] Restrict Local Administrators Group for PAWs
 
 <a id="07-paws-restrict-local-administrators-md-target-scope"></a>
 ## Target Scope
@@ -13370,8 +13370,8 @@ if ($LocalAdmins) {
 
 <a id="07-paws-enable-bitlocker-md"></a>
 
-<a id="07-paws-enable-bitlocker-md-hardening-requirement-enforce-bitlocker-with-tpm-and-startup-pin-for-paws"></a>
-# Hardening Requirement: Enforce BitLocker with TPM and Startup PIN for PAWs
+<a id="07-paws-enable-bitlocker-md-req-paw-004-enforce-bitlocker-with-tpm-and-startup-pin-for-paws"></a>
+# [REQ-PAW-004] Enforce BitLocker with TPM and Startup PIN for PAWs
 
 <a id="07-paws-enable-bitlocker-md-target-scope"></a>
 ## Target Scope
@@ -13629,8 +13629,8 @@ if ($DmaVal -and $DmaVal.DeviceEnumerationPolicy -eq 0) {
 
 <a id="07-paws-configure-uefi-security-md"></a>
 
-<a id="07-paws-configure-uefi-security-md-hardening-requirement-uefi-firmware-security-hardening"></a>
-# Hardening Requirement: UEFI Firmware Security Hardening
+<a id="07-paws-configure-uefi-security-md-req-paw-005-uefi-firmware-security-hardening"></a>
+# [REQ-PAW-005] UEFI Firmware Security Hardening
 
 <a id="07-paws-configure-uefi-security-md-target-scope"></a>
 ## Target Scope
@@ -13772,8 +13772,8 @@ if ($BiosDetails) {
 
 <a id="07-paws-enable-hardware-virtualization-and-dma-protection-md"></a>
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-hardening-requirement-enable-hardware-virtualization-and-dma-protection"></a>
-# Hardening Requirement: Enable Hardware Virtualization and DMA Protection
+<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-req-paw-006-enable-hardware-virtualization-and-dma-protection"></a>
+# [REQ-PAW-006] Enable Hardware Virtualization and DMA Protection
 
 <a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-target-scope"></a>
 ## Target Scope
@@ -13934,8 +13934,8 @@ try {
 
 <a id="07-paws-disable-wpbt-md"></a>
 
-<a id="07-paws-disable-wpbt-md-hardening-requirement-disable-windows-platform-binary-table-wpbt"></a>
-# Hardening Requirement: Disable Windows Platform Binary Table (WPBT)
+<a id="07-paws-disable-wpbt-md-req-paw-007-disable-windows-platform-binary-table-wpbt"></a>
+# [REQ-PAW-007] Disable Windows Platform Binary Table (WPBT)
 
 <a id="07-paws-disable-wpbt-md-target-scope"></a>
 ## Target Scope
@@ -14061,8 +14061,8 @@ if ($RegistryValue) {
 
 <a id="07-paws-defender-antivirus-md"></a>
 
-<a id="07-paws-defender-antivirus-md-hardening-requirement-windows-defender-antivirus-paw-baseline-and-exploit-guard"></a>
-# Hardening Requirement: Windows Defender Antivirus PAW Baseline and Exploit Guard
+<a id="07-paws-defender-antivirus-md-req-paw-008-windows-defender-antivirus-paw-baseline-and-exploit-guard"></a>
+# [REQ-PAW-008] Windows Defender Antivirus PAW Baseline and Exploit Guard
 
 <a id="07-paws-defender-antivirus-md-target-scope"></a>
 ## Target Scope
@@ -14578,8 +14578,8 @@ foreach ($KeyName in $CheckKeys.Keys) {
 
 <a id="07-paws-configure-user-rights-assignments-md"></a>
 
-<a id="07-paws-configure-user-rights-assignments-md-hardening-requirement-configure-user-rights-assignments-for-paws"></a>
-# Hardening Requirement: Configure User Rights Assignments for PAWs
+<a id="07-paws-configure-user-rights-assignments-md-req-paw-009-configure-user-rights-assignments-for-paws"></a>
+# [REQ-PAW-009] Configure User Rights Assignments for PAWs
 
 <a id="07-paws-configure-user-rights-assignments-md-target-scope"></a>
 ## Target Scope
@@ -14854,8 +14854,8 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 <a id="07-paws-enable-vbs-credential-guard-md"></a>
 
-<a id="07-paws-enable-vbs-credential-guard-md-hardening-requirement-enable-vbs-and-credential-guard-for-paws"></a>
-# Hardening Requirement: Enable VBS and Credential Guard for PAWs
+<a id="07-paws-enable-vbs-credential-guard-md-req-paw-010-enable-vbs-and-credential-guard-for-paws"></a>
+# [REQ-PAW-010] Enable VBS and Credential Guard for PAWs
 
 <a id="07-paws-enable-vbs-credential-guard-md-target-scope"></a>
 ## Target Scope
@@ -14892,7 +14892,7 @@ Privileged Access Workstations (PAWs) contain Tier 0 administrative tokens. A co
 
 <a id="07-paws-enable-vbs-credential-guard-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
-* **Firmware Requirements**: PAWs must use modern UEFI firmware, native UEFI boot (Legacy CSM disabled), Secure Boot, IOMMU (Intel VT-d or AMD-Vi), CPU Virtualization (Intel VT-x or AMD-V), and TPM 2.0. Enabling Secure Boot and virtualization functions is a strict pre-requisite. Refer to [UEFI Firmware Security Hardening](#07-paws-enable-vbs-credential-guard-md-07-paws-configure-uefi-security-md) and [Hardware Virtualization and DMA Protection](#07-paws-enable-vbs-credential-guard-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) to secure these features in the firmware. If physical hardware does not meet these criteria, it is unfit for use as a PAW.
+* **Firmware Requirements**: PAWs must use modern UEFI firmware, native UEFI boot (Legacy CSM disabled), Secure Boot, IOMMU (Intel VT-d or AMD-Vi), CPU Virtualization (Intel VT-x or AMD-V), and TPM 2.0. Enabling Secure Boot and virtualization functions is a strict pre-requisite. Refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-enable-vbs-credential-guard-md-07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-vbs-credential-guard-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) to secure these features in the firmware. If physical hardware does not meet these criteria, it is unfit for use as a PAW.
 * **Hypervisor Conflicts**: Standard Windows virtualization layers will be required. Running non-compliant third-party hypervisors (such as older VirtualBox or VMware Workstation configurations) that do not support nested virtualization on Hyper-V will fail.
 
 ---
@@ -15004,8 +15004,8 @@ try {
 
 <a id="07-paws-harden-dma-and-physical-security-md"></a>
 
-<a id="07-paws-harden-dma-and-physical-security-md-hardening-requirement-harden-dma-and-physical-security-for-paws"></a>
-# Hardening Requirement: Harden DMA and Physical Security for PAWs
+<a id="07-paws-harden-dma-and-physical-security-md-req-paw-011-harden-dma-and-physical-security-for-paws"></a>
+# [REQ-PAW-011] Harden DMA and Physical Security for PAWs
 
 <a id="07-paws-harden-dma-and-physical-security-md-target-scope"></a>
 ## Target Scope
@@ -15254,8 +15254,8 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block
 
 <a id="07-paws-enable-wdac-driver-blocklist-md"></a>
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-hardening-requirement-enable-wdac-driver-blocklist"></a>
-# Hardening Requirement: Enable WDAC Driver Blocklist
+<a id="07-paws-enable-wdac-driver-blocklist-md-req-paw-012-enable-wdac-driver-blocklist"></a>
+# [REQ-PAW-012] Enable WDAC Driver Blocklist
 
 <a id="07-paws-enable-wdac-driver-blocklist-md-target-scope"></a>
 ## Target Scope
@@ -15283,7 +15283,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
 
 <a id="07-paws-enable-wdac-driver-blocklist-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
-* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [Enable VBS and Credential Guard for PAWs](#07-paws-enable-wdac-driver-blocklist-md-07-paws-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [UEFI Firmware Security Hardening](#07-paws-enable-wdac-driver-blocklist-md-07-paws-configure-uefi-security-md) and [Hardware Virtualization and DMA Protection](#07-paws-enable-wdac-driver-blocklist-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware configuration.
+* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#07-paws-enable-wdac-driver-blocklist-md-07-paws-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-enable-wdac-driver-blocklist-md-07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-wdac-driver-blocklist-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware configuration.
 * **Compatibility with Legacy Drivers**: Third-party backup, monitoring, or hardware administration software running deprecated, vulnerable drivers may fail to load. All such software must be updated to use secure, modern drivers.
 * **Deployment Testing**: To prevent system instability, the WDAC blocklist policy should be deployed in **Audit Mode** initially to verify that no critical operational drivers are blocked in production before shifting to enforcement mode.
 
@@ -15426,8 +15426,8 @@ if ($Vulnerable) {
 
 <a id="07-paws-configure-account-policies-md"></a>
 
-<a id="07-paws-configure-account-policies-md-hardening-requirement-configure-account-and-password-policies-for-paws"></a>
-# Hardening Requirement: Configure Account and Password Policies for PAWs
+<a id="07-paws-configure-account-policies-md-req-paw-013-configure-account-and-password-policies-for-paws"></a>
+# [REQ-PAW-013] Configure Account and Password Policies for PAWs
 
 <a id="07-paws-configure-account-policies-md-target-scope"></a>
 ## Target Scope
@@ -15509,7 +15509,7 @@ Securing authentication parameters and account controls reduces the risk of pass
 7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
 8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
 9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, and requiring NTLMv2 and 128-bit encryption block legacy protocol exploitation.
-10. **Fine-Grained Password Policies (FGPP)**: While local accounts are secured on the machine, the Active Directory user accounts of the Tier 0 Administrators who logon to these PAWs must also be protected by a domain-level Fine-Grained Password Policy (FGPP / PSO) of at least 20 characters, as configured in [Enforce Fine-Grained Password Policies](#07-paws-configure-account-policies-md-03-identities-services-enforce-fgpp-md).
+10. **Fine-Grained Password Policies (FGPP)**: While local accounts are secured on the machine, the Active Directory user accounts of the Tier 0 Administrators who logon to these PAWs must also be protected by a domain-level Fine-Grained Password Policy (FGPP / PSO) of at least 20 characters, as configured in [REQ-ID-001 - Enforce Fine-Grained Password Policies](#07-paws-configure-account-policies-md-03-identities-services-enforce-fgpp-md).
 
 ---
 
@@ -15950,70 +15950,70 @@ To prevent initial access and lateral movement, the following unitary technical 
 <a id="08-endpoints-README-md-technical-hardening-controls"></a>
 ## Technical Hardening Controls
 
-1. **[Harden Network and Name Resolution](#08-endpoints-README-md-08-endpoints-harden-network-and-name-resolution-md)**
+1. **[REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](#08-endpoints-README-md-08-endpoints-harden-network-and-name-resolution-md)**
    Disables Link-Local Multicast Name Resolution (LLMNR), NetBIOS over TCP/IP, and mDNS, and secures TCP/IP parameters to prevent local credential harvesting and protocol exploits.
 
-2. **[Configure User Account Control (UAC) Policies](#08-endpoints-README-md-08-endpoints-configure-uac-policies-md)**
+2. **[REQ-END-002 - Configure User Account Control Policies](#08-endpoints-README-md-08-endpoints-configure-uac-policies-md)**
    Enforces maximum UAC security behavior, requiring credential entry on the secure desktop for administrators and automatically denying elevation prompts for standard users.
 
-3. **[Disable AutoPlay and AutoRun](#08-endpoints-README-md-08-endpoints-disable-autoplay-autorun-md)**
+3. **[REQ-END-003 - Disable AutoPlay and AutoRun](#08-endpoints-README-md-08-endpoints-disable-autoplay-autorun-md)**
    Turns off AutoPlay and AutoRun features across all drive types to prevent automatic execution of files and payloads from external media.
 
-4. **[Block Removable Storage](#08-endpoints-README-md-08-endpoints-block-removable-storage-md)**
+4. **[REQ-END-004 - Block Removable Storage](#08-endpoints-README-md-08-endpoints-block-removable-storage-md)**
    Blocks read and write access to USB drives and other removable media classes to mitigate data leakage and malware propagation.
 
-5. **[Restrict Remote Desktop (RDP) Access](#08-endpoints-README-md-08-endpoints-restrict-rdp-access-md)**
+5. **[REQ-END-005 - Restrict Remote Desktop Access](#08-endpoints-README-md-08-endpoints-restrict-rdp-access-md)**
    Blocks incoming RDP connections to standard workstations by default, or restricts allowed connection sources to authorized administrative subnets with Network Level Authentication (NLA) enabled.
 
-6. **[Restrict Local Administrators Group](#08-endpoints-README-md-08-endpoints-restrict-local-admins-md)**
+6. **[REQ-END-006 - Restrict Local Administrators Group](#08-endpoints-README-md-08-endpoints-restrict-local-admins-md)**
    Locks down local workstation administrative privileges, removing standard domain users and enforcing administrative segregation utilizing LAPS.
 
-7. **[Windows Defender Antivirus Baseline and Exploit Guard](#08-endpoints-README-md-08-endpoints-defender-antivirus-md)**
+7. **[REQ-END-007 - Windows Defender Antivirus Baseline and Exploit Guard](#08-endpoints-README-md-08-endpoints-defender-antivirus-md)**
    Configures Windows Defender Antivirus, enabling real-time scanning, behavioral monitoring, preventing local exclusion modifications, enforcing Attack Surface Reduction (ASR) rules, activating Tamper Protection, and enabling AppContainer sandbox isolation.
 
-8. **[WSUS Client Configuration](#08-endpoints-README-md-08-endpoints-wsus-client-config-md)**
+8. **[REQ-END-008 - WSUS Client Configuration](#08-endpoints-README-md-08-endpoints-wsus-client-config-md)**
    Enforces update client registry baselines to ensure workstations pull OS patches and security signatures exclusively from the local, offline WSUS server.
 
-9. **[Enable Secure Boot](#08-endpoints-README-md-08-endpoints-enable-secure-boot-md)**
+9. **[REQ-END-009 - Enable Secure Boot](#08-endpoints-README-md-08-endpoints-enable-secure-boot-md)**
    Mandates hardware-rooted platform integrity checks, preventing bootkits, rootkits, and unauthorized bootloader modifications.
 
-10. **[Enable VBS and Credential Guard](#08-endpoints-README-md-08-endpoints-enable-vbs-credential-guard-md)**
+10. **[REQ-END-010 - Enable VBS and Credential Guard](#08-endpoints-README-md-08-endpoints-enable-vbs-credential-guard-md)**
     Activates Virtualization-Based Security (VBS) and Credential Guard to protect password hashes and Kerberos tickets in an isolated virtual container, mitigating LSASS dumping.
 
-11. **[Configure Windows Defender Application Control](#08-endpoints-README-md-08-endpoints-configure-wdac-md)**
+11. **[REQ-END-011 - Configure Windows Defender Application Control](#08-endpoints-README-md-08-endpoints-configure-wdac-md)**
     Deploys application control baselines and the Microsoft Vulnerable Driver Blocklist to enforce code integrity policies, restricting the system to run only signed, authorized binaries, scripts, and secure drivers.
 
-12. **[Enable BitLocker and Network Unlock](#08-endpoints-README-md-08-endpoints-enable-bitlocker-md)**
+12. **[REQ-END-012 - Enable BitLocker and Network Unlock](#08-endpoints-README-md-08-endpoints-enable-bitlocker-md)**
     Enforces full disk encryption with TPM and enables secure Network Unlock capabilities for standard client workstations.
 
-13. **[UEFI Firmware Security Hardening](#08-endpoints-README-md-08-endpoints-configure-uefi-security-md)**
+13. **[REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-README-md-08-endpoints-configure-uefi-security-md)**
     Enforces password protection, disables Compatibility Support Module (CSM)/Legacy Boot, locks boot order, and configures secure firmware update policies.
 
-14. **[Hardware Virtualization and DMA Protection](#08-endpoints-README-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md)**
+14. **[REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-README-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md)**
     Enables CPU virtualization (VT-x/AMD-V) and IOMMU (VT-d/AMD-Vi) to provide the hardware-rooted platform integrity required for VBS and Kernel DMA protection.
 
-15. **[Disable Windows Platform Binary Table (WPBT)](#08-endpoints-README-md-08-endpoints-disable-wpbt-md)**
+15. **[REQ-END-015 - Disable Windows Platform Binary Table (WPBT)](#08-endpoints-README-md-08-endpoints-disable-wpbt-md)**
     Disables execution of binaries supplied by the Windows Platform Binary Table (WPBT) ACPI firmware table to mitigate boot-level security bypasses.
 
-16. **[Configure User Rights Assignments](#08-endpoints-README-md-08-endpoints-configure-user-rights-assignments-md)**
+16. **[REQ-END-016 - Configure User Rights Assignments](#08-endpoints-README-md-08-endpoints-configure-user-rights-assignments-md)**
     Restricts critical user rights assignments (URAs) such as debugging programs, token impersonation, and local logon permissions on standard client endpoints.
 
-17. **[Harden DMA and Physical Security](#08-endpoints-README-md-08-endpoints-harden-dma-and-physical-security-md)**
+17. **[REQ-END-017 - Harden DMA and Physical Security](#08-endpoints-README-md-08-endpoints-harden-dma-and-physical-security-md)**
     Mitigates physical access threat vectors by disabling standby sleep states (S1-S3), disabling external DMA device enumeration under lock, blocking legacy SBP-2 device classes, and denying write access to removable drives without BitLocker protection.
 
-18. **[Configure Account Policies](#08-endpoints-README-md-08-endpoints-configure-account-policies-md)**
+18. **[REQ-END-018 - Configure Account and Password Policies](#08-endpoints-README-md-08-endpoints-configure-account-policies-md)**
     Enforces local and domain-wide account settings, including account lockout thresholds, lockout observation windows, smart card removal actions, and disabling reversible password encryption.
 
-19. **[Configure User Profile Restrictions](#08-endpoints-README-md-08-endpoints-configure-user-profile-restrictions-md)**
+19. **[REQ-END-019 - Configure User Profile Restrictions](#08-endpoints-README-md-08-endpoints-configure-user-profile-restrictions-md)**
     Locks down user profile registry settings (HKCU) to disable toast notifications on the lock screen and block third-party application suggestions.
 
-20. **[Configure Exploit Protection Profile](#08-endpoints-README-md-08-endpoints-configure-exploit-protection-md)**
+20. **[REQ-END-020 - Configure Exploit Protection Profile](#08-endpoints-README-md-08-endpoints-configure-exploit-protection-md)**
     Configures and enforces a system-wide Microsoft Defender Exploit Protection profile to apply advanced memory mitigations (DEP, ASLR, CFG, SEHOP, Heap Integrity) on all endpoints.
 
-21. **[Restrict Safe Mode Access to Administrators](#08-endpoints-README-md-08-endpoints-disable-safe-mode-for-standard-users-md)**
+21. **[REQ-END-021 - Restrict Safe Mode Access to Administrators](#08-endpoints-README-md-08-endpoints-disable-safe-mode-for-standard-users-md)**
     Prevents standard (non-administrative) users from logging into the system while in Safe Mode by setting SafeModeBlockNonAdmins to 1.
 
-22. **[Block Outbound Traffic for Known LOLBins](#08-endpoints-README-md-08-endpoints-block-lolbins-outbound-traffic-md)**
+22. **[REQ-END-022 - Block Outbound Traffic for Known LOLBins](#08-endpoints-README-md-08-endpoints-block-lolbins-outbound-traffic-md)**
     Enforces Windows Defender Firewall outbound rules to block known Living Off the Land Binaries (LOLBins) from initiating outgoing network connections.
 
 
@@ -16022,8 +16022,8 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 <a id="08-endpoints-harden-network-and-name-resolution-md"></a>
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-hardening-requirement-harden-network-parameters-and-disable-legacy-name-resolution"></a>
-# Hardening Requirement: Harden Network Parameters and Disable Legacy Name Resolution
+<a id="08-endpoints-harden-network-and-name-resolution-md-req-end-001-harden-network-parameters-and-disable-legacy-name-resolution"></a>
+# [REQ-END-001] Harden Network Parameters and Disable Legacy Name Resolution
 
 <a id="08-endpoints-harden-network-and-name-resolution-md-target-scope"></a>
 ## Target Scope
@@ -16379,8 +16379,8 @@ if ($script:Vulnerable) {
 
 <a id="08-endpoints-configure-uac-policies-md"></a>
 
-<a id="08-endpoints-configure-uac-policies-md-hardening-requirement-configure-user-account-control-policies"></a>
-# Hardening Requirement: Configure User Account Control Policies
+<a id="08-endpoints-configure-uac-policies-md-req-end-002-configure-user-account-control-policies"></a>
+# [REQ-END-002] Configure User Account Control Policies
 
 <a id="08-endpoints-configure-uac-policies-md-target-scope"></a>
 ## Target Scope
@@ -16536,8 +16536,8 @@ if (Test-Path $SudoPath) {
 
 <a id="08-endpoints-disable-autoplay-autorun-md"></a>
 
-<a id="08-endpoints-disable-autoplay-autorun-md-hardening-requirement-disable-autoplay-and-autorun"></a>
-# Hardening Requirement: Disable AutoPlay and AutoRun
+<a id="08-endpoints-disable-autoplay-autorun-md-req-end-003-disable-autoplay-and-autorun"></a>
+# [REQ-END-003] Disable AutoPlay and AutoRun
 
 <a id="08-endpoints-disable-autoplay-autorun-md-target-scope"></a>
 ## Target Scope
@@ -16676,8 +16676,8 @@ Write-Host "    - NoAutoplayfornonVolume: $NoNonVolVal (Required = 1)" -Foregrou
 
 <a id="08-endpoints-block-removable-storage-md"></a>
 
-<a id="08-endpoints-block-removable-storage-md-hardening-requirement-block-removable-storage"></a>
-# Hardening Requirement: Block Removable Storage
+<a id="08-endpoints-block-removable-storage-md-req-end-004-block-removable-storage"></a>
+# [REQ-END-004] Block Removable Storage
 
 <a id="08-endpoints-block-removable-storage-md-target-scope"></a>
 ## Target Scope
@@ -16785,8 +16785,8 @@ Write-Host "    - Removable Storage Deny_All: $DenyAllVal (Required = 1)" -Foreg
 
 <a id="08-endpoints-restrict-rdp-access-md"></a>
 
-<a id="08-endpoints-restrict-rdp-access-md-hardening-requirement-restrict-remote-desktop-access"></a>
-# Hardening Requirement: Restrict Remote Desktop Access
+<a id="08-endpoints-restrict-rdp-access-md-req-end-005-restrict-remote-desktop-access"></a>
+# [REQ-END-005] Restrict Remote Desktop Access
 
 <a id="08-endpoints-restrict-rdp-access-md-target-scope"></a>
 ## Target Scope
@@ -16995,8 +16995,8 @@ if (Test-Path $TSPoliciesPath) {
 
 <a id="08-endpoints-restrict-local-admins-md"></a>
 
-<a id="08-endpoints-restrict-local-admins-md-hardening-requirement-restrict-local-administrators-group"></a>
-# Hardening Requirement: Restrict Local Administrators Group
+<a id="08-endpoints-restrict-local-admins-md-req-end-006-restrict-local-administrators-group"></a>
+# [REQ-END-006] Restrict Local Administrators Group
 
 <a id="08-endpoints-restrict-local-admins-md-target-scope"></a>
 ## Target Scope
@@ -17182,8 +17182,8 @@ if (Test-Path $RegistryPath) {
 
 <a id="08-endpoints-defender-antivirus-md"></a>
 
-<a id="08-endpoints-defender-antivirus-md-hardening-requirement-windows-defender-antivirus-baseline-and-exploit-guard"></a>
-# Hardening Requirement: Windows Defender Antivirus Baseline and Exploit Guard
+<a id="08-endpoints-defender-antivirus-md-req-end-007-windows-defender-antivirus-baseline-and-exploit-guard"></a>
+# [REQ-END-007] Windows Defender Antivirus Baseline and Exploit Guard
 
 <a id="08-endpoints-defender-antivirus-md-target-scope"></a>
 ## Target Scope
@@ -17775,8 +17775,8 @@ if (Test-Path $AmsiPath) {
 
 <a id="08-endpoints-wsus-client-config-md"></a>
 
-<a id="08-endpoints-wsus-client-config-md-hardening-requirement-wsus-client-configuration"></a>
-# Hardening Requirement: WSUS Client Configuration
+<a id="08-endpoints-wsus-client-config-md-req-end-008-wsus-client-configuration"></a>
+# [REQ-END-008] WSUS Client Configuration
 
 <a id="08-endpoints-wsus-client-config-md-target-scope"></a>
 ## Target Scope
@@ -17950,8 +17950,8 @@ Write-Host "    - Delivery Optimization DODownloadMode: $($DOVal | Out-String).T
 
 <a id="08-endpoints-enable-secure-boot-md"></a>
 
-<a id="08-endpoints-enable-secure-boot-md-hardening-requirement-enable-secure-boot"></a>
-# Hardening Requirement: Enable Secure Boot
+<a id="08-endpoints-enable-secure-boot-md-req-end-009-enable-secure-boot"></a>
+# [REQ-END-009] Enable Secure Boot
 
 <a id="08-endpoints-enable-secure-boot-md-target-scope"></a>
 ## Target Scope
@@ -17985,7 +17985,7 @@ If Secure Boot is disabled:
 
 <a id="08-endpoints-enable-secure-boot-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
-* **BIOS Mode Conversion**: Systems running in legacy BIOS mode (Compatibility Support Module - CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires changing partition styles from MBR to GPT (using tools like `MBR2GPT.exe`) and changing firmware settings; refer to [UEFI Firmware Security Hardening](#08-endpoints-enable-secure-boot-md-08-endpoints-configure-uefi-security-md) for firmware settings. Improper conversion can cause boot failures if not executed correctly.
+* **BIOS Mode Conversion**: Systems running in legacy BIOS mode (Compatibility Support Module - CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires changing partition styles from MBR to GPT (using tools like `MBR2GPT.exe`) and changing firmware settings; refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-enable-secure-boot-md-08-endpoints-configure-uefi-security-md) for firmware settings. Improper conversion can cause boot failures if not executed correctly.
 * **Dual-Boot Systems**: If the workstation dual-boots with unsigned Linux distributions or runs legacy recovery media, the firmware will reject the bootloader, preventing boot.
 * **BlackLotus Mitigation Risks**: Enforcing the BlackLotus DBX and SVN updates is a permanent, non-reversible action once written to the device firmware. If an administrator attempts to boot the machine using older, unpatched Windows installation media or recovery disks, the system will reject the boot manager and fail to boot. All recovery and deployment media must be updated with current security patches before applying these mitigations.
 
@@ -18129,8 +18129,8 @@ Write-Host "[+] BlackLotus DBX revocation update configured in registry. A syste
 
 <a id="08-endpoints-enable-vbs-credential-guard-md"></a>
 
-<a id="08-endpoints-enable-vbs-credential-guard-md-hardening-requirement-enable-vbs-and-credential-guard"></a>
-# Hardening Requirement: Enable VBS and Credential Guard
+<a id="08-endpoints-enable-vbs-credential-guard-md-req-end-010-enable-vbs-and-credential-guard"></a>
+# [REQ-END-010] Enable VBS and Credential Guard
 
 <a id="08-endpoints-enable-vbs-credential-guard-md-target-scope"></a>
 ## Target Scope
@@ -18171,7 +18171,7 @@ Enforcing VBS and Credential Guard prevents in-memory credential harvesting, bre
 <a id="08-endpoints-enable-vbs-credential-guard-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
 * **Virtualization Conflicts**: Third-party virtualization software (such as legacy versions of VMware Workstation or VirtualBox) that do not support nested virtualization or integration with Windows Hyper-V will fail to run when VBS is active.
-* **Hardware Requirements**: Systems must support CPU virtualization (Intel VT-x or AMD-V), Second Level Address Translation (SLAT), and have secure firmware (UEFI, Secure Boot, IOMMU / DMA protection) as strict pre-requisites. Refer to [UEFI Firmware Security Hardening](#08-endpoints-enable-vbs-credential-guard-md-08-endpoints-configure-uefi-security-md) and [Hardware Virtualization and DMA Protection](#08-endpoints-enable-vbs-credential-guard-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md) to ensure these platform security features are fully enabled in the firmware. Older client hardware that does not support these specifications cannot run Credential Guard.
+* **Hardware Requirements**: Systems must support CPU virtualization (Intel VT-x or AMD-V), Second Level Address Translation (SLAT), and have secure firmware (UEFI, Secure Boot, IOMMU / DMA protection) as strict pre-requisites. Refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-enable-vbs-credential-guard-md-08-endpoints-configure-uefi-security-md) and [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-enable-vbs-credential-guard-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md) to ensure these platform security features are fully enabled in the firmware. Older client hardware that does not support these specifications cannot run Credential Guard.
 
 ---
 
@@ -18283,8 +18283,8 @@ try {
 
 <a id="08-endpoints-configure-wdac-md"></a>
 
-<a id="08-endpoints-configure-wdac-md-hardening-requirement-configure-windows-defender-application-control"></a>
-# Hardening Requirement: Configure Windows Defender Application Control
+<a id="08-endpoints-configure-wdac-md-req-end-011-configure-windows-defender-application-control"></a>
+# [REQ-END-011] Configure Windows Defender Application Control
 
 <a id="08-endpoints-configure-wdac-md-target-scope"></a>
 ## Target Scope
@@ -18320,7 +18320,7 @@ Deploying a strict WDAC baseline ensures that only binaries and scripts signed b
 
 <a id="08-endpoints-configure-wdac-md-legacy-impact-compatibility"></a>
 ## Legacy Impact & Compatibility
-* **Pre-requisite (Memory Integrity/HVCI)**: Enforcing the vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [Enable VBS and Credential Guard](#08-endpoints-configure-wdac-md-08-endpoints-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [UEFI Firmware Security Hardening](#08-endpoints-configure-wdac-md-08-endpoints-configure-uefi-security-md) and [Hardware Virtualization and DMA Protection](#08-endpoints-configure-wdac-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md) for firmware setup.
+* **Pre-requisite (Memory Integrity/HVCI)**: Enforcing the vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-END-010 - Enable VBS and Credential Guard](#08-endpoints-configure-wdac-md-08-endpoints-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-configure-wdac-md-08-endpoints-configure-uefi-security-md) and [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-configure-wdac-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md) for firmware setup.
 * **Administrative Overhead**: Any new enterprise software must be added to the code integrity trust policy (by digital signature or folder exceptions). Deploying unapproved third-party software will trigger blocks.
 * **User Script Blocks**: Administrators and power users cannot write and run custom PowerShell or VBS scripts locally unless the scripts are digitally signed by a trusted certificate in the WDAC policy or run in a directory excluded by the rules.
 * **Audit Phase Mandate**: To prevent severe business disruption, WDAC policies must always be deployed in **Audit Mode** first. This logs would-be blocks to the Event Viewer without interrupting execution, allowing administrators to gather a list of required applications and construct rules before shifting to **Enforced Mode**.
@@ -18492,8 +18492,8 @@ if ($Vulnerable) {
 
 <a id="08-endpoints-enable-bitlocker-md"></a>
 
-<a id="08-endpoints-enable-bitlocker-md-hardening-requirement-enable-bitlocker-and-network-unlock"></a>
-# Hardening Requirement: Enable BitLocker and Network Unlock
+<a id="08-endpoints-enable-bitlocker-md-req-end-012-enable-bitlocker-and-network-unlock"></a>
+# [REQ-END-012] Enable BitLocker and Network Unlock
 
 <a id="08-endpoints-enable-bitlocker-md-target-scope"></a>
 ## Target Scope
@@ -18869,8 +18869,8 @@ Write-Host "`n    - AllowNetworkUnlock Registry Value: $NetUnlockSetting (Requir
 
 <a id="08-endpoints-configure-uefi-security-md"></a>
 
-<a id="08-endpoints-configure-uefi-security-md-hardening-requirement-uefi-firmware-security-hardening"></a>
-# Hardening Requirement: UEFI Firmware Security Hardening
+<a id="08-endpoints-configure-uefi-security-md-req-end-013-uefi-firmware-security-hardening"></a>
+# [REQ-END-013] UEFI Firmware Security Hardening
 
 <a id="08-endpoints-configure-uefi-security-md-target-scope"></a>
 ## Target Scope
@@ -19037,8 +19037,8 @@ if ($BiosDetails) {
 
 <a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md"></a>
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-hardening-requirement-enable-hardware-virtualization-and-dma-protection"></a>
-# Hardening Requirement: Enable Hardware Virtualization and DMA Protection
+<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-req-end-014-enable-hardware-virtualization-and-dma-protection"></a>
+# [REQ-END-014] Enable Hardware Virtualization and DMA Protection
 
 <a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-target-scope"></a>
 ## Target Scope
@@ -19200,8 +19200,8 @@ try {
 
 <a id="08-endpoints-disable-wpbt-md"></a>
 
-<a id="08-endpoints-disable-wpbt-md-hardening-requirement-disable-windows-platform-binary-table-wpbt"></a>
-# Hardening Requirement: Disable Windows Platform Binary Table (WPBT)
+<a id="08-endpoints-disable-wpbt-md-req-end-015-disable-windows-platform-binary-table-wpbt"></a>
+# [REQ-END-015] Disable Windows Platform Binary Table (WPBT)
 
 <a id="08-endpoints-disable-wpbt-md-target-scope"></a>
 ## Target Scope
@@ -19327,8 +19327,8 @@ if ($RegistryValue) {
 
 <a id="08-endpoints-configure-user-rights-assignments-md"></a>
 
-<a id="08-endpoints-configure-user-rights-assignments-md-hardening-requirement-configure-user-rights-assignments"></a>
-# Hardening Requirement: Configure User Rights Assignments
+<a id="08-endpoints-configure-user-rights-assignments-md-req-end-016-configure-user-rights-assignments"></a>
+# [REQ-END-016] Configure User Rights Assignments
 
 <a id="08-endpoints-configure-user-rights-assignments-md-target-scope"></a>
 ## Target Scope
@@ -19616,8 +19616,8 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 <a id="08-endpoints-harden-dma-and-physical-security-md"></a>
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-hardening-requirement-harden-dma-and-physical-security"></a>
-# Hardening Requirement: Harden DMA and Physical Security
+<a id="08-endpoints-harden-dma-and-physical-security-md-req-end-017-harden-dma-and-physical-security"></a>
+# [REQ-END-017] Harden DMA and Physical Security
 
 <a id="08-endpoints-harden-dma-and-physical-security-md-target-scope"></a>
 ## Target Scope
@@ -19865,8 +19865,8 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 1 [Block
 
 <a id="08-endpoints-configure-account-policies-md"></a>
 
-<a id="08-endpoints-configure-account-policies-md-hardening-requirement-configure-account-and-password-policies"></a>
-# Hardening Requirement: Configure Account and Password Policies
+<a id="08-endpoints-configure-account-policies-md-req-end-018-configure-account-and-password-policies"></a>
+# [REQ-END-018] Configure Account and Password Policies
 
 <a id="08-endpoints-configure-account-policies-md-target-scope"></a>
 ## Target Scope
@@ -20378,8 +20378,8 @@ if ($script:Vulnerable) {
 
 <a id="08-endpoints-configure-user-profile-restrictions-md"></a>
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-hardening-requirement-configure-user-profile-restrictions"></a>
-# Hardening Requirement: Configure User Profile Restrictions
+<a id="08-endpoints-configure-user-profile-restrictions-md-req-end-019-configure-user-profile-restrictions"></a>
+# [REQ-END-019] Configure User Profile Restrictions
 
 <a id="08-endpoints-configure-user-profile-restrictions-md-target-scope"></a>
 ## Target Scope
@@ -20935,8 +20935,8 @@ if ($script:Vulnerable) {
 
 <a id="08-endpoints-configure-exploit-protection-md"></a>
 
-<a id="08-endpoints-configure-exploit-protection-md-hardening-requirement-configure-exploit-protection-profile"></a>
-# Hardening Requirement: Configure Exploit Protection Profile
+<a id="08-endpoints-configure-exploit-protection-md-req-end-020-configure-exploit-protection-profile"></a>
+# [REQ-END-020] Configure Exploit Protection Profile
 
 <a id="08-endpoints-configure-exploit-protection-md-target-scope"></a>
 ## Target Scope
@@ -21329,8 +21329,8 @@ if ($BaselineFailed) {
 
 <a id="08-endpoints-disable-safe-mode-for-standard-users-md"></a>
 
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-hardening-requirement-restrict-safe-mode-access-to-administrators"></a>
-# Hardening Requirement: Restrict Safe Mode Access to Administrators
+<a id="08-endpoints-disable-safe-mode-for-standard-users-md-req-end-021-restrict-safe-mode-access-to-administrators"></a>
+# [REQ-END-021] Restrict Safe Mode Access to Administrators
 
 <a id="08-endpoints-disable-safe-mode-for-standard-users-md-target-scope"></a>
 ## Target Scope
@@ -21453,8 +21453,8 @@ exit 1
 
 <a id="08-endpoints-block-lolbins-outbound-traffic-md"></a>
 
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-hardening-requirement-block-outbound-traffic-for-known-lolbins"></a>
-# Hardening Requirement: Block Outbound Traffic for Known LOLBins
+<a id="08-endpoints-block-lolbins-outbound-traffic-md-req-end-022-block-outbound-traffic-for-known-lolbins"></a>
+# [REQ-END-022] Block Outbound Traffic for Known LOLBins
 
 <a id="08-endpoints-block-lolbins-outbound-traffic-md-target-scope"></a>
 ## Target Scope

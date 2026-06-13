@@ -1,4 +1,4 @@
-# Hardening Requirement: Enforce BitLocker with TPM and Startup PIN for PAWs
+# [REQ-PAW-004] Enforce BitLocker with TPM and Startup PIN for PAWs
 
 ## Target Scope
 * **Applicable Systems**: Tier 0 Privileged Access Workstations (PAWs).

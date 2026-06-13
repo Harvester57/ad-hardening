@@ -1,4 +1,4 @@
-# Hardening Requirement: Harden adminSDHolder Permissions
+# [REQ-DC-016] Harden adminSDHolder Permissions
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers

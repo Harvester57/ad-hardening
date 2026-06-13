@@ -1,4 +1,4 @@
-# Hardening Requirement: Enable Secure Boot
+# [REQ-END-009] Enable Secure Boot
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
@@ -28,7 +28,7 @@ If Secure Boot is disabled:
 ---
 
 ## Legacy Impact & Compatibility
-* **BIOS Mode Conversion**: Systems running in legacy BIOS mode (Compatibility Support Module - CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires changing partition styles from MBR to GPT (using tools like `MBR2GPT.exe`) and changing firmware settings; refer to [UEFI Firmware Security Hardening](configure-uefi-security.md) for firmware settings. Improper conversion can cause boot failures if not executed correctly.
+* **BIOS Mode Conversion**: Systems running in legacy BIOS mode (Compatibility Support Module - CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires changing partition styles from MBR to GPT (using tools like `MBR2GPT.exe`) and changing firmware settings; refer to [REQ-END-013 - UEFI Firmware Security Hardening](configure-uefi-security.md) for firmware settings. Improper conversion can cause boot failures if not executed correctly.
 * **Dual-Boot Systems**: If the workstation dual-boots with unsigned Linux distributions or runs legacy recovery media, the firmware will reject the bootloader, preventing boot.
 * **BlackLotus Mitigation Risks**: Enforcing the BlackLotus DBX and SVN updates is a permanent, non-reversible action once written to the device firmware. If an administrator attempts to boot the machine using older, unpatched Windows installation media or recovery disks, the system will reject the boot manager and fail to boot. All recovery and deployment media must be updated with current security patches before applying these mitigations.
 

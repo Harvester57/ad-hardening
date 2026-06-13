@@ -1,4 +1,4 @@
-# Hardening Requirement: Disable Machine Account Quota
+# [REQ-ID-017] Disable Machine Account Quota
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Domain Environment

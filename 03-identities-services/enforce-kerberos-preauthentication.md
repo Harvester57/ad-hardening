@@ -1,4 +1,4 @@
-# Hardening Requirement: Enforce Kerberos Pre-Authentication
+# [REQ-ID-009] Enforce Kerberos Pre-Authentication
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers (Active Directory User Accounts)

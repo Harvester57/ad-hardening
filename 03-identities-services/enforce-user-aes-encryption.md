@@ -1,4 +1,4 @@
-# Hardening Requirement: Enforce User and Service Account Kerberos Encryption (AES-Only)
+# [REQ-ID-008] Enforce User and Service Account Kerberos Encryption (AES-Only)
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers

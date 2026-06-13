@@ -101,11 +101,11 @@ Administrators must never connect directly to Domain Controllers from standard w
 
 To enforce this theoretical architecture on Domain Controllers and client computers, you must configure the following technical controls:
 
-1. **[Restrict Tier Logons](restrict-tier-logons.md)**
+1. **[REQ-ARCH-001 - Restrict Tier Logons](restrict-tier-logons.md)**
    Enforces User Rights Assignment GPOs to deny Tier 0 administrative accounts from logging on to Tier 1 and Tier 2 machines, and Tier 1 administrative accounts from logging on to Tier 2 machines.
 
-2. **[Restrict Administrative Management Protocols](restrict-mgmt-protocols.md)**
+2. **[REQ-ARCH-002 - Restrict Administrative Management Protocols](restrict-mgmt-protocols.md)**
    Enforces network-level restriction of RDP (TCP 3389) and WinRM (TCP 5985/5986) management traffic to specific administrative IP ranges and Jump Host IP addresses.
 
-3. **[Audit Privileged Groups](audit-privileged-groups.md)**
+3. **[REQ-ARCH-003 - Audit Privileged Groups](audit-privileged-groups.md)**
    Enforces regular automated checks on domain administrative groups to ensure no nested memberships or unapproved accounts are assigned Tier 0 rights.

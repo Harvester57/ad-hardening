@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure IPsec Domain Isolation
+# [REQ-NET-004] Configure IPsec Domain Isolation
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.

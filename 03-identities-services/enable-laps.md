@@ -1,4 +1,4 @@
-# Hardening Requirement: Enable Local Administrator Password Solution (LAPS)
+# [REQ-ID-002] Enable Local Administrator Password Solution (LAPS)
 
 ## Target Scope
 * **Applicable Systems**: Member Servers, Tier 2 Clients

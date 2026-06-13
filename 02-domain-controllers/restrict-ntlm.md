@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict NTLM
+# [REQ-DC-014] Restrict NTLM
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients

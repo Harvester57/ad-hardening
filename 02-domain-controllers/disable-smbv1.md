@@ -1,4 +1,4 @@
-# Hardening Requirement: Disable SMBv1
+# [REQ-DC-001] Disable SMBv1
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients

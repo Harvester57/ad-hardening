@@ -1,4 +1,4 @@
-# Hardening Requirement: Enforce Accidental Deletion Protection on Organizational Units
+# [REQ-ID-011] Enforce Accidental Deletion Protection on Organizational Units
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers

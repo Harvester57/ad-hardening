@@ -1,4 +1,4 @@
-# Hardening Requirement: Harden Microsoft DNS AD Container Permissions
+# [REQ-DC-017] Harden Microsoft DNS AD Container Permissions
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers

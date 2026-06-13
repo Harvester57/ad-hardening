@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict Interactive Logons for Service Accounts
+# [REQ-ID-007] Restrict Interactive Logons for Service Accounts
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients

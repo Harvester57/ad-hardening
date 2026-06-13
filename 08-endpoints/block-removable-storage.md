@@ -1,4 +1,4 @@
-# Hardening Requirement: Block Removable Storage
+# [REQ-END-004] Block Removable Storage
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations.

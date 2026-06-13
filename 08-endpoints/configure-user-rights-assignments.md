@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure User Rights Assignments
+# [REQ-END-016] Configure User Rights Assignments
 
 ## Target Scope
 * **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)

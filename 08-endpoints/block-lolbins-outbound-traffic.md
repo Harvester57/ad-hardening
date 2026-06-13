@@ -1,4 +1,4 @@
-# Hardening Requirement: Block Outbound Traffic for Known LOLBins
+# [REQ-END-022] Block Outbound Traffic for Known LOLBins
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.

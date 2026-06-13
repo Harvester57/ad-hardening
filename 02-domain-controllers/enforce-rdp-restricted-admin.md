@@ -1,4 +1,4 @@
-# Hardening Requirement: Enforce RDP Restricted Admin Mode
+# [REQ-DC-019] Enforce RDP Restricted Admin Mode
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients, PAWs

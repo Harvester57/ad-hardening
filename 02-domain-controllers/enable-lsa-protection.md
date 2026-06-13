@@ -1,4 +1,4 @@
-# Hardening Requirement: Enable LSA Protection
+# [REQ-DC-006] Enable LSA Protection
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients

@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure Account and Password Policies
+# [REQ-END-018] Configure Account and Password Policies
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers

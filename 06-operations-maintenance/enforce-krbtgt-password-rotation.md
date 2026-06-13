@@ -1,4 +1,4 @@
-# Hardening Requirement: Enforce KRBTGT Password Rotation
+# [REQ-OPS-001] Enforce KRBTGT Password Rotation
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers

@@ -1,4 +1,4 @@
-# Hardening Requirement: Windows Defender Antivirus PAW Baseline and Exploit Guard
+# [REQ-PAW-008] Windows Defender Antivirus PAW Baseline and Exploit Guard
 
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.

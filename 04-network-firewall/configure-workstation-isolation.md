@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure Workstation and Server Isolation
+# [REQ-NET-003] Configure Workstation and Server Isolation
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 Client Workstations, Member Servers.

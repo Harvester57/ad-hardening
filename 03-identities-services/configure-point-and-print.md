@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation
+# [REQ-ID-016] Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients.

@@ -1,4 +1,4 @@
-# Hardening Requirement: Harden Active Directory Domain Trusts
+# [REQ-ARCH-006] Harden Active Directory Domain Trusts
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers

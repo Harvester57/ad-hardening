@@ -1,4 +1,4 @@
-# Hardening Requirement: Renew KDS Root Keys and gMSA Secrets
+# [REQ-ID-014] Renew KDS Root Keys and gMSA Secrets
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Group Managed Service Accounts (gMSAs)

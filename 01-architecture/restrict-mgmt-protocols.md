@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict Administrative Management Protocols
+# [REQ-ARCH-002] Restrict Administrative Management Protocols
 
 ## Target Scope
 * **Applicable Systems**: Tier 0 assets (Domain Controllers, Jump Hosts) and Tier 1 member servers.

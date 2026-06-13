@@ -1,4 +1,4 @@
-# Hardening Requirement: Default Domain and Domain Controllers Policies Management
+# [REQ-ARCH-005] Default Domain and Domain Controllers Policies Management
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers and Domain Members (Forest-wide)

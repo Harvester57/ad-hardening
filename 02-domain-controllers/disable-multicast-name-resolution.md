@@ -1,4 +1,4 @@
-# Hardening Requirement: Disable Multicast Name Resolution
+# [REQ-DC-002] Disable Multicast Name Resolution
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients

@@ -1,4 +1,4 @@
-# Hardening Requirement: [Short, Clear Title of the Requirement]
+# [REQ-XXX-000] [Short, Clear Title of the Requirement]
 
 ## Target Scope
 * **Applicable Systems**: [e.g., Domain Controllers, Member Servers, Tier 2 Clients (Windows 10/11)]

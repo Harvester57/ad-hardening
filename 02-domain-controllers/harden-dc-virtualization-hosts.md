@@ -1,4 +1,4 @@
-# Hardening Requirement: Harden Virtualization Hosts for Domain Controllers
+# [REQ-DC-018] Harden Virtualization Hosts for Domain Controllers
 
 ## Target Scope
 * **Applicable Systems**: Virtualization Hosts (Hyper-V / VMware ESXi hosting Domain Controllers)

@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure AppLocker Policies for PAWs
+# [REQ-PAW-001] Configure AppLocker Policies for PAWs
 
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.

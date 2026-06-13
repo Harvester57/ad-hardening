@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure User Profile Restrictions
+# [REQ-END-019] Configure User Profile Restrictions
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 Client Workstations

@@ -1,4 +1,4 @@
-# Hardening Requirement: Deploy and Harden Microsoft Sysmon
+# [REQ-LOG-003] Deploy and Harden Microsoft Sysmon
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.

@@ -1,4 +1,4 @@
-# Hardening Requirement: Enable WDAC Driver Blocklist
+# [REQ-PAW-012] Enable WDAC Driver Blocklist
 
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs)
@@ -22,7 +22,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
 ---
 
 ## Legacy Impact & Compatibility
-* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [Enable VBS and Credential Guard for PAWs](enable-vbs-credential-guard.md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [UEFI Firmware Security Hardening](configure-uefi-security.md) and [Hardware Virtualization and DMA Protection](enable-hardware-virtualization-and-dma-protection.md) for firmware configuration.
+* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](enable-vbs-credential-guard.md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](configure-uefi-security.md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](enable-hardware-virtualization-and-dma-protection.md) for firmware configuration.
 * **Compatibility with Legacy Drivers**: Third-party backup, monitoring, or hardware administration software running deprecated, vulnerable drivers may fail to load. All such software must be updated to use secure, modern drivers.
 * **Deployment Testing**: To prevent system instability, the WDAC blocklist policy should be deployed in **Audit Mode** initially to verify that no critical operational drivers are blocked in production before shifting to enforcement mode.
 

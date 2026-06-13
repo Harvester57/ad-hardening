@@ -1,4 +1,4 @@
-# Hardening Requirement: Enforce LDAP Channel Binding
+# [REQ-DC-005] Enforce LDAP Channel Binding
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers

@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure Hardened UNC Paths and LDAP Client Signing
+# [REQ-NET-009] Configure Hardened UNC Paths and LDAP Client Signing
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients.

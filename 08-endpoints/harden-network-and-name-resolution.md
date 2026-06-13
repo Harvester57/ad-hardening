@@ -1,4 +1,4 @@
-# Hardening Requirement: Harden Network Parameters and Disable Legacy Name Resolution
+# [REQ-END-001] Harden Network Parameters and Disable Legacy Name Resolution
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.

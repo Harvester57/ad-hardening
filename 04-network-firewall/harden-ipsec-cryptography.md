@@ -1,4 +1,4 @@
-# Hardening Requirement: Harden IPsec Cryptographic Configurations
+# [REQ-NET-005] Harden IPsec Cryptographic Configurations
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.

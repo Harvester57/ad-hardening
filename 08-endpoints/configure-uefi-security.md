@@ -1,4 +1,4 @@
-# Hardening Requirement: UEFI Firmware Security Hardening
+# [REQ-END-013] UEFI Firmware Security Hardening
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.

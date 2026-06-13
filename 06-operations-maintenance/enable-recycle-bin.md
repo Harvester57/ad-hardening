@@ -1,4 +1,4 @@
-# Hardening Requirement: Enable and Configure the Active Directory Recycle Bin
+# [REQ-OPS-002] Enable and Configure the Active Directory Recycle Bin
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers (Forest-wide configuration)

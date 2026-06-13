@@ -1,4 +1,4 @@
-# Hardening Requirement: Implement Group Managed Service Accounts (gMSA)
+# [REQ-ID-003] Implement Group Managed Service Accounts (gMSA)
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers

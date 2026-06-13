@@ -1,4 +1,4 @@
-# Hardening Requirement: Harden DMA and Physical Security for PAWs
+# [REQ-PAW-011] Harden DMA and Physical Security for PAWs
 
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.

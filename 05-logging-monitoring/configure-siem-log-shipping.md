@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure Secure SIEM Log Shipping
+# [REQ-LOG-004] Configure Secure SIEM Log Shipping
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.

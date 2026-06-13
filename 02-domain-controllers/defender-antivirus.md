@@ -1,4 +1,4 @@
-# Hardening Requirement: Windows Defender Antivirus Domain Controller Baseline and Exploit Guard
+# [REQ-DC-020] Windows Defender Antivirus Domain Controller Baseline and Exploit Guard
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers.

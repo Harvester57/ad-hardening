@@ -1,4 +1,4 @@
-# Hardening Requirement: Rename and Disable Default Administrator and Guest Accounts
+# [REQ-ID-006] Rename and Disable Default Administrator and Guest Accounts
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients

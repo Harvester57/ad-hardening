@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict Remote Desktop Access
+# [REQ-END-005] Restrict Remote Desktop Access
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.

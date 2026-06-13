@@ -1,4 +1,4 @@
-# Hardening Requirement: Disable NTLMv1
+# [REQ-DC-003] Disable NTLMv1
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients

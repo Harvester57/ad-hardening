@@ -1,4 +1,4 @@
-# Hardening Requirement: Enforce LDAP Server Signing
+# [REQ-DC-004] Enforce LDAP Server Signing
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers

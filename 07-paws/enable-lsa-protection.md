@@ -1,4 +1,4 @@
-# Hardening Requirement: Enable LSA Protection for PAWs
+# [REQ-PAW-002] Enable LSA Protection for PAWs
 
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.

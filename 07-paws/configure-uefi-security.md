@@ -1,4 +1,4 @@
-# Hardening Requirement: UEFI Firmware Security Hardening
+# [REQ-PAW-005] UEFI Firmware Security Hardening
 
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.

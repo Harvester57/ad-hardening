@@ -1,4 +1,4 @@
-# Hardening Requirement: Restrict RPC Dynamic Ports
+# [REQ-NET-002] Restrict RPC Dynamic Ports
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers.

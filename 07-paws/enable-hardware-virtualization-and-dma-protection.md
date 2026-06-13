@@ -1,4 +1,4 @@
-# Hardening Requirement: Enable Hardware Virtualization and DMA Protection
+# [REQ-PAW-006] Enable Hardware Virtualization and DMA Protection
 
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
