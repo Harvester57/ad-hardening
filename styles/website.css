@@ -240,6 +240,9 @@
 
 /* Header Navbar Styling */
 .book-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
   background: var(--bg-primary) !important;
   border-bottom: 1px solid var(--border-color) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01) !important;
@@ -247,6 +250,9 @@
 }
 
 .book-header h1 {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
   font-family: 'Outfit', sans-serif !important;
   font-weight: 600 !important;
   font-size: 1.1em !important;
