@@ -6,11 +6,13 @@
     "gitbook:summary": "python scripts/generate_summary.py",
     "gitbook:build": "npm run gitbook:summary && honkit build",
     "gitbook:serve": "npm run gitbook:summary && honkit serve",
-    "gitbook:stop": "powershell -Command \"Get-NetTCPConnection -LocalPort 4000,35729 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }; exit 0\""
+    "gitbook:stop": "powershell -Command \"Get-NetTCPConnection -LocalPort 4000,35729 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }; exit 0\"",
+    "pdf:build": "python scripts/compile_docs.py && node scripts/generate_pdf.js"
   },
   "devDependencies": {
     "gitbook-plugin-flexible-alerts": "^1.0.4",
     "honkit": "^6.2.1",
-    "honkit-plugin-prism": "^2.5.4"
+    "honkit-plugin-prism": "^2.5.4",
+    "md-to-pdf": "^5.2.5"
   }
 }
