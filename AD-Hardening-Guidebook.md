@@ -1,4 +1,9 @@
 ---
+launch_options:
+  args:
+    - --no-sandbox
+    - --disable-setuid-sandbox
+    - --disable-gpu
 pdf_options:
   format: A4
   margin:
@@ -13,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 0fae49a | Generated: June 13, 2026</span>
+      <span>Commit: c1a3b4e | Generated: June 14, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -34,12 +39,12 @@ pdf_options:
     <li>Tier 2 Client Workstations: Windows 10 and above</li>
   </ul>
   <hr>
-  <p><em>Generated dynamically on: June 13, 2026</em></p>
+  <p><em>Generated dynamically on: June 14, 2026</em></p>
 </div>
 
-<a id="README-md"></a>
+<div id="README-md"></div>
 
-<a id="README-md-active-directory-hardening-guidebook"></a>
+<div id="README-md-active-directory-hardening-guidebook"></div>
 # Active Directory Hardening Guidebook
 
 Welcome to the **Active Directory Hardening Guidebook**. This repository contains a structured, production-grade set of hardening requirements and guidelines specifically designed for securing **modern Active Directory (AD) environments** in **air-gapped (offline)** settings. 
@@ -56,158 +61,154 @@ All security recommendations contained herein are aligned with the following cyb
 
 ---
 
-<a id="README-md-table-of-contents"></a>
+<div id="README-md-table-of-contents"></div>
 ### Table of Contents
 
 The guidebook is organized into eight functional modules:
 
-1. **[Module 1: Architecture & Administrative Tiering](#README-md-01-architecture-readme-md)**
+1. **[Module 1: Architecture & Administrative Tiering](#01-architecture-README-md)**
    * Entry point index and technical treatise on Active Directory tiering and administrative boundaries.
    * Hardening controls:
-     * [REQ-ARCH-001 - Restrict Tier Logons](#README-md-01-architecture-restrict-tier-logons-md)
-     * [REQ-ARCH-002 - Restrict Administrative Management Protocols](#README-md-01-architecture-restrict-mgmt-protocols-md)
-     * [REQ-ARCH-003 - Audit Privileged Groups](#README-md-01-architecture-audit-privileged-groups-md)
-     * [REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](#README-md-01-architecture-keep-functional-levels-up-to-date-md)
-     * [REQ-ARCH-005 - Default Domain and Domain Controllers Policies Management](#README-md-01-architecture-default-policies-recommendations-md)
-     * [REQ-ARCH-006 - Harden Active Directory Domain Trusts](#README-md-01-architecture-harden-domain-trusts-md)
-2. **[Module 2: Domain Controller Hardening](#README-md-02-domain-controllers-readme-md)**
+     * [REQ-ARCH-001 - Restrict Tier Logons](#01-architecture-restrict-tier-logons-md)
+     * [REQ-ARCH-002 - Restrict Administrative Management Protocols](#01-architecture-restrict-mgmt-protocols-md)
+     * [REQ-ARCH-003 - Audit Privileged Groups](#01-architecture-audit-privileged-groups-md)
+     * [REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](#01-architecture-keep-functional-levels-up-to-date-md)
+     * [REQ-ARCH-005 - Default Domain and Domain Controllers Policies Management](#01-architecture-default-policies-recommendations-md)
+     * [REQ-ARCH-006 - Harden Active Directory Domain Trusts](#01-architecture-harden-domain-trusts-md)
+2. **[Module 2: Domain Controller Hardening](#02-domain-controllers-README-md)**
    * Operating system-level DC security configuration.
    * Hardening controls:
-     * [REQ-DC-001 - Disable SMBv1](#README-md-02-domain-controllers-disable-smbv1-md)
-     * [REQ-DC-002 - Disable Multicast Name Resolution](#README-md-02-domain-controllers-disable-multicast-name-resolution-md)
-     * [REQ-DC-003 - Disable NTLMv1](#README-md-02-domain-controllers-disable-ntlmv1-md)
-     * [REQ-DC-004 - Enforce LDAP Server Signing](#README-md-02-domain-controllers-enforce-ldap-signing-md)
-     * [REQ-DC-005 - Enforce LDAP Channel Binding](#README-md-02-domain-controllers-enforce-ldap-channel-binding-md)
-     * [REQ-DC-006 - Enable LSA Protection](#README-md-02-domain-controllers-enable-lsa-protection-md)
-     * [REQ-DC-007 - Enable Credential Guard](#README-md-02-domain-controllers-enable-credential-guard-md)
-     * [REQ-DC-008 - Disable Print Spooler Service](#README-md-02-domain-controllers-disable-print-spooler-md)
-     * [REQ-DC-009 - Enforce SMB Message Signing](#README-md-02-domain-controllers-enforce-smb-signing-md)
-     * [REQ-DC-010 - Restrict Kerberos Encryption Types](#README-md-02-domain-controllers-restrict-kerberos-encryption-md)
-     * [REQ-DC-011 - Restrict Remote SAM API Access](#README-md-02-domain-controllers-restrict-ntds-sam-api-md)
-     * [REQ-DC-012 - Disable Unnecessary Services on Domain Controllers](#README-md-02-domain-controllers-disable-unnecessary-services-md)
-     * [REQ-DC-013 - Enable Kerberos Armoring](#README-md-02-domain-controllers-enable-kerberos-armoring-md)
-     * [REQ-DC-014 - Restrict NTLM](#README-md-02-domain-controllers-restrict-ntlm-md)
-     * [REQ-DC-015 - Migrate SYSVOL Replication to DFSR](#README-md-02-domain-controllers-migrate-sysvol-replication-dfsr-md)
-     * [REQ-DC-016 - Harden adminSDHolder Permissions](#README-md-02-domain-controllers-harden-adminsdholder-permissions-md)
-     * [REQ-DC-017 - Harden Microsoft DNS AD Container Permissions](#README-md-02-domain-controllers-harden-dns-container-permissions-md)
-     * [REQ-DC-018 - Harden Virtualization Hosts for Domain Controllers](#README-md-02-domain-controllers-harden-dc-virtualization-hosts-md)
-     * [REQ-DC-019 - Enforce RDP Restricted Admin Mode](#README-md-02-domain-controllers-enforce-rdp-restricted-admin-md)
-     * [REQ-DC-020 - Windows Defender Antivirus Domain Controller Baseline and Exploit Guard](#README-md-02-domain-controllers-defender-antivirus-md)
-     * [REQ-DC-021 - Configure AppLocker Policies on Domain Controllers](#README-md-02-domain-controllers-configure-applocker-policies-md)
-3. **[Module 3: Identities & Services Hardening](#README-md-03-identities-services-readme-md)**
+     * [REQ-DC-001 - Disable SMBv1](#02-domain-controllers-disable-smbv1-md)
+     * [REQ-DC-002 - Disable Multicast Name Resolution](#02-domain-controllers-disable-multicast-name-resolution-md)
+     * [REQ-DC-003 - Disable NTLMv1](#02-domain-controllers-disable-ntlmv1-md)
+     * [REQ-DC-004 - Enforce LDAP Server Signing](#02-domain-controllers-enforce-ldap-signing-md)
+     * [REQ-DC-005 - Enforce LDAP Channel Binding](#02-domain-controllers-enforce-ldap-channel-binding-md)
+     * [REQ-DC-006 - Enable LSA Protection](#02-domain-controllers-enable-lsa-protection-md)
+     * [REQ-DC-007 - Enable Credential Guard](#02-domain-controllers-enable-credential-guard-md)
+     * [REQ-DC-008 - Disable Print Spooler Service](#02-domain-controllers-disable-print-spooler-md)
+     * [REQ-DC-009 - Enforce SMB Message Signing](#02-domain-controllers-enforce-smb-signing-md)
+     * [REQ-DC-010 - Restrict Kerberos Encryption Types](#02-domain-controllers-restrict-kerberos-encryption-md)
+     * [REQ-DC-011 - Restrict Remote SAM API Access](#02-domain-controllers-restrict-ntds-sam-api-md)
+     * [REQ-DC-012 - Disable Unnecessary Services on Domain Controllers](#02-domain-controllers-disable-unnecessary-services-md)
+     * [REQ-DC-013 - Enable Kerberos Armoring](#02-domain-controllers-enable-kerberos-armoring-md)
+     * [REQ-DC-014 - Restrict NTLM](#02-domain-controllers-restrict-ntlm-md)
+     * [REQ-DC-015 - Migrate SYSVOL Replication to DFSR](#02-domain-controllers-migrate-sysvol-replication-dfsr-md)
+     * [REQ-DC-016 - Harden adminSDHolder Permissions](#02-domain-controllers-harden-adminsdholder-permissions-md)
+     * [REQ-DC-017 - Harden Microsoft DNS AD Container Permissions](#02-domain-controllers-harden-dns-container-permissions-md)
+     * [REQ-DC-018 - Harden Virtualization Hosts for Domain Controllers](#02-domain-controllers-harden-dc-virtualization-hosts-md)
+     * [REQ-DC-019 - Enforce RDP Restricted Admin Mode](#02-domain-controllers-enforce-rdp-restricted-admin-md)
+     * [REQ-DC-020 - Windows Defender Antivirus Domain Controller Baseline and Exploit Guard](#02-domain-controllers-defender-antivirus-md)
+     * [REQ-DC-021 - Configure AppLocker Policies on Domain Controllers](#02-domain-controllers-configure-applocker-policies-md)
+3. **[Module 3: Identities & Services Hardening](#03-identities-services-README-md)**
    * Administrative identity protection, credential hygiene, and service account hardening.
    * Hardening controls:
-     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](#README-md-03-identities-services-enforce-fgpp-md)
-     * [REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](#README-md-03-identities-services-enable-laps-md)
-     * [REQ-ID-003 - Implement Group Managed Service Accounts (gMSA)](#README-md-03-identities-services-harden-service-accounts-md)
-     * [REQ-ID-004 - Restrict Kerberos Delegation](#README-md-03-identities-services-restrict-kerberos-delegation-md)
-     * [REQ-ID-005 - Configure and Populate Protected Users Group](#README-md-03-identities-services-configure-protected-users-group-md)
-     * [REQ-ID-006 - Rename and Disable Default Administrator and Guest Accounts](#README-md-03-identities-services-harden-default-accounts-md)
-     * [REQ-ID-007 - Restrict Interactive Logons for Service Accounts](#README-md-03-identities-services-restrict-service-account-logons-md)
-     * [REQ-ID-008 - Enforce User and Service Account Kerberos Encryption (AES-Only)](#README-md-03-identities-services-enforce-user-aes-encryption-md)
-     * [REQ-ID-009 - Enforce Kerberos Pre-Authentication](#README-md-03-identities-services-enforce-kerberos-preauthentication-md)
-     * [REQ-ID-010 - Restrict Schema Administrators Group Membership](#README-md-03-identities-services-restrict-schema-admins-md)
-     * [REQ-ID-011 - Enforce Accidental Deletion Protection on Organizational Units](#README-md-03-identities-services-prevent-accidental-deletion-ous-md)
-     * [REQ-ID-012 - Configure Active Directory Authentication Silos and Policies](#README-md-03-identities-services-configure-authentication-silos-md)
-     * [REQ-ID-013 - Clean Up adminCount Attribute Orphans](#README-md-03-identities-services-cleanup-admincount-orphans-md)
-     * [REQ-ID-014 - Renew KDS Root Keys and gMSA Secrets](#README-md-03-identities-services-renew-kds-keys-gmsa-secrets-md)
-     * [REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#README-md-03-identities-services-harden-adcs-pki-md)
-     * [REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](#README-md-03-identities-services-configure-point-and-print-md)
-     * [REQ-ID-017 - Disable Machine Account Quota](#README-md-03-identities-services-disable-machine-account-quota-md)
-     * [REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#README-md-03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)
-4. **[Module 4: Network Configuration & Firewalling](#README-md-04-network-firewall-readme-md)**
+     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](#03-identities-services-enforce-fgpp-md)
+     * [REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](#03-identities-services-enable-laps-md)
+     * [REQ-ID-003 - Implement Group Managed Service Accounts (gMSA)](#03-identities-services-harden-service-accounts-md)
+     * [REQ-ID-004 - Restrict Kerberos Delegation](#03-identities-services-restrict-kerberos-delegation-md)
+     * [REQ-ID-005 - Configure and Populate Protected Users Group](#03-identities-services-configure-protected-users-group-md)
+     * [REQ-ID-006 - Rename and Disable Default Administrator and Guest Accounts](#03-identities-services-harden-default-accounts-md)
+     * [REQ-ID-007 - Restrict Interactive Logons for Service Accounts](#03-identities-services-restrict-service-account-logons-md)
+     * [REQ-ID-008 - Enforce User and Service Account Kerberos Encryption (AES-Only)](#03-identities-services-enforce-user-aes-encryption-md)
+     * [REQ-ID-009 - Enforce Kerberos Pre-Authentication](#03-identities-services-enforce-kerberos-preauthentication-md)
+     * [REQ-ID-010 - Restrict Schema Administrators Group Membership](#03-identities-services-restrict-schema-admins-md)
+     * [REQ-ID-011 - Enforce Accidental Deletion Protection on Organizational Units](#03-identities-services-prevent-accidental-deletion-ous-md)
+     * [REQ-ID-012 - Configure Active Directory Authentication Silos and Policies](#03-identities-services-configure-authentication-silos-md)
+     * [REQ-ID-013 - Clean Up adminCount Attribute Orphans](#03-identities-services-cleanup-admincount-orphans-md)
+     * [REQ-ID-014 - Renew KDS Root Keys and gMSA Secrets](#03-identities-services-renew-kds-keys-gmsa-secrets-md)
+     * [REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#03-identities-services-harden-adcs-pki-md)
+     * [REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](#03-identities-services-configure-point-and-print-md)
+     * [REQ-ID-017 - Disable Machine Account Quota](#03-identities-services-disable-machine-account-quota-md)
+     * [REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)
+4. **[Module 4: Network Configuration & Firewalling](#04-network-firewall-README-md)**
    * Active Directory network boundaries, port configurations, and encryption/authentication configurations.
    * Hardening controls:
-     * [REQ-NET-001 - Configure Active Directory Port Matrix](#README-md-04-network-firewall-configure-ad-port-matrix-md)
-     * [REQ-NET-002 - Restrict RPC Dynamic Ports](#README-md-04-network-firewall-restrict-rpc-dynamic-ports-md)
-     * [REQ-NET-003 - Configure Workstation and Server Isolation](#README-md-04-network-firewall-configure-workstation-isolation-md)
-     * [REQ-NET-004 - Configure IPsec Domain Isolation](#README-md-04-network-firewall-configure-ipsec-domain-isolation-md)
-     * [REQ-NET-005 - Harden IPsec Cryptographic Configurations](#README-md-04-network-firewall-harden-ipsec-cryptography-md)
-     * [REQ-NET-006 - Harden TLS Protocols, Cipher Suites, and Elliptic Curves](#README-md-04-network-firewall-harden-tls-configuration-md)
-     * [REQ-NET-007 - Enforce SMBv3 Security and Digitally Sign/Encrypt Communications](#README-md-04-network-firewall-enforce-smbv3-security-md)
-     * [REQ-NET-008 - Configure Firewall Logging and Operational Settings](#README-md-04-network-firewall-configure-firewall-logging-md)
-     * [REQ-NET-009 - Configure Hardened UNC Paths and LDAP Client Signing](#README-md-04-network-firewall-configure-hardened-unc-paths-md)
-     * [REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](#README-md-04-network-firewall-harden-winrm-service-md)
-5. **[Module 5: Logging, Monitoring & SIEM](#README-md-05-logging-monitoring-readme-md)**
+     * [REQ-NET-001 - Configure Active Directory Port Matrix](#04-network-firewall-configure-ad-port-matrix-md)
+     * [REQ-NET-002 - Restrict RPC Dynamic Ports](#04-network-firewall-restrict-rpc-dynamic-ports-md)
+     * [REQ-NET-003 - Configure Workstation and Server Isolation](#04-network-firewall-configure-workstation-isolation-md)
+     * [REQ-NET-004 - Configure IPsec Domain Isolation](#04-network-firewall-configure-ipsec-domain-isolation-md)
+     * [REQ-NET-005 - Harden IPsec Cryptographic Configurations](#04-network-firewall-harden-ipsec-cryptography-md)
+     * [REQ-NET-006 - Harden TLS Protocols, Cipher Suites, and Elliptic Curves](#04-network-firewall-harden-tls-configuration-md)
+     * [REQ-NET-007 - Enforce SMBv3 Security and Digitally Sign/Encrypt Communications](#04-network-firewall-enforce-smbv3-security-md)
+     * [REQ-NET-008 - Configure Firewall Logging and Operational Settings](#04-network-firewall-configure-firewall-logging-md)
+     * [REQ-NET-009 - Configure Hardened UNC Paths and LDAP Client Signing](#04-network-firewall-configure-hardened-unc-paths-md)
+     * [REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](#04-network-firewall-harden-winrm-service-md)
+5. **[Module 5: Logging, Monitoring & SIEM](#05-logging-monitoring-README-md)**
    * Entry point index for security log auditing, host monitoring, and centralized SIEM ingestion.
    * Hardening controls:
-     * [REQ-LOG-001 - Configure Advanced Security Audit Policies](#README-md-05-logging-monitoring-configure-advanced-audit-policies-md)
-     * [REQ-LOG-002 - Configure PowerShell and Command-Line Auditing](#README-md-05-logging-monitoring-configure-powershell-and-command-line-auditing-md)
-     * [REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](#README-md-05-logging-monitoring-deploy-and-harden-sysmon-md)
-     * [REQ-LOG-004 - Configure Secure SIEM Log Shipping](#README-md-05-logging-monitoring-configure-siem-log-shipping-md)
-6. **[Module 6: Secure Operations & Maintenance](#README-md-06-operations-maintenance-readme-md)**
+     * [REQ-LOG-001 - Configure Advanced Security Audit Policies](#05-logging-monitoring-configure-advanced-audit-policies-md)
+     * [REQ-LOG-002 - Configure PowerShell and Command-Line Auditing](#05-logging-monitoring-configure-powershell-and-command-line-auditing-md)
+     * [REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](#05-logging-monitoring-deploy-and-harden-sysmon-md)
+     * [REQ-LOG-004 - Configure Secure SIEM Log Shipping](#05-logging-monitoring-configure-siem-log-shipping-md)
+6. **[Module 6: Secure Operations & Maintenance](#06-operations-maintenance-README-md)**
    * AD System State backup, restore, and offline immutable storage.
    * Hardening controls:
-     * [Secure Operations and Maintenance Baseline](#README-md-06-operations-maintenance-ops-and-maintenance-md)
-     * [REQ-OPS-001 - Enforce KRBTGT Password Rotation](#README-md-06-operations-maintenance-enforce-krbtgt-password-rotation-md)
-     * [REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](#README-md-06-operations-maintenance-enable-recycle-bin-md)
-     * [REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#README-md-06-operations-maintenance-maintain-gpo-templates-md)
-     * [REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](#README-md-06-operations-maintenance-use-third-party-templates-md)
-     * [REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#README-md-06-operations-maintenance-configure-dedicated-tier0-wsus-md)
-7. **[Module 7: Privileged Access Workstations (PAWs) Hardening](#README-md-07-paws-readme-md)**
+     * [Secure Operations and Maintenance Baseline](#06-operations-maintenance-ops-and-maintenance-md)
+     * [REQ-OPS-001 - Enforce KRBTGT Password Rotation](#06-operations-maintenance-enforce-krbtgt-password-rotation-md)
+     * [REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](#06-operations-maintenance-enable-recycle-bin-md)
+     * [REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#06-operations-maintenance-maintain-gpo-templates-md)
+     * [REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](#06-operations-maintenance-use-third-party-templates-md)
+     * [REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#06-operations-maintenance-configure-dedicated-tier0-wsus-md)
+7. **[Module 7: Privileged Access Workstations (PAWs) Hardening](#07-paws-README-md)**
    * Physical and operating system isolation rules for administration devices.
    * Hardening controls:
-     * [REQ-PAW-001 - Configure AppLocker Policies for PAWs](#README-md-07-paws-configure-applocker-policies-md)
-     * [REQ-PAW-002 - Enable LSA Protection for PAWs](#README-md-07-paws-enable-lsa-protection-md)
-     * [REQ-PAW-003 - Restrict Local Administrators Group for PAWs](#README-md-07-paws-restrict-local-administrators-md)
-     * [REQ-PAW-004 - Enforce BitLocker with TPM and Startup PIN for PAWs](#README-md-07-paws-enable-bitlocker-md)
-     * [REQ-PAW-005 - UEFI Firmware Security Hardening](#README-md-07-paws-configure-uefi-security-md)
-     * [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#README-md-07-paws-enable-hardware-virtualization-and-dma-protection-md)
-     * [REQ-PAW-007 - Disable Windows Platform Binary Table (WPBT)](#README-md-07-paws-disable-wpbt-md)
-     * [REQ-PAW-008 - Windows Defender Antivirus PAW Baseline and Exploit Guard](#README-md-07-paws-defender-antivirus-md)
-     * [REQ-PAW-009 - Configure User Rights Assignments for PAWs](#README-md-07-paws-configure-user-rights-assignments-md)
-     * [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#README-md-07-paws-enable-vbs-credential-guard-md)
-     * [REQ-PAW-011 - Harden DMA and Physical Security for PAWs](#README-md-07-paws-harden-dma-and-physical-security-md)
-8. **[Module 8: Endpoint Hardening](#README-md-08-endpoints-readme-md)**
+     * [REQ-PAW-001 - Configure AppLocker Policies for PAWs](#07-paws-configure-applocker-policies-md)
+     * [REQ-PAW-002 - Enable LSA Protection for PAWs](#07-paws-enable-lsa-protection-md)
+     * [REQ-PAW-003 - Restrict Local Administrators Group for PAWs](#07-paws-restrict-local-administrators-md)
+     * [REQ-PAW-004 - Enforce BitLocker with TPM and Startup PIN for PAWs](#07-paws-enable-bitlocker-md)
+     * [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-configure-uefi-security-md)
+     * [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-hardware-virtualization-and-dma-protection-md)
+     * [REQ-PAW-007 - Disable Windows Platform Binary Table (WPBT)](#07-paws-disable-wpbt-md)
+     * [REQ-PAW-008 - Windows Defender Antivirus PAW Baseline and Exploit Guard](#07-paws-defender-antivirus-md)
+     * [REQ-PAW-009 - Configure User Rights Assignments for PAWs](#07-paws-configure-user-rights-assignments-md)
+     * [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#07-paws-enable-vbs-credential-guard-md)
+     * [REQ-PAW-011 - Harden DMA and Physical Security for PAWs](#07-paws-harden-dma-and-physical-security-md)
+8. **[Module 8: Endpoint Hardening](#08-endpoints-README-md)**
    * Entry point index for Tier 2 workstation security.
    * Hardening controls:
-     * [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](#README-md-08-endpoints-harden-network-and-name-resolution-md)
-     * [REQ-END-002 - Configure User Account Control Policies](#README-md-08-endpoints-configure-uac-policies-md)
-     * [REQ-END-003 - Disable AutoPlay and AutoRun](#README-md-08-endpoints-disable-autoplay-autorun-md)
-     * [REQ-END-004 - Block Removable Storage](#README-md-08-endpoints-block-removable-storage-md)
-     * [REQ-END-005 - Restrict Remote Desktop Access](#README-md-08-endpoints-restrict-rdp-access-md)
-     * [REQ-END-006 - Restrict Local Administrators Group](#README-md-08-endpoints-restrict-local-admins-md)
-     * [REQ-END-007 - Windows Defender Antivirus Baseline and Exploit Guard](#README-md-08-endpoints-defender-antivirus-md)
-     * [REQ-END-008 - WSUS Client Configuration](#README-md-08-endpoints-wsus-client-config-md)
-     * [REQ-END-009 - Enable Secure Boot](#README-md-08-endpoints-enable-secure-boot-md)
-     * [REQ-END-010 - Enable VBS and Credential Guard](#README-md-08-endpoints-enable-vbs-credential-guard-md)
-     * [REQ-END-011 - Configure Windows Defender Application Control](#README-md-08-endpoints-configure-wdac-md)
-     * [REQ-END-012 - Enable BitLocker and Network Unlock](#README-md-08-endpoints-enable-bitlocker-md)
-     * [REQ-END-013 - UEFI Firmware Security Hardening](#README-md-08-endpoints-configure-uefi-security-md)
-     * [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#README-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md)
-     * [REQ-END-015 - Disable Windows Platform Binary Table (WPBT)](#README-md-08-endpoints-disable-wpbt-md)
-     * [REQ-END-016 - Configure User Rights Assignments](#README-md-08-endpoints-configure-user-rights-assignments-md)
-     * [REQ-END-017 - Harden DMA and Physical Security](#README-md-08-endpoints-harden-dma-and-physical-security-md)
-     * [REQ-END-018 - Configure Account and Password Policies](#README-md-08-endpoints-configure-account-policies-md)
-     * [REQ-END-019 - Configure User Profile Restrictions](#README-md-08-endpoints-configure-user-profile-restrictions-md)
-     * [REQ-END-022 - Block Outbound Traffic for Known LOLBins](#README-md-08-endpoints-block-lolbins-outbound-traffic-md)
+     * [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](#08-endpoints-harden-network-and-name-resolution-md)
+     * [REQ-END-002 - Configure User Account Control Policies](#08-endpoints-configure-uac-policies-md)
+     * [REQ-END-003 - Disable AutoPlay and AutoRun](#08-endpoints-disable-autoplay-autorun-md)
+     * [REQ-END-004 - Block Removable Storage](#08-endpoints-block-removable-storage-md)
+     * [REQ-END-005 - Restrict Remote Desktop Access](#08-endpoints-restrict-rdp-access-md)
+     * [REQ-END-006 - Restrict Local Administrators Group](#08-endpoints-restrict-local-admins-md)
+     * [REQ-END-007 - Windows Defender Antivirus Baseline and Exploit Guard](#08-endpoints-defender-antivirus-md)
+     * [REQ-END-008 - WSUS Client Configuration](#08-endpoints-wsus-client-config-md)
+     * [REQ-END-009 - Enable Secure Boot](#08-endpoints-enable-secure-boot-md)
+     * [REQ-END-010 - Enable VBS and Credential Guard](#08-endpoints-enable-vbs-credential-guard-md)
+     * [REQ-END-011 - Configure Windows Defender Application Control](#08-endpoints-configure-wdac-md)
+     * [REQ-END-012 - Enable BitLocker and Network Unlock](#08-endpoints-enable-bitlocker-md)
+     * [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-configure-uefi-security-md)
+     * [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-enable-hardware-virtualization-and-dma-protection-md)
+     * [REQ-END-015 - Disable Windows Platform Binary Table (WPBT)](#08-endpoints-disable-wpbt-md)
+     * [REQ-END-016 - Configure User Rights Assignments](#08-endpoints-configure-user-rights-assignments-md)
+     * [REQ-END-017 - Harden DMA and Physical Security](#08-endpoints-harden-dma-and-physical-security-md)
+     * [REQ-END-018 - Configure Account and Password Policies](#08-endpoints-configure-account-policies-md)
+     * [REQ-END-019 - Configure User Profile Restrictions](#08-endpoints-configure-user-profile-restrictions-md)
+     * [REQ-END-022 - Block Outbound Traffic for Known LOLBins](#08-endpoints-block-lolbins-outbound-traffic-md)
 
 ---
 
-<a id="README-md-compliance-mapping-matrix"></a>
-## Compliance Mapping Matrix
+<div id="README-md-compliance-mapping-matrices"></div>
+## Compliance Mapping Matrices
 
-Below is a cross-reference matrix mapping each guidebook module to specific guidelines from **ANSSI**, **CIS**, and **Microsoft Security Baselines**:
+To ensure full transparency and compliance alignment, the unified compliance matrix has been split into three distinct, dedicated mapping matrices:
 
-| Module | ANSSI AD Guide Recommendation | CIS Windows Server/10 Benchmark | Microsoft Security Baseline Focus |
-| :--- | :--- | :--- | :--- |
-| **[M1: Architecture](#README-md-01-architecture-readme-md)**<br>- [REQ-ARCH-001 - Restrict Tier Logons](#README-md-01-architecture-restrict-tier-logons-md)<br>- [REQ-ARCH-002 - Restrict Administrative Management Protocols](#README-md-01-architecture-restrict-mgmt-protocols-md)<br>- [REQ-ARCH-003 - Audit Privileged Groups](#README-md-01-architecture-audit-privileged-groups-md)<br>- [REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](#README-md-01-architecture-keep-functional-levels-up-to-date-md)<br>- [REQ-ARCH-005 - Default Domain and Domain Controllers Policies Management](#README-md-01-architecture-default-policies-recommendations-md)<br>- [REQ-ARCH-006 - Harden Active Directory Domain Trusts](#README-md-01-architecture-harden-domain-trusts-md) | ANSSI R1, R2, R3 (Tiering Model)<br>ANSSI R8 (Management subnets) | Section 18.2 (User Rights)<br>Section 19 (Windows Defender Firewall) | Privileged access boundaries, logon blocks, and management protocol restrictions. |
-| **[M2: Domain Controllers](#README-md-02-domain-controllers-readme-md)**<br>- [REQ-DC-001 - Disable SMBv1](#README-md-02-domain-controllers-disable-smbv1-md)<br>- [REQ-DC-002 - Disable Multicast Name Resolution](#README-md-02-domain-controllers-disable-multicast-name-resolution-md)<br>- [REQ-DC-003 - Disable NTLMv1](#README-md-02-domain-controllers-disable-ntlmv1-md)<br>- [REQ-DC-004 - Enforce LDAP Server Signing](#README-md-02-domain-controllers-enforce-ldap-signing-md)<br>- [REQ-DC-005 - Enforce LDAP Channel Binding](#README-md-02-domain-controllers-enforce-ldap-channel-binding-md)<br>- [REQ-DC-006 - Enable LSA Protection](#README-md-02-domain-controllers-enable-lsa-protection-md)<br>- [REQ-DC-007 - Enable Credential Guard](#README-md-02-domain-controllers-enable-credential-guard-md)<br>- [REQ-DC-008 - Disable Print Spooler Service](#README-md-02-domain-controllers-disable-print-spooler-md)<br>- [REQ-DC-009 - Enforce SMB Message Signing](#README-md-02-domain-controllers-enforce-smb-signing-md)<br>- [REQ-DC-010 - Restrict Kerberos Encryption Types](#README-md-02-domain-controllers-restrict-kerberos-encryption-md)<br>- [REQ-DC-011 - Restrict Remote SAM API Access](#README-md-02-domain-controllers-restrict-ntds-sam-api-md)<br>- [REQ-DC-012 - Disable Unnecessary Services on Domain Controllers](#README-md-02-domain-controllers-disable-unnecessary-services-md)<br>- [REQ-DC-013 - Enable Kerberos Armoring](#README-md-02-domain-controllers-enable-kerberos-armoring-md)<br>- [REQ-DC-014 - Restrict NTLM](#README-md-02-domain-controllers-restrict-ntlm-md)<br>- [REQ-DC-015 - Migrate SYSVOL Replication to DFSR](#README-md-02-domain-controllers-migrate-sysvol-replication-dfsr-md)<br>- [REQ-DC-016 - Harden adminSDHolder Permissions](#README-md-02-domain-controllers-harden-adminsdholder-permissions-md)<br>- [REQ-DC-017 - Harden Microsoft DNS AD Container Permissions](#README-md-02-domain-controllers-harden-dns-container-permissions-md)<br>- [REQ-DC-018 - Harden Virtualization Hosts for Domain Controllers](#README-md-02-domain-controllers-harden-dc-virtualization-hosts-md)<br>- [REQ-DC-019 - Enforce RDP Restricted Admin Mode](#README-md-02-domain-controllers-enforce-rdp-restricted-admin-md)<br>- [REQ-DC-020 - Windows Defender Antivirus Domain Controller Baseline and Exploit Guard](#README-md-02-domain-controllers-defender-antivirus-md)<br>- [REQ-DC-021 - Configure AppLocker Policies on Domain Controllers](#README-md-02-domain-controllers-configure-applocker-policies-md) | R19, R20 (LDAP Signing/Channel Binding), R22 (Spooler), R14 (LSA) | Section 2.3 (Security Options), Section 18.9 (System Services) | Credential Guard, Device Guard, Protocol Deprecation, AppLocker |
-| **[M3: Identities & Services](#README-md-03-identities-services-readme-md)**<br>- [REQ-ID-001 - Enforce Fine-Grained Password Policies](#README-md-03-identities-services-enforce-fgpp-md)<br>- [REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](#README-md-03-identities-services-enable-laps-md)<br>- [REQ-ID-003 - Implement Group Managed Service Accounts (gMSA)](#README-md-03-identities-services-harden-service-accounts-md)<br>- [REQ-ID-004 - Restrict Kerberos Delegation](#README-md-03-identities-services-restrict-kerberos-delegation-md)<br>- [REQ-ID-005 - Configure and Populate Protected Users Group](#README-md-03-identities-services-configure-protected-users-group-md)<br>- [REQ-ID-006 - Rename and Disable Default Administrator and Guest Accounts](#README-md-03-identities-services-harden-default-accounts-md)<br>- [REQ-ID-007 - Restrict Interactive Logons for Service Accounts](#README-md-03-identities-services-restrict-service-account-logons-md)<br>- [REQ-ID-008 - Enforce User and Service Account Kerberos Encryption (AES-Only)](#README-md-03-identities-services-enforce-user-aes-encryption-md)<br>- [REQ-ID-009 - Enforce Kerberos Pre-Authentication](#README-md-03-identities-services-enforce-kerberos-preauthentication-md)<br>- [REQ-ID-010 - Restrict Schema Administrators Group Membership](#README-md-03-identities-services-restrict-schema-admins-md)<br>- [REQ-ID-011 - Enforce Accidental Deletion Protection on Organizational Units](#README-md-03-identities-services-prevent-accidental-deletion-ous-md)<br>- [REQ-ID-012 - Configure Active Directory Authentication Silos and Policies](#README-md-03-identities-services-configure-authentication-silos-md)<br>- [REQ-ID-013 - Clean Up adminCount Attribute Orphans](#README-md-03-identities-services-cleanup-admincount-orphans-md)<br>- [REQ-ID-014 - Renew KDS Root Keys and gMSA Secrets](#README-md-03-identities-services-renew-kds-keys-gmsa-secrets-md)<br>- [REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#README-md-03-identities-services-harden-adcs-pki-md)<br>- [REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](#README-md-03-identities-services-configure-point-and-print-md)<br>- [REQ-ID-017 - Disable Machine Account Quota](#README-md-03-identities-services-disable-machine-account-quota-md)<br>- [REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#README-md-03-identities-services-restrict-pre-windows-2000-compatible-access-group-md) | R9 (LAPS), R35 (gMSA), R15, R16 (Kerberos Delegation), R14 | Section 1.1 (Account Policies), Section 2.2.4 (User Rights), Section 2.3.10 (Network Security) | Password Complexity, Kerberos Encryption, LAPS Configuration, Point and Print restrictions, Machine Account Quota restriction, anonymous access restrictions |
-| **[M4: Network & Firewall](#README-md-04-network-firewall-readme-md)**<br>- [REQ-NET-001 - Configure Active Directory Port Matrix](#README-md-04-network-firewall-configure-ad-port-matrix-md)<br>- [REQ-NET-002 - Restrict RPC Dynamic Ports](#README-md-04-network-firewall-restrict-rpc-dynamic-ports-md)<br>- [REQ-NET-003 - Configure Workstation and Server Isolation](#README-md-04-network-firewall-configure-workstation-isolation-md)<br>- [REQ-NET-004 - Configure IPsec Domain Isolation](#README-md-04-network-firewall-configure-ipsec-domain-isolation-md)<br>- [REQ-NET-005 - Harden IPsec Cryptographic Configurations](#README-md-04-network-firewall-harden-ipsec-cryptography-md)<br>- [REQ-NET-006 - Harden TLS Protocols, Cipher Suites, and Elliptic Curves](#README-md-04-network-firewall-harden-tls-configuration-md)<br>- [REQ-NET-007 - Enforce SMBv3 Security and Digitally Sign/Encrypt Communications](#README-md-04-network-firewall-enforce-smbv3-security-md)<br>- [REQ-NET-008 - Configure Firewall Logging and Operational Settings](#README-md-04-network-firewall-configure-firewall-logging-md)<br>- [REQ-NET-009 - Configure Hardened UNC Paths and LDAP Client Signing](#README-md-04-network-firewall-configure-hardened-unc-paths-md)<br>- [REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](#README-md-04-network-firewall-harden-winrm-service-md) | R7 (IPsec), R8 (Administration subnets), R19 (Hardened UNC Paths) | Section 19 (Windows Defender Firewall) | Network Isolation, IPsec Domain Security, WinRM and RPC Client Hardening |
-| **[M5: Logging & SIEM](#README-md-05-logging-monitoring-readme-md)**<br>- [REQ-LOG-001 - Configure Advanced Security Audit Policies](#README-md-05-logging-monitoring-configure-advanced-audit-policies-md)<br>- [REQ-LOG-002 - Configure PowerShell and Command-Line Auditing](#README-md-05-logging-monitoring-configure-powershell-and-command-line-auditing-md)<br>- [REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](#README-md-05-logging-monitoring-deploy-and-harden-sysmon-md)<br>- [REQ-LOG-004 - Configure Secure SIEM Log Shipping](#README-md-05-logging-monitoring-configure-siem-log-shipping-md) | R48 (Audit Policy), R50 (PowerShell Log), R52 (Sysmon/WEC) | Section 9 (Audit Policy), Section 18.8 (PowerShell Logging) | Advanced Audit Policy, Transcription, Command Line Logs |
-| **[M6: Ops & Maintenance](#README-md-06-operations-maintenance-readme-md)**<br>- [Secure Operations and Maintenance Baseline](#README-md-06-operations-maintenance-ops-and-maintenance-md)<br>- [REQ-OPS-001 - Enforce KRBTGT Password Rotation](#README-md-06-operations-maintenance-enforce-krbtgt-password-rotation-md)<br>- [REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](#README-md-06-operations-maintenance-enable-recycle-bin-md)<br>- [REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#README-md-06-operations-maintenance-maintain-gpo-templates-md)<br>- [REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](#README-md-06-operations-maintenance-use-third-party-templates-md)<br>- [REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#README-md-06-operations-maintenance-configure-dedicated-tier0-wsus-md) | R54 (AD Backup), R57 (Vulnerability Assessment) | Section 18.3 (System/Recovery Options) | Patch Management, Offline Disaster Recovery |
-| **[M7: PAWs Hardening](#README-md-07-paws-readme-md)**<br>- [REQ-PAW-001 - Configure AppLocker Policies for PAWs](#README-md-07-paws-configure-applocker-policies-md)<br>- [REQ-PAW-002 - Enable LSA Protection for PAWs](#README-md-07-paws-enable-lsa-protection-md)<br>- [REQ-PAW-003 - Restrict Local Administrators Group for PAWs](#README-md-07-paws-restrict-local-administrators-md)<br>- [REQ-PAW-004 - Enforce BitLocker with TPM and Startup PIN for PAWs](#README-md-07-paws-enable-bitlocker-md)<br>- [REQ-PAW-005 - UEFI Firmware Security Hardening](#README-md-07-paws-configure-uefi-security-md)<br>- [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#README-md-07-paws-enable-hardware-virtualization-and-dma-protection-md)<br>- [REQ-PAW-007 - Disable Windows Platform Binary Table (WPBT)](#README-md-07-paws-disable-wpbt-md)<br>- [REQ-PAW-008 - Windows Defender Antivirus PAW Baseline and Exploit Guard](#README-md-07-paws-defender-antivirus-md)<br>- [REQ-PAW-009 - Configure User Rights Assignments for PAWs](#README-md-07-paws-configure-user-rights-assignments-md)<br>- [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#README-md-07-paws-enable-vbs-credential-guard-md)<br>- [REQ-PAW-011 - Harden DMA and Physical Security for PAWs](#README-md-07-paws-harden-dma-and-physical-security-md) | R58 (Use of PAWs) | Section 18.2.1 (LSA Protection), Section 18.8 (Device Guard/HVCI), Section 18.2.1.1 (BitLocker Startup Auth), Section 18.2.1.2 (Enhanced PINs), Section 18.2.1.3 (PIN Length) | VBS, AppLocker, Device Guard, and secure BitLocker disk encryption with Startup PIN. |
-| **[M8: Endpoint Hardening](#README-md-08-endpoints-readme-md)**<br>- [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](#README-md-08-endpoints-harden-network-and-name-resolution-md)<br>- [REQ-END-002 - Configure User Account Control Policies](#README-md-08-endpoints-configure-uac-policies-md)<br>- [REQ-END-003 - Disable AutoPlay and AutoRun](#README-md-08-endpoints-disable-autoplay-autorun-md)<br>- [REQ-END-004 - Block Removable Storage](#README-md-08-endpoints-block-removable-storage-md)<br>- [REQ-END-005 - Restrict Remote Desktop Access](#README-md-08-endpoints-restrict-rdp-access-md)<br>- [REQ-END-006 - Restrict Local Administrators Group](#README-md-08-endpoints-restrict-local-admins-md)<br>- [REQ-END-007 - Windows Defender Antivirus Baseline and Exploit Guard](#README-md-08-endpoints-defender-antivirus-md)<br>- [REQ-END-008 - WSUS Client Configuration](#README-md-08-endpoints-wsus-client-config-md)<br>- [REQ-END-009 - Enable Secure Boot](#README-md-08-endpoints-enable-secure-boot-md)<br>- [REQ-END-010 - Enable VBS and Credential Guard](#README-md-08-endpoints-enable-vbs-credential-guard-md)<br>- [REQ-END-011 - Configure Windows Defender Application Control](#README-md-08-endpoints-configure-wdac-md)<br>- [REQ-END-012 - Enable BitLocker and Network Unlock](#README-md-08-endpoints-enable-bitlocker-md)<br>- [REQ-END-013 - UEFI Firmware Security Hardening](#README-md-08-endpoints-configure-uefi-security-md)<br>- [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#README-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md)<br>- [REQ-END-015 - Disable Windows Platform Binary Table (WPBT)](#README-md-08-endpoints-disable-wpbt-md)<br>- [REQ-END-016 - Configure User Rights Assignments](#README-md-08-endpoints-configure-user-rights-assignments-md)<br>- [REQ-END-017 - Harden DMA and Physical Security](#README-md-08-endpoints-harden-dma-and-physical-security-md)<br>- [REQ-END-018 - Configure Account and Password Policies](#README-md-08-endpoints-configure-account-policies-md)<br>- [REQ-END-019 - Configure User Profile Restrictions](#README-md-08-endpoints-configure-user-profile-restrictions-md)<br>- [REQ-END-022 - Block Outbound Traffic for Known LOLBins](#README-md-08-endpoints-block-lolbins-outbound-traffic-md) | ANSSI R19 (Client signing)<br>ANSSI R9 (LAPS context)<br>ANSSI R58 (PAW / Endpoint encryption) | Section 9.1 (LLMNR)<br>Section 2.3.17 (UAC)<br>Section 18.3.1 (AutoPlay)<br>Section 18.9.82 (USB)<br>Section 18.2.1 (NLA)<br>Section 5.5 (Admins)<br>Section 18.9.47 (Defender)<br>Section 18.2.2 (WSUS)<br>Section 18.8.14.1 (Secure Boot/VBS)<br>Section 18.8.14.2 (Credential Guard)<br>Section 18.8.14.3 (WDAC)<br>Section 18.2.1.1 (Startup Auth)<br>Section 18.2.1.5 (Network Unlock) | Comprehensive Tier 2 workstation security configurations, network resolution controls, offline defense settings, disk encryption, and outbound firewall block rules. |
+*   **[ANSSI Compliance Matrix](#compliance-anssi-md)**: Detailed mapping to the recommendations of the ANSSI Active Directory Hardening Guide.
+*   **[CIS Benchmarks Compliance Matrix](#compliance-cis-md)**: Detailed mapping to the Center for Internet Security (CIS) Windows Server and Windows Client Benchmarks.
+*   **[Microsoft Security Baselines Compliance Matrix](#compliance-microsoft-md)**: Detailed mapping to Microsoft Security Baselines focus areas.
+
+These detailed matrices extract each control from the respective guidelines and declare its compliance coverage status (**Covered** or **Not Covered**) alongside links to the corresponding technical controls in this guidebook.
+
 
 ---
 
-<a id="README-md-script-verification"></a>
+<div id="README-md-script-verification"></div>
 ## Script Verification
 
 To ensure that the markdown files contain valid links and that all embedded PowerShell code snippets are syntactically correct, you can run the verification script located in the root of this workspace.
 
-<a id="README-md-running-the-verification-script"></a>
+<div id="README-md-running-the-verification-script"></div>
 ### Running the Verification Script
 
 Open a PowerShell console and run:
@@ -221,53 +222,53 @@ The script parses all markdown documents, verifies internal relative links, and 
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-architecture-README-md"></a>
+<div id="01-architecture-README-md"></div>
 
-<a id="01-architecture-README-md-module-1-architecture-administrative-tiering"></a>
+<div id="01-architecture-README-md-module-1-architecture-administrative-tiering"></div>
 # Module 1: Architecture & Administrative Tiering
 
 This directory contains the Active Directory Administrative Tiering Model definitions, theoretical designs, and technical enforcement controls for secure, air-gapped environments.
 
-<a id="01-architecture-README-md-architecture-treatise-guidelines"></a>
+<div id="01-architecture-README-md-architecture-treatise-guidelines"></div>
 ## Architecture Treatise & Guidelines
 
-* **[Tiering and Architecture Overview](#01-architecture-README-md-01-architecture-tiering-and-architecture-md)**
+* **[Tiering and Architecture Overview](#01-architecture-tiering-and-architecture-md)**
   Detailed design treatise covering administrative boundaries (Tier 0, Tier 1, Tier 2), Organizational Unit layout structures, custom naming conventions, credentials hygiene, and management routing from PAWs to DCs via secure jump hosts.
 
-<a id="01-architecture-README-md-technical-hardening-controls"></a>
+<div id="01-architecture-README-md-technical-hardening-controls"></div>
 ## Technical Hardening Controls
 
-1. **[REQ-ARCH-001 - Restrict Tier Logons](#01-architecture-README-md-01-architecture-restrict-tier-logons-md)**
+1. **[REQ-ARCH-001 - Restrict Tier Logons](#01-architecture-restrict-tier-logons-md)**
    Enforces User Rights Assignment GPOs to block high-privilege administrators (Tier 0/1) from authenticating interactively or via network logon on lower-tier computers (Tier 1/2), preventing credential exposure in LSASS memory.
 
-2. **[REQ-ARCH-002 - Restrict Administrative Management Protocols](#01-architecture-README-md-01-architecture-restrict-mgmt-protocols-md)**
+2. **[REQ-ARCH-002 - Restrict Administrative Management Protocols](#01-architecture-restrict-mgmt-protocols-md)**
    Restricts inbound Remote Desktop (RDP) and Windows Remote Management (WinRM) administrative protocols to dedicated, secure administrative subnets and jump hosts.
 
-3. **[REQ-ARCH-003 - Audit Privileged Groups](#01-architecture-README-md-01-architecture-audit-privileged-groups-md)**
+3. **[REQ-ARCH-003 - Audit Privileged Groups](#01-architecture-audit-privileged-groups-md)**
    Implements automated auditing of Tier 0 administrative Active Directory groups to detect nested memberships and unauthorized additions.
 
-4. **[REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](#01-architecture-README-md-01-architecture-keep-functional-levels-up-to-date-md)**
+4. **[REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](#01-architecture-keep-functional-levels-up-to-date-md)**
    Recommends migrating Domain and Forest Functional Levels to Windows Server 2016 or higher to unlock critical security features like the Protected Users group, gMSAs, and Kerberos Armoring.
 
-5. **[REQ-ARCH-005 - Default Domain and Domain Controllers Policies Management](#01-architecture-README-md-01-architecture-default-policies-recommendations-md)**
+5. **[REQ-ARCH-005 - Default Domain and Domain Controllers Policies Management](#01-architecture-default-policies-recommendations-md)**
    Provides structural guidelines to separate custom hardening policies into dedicated, modular GPOs rather than directly editing Default Domain/DC policies, protecting the forest baseline.
 
-6. **[REQ-ARCH-006 - Harden Active Directory Domain Trusts](#01-architecture-README-md-01-architecture-harden-domain-trusts-md)**
+6. **[REQ-ARCH-006 - Harden Active Directory Domain Trusts](#01-architecture-harden-domain-trusts-md)**
    Hardens trust relationships across forest and external boundaries by disabling SID History, enabling Quarantine (SID filtering), enforcing Selective Authentication, and blocking Kerberos TGT Delegation.
 
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-architecture-tiering-and-architecture-md"></a>
+<div id="01-architecture-tiering-and-architecture-md"></div>
 
-<a id="01-architecture-tiering-and-architecture-md-module-1-architecture-and-administrative-tiering"></a>
+<div id="01-architecture-tiering-and-architecture-md-module-1-architecture-and-administrative-tiering"></div>
 # Module 1: Architecture and Administrative Tiering
 
 This document details the design principles, theoretical concepts, threat vectors, and management rules governing the Active Directory Administrative Tiering Model in secure, air-gapped environments.
 
 ---
 
-<a id="01-architecture-tiering-and-architecture-md-1-rationale-behind-the-tiering-model"></a>
+<div id="01-architecture-tiering-and-architecture-md-1-rationale-behind-the-tiering-model"></div>
 ## 1. Rationale Behind the Tiering Model
 
 Active Directory directory services run as a shared security database where trust is transitive across the entire domain. By default, any account with local administrator rights on a domain-joined machine can access memory components containing active authentication tokens.
@@ -280,34 +281,34 @@ The administrative tiering model prevents this escalation pathway by establishin
 
 ---
 
-<a id="01-architecture-tiering-and-architecture-md-2-threat-model-and-mitigated-attack-vectors"></a>
+<div id="01-architecture-tiering-and-architecture-md-2-threat-model-and-mitigated-attack-vectors"></div>
 ## 2. Threat Model and Mitigated Attack Vectors
 
 Implementing administrative tiering directly mitigates the most common and critical Active Directory exploit techniques:
 
-<a id="01-architecture-tiering-and-architecture-md-credential-harvesting-from-lsass-memory-dumping"></a>
+<div id="01-architecture-tiering-and-architecture-md-credential-harvesting-from-lsass-memory-dumping"></div>
 ### Credential Harvesting from LSASS (Memory Dumping)
 * **Threat**: When a user logs on to a Windows machine, the LSASS process caches credentials (hashes, Kerberos tickets, or cleartext passwords depending on OS configuration) to support single sign-on. Tools like Mimikatz allow attackers with local administrator rights on that host to read LSASS memory and extract these secrets.
 * **Mitigation**: Under the tiering model, Tier 0 administrators are restricted from logging on to Tier 1 and Tier 2 machines. If an attacker dumps LSASS on a Tier 2 endpoint, they will only find Tier 2 user credentials, preventing them from escalating to domain administrator levels.
 
-<a id="01-architecture-tiering-and-architecture-md-pass-the-hash-pth-and-overpass-the-hash"></a>
+<div id="01-architecture-tiering-and-architecture-md-pass-the-hash-pth-and-overpass-the-hash"></div>
 ### Pass-the-Hash (PtH) and Overpass-the-Hash
 * **Threat**: Windows uses NTLM hashes for local and network authentication. Attackers do not need to decrypt NTLM hashes to authenticate; they can present the captured hash directly to target systems to log on as that user.
 * **Mitigation**: Enforcing explicit boundaries prevents Tier 0 and Tier 1 hashes from being cached on Tier 2 endpoints, meaning there are no high-tier hashes on standard machines for attackers to pass or relay.
 
-<a id="01-architecture-tiering-and-architecture-md-coercion-and-relay-attacks-eg-petitpotam-printer-bug"></a>
+<div id="01-architecture-tiering-and-architecture-md-coercion-and-relay-attacks-eg-petitpotam-printer-bug"></div>
 ### Coercion and Relay Attacks (e.g., PetitPotam, Printer Bug)
 * **Threat**: Attackers coercion tools force a machine account (such as a Domain Controller) to initiate an authentication request to an attacker-controlled listener. The attacker then relays this machine credential to other services (like Active Directory Certificate Services) to generate domain administrator certificates.
 * **Mitigation**: Active Directory tiering, coupled with workstation isolation and network boundaries, blocks cross-tier network protocols (such as SMB/RPC) between workstations and Domain Controllers, preventing the relay path.
 
 ---
 
-<a id="01-architecture-tiering-and-architecture-md-3-theoretical-implementation"></a>
+<div id="01-architecture-tiering-and-architecture-md-3-theoretical-implementation"></div>
 ## 3. Theoretical Implementation
 
 Enforcing administrative tiering requires structural separation in Active Directory at the Organizational Unit (OU) level, Group Policy level, and account naming level.
 
-<a id="01-architecture-tiering-and-architecture-md-organizational-unit-ou-structure"></a>
+<div id="01-architecture-tiering-and-architecture-md-organizational-unit-ou-structure"></div>
 ### Organizational Unit (OU) Structure
 Active Directory OUs must be organized to group assets logically by security level:
 
@@ -327,14 +328,14 @@ Domain Root (domain.local)
 |  |  +- Tier 2 Local Administrators
 ```
 
-<a id="01-architecture-tiering-and-architecture-md-group-policy-object-gpo-separation"></a>
+<div id="01-architecture-tiering-and-architecture-md-group-policy-object-gpo-separation"></div>
 ### Group Policy Object (GPO) Separation
 Separate, distinct GPOs must be created and linked to each tier's OU. Cross-linking GPOs is prohibited:
 * **GPO_Hardening_Tier0**: Linked only to the Tier 0 OU. Defines strict Logon Rights, audits NTDS access, and enforces LSA/Credential Guard policies.
 * **GPO_Hardening_Tier1**: Linked only to the Tier 1 OU. Configures server security baselines, restricts incoming RDP, and disables legacy protocols.
 * **GPO_Hardening_Tier2**: Linked only to the Tier 2 OU. Enforces Workstation Isolation, blocks incoming RPC/SMB from peer workstations, and configures local UAC restrictions.
 
-<a id="01-architecture-tiering-and-architecture-md-administrative-account-design-and-naming-prefixes"></a>
+<div id="01-architecture-tiering-and-architecture-md-administrative-account-design-and-naming-prefixes"></div>
 ### Administrative Account Design and Naming Prefixes
 Administrators must use distinct accounts depending on the tier they are managing. Standardizing account prefixes facilitates GPO targeting and automated auditing:
 * **Tier 0 Accounts (Prefix: `a0-`)**: Members of `Domain Admins`, `Enterprise Admins`, or custom groups delegated to modify Active Directory objects. E.g., `a0-florian`.
@@ -343,12 +344,12 @@ Administrators must use distinct accounts depending on the tier they are managin
 
 ---
 
-<a id="01-architecture-tiering-and-architecture-md-4-operational-management-and-administrative-routing"></a>
+<div id="01-architecture-tiering-and-architecture-md-4-operational-management-and-administrative-routing"></div>
 ## 4. Operational Management and Administrative Routing
 
 Managing a tiered environment requires strict adherence to operational routing paths.
 
-<a id="01-architecture-tiering-and-architecture-md-management-routing-paw-to-jump-host-to-dc"></a>
+<div id="01-architecture-tiering-and-architecture-md-management-routing-paw-to-jump-host-to-dc"></div>
 ### Management Routing: PAW to Jump Host to DC
 Administrators must never connect directly to Domain Controllers from standard workstations. All administrative access must follow this path:
 
@@ -364,7 +365,7 @@ Administrators must never connect directly to Domain Controllers from standard w
 [Domain Controller] -> Tier 0 database server
 ```
 
-<a id="01-architecture-tiering-and-architecture-md-credentials-lifecycle-hygiene"></a>
+<div id="01-architecture-tiering-and-architecture-md-credentials-lifecycle-hygiene"></div>
 ### Credentials Lifecycle & Hygiene
 1. **Interactive Logons**: Tier 0 administrator credentials (`a0-` prefix) must only be entered interactively on PAWs, Tier 0 Jump Hosts, and Domain Controllers. They must never be used in `RunAs` contexts on Tier 1 or Tier 2 machines.
 2. **Service Accounts**: Service accounts must be assigned to a specific tier. A service account running an application on a Tier 1 server must never have administrative rights in Active Directory (Tier 0).
@@ -372,36 +373,36 @@ Administrators must never connect directly to Domain Controllers from standard w
 
 ---
 
-<a id="01-architecture-tiering-and-architecture-md-5-technical-hardening-controls"></a>
+<div id="01-architecture-tiering-and-architecture-md-5-technical-hardening-controls"></div>
 ## 5. Technical Hardening Controls
 
 To enforce this theoretical architecture on Domain Controllers and client computers, you must configure the following technical controls:
 
-1. **[REQ-ARCH-001 - Restrict Tier Logons](#01-architecture-tiering-and-architecture-md-01-architecture-restrict-tier-logons-md)**
+1. **[REQ-ARCH-001 - Restrict Tier Logons](#01-architecture-restrict-tier-logons-md)**
    Enforces User Rights Assignment GPOs to deny Tier 0 administrative accounts from logging on to Tier 1 and Tier 2 machines, and Tier 1 administrative accounts from logging on to Tier 2 machines.
 
-2. **[REQ-ARCH-002 - Restrict Administrative Management Protocols](#01-architecture-tiering-and-architecture-md-01-architecture-restrict-mgmt-protocols-md)**
+2. **[REQ-ARCH-002 - Restrict Administrative Management Protocols](#01-architecture-restrict-mgmt-protocols-md)**
    Enforces network-level restriction of RDP (TCP 3389) and WinRM (TCP 5985/5986) management traffic to specific administrative IP ranges and Jump Host IP addresses.
 
-3. **[REQ-ARCH-003 - Audit Privileged Groups](#01-architecture-tiering-and-architecture-md-01-architecture-audit-privileged-groups-md)**
+3. **[REQ-ARCH-003 - Audit Privileged Groups](#01-architecture-audit-privileged-groups-md)**
    Enforces regular automated checks on domain administrative groups to ensure no nested memberships or unapproved accounts are assigned Tier 0 rights.
 
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-architecture-restrict-tier-logons-md"></a>
+<div id="01-architecture-restrict-tier-logons-md"></div>
 
-<a id="01-architecture-restrict-tier-logons-md-req-arch-001-restrict-tier-logons"></a>
+<div id="01-architecture-restrict-tier-logons-md-req-arch-001-restrict-tier-logons"></div>
 # [REQ-ARCH-001] Restrict Tier Logons
 
-<a id="01-architecture-restrict-tier-logons-md-target-scope"></a>
+<div id="01-architecture-restrict-tier-logons-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 1 member servers and Tier 2 client workstations.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
 
 ---
 
-<a id="01-architecture-restrict-tier-logons-md-implementation-details"></a>
+<div id="01-architecture-restrict-tier-logons-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -409,7 +410,7 @@ To enforce this theoretical architecture on Domain Controllers and client comput
 
 ---
 
-<a id="01-architecture-restrict-tier-logons-md-rationale"></a>
+<div id="01-architecture-restrict-tier-logons-md-rationale"></div>
 ## Rationale
 To successfully enforce the administrative tiering model, the boundaries must be programmatically restricted. Active Directory administrative groups (such as `Domain Admins`, `Enterprise Admins`, and `Schema Admins`) must be explicitly blocked from authenticating to lower-tier systems. 
 
@@ -419,22 +420,22 @@ By configuring Group Policy objects to explicitly deny logon rights (interactive
 
 ---
 
-<a id="01-architecture-restrict-tier-logons-md-legacy-impact-compatibility"></a>
+<div id="01-architecture-restrict-tier-logons-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Administration Access**: Technicians cannot log on to workstations or member servers using Domain Admin accounts. They must use dedicated administrative credentials assigned to that specific tier (e.g., `a2-florian` for workstation support) or use local administrator accounts managed by LAPS.
 * **Remote Support Tools**: Automated support tools or scripts that authenticate using Domain Admin accounts to query local client registry hives or modify system files will be blocked. These tools must be reconfigured to authenticate using dedicated service accounts or Tier 1/2 administrative accounts.
 
 ---
 
-<a id="01-architecture-restrict-tier-logons-md-implementation-steps"></a>
+<div id="01-architecture-restrict-tier-logons-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="01-architecture-restrict-tier-logons-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="01-architecture-restrict-tier-logons-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 To prevent Tier 0 credentials from being exposed on Tier 1 and Tier 2 systems, configure the logon restrictions using GPOs linked to the Tier 1 (Member Servers) and Tier 2 (Workstations) OUs.
 
-<a id="01-architecture-restrict-tier-logons-md-1-configure-tier-1-logon-restrictions-gpo"></a>
+<div id="01-architecture-restrict-tier-logons-md-1-configure-tier-1-logon-restrictions-gpo"></div>
 #### 1. Configure Tier 1 Logon Restrictions GPO
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create a GPO linked to the **Tier 1 Member Servers** OU (e.g., `GPO_Restrictions_Tier1`).
@@ -447,7 +448,7 @@ To prevent Tier 0 credentials from being exposed on Tier 1 and Tier 2 systems, c
    * **Deny log on locally**: Add `Domain Admins`, `Enterprise Admins`, `Schema Admins`.
    * **Deny log on through Remote Desktop Services**: Add `Domain Admins`, `Enterprise Admins`, `Schema Admins`.
 
-<a id="01-architecture-restrict-tier-logons-md-2-configure-tier-2-logon-restrictions-gpo"></a>
+<div id="01-architecture-restrict-tier-logons-md-2-configure-tier-2-logon-restrictions-gpo"></div>
 #### 2. Configure Tier 2 Logon Restrictions GPO
 1. Create a GPO linked to the **Tier 2 Workstations** OU (e.g., `GPO_Restrictions_Tier2`).
 2. Navigate to the same path:
@@ -461,7 +462,7 @@ To prevent Tier 0 credentials from being exposed on Tier 1 and Tier 2 systems, c
 
 ---
 
-<a id="01-architecture-restrict-tier-logons-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="01-architecture-restrict-tier-logons-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this script to configure local security database files via `secedit` to deny specified administrative groups from logging on locally, over the network, or via Remote Desktop.
@@ -599,7 +600,7 @@ if (Test-Path $secConfigPath) { Remove-Item $secConfigPath -Force }
 
 ---
 
-<a id="01-architecture-restrict-tier-logons-md-sources-compliance-references"></a>
+<div id="01-architecture-restrict-tier-logons-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations R1, R2, and R3 (Administrative isolation and account restriction rules)
 * **CIS Microsoft Windows Server 2016 Benchmark**: Section 18.2 (User Rights Assignment)
@@ -607,19 +608,19 @@ if (Test-Path $secConfigPath) { Remove-Item $secConfigPath -Force }
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-architecture-restrict-mgmt-protocols-md"></a>
+<div id="01-architecture-restrict-mgmt-protocols-md"></div>
 
-<a id="01-architecture-restrict-mgmt-protocols-md-req-arch-002-restrict-administrative-management-protocols"></a>
+<div id="01-architecture-restrict-mgmt-protocols-md-req-arch-002-restrict-administrative-management-protocols"></div>
 # [REQ-ARCH-002] Restrict Administrative Management Protocols
 
-<a id="01-architecture-restrict-mgmt-protocols-md-target-scope"></a>
+<div id="01-architecture-restrict-mgmt-protocols-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 0 assets (Domain Controllers, Jump Hosts) and Tier 1 member servers.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
 
 ---
 
-<a id="01-architecture-restrict-mgmt-protocols-md-implementation-details"></a>
+<div id="01-architecture-restrict-mgmt-protocols-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -627,7 +628,7 @@ if (Test-Path $secConfigPath) { Remove-Item $secConfigPath -Force }
 
 ---
 
-<a id="01-architecture-restrict-mgmt-protocols-md-rationale"></a>
+<div id="01-architecture-restrict-mgmt-protocols-md-rationale"></div>
 ## Rationale
 Remote management protocols like Remote Desktop Protocol (RDP) and Windows Remote Management (WinRM) are critical interfaces for directory administration. However, if these protocols are accessible from any host in the network, they become high-value targets for attackers.
 
@@ -637,17 +638,17 @@ Restricting administrative protocols at the network and local firewall levels to
 
 ---
 
-<a id="01-architecture-restrict-mgmt-protocols-md-legacy-impact-compatibility"></a>
+<div id="01-architecture-restrict-mgmt-protocols-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Administration Location**: Administrators cannot manage Domain Controllers or member servers from standard client subnets. They must be physically connected to the dedicated administrative subnet or log on from a designated PAW.
 * **Network Planning**: Any changes to administrative IP address ranges require updating GPO firewall rules. If IP assignments are incorrect, administrators can be locked out of remote management interfaces.
 
 ---
 
-<a id="01-architecture-restrict-mgmt-protocols-md-implementation-steps"></a>
+<div id="01-architecture-restrict-mgmt-protocols-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="01-architecture-restrict-mgmt-protocols-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="01-architecture-restrict-mgmt-protocols-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -664,7 +665,7 @@ Restricting administrative protocols at the network and local firewall levels to
 
 ---
 
-<a id="01-architecture-restrict-mgmt-protocols-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="01-architecture-restrict-mgmt-protocols-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally on a Domain Controller or member server to create Windows Defender Firewall rules restricting WinRM and RDP to authorized subnets.
@@ -745,7 +746,7 @@ foreach ($RuleName in $Rules) {
 
 ---
 
-<a id="01-architecture-restrict-mgmt-protocols-md-sources-compliance-references"></a>
+<div id="01-architecture-restrict-mgmt-protocols-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R8 (Dedicated management subnets and jump hosts)
 * **CIS Microsoft Windows Server 2016 Benchmark**: Section 19 (Windows Defender Firewall)
@@ -753,19 +754,19 @@ foreach ($RuleName in $Rules) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-architecture-audit-privileged-groups-md"></a>
+<div id="01-architecture-audit-privileged-groups-md"></div>
 
-<a id="01-architecture-audit-privileged-groups-md-req-arch-003-audit-privileged-groups"></a>
+<div id="01-architecture-audit-privileged-groups-md-req-arch-003-audit-privileged-groups"></div>
 # [REQ-ARCH-003] Audit Privileged Groups
 
-<a id="01-architecture-audit-privileged-groups-md-target-scope"></a>
+<div id="01-architecture-audit-privileged-groups-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Active Directory Domain.
 * **Operating Systems**: Windows Server 2016 (and above) Domain Controllers.
 
 ---
 
-<a id="01-architecture-audit-privileged-groups-md-implementation-details"></a>
+<div id="01-architecture-audit-privileged-groups-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -773,7 +774,7 @@ foreach ($RuleName in $Rules) {
 
 ---
 
-<a id="01-architecture-audit-privileged-groups-md-rationale"></a>
+<div id="01-architecture-audit-privileged-groups-md-rationale"></div>
 ## Rationale
 Attackers who gain initial access to an Active Directory domain attempt to elevate their privileges to Tier 0. A primary method for establishing domain persistence is adding compromised domain accounts to highly privileged administrative groups, such as `Domain Admins`, `Enterprise Admins`, `Schema Admins`, or `Builtin\Administrators`.
 
@@ -786,17 +787,17 @@ Enforcing advanced auditing on directory object changes, combined with a daily s
 
 ---
 
-<a id="01-architecture-audit-privileged-groups-md-legacy-impact-compatibility"></a>
+<div id="01-architecture-audit-privileged-groups-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Auditing Load**: Directory Service changes logging (Event ID 5136) can generate a high volume of events on Domain Controllers in large environments. Ensure event logs have appropriate size allocations and logs are shipped to a local SIEM.
 * **Operational Workflows**: Administrators must use standard change management procedures when adding or removing accounts from administrative groups to avoid generating false-positive security alerts.
 
 ---
 
-<a id="01-architecture-audit-privileged-groups-md-implementation-steps"></a>
+<div id="01-architecture-audit-privileged-groups-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="01-architecture-audit-privileged-groups-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="01-architecture-audit-privileged-groups-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 To generate events when administrative group membership is altered:
@@ -812,7 +813,7 @@ This ensures that Event ID **5136** is logged in the Security log of the Domain 
 
 ---
 
-<a id="01-architecture-audit-privileged-groups-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="01-architecture-audit-privileged-groups-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run this script from a secure administrative workstation to audit nested and direct memberships in critical Tier 0 groups, highlighting any unexpected accounts.
@@ -886,7 +887,7 @@ if ($rawOutput -match "^.+,Directory Service Changes,.+,(.+)$") {
 
 ---
 
-<a id="01-architecture-audit-privileged-groups-md-sources-compliance-references"></a>
+<div id="01-architecture-audit-privileged-groups-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R57 (Vulnerability assessment of directory services), Section on administrative groups.
 * **CIS Microsoft Windows Server 2016 Benchmark**: Section 9.2.1 (Audit Directory Service Access)
@@ -895,26 +896,26 @@ if ($rawOutput -match "^.+,Directory Service Changes,.+,(.+)$") {
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md"></a>
+<div id="01-architecture-keep-functional-levels-up-to-date-md"></div>
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-req-arch-004-keep-domain-and-forest-functional-levels-up-to-date"></a>
+<div id="01-architecture-keep-functional-levels-up-to-date-md-req-arch-004-keep-domain-and-forest-functional-levels-up-to-date"></div>
 # [REQ-ARCH-004] Keep Domain and Forest Functional Levels Up-To-Date
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-target-scope"></a>
+<div id="01-architecture-keep-functional-levels-up-to-date-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers (Forest-wide configuration)
 * **Operating Systems**: Windows Server 2016 and above
 
 ---
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-implementation-details"></a>
+<div id="01-architecture-keep-functional-levels-up-to-date-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**: Active Directory Domains and Trusts (AD Schema modification)
 
 ---
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-rationale"></a>
+<div id="01-architecture-keep-functional-levels-up-to-date-md-rationale"></div>
 ## Rationale
 The Domain Functional Level (DFL) and Forest Functional Level (FFL) dictate the capabilities of the Active Directory (AD) infrastructure. While upgrading the Operating System of Domain Controllers (DCs) improves the underlying OS security, the AD logic remains constrained by the functional level. Maintaining an obsolete DFL forces Domain Controllers to emulate legacy behaviors and protocols to ensure backward compatibility with non-existent older DCs. This emulation effectively creates a ceiling for your security posture, preventing the activation of modern identity protection mechanisms.
 
@@ -926,7 +927,7 @@ Raising the functional level is critical for hardening because it unlocks archit
 
 ---
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-legacy-impact-compatibility"></a>
+<div id="01-architecture-keep-functional-levels-up-to-date-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Irreversibility**: Raising the domain and forest functional levels is generally irreversible. Once raised to Windows Server 2016, you cannot demote the functional levels back to any previous Server version.
 * **Domain Controller Compatibility**: Any older Domain Controller running Windows Server 2012 R2 or earlier will fail to replicate and will be blocked from functioning. All Domain Controllers must run an OS version equal to or higher than the target functional level before it is raised.
@@ -934,10 +935,10 @@ Raising the functional level is critical for hardening because it unlocks archit
 
 ---
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-implementation-steps"></a>
+<div id="01-architecture-keep-functional-levels-up-to-date-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-option-a-active-directory-domains-and-trusts-preferred"></a>
+<div id="01-architecture-keep-functional-levels-up-to-date-md-option-a-active-directory-domains-and-trusts-preferred"></div>
 ### Option A: Active Directory Domains and Trusts (Preferred)
 
 1. Log on to a Domain Controller or a management workstation with **Enterprise Admins** credentials.
@@ -953,12 +954,12 @@ Raising the functional level is critical for hardening because it unlocks archit
 
 ---
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="01-architecture-keep-functional-levels-up-to-date-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts to audit and raise the functional levels.
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-1-local-audit-audit-adfunctionallevelsps1"></a>
+<div id="01-architecture-keep-functional-levels-up-to-date-md-1-local-audit-audit-adfunctionallevelsps1"></div>
 #### 1. Local Audit (Audit-ADFunctionalLevels.ps1)
 
 [Download Script: Audit-ADFunctionalLevels.ps1](audit_scripts/Audit-ADFunctionalLevels.ps1)
@@ -1000,7 +1001,7 @@ if ($Domain -and $Forest) {
 }
 ```
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-2-local-remediation-set-adfunctionallevelsps1"></a>
+<div id="01-architecture-keep-functional-levels-up-to-date-md-2-local-remediation-set-adfunctionallevelsps1"></div>
 #### 2. Local Remediation (Set-ADFunctionalLevels.ps1)
 
 [Download Script: Set-ADFunctionalLevels.ps1](implementation_scripts/Set-ADFunctionalLevels.ps1)
@@ -1048,7 +1049,7 @@ if ($Forest.ForestMode -lt [Microsoft.ActiveDirectory.Management.ADForestMode]::
 
 ---
 
-<a id="01-architecture-keep-functional-levels-up-to-date-md-sources-compliance-references"></a>
+<div id="01-architecture-keep-functional-levels-up-to-date-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Section on raising Forest and Domain functional levels.
 * **Microsoft Security Guidance**: Active Directory Forest and Domain Functional Levels Overview.
@@ -1056,26 +1057,26 @@ if ($Forest.ForestMode -lt [Microsoft.ActiveDirectory.Management.ADForestMode]::
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-architecture-default-policies-recommendations-md"></a>
+<div id="01-architecture-default-policies-recommendations-md"></div>
 
-<a id="01-architecture-default-policies-recommendations-md-req-arch-005-default-domain-and-domain-controllers-policies-management"></a>
+<div id="01-architecture-default-policies-recommendations-md-req-arch-005-default-domain-and-domain-controllers-policies-management"></div>
 # [REQ-ARCH-005] Default Domain and Domain Controllers Policies Management
 
-<a id="01-architecture-default-policies-recommendations-md-target-scope"></a>
+<div id="01-architecture-default-policies-recommendations-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers and Domain Members (Forest-wide)
 * **Operating Systems**: Windows Server 2016 and above
 
 ---
 
-<a id="01-architecture-default-policies-recommendations-md-implementation-details"></a>
+<div id="01-architecture-default-policies-recommendations-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Group Policy Objects Management (GPMC)
 
 ---
 
-<a id="01-architecture-default-policies-recommendations-md-rationale"></a>
+<div id="01-architecture-default-policies-recommendations-md-rationale"></div>
 ## Rationale
 Modifying the Default Domain Policy (GUID: {31B2F340-016D-11D2-945F-00C04FB984F9}) and Default Domain Controllers Policy (GUID: {6AC1786C-016F-11D2-945F-00C04fB984F9}) introduces significant operational risks. These default policies define the core directory baseline configurations required for Active Directory to initialize, replicate, and authenticate.
 
@@ -1086,17 +1087,17 @@ Adhering to a modular Group Policy architecture is critical for several security
 
 ---
 
-<a id="01-architecture-default-policies-recommendations-md-legacy-impact-compatibility"></a>
+<div id="01-architecture-default-policies-recommendations-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Precedence Ordering**: When linking a new hardening GPO, its link order must have a lower number (higher precedence) than the default policies to ensure custom settings override the defaults.
 * **GPO Overlaps**: Settings defined in the custom GPO will take precedence. If a conflict arises with default GPOs, the custom GPO's value will win. Ensure that core required values (such as system access permissions) are not blocked.
 
 ---
 
-<a id="01-architecture-default-policies-recommendations-md-implementation-steps"></a>
+<div id="01-architecture-default-policies-recommendations-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="01-architecture-default-policies-recommendations-md-option-a-group-policy-management-console-gpmc-preferred"></a>
+<div id="01-architecture-default-policies-recommendations-md-option-a-group-policy-management-console-gpmc-preferred"></div>
 ### Option A: Group Policy Management Console (GPMC) (Preferred)
 
 1. Log on to a management workstation or Domain Controller with **Domain Admins** credentials.
@@ -1114,12 +1115,12 @@ Adhering to a modular Group Policy architecture is critical for several security
 
 ---
 
-<a id="01-architecture-default-policies-recommendations-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="01-architecture-default-policies-recommendations-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts to audit and set up the GPO structure.
 
-<a id="01-architecture-default-policies-recommendations-md-1-local-audit-audit-gpoprecedenceps1"></a>
+<div id="01-architecture-default-policies-recommendations-md-1-local-audit-audit-gpoprecedenceps1"></div>
 #### 1. Local Audit (Audit-GPOPrecedence.ps1)
 
 [Download Script: Audit-GPOPrecedence.ps1](audit_scripts/Audit-GPOPrecedence.ps1)
@@ -1167,7 +1168,7 @@ try {
 }
 ```
 
-<a id="01-architecture-default-policies-recommendations-md-2-local-remediation-set-admodulargpops1"></a>
+<div id="01-architecture-default-policies-recommendations-md-2-local-remediation-set-admodulargpops1"></div>
 #### 2. Local Remediation (Set-ADModularGPO.ps1)
 
 [Download Script: Set-ADModularGPO.ps1](implementation_scripts/Set-ADModularGPO.ps1)
@@ -1223,7 +1224,7 @@ try {
 
 ---
 
-<a id="01-architecture-default-policies-recommendations-md-sources-compliance-references"></a>
+<div id="01-architecture-default-policies-recommendations-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **Microsoft Security Guidance**: Modular GPO Design Best Practices.
 * **ANSSI AD Hardening Guide**: Recommendations on directory service configuration management.
@@ -1231,26 +1232,26 @@ try {
 
 <div style="page-break-before: always;"></div>
 
-<a id="01-architecture-harden-domain-trusts-md"></a>
+<div id="01-architecture-harden-domain-trusts-md"></div>
 
-<a id="01-architecture-harden-domain-trusts-md-req-arch-006-harden-active-directory-domain-trusts"></a>
+<div id="01-architecture-harden-domain-trusts-md-req-arch-006-harden-active-directory-domain-trusts"></div>
 # [REQ-ARCH-006] Harden Active Directory Domain Trusts
 
-<a id="01-architecture-harden-domain-trusts-md-target-scope"></a>
+<div id="01-architecture-harden-domain-trusts-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="01-architecture-harden-domain-trusts-md-implementation-details"></a>
+<div id="01-architecture-harden-domain-trusts-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory trust object attributes (`msDS-TrustSettings` / `trustAttributes` on trusted domain objects)
 
 ---
 
-<a id="01-architecture-harden-domain-trusts-md-rationale"></a>
+<div id="01-architecture-harden-domain-trusts-md-rationale"></div>
 ## Rationale
 Active Directory trust relationships permit authentication and resource access across domain or forest boundaries. However, weak trust configurations can serve as transit routes for attackers to compromise trusting domains.
 
@@ -1262,17 +1263,17 @@ Specifically:
 
 ---
 
-<a id="01-architecture-harden-domain-trusts-md-legacy-impact-compatibility"></a>
+<div id="01-architecture-harden-domain-trusts-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Operational Disruption**: Disabling SID History may disrupt access for users who migrated from old domains but still rely on legacy SIDs for resource permissions. Ensure that all migrated resources have updated Access Control Lists (ACLs) before disabling SID History.
 * **Authentication Failure**: Enforcing selective authentication will block all cross-forest access by default until explicit "Allowed to Authenticate" permissions are configured on computer objects for target external security groups.
 
 ---
 
-<a id="01-architecture-harden-domain-trusts-md-implementation-steps"></a>
+<div id="01-architecture-harden-domain-trusts-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="01-architecture-harden-domain-trusts-md-option-a-active-directory-domains-and-trusts-gui-configuration"></a>
+<div id="01-architecture-harden-domain-trusts-md-option-a-active-directory-domains-and-trusts-gui-configuration"></div>
 ### Option A: Active Directory Domains and Trusts GUI Configuration
 
 1. Open **Active Directory Domains and Trusts** (`domain.msc`) on a Domain Controller.
@@ -1286,7 +1287,7 @@ Specifically:
 
 ---
 
-<a id="01-architecture-harden-domain-trusts-md-option-b-powershell-netdom-configuration-remediation-non-gpo"></a>
+<div id="01-architecture-harden-domain-trusts-md-option-b-powershell-netdom-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & netdom Configuration (Remediation / Non-GPO)
 
 Run the following script block to audit and harden trust relationships. The `netdom` utility is used to query and apply the trust settings.
@@ -1350,7 +1351,7 @@ if ($Trusts) {
 
 ---
 
-<a id="01-architecture-harden-domain-trusts-md-sources-compliance-references"></a>
+<div id="01-architecture-harden-domain-trusts-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations R24, R25+, R26 (Section 3.2.3)
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 8 (Page 34), Section 4.e (Page 27)
@@ -1359,59 +1360,59 @@ if ($Trusts) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-README-md"></a>
+<div id="02-domain-controllers-README-md"></div>
 
-<a id="02-domain-controllers-README-md-module-2-domain-controller-hardening"></a>
+<div id="02-domain-controllers-README-md-module-2-domain-controller-hardening"></div>
 # Module 2: Domain Controller Hardening
 
 This directory contains security baselines for Domain Controllers running Windows Server 2016 and above in high-security, air-gapped Active Directory environments.
 
-<a id="02-domain-controllers-README-md-technical-hardening-controls"></a>
+<div id="02-domain-controllers-README-md-technical-hardening-controls"></div>
 ## Technical Hardening Controls
 
-* **[REQ-DC-001 - Disable SMBv1](#02-domain-controllers-README-md-02-domain-controllers-disable-smbv1-md)**
+* **[REQ-DC-001 - Disable SMBv1](#02-domain-controllers-disable-smbv1-md)**
   Requirement to disable the legacy SMBv1 protocol and its associated client-side driver to prevent remote code execution and spoofing vulnerabilities.
-* **[REQ-DC-002 - Disable Multicast Name Resolution](#02-domain-controllers-README-md-02-domain-controllers-disable-multicast-name-resolution-md)**
+* **[REQ-DC-002 - Disable Multicast Name Resolution](#02-domain-controllers-disable-multicast-name-resolution-md)**
   Requirement to disable LLMNR, NetBIOS (NBT-NS), and mDNS to prevent local name resolution spoofing and credential harvesting.
-* **[REQ-DC-003 - Disable NTLMv1](#02-domain-controllers-README-md-02-domain-controllers-disable-ntlmv1-md)**
+* **[REQ-DC-003 - Disable NTLMv1](#02-domain-controllers-disable-ntlmv1-md)**
   Requirement to restrict NTLM authentication to NTLMv2 or Kerberos to protect credentials from offline brute-force cracking.
-* **[REQ-DC-004 - Enforce LDAP Server Signing](#02-domain-controllers-README-md-02-domain-controllers-enforce-ldap-signing-md)**
+* **[REQ-DC-004 - Enforce LDAP Server Signing](#02-domain-controllers-enforce-ldap-signing-md)**
   Requirement to enforce packet signing on LDAP cleartext traffic to protect directory transactions from man-in-the-middle attacks.
-* **[REQ-DC-005 - Enforce LDAP Channel Binding](#02-domain-controllers-README-md-02-domain-controllers-enforce-ldap-channel-binding-md)**
+* **[REQ-DC-005 - Enforce LDAP Channel Binding](#02-domain-controllers-enforce-ldap-channel-binding-md)**
   Requirement to enforce LDAP Channel Binding Tokens (CBT) over secure LDAPS connections to prevent authentication relay attacks.
-* **[REQ-DC-006 - Enable LSA Protection](#02-domain-controllers-README-md-02-domain-controllers-enable-lsa-protection-md)**
+* **[REQ-DC-006 - Enable LSA Protection](#02-domain-controllers-enable-lsa-protection-md)**
   Requirement to configure the Local Security Authority (LSA) process to run as a Protected Process Light (PPL) to protect credential secrets from LSASS memory dumps.
-* **[REQ-DC-007 - Enable Credential Guard](#02-domain-controllers-README-md-02-domain-controllers-enable-credential-guard-md)**
+* **[REQ-DC-007 - Enable Credential Guard](#02-domain-controllers-enable-credential-guard-md)**
   Requirement to enable Windows Defender Credential Guard using Virtualization-Based Security (VBS) to hardware-isolate credential secrets.
-* **[REQ-DC-008 - Disable Print Spooler Service](#02-domain-controllers-README-md-02-domain-controllers-disable-print-spooler-md)**
+* **[REQ-DC-008 - Disable Print Spooler Service](#02-domain-controllers-disable-print-spooler-md)**
   Requirement to stop and disable the Print Spooler service on Domain Controllers to prevent remote execution and coercive authentication attacks.
-* **[REQ-DC-009 - Enforce SMB Message Signing](#02-domain-controllers-README-md-02-domain-controllers-enforce-smb-signing-md)**
+* **[REQ-DC-009 - Enforce SMB Message Signing](#02-domain-controllers-enforce-smb-signing-md)**
   Requirement to enforce SMB client and server signing to protect file transfer data and block SMB relay attacks.
-* **[REQ-DC-010 - Restrict Kerberos Encryption Types](#02-domain-controllers-README-md-02-domain-controllers-restrict-kerberos-encryption-md)**
+* **[REQ-DC-010 - Restrict Kerberos Encryption Types](#02-domain-controllers-restrict-kerberos-encryption-md)**
   Requirement to configure allowed Kerberos encryption types, restricting to AES128/AES256 and disabling legacy DES and RC4 to prevent Kerberoasting.
-* **[REQ-DC-011 - Restrict Remote SAM API Access](#02-domain-controllers-README-md-02-domain-controllers-restrict-ntds-sam-api-md)**
+* **[REQ-DC-011 - Restrict Remote SAM API Access](#02-domain-controllers-restrict-ntds-sam-api-md)**
   Requirement to restrict remote RPC access to the SAM database to local Administrators, preventing remote recon and user enumeration.
-* **[REQ-DC-012 - Disable Unnecessary Services on Domain Controllers](#02-domain-controllers-README-md-02-domain-controllers-disable-unnecessary-services-md)**
+* **[REQ-DC-012 - Disable Unnecessary Services on Domain Controllers](#02-domain-controllers-disable-unnecessary-services-md)**
   Requirement to disable unnecessary system services (such as Xbox services and other non-essential services) on Domain Controllers to minimize the attack surface.
-* **[REQ-DC-013 - Enable Kerberos Armoring](#02-domain-controllers-README-md-02-domain-controllers-enable-kerberos-armoring-md)**
+* **[REQ-DC-013 - Enable Kerberos Armoring](#02-domain-controllers-enable-kerberos-armoring-md)**
   Requirement to enable Kerberos Armoring (FAST) on Domain Controllers and client endpoints to encrypt pre-authentication exchanges and protect credentials from offline brute-force attacks.
-* **[REQ-DC-014 - Restrict NTLM](#02-domain-controllers-README-md-02-domain-controllers-restrict-ntlm-md)**
+* **[REQ-DC-014 - Restrict NTLM](#02-domain-controllers-restrict-ntlm-md)**
   Requirement to audit and restrict NTLMv2 and domain-wide NTLM authentication to prevent credential relaying and force the transition to Kerberos.
-* **[REQ-DC-015 - Migrate SYSVOL Replication to DFSR](#02-domain-controllers-README-md-02-domain-controllers-migrate-sysvol-replication-dfsr-md)**
+* **[REQ-DC-015 - Migrate SYSVOL Replication to DFSR](#02-domain-controllers-migrate-sysvol-replication-dfsr-md)**
   Requirement to migrate SYSVOL folder replication from legacy FRS to secure DFSR to ensure replication integrity and disable deprecated services.
-* **[REQ-DC-016 - Harden adminSDHolder Permissions](#02-domain-controllers-README-md-02-domain-controllers-harden-adminsdholder-permissions-md)**
+* **[REQ-DC-016 - Harden adminSDHolder Permissions](#02-domain-controllers-harden-adminsdholder-permissions-md)**
   Requirement to secure the adminSDHolder object's Access Control List to prevent privilege escalation backdoors on protected accounts.
-* **[REQ-DC-017 - Harden Microsoft DNS AD Container Permissions](#02-domain-controllers-README-md-02-domain-controllers-harden-dns-container-permissions-md)**
+* **[REQ-DC-017 - Harden Microsoft DNS AD Container Permissions](#02-domain-controllers-harden-dns-container-permissions-md)**
   Requirement to secure CN=MicrosoftDNS,CN=System container permissions and block DNS service DLL hijacking (ServerLevelPluginDll).
-* **[REQ-DC-018 - Harden Virtualization Hosts for Domain Controllers](#02-domain-controllers-README-md-02-domain-controllers-harden-dc-virtualization-hosts-md)**
+* **[REQ-DC-018 - Harden Virtualization Hosts for Domain Controllers](#02-domain-controllers-harden-dc-virtualization-hosts-md)**
   Requirement to treat virtualization hypervisors hosting Domain Controllers as Tier 0 systems, separating host hardware and enforcing VM encryption.
-* **[REQ-DC-019 - Enforce RDP Restricted Admin Mode](#02-domain-controllers-README-md-02-domain-controllers-enforce-rdp-restricted-admin-md)**
+* **[REQ-DC-019 - Enforce RDP Restricted Admin Mode](#02-domain-controllers-enforce-rdp-restricted-admin-md)**
   Requirement to configure and require RDP Restricted Admin Mode on administrative clients and servers to protect credentials in host memory.
-* **[REQ-DC-020 - Windows Defender Antivirus Domain Controller Baseline and Exploit Guard](#02-domain-controllers-README-md-02-domain-controllers-defender-antivirus-md)**
+* **[REQ-DC-020 - Windows Defender Antivirus Domain Controller Baseline and Exploit Guard](#02-domain-controllers-defender-antivirus-md)**
   Requirement to configure and harden Windows Defender Antivirus on Domain Controllers, enabling real-time scanning, preventing local exclusion modifications, enforcing server-compatible ASR rules (including LSASS protection), activating Tamper Protection, and sandboxing execution.
-* **[REQ-DC-021 - Configure AppLocker Policies on Domain Controllers](#02-domain-controllers-README-md-02-domain-controllers-configure-applocker-policies-md)**
+* **[REQ-DC-021 - Configure AppLocker Policies on Domain Controllers](#02-domain-controllers-configure-applocker-policies-md)**
   Requirement to configure strict AppLocker rules on Domain Controllers to prevent administrative users from executing unapproved binaries, scripts, installers, or web browsers on Tier 0 systems.
-* **[REQ-DC-022 - Enable WDAC Driver Blocklist](#02-domain-controllers-README-md-02-domain-controllers-enable-wdac-driver-blocklist-md)**
+* **[REQ-DC-022 - Enable WDAC Driver Blocklist](#02-domain-controllers-enable-wdac-driver-blocklist-md)**
   Requirement to configure the Windows Defender Application Control (WDAC) driver blocklist to protect kernel memory from Bring Your Own Vulnerable Driver (BYOVD) attacks.
 
 
@@ -1420,19 +1421,19 @@ This directory contains security baselines for Domain Controllers running Window
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-disable-smbv1-md"></a>
+<div id="02-domain-controllers-disable-smbv1-md"></div>
 
-<a id="02-domain-controllers-disable-smbv1-md-req-dc-001-disable-smbv1"></a>
+<div id="02-domain-controllers-disable-smbv1-md-req-dc-001-disable-smbv1"></div>
 # [REQ-DC-001] Disable SMBv1
 
-<a id="02-domain-controllers-disable-smbv1-md-target-scope"></a>
+<div id="02-domain-controllers-disable-smbv1-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
 
 ---
 
-<a id="02-domain-controllers-disable-smbv1-md-implementation-details"></a>
+<div id="02-domain-controllers-disable-smbv1-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -1451,7 +1452,7 @@ This directory contains security baselines for Domain Controllers running Window
 
 ---
 
-<a id="02-domain-controllers-disable-smbv1-md-rationale"></a>
+<div id="02-domain-controllers-disable-smbv1-md-rationale"></div>
 ## Rationale
 SMBv1 (Server Message Block version 1) is a legacy networking protocol designed over 30 years ago. It lacks modern security features such as packet encryption, cryptographic signing enforcement, and robust integrity verification. 
 
@@ -1459,17 +1460,17 @@ SMBv1 contains severe remote code execution (RCE) vulnerabilities (e.g., the Ete
 
 ---
 
-<a id="02-domain-controllers-disable-smbv1-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-disable-smbv1-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Authentication Failures**: Disabling SMBv1 breaks network sharing and file transfer with outdated systems, including Windows XP, Windows Server 2003, early Linux distributions using old Samba versions, older network-attached storage (NAS) appliances, and legacy printers or scanners.
 * **Pre-requisite Audit**: In legacy environments, network administrators should audit SMBv1 usage using Windows Event Logs (Microsoft-Windows-SMBServer/Analytic log) before disabling the protocol. If legacy clients exist, they must be upgraded or isolated.
 
 ---
 
-<a id="02-domain-controllers-disable-smbv1-md-implementation-steps"></a>
+<div id="02-domain-controllers-disable-smbv1-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-disable-smbv1-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-disable-smbv1-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 Configure Group Policy Preferences to enforce the registry settings:
@@ -1496,7 +1497,7 @@ Configure Group Policy Preferences to enforce the registry settings:
 
 ---
 
-<a id="02-domain-controllers-disable-smbv1-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-disable-smbv1-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the setting locally or if the control is not manageable via standard GPO GUI interfaces.
@@ -1582,7 +1583,7 @@ if ($vulnerable) {
 
 ---
 
-<a id="02-domain-controllers-disable-smbv1-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-disable-smbv1-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R13 (Disabling obsolete and insecure protocols)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9.72 (Ensure 'Configure SMBv1 client driver' is set to 'Enabled: Disable driver')
@@ -1591,19 +1592,19 @@ if ($vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md"></a>
+<div id="02-domain-controllers-disable-multicast-name-resolution-md"></div>
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-req-dc-002-disable-multicast-name-resolution"></a>
+<div id="02-domain-controllers-disable-multicast-name-resolution-md-req-dc-002-disable-multicast-name-resolution"></div>
 # [REQ-DC-002] Disable Multicast Name Resolution
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-target-scope"></a>
+<div id="02-domain-controllers-disable-multicast-name-resolution-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
 
 ---
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-implementation-details"></a>
+<div id="02-domain-controllers-disable-multicast-name-resolution-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -1627,7 +1628,7 @@ if ($vulnerable) {
 
 ---
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-rationale"></a>
+<div id="02-domain-controllers-disable-multicast-name-resolution-md-rationale"></div>
 ## Rationale
 Link-Local Multicast Name Resolution (LLMNR), NetBIOS Name Service (NBT-NS), and multicast DNS (mDNS) are fallback name resolution protocols. When a Windows host is unable to resolve a name via standard DNS, it broadcasts the query to the local subnet using these protocols.
 
@@ -1635,17 +1636,17 @@ Adversaries on the same subnet can easily sniff these broadcast/multicast querie
 
 ---
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-disable-multicast-name-resolution-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **DNS Dependency**: Once these protocols are disabled, hosts rely entirely on DNS. If DNS registration, DNS suffixes, or DNS servers are misconfigured, systems may fail to resolve names of adjacent local network resources.
 * **Legacy System Impact**: Legacy applications or operating systems that do not use DNS for local hostname resolution will lose the ability to locate resources. A robust DNS infrastructure with dynamic registration enabled is a pre-requisite.
 
 ---
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-implementation-steps"></a>
+<div id="02-domain-controllers-disable-multicast-name-resolution-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-disable-multicast-name-resolution-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 Configure Group Policy to disable LLMNR, and Group Policy Preferences to disable NetBIOS and mDNS:
@@ -1671,7 +1672,7 @@ Configure Group Policy to disable LLMNR, and Group Policy Preferences to disable
 
 ---
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-disable-multicast-name-resolution-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the settings locally.
@@ -1794,7 +1795,7 @@ if ($vulnerable) {
 
 ---
 
-<a id="02-domain-controllers-disable-multicast-name-resolution-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-disable-multicast-name-resolution-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R13 (Disabling obsolete and insecure protocols)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.8.19.1.1 (Ensure 'Turn off multicast name resolution' is set to 'Enabled')
@@ -1803,19 +1804,19 @@ if ($vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-disable-ntlmv1-md"></a>
+<div id="02-domain-controllers-disable-ntlmv1-md"></div>
 
-<a id="02-domain-controllers-disable-ntlmv1-md-req-dc-003-disable-ntlmv1"></a>
+<div id="02-domain-controllers-disable-ntlmv1-md-req-dc-003-disable-ntlmv1"></div>
 # [REQ-DC-003] Disable NTLMv1
 
-<a id="02-domain-controllers-disable-ntlmv1-md-target-scope"></a>
+<div id="02-domain-controllers-disable-ntlmv1-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
 
 ---
 
-<a id="02-domain-controllers-disable-ntlmv1-md-implementation-details"></a>
+<div id="02-domain-controllers-disable-ntlmv1-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -1826,7 +1827,7 @@ if ($vulnerable) {
 
 ---
 
-<a id="02-domain-controllers-disable-ntlmv1-md-rationale"></a>
+<div id="02-domain-controllers-disable-ntlmv1-md-rationale"></div>
 ## Rationale
 NTLMv1 (NT LAN Manager version 1) is a legacy authentication protocol that relies on weak cryptographic primitives (specifically MD4 and DES). Because of these mathematical weaknesses, an attacker who intercepts NTLMv1 network authentication traffic can decrypt the responses offline in a matter of minutes, recovering the user's plaintext password or NT hash.
 
@@ -1834,17 +1835,17 @@ By configuring the system to send only NTLMv2 responses and refuse both LM and N
 
 ---
 
-<a id="02-domain-controllers-disable-ntlmv1-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-disable-ntlmv1-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Legacy Clients**: Operating systems older than Windows 7 / Windows Server 2008 R2, along with outdated non-Windows systems (such as older Samba integrations, legacy network scanners, or ancient printers), might not support NTLMv2. Disabling NTLMv1 will block these systems from authenticating.
 * **Pre-remediation Audit**: Before applying this control, administrators should monitor NTLMv1 authentications by checking the Windows Security Log (Event ID 4624, checking the authentication package details) or enabling NTLM auditing via GPO (`Network security: Restrict NTLM: Audit NTLM authentication in this domain`).
 
 ---
 
-<a id="02-domain-controllers-disable-ntlmv1-md-implementation-steps"></a>
+<div id="02-domain-controllers-disable-ntlmv1-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-disable-ntlmv1-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-disable-ntlmv1-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -1858,7 +1859,7 @@ By configuring the system to send only NTLMv2 responses and refuse both LM and N
 
 ---
 
-<a id="02-domain-controllers-disable-ntlmv1-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-disable-ntlmv1-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the setting locally.
@@ -1906,7 +1907,7 @@ if ($lsaReg) {
 
 ---
 
-<a id="02-domain-controllers-disable-ntlmv1-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-disable-ntlmv1-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R13 (Disabling obsolete and insecure protocols)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 2.3.7.4 (Ensure 'Network security: LAN Manager authentication level' is set to 'Send NTLMv2 response only. Refuse LM & NTLM')
@@ -1915,19 +1916,19 @@ if ($lsaReg) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-enforce-ldap-signing-md"></a>
+<div id="02-domain-controllers-enforce-ldap-signing-md"></div>
 
-<a id="02-domain-controllers-enforce-ldap-signing-md-req-dc-004-enforce-ldap-server-signing"></a>
+<div id="02-domain-controllers-enforce-ldap-signing-md-req-dc-004-enforce-ldap-server-signing"></div>
 # [REQ-DC-004] Enforce LDAP Server Signing
 
-<a id="02-domain-controllers-enforce-ldap-signing-md-target-scope"></a>
+<div id="02-domain-controllers-enforce-ldap-signing-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="02-domain-controllers-enforce-ldap-signing-md-implementation-details"></a>
+<div id="02-domain-controllers-enforce-ldap-signing-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -1938,7 +1939,7 @@ if ($lsaReg) {
 
 ---
 
-<a id="02-domain-controllers-enforce-ldap-signing-md-rationale"></a>
+<div id="02-domain-controllers-enforce-ldap-signing-md-rationale"></div>
 ## Rationale
 Lightweight Directory Access Protocol (LDAP) traffic transmitted over cleartext (TCP port 389) without signing is vulnerable to eavesdropping and man-in-the-middle (MitM) attacks. An adversary in a position to intercept network traffic can inject malicious payload packets, modify directory responses, or perform session hijacking.
 
@@ -1946,7 +1947,7 @@ Enforcing LDAP signing ensures that the LDAP server (Domain Controller) rejects 
 
 ---
 
-<a id="02-domain-controllers-enforce-ldap-signing-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-enforce-ldap-signing-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Client Compatibility**: Enforcing LDAP signing on Domain Controllers requires that all clients connecting via cleartext LDAP support and negotiate signing (e.g., SASL GSS-API). Simple LDAP binds that pass passwords in cleartext without SSL/TLS or signing will fail.
 * **Non-Windows Systems**: Many third-party integrations, older Linux/Unix servers (running older SSSD or PAM LDAP modules), network appliances (e.g., printers, scanners, firewalls), and custom legacy applications do not support LDAP signing. These devices must be updated to support signing or reconfigured to use secure LDAP (LDAPS) over port 636.
@@ -1954,10 +1955,10 @@ Enforcing LDAP signing ensures that the LDAP server (Domain Controller) rejects 
 
 ---
 
-<a id="02-domain-controllers-enforce-ldap-signing-md-implementation-steps"></a>
+<div id="02-domain-controllers-enforce-ldap-signing-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-enforce-ldap-signing-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-enforce-ldap-signing-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -1971,7 +1972,7 @@ Enforcing LDAP signing ensures that the LDAP server (Domain Controller) rejects 
 
 ---
 
-<a id="02-domain-controllers-enforce-ldap-signing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-enforce-ldap-signing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the setting locally.
@@ -2019,7 +2020,7 @@ if ($ntdsReg) {
 
 ---
 
-<a id="02-domain-controllers-enforce-ldap-signing-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-enforce-ldap-signing-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R19 (LDAP Signing)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 2.3.3.1 (Ensure 'Domain controller: LDAP server signing requirements' is set to 'Require signing')
@@ -2028,19 +2029,19 @@ if ($ntdsReg) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md"></a>
+<div id="02-domain-controllers-enforce-ldap-channel-binding-md"></div>
 
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-req-dc-005-enforce-ldap-channel-binding"></a>
+<div id="02-domain-controllers-enforce-ldap-channel-binding-md-req-dc-005-enforce-ldap-channel-binding"></div>
 # [REQ-DC-005] Enforce LDAP Channel Binding
 
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-target-scope"></a>
+<div id="02-domain-controllers-enforce-ldap-channel-binding-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-implementation-details"></a>
+<div id="02-domain-controllers-enforce-ldap-channel-binding-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -2051,7 +2052,7 @@ if ($ntdsReg) {
 
 ---
 
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-rationale"></a>
+<div id="02-domain-controllers-enforce-ldap-channel-binding-md-rationale"></div>
 ## Rationale
 Adversaries use credential relay attacks (such as NTLM relaying) to intercept authentication challenges and replay them to other network services. In a coercion attack (e.g., the PetitPotam technique), an attacker forces a Domain Controller to authenticate to a malicious listener using NTLM. The attacker then relays these credentials to Active Directory Certificate Services (ADCS) or an LDAPS server to issue administrative certificates or modify directory databases.
 
@@ -2059,7 +2060,7 @@ LDAP Channel Binding Tokens (CBT) mitigate these relay attacks. CBT establishes 
 
 ---
 
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-enforce-ldap-channel-binding-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Client and Software Compatibility**: Enforcing Channel Binding requirements to `Always` (level 2) means that any LDAP client connecting over SSL/TLS (LDAPS on port 636 or LDAP startTLS on port 389) must support and submit CBT. Older Windows clients without security patches, third-party LDAP integration clients, Java-based applications, or Linux/Unix systems using outdated LDAP packages may fail to bind if they do not support channel binding.
 * **Pre-requisite Patching**: Ensure that all clients and Domain Controllers have the latest security updates installed.
@@ -2067,10 +2068,10 @@ LDAP Channel Binding Tokens (CBT) mitigate these relay attacks. CBT establishes 
 
 ---
 
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-implementation-steps"></a>
+<div id="02-domain-controllers-enforce-ldap-channel-binding-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-enforce-ldap-channel-binding-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -2084,7 +2085,7 @@ LDAP Channel Binding Tokens (CBT) mitigate these relay attacks. CBT establishes 
 
 ---
 
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-enforce-ldap-channel-binding-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the setting locally.
@@ -2132,7 +2133,7 @@ if ($ntdsReg) {
 
 ---
 
-<a id="02-domain-controllers-enforce-ldap-channel-binding-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-enforce-ldap-channel-binding-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R20 (LDAP Channel Binding)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 2.3.3.2 (Ensure 'Domain controller: LDAP server channel binding token requirements' is set to 'Always')
@@ -2141,19 +2142,19 @@ if ($ntdsReg) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-enable-lsa-protection-md"></a>
+<div id="02-domain-controllers-enable-lsa-protection-md"></div>
 
-<a id="02-domain-controllers-enable-lsa-protection-md-req-dc-006-enable-lsa-protection"></a>
+<div id="02-domain-controllers-enable-lsa-protection-md-req-dc-006-enable-lsa-protection"></div>
 # [REQ-DC-006] Enable LSA Protection
 
-<a id="02-domain-controllers-enable-lsa-protection-md-target-scope"></a>
+<div id="02-domain-controllers-enable-lsa-protection-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
 
 ---
 
-<a id="02-domain-controllers-enable-lsa-protection-md-implementation-details"></a>
+<div id="02-domain-controllers-enable-lsa-protection-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -2164,7 +2165,7 @@ if ($ntdsReg) {
 
 ---
 
-<a id="02-domain-controllers-enable-lsa-protection-md-rationale"></a>
+<div id="02-domain-controllers-enable-lsa-protection-md-rationale"></div>
 ## Rationale
 The Local Security Authority Subsystem Service (LSASS) process (`lsass.exe`) is responsible for enforcing security policies, handling user authentication, and storing sensitive credential secrets (such as Kerberos tickets, NT hashes, and cached credentials) in memory. Adversaries who gain local administrative rights frequently target LSASS using memory-dumping tools (e.g., Mimikatz, Procdump) to extract these credentials, leading to domain-wide compromise and lateral movement.
 
@@ -2172,7 +2173,7 @@ Enabling LSA Protection configures LSASS to run as a Protected Process Light (PP
 
 ---
 
-<a id="02-domain-controllers-enable-lsa-protection-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-enable-lsa-protection-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Third-Party Plug-ins**: Any third-party authentication plug-in, custom credential provider, smart card reader driver, or security agent (such as older antivirus or host-intrusion prevention systems) that interacts directly with LSASS must be digitally signed with a Microsoft signature. Unsigned binaries will fail to load into LSASS, potentially breaking multi-factor authentication or smart card logon.
 * **Audit Mode**: Administrators should audit the system for unsigned LSA plug-ins before enforcing LSA Protection. Event ID 3065 and 3066 in the `Microsoft-Windows-CodeIntegrity/Operational` log will list any unsigned drivers or DLLs that would have been blocked from loading into LSASS.
@@ -2180,10 +2181,10 @@ Enabling LSA Protection configures LSASS to run as a Protected Process Light (PP
 
 ---
 
-<a id="02-domain-controllers-enable-lsa-protection-md-implementation-steps"></a>
+<div id="02-domain-controllers-enable-lsa-protection-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-enable-lsa-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-enable-lsa-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -2198,7 +2199,7 @@ Enabling LSA Protection configures LSASS to run as a Protected Process Light (PP
 
 ---
 
-<a id="02-domain-controllers-enable-lsa-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-enable-lsa-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the setting locally.
@@ -2246,7 +2247,7 @@ if ($lsaReg) {
 
 ---
 
-<a id="02-domain-controllers-enable-lsa-protection-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-enable-lsa-protection-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R14 (LSA Protection)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9.50.1 (Ensure 'Configure LSA to run as a protected process' is set to 'Enabled: Enabled with LSA Protection')
@@ -2255,19 +2256,19 @@ if ($lsaReg) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-enable-credential-guard-md"></a>
+<div id="02-domain-controllers-enable-credential-guard-md"></div>
 
-<a id="02-domain-controllers-enable-credential-guard-md-req-dc-007-enable-credential-guard"></a>
+<div id="02-domain-controllers-enable-credential-guard-md-req-dc-007-enable-credential-guard"></div>
 # [REQ-DC-007] Enable Credential Guard
 
-<a id="02-domain-controllers-enable-credential-guard-md-target-scope"></a>
+<div id="02-domain-controllers-enable-credential-guard-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11 (Enterprise and Datacenter editions)
 
 ---
 
-<a id="02-domain-controllers-enable-credential-guard-md-implementation-details"></a>
+<div id="02-domain-controllers-enable-credential-guard-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -2289,7 +2290,7 @@ if ($lsaReg) {
 
 ---
 
-<a id="02-domain-controllers-enable-credential-guard-md-rationale"></a>
+<div id="02-domain-controllers-enable-credential-guard-md-rationale"></div>
 ## Rationale
 Windows Defender Credential Guard uses virtualization-based security (VBS) to isolate secrets (such as NTLM password hashes and Kerberos Ticket Granting Tickets) in a secure, hypervisor-protected environment running parallel to the standard Windows kernel. 
 
@@ -2297,19 +2298,19 @@ By running LSA in a secure container separate from the main LSASS process, Crede
 
 ---
 
-<a id="02-domain-controllers-enable-credential-guard-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-enable-credential-guard-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Hardware Requirements**: Enabling UEFI Secure Boot and CPU virtualization features is a strict pre-requisite for Credential Guard. For physical systems, refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#02-domain-controllers-enable-credential-guard-md-07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#02-domain-controllers-enable-credential-guard-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) to secure these configurations.
+* **Hardware Requirements**: Enabling UEFI Secure Boot and CPU virtualization features is a strict pre-requisite for Credential Guard. For physical systems, refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-hardware-virtualization-and-dma-protection-md) to secure these configurations.
 * **Virtualization Support**: If the target server is a virtual machine, the hypervisor must support nested virtualization, and the virtual machine configuration must have VBS features enabled.
 * **Authentication Protocol Impact**: Enabling Credential Guard disables NTLMv1, MS-CHAPv2, CredSSP single sign-on, and unconstrained Kerberos delegation. Applications that rely on these insecure delegation or authentication methods will fail.
 * **Smart Card Requirement**: Kerberos authentication using smart cards is fully supported, but the smart card drivers must be compatible with VBS environment constraints.
 
 ---
 
-<a id="02-domain-controllers-enable-credential-guard-md-implementation-steps"></a>
+<div id="02-domain-controllers-enable-credential-guard-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-enable-credential-guard-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-enable-credential-guard-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -2325,7 +2326,7 @@ By running LSA in a secure container separate from the main LSASS process, Crede
 
 ---
 
-<a id="02-domain-controllers-enable-credential-guard-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-enable-credential-guard-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the settings locally.
@@ -2456,7 +2457,7 @@ if ($vulnerable) {
 
 ---
 
-<a id="02-domain-controllers-enable-credential-guard-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-enable-credential-guard-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R14 (LSA Protection and credential isolation defenses)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9.31.2 (Ensure 'Turn On Virtualization-Based Security: Select Credential Guard Configuration' is set to 'Enabled with UEFI lock')
@@ -2465,19 +2466,19 @@ if ($vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-disable-print-spooler-md"></a>
+<div id="02-domain-controllers-disable-print-spooler-md"></div>
 
-<a id="02-domain-controllers-disable-print-spooler-md-req-dc-008-disable-print-spooler-service"></a>
+<div id="02-domain-controllers-disable-print-spooler-md-req-dc-008-disable-print-spooler-service"></div>
 # [REQ-DC-008] Disable Print Spooler Service
 
-<a id="02-domain-controllers-disable-print-spooler-md-target-scope"></a>
+<div id="02-domain-controllers-disable-print-spooler-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="02-domain-controllers-disable-print-spooler-md-implementation-details"></a>
+<div id="02-domain-controllers-disable-print-spooler-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -2488,7 +2489,7 @@ if ($vulnerable) {
 
 ---
 
-<a id="02-domain-controllers-disable-print-spooler-md-rationale"></a>
+<div id="02-domain-controllers-disable-print-spooler-md-rationale"></div>
 ## Rationale
 The Windows Print Spooler service (`Spooler`) is enabled and running by default on Windows Server installations, including Domain Controllers. However, Domain Controllers do not print and should never act as print servers.
 
@@ -2496,17 +2497,17 @@ The Print Spooler service has a history of high-severity vulnerabilities, includ
 
 ---
 
-<a id="02-domain-controllers-disable-print-spooler-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-disable-print-spooler-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **No Functional Impact**: Disabling the Print Spooler service on a Domain Controller has no negative impact on Active Directory replication, client logins, DNS, or directory services.
 * **Pruning Shared Printers**: If the Domain Controller was historically used to host shared printers (which violates security best practices), those print queues will become unavailable and must be migrated to dedicated Member Servers.
 
 ---
 
-<a id="02-domain-controllers-disable-print-spooler-md-implementation-steps"></a>
+<div id="02-domain-controllers-disable-print-spooler-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-disable-print-spooler-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-disable-print-spooler-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -2519,7 +2520,7 @@ The Print Spooler service has a history of high-severity vulnerabilities, includ
 
 ---
 
-<a id="02-domain-controllers-disable-print-spooler-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-disable-print-spooler-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the setting locally.
@@ -2577,7 +2578,7 @@ if ($service) {
 
 ---
 
-<a id="02-domain-controllers-disable-print-spooler-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-disable-print-spooler-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R4 (Minimization of service execution and software installation)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 2.2.33 (Ensure 'Print Spooler' is set to 'Disabled')
@@ -2587,19 +2588,19 @@ if ($service) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-enforce-smb-signing-md"></a>
+<div id="02-domain-controllers-enforce-smb-signing-md"></div>
 
-<a id="02-domain-controllers-enforce-smb-signing-md-req-dc-009-enforce-smb-message-signing"></a>
+<div id="02-domain-controllers-enforce-smb-signing-md-req-dc-009-enforce-smb-message-signing"></div>
 # [REQ-DC-009] Enforce SMB Message Signing
 
-<a id="02-domain-controllers-enforce-smb-signing-md-target-scope"></a>
+<div id="02-domain-controllers-enforce-smb-signing-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
 
 ---
 
-<a id="02-domain-controllers-enforce-smb-signing-md-implementation-details"></a>
+<div id="02-domain-controllers-enforce-smb-signing-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -2616,7 +2617,7 @@ if ($service) {
 
 ---
 
-<a id="02-domain-controllers-enforce-smb-signing-md-rationale"></a>
+<div id="02-domain-controllers-enforce-smb-signing-md-rationale"></div>
 ## Rationale
 Server Message Block (SMB) authentication is vulnerable to man-in-the-middle (MitM) and relay attacks. If SMB signing is not enforced, an attacker positioned on the local network can intercept SMB authentication sessions from client systems and relay them to another host (e.g., a Domain Controller or high-value member server). If the relayed user credential possesses administrative rights on the target host, the attacker can execute commands remotely (e.g., via PsExec/WMI) and compromise the system without knowing the password.
 
@@ -2624,17 +2625,17 @@ Enforcing SMB signing ensures that all SMB packets are digitally signed using se
 
 ---
 
-<a id="02-domain-controllers-enforce-smb-signing-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-enforce-smb-signing-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Performance Overhead**: Enforcing SMB signing introduces a slight CPU processing overhead for signing and verifying packets. On modern hardware supporting instruction sets such as AES-NI, this performance impact is negligible.
 * **Legacy Compatibility**: Legacy operating systems (e.g., Windows 98/NT4) or outdated third-party SMB client implementations that do not support SMB signing will be blocked from accessing SYSVOL, NETLOGON, or other file shares on Domain Controllers. Ensure all network systems support SMBv2 or higher with signing capabilities.
 
 ---
 
-<a id="02-domain-controllers-enforce-smb-signing-md-implementation-steps"></a>
+<div id="02-domain-controllers-enforce-smb-signing-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-enforce-smb-signing-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-enforce-smb-signing-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -2650,7 +2651,7 @@ Enforcing SMB signing ensures that all SMB packets are digitally signed using se
 
 ---
 
-<a id="02-domain-controllers-enforce-smb-signing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-enforce-smb-signing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the settings locally.
@@ -2717,7 +2718,7 @@ if ($vulnerable) {
 
 ---
 
-<a id="02-domain-controllers-enforce-smb-signing-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-enforce-smb-signing-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R13 (Disabling obsolete and insecure protocols and configuring transport security)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Sections 2.3.9.2 and 2.3.9.5 (Ensure 'Microsoft network server/client: Digitally sign communications (always)' is set to 'Enabled')
@@ -2726,19 +2727,19 @@ if ($vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-restrict-kerberos-encryption-md"></a>
+<div id="02-domain-controllers-restrict-kerberos-encryption-md"></div>
 
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-req-dc-010-restrict-kerberos-encryption-types"></a>
+<div id="02-domain-controllers-restrict-kerberos-encryption-md-req-dc-010-restrict-kerberos-encryption-types"></div>
 # [REQ-DC-010] Restrict Kerberos Encryption Types
 
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-target-scope"></a>
+<div id="02-domain-controllers-restrict-kerberos-encryption-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
 
 ---
 
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-implementation-details"></a>
+<div id="02-domain-controllers-restrict-kerberos-encryption-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -2749,7 +2750,7 @@ if ($vulnerable) {
 
 ---
 
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-rationale"></a>
+<div id="02-domain-controllers-restrict-kerberos-encryption-md-rationale"></div>
 ## Rationale
 Active Directory uses Kerberos as its primary authentication protocol. By default, older cryptographic algorithms such as Data Encryption Standard (DES) and Rivest Cipher 4 (RC4) are supported for compatibility reasons.
 
@@ -2759,7 +2760,7 @@ Restricting allowed Kerberos encryption types to Advanced Encryption Standard (A
 
 ---
 
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-restrict-kerberos-encryption-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Account Compatibility**: User and computer accounts in Active Directory must support AES encryption. If a legacy service account does not have "This account supports Kerberos AES 128 bit/256 bit encryption" checked in its account options in Active Directory, authentication will fail once RC4 is disabled.
 * **Domain Trust Impact**: If the domain is joined in a trust relationship with an external domain (e.g., legacy MIT Kerberos realms or older Windows forests) that does not support AES, trust authentication will fail.
@@ -2769,10 +2770,10 @@ Restricting allowed Kerberos encryption types to Advanced Encryption Standard (A
 
 ---
 
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-implementation-steps"></a>
+<div id="02-domain-controllers-restrict-kerberos-encryption-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-restrict-kerberos-encryption-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -2789,7 +2790,7 @@ Restricting allowed Kerberos encryption types to Advanced Encryption Standard (A
 
 ---
 
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-restrict-kerberos-encryption-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the setting locally.
@@ -2849,7 +2850,7 @@ if ($regVal) {
 
 ---
 
-<a id="02-domain-controllers-restrict-kerberos-encryption-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-restrict-kerberos-encryption-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R13 (Disabling obsolete and insecure protocols)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 2.3.7.5 (Ensure 'Network security: Configure encryption types allowed for Kerberos' is configured)
@@ -2858,19 +2859,19 @@ if ($regVal) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-restrict-ntds-sam-api-md"></a>
+<div id="02-domain-controllers-restrict-ntds-sam-api-md"></div>
 
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-req-dc-011-restrict-remote-sam-api-access"></a>
+<div id="02-domain-controllers-restrict-ntds-sam-api-md-req-dc-011-restrict-remote-sam-api-access"></div>
 # [REQ-DC-011] Restrict Remote SAM API Access
 
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-target-scope"></a>
+<div id="02-domain-controllers-restrict-ntds-sam-api-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10 (1607+), Windows 11
 
 ---
 
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-implementation-details"></a>
+<div id="02-domain-controllers-restrict-ntds-sam-api-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -2881,7 +2882,7 @@ if ($regVal) {
 
 ---
 
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-rationale"></a>
+<div id="02-domain-controllers-restrict-ntds-sam-api-md-rationale"></div>
 ## Rationale
 By default, the Security Account Manager (SAM) and NT Directory Services (NTDS) allow remote RPC connections from non-privileged accounts. Using these connections, an attacker who has established a foothold in the network (even with a basic, non-administrative domain user account) can query the Domain Controller or member servers to enumerate local users, group memberships, and security policies.
 
@@ -2889,17 +2890,17 @@ Tools like BloodHound/SharpHound, or simple commands like `net user /domain`, re
 
 ---
 
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-restrict-ntds-sam-api-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Monitoring Tool Impact**: Monitoring, configuration management, vulnerability scanning, or security audit systems that run under non-administrative accounts and remotely query local user or group lists on servers will fail. These tools must be updated to run under administrative credentials, or their service accounts must be explicitly granted access in the custom SDDL security descriptor.
 * **Compatibility Testing**: Prior to wide-scale enforcement, check the `System` event log on Domain Controllers for event sources relating to SAM RPC blocks (Event ID 16962 and 16969, which log blocked remote calls to SAM with details on the calling user account and IP).
 
 ---
 
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-implementation-steps"></a>
+<div id="02-domain-controllers-restrict-ntds-sam-api-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-restrict-ntds-sam-api-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -2913,7 +2914,7 @@ Tools like BloodHound/SharpHound, or simple commands like `net user /domain`, re
 
 ---
 
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-restrict-ntds-sam-api-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the setting locally.
@@ -2962,7 +2963,7 @@ if ($lsaReg) {
 
 ---
 
-<a id="02-domain-controllers-restrict-ntds-sam-api-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-restrict-ntds-sam-api-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R4 (Minimization of service execution and interface exposures)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 2.3.10.10 (Ensure 'Network access: Restrict clients allowed to make remote calls to SAM' is set to 'Administrators: Remote Access: Allowed')
@@ -2971,19 +2972,19 @@ if ($lsaReg) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-disable-unnecessary-services-md"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md"></div>
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-req-dc-012-disable-unnecessary-services-on-domain-controllers"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-req-dc-012-disable-unnecessary-services-on-domain-controllers"></div>
 # [REQ-DC-012] Disable Unnecessary Services on Domain Controllers
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-target-scope"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers (DCs) running Windows Server.
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022.
 
 ---
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-implementation-details"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
@@ -2992,7 +2993,7 @@ if ($lsaReg) {
 
 ---
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-rationale"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-rationale"></div>
 ## Rationale
 Domain Controllers are the core authority within an Active Directory forest (Tier 0). Minimizing the running services on these critical systems reduces the overall attack surface and limits potential targets for local privilege escalation, remote exploit execution, or credential extraction.
 
@@ -3000,12 +3001,12 @@ Disabling non-essential services aligns with the principle of least functionalit
 
 ---
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-technical-services-baselines"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-technical-services-baselines"></div>
 ## Technical Services Baselines
 
 The following tables list default services in Windows Server and their hardening recommendations.
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-services-that-should-be-disabled"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-services-that-should-be-disabled"></div>
 ### Services That Should Be Disabled
 These services present an unnecessary security risk and should be disabled on all Domain Controllers.
 
@@ -3014,7 +3015,7 @@ These services present an unnecessary security risk and should be disabled on al
 | `XblAuthManager` | Xbox Live Auth Manager | Provides gaming authentication functions; irrelevant to server infrastructure. |
 | `XblGameSave` | Xbox Live Game Save | Provides gaming save functions; irrelevant to server infrastructure. |
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-additional-services-that-can-be-disabled-ok-to-disable"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-additional-services-that-can-be-disabled-ok-to-disable"></div>
 ### Additional Services That Can Be Disabled (OK to Disable)
 These services are installed by default but are not required for Domain Controller functionality. They should be disabled to minimize the attack surface.
 
@@ -3061,7 +3062,7 @@ These services are installed by default but are not required for Domain Controll
 
 *Note: The Print Spooler (`Spooler`) service is also listed as OK to disable on non-print servers, but it is managed separately as a High-priority control for Domain Controllers.*
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-default-services-already-disabled-in-windows-server-2016"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-default-services-already-disabled-in-windows-server-2016"></div>
 ### Default Services Already Disabled in Windows Server 2016+
 These services are disabled by default. Administrators must ensure they are not manually re-enabled without verification.
 
@@ -3077,7 +3078,7 @@ These services are disabled by default. Administrators must ensure they are not 
 | `UevAgentService` | User Experience Virtualization Service | Synchronizes application settings; disabled by default. |
 | `WSearch` | Windows Search | Indexes search queries; disabled by default on Windows Server. |
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-critical-services-that-must-not-be-disabled-do-not-disable"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-critical-services-that-must-not-be-disabled-do-not-disable"></div>
 ### Critical Services That Must Not Be Disabled (Do Not Disable)
 The following services are essential for system stability, network roles, administration, or virtualization integration, and must not be disabled.
 
@@ -3119,7 +3120,7 @@ The following services are essential for system stability, network roles, admini
 
 ---
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **No Functional Impact**: Disabling the specified services has no operational impact on Active Directory Domain Services, replication, group policy processing, client authentication, or administrative management tools.
 * **Smart Cards**: If your domain relies on Smart Card authentication, the Smart Card Device Enumeration Service (`ScDeviceEnum`) and Smart Card (`SCardSvr`) services must remain enabled.
@@ -3127,10 +3128,10 @@ The following services are essential for system stability, network roles, admini
 
 ---
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-implementation-steps"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 Because many of these services are not managed through standard GPO Administrative Templates (ADMX), they should be disabled by configuring Group Policy Preferences (GPP) for the registry:
@@ -3151,7 +3152,7 @@ Apply this registry change for the service names listed in the tables above.
 
 ---
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following script to configure the registry settings and stop the services locally:
@@ -3317,7 +3318,7 @@ if ($vulnerableCount -gt 0) {
 
 ---
 
-<a id="02-domain-controllers-disable-unnecessary-services-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-disable-unnecessary-services-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **Microsoft Windows Server Security Guidance**: [Security guidelines for disabling system services in Windows Server](https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server)
 * **ANSSI AD Hardening Guide**: Recommendation R4 (Minimization of service execution and software installation)
@@ -3326,19 +3327,19 @@ if ($vulnerableCount -gt 0) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md"></a>
+<div id="02-domain-controllers-enable-kerberos-armoring-md"></div>
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-req-dc-013-enable-kerberos-armoring"></a>
+<div id="02-domain-controllers-enable-kerberos-armoring-md-req-dc-013-enable-kerberos-armoring"></div>
 # [REQ-DC-013] Enable Kerberos Armoring
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-target-scope"></a>
+<div id="02-domain-controllers-enable-kerberos-armoring-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
 
 ---
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-implementation-details"></a>
+<div id="02-domain-controllers-enable-kerberos-armoring-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
@@ -3355,7 +3356,7 @@ if ($vulnerableCount -gt 0) {
 
 ---
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-rationale"></a>
+<div id="02-domain-controllers-enable-kerberos-armoring-md-rationale"></div>
 ## Rationale
 Active Directory environments relying on standard Kerberos authentication are susceptible to offline brute-force, dictionary attacks, and credential harvesting. During the initial Kerberos pre-authentication phase, the client requests a Ticket Granting Ticket (TGT) in clear text by sending an AS-REQ containing encrypted timestamps. Attackers monitoring network traffic can intercept these exchanges, or perform AS-REP roasting against accounts that do not require pre-authentication, conducting offline password cracking to compromise credentials.
 
@@ -3365,7 +3366,7 @@ Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Cont
 
 ---
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-enable-kerberos-armoring-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Operating System Requirements**: Kerberos Armoring requires at least a Windows Server 2012 domain functional level. Target clients and servers must run Windows 8 / Windows Server 2012 or newer.
 * **Enforcement Risk**: Setting KDC support to "Fail unarmored authentication requests" (Value 3) too early will prevent systems that are not configured for FAST, legacy operating systems (e.g., Windows 7, Windows Server 2008 R2), and non-domain-joined devices from authenticating, resulting in complete denial of service.
@@ -3373,13 +3374,13 @@ Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Cont
 
 ---
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-implementation-steps"></a>
+<div id="02-domain-controllers-enable-kerberos-armoring-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-enable-kerberos-armoring-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-configure-domain-controller-kdc-policy"></a>
+<div id="02-domain-controllers-enable-kerberos-armoring-md-configure-domain-controller-kdc-policy"></div>
 #### Configure Domain Controller KDC Policy
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
 2. Edit the appropriate Domain Controllers hardening GPO (e.g., `GPO_Hardening_DomainControllers`).
@@ -3391,7 +3392,7 @@ Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Cont
    * **Options**: Select `Supported` from the dropdown list (upgrade to `Fail unarmored authentication requests` only after full client rollout and validation).
 5. Link the GPO to the Domain Controllers Organizational Unit (OU).
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-configure-client-member-server-policy"></a>
+<div id="02-domain-controllers-enable-kerberos-armoring-md-configure-client-member-server-policy"></div>
 #### Configure Client & Member Server Policy
 1. In the **Group Policy Management Console**, edit the GPO applied to clients and member servers (e.g., `GPO_Hardening_Clients`).
 2. Navigate to:
@@ -3403,7 +3404,7 @@ Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Cont
 
 ---
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-enable-kerberos-armoring-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the setting locally (for testing or standalone systems) or if the control is not manageable via standard GPO GUI interfaces.
@@ -3494,7 +3495,7 @@ if ($IsDC) {
 
 ---
 
-<a id="02-domain-controllers-enable-kerberos-armoring-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-enable-kerberos-armoring-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R20 (Claims, compound authentication, and Kerberos armoring)
 * **CIS Benchmark**: CIS Microsoft Windows Server 2016 Benchmark - Section 18.9.4.1 (Ensure 'KDC support for claims, compound authentication and Kerberos armoring' is configured) & Section 18.9.11.1 (Ensure 'Kerberos client support for claims, compound authentication and Kerberos armoring' is configured)
@@ -3503,19 +3504,19 @@ if ($IsDC) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-restrict-ntlm-md"></a>
+<div id="02-domain-controllers-restrict-ntlm-md"></div>
 
-<a id="02-domain-controllers-restrict-ntlm-md-req-dc-014-restrict-ntlm"></a>
+<div id="02-domain-controllers-restrict-ntlm-md-req-dc-014-restrict-ntlm"></div>
 # [REQ-DC-014] Restrict NTLM
 
-<a id="02-domain-controllers-restrict-ntlm-md-target-scope"></a>
+<div id="02-domain-controllers-restrict-ntlm-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
 
 ---
 
-<a id="02-domain-controllers-restrict-ntlm-md-implementation-details"></a>
+<div id="02-domain-controllers-restrict-ntlm-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -3536,7 +3537,7 @@ if ($IsDC) {
 
 ---
 
-<a id="02-domain-controllers-restrict-ntlm-md-rationale"></a>
+<div id="02-domain-controllers-restrict-ntlm-md-rationale"></div>
 ## Rationale
 The NT LAN Manager (NTLM) authentication protocol is legacy, cryptographically weak, and lacks support for modern security primitives such as mutual authentication. Adversaries exploit NTLM through credential relaying attacks (e.g., replaying captured authentication responses to other network services) and coercion techniques (e.g., PetitPotam or printer spooler RPC abuse).
 
@@ -3544,7 +3545,7 @@ By auditing and subsequently restricting NTLM authentication incoming to, outgoi
 
 ---
 
-<a id="02-domain-controllers-restrict-ntlm-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-restrict-ntlm-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Auditing Requirement**: Administrators must enable auditing policies prior to enforcing restriction policies. Review the operational logs at `Applications and Services Logs > Microsoft > Windows > NTLM > Operational` for Event ID `8004` (Domain Controller NTLM validation), `8001` (incoming NTLM block auditing), and `8003` (outgoing NTLM block auditing) to identify legitimate business applications requiring NTLM.
 * **Authentication Failures**: Hard enforcement of NTLM restrictions will block applications that use hardcoded IP addresses (preventing Kerberos SPN mapping), non-domain joined assets, and legacy appliances.
@@ -3552,13 +3553,13 @@ By auditing and subsequently restricting NTLM authentication incoming to, outgoi
 
 ---
 
-<a id="02-domain-controllers-restrict-ntlm-md-implementation-steps"></a>
+<div id="02-domain-controllers-restrict-ntlm-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-restrict-ntlm-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-restrict-ntlm-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="02-domain-controllers-restrict-ntlm-md-phase-1-enable-auditing-apply-to-domain-controllers-servers-and-clients"></a>
+<div id="02-domain-controllers-restrict-ntlm-md-phase-1-enable-auditing-apply-to-domain-controllers-servers-and-clients"></div>
 #### Phase 1: Enable Auditing (Apply to Domain Controllers, Servers, and Clients)
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
 2. Edit the appropriate hardening GPO (e.g., `GPO_Hardening_DomainControllers`).
@@ -3572,7 +3573,7 @@ By auditing and subsequently restricting NTLM authentication incoming to, outgoi
    * **Policy**: `Network security: Restrict NTLM: Outgoing NTLM traffic to remote servers`
      * **Setting**: `Audit all` (Apply to DCs, member servers, and clients)
 
-<a id="02-domain-controllers-restrict-ntlm-md-phase-2-enforce-restrictions-apply-after-logs-have-been-verified-and-exception-lists-populated"></a>
+<div id="02-domain-controllers-restrict-ntlm-md-phase-2-enforce-restrictions-apply-after-logs-have-been-verified-and-exception-lists-populated"></div>
 #### Phase 2: Enforce Restrictions (Apply after logs have been verified and exception lists populated)
 1. Navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
@@ -3588,7 +3589,7 @@ By auditing and subsequently restricting NTLM authentication incoming to, outgoi
 
 ---
 
-<a id="02-domain-controllers-restrict-ntlm-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-restrict-ntlm-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the setting locally (for testing or standalone systems) or if the control is not manageable via standard GPO GUI interfaces.
@@ -3682,7 +3683,7 @@ if (Test-Path $NetlogonPath) {
 
 ---
 
-<a id="02-domain-controllers-restrict-ntlm-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-restrict-ntlm-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R13 (Disabling obsolete and insecure protocols)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 2.3.7.5 to 2.3.7.9 (Restrict NTLM policies)
@@ -3691,26 +3692,26 @@ if (Test-Path $NetlogonPath) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md"></a>
+<div id="02-domain-controllers-migrate-sysvol-replication-dfsr-md"></div>
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-req-dc-015-migrate-sysvol-replication-to-dfsr"></a>
+<div id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-req-dc-015-migrate-sysvol-replication-to-dfsr"></div>
 # [REQ-DC-015] Migrate SYSVOL Replication to DFSR
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-target-scope"></a>
+<div id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-implementation-details"></a>
+<div id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Domain Controller replication system attributes (managed via `dfsrmig.exe` tool and the DFSR service)
 
 ---
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-rationale"></a>
+<div id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-rationale"></div>
 ## Rationale
 Active Directory domain environments rely on replication to synchronize GPO templates and scripts stored in the `SYSVOL` share across all Domain Controllers. Historically, this replication was managed by the File Replication Service (FRS). 
 
@@ -3723,7 +3724,7 @@ Migrating to Distributed File System Replication (DFSR):
 
 ---
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Replication Health Requirement**: Prior to migration, Active Directory and file replication must be fully synchronized and healthy. Any existing replication errors will prevent successful migration and can lead to domain-wide split-brain scenarios.
 * **One-Way Committal**: The final stage of the migration (State 3: Eliminated) is permanent. FRS databases are deleted, and it is impossible to roll back to FRS without restoring Domain Controllers from backups.
@@ -3731,10 +3732,10 @@ Migrating to Distributed File System Replication (DFSR):
 
 ---
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-implementation-steps"></a>
+<div id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-option-a-manual-step-by-step-migration-command-line"></a>
+<div id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-option-a-manual-step-by-step-migration-command-line"></div>
 ### Option A: Manual Step-by-Step Migration Command Line
 
 The migration process consists of transitioning the domain through four replication states (from State 0 to State 3) using the `dfsrmig` command line tool on a writable Domain Controller (typically the PDC Emulator).
@@ -3773,7 +3774,7 @@ The migration process consists of transitioning the domain through four replicat
 
 ---
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-option-b-powershell-migration-status-auditing"></a>
+<div id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-option-b-powershell-migration-status-auditing"></div>
 ### Option B: PowerShell Migration Status Auditing
 
 Use this PowerShell script to monitor the progress of the DFSR migration across all Domain Controllers in the forest.
@@ -3831,7 +3832,7 @@ if ($DfsrEvents) {
 
 ---
 
-<a id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-migrate-sysvol-replication-dfsr-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 5.e (Page 31)
 * **ANSSI AD Hardening Guide**: Section 3.1.1 (Niveaux fonctionnels)
@@ -3840,26 +3841,26 @@ if ($DfsrEvents) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md"></a>
+<div id="02-domain-controllers-harden-adminsdholder-permissions-md"></div>
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-req-dc-016-harden-adminsdholder-permissions"></a>
+<div id="02-domain-controllers-harden-adminsdholder-permissions-md-req-dc-016-harden-adminsdholder-permissions"></div>
 # [REQ-DC-016] Harden adminSDHolder Permissions
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-target-scope"></a>
+<div id="02-domain-controllers-harden-adminsdholder-permissions-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-implementation-details"></a>
+<div id="02-domain-controllers-harden-adminsdholder-permissions-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory Object Path: `CN=adminSDHolder,CN=System,DC=[Domain]`
 
 ---
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-rationale"></a>
+<div id="02-domain-controllers-harden-adminsdholder-permissions-md-rationale"></div>
 ## Rationale
 In Active Directory, the `adminSDHolder` object acts as a security template for administrative accounts and groups (known as protected objects). Every hour, a background system thread called SDPROP (Security Descriptor Propagator) compares the ACLs of all protected objects against the ACL of the `adminSDHolder` object. If they differ, the ACL on the protected object is overwritten by the ACL on `adminSDHolder`, and security inheritance is disabled.
 
@@ -3871,17 +3872,17 @@ Therefore:
 
 ---
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-harden-adminsdholder-permissions-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Administrative Operations**: If custom scripts or third-party provisioning systems rely on writing directly to protected accounts without belonging to the built-in protected groups, modifying the `adminSDHolder` ACL may disrupt their operations. Ensure all automated directory tools are audited before removing custom ACL entries.
 * **Pre-Remediation Check**: Ensure that only trusted, built-in system groups (such as Domain Admins, Enterprise Admins, and SYSTEM) have Write and Modify permissions on the `adminSDHolder` object.
 
 ---
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-implementation-steps"></a>
+<div id="02-domain-controllers-harden-adminsdholder-permissions-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-option-a-active-directory-users-and-computers-aduc-console-configuration"></a>
+<div id="02-domain-controllers-harden-adminsdholder-permissions-md-option-a-active-directory-users-and-computers-aduc-console-configuration"></div>
 ### Option A: Active Directory Users and Computers (ADUC) Console Configuration
 
 1. Open **Active Directory Users and Computers** (`dsa.msc`) on a Domain Controller.
@@ -3898,7 +3899,7 @@ Therefore:
 
 ---
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-option-b-powershell-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-harden-adminsdholder-permissions-md-option-b-powershell-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell Configuration (Remediation / Non-GPO)
 
 Run the following script to audit and remediate unauthorized permissions on the `adminSDHolder` object.
@@ -3990,7 +3991,7 @@ foreach ($Rule in $Acl.Access) {
 
 ---
 
-<a id="02-domain-controllers-harden-adminsdholder-permissions-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-harden-adminsdholder-permissions-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 5.d (Page 31)
 * **ANSSI AD Hardening Guide**: Recommendation R23
@@ -4000,26 +4001,26 @@ foreach ($Rule in $Acl.Access) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md"></a>
+<div id="02-domain-controllers-harden-dns-container-permissions-md"></div>
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-req-dc-017-harden-microsoft-dns-ad-container-permissions"></a>
+<div id="02-domain-controllers-harden-dns-container-permissions-md-req-dc-017-harden-microsoft-dns-ad-container-permissions"></div>
 # [REQ-DC-017] Harden Microsoft DNS AD Container Permissions
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-target-scope"></a>
+<div id="02-domain-controllers-harden-dns-container-permissions-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-implementation-details"></a>
+<div id="02-domain-controllers-harden-dns-container-permissions-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory path: `CN=MicrosoftDNS,CN=System,DC=[Domain]` and Registry Path: `HKLM:\System\CurrentControlSet\Services\DNS\Parameters`
 
 ---
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-rationale"></a>
+<div id="02-domain-controllers-harden-dns-container-permissions-md-rationale"></div>
 ## Rationale
 In Active Directory-integrated DNS zones, DNS server configurations and zone data are stored inside the directory. By default, members of the built-in `DnsAdmins` group have write permissions over the properties of the `CN=MicrosoftDNS,CN=System` container.
 
@@ -4029,17 +4030,17 @@ This default configuration presents a critical privilege escalation vector:
 
 ---
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-harden-dns-container-permissions-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **DNS Administrative Workloads**: Delegated network administrators who are not members of Tier 0 but manage DNS records may fail to perform some zone maintenance if they rely on membership in the default `DnsAdmins` group. They should instead be granted delegated rights over specific DNS zones rather than write access on the main DNS system container.
 * **Vulnerability Mitigation**: Ensure that Microsoft security update CVE-2021-40469 is installed on all Domain Controllers to harden the DNS plugin loading behavior.
 
 ---
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-implementation-steps"></a>
+<div id="02-domain-controllers-harden-dns-container-permissions-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-option-a-active-directory-users-and-computers-aduc-console-configuration"></a>
+<div id="02-domain-controllers-harden-dns-container-permissions-md-option-a-active-directory-users-and-computers-aduc-console-configuration"></div>
 ### Option A: Active Directory Users and Computers (ADUC) Console Configuration
 
 1. Open **Active Directory Users and Computers** (`dsa.msc`) on a Domain Controller.
@@ -4057,7 +4058,7 @@ This default configuration presents a critical privilege escalation vector:
 
 ---
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-harden-dns-container-permissions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following script block to audit and remove the `ServerLevelPluginDll` registry backdoor on Domain Controllers, and verify DNSAdmins membership.
@@ -4142,7 +4143,7 @@ foreach ($Rule in $Acl.Access) {
 
 ---
 
-<a id="02-domain-controllers-harden-dns-container-permissions-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-harden-dns-container-permissions-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 3.e (Page 23)
 * **ANSSI AD Hardening Guide**: Section 3.2.1, Section 3.6, Section 9
@@ -4152,26 +4153,26 @@ foreach ($Rule in $Acl.Access) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md"></a>
+<div id="02-domain-controllers-harden-dc-virtualization-hosts-md"></div>
 
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-req-dc-018-harden-virtualization-hosts-for-domain-controllers"></a>
+<div id="02-domain-controllers-harden-dc-virtualization-hosts-md-req-dc-018-harden-virtualization-hosts-for-domain-controllers"></div>
 # [REQ-DC-018] Harden Virtualization Hosts for Domain Controllers
 
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-target-scope"></a>
+<div id="02-domain-controllers-harden-dc-virtualization-hosts-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Virtualization Hosts (Hyper-V / VMware ESXi hosting Domain Controllers)
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, VMware vSphere ESXi 6.7+
 
 ---
 
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-implementation-details"></a>
+<div id="02-domain-controllers-harden-dc-virtualization-hosts-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Hypervisor Host Group Policies, Local Host Firewall Configuration, and Virtualization Management boundaries
 
 ---
 
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-rationale"></a>
+<div id="02-domain-controllers-harden-dc-virtualization-hosts-md-rationale"></div>
 ## Rationale
 In modern IT environments, Domain Controllers (DCs) are frequently virtualized. However, a virtualized DC is only as secure as the physical host and hypervisor running it. 
 
@@ -4187,17 +4188,17 @@ To mitigate these risks:
 
 ---
 
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-harden-dc-virtualization-hosts-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Infrastructure Cost**: Dedicating specific physical hardware hosts solely for Domain Controllers and other Tier 0 VMs reduces server hardware resource utilization, potentially increasing cost.
 * **Management Disruption**: Standard virtualization administrators will lose the ability to manage the hosts running Domain Controllers, requiring a separate, dedicated administrative pool.
 
 ---
 
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-implementation-steps"></a>
+<div id="02-domain-controllers-harden-dc-virtualization-hosts-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-option-a-manual-virtualization-host-isolation-preferred"></a>
+<div id="02-domain-controllers-harden-dc-virtualization-hosts-md-option-a-manual-virtualization-host-isolation-preferred"></div>
 ### Option A: Manual Virtualization Host Isolation (Preferred)
 
 1. Identify all physical hosts running virtualized Domain Controllers.
@@ -4211,7 +4212,7 @@ To mitigate these risks:
 
 ---
 
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-option-b-powershell-host-configuration-auditing"></a>
+<div id="02-domain-controllers-harden-dc-virtualization-hosts-md-option-b-powershell-host-configuration-auditing"></div>
 ### Option B: PowerShell Host Configuration Auditing
 
 Run the following script block on a Domain Controller to determine if it is virtualized, identify the hypervisor type, and audit key integration parameters.
@@ -4262,7 +4263,7 @@ if ($IsVirtual) {
 
 ---
 
-<a id="02-domain-controllers-harden-dc-virtualization-hosts-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-harden-dc-virtualization-hosts-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R47 (Risques relatifs aux infrastructures de virtualisation)
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 3.d (Page 23), Section 4.d (Page 27)
@@ -4272,19 +4273,19 @@ if ($IsVirtual) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md"></a>
+<div id="02-domain-controllers-enforce-rdp-restricted-admin-md"></div>
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-req-dc-019-enforce-rdp-restricted-admin-mode"></a>
+<div id="02-domain-controllers-enforce-rdp-restricted-admin-md-req-dc-019-enforce-rdp-restricted-admin-mode"></div>
 # [REQ-DC-019] Enforce RDP Restricted Admin Mode
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-target-scope"></a>
+<div id="02-domain-controllers-enforce-rdp-restricted-admin-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients, PAWs
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10/11 Enterprise
 
 ---
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-implementation-details"></a>
+<div id="02-domain-controllers-enforce-rdp-restricted-admin-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: 
@@ -4305,7 +4306,7 @@ if ($IsVirtual) {
 
 ---
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-rationale"></a>
+<div id="02-domain-controllers-enforce-rdp-restricted-admin-md-rationale"></div>
 ## Rationale
 Remote Desktop Protocol (RDP) is a standard tool for administrative sessions. However, by default, RDP authenticates users by placing their credentials (NTLM hashes or Kerberos tickets) directly in the Local Security Authority Subsystem Service (LSASS) memory of the destination host. 
 
@@ -4317,20 +4318,20 @@ Enforcing RDP Restricted Admin Mode (RDP RA) prevents credential harvesting:
 
 ---
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-enforce-rdp-restricted-admin-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **No Network SSO**: Because the remote session lacks the user's credentials, the administrator cannot access other network shares or Active Directory resources (such as mapped drives or remote management tools) from *within* the RDP session. Any cross-machine administrative tasks must be executed from the administrator's local management host using tools like RSAT or PowerShell Remoting rather than nested RDP.
 * **Server Compatibility**: Target servers must support Restricted Admin Mode (supported natively on Windows Server 2012 R2 and later).
 
 ---
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-implementation-steps"></a>
+<div id="02-domain-controllers-enforce-rdp-restricted-admin-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-option-a-group-policy-object-gpo-configuration"></a>
+<div id="02-domain-controllers-enforce-rdp-restricted-admin-md-option-a-group-policy-object-gpo-configuration"></div>
 ### Option A: Group Policy Object (GPO) Configuration
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-1-enforce-client-side-connection-restriction-paws-workstations"></a>
+<div id="02-domain-controllers-enforce-rdp-restricted-admin-md-1-enforce-client-side-connection-restriction-paws-workstations"></div>
 #### 1. Enforce Client-Side Connection Restriction (PAWs & Workstations)
 To force administrative workstations to use Restricted Admin mode for all remote RDP sessions:
 
@@ -4343,7 +4344,7 @@ To force administrative workstations to use Restricted Admin mode for all remote
 6. In the options dropdown, select **Require Restricted Admin**.
 7. Click **OK** and link the GPO to your PAW / Workstation OUs.
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-2-configure-server-side-support-domain-controllers-member-servers"></a>
+<div id="02-domain-controllers-enforce-rdp-restricted-admin-md-2-configure-server-side-support-domain-controllers-member-servers"></div>
 #### 2. Configure Server-Side Support (Domain Controllers & Member Servers)
 Ensure that all target hosts are configured to permit Restricted Admin connections:
 
@@ -4377,7 +4378,7 @@ Ensure that all target hosts are configured to permit Restricted Admin connectio
 
 ---
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-enforce-rdp-restricted-admin-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following script to configure the local host registry to allow and enforce Restricted Admin mode.
@@ -4478,7 +4479,7 @@ mstsc.exe /RestrictedAdmin
 
 ---
 
-<a id="02-domain-controllers-enforce-rdp-restricted-admin-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-enforce-rdp-restricted-admin-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Section 4.7, Section 4.9 (Connexions distantes), Annexe E
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 10.g (Page 40), Section 5.1 (Page 104)
@@ -4488,19 +4489,19 @@ mstsc.exe /RestrictedAdmin
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-defender-antivirus-md"></a>
+<div id="02-domain-controllers-defender-antivirus-md"></div>
 
-<a id="02-domain-controllers-defender-antivirus-md-req-dc-020-windows-defender-antivirus-domain-controller-baseline-and-exploit-guard"></a>
+<div id="02-domain-controllers-defender-antivirus-md-req-dc-020-windows-defender-antivirus-domain-controller-baseline-and-exploit-guard"></div>
 # [REQ-DC-020] Windows Defender Antivirus Domain Controller Baseline and Exploit Guard
 
-<a id="02-domain-controllers-defender-antivirus-md-target-scope"></a>
+<div id="02-domain-controllers-defender-antivirus-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers.
 * **Operating Systems**: Windows Server 2016 (and above).
 
 ---
 
-<a id="02-domain-controllers-defender-antivirus-md-implementation-details"></a>
+<div id="02-domain-controllers-defender-antivirus-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -4515,7 +4516,7 @@ mstsc.exe /RestrictedAdmin
 
 ---
 
-<a id="02-domain-controllers-defender-antivirus-md-rationale"></a>
+<div id="02-domain-controllers-defender-antivirus-md-rationale"></div>
 ## Rationale
 Domain Controllers are the most critical assets in an Active Directory environment, containing the Active Directory database (NTDS.dit) and credential material for the entire enterprise. Because Domain Controllers are Tier 0 assets, protective security agents running on them must be hardened to prevent credential access, lateral movement, and tampering.
 
@@ -4526,7 +4527,7 @@ This control establishes a server-optimized defense posture:
 
 ---
 
-<a id="02-domain-controllers-defender-antivirus-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-defender-antivirus-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **ASR PSExec and WMI Rule**: Enforcing "Block process creations originating from PSExec and WMI commands" (`d1e49aac-8f56-4280-b9ba-993a6d77406c`) can disrupt enterprise remote administration, monitoring agents, and backup orchestrators. In environments utilizing such orchestrators, this rule should be set to **Audit** mode or configured with explicit process exclusions rather than hard Block mode.
 * **Office Application Rules**: Rules targeting Microsoft Office or Adobe applications are documented but will not affect Domain Controllers, as these applications must never be installed on Tier 0 systems.
@@ -4534,10 +4535,10 @@ This control establishes a server-optimized defense posture:
 
 ---
 
-<a id="02-domain-controllers-defender-antivirus-md-implementation-steps"></a>
+<div id="02-domain-controllers-defender-antivirus-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-defender-antivirus-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-defender-antivirus-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -4677,7 +4678,7 @@ This control establishes a server-optimized defense posture:
 
 ---
 
-<a id="02-domain-controllers-defender-antivirus-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-defender-antivirus-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally on the Domain Controller to configure Windows Defender baseline, ASR rules, Tamper Protection, and Sandbox execution.
@@ -4983,7 +4984,7 @@ foreach ($KeyName in $CheckKeys.Keys) {
 
 ---
 
-<a id="02-domain-controllers-defender-antivirus-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-defender-antivirus-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **CIS Microsoft Windows Server Benchmark**: Section 18.9.47 (Exclusions restrictions), Section 18.9.30 (ASR Rules), Section 18.9.47.11 (Real-time protection)
 * **ANSSI Active Directory Hardening Guide**: Recommendations regarding protective controls on Domain Controllers
@@ -4993,19 +4994,19 @@ foreach ($KeyName in $CheckKeys.Keys) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-configure-applocker-policies-md"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md"></div>
 
-<a id="02-domain-controllers-configure-applocker-policies-md-req-dc-021-configure-applocker-policies-on-domain-controllers"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md-req-dc-021-configure-applocker-policies-on-domain-controllers"></div>
 # [REQ-DC-021] Configure AppLocker Policies on Domain Controllers
 
-<a id="02-domain-controllers-configure-applocker-policies-md-target-scope"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers.
 * **Operating Systems**: Windows Server 2016 (and above).
 
 ---
 
-<a id="02-domain-controllers-configure-applocker-policies-md-implementation-details"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -5016,7 +5017,7 @@ foreach ($KeyName in $CheckKeys.Keys) {
 
 ---
 
-<a id="02-domain-controllers-configure-applocker-policies-md-rationale"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md-rationale"></div>
 ## Rationale
 Domain Controllers are Tier 0 administrative assets and must never be used for general-purpose tasks like web browsing, document viewing, or running unapproved utilities. Attackers who compromise a Domain Controller or obtain administrative access often attempt to execute custom binaries, remote access tools (RATs), or script-based tools to pivot, establish persistence, or extract the Active Directory database (NTDS.dit).
 
@@ -5028,7 +5029,7 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
 
 ---
 
-<a id="02-domain-controllers-configure-applocker-policies-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Third-Party Administrative Tools**: Monitoring agents, backup orchestrators, and system management tools that run from custom directories (outside `%ProgramFiles%` or `%WinDir%`) will be blocked unless explicit path, publisher, or hash rules are created to whitelist them.
 * **Audit Mode Verification**: It is highly recommended to deploy AppLocker in **Audit Only** mode for a baseline period (e.g., 30 days) to identify all legitimate software and administrative scripts. Analyze the event log (`Applications and Services Logs\Microsoft\Windows\AppLocker`) to create the necessary whitelist rules before switching to **Enforce rules** mode.
@@ -5036,13 +5037,13 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
 
 ---
 
-<a id="02-domain-controllers-configure-applocker-policies-md-implementation-steps"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-configure-applocker-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="02-domain-controllers-configure-applocker-policies-md-1-enable-application-identity-service"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md-1-enable-application-identity-service"></div>
 #### 1. Enable Application Identity Service
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO targeting Domain Controllers (e.g., `GPO_Hardening_DomainControllers`).
@@ -5051,7 +5052,7 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
 4. Double-click **Application Identity**.
 5. Select **Define this policy setting** and configure the startup mode to **Automatic**.
 
-<a id="02-domain-controllers-configure-applocker-policies-md-2-configure-applocker-enforcement"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md-2-configure-applocker-enforcement"></div>
 #### 2. Configure AppLocker Enforcement
 1. Navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\Application Control Policies\AppLocker`
@@ -5063,7 +5064,7 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
    * **Packaged app rules** -> Select **Enforce rules** (or **Audit only**)
 4. Click **OK**.
 
-<a id="02-domain-controllers-configure-applocker-policies-md-3-create-default-and-block-rules"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md-3-create-default-and-block-rules"></div>
 #### 3. Create Default and Block Rules
 1. Expand **AppLocker** and select **Executable Rules**.
 2. Right-click **Executable Rules** and select **Create Default Rules** (allows all files in Windows and Program Files directories, and allows local Administrators to run all files).
@@ -5113,7 +5114,7 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
 
 ---
 
-<a id="02-domain-controllers-configure-applocker-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to configure the Application Identity service and import a robust local AppLocker policy.
@@ -5347,7 +5348,7 @@ if (Test-Path $NtvdmPath) {
 
 ---
 
-<a id="02-domain-controllers-configure-applocker-policies-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-configure-applocker-policies-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations Section 3.1.2 (System hardening and configuration baseline controls), DAT-NT-13 Note Technique (R8, R10, R15, R16, R20)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9 (Application Control Policies / AppLocker)
@@ -5357,19 +5358,19 @@ if (Test-Path $NtvdmPath) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md"></a>
+<div id="02-domain-controllers-enable-wdac-driver-blocklist-md"></div>
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-req-dc-022-enable-wdac-driver-blocklist"></a>
+<div id="02-domain-controllers-enable-wdac-driver-blocklist-md-req-dc-022-enable-wdac-driver-blocklist"></div>
 # [REQ-DC-022] Enable WDAC Driver Blocklist
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-target-scope"></a>
+<div id="02-domain-controllers-enable-wdac-driver-blocklist-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025
 
 ---
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-implementation-details"></a>
+<div id="02-domain-controllers-enable-wdac-driver-blocklist-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -5378,7 +5379,7 @@ if (Test-Path $NtvdmPath) {
 
 ---
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-rationale"></a>
+<div id="02-domain-controllers-enable-wdac-driver-blocklist-md-rationale"></div>
 ## Rationale
 Attackers frequently employ "Bring Your Own Vulnerable Driver" (BYOVD) attacks to bypass Windows kernel protections. In a BYOVD attack, an adversary with administrative privileges installs a legitimate, cryptographically signed third-party driver that contains a known, exploitable vulnerability. The attacker then exploits this vulnerability to execute arbitrary code with kernel privileges, allowing them to disable security agents, dump LSASS memory, or tamper with system integrity.
 
@@ -5386,18 +5387,18 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
 
 ---
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-legacy-impact-compatibility"></a>
+<div id="02-domain-controllers-enable-wdac-driver-blocklist-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-DC-007 - Enable Credential Guard](#02-domain-controllers-enable-wdac-driver-blocklist-md-02-domain-controllers-enable-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Enabling Secure Boot and CPU virtualization features is a strict pre-requisite; refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#02-domain-controllers-enable-wdac-driver-blocklist-md-07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#02-domain-controllers-enable-wdac-driver-blocklist-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware settings.
+* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-DC-007 - Enable Credential Guard](#02-domain-controllers-enable-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Enabling Secure Boot and CPU virtualization features is a strict pre-requisite; refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware settings.
 * **Compatibility with Legacy Drivers**: Third-party backup, monitoring, or hardware administration software running deprecated, vulnerable drivers may fail to load. All such software must be updated to use secure, modern drivers.
 * **Deployment Testing**: To prevent system instability, the WDAC blocklist policy should be deployed in **Audit Mode** initially to verify that no critical operational drivers are blocked in production before shifting to enforcement mode.
 
 ---
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-implementation-steps"></a>
+<div id="02-domain-controllers-enable-wdac-driver-blocklist-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="02-domain-controllers-enable-wdac-driver-blocklist-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 To enforce the driver blocklist across all Domain Controllers, you can deploy the Microsoft recommended block rules as a custom WDAC policy.
@@ -5426,7 +5427,7 @@ ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\DriverBlocklist.xml" -BinaryFilePath 
 
 ---
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="02-domain-controllers-enable-wdac-driver-blocklist-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to enable the Vulnerable Driver Blocklist registry key and ensure proper configuration.
@@ -5520,7 +5521,7 @@ if ($Vulnerable) {
 
 ---
 
-<a id="02-domain-controllers-enable-wdac-driver-blocklist-md-sources-compliance-references"></a>
+<div id="02-domain-controllers-enable-wdac-driver-blocklist-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI Active Directory Hardening Guide**: Recommendations on system component code integrity and driver signature enforcement.
 * **CIS Microsoft Windows Server Benchmark**: Section 18.8.14.3 / 18.9.31.2 (Deploy Windows Defender Application Control / Memory Integrity).
@@ -5529,93 +5530,93 @@ if ($Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-README-md"></a>
+<div id="03-identities-services-README-md"></div>
 
-<a id="03-identities-services-README-md-module-3-identities-services-hardening"></a>
+<div id="03-identities-services-README-md-module-3-identities-services-hardening"></div>
 # Module 3: Identities & Services Hardening
 
 This directory contains security requirements and policies designed to protect administrative identities, user credentials, and critical network service accounts in the Active Directory domain.
 
-<a id="03-identities-services-README-md-technical-hardening-controls"></a>
+<div id="03-identities-services-README-md-technical-hardening-controls"></div>
 ## Technical Hardening Controls
 
-1. **[REQ-ID-001 - Enforce Fine-Grained Password Policies](#03-identities-services-README-md-03-identities-services-enforce-fgpp-md)**
+1. **[REQ-ID-001 - Enforce Fine-Grained Password Policies](#03-identities-services-enforce-fgpp-md)**
    Enforces Password Settings Objects (PSOs) with strong password length and lockout settings for administrative groups.
 
-2. **[REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](#03-identities-services-README-md-03-identities-services-enable-laps-md)**
+2. **[REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](#03-identities-services-enable-laps-md)**
    Implements Windows LAPS or Classic LAPS to rotate local administrator passwords periodically.
 
-3. **[REQ-ID-003 - Implement Group Managed Service Accounts (gMSA)](#03-identities-services-README-md-03-identities-services-harden-service-accounts-md)**
+3. **[REQ-ID-003 - Implement Group Managed Service Accounts (gMSA)](#03-identities-services-harden-service-accounts-md)**
    Replaces static passwords with auto-managed complex service account credentials.
 
-4. **[REQ-ID-004 - Restrict Kerberos Delegation](#03-identities-services-README-md-03-identities-services-restrict-kerberos-delegation-md)**
+4. **[REQ-ID-004 - Restrict Kerberos Delegation](#03-identities-services-restrict-kerberos-delegation-md)**
    Bans unconstrained delegation and mandates constrained/resource-based constrained delegation.
 
-5. **[REQ-ID-005 - Configure and Populate Protected Users Group](#03-identities-services-README-md-03-identities-services-configure-protected-users-group-md)**
+5. **[REQ-ID-005 - Configure and Populate Protected Users Group](#03-identities-services-configure-protected-users-group-md)**
    Enforces strict caching and authentication restrictions on high-privilege identities to prevent credential theft.
 
-6. **[REQ-ID-006 - Rename and Disable Default Administrator and Guest Accounts](#03-identities-services-README-md-03-identities-services-harden-default-accounts-md)**
+6. **[REQ-ID-006 - Rename and Disable Default Administrator and Guest Accounts](#03-identities-services-harden-default-accounts-md)**
    Mitigates automated scanning and brute-force attempts on built-in OS accounts.
 
-7. **[REQ-ID-007 - Restrict Interactive Logons for Service Accounts](#03-identities-services-README-md-03-identities-services-restrict-service-account-logons-md)**
+7. **[REQ-ID-007 - Restrict Interactive Logons for Service Accounts](#03-identities-services-restrict-service-account-logons-md)**
    Blocks interactive local and remote desktop logons for service accounts via User Rights Assignment GPOs.
 
-8. **[REQ-ID-008 - Enforce User and Service Account Kerberos Encryption (AES-Only)](#03-identities-services-README-md-03-identities-services-enforce-user-aes-encryption-md)**
+8. **[REQ-ID-008 - Enforce User and Service Account Kerberos Encryption (AES-Only)](#03-identities-services-enforce-user-aes-encryption-md)**
    Sets the msDS-SupportedEncryptionTypes attribute to AES-only to mitigate Kerberoasting and session hijacking.
 
-9. **[REQ-ID-009 - Enforce Kerberos Pre-Authentication](#03-identities-services-README-md-03-identities-services-enforce-kerberos-preauthentication-md)**
+9. **[REQ-ID-009 - Enforce Kerberos Pre-Authentication](#03-identities-services-enforce-kerberos-preauthentication-md)**
    Mandates Kerberos pre-authentication on all active user accounts to mitigate AS-REP Roasting attacks.
 
-10. **[REQ-ID-010 - Restrict Schema Administrators Group Membership](#03-identities-services-README-md-03-identities-services-restrict-schema-admins-md)**
+10. **[REQ-ID-010 - Restrict Schema Administrators Group Membership](#03-identities-services-restrict-schema-admins-md)**
     Automates Schema Admins membership audit and locking using Restricted Groups GPO to minimize the attack surface.
 
-11. **[REQ-ID-011 - Enforce Accidental Deletion Protection on Organizational Units](#03-identities-services-README-md-03-identities-services-prevent-accidental-deletion-ous-md)**
+11. **[REQ-ID-011 - Enforce Accidental Deletion Protection on Organizational Units](#03-identities-services-prevent-accidental-deletion-ous-md)**
     Safeguards OUs from deletion errors or malicious administrative actions via the `ProtectedFromAccidentalDeletion` attribute.
 
-12. **[REQ-ID-012 - Configure Active Directory Authentication Silos and Policies](#03-identities-services-README-md-03-identities-services-configure-authentication-silos-md)**
+12. **[REQ-ID-012 - Configure Active Directory Authentication Silos and Policies](#03-identities-services-configure-authentication-silos-md)**
     Enforces logical boundaries restricting where Tier 0 administrator and host accounts can authenticate, preventing credential theft.
 
-13. **[REQ-ID-013 - Clean Up adminCount Attribute Orphans](#03-identities-services-README-md-03-identities-services-cleanup-admincount-orphans-md)**
+13. **[REQ-ID-013 - Clean Up adminCount Attribute Orphans](#03-identities-services-cleanup-admincount-orphans-md)**
     Identifies and remediates orphan accounts with disabled security descriptor inheritance, resetting adminCount to 0 and re-enabling inheritance.
 
-14. **[REQ-ID-014 - Renew KDS Root Keys and gMSA Secrets](#03-identities-services-README-md-03-identities-services-renew-kds-keys-gmsa-secrets-md)**
+14. **[REQ-ID-014 - Renew KDS Root Keys and gMSA Secrets](#03-identities-services-renew-kds-keys-gmsa-secrets-md)**
     Enforces KDS root key rotation and triggers password regeneration for Group Managed Service Accounts to mitigate exfiltration backdoors.
 
-15. **[REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#03-identities-services-README-md-03-identities-services-harden-adcs-pki-md)**
+15. **[REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#03-identities-services-harden-adcs-pki-md)**
     Hardens ADCS templates to block ESC1 SAN enrollment bypasses, mandates manager approval, and secures CA Web Enrollment endpoints.
 
-16. **[REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](#03-identities-services-README-md-03-identities-services-configure-point-and-print-md)**
+16. **[REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](#03-identities-services-configure-point-and-print-md)**
     Restricts printer driver installation to administrators, configures Early Launch Antimalware driver policy, disables logon screen user enumeration, and hardens CredSSP/credentials delegation.
 
-17. **[REQ-ID-017 - Disable Machine Account Quota](#03-identities-services-README-md-03-identities-services-disable-machine-account-quota-md)**
+17. **[REQ-ID-017 - Disable Machine Account Quota](#03-identities-services-disable-machine-account-quota-md)**
     Restricts the ms-DS-MachineAccountQuota attribute to 0 and limits the SeMachineAccountPrivilege user right to prevent unauthorized computer object creation by standard domain users.
 
-18. **[REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#03-identities-services-README-md-03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)**
+18. **[REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)**
     Limits the memberships of the legacy "Pre-Windows 2000 Compatible Access" group and restricts anonymous query options to prevent directory enumeration.
 
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-enforce-fgpp-md"></a>
+<div id="03-identities-services-enforce-fgpp-md"></div>
 
-<a id="03-identities-services-enforce-fgpp-md-req-id-001-enforce-fine-grained-password-policies"></a>
+<div id="03-identities-services-enforce-fgpp-md-req-id-001-enforce-fine-grained-password-policies"></div>
 # [REQ-ID-001] Enforce Fine-Grained Password Policies
 
-<a id="03-identities-services-enforce-fgpp-md-target-scope"></a>
+<div id="03-identities-services-enforce-fgpp-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="03-identities-services-enforce-fgpp-md-implementation-details"></a>
+<div id="03-identities-services-enforce-fgpp-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory System Container: `CN=Password Settings Container,CN=System,DC=[Domain]`
 
 ---
 
-<a id="03-identities-services-enforce-fgpp-md-rationale"></a>
+<div id="03-identities-services-enforce-fgpp-md-rationale"></div>
 ## Rationale
 Active Directory default domain password policies apply globally to all user accounts. These global policies are often configured with lower complexity and length requirements to avoid overwhelming standard users. However, such settings are inadequate for highly privileged accounts (Tier 0 and Tier 1 administrators), which are primary targets for credential stuffing, brute-force, and offline cracking attacks.
 
@@ -5623,17 +5624,17 @@ Enforcing Fine-Grained Password Policies (FGPP) via Password Settings Objects (P
 
 ---
 
-<a id="03-identities-services-enforce-fgpp-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-enforce-fgpp-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Application Compatibility**: Legacy applications, automated scripts, or administrative tools that authenticate using service accounts or administrative credentials might fail if they do not support passwords longer than 14 characters or are hardcoded to fail on password complexity.
 * **Pre-remediation Audit**: Before applying the policy to administrative groups, audit administrative accounts to ensure their current passwords comply with the new length requirements, or force a password reset upon applying the PSO.
 
 ---
 
-<a id="03-identities-services-enforce-fgpp-md-implementation-steps"></a>
+<div id="03-identities-services-enforce-fgpp-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-enforce-fgpp-md-option-a-active-directory-administrative-center-adac-configuration-preferred"></a>
+<div id="03-identities-services-enforce-fgpp-md-option-a-active-directory-administrative-center-adac-configuration-preferred"></div>
 ### Option A: Active Directory Administrative Center (ADAC) Configuration (Preferred)
 
 1. Open the **Active Directory Administrative Center** (`dsac.exe`) on a Domain Controller or management server.
@@ -5655,7 +5656,7 @@ Enforcing Fine-Grained Password Policies (FGPP) via Password Settings Objects (P
 
 ---
 
-<a id="03-identities-services-enforce-fgpp-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-enforce-fgpp-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following script to create and apply the Fine-Grained Password Policy using PowerShell.
@@ -5721,7 +5722,7 @@ if ($psoList) {
 
 ---
 
-<a id="03-identities-services-enforce-fgpp-md-sources-compliance-references"></a>
+<div id="03-identities-services-enforce-fgpp-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Section 3.1 (User Password policies)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 1.1 (Password Policy)
@@ -5730,19 +5731,19 @@ if ($psoList) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-enable-laps-md"></a>
+<div id="03-identities-services-enable-laps-md"></div>
 
-<a id="03-identities-services-enable-laps-md-req-id-002-enable-local-administrator-password-solution-laps"></a>
+<div id="03-identities-services-enable-laps-md-req-id-002-enable-local-administrator-password-solution-laps"></div>
 # [REQ-ID-002] Enable Local Administrator Password Solution (LAPS)
 
-<a id="03-identities-services-enable-laps-md-target-scope"></a>
+<div id="03-identities-services-enable-laps-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
 
 ---
 
-<a id="03-identities-services-enable-laps-md-implementation-details"></a>
+<div id="03-identities-services-enable-laps-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -5759,7 +5760,7 @@ if ($psoList) {
 
 ---
 
-<a id="03-identities-services-enable-laps-md-rationale"></a>
+<div id="03-identities-services-enable-laps-md-rationale"></div>
 ## Rationale
 In standard Active Directory setups, local administrator accounts on member servers and client workstations often share the same password. If a single machine is compromised and the local administrator password hash is extracted (e.g., from LSASS memory or SAM database), attackers can leverage Pass-the-Hash (PtH) techniques to log on to other domain machines laterally.
 
@@ -5767,7 +5768,7 @@ Implementing the Local Administrator Password Solution (LAPS) completely mitigat
 
 ---
 
-<a id="03-identities-services-enable-laps-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-enable-laps-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **LAPS Client Dependency**: Devices must have the Windows LAPS extension installed (native to modern Windows updates) or have the Classic LAPS client installed.
 * **Schema Extension**: The Active Directory schema must be extended to include LAPS attributes.
@@ -5775,10 +5776,10 @@ Implementing the Local Administrator Password Solution (LAPS) completely mitigat
 
 ---
 
-<a id="03-identities-services-enable-laps-md-implementation-steps"></a>
+<div id="03-identities-services-enable-laps-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-enable-laps-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="03-identities-services-enable-laps-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -5798,7 +5799,7 @@ Implementing the Local Administrator Password Solution (LAPS) completely mitigat
 
 ---
 
-<a id="03-identities-services-enable-laps-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-enable-laps-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following script to configure Windows LAPS locally using the registry.
@@ -5856,7 +5857,7 @@ if (Test-Path $RegPath) {
 
 ---
 
-<a id="03-identities-services-enable-laps-md-sources-compliance-references"></a>
+<div id="03-identities-services-enable-laps-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Section on Local account management and password randomization
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9.11 (LAPS Configuration)
@@ -5865,26 +5866,26 @@ if (Test-Path $RegPath) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-harden-service-accounts-md"></a>
+<div id="03-identities-services-harden-service-accounts-md"></div>
 
-<a id="03-identities-services-harden-service-accounts-md-req-id-003-implement-group-managed-service-accounts-gmsa"></a>
+<div id="03-identities-services-harden-service-accounts-md-req-id-003-implement-group-managed-service-accounts-gmsa"></div>
 # [REQ-ID-003] Implement Group Managed Service Accounts (gMSA)
 
-<a id="03-identities-services-harden-service-accounts-md-target-scope"></a>
+<div id="03-identities-services-harden-service-accounts-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="03-identities-services-harden-service-accounts-md-implementation-details"></a>
+<div id="03-identities-services-harden-service-accounts-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory Object Management (Managed Service Accounts container: `CN=Managed Service Accounts,DC=[Domain]`)
 
 ---
 
-<a id="03-identities-services-harden-service-accounts-md-rationale"></a>
+<div id="03-identities-services-harden-service-accounts-md-rationale"></div>
 ## Rationale
 Traditional service accounts in Active Directory are standard user accounts with static, often long-lived passwords. Because service passwords are rarely rotated, they are prime targets for offline brute-force attacks known as **Kerberoasting**. An attacker with domain access can request a Kerberos service ticket (TGS) for any account with a Service Principal Name (SPN) and attempt to crack the password hash offline.
 
@@ -5892,7 +5893,7 @@ Group Managed Service Accounts (gMSAs) address this risk by delegating password 
 
 ---
 
-<a id="03-identities-services-harden-service-accounts-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-harden-service-accounts-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **OS Compatibility**: gMSAs require a domain functional level of Windows Server 2012 or higher. Client hosts running the service must run Windows Server 2012/Windows 8 or higher.
 * **Application Support**: While major enterprise services such as Microsoft SQL Server, IIS, and Windows Services support gMSAs native, some legacy third-party applications do not support managing authentication without standard credentials.
@@ -5900,10 +5901,10 @@ Group Managed Service Accounts (gMSAs) address this risk by delegating password 
 
 ---
 
-<a id="03-identities-services-harden-service-accounts-md-implementation-steps"></a>
+<div id="03-identities-services-harden-service-accounts-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-harden-service-accounts-md-option-a-active-directory-management-console-configuration-preferred"></a>
+<div id="03-identities-services-harden-service-accounts-md-option-a-active-directory-management-console-configuration-preferred"></div>
 ### Option A: Active Directory Management Console Configuration (Preferred)
 
 gMSAs are primarily created and managed using administrative consoles or PowerShell.
@@ -5919,7 +5920,7 @@ gMSAs are primarily created and managed using administrative consoles or PowerSh
 
 ---
 
-<a id="03-identities-services-harden-service-accounts-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-harden-service-accounts-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use the following PowerShell script to initialize the KDS root key (if not already done) and create a gMSA.
@@ -5987,7 +5988,7 @@ if ($gMSAs) {
 
 ---
 
-<a id="03-identities-services-harden-service-accounts-md-sources-compliance-references"></a>
+<div id="03-identities-services-harden-service-accounts-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Section on Service account authentication management
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section on Managed Service Accounts
@@ -5996,26 +5997,26 @@ if ($gMSAs) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-restrict-kerberos-delegation-md"></a>
+<div id="03-identities-services-restrict-kerberos-delegation-md"></div>
 
-<a id="03-identities-services-restrict-kerberos-delegation-md-req-id-004-restrict-kerberos-delegation"></a>
+<div id="03-identities-services-restrict-kerberos-delegation-md-req-id-004-restrict-kerberos-delegation"></div>
 # [REQ-ID-004] Restrict Kerberos Delegation
 
-<a id="03-identities-services-restrict-kerberos-delegation-md-target-scope"></a>
+<div id="03-identities-services-restrict-kerberos-delegation-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="03-identities-services-restrict-kerberos-delegation-md-implementation-details"></a>
+<div id="03-identities-services-restrict-kerberos-delegation-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory Object Attributes (`userAccountControl` flags: `ADS_UF_TRUSTED_FOR_DELEGATION` = `0x80000`)
 
 ---
 
-<a id="03-identities-services-restrict-kerberos-delegation-md-rationale"></a>
+<div id="03-identities-services-restrict-kerberos-delegation-md-rationale"></div>
 ## Rationale
 Kerberos delegation allows a service to impersonate a user to access downstream resources on behalf of that user. In **Unconstrained Delegation**, when a user authenticates to a service, the user's Ticket Granting Ticket (TGT) is sent to the service server and stored in LSASS memory. If an attacker compromises that service server, they can extract the cached TGTs of all users who have authenticated to it (including Domain Admins) and impersonate them across the entire domain.
 
@@ -6023,17 +6024,17 @@ To prevent this critical privilege escalation path, **Unconstrained Delegation m
 
 ---
 
-<a id="03-identities-services-restrict-kerberos-delegation-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-restrict-kerberos-delegation-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Application Functionality**: Disabling unconstrained delegation on legacy servers might break multi-tier applications (e.g., Web Frontend -> SQL Backend) if they have not been configured for constrained delegation or RBCD.
 * **Transition Plan**: Before disabling unconstrained delegation, identify the specific Service Principal Names (SPNs) and destination services required, and configure Constrained Delegation (S4U2Proxy) to allow only those pathways.
 
 ---
 
-<a id="03-identities-services-restrict-kerberos-delegation-md-implementation-steps"></a>
+<div id="03-identities-services-restrict-kerberos-delegation-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-restrict-kerberos-delegation-md-option-a-active-directory-users-and-computers-console-configuration-preferred"></a>
+<div id="03-identities-services-restrict-kerberos-delegation-md-option-a-active-directory-users-and-computers-console-configuration-preferred"></div>
 ### Option A: Active Directory Users and Computers Console Configuration (Preferred)
 
 1. Open **Active Directory Users and Computers** (`dsa.msc`).
@@ -6049,7 +6050,7 @@ To prevent this critical privilege escalation path, **Unconstrained Delegation m
 
 ---
 
-<a id="03-identities-services-restrict-kerberos-delegation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-restrict-kerberos-delegation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use the following PowerShell script to audit and disable unconstrained delegation on all computers and users.
@@ -6111,7 +6112,7 @@ if ($totalUnconstrained -eq 0) {
 
 ---
 
-<a id="03-identities-services-restrict-kerberos-delegation-md-sources-compliance-references"></a>
+<div id="03-identities-services-restrict-kerberos-delegation-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R15 (Unconstrained Delegation ban) and R16 (Restricting Constrained Delegation)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section on Kerberos Delegation
@@ -6120,26 +6121,26 @@ if ($totalUnconstrained -eq 0) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-configure-protected-users-group-md"></a>
+<div id="03-identities-services-configure-protected-users-group-md"></div>
 
-<a id="03-identities-services-configure-protected-users-group-md-req-id-005-configure-and-populate-protected-users-group"></a>
+<div id="03-identities-services-configure-protected-users-group-md-req-id-005-configure-and-populate-protected-users-group"></div>
 # [REQ-ID-005] Configure and Populate Protected Users Group
 
-<a id="03-identities-services-configure-protected-users-group-md-target-scope"></a>
+<div id="03-identities-services-configure-protected-users-group-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
 
 ---
 
-<a id="03-identities-services-configure-protected-users-group-md-implementation-details"></a>
+<div id="03-identities-services-configure-protected-users-group-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory Built-in Group: `CN=Protected Users,CN=Users,DC=[Domain]`
 
 ---
 
-<a id="03-identities-services-configure-protected-users-group-md-rationale"></a>
+<div id="03-identities-services-configure-protected-users-group-md-rationale"></div>
 ## Rationale
 Standard administrative accounts are highly vulnerable to credential harvesting attacks. If a Domain Admin or other high-privilege account authenticates to a compromised workstation or member server, their credentials (passwords, Kerberos TGTs, NTLM hashes) remain cached in the Local Security Authority Subsystem Service (LSASS) memory. Attackers can extract these credentials using tools like Mimikatz to escalate privileges or move laterally.
 
@@ -6154,7 +6155,7 @@ Placing Tier 0 and Tier 1 administrative accounts into the Protected Users group
 
 ---
 
-<a id="03-identities-services-configure-protected-users-group-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-configure-protected-users-group-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **NTLM Authentication Blocked**: Any application or administrative process that authenticates using a Protected User account via NTLM (instead of Kerberos) will fail. Ensure DNS resolution and Kerberos pathways are fully functional.
 * **Short Session Lifetimes**: Administrative sessions will require re-authentication after 4 hours due to the non-configurable TGT limit.
@@ -6162,10 +6163,10 @@ Placing Tier 0 and Tier 1 administrative accounts into the Protected Users group
 
 ---
 
-<a id="03-identities-services-configure-protected-users-group-md-implementation-steps"></a>
+<div id="03-identities-services-configure-protected-users-group-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-configure-protected-users-group-md-option-a-active-directory-users-and-computers-console-configuration-preferred"></a>
+<div id="03-identities-services-configure-protected-users-group-md-option-a-active-directory-users-and-computers-console-configuration-preferred"></div>
 ### Option A: Active Directory Users and Computers Console Configuration (Preferred)
 
 1. Open **Active Directory Users and Computers** (`dsa.msc`).
@@ -6179,7 +6180,7 @@ Placing Tier 0 and Tier 1 administrative accounts into the Protected Users group
 
 ---
 
-<a id="03-identities-services-configure-protected-users-group-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-configure-protected-users-group-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following script to add administrative accounts to the Protected Users security group using PowerShell.
@@ -6242,7 +6243,7 @@ if ($Members) {
 
 ---
 
-<a id="03-identities-services-configure-protected-users-group-md-sources-compliance-references"></a>
+<div id="03-identities-services-configure-protected-users-group-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R14 (Use of Protected Users group)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section on Account Lockout and Protected Groups
@@ -6251,19 +6252,19 @@ if ($Members) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-harden-default-accounts-md"></a>
+<div id="03-identities-services-harden-default-accounts-md"></div>
 
-<a id="03-identities-services-harden-default-accounts-md-req-id-006-rename-and-disable-default-administrator-and-guest-accounts"></a>
+<div id="03-identities-services-harden-default-accounts-md-req-id-006-rename-and-disable-default-administrator-and-guest-accounts"></div>
 # [REQ-ID-006] Rename and Disable Default Administrator and Guest Accounts
 
-<a id="03-identities-services-harden-default-accounts-md-target-scope"></a>
+<div id="03-identities-services-harden-default-accounts-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
 
 ---
 
-<a id="03-identities-services-harden-default-accounts-md-implementation-details"></a>
+<div id="03-identities-services-harden-default-accounts-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
@@ -6279,7 +6280,7 @@ if ($Members) {
 
 ---
 
-<a id="03-identities-services-harden-default-accounts-md-rationale"></a>
+<div id="03-identities-services-harden-default-accounts-md-rationale"></div>
 ## Rationale
 Active Directory and local Windows environments initialize built-in accounts with fixed Relative Identifiers (RIDs). The default Administrator account always has RID 500, and the Guest account always has RID 501. 
 
@@ -6287,17 +6288,17 @@ Because these accounts are well-known, they are frequent targets for automated b
 
 ---
 
-<a id="03-identities-services-harden-default-accounts-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-harden-default-accounts-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Script Dependencies**: Older scripts, setup packages, or orchestration tools that rely on the hardcoded username `Administrator` or `Guest` for authentication will fail. Update scripts to query by SID (e.g., `S-1-5-21-...-500`) or target the updated username.
 * **Safe Mode Access**: If the local Administrator account is disabled and no other administrative account is functional, Safe Mode might limit recovery options. However, Windows automatically enables the built-in Administrator account in Safe Mode if no other local administrator accounts exist.
 
 ---
 
-<a id="03-identities-services-harden-default-accounts-md-implementation-steps"></a>
+<div id="03-identities-services-harden-default-accounts-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-harden-default-accounts-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="03-identities-services-harden-default-accounts-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -6317,7 +6318,7 @@ Because these accounts are well-known, they are frequent targets for automated b
 
 ---
 
-<a id="03-identities-services-harden-default-accounts-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-harden-default-accounts-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following script to disable the local Administrator and Guest accounts locally using PowerShell.
@@ -6387,7 +6388,7 @@ if ($guestAccount) {
 
 ---
 
-<a id="03-identities-services-harden-default-accounts-md-sources-compliance-references"></a>
+<div id="03-identities-services-harden-default-accounts-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Section on Default accounts and local user restriction
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 2.3.1.1 (Accounts: Administrator account status) and Section 2.3.1.2 (Accounts: Guest account status)
@@ -6396,19 +6397,19 @@ if ($guestAccount) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-restrict-service-account-logons-md"></a>
+<div id="03-identities-services-restrict-service-account-logons-md"></div>
 
-<a id="03-identities-services-restrict-service-account-logons-md-req-id-007-restrict-interactive-logons-for-service-accounts"></a>
+<div id="03-identities-services-restrict-service-account-logons-md-req-id-007-restrict-interactive-logons-for-service-accounts"></div>
 # [REQ-ID-007] Restrict Interactive Logons for Service Accounts
 
-<a id="03-identities-services-restrict-service-account-logons-md-target-scope"></a>
+<div id="03-identities-services-restrict-service-account-logons-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
 
 ---
 
-<a id="03-identities-services-restrict-service-account-logons-md-implementation-details"></a>
+<div id="03-identities-services-restrict-service-account-logons-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -6419,7 +6420,7 @@ if ($guestAccount) {
 
 ---
 
-<a id="03-identities-services-restrict-service-account-logons-md-rationale"></a>
+<div id="03-identities-services-restrict-service-account-logons-md-rationale"></div>
 ## Rationale
 Service accounts are frequent targets of brute-force and Kerberoasting attacks. If an adversary successfully cracks a service account's password offline, their immediate next step is to use those credentials to log on to domain systems to establish a footprint, dump credentials from memory, or perform administrative tasks.
 
@@ -6427,17 +6428,17 @@ By enforcing User Rights Assignment policies that explicitly deny service accoun
 
 ---
 
-<a id="03-identities-services-restrict-service-account-logons-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-restrict-service-account-logons-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Scheduled Tasks**: If service accounts are configured to run local scheduled tasks, they might require "Log on as a batch job" permissions. Make sure not to block "Log on as a batch job" if the service account has legitimate batch requirements.
 * **Testing Phase**: Prior to implementing these deny policies in production GPOs, identify all service accounts, group them into a central security group, and verify that none of these accounts are used by administrators to log on to servers manually for management purposes.
 
 ---
 
-<a id="03-identities-services-restrict-service-account-logons-md-implementation-steps"></a>
+<div id="03-identities-services-restrict-service-account-logons-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-restrict-service-account-logons-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="03-identities-services-restrict-service-account-logons-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -6454,7 +6455,7 @@ By enforcing User Rights Assignment policies that explicitly deny service accoun
 
 ---
 
-<a id="03-identities-services-restrict-service-account-logons-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-restrict-service-account-logons-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Since User Rights Assignment is typically controlled by GPO or local security policy database (`secedit.sdb`), local changes can be made using the `secedit` command-line utility.
@@ -6565,7 +6566,7 @@ Remove-Item -Path $SecCfg -Force
 
 ---
 
-<a id="03-identities-services-restrict-service-account-logons-md-sources-compliance-references"></a>
+<div id="03-identities-services-restrict-service-account-logons-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation on limiting administrative and service account interactive logons
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 2.2.14 (Deny log on locally) and Section 2.2.16 (Deny log on through Remote Desktop Services)
@@ -6574,26 +6575,26 @@ Remove-Item -Path $SecCfg -Force
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-enforce-user-aes-encryption-md"></a>
+<div id="03-identities-services-enforce-user-aes-encryption-md"></div>
 
-<a id="03-identities-services-enforce-user-aes-encryption-md-req-id-008-enforce-user-and-service-account-kerberos-encryption-aes-only"></a>
+<div id="03-identities-services-enforce-user-aes-encryption-md-req-id-008-enforce-user-and-service-account-kerberos-encryption-aes-only"></div>
 # [REQ-ID-008] Enforce User and Service Account Kerberos Encryption (AES-Only)
 
-<a id="03-identities-services-enforce-user-aes-encryption-md-target-scope"></a>
+<div id="03-identities-services-enforce-user-aes-encryption-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="03-identities-services-enforce-user-aes-encryption-md-implementation-details"></a>
+<div id="03-identities-services-enforce-user-aes-encryption-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory Account Attribute: `msDS-SupportedEncryptionTypes` (Set to `24`)
 
 ---
 
-<a id="03-identities-services-enforce-user-aes-encryption-md-rationale"></a>
+<div id="03-identities-services-enforce-user-aes-encryption-md-rationale"></div>
 ## Rationale
 In Active Directory, even when Group Policies restrict Kerberos encryption algorithms on domain members, individual user and service accounts can override these restrictions during authentication negotiation. If an account has obsolete encryption types enabled (e.g., RC4 or DES) or has the `msDS-SupportedEncryptionTypes` attribute set to `0` (default, which defaults to domain controllers' allowed options), the Key Distribution Center (KDC) may issue Service tickets (TGS) using the RC4 algorithm.
 
@@ -6601,17 +6602,17 @@ Because RC4 utilizes weaker, legacy cryptography, tickets encrypted using RC4 ca
 
 ---
 
-<a id="03-identities-services-enforce-user-aes-encryption-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-enforce-user-aes-encryption-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Client and Service Compatibility**: Host systems running services under these accounts, as well as the clients connecting to them, must support AES Kerberos encryption. Windows 7/Server 2008 and newer support AES natively.
 * **Pre-remediation Audit**: Ensure that any legacy non-Windows servers (e.g., older UNIX/Linux systems running Samba or Java applications) are verified to support AES Kerberos encryption before enforcing this setting.
 
 ---
 
-<a id="03-identities-services-enforce-user-aes-encryption-md-implementation-steps"></a>
+<div id="03-identities-services-enforce-user-aes-encryption-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-enforce-user-aes-encryption-md-option-a-active-directory-users-and-computers-attribute-editor-preferred"></a>
+<div id="03-identities-services-enforce-user-aes-encryption-md-option-a-active-directory-users-and-computers-attribute-editor-preferred"></div>
 ### Option A: Active Directory Users and Computers Attribute Editor (Preferred)
 
 1. Open **Active Directory Users and Computers** (`dsa.msc`).
@@ -6626,7 +6627,7 @@ Because RC4 utilizes weaker, legacy cryptography, tickets encrypted using RC4 ca
 
 ---
 
-<a id="03-identities-services-enforce-user-aes-encryption-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-enforce-user-aes-encryption-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following script to enforce AES-only encryption on active user accounts in the domain.
@@ -6686,7 +6687,7 @@ if ($VulnerableAccounts) {
 
 ---
 
-<a id="03-identities-services-enforce-user-aes-encryption-md-sources-compliance-references"></a>
+<div id="03-identities-services-enforce-user-aes-encryption-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R13 (Disabling obsolete encryption algorithms)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section on Kerberos Encryption Strength
@@ -6695,26 +6696,26 @@ if ($VulnerableAccounts) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md"></a>
+<div id="03-identities-services-enforce-kerberos-preauthentication-md"></div>
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-req-id-009-enforce-kerberos-pre-authentication"></a>
+<div id="03-identities-services-enforce-kerberos-preauthentication-md-req-id-009-enforce-kerberos-pre-authentication"></div>
 # [REQ-ID-009] Enforce Kerberos Pre-Authentication
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-target-scope"></a>
+<div id="03-identities-services-enforce-kerberos-preauthentication-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers (Active Directory User Accounts)
 * **Operating Systems**: Windows Server 2016 and above
 
 ---
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-implementation-details"></a>
+<div id="03-identities-services-enforce-kerberos-preauthentication-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory User Account Control Attribute (flag `DONOTREQ_PREAUTH` / 0x400000)
 
 ---
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-rationale"></a>
+<div id="03-identities-services-enforce-kerberos-preauthentication-md-rationale"></div>
 ## Rationale
 Kerberos Pre-Authentication serves as the primary line of defense against AS-REP Roasting. AS-REP Roasting is a credential theft technique where attackers target accounts that do not require Kerberos pre-authentication.
 
@@ -6726,17 +6727,17 @@ By enforcing pre-authentication, the KDC requires the client to encrypt a timest
 
 ---
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-enforce-kerberos-preauthentication-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Authentication Failure**: Accounts linked to very old or poorly designed application integrations, legacy mainframes, or third-party appliances that do not support Kerberos pre-authentication will fail to authenticate. These service integrations must be upgraded to support standard Kerberos pre-authentication or transitioned to secure modern service account models (like gMSAs).
 * **Initial Audit**: Administrators must audit the environment to locate and analyze why any accounts have pre-authentication disabled prior to enforcing the setting.
 
 ---
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-implementation-steps"></a>
+<div id="03-identities-services-enforce-kerberos-preauthentication-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-option-a-active-directory-users-and-computers-preferred"></a>
+<div id="03-identities-services-enforce-kerberos-preauthentication-md-option-a-active-directory-users-and-computers-preferred"></div>
 ### Option A: Active Directory Users and Computers (Preferred)
 
 1. Log on to a Domain Controller or administrative workstation with **Account Operators** or **Domain Admins** credentials.
@@ -6748,12 +6749,12 @@ By enforcing pre-authentication, the KDC requires the client to encrypt a timest
 
 ---
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-enforce-kerberos-preauthentication-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts to audit and remediate accounts in the forest.
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-1-local-ad-audit-audit-kerberospreauthps1"></a>
+<div id="03-identities-services-enforce-kerberos-preauthentication-md-1-local-ad-audit-audit-kerberospreauthps1"></div>
 #### 1. Local AD Audit (Audit-KerberosPreAuth.ps1)
 
 [Download Script: Audit-KerberosPreAuth.ps1](audit_scripts/Audit-KerberosPreAuth.ps1)
@@ -6783,7 +6784,7 @@ try {
 }
 ```
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-2-local-ad-remediation-set-kerberospreauthps1"></a>
+<div id="03-identities-services-enforce-kerberos-preauthentication-md-2-local-ad-remediation-set-kerberospreauthps1"></div>
 #### 2. Local AD Remediation (Set-KerberosPreAuth.ps1)
 
 [Download Script: Set-KerberosPreAuth.ps1](implementation_scripts/Set-KerberosPreAuth.ps1)
@@ -6816,7 +6817,7 @@ try {
 
 ---
 
-<a id="03-identities-services-enforce-kerberos-preauthentication-md-sources-compliance-references"></a>
+<div id="03-identities-services-enforce-kerberos-preauthentication-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Technical recommendations regarding Kerberos protocol security.
 * **CIS Microsoft Windows Server Benchmark**: User Account Control security baseline configuration.
@@ -6825,26 +6826,26 @@ try {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-restrict-schema-admins-md"></a>
+<div id="03-identities-services-restrict-schema-admins-md"></div>
 
-<a id="03-identities-services-restrict-schema-admins-md-req-id-010-restrict-schema-administrators-group-membership"></a>
+<div id="03-identities-services-restrict-schema-admins-md-req-id-010-restrict-schema-administrators-group-membership"></div>
 # [REQ-ID-010] Restrict Schema Administrators Group Membership
 
-<a id="03-identities-services-restrict-schema-admins-md-target-scope"></a>
+<div id="03-identities-services-restrict-schema-admins-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016 and above
 
 ---
 
-<a id="03-identities-services-restrict-schema-admins-md-implementation-details"></a>
+<div id="03-identities-services-restrict-schema-admins-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: `Computer Configuration\Policies\Windows Settings\Security Settings\Restricted Groups`
 
 ---
 
-<a id="03-identities-services-restrict-schema-admins-md-rationale"></a>
+<div id="03-identities-services-restrict-schema-admins-md-rationale"></div>
 ## Rationale
 The Schema Admins group is one of the most critical security groups within an Active Directory forest. This group controls the underlying structure of the directory database, defining every class of object and every attribute that those objects can possess.
 
@@ -6856,17 +6857,17 @@ To minimize the attack surface, standard administrative accounts must not have p
 
 ---
 
-<a id="03-identities-services-restrict-schema-admins-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-restrict-schema-admins-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Schema Updates Blocked**: When executing legitimate schema updates, the Restricted Groups GPO will automatically remove installers from the group, causing setup failures. During scheduled upgrades, administrators must temporarily disable the link for this GPO (or modify the policy) and enable it immediately once the upgrade completes.
 * **Administrative Training**: Administrators must be trained on JIT procedures for schema changes.
 
 ---
 
-<a id="03-identities-services-restrict-schema-admins-md-implementation-steps"></a>
+<div id="03-identities-services-restrict-schema-admins-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-restrict-schema-admins-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="03-identities-services-restrict-schema-admins-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Log on to a management workstation or Domain Controller with **Domain Admins** credentials.
@@ -6885,12 +6886,12 @@ To minimize the attack surface, standard administrative accounts must not have p
 
 ---
 
-<a id="03-identities-services-restrict-schema-admins-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-restrict-schema-admins-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts to audit and clear the group membership.
 
-<a id="03-identities-services-restrict-schema-admins-md-1-local-audit-audit-schemaadminsgroupps1"></a>
+<div id="03-identities-services-restrict-schema-admins-md-1-local-audit-audit-schemaadminsgroupps1"></div>
 #### 1. Local Audit (Audit-SchemaAdminsGroup.ps1)
 
 [Download Script: Audit-SchemaAdminsGroup.ps1](audit_scripts/Audit-SchemaAdminsGroup.ps1)
@@ -6921,7 +6922,7 @@ try {
 }
 ```
 
-<a id="03-identities-services-restrict-schema-admins-md-2-local-remediation-clear-schemaadminsgroupps1"></a>
+<div id="03-identities-services-restrict-schema-admins-md-2-local-remediation-clear-schemaadminsgroupps1"></div>
 #### 2. Local Remediation (Clear-SchemaAdminsGroup.ps1)
 
 [Download Script: Clear-SchemaAdminsGroup.ps1](implementation_scripts/Clear-SchemaAdminsGroup.ps1)
@@ -6955,7 +6956,7 @@ try {
 
 ---
 
-<a id="03-identities-services-restrict-schema-admins-md-sources-compliance-references"></a>
+<div id="03-identities-services-restrict-schema-admins-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Technical recommendations regarding privileged group membership management.
 * **Microsoft Architecture Guide**: Design recommendations for administrative group hygiene.
@@ -6963,26 +6964,26 @@ try {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md"></a>
+<div id="03-identities-services-prevent-accidental-deletion-ous-md"></div>
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-req-id-011-enforce-accidental-deletion-protection-on-organizational-units"></a>
+<div id="03-identities-services-prevent-accidental-deletion-ous-md-req-id-011-enforce-accidental-deletion-protection-on-organizational-units"></div>
 # [REQ-ID-011] Enforce Accidental Deletion Protection on Organizational Units
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-target-scope"></a>
+<div id="03-identities-services-prevent-accidental-deletion-ous-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016 and above
 
 ---
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-implementation-details"></a>
+<div id="03-identities-services-prevent-accidental-deletion-ous-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**: Active Directory Object Access Control Lists (`ProtectedFromAccidentalDeletion` attribute)
 
 ---
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-rationale"></a>
+<div id="03-identities-services-prevent-accidental-deletion-ous-md-rationale"></div>
 ## Rationale
 Organizational Units (OUs) act as the logical containers for structuring users, groups, and computers in Active Directory, and are the targets for linking Group Policy Objects (GPOs).
 
@@ -6992,17 +6993,17 @@ Enforcing the accidental deletion protection property provides the following sec
 
 ---
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-prevent-accidental-deletion-ous-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Administrative Operations**: When moving an OU, or renaming/deleting it during structural reorganizations, administrators must manually uncheck the protection box (or disable the property via PowerShell) before performing the action.
 * **Scripted Creation**: Any custom PowerShell scripts used to provision new OUs should explicitly set the `-ProtectedFromAccidentalDeletion $true` parameter during creation to ensure consistent compliance.
 
 ---
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-implementation-steps"></a>
+<div id="03-identities-services-prevent-accidental-deletion-ous-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-option-a-active-directory-users-and-computers-preferred"></a>
+<div id="03-identities-services-prevent-accidental-deletion-ous-md-option-a-active-directory-users-and-computers-preferred"></div>
 ### Option A: Active Directory Users and Computers (Preferred)
 
 1. Log on to a management workstation or Domain Controller with **Domain Admins** or **Account Operators** credentials.
@@ -7015,12 +7016,12 @@ Enforcing the accidental deletion protection property provides the following sec
 
 ---
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-prevent-accidental-deletion-ous-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts to audit and configure the setting domain-wide.
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-1-local-audit-audit-ouaccidentaldeletionps1"></a>
+<div id="03-identities-services-prevent-accidental-deletion-ous-md-1-local-audit-audit-ouaccidentaldeletionps1"></div>
 #### 1. Local Audit (Audit-OUAccidentalDeletion.ps1)
 
 [Download Script: Audit-OUAccidentalDeletion.ps1](audit_scripts/Audit-OUAccidentalDeletion.ps1)
@@ -7049,7 +7050,7 @@ try {
 }
 ```
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-2-local-remediation-enforce-ouaccidentaldeletionps1"></a>
+<div id="03-identities-services-prevent-accidental-deletion-ous-md-2-local-remediation-enforce-ouaccidentaldeletionps1"></div>
 #### 2. Local Remediation (Enforce-OUAccidentalDeletion.ps1)
 
 [Download Script: Enforce-OUAccidentalDeletion.ps1](implementation_scripts/Enforce-OUAccidentalDeletion.ps1)
@@ -7082,7 +7083,7 @@ try {
 
 ---
 
-<a id="03-identities-services-prevent-accidental-deletion-ous-md-sources-compliance-references"></a>
+<div id="03-identities-services-prevent-accidental-deletion-ous-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **Microsoft Best Practices**: Protecting Organizational Units from Accidental Deletion.
 * **ANSSI AD Hardening Guide**: Operational integrity and directory maintenance recommendations.
@@ -7090,19 +7091,19 @@ try {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-configure-authentication-silos-md"></a>
+<div id="03-identities-services-configure-authentication-silos-md"></div>
 
-<a id="03-identities-services-configure-authentication-silos-md-req-id-012-configure-active-directory-authentication-silos-and-policies"></a>
+<div id="03-identities-services-configure-authentication-silos-md-req-id-012-configure-active-directory-authentication-silos-and-policies"></div>
 # [REQ-ID-012] Configure Active Directory Authentication Silos and Policies
 
-<a id="03-identities-services-configure-authentication-silos-md-target-scope"></a>
+<div id="03-identities-services-configure-authentication-silos-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Tier 0 Administration Workstations (PAWs), Tier 0 Administrator Accounts
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="03-identities-services-configure-authentication-silos-md-implementation-details"></a>
+<div id="03-identities-services-configure-authentication-silos-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: 
@@ -7111,7 +7112,7 @@ try {
 
 ---
 
-<a id="03-identities-services-configure-authentication-silos-md-rationale"></a>
+<div id="03-identities-services-configure-authentication-silos-md-rationale"></div>
 ## Rationale
 Standard Active Directory group memberships define access permissions but do not prevent highly privileged accounts from authenticating to lower-trust systems. If an administrator accidentally logs on to a compromised Tier 1/2 machine, their credentials can be stolen.
 
@@ -7122,7 +7123,7 @@ Authentication Silos and Policies provide cryptographic containment:
 
 ---
 
-<a id="03-identities-services-configure-authentication-silos-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-configure-authentication-silos-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Protected Users Prerequisite**: Users placed in an Authentication Silo must also be members of the **Protected Users** security group. Silos apply only to the Kerberos protocol; if NTLM is not blocked for these users, the silo restrictions can be bypassed using NTLM fallbacks.
 * **Domain Functional Level (DFL)**: The AD environment must be at a minimum functional level of Windows Server 2012 R2.
@@ -7130,13 +7131,13 @@ Authentication Silos and Policies provide cryptographic containment:
 
 ---
 
-<a id="03-identities-services-configure-authentication-silos-md-implementation-steps"></a>
+<div id="03-identities-services-configure-authentication-silos-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-configure-authentication-silos-md-option-a-active-directory-administrative-center-adac-configuration"></a>
+<div id="03-identities-services-configure-authentication-silos-md-option-a-active-directory-administrative-center-adac-configuration"></div>
 ### Option A: Active Directory Administrative Center (ADAC) Configuration
 
-<a id="03-identities-services-configure-authentication-silos-md-1-enable-kdc-claims-and-armoring-via-group-policy"></a>
+<div id="03-identities-services-configure-authentication-silos-md-1-enable-kdc-claims-and-armoring-via-group-policy"></div>
 #### 1. Enable KDC Claims and Armoring via Group Policy
 Before configuring silos, Domain Controllers must be configured to support claims:
 
@@ -7149,7 +7150,7 @@ Before configuring silos, Domain Controllers must be configured to support claim
 6. Under options, select **Supported** (or **Always support**).
 7. Save the GPO and run `gpupdate /force` on all Domain Controllers.
 
-<a id="03-identities-services-configure-authentication-silos-md-2-create-the-authentication-policy-and-silo-in-adac"></a>
+<div id="03-identities-services-configure-authentication-silos-md-2-create-the-authentication-policy-and-silo-in-adac"></div>
 #### 2. Create the Authentication Policy and Silo in ADAC
 1. Open **Active Directory Administrative Center** (`dsac.exe`).
 2. In the left pane, click the tree view, expand your domain, and select the **Authentication** container.
@@ -7165,7 +7166,7 @@ Before configuring silos, Domain Controllers must be configured to support claim
 
 ---
 
-<a id="03-identities-services-configure-authentication-silos-md-option-b-powershell-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-configure-authentication-silos-md-option-b-powershell-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell Configuration (Remediation / Non-GPO)
 
 Run the following script block to programmatically define the Authentication Policy, create the Silo, and enroll Tier 0 members.
@@ -7271,7 +7272,7 @@ if ($Silos) {
 
 ---
 
-<a id="03-identities-services-configure-authentication-silos-md-sources-compliance-references"></a>
+<div id="03-identities-services-configure-authentication-silos-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations R8, R64, R80, Annexe C (Mise en œuvre d'un silo)
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 10.g (Page 40), Section 11 (Page 49)
@@ -7280,26 +7281,26 @@ if ($Silos) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-cleanup-admincount-orphans-md"></a>
+<div id="03-identities-services-cleanup-admincount-orphans-md"></div>
 
-<a id="03-identities-services-cleanup-admincount-orphans-md-req-id-013-clean-up-admincount-attribute-orphans"></a>
+<div id="03-identities-services-cleanup-admincount-orphans-md-req-id-013-clean-up-admincount-attribute-orphans"></div>
 # [REQ-ID-013] Clean Up adminCount Attribute Orphans
 
-<a id="03-identities-services-cleanup-admincount-orphans-md-target-scope"></a>
+<div id="03-identities-services-cleanup-admincount-orphans-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Identity Management
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="03-identities-services-cleanup-admincount-orphans-md-implementation-details"></a>
+<div id="03-identities-services-cleanup-admincount-orphans-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**: Active Directory User Object attributes (`adminCount` and Security Descriptor inheritance flag)
 
 ---
 
-<a id="03-identities-services-cleanup-admincount-orphans-md-rationale"></a>
+<div id="03-identities-services-cleanup-admincount-orphans-md-rationale"></div>
 ## Rationale
 In Active Directory, when an account is added to a protected group (such as `Domain Admins`, `Schema Admins`, or `Account Operators`), a background system process called SDPROP automatically sets the account's `adminCount` attribute to `1` and disables security descriptor inheritance. This is done to ensure the account only inherits permissions defined by the secure `adminSDHolder` template rather than any insecure permissions on the parent Organizational Unit (OU).
 
@@ -7312,17 +7313,17 @@ Auditing and resetting these orphan accounts restores proper security inheritanc
 
 ---
 
-<a id="03-identities-services-cleanup-admincount-orphans-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-cleanup-admincount-orphans-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Parent OU Access Control**: Re-enabling security inheritance on a user object will immediately apply the Access Control Lists (ACLs) of its parent Organizational Unit. Before re-enabling inheritance, ensure that the target user's parent OU is properly secured and does not grant excessive delegation permissions to non-Tier 0 accounts.
 * **Service Interruption**: No service interruption is expected, as this is an attribute cleanup task.
 
 ---
 
-<a id="03-identities-services-cleanup-admincount-orphans-md-implementation-steps"></a>
+<div id="03-identities-services-cleanup-admincount-orphans-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-cleanup-admincount-orphans-md-option-a-active-directory-administrative-center-adac-manual-modification"></a>
+<div id="03-identities-services-cleanup-admincount-orphans-md-option-a-active-directory-administrative-center-adac-manual-modification"></div>
 ### Option A: Active Directory Administrative Center (ADAC) Manual Modification
 
 1. Open **Active Directory Administrative Center** (`dsac.exe`) on a Domain Controller.
@@ -7335,7 +7336,7 @@ Auditing and resetting these orphan accounts restores proper security inheritanc
 
 ---
 
-<a id="03-identities-services-cleanup-admincount-orphans-md-option-b-powershell-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-cleanup-admincount-orphans-md-option-b-powershell-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell Configuration (Remediation / Non-GPO)
 
 Run the following script to automatically identify all user accounts with `adminCount=1` that are no longer members of any protected AD group, reset the attribute, and re-enable security inheritance.
@@ -7454,7 +7455,7 @@ Write-Host "[*] Total adminCount orphans detected: $($OrphanCount)." -Foreground
 
 ---
 
-<a id="03-identities-services-cleanup-admincount-orphans-md-sources-compliance-references"></a>
+<div id="03-identities-services-cleanup-admincount-orphans-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 6.b (Page 32)
 * **ANSSI AD Hardening Guide**: Section 3.2.2 (adminSDHolder Context)
@@ -7463,26 +7464,26 @@ Write-Host "[*] Total adminCount orphans detected: $($OrphanCount)." -Foreground
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md"></a>
+<div id="03-identities-services-renew-kds-keys-gmsa-secrets-md"></div>
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-req-id-014-renew-kds-root-keys-and-gmsa-secrets"></a>
+<div id="03-identities-services-renew-kds-keys-gmsa-secrets-md-req-id-014-renew-kds-root-keys-and-gmsa-secrets"></div>
 # [REQ-ID-014] Renew KDS Root Keys and gMSA Secrets
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-target-scope"></a>
+<div id="03-identities-services-renew-kds-keys-gmsa-secrets-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Group Managed Service Accounts (gMSAs)
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-implementation-details"></a>
+<div id="03-identities-services-renew-kds-keys-gmsa-secrets-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory KDS Configuration container: `CN=Microsoft Key Distribution Service,CN=Services,CN=Configuration,DC=[Domain]`
 
 ---
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-rationale"></a>
+<div id="03-identities-services-renew-kds-keys-gmsa-secrets-md-rationale"></div>
 ## Rationale
 Group Managed Service Accounts (gMSAs) offer secure, automated password management (complex 120-character passwords rotated every 30 days) for services running on domain member systems. The passwords for these accounts are generated by the Key Distribution Service (KDS) running on Domain Controllers.
 
@@ -7496,22 +7497,22 @@ Therefore:
 
 ---
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-renew-kds-keys-gmsa-secrets-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Replication Sync Delay**: By default, Active Directory enforces a 10-hour delay when adding a new KDS root key. This is done to ensure that all Domain Controllers have successfully replicated the new root key before it is used to generate gMSA passwords. Bypassing this delay during remediation using `-EffectiveImmediately` is possible, but requires verifying that AD replication is functioning properly.
 * **Service Downtime**: gMSA password rotation is handled automatically by the host systems. However, triggering a force-reset of the password requires restarting the associated service on the host system to ensure it fetches the new password.
 
 ---
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-implementation-steps"></a>
+<div id="03-identities-services-renew-kds-keys-gmsa-secrets-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-option-a-active-directory-powershell-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-renew-kds-keys-gmsa-secrets-md-option-a-active-directory-powershell-configuration-remediation-non-gpo"></div>
 ### Option A: Active Directory PowerShell Configuration (Remediation / Non-GPO)
 
 Because KDS keys and gMSAs do not have standard GPO management interfaces, the creation of root keys and service account password rotation must be executed via PowerShell.
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-1-generate-a-new-kds-root-key"></a>
+<div id="03-identities-services-renew-kds-keys-gmsa-secrets-md-1-generate-a-new-kds-root-key"></div>
 #### 1. Generate a New KDS Root Key
 Open an elevated PowerShell console on the PDC Emulator Domain Controller and run:
 
@@ -7533,7 +7534,7 @@ if ($null -ne $NewKey) {
 }
 ```
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-2-force-gmsa-password-rotation"></a>
+<div id="03-identities-services-renew-kds-keys-gmsa-secrets-md-2-force-gmsa-password-rotation"></div>
 #### 2. Force gMSA Password Rotation
 Once the new root key is active, force password rotation for all gMSAs:
 
@@ -7565,7 +7566,7 @@ if ($gMSAs) {
 
 ---
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-option-b-powershell-auditing-status"></a>
+<div id="03-identities-services-renew-kds-keys-gmsa-secrets-md-option-b-powershell-auditing-status"></div>
 ### Option B: PowerShell Auditing Status
 
 Use this PowerShell script to audit current KDS root keys and gMSA replication status.
@@ -7609,7 +7610,7 @@ if ($Accounts) {
 
 ---
 
-<a id="03-identities-services-renew-kds-keys-gmsa-secrets-md-sources-compliance-references"></a>
+<div id="03-identities-services-renew-kds-keys-gmsa-secrets-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 4.d (Page 27)
 * **ANSSI AD Hardening Guide**: Section 4.14 (Managed Service Accounts)
@@ -7618,19 +7619,19 @@ if ($Accounts) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-harden-adcs-pki-md"></a>
+<div id="03-identities-services-harden-adcs-pki-md"></div>
 
-<a id="03-identities-services-harden-adcs-pki-md-req-id-015-harden-active-directory-certificate-services-adcs-and-pki"></a>
+<div id="03-identities-services-harden-adcs-pki-md-req-id-015-harden-active-directory-certificate-services-adcs-and-pki"></div>
 # [REQ-ID-015] Harden Active Directory Certificate Services (ADCS) and PKI
 
-<a id="03-identities-services-harden-adcs-pki-md-target-scope"></a>
+<div id="03-identities-services-harden-adcs-pki-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Member Servers (Certification Authorities), Domain Controllers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="03-identities-services-harden-adcs-pki-md-implementation-details"></a>
+<div id="03-identities-services-harden-adcs-pki-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: 
@@ -7639,7 +7640,7 @@ if ($Accounts) {
 
 ---
 
-<a id="03-identities-services-harden-adcs-pki-md-rationale"></a>
+<div id="03-identities-services-harden-adcs-pki-md-rationale"></div>
 ## Rationale
 Active Directory Certificate Services (ADCS) is a built-in Public Key Infrastructure (PKI) solution widely used for issuing certificates for computer and user authentication. However, misconfigured certificate templates and CA web endpoints present severe privilege escalation vectors (collectively referred to as ESC1 through ESC8).
 
@@ -7651,20 +7652,20 @@ Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary
 
 ---
 
-<a id="03-identities-services-harden-adcs-pki-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-harden-adcs-pki-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Enrollment Disruption**: Disabling template configurations that allow client-specified SANs will block applications (such as third-party firewalls, load balancers, or web servers) that legitimately use this configuration to automatically request certificates with custom SANs. These systems should be migrated to secure enrollment agents or manual enrollment templates with manager approval.
 * **Authentication Failures**: Disabling HTTP Web Enrollment (`/certsrv`) entirely is recommended. If it must remain active, IIS must be configured to enforce HTTPS and Extended Protection for Authentication (EPA), which will block legacy non-channel-bound clients.
 
 ---
 
-<a id="03-identities-services-harden-adcs-pki-md-implementation-steps"></a>
+<div id="03-identities-services-harden-adcs-pki-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-harden-adcs-pki-md-option-a-certificate-templates-console-configuration"></a>
+<div id="03-identities-services-harden-adcs-pki-md-option-a-certificate-templates-console-configuration"></div>
 ### Option A: Certificate Templates Console Configuration
 
-<a id="03-identities-services-harden-adcs-pki-md-1-mitigate-esc1-disable-enrollee-supplies-subject"></a>
+<div id="03-identities-services-harden-adcs-pki-md-1-mitigate-esc1-disable-enrollee-supplies-subject"></div>
 #### 1. Mitigate ESC1 (Disable Enrollee Supplies Subject)
 1. Open the **Certificate Templates Console** (`certtmpl.msc`) on the CA server or a management host.
 2. Locate the active templates used for authentication (e.g., `User`, `Computer`, or custom templates).
@@ -7673,14 +7674,14 @@ Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary
 5. Ensure the option **Build from this Active Directory information** is selected. 
 6. **Do NOT select** the option **Supply in the request**. If a template *must* allow user-supplied subjects (e.g., web server SSL templates), ensure that **Client Authentication** is *not* present in the Extended Key Usage (EKU) list, and enforce manager approval (see below).
 
-<a id="03-identities-services-harden-adcs-pki-md-2-enforce-manager-approval-on-sensitive-templates"></a>
+<div id="03-identities-services-harden-adcs-pki-md-2-enforce-manager-approval-on-sensitive-templates"></div>
 #### 2. Enforce Manager Approval on Sensitive Templates
 1. In the template properties, select the **Issuance Requirements** tab.
 2. Check the box for **CA administrator approval**.
 3. Under **Require the following for enrollment**, set the authorized signatures to `1` if an enrollment agent is required.
 4. Save the template.
 
-<a id="03-identities-services-harden-adcs-pki-md-3-disable-or-secure-http-web-enrollment-mitigate-esc8"></a>
+<div id="03-identities-services-harden-adcs-pki-md-3-disable-or-secure-http-web-enrollment-mitigate-esc8"></div>
 #### 3. Disable or Secure HTTP Web Enrollment (Mitigate ESC8)
 1. Log on to the CA server hosting the Web Enrollment role.
 2. Open **Internet Information Services (IIS) Manager** (`inetmgr.exe`).
@@ -7694,7 +7695,7 @@ Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary
 
 ---
 
-<a id="03-identities-services-harden-adcs-pki-md-option-b-powershell-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-harden-adcs-pki-md-option-b-powershell-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell Configuration (Remediation / Non-GPO)
 
 Run the following script block to audit active certificate templates for vulnerable configurations (ESC1).
@@ -7756,7 +7757,7 @@ if ($VulnerableCount -eq 0) {
 
 ---
 
-<a id="03-identities-services-harden-adcs-pki-md-sources-compliance-references"></a>
+<div id="03-identities-services-harden-adcs-pki-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations R36, R37 (Section 3.3.4)
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 9 (Page 35)
@@ -7766,19 +7767,19 @@ if ($VulnerableCount -eq 0) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-configure-point-and-print-md"></a>
+<div id="03-identities-services-configure-point-and-print-md"></div>
 
-<a id="03-identities-services-configure-point-and-print-md-req-id-016-configure-point-and-print-elam-logon-screen-and-credentials-delegation"></a>
+<div id="03-identities-services-configure-point-and-print-md-req-id-016-configure-point-and-print-elam-logon-screen-and-credentials-delegation"></div>
 # [REQ-ID-016] Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation
 
-<a id="03-identities-services-configure-point-and-print-md-target-scope"></a>
+<div id="03-identities-services-configure-point-and-print-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise.
 
 ---
 
-<a id="03-identities-services-configure-point-and-print-md-implementation-details"></a>
+<div id="03-identities-services-configure-point-and-print-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -7795,7 +7796,7 @@ if ($VulnerableCount -eq 0) {
 
 ---
 
-<a id="03-identities-services-configure-point-and-print-md-rationale"></a>
+<div id="03-identities-services-configure-point-and-print-md-rationale"></div>
 ## Rationale
 Ensuring robust endpoint security and credential isolation requires configurations that address printer drivers, early boot processes, credential delegation, and the local login screen.
 
@@ -7808,7 +7809,7 @@ Hardening these features mitigates the following vulnerabilities:
 
 ---
 
-<a id="03-identities-services-configure-point-and-print-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-configure-point-and-print-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Network Printer Deployments**: Non-administrative users will be blocked from connecting to shared network printers unless the corresponding drivers have been pre-installed or pre-staged by an administrator using tools like Print Management.
 * **Boot-Start Drivers**: If legitimate, custom, unsigned kernel drivers are active on the host, the ELAM policy may block them from loading during boot, causing blue screen (BSOD) failures. Ensure all active drivers are digitally signed and verified prior to applying this policy.
@@ -7816,13 +7817,13 @@ Hardening these features mitigates the following vulnerabilities:
 
 ---
 
-<a id="03-identities-services-configure-point-and-print-md-implementation-steps"></a>
+<div id="03-identities-services-configure-point-and-print-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-configure-point-and-print-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="03-identities-services-configure-point-and-print-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="03-identities-services-configure-point-and-print-md-1-limit-print-driver-installation"></a>
+<div id="03-identities-services-configure-point-and-print-md-1-limit-print-driver-installation"></div>
 #### 1. Limit Print Driver Installation
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to your computer OUs (e.g., `GPO_Computer_Hardening_Baseline`).
@@ -7831,7 +7832,7 @@ Hardening these features mitigates the following vulnerabilities:
 4. Double-click **Limits print driver installation to Administrators**.
 5. Set it to **Enabled** and click **OK**.
 
-<a id="03-identities-services-configure-point-and-print-md-2-configure-elam-boot-driver-policy"></a>
+<div id="03-identities-services-configure-point-and-print-md-2-configure-elam-boot-driver-policy"></div>
 #### 2. Configure ELAM Boot Driver Policy
 1. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware`
@@ -7840,14 +7841,14 @@ Hardening these features mitigates the following vulnerabilities:
 4. In the options dropdown, select **Good, unknown and bad but critical** (corresponds to registry value `3`).
 5. Click **OK**.
 
-<a id="03-identities-services-configure-point-and-print-md-3-disable-logon-screen-username-enumeration"></a>
+<div id="03-identities-services-configure-point-and-print-md-3-disable-logon-screen-username-enumeration"></div>
 #### 3. Disable Logon Screen Username Enumeration
 1. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Logon`
 2. Double-click **Enumerate local users on domain-joined computers**.
 3. Set it to **Disabled** and click **OK**.
 
-<a id="03-identities-services-configure-point-and-print-md-4-configure-credssp-and-credentials-delegation"></a>
+<div id="03-identities-services-configure-point-and-print-md-4-configure-credssp-and-credentials-delegation"></div>
 #### 4. Configure CredSSP and Credentials Delegation
 1. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Credentials Delegation`
@@ -7858,7 +7859,7 @@ Hardening these features mitigates the following vulnerabilities:
 
 ---
 
-<a id="03-identities-services-configure-point-and-print-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-configure-point-and-print-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to apply the printers, boot drivers, logon screen, and delegation settings to the registry.
@@ -7951,7 +7952,7 @@ Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegatio
 
 ---
 
-<a id="03-identities-services-configure-point-and-print-md-sources-compliance-references"></a>
+<div id="03-identities-services-configure-point-and-print-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.2.1 (Printers), Section 18.2.2 (System Options / ELAM), Section 18.8 (Credentials Delegation)
 * **ANSSI AD Hardening Guide**: Security guidelines regarding printer service vulnerabilities (PrintNightmare) and local machine access configuration.
@@ -7960,19 +7961,19 @@ Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegatio
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-disable-machine-account-quota-md"></a>
+<div id="03-identities-services-disable-machine-account-quota-md"></div>
 
-<a id="03-identities-services-disable-machine-account-quota-md-req-id-017-disable-machine-account-quota"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-req-id-017-disable-machine-account-quota"></div>
 # [REQ-ID-017] Disable Machine Account Quota
 
-<a id="03-identities-services-disable-machine-account-quota-md-target-scope"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Domain Environment
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="03-identities-services-disable-machine-account-quota-md-implementation-details"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -7983,7 +7984,7 @@ Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegatio
 
 ---
 
-<a id="03-identities-services-disable-machine-account-quota-md-rationale"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-rationale"></div>
 ## Rationale
 By default, Active Directory grants all authenticated users the ability to add up to 10 computer objects to the domain. This default configuration (defined by the `ms-DS-MachineAccountQuota` attribute on the domain head) poses a severe security risk:
 
@@ -7996,7 +7997,7 @@ Restricting this behavior by setting `ms-DS-MachineAccountQuota` to 0 and removi
 
 ---
 
-<a id="03-identities-services-disable-machine-account-quota-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Workstation Joins**: Standard users will no longer be able to join their own computers to the domain using their standard user accounts. 
 * **Automated Provisioning**: Automated deployment tools, OS imaging scripts, or deployment servers (such as MDT or SCCM) that rely on generic domain user accounts to join target systems to the domain will fail.
@@ -8006,13 +8007,13 @@ Restricting this behavior by setting `ms-DS-MachineAccountQuota` to 0 and removi
 
 ---
 
-<a id="03-identities-services-disable-machine-account-quota-md-implementation-steps"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-disable-machine-account-quota-md-option-a-active-directory-administrative-center-gpmc-preferred"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-option-a-active-directory-administrative-center-gpmc-preferred"></div>
 ### Option A: Active Directory Administrative Center & GPMC (Preferred)
 
-<a id="03-identities-services-disable-machine-account-quota-md-step-1-set-ms-ds-machineaccountquota-to-0"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-step-1-set-ms-ds-machineaccountquota-to-0"></div>
 #### Step 1: Set ms-DS-MachineAccountQuota to 0
 1. Log on to a Domain Controller or administrative host with **Domain Admins** credentials.
 2. Open **Active Directory Users and Computers** (`dsa.msc`).
@@ -8023,7 +8024,7 @@ Restricting this behavior by setting `ms-DS-MachineAccountQuota` to 0 and removi
 7. Change the value to **0** and click **OK**.
 8. Click **Apply** and then **OK**.
 
-<a id="03-identities-services-disable-machine-account-quota-md-step-2-restrict-add-workstations-to-domain-gpo"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-step-2-restrict-add-workstations-to-domain-gpo"></div>
 #### Step 2: Restrict 'Add workstations to domain' GPO
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
 2. Edit the **Default Domain Controllers Policy** or another GPO applying to all Domain Controllers.
@@ -8035,12 +8036,12 @@ Restricting this behavior by setting `ms-DS-MachineAccountQuota` to 0 and removi
 
 ---
 
-<a id="03-identities-services-disable-machine-account-quota-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts to audit and remediate these settings.
 
-<a id="03-identities-services-disable-machine-account-quota-md-1-local-audit-audit-machineaccountquotaps1"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-1-local-audit-audit-machineaccountquotaps1"></div>
 #### 1. Local Audit (Audit-MachineAccountQuota.ps1)
 
 [Download Script: Audit-MachineAccountQuota.ps1](audit_scripts/Audit-MachineAccountQuota.ps1)
@@ -8102,7 +8103,7 @@ try {
 }
 ```
 
-<a id="03-identities-services-disable-machine-account-quota-md-2-local-remediation-set-machineaccountquotaps1"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-2-local-remediation-set-machineaccountquotaps1"></div>
 #### 2. Local Remediation (Set-MachineAccountQuota.ps1)
 
 [Download Script: Set-MachineAccountQuota.ps1](implementation_scripts/Set-MachineAccountQuota.ps1)
@@ -8182,7 +8183,7 @@ try {
 
 ---
 
-<a id="03-identities-services-disable-machine-account-quota-md-sources-compliance-references"></a>
+<div id="03-identities-services-disable-machine-account-quota-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI Active Directory Hardening Guide**: Section 3.1.2 / CERT-FR AD Checklist (vuln_user_accounts_machineaccountquota)
 * **CIS Benchmark**: CIS Microsoft Windows Server 2016 Benchmark v2.0.0 - Section 2.2.4 (Add workstations to domain)
@@ -8191,19 +8192,19 @@ try {
 
 <div style="page-break-before: always;"></div>
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md"></div>
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-req-id-018-restrict-pre-windows-2000-compatible-access-group"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-req-id-018-restrict-pre-windows-2000-compatible-access-group"></div>
 # [REQ-ID-018] Restrict Pre-Windows 2000 Compatible Access Group
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-target-scope"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Domain Environment
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-implementation-details"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -8215,7 +8216,7 @@ try {
 
 ---
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-rationale"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-rationale"></div>
 ## Rationale
 The "Pre-Windows 2000 Compatible Access" group (SID: `S-1-5-32-554`) is a legacy Active Directory security group designed to provide backward compatibility for NT4-era operating systems. By default, this group has broad read permissions to all user and group object attributes within the domain.
 
@@ -8229,7 +8230,7 @@ Removing insecure principals from this group and enforcing anonymous access rest
 
 ---
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-legacy-impact-compatibility"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Legacy Integrations**: Non-Windows devices or legacy operating systems (such as older Linux integrations utilizing SSSD or Samba, Cisco ISE, or third-party reporting tools) may rely on the broad permissions of this group to query domain objects. Removing "Authenticated Users" can cause these services to fail to authenticate users or map group memberships.
 * **Active Directory Certificate Services (AD CS)**: Integrated Enterprise CAs are added to this group by default to enable certificate management policies. If certificate manager restrictions are in use, removing the CA servers can impact enrollment processes.
@@ -8239,13 +8240,13 @@ Removing insecure principals from this group and enforcing anonymous access rest
 
 ---
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-implementation-steps"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-step-1-restrict-group-membership"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-step-1-restrict-group-membership"></div>
 #### Step 1: Restrict Group Membership
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
 2. Create or edit a GPO linked to the **Domain Controllers** OU (e.g., `GPO_Hardening_DomainControllers`).
@@ -8256,7 +8257,7 @@ Removing insecure principals from this group and enforcing anonymous access rest
 6. In the group properties dialog, under **Members of this group**, ensure the list is empty (or contains only authorized service accounts/CA computer accounts). Ensure **Everyone**, **Anonymous Logon**, and **Authenticated Users** are not listed.
 7. Click **Apply** and then **OK**.
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-step-2-configure-supporting-anonymous-access-policies"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-step-2-configure-supporting-anonymous-access-policies"></div>
 #### Step 2: Configure Supporting Anonymous Access Policies
 1. In the same GPO, navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
@@ -8271,12 +8272,12 @@ Removing insecure principals from this group and enforcing anonymous access rest
 
 ---
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts to audit and remediate these configurations.
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-1-local-audit-audit-prewin2000groupps1"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-1-local-audit-audit-prewin2000groupps1"></div>
 #### 1. Local Audit (Audit-PreWin2000Group.ps1)
 
 [Download Script: Audit-PreWin2000Group.ps1](audit_scripts/Audit-PreWin2000Group.ps1)
@@ -8353,7 +8354,7 @@ foreach ($Key in $Settings.Keys) {
 }
 ```
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-2-local-remediation-set-prewin2000groupps1"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-2-local-remediation-set-prewin2000groupps1"></div>
 #### 2. Local Remediation (Set-PreWin2000Group.ps1)
 
 [Download Script: Set-PreWin2000Group.ps1](implementation_scripts/Set-PreWin2000Group.ps1)
@@ -8426,7 +8427,7 @@ foreach ($Key in $Settings.Keys) {
 
 ---
 
-<a id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-sources-compliance-references"></a>
+<div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Section 3.1.2 (Management of default groups and security options)
 * **CIS Benchmark**:
@@ -8438,63 +8439,63 @@ foreach ($Key in $Settings.Keys) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-network-firewall-README-md"></a>
+<div id="04-network-firewall-README-md"></div>
 
-<a id="04-network-firewall-README-md-module-4-network-configuration-firewalling"></a>
+<div id="04-network-firewall-README-md-module-4-network-configuration-firewalling"></div>
 # Module 4: Network Configuration & Firewalling
 
 This directory contains network security architectures, active directory port configurations, and network isolation boundaries.
 
-<a id="04-network-firewall-README-md-technical-hardening-controls"></a>
+<div id="04-network-firewall-README-md-technical-hardening-controls"></div>
 ## Technical Hardening Controls
 
-1. **[REQ-NET-001 - Configure Active Directory Port Matrix](#04-network-firewall-README-md-04-network-firewall-configure-ad-port-matrix-md)**
+1. **[REQ-NET-001 - Configure Active Directory Port Matrix](#04-network-firewall-configure-ad-port-matrix-md)**
    Establishes the minimum permitted ports for Domain Controllers, Member Servers, and Client Workstations, ensuring perimeter and local firewalls block unauthorized inbound traffic.
 
-2. **[REQ-NET-002 - Restrict RPC Dynamic Ports](#04-network-firewall-README-md-04-network-firewall-restrict-rpc-dynamic-ports-md)**
+2. **[REQ-NET-002 - Restrict RPC Dynamic Ports](#04-network-firewall-restrict-rpc-dynamic-ports-md)**
    Restricts default dynamic RPC ports from a massive range (TCP 49152-65535) to a predictable restricted range (e.g., TCP 50000-50100) or static ports to simplify firewall policies.
 
-3. **[REQ-NET-003 - Configure Workstation and Server Isolation](#04-network-firewall-README-md-04-network-firewall-configure-workstation-isolation-md)**
+3. **[REQ-NET-003 - Configure Workstation and Server Isolation](#04-network-firewall-configure-workstation-isolation-md)**
    Configures local firewall rules on workstations and servers to block inbound SMB, RPC, RDP, and WinRM from peer systems to prevent lateral movement.
 
-4. **[REQ-NET-004 - Configure IPsec Domain Isolation](#04-network-firewall-README-md-04-network-firewall-configure-ipsec-domain-isolation-md)**
+4. **[REQ-NET-004 - Configure IPsec Domain Isolation](#04-network-firewall-configure-ipsec-domain-isolation-md)**
    Enforces IPsec Connection Security Rules to authenticate and encrypt traffic within the domain boundary.
 
-5. **[REQ-NET-005 - Harden IPsec Cryptographic Configurations](#04-network-firewall-README-md-04-network-firewall-harden-ipsec-cryptography-md)**
+5. **[REQ-NET-005 - Harden IPsec Cryptographic Configurations](#04-network-firewall-harden-ipsec-cryptography-md)**
    Restricts permitted IPsec cryptography suites to secure options (AES-256 and DH Group 19/20) for Phase 1 and Phase 2 negotiations.
 
-6. **[REQ-NET-006 - Harden TLS Protocols, Cipher Suites, and Elliptic Curves](#04-network-firewall-README-md-04-network-firewall-harden-tls-configuration-md)**
+6. **[REQ-NET-006 - Harden TLS Protocols, Cipher Suites, and Elliptic Curves](#04-network-firewall-harden-tls-configuration-md)**
    Disables legacy SSL/TLS versions, enforces TLS 1.2/1.3, orders strong cipher suites, and prioritizes secure elliptic curves.
 
-7. **[REQ-NET-007 - Enforce SMBv3 Security and Digitally Sign/Encrypt Communications](#04-network-firewall-README-md-04-network-firewall-enforce-smbv3-security-md)**
+7. **[REQ-NET-007 - Enforce SMBv3 Security and Digitally Sign/Encrypt Communications](#04-network-firewall-enforce-smbv3-security-md)**
    Disables legacy SMB dialects, enforces SMBv3, and mandates message signing and encryption to protect communications and prevent relay attacks.
 
-8. **[REQ-NET-008 - Configure Firewall Logging and Operational Settings](#04-network-firewall-README-md-04-network-firewall-configure-firewall-logging-md)**
+8. **[REQ-NET-008 - Configure Firewall Logging and Operational Settings](#04-network-firewall-configure-firewall-logging-md)**
    Enforces Windows Defender Firewall state, sets default inbound block policies, disables local rule merging on Domain Controllers, and configures detailed dropped packet logging to improve security visibility and forensic capabilities.
 
-9. **[REQ-NET-009 - Configure Hardened UNC Paths and LDAP Client Signing](#04-network-firewall-README-md-04-network-firewall-configure-hardened-unc-paths-md)**
+9. **[REQ-NET-009 - Configure Hardened UNC Paths and LDAP Client Signing](#04-network-firewall-configure-hardened-unc-paths-md)**
    Enforces mutual authentication and SMB signing for GPO folder structures (SYSVOL/NETLOGON), restricts workstation guest logons, and requires outgoing LDAP client signing.
 
-10. **[REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](#04-network-firewall-README-md-04-network-firewall-harden-winrm-service-md)**
+10. **[REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](#04-network-firewall-harden-winrm-service-md)**
     Disables Basic and Digest authentication, forces encrypted WinRM communications, restricts WinRM credential caching, and blocks anonymous RPC connections.
 
 
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-network-firewall-configure-ad-port-matrix-md"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md"></div>
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-req-net-001-configure-active-directory-port-matrix"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-req-net-001-configure-active-directory-port-matrix"></div>
 # [REQ-NET-001] Configure Active Directory Port Matrix
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-target-scope"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
 
 ---
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-implementation-details"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -8502,7 +8503,7 @@ This directory contains network security architectures, active directory port co
 
 ---
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-rationale"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-rationale"></div>
 ## Rationale
 Active Directory services require several ports to function, including DNS, Kerberos, LDAP, SMB, and RPC. If firewalls are not configured to restrict traffic to only these essential ports, adversaries can perform internal network scanning, identify open services, exploit vulnerabilities in unhardened services, or pivot across systems.
 
@@ -8513,7 +8514,7 @@ Restricting network communications to the minimum required AD Port Matrix ensure
 
 ---
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-legacy-impact-compatibility"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Legacy Protocols**: Disabling NetBIOS ports (UDP 137/138, TCP 139) will break legacy name resolution and applications relying on NetBIOS API.
 * **RPC Communication**: Dynamic RPC ranges must be synchronized between firewall rules and system settings. If firewalls restrict the RPC range but the operating system is not configured to bind RPC to that range, legitimate RPC traffic (like replication and group policy processing) will fail.
@@ -8521,13 +8522,13 @@ Restricting network communications to the minimum required AD Port Matrix ensure
 
 ---
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-implementation-steps"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-1-enforce-default-inbound-block"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-1-enforce-default-inbound-block"></div>
 #### 1. Enforce Default Inbound Block
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to the target systems (e.g., `GPO_Hardening_Firewall_Baseline`).
@@ -8539,7 +8540,7 @@ Restricting network communications to the minimum required AD Port Matrix ensure
    * **Inbound connections**: `Block (default)`
    * **Outbound connections**: `Allow (default)`
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-2-create-inbound-allow-rules-for-the-ad-port-matrix-domain-controllers-gpo"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-2-create-inbound-allow-rules-for-the-ad-port-matrix-domain-controllers-gpo"></div>
 #### 2. Create Inbound Allow Rules for the AD Port Matrix (Domain Controllers GPO)
 For GPOs targeting Domain Controllers, configure the following inbound rules under **Inbound Rules**:
 
@@ -8561,12 +8562,12 @@ For GPOs targeting Domain Controllers, configure the following inbound rules und
 
 ---
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to audit and configure the firewall profiles and inbound port rules.
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-remediation-script"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-remediation-script"></div>
 #### Remediation Script:
 [Download Script: Set-ADPortMatrixRules.ps1](implementation_scripts/Set-ADPortMatrixRules.ps1)
 
@@ -8623,7 +8624,7 @@ foreach ($Rule in $Rules) {
 Write-Host "Firewall port matrix configuration completed successfully." -ForegroundColor Cyan
 ```
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-audit-script"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-audit-script"></div>
 #### Audit Script:
 [Download Script: Test-ADPortMatrixRules.ps1](audit_scripts/Test-ADPortMatrixRules.ps1)
 
@@ -8658,7 +8659,7 @@ if ($AllProfilesSecure) {
 
 ---
 
-<a id="04-network-firewall-configure-ad-port-matrix-md-sources-compliance-references"></a>
+<div id="04-network-firewall-configure-ad-port-matrix-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R8 (Administration network subnets)
 * **CIS Windows Server 2016 Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
@@ -8667,19 +8668,19 @@ if ($AllProfilesSecure) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md"></div>
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-req-net-002-restrict-rpc-dynamic-ports"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-req-net-002-restrict-rpc-dynamic-ports"></div>
 # [REQ-NET-002] Restrict RPC Dynamic Ports
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-target-scope"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers.
 * **Operating Systems**: Windows Server 2016 (and above).
 
 ---
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-implementation-details"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -8696,7 +8697,7 @@ if ($AllProfilesSecure) {
 
 ---
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-rationale"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-rationale"></div>
 ## Rationale
 By default, the RPC runtime utilizes a massive dynamic range of high-order ports (TCP 49152-65535) for communication, including Active Directory replication, netlogon authentication, and DFS replication.
 
@@ -8706,7 +8707,7 @@ Restricting dynamic RPC to a narrow, predictable range (e.g., TCP 50000-50100) o
 
 ---
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-legacy-impact-compatibility"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Firewall Coordination**: Firewall rules permitting the restricted dynamic range must be active before applying this setting, or replication and authentication failures will occur immediately.
 * **Port Availability**: The chosen static/dynamic ports must not be utilized by any other software running on the servers.
@@ -8714,13 +8715,13 @@ Restricting dynamic RPC to a narrow, predictable range (e.g., TCP 50000-50100) o
 
 ---
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-implementation-steps"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-1-define-static-ports-for-ntds-and-netlogon-via-gpo-registry-preferences"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-1-define-static-ports-for-ntds-and-netlogon-via-gpo-registry-preferences"></div>
 #### 1. Define Static Ports for NTDS and Netlogon via GPO Registry Preferences
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO targeting Domain Controllers (e.g., `GPO_Hardening_DC_RPC`).
@@ -8742,7 +8743,7 @@ Restricting dynamic RPC to a narrow, predictable range (e.g., TCP 50000-50100) o
      * **Value Type**: `REG_DWORD`
      * **Value Data**: `50001` (Decimal)
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-2-restrict-dynamic-rpc-port-range-system-wide"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-2-restrict-dynamic-rpc-port-range-system-wide"></div>
 #### 2. Restrict Dynamic RPC Port Range (System-Wide)
 To enforce the dynamic port range restriction across Member Servers and Domain Controllers:
 Create or edit a GPO (e.g., `GPO_Hardening_RPC_Range`) and apply Registry Preferences under:
@@ -8757,12 +8758,12 @@ Create or edit a GPO (e.g., `GPO_Hardening_RPC_Range`) and apply Registry Prefer
 
 ---
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to audit and restrict the RPC dynamic port configuration.
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-remediation-script"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-remediation-script"></div>
 #### Remediation Script:
 [Download Script: Set-RPCDynamicPorts.ps1](implementation_scripts/Set-RPCDynamicPorts.ps1)
 
@@ -8828,7 +8829,7 @@ if ($ProcV6.ExitCode -eq 0) {
 Write-Host "RPC Dynamic Port configuration applied successfully." -ForegroundColor Cyan
 ```
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-audit-script"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-audit-script"></div>
 #### Audit Script:
 [Download Script: Test-RPCDynamicPorts.ps1](audit_scripts/Test-RPCDynamicPorts.ps1)
 
@@ -8888,7 +8889,7 @@ Write-Host $IPv6Match -ForegroundColor DarkGray
 
 ---
 
-<a id="04-network-firewall-restrict-rpc-dynamic-ports-md-sources-compliance-references"></a>
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R8 (Administration network subnets)
 * **Microsoft Security Guidance**: Restricting Active Directory RPC Traffic to a Specific Port
@@ -8897,19 +8898,19 @@ Write-Host $IPv6Match -ForegroundColor DarkGray
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-network-firewall-configure-workstation-isolation-md"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md"></div>
 
-<a id="04-network-firewall-configure-workstation-isolation-md-req-net-003-configure-workstation-and-server-isolation"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-req-net-003-configure-workstation-and-server-isolation"></div>
 # [REQ-NET-003] Configure Workstation and Server Isolation
 
-<a id="04-network-firewall-configure-workstation-isolation-md-target-scope"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 Client Workstations, Member Servers.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
 
 ---
 
-<a id="04-network-firewall-configure-workstation-isolation-md-implementation-details"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -8917,7 +8918,7 @@ Write-Host $IPv6Match -ForegroundColor DarkGray
 
 ---
 
-<a id="04-network-firewall-configure-workstation-isolation-md-rationale"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-rationale"></div>
 ## Rationale
 Once an adversary establishes initial access on a Tier 2 client workstation or a Member Server, they will attempt to move laterally across the network to identify high-value targets, harvest credentials, and locate Tier 0 administrative pathways.
 
@@ -8927,7 +8928,7 @@ Configuring local firewalls via Group Policy to explicitly block inbound SMB, RP
 
 ---
 
-<a id="04-network-firewall-configure-workstation-isolation-md-legacy-impact-compatibility"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Peer-to-Peer Sharing**: Local network resource sharing (such as peer-to-peer file folders, local network printer sharing, or remote system diagnostics) will fail.
 * **Administrative Jump Hosts**: System administrators must use designated Privileged Access Workstations (PAWs) or Management Jump Hosts located in the allowed administrative subnets to manage these systems.
@@ -8935,13 +8936,13 @@ Configuring local firewalls via Group Policy to explicitly block inbound SMB, RP
 
 ---
 
-<a id="04-network-firewall-configure-workstation-isolation-md-implementation-steps"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="04-network-firewall-configure-workstation-isolation-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="04-network-firewall-configure-workstation-isolation-md-1-configure-peer-isolation-gpo-rules"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-1-configure-peer-isolation-gpo-rules"></div>
 #### 1. Configure Peer Isolation GPO Rules
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstation_Isolation`) or Member Servers OU.
@@ -8969,7 +8970,7 @@ Configuring local firewalls via Group Policy to explicitly block inbound SMB, RP
      * **Remote Address**: `[Insert Local Client / Peer Subnets]`
      * **Profile**: `Domain, Private`
 
-<a id="04-network-firewall-configure-workstation-isolation-md-2-create-management-allow-exceptions"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-2-create-management-allow-exceptions"></div>
 #### 2. Create Management Allow Exceptions
 In the same GPO, ensure there are priority inbound **Allow** rules configured to permit administration from dedicated administrative paths:
 * **Allow Inbound Administration**:
@@ -8980,12 +8981,12 @@ In the same GPO, ensure there are priority inbound **Allow** rules configured to
 
 ---
 
-<a id="04-network-firewall-configure-workstation-isolation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to audit and apply workstation/server isolation rules.
 
-<a id="04-network-firewall-configure-workstation-isolation-md-remediation-script"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-remediation-script"></div>
 #### Remediation Script:
 [Download Script: Set-WorkstationIsolation.ps1](implementation_scripts/Set-WorkstationIsolation.ps1)
 
@@ -9062,7 +9063,7 @@ Write-Host "Management subnet inbound allowance rule created." -ForegroundColor 
 Write-Host "Workstation and Server isolation firewall rules applied successfully." -ForegroundColor Cyan
 ```
 
-<a id="04-network-firewall-configure-workstation-isolation-md-audit-script"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-audit-script"></div>
 #### Audit Script:
 [Download Script: Test-WorkstationIsolation.ps1](audit_scripts/Test-WorkstationIsolation.ps1)
 
@@ -9109,7 +9110,7 @@ if ($FailedChecks -eq 0) {
 
 ---
 
-<a id="04-network-firewall-configure-workstation-isolation-md-sources-compliance-references"></a>
+<div id="04-network-firewall-configure-workstation-isolation-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R8 (Administration network subnets)
 * **CIS Windows Server 2016 Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
@@ -9118,19 +9119,19 @@ if ($FailedChecks -eq 0) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md"></div>
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-req-net-004-configure-ipsec-domain-isolation"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-req-net-004-configure-ipsec-domain-isolation"></div>
 # [REQ-NET-004] Configure IPsec Domain Isolation
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-target-scope"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
 
 ---
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-implementation-details"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
@@ -9138,7 +9139,7 @@ if ($FailedChecks -eq 0) {
 
 ---
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-rationale"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-rationale"></div>
 ## Rationale
 In environments without hardware-enforced line-encryption, an attacker who gains physical or logical access to internal network switches can perform Man-in-the-Middle (MitM) attacks (e.g., ARP spoofing, DHCP spoofing) or passive packet sniffing.
 
@@ -9151,7 +9152,7 @@ Benefits of IPsec isolation include:
 
 ---
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-legacy-impact-compatibility"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Non-Windows and Standalone Systems**: Linux/Unix servers, network appliances, IP cameras, and network printers that do not participate in Active Directory Kerberos authentication will fail to connect. An **IPsec Boundary Group** (exemption list) must be configured to allow these hosts to communicate in cleartext.
 * **Network Performance**: IPsec encryption and authentication overhead may slightly increase CPU usage on older hardware, though modern CPUs with AES-NI support experience negligible latency.
@@ -9159,13 +9160,13 @@ Benefits of IPsec isolation include:
 
 ---
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-implementation-steps"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-1-define-ipsec-transport-rules-for-domain-isolation"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-1-define-ipsec-transport-rules-for-domain-isolation"></div>
 #### 1. Define IPsec Transport Rules for Domain Isolation
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO targeting all domain assets (e.g., `GPO_Hardening_IPsec_Isolation`).
@@ -9179,7 +9180,7 @@ Benefits of IPsec isolation include:
    * **Profile**: `Domain`
    * **Name**: `Hardening: IPsec Domain Isolation`
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-2-mandate-esp-encryption-for-dc-to-dc-replication"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-2-mandate-esp-encryption-for-dc-to-dc-replication"></div>
 #### 2. Mandate ESP Encryption for DC-to-DC Replication
 On Domain Controllers, replication traffic should be encrypted:
 1. Create a GPO targeting the Domain Controllers OU.
@@ -9193,12 +9194,12 @@ On Domain Controllers, replication traffic should be encrypted:
 
 ---
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to audit and configure Connection Security Rules.
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-remediation-script"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-remediation-script"></div>
 #### Remediation Script:
 [Download Script: Set-IPsecDomainIsolation.ps1](implementation_scripts/Set-IPsecDomainIsolation.ps1)
 
@@ -9227,7 +9228,7 @@ if ($null -eq $ExistingRule) {
 }
 ```
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-audit-script"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-audit-script"></div>
 #### Audit Script:
 [Download Script: Test-IPsecDomainIsolation.ps1](audit_scripts/Test-IPsecDomainIsolation.ps1)
 
@@ -9260,7 +9261,7 @@ if ($null -eq $Rules -or $Rules.Count -eq 0) {
 
 ---
 
-<a id="04-network-firewall-configure-ipsec-domain-isolation-md-sources-compliance-references"></a>
+<div id="04-network-firewall-configure-ipsec-domain-isolation-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R7 (IPsec transport mode for domain isolation)
 * **CIS Windows Server 2016 Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
@@ -9269,19 +9270,19 @@ if ($null -eq $Rules -or $Rules.Count -eq 0) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md"></a>
+<div id="04-network-firewall-harden-ipsec-cryptography-md"></div>
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-req-net-005-harden-ipsec-cryptographic-configurations"></a>
+<div id="04-network-firewall-harden-ipsec-cryptography-md-req-net-005-harden-ipsec-cryptographic-configurations"></div>
 # [REQ-NET-005] Harden IPsec Cryptographic Configurations
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-target-scope"></a>
+<div id="04-network-firewall-harden-ipsec-cryptography-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
 
 ---
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-implementation-details"></a>
+<div id="04-network-firewall-harden-ipsec-cryptography-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: 
@@ -9289,7 +9290,7 @@ if ($null -eq $Rules -or $Rules.Count -eq 0) {
 
 ---
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-rationale"></a>
+<div id="04-network-firewall-harden-ipsec-cryptography-md-rationale"></div>
 ## Rationale
 Default IPsec configurations in older Windows deployments or standard configurations allow weak encryption and integrity algorithms (such as 3DES, DES, MD5, SHA-1, and Diffie-Hellman Groups 1, 2, or 5). These legacy algorithms are vulnerable to key recovery attacks, pre-computation table attacks, and cryptographic collisions.
 
@@ -9297,7 +9298,7 @@ To maintain secure communications through 2030 and beyond, IPsec configurations 
 
 ---
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-legacy-impact-compatibility"></a>
+<div id="04-network-firewall-harden-ipsec-cryptography-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Legacy OS Support**: Outdated operating systems (such as Windows 7, Windows Server 2008 R2, or old Linux kernels that do not support modern DH groups or AES-256) will fail to establish IPsec security associations (SAs). Ensure all domain member systems are upgraded to supported OS versions before applying this policy.
 * **Non-Domain / Third-Party Appliances**: Network devices, storage systems, and Linux servers that communicate within the IPsec domain boundary must support these strong suites. If they do not, they must be added to the IPsec exemption list (Boundary Group) to maintain cleartext communications.
@@ -9305,10 +9306,10 @@ To maintain secure communications through 2030 and beyond, IPsec configurations 
 
 ---
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-implementation-steps"></a>
+<div id="04-network-firewall-harden-ipsec-cryptography-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="04-network-firewall-harden-ipsec-cryptography-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -9339,12 +9340,12 @@ To maintain secure communications through 2030 and beyond, IPsec configurations 
 
 ---
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="04-network-firewall-harden-ipsec-cryptography-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to audit and configure custom cryptographic sets on individual systems.
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-remediation-script"></a>
+<div id="04-network-firewall-harden-ipsec-cryptography-md-remediation-script"></div>
 #### Remediation Script:
 [Download Script: Set-IPsecCryptography.ps1](implementation_scripts/Set-IPsecCryptography.ps1)
 
@@ -9402,7 +9403,7 @@ if ($null -ne $MMRules) {
 Write-Host "IPsec cryptography configuration applied." -ForegroundColor Green
 ```
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-audit-script"></a>
+<div id="04-network-firewall-harden-ipsec-cryptography-md-audit-script"></div>
 #### Audit Script:
 [Download Script: Test-IPsecCryptography.ps1](audit_scripts/Test-IPsecCryptography.ps1)
 
@@ -9459,7 +9460,7 @@ if ($NonCompliantCount -eq 0) {
 
 ---
 
-<a id="04-network-firewall-harden-ipsec-cryptography-md-sources-compliance-references"></a>
+<div id="04-network-firewall-harden-ipsec-cryptography-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R7 (IPsec transport mode for domain isolation)
 * **ANSSI General Security Rules (RGS)**: Annex B1 (Cryptographic mechanisms)
@@ -9469,19 +9470,19 @@ if ($NonCompliantCount -eq 0) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-network-firewall-harden-tls-configuration-md"></a>
+<div id="04-network-firewall-harden-tls-configuration-md"></div>
 
-<a id="04-network-firewall-harden-tls-configuration-md-req-net-006-harden-tls-protocols-cipher-suites-and-elliptic-curves"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-req-net-006-harden-tls-protocols-cipher-suites-and-elliptic-curves"></div>
 # [REQ-NET-006] Harden TLS Protocols, Cipher Suites, and Elliptic Curves
 
-<a id="04-network-firewall-harden-tls-configuration-md-target-scope"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10 (and above).
 
 ---
 
-<a id="04-network-firewall-harden-tls-configuration-md-implementation-details"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -9501,7 +9502,7 @@ if ($NonCompliantCount -eq 0) {
 
 ---
 
-<a id="04-network-firewall-harden-tls-configuration-md-rationale"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-rationale"></div>
 ## Rationale
 Legacy versions of SSL (2.0 and 3.0) and TLS (1.0 and 1.1) are cryptographically weak and vulnerable to various attacks (such as BEAST, POODLE, and SWEET32) that can lead to credential exposure and session hijacking. Domain services, including LDAPS and WinRM, must enforce the usage of TLS 1.2 and TLS 1.3 (where supported) to prevent protocol downgrade attacks.
 
@@ -9511,7 +9512,7 @@ By default, legacy .NET Framework applications (targeting .NET 3.5 or earlier) a
 
 ---
 
-<a id="04-network-firewall-harden-tls-configuration-md-legacy-impact-compatibility"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Legacy Clients**: Operating systems prior to Windows 7/Server 2008 R2 (without updates enabling TLS 1.2) or outdated third-party management agents, appliances, and legacy printers will fail to establish secure connections (LDAPS, HTTPS, RDP, WinRM) with hardened hosts.
 * **Domain Controller Reachability**: Active Directory replication between DCs remains unaffected as it relies on RPC (Kerberos) rather than TLS. However, client-facing services such as secure LDAP (LDAPS) require TLS; clients must support TLS 1.2.
@@ -9520,13 +9521,13 @@ By default, legacy .NET Framework applications (targeting .NET 3.5 or earlier) a
 
 ---
 
-<a id="04-network-firewall-harden-tls-configuration-md-implementation-steps"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="04-network-firewall-harden-tls-configuration-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="04-network-firewall-harden-tls-configuration-md-1-enforce-ssl-cipher-suite-order-and-ecc-curve-order-via-gpo"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-1-enforce-ssl-cipher-suite-order-and-ecc-curve-order-via-gpo"></div>
 #### 1. Enforce SSL Cipher Suite Order and ECC Curve Order via GPO
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO targeting all domain assets (e.g., `GPO_Hardening_TLS_Schannel`).
@@ -9542,7 +9543,7 @@ By default, legacy .NET Framework applications (targeting .NET 3.5 or earlier) a
      `curve25519,nistP384,nistP256`
 6. Click **OK**.
 
-<a id="04-network-firewall-harden-tls-configuration-md-2-deploy-schannel-protocol-registry-settings-via-gpo-preferences"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-2-deploy-schannel-protocol-registry-settings-via-gpo-preferences"></div>
 #### 2. Deploy Schannel Protocol Registry settings via GPO Preferences
 Since Schannel protocol versions (disabling TLS 1.0/1.1 and enabling TLS 1.2/1.3) are not exposed via default ADMX templates, configure them using **Registry Preferences**:
 1. Within the same GPO, navigate to:
@@ -9560,7 +9561,7 @@ Since Schannel protocol versions (disabling TLS 1.0/1.1 and enabling TLS 1.2/1.3
 
 *Note: Systems must be rebooted for Schannel protocol and cipher settings to take effect.*
 
-<a id="04-network-firewall-harden-tls-configuration-md-3-deploy-net-and-winhttp-registry-settings-via-gpo-preferences"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-3-deploy-net-and-winhttp-registry-settings-via-gpo-preferences"></div>
 #### 3. Deploy .NET and WinHTTP Registry Settings via GPO Preferences
 1. Within the same GPO, navigate to:
    `Computer Configuration\Preferences\Windows Settings\Registry`
@@ -9584,12 +9585,12 @@ Since Schannel protocol versions (disabling TLS 1.0/1.1 and enabling TLS 1.2/1.3
 
 ---
 
-<a id="04-network-firewall-harden-tls-configuration-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally on testing hosts or non-GPO-managed systems.
 
-<a id="04-network-firewall-harden-tls-configuration-md-remediation-script"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-remediation-script"></div>
 #### Remediation Script:
 [Download Script: Set-TLSConfiguration.ps1](implementation_scripts/Set-TLSConfiguration.ps1)
 
@@ -9687,7 +9688,7 @@ foreach ($target in $RegistryTargets) {
 Write-Host "Schannel configuration applied. A system reboot is required to apply changes." -ForegroundColor Green
 ```
 
-<a id="04-network-firewall-harden-tls-configuration-md-audit-script"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-audit-script"></div>
 #### Audit Script:
 [Download Script: Test-TLSConfiguration.ps1](audit_scripts/Test-TLSConfiguration.ps1)
 
@@ -9797,7 +9798,7 @@ if ($NonCompliantCount -eq 0) {
 
 ---
 
-<a id="04-network-firewall-harden-tls-configuration-md-sources-compliance-references"></a>
+<div id="04-network-firewall-harden-tls-configuration-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R18 (Schannel configuration)
 * **ANSSI General Security Rules (RGS)**: Annex B1 (Cryptographic mechanisms)
@@ -9807,19 +9808,19 @@ if ($NonCompliantCount -eq 0) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-network-firewall-enforce-smbv3-security-md"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md"></div>
 
-<a id="04-network-firewall-enforce-smbv3-security-md-req-net-007-enforce-smbv3-security-and-digitally-signencrypt-communications"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-req-net-007-enforce-smbv3-security-and-digitally-signencrypt-communications"></div>
 # [REQ-NET-007] Enforce SMBv3 Security and Digitally Sign/Encrypt Communications
 
-<a id="04-network-firewall-enforce-smbv3-security-md-target-scope"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10 (and above).
 
 ---
 
-<a id="04-network-firewall-enforce-smbv3-security-md-implementation-details"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -9835,7 +9836,7 @@ if ($NonCompliantCount -eq 0) {
 
 ---
 
-<a id="04-network-firewall-enforce-smbv3-security-md-rationale"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-rationale"></div>
 ## Rationale
 Server Message Block (SMB) version 1.0 (SMBv1) is obsolete, highly insecure, and vulnerable to critical exploits (such as MS17-010 / EternalBlue, which enabled the global spread of WannaCry and NotPetya). SMBv2, while newer, lacks modern cryptographic protection and is prone to Man-in-the-Middle (MitM) interception and NTLM relaying.
 
@@ -9846,7 +9847,7 @@ Enforcing SMBv3 (minimum version 3.0.0 or 3.1.1) provides significant security a
 
 ---
 
-<a id="04-network-firewall-enforce-smbv3-security-md-legacy-impact-compatibility"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Legacy Systems**: Any client or server operating system that does not support SMB 3.x (such as Windows Server 2008, Windows Vista, or old versions of Linux/Samba) will fail to establish connections if SMBv3 is mandated or if SMB encryption is required.
 * **Multifunction Printers and NAS**: Older network scanners, printers, and NAS storage appliances that only support SMBv1 or SMBv2 will no longer be able to write files to network shares. These devices must be updated or isolated to a dedicated segment with specialized access rules.
@@ -9854,13 +9855,13 @@ Enforcing SMBv3 (minimum version 3.0.0 or 3.1.1) provides significant security a
 
 ---
 
-<a id="04-network-firewall-enforce-smbv3-security-md-implementation-steps"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="04-network-firewall-enforce-smbv3-security-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="04-network-firewall-enforce-smbv3-security-md-1-configure-smb-signing-policies"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-1-configure-smb-signing-policies"></div>
 #### 1. Configure SMB Signing Policies
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO targeting all domain assets (e.g., `GPO_Hardening_SMB_Security`).
@@ -9872,7 +9873,7 @@ Enforcing SMBv3 (minimum version 3.0.0 or 3.1.1) provides significant security a
    * **Microsoft network server: Digitally sign communications (always)**: `Enabled`
    * **Microsoft network server: Digitally sign communications (if client agrees)**: `Enabled`
 
-<a id="04-network-firewall-enforce-smbv3-security-md-2-mandate-minimum-smb-dialects"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-2-mandate-minimum-smb-dialects"></div>
 #### 2. Mandate Minimum SMB Dialects
 On systems that support ADMX templates for SMB dialects (Windows 11 / Server 2022+):
 1. Navigate to:
@@ -9886,7 +9887,7 @@ On systems that support ADMX templates for SMB dialects (Windows 11 / Server 202
    * Set the policy to **Enabled**.
    * Set the minimum version to `SMB 3.0.0` (or `SMB 3.1.1`).
 
-<a id="04-network-firewall-enforce-smbv3-security-md-3-disable-smbv1-driver-via-gpo-preferences"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-3-disable-smbv1-driver-via-gpo-preferences"></div>
 #### 3. Disable SMBv1 Driver via GPO Preferences
 To ensure the SMBv1 driver is disabled on older machines, deploy a registry change:
 1. Navigate to:
@@ -9901,12 +9902,12 @@ To ensure the SMBv1 driver is disabled on older machines, deploy a registry chan
 
 ---
 
-<a id="04-network-firewall-enforce-smbv3-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to enforce SMBv3 standards.
 
-<a id="04-network-firewall-enforce-smbv3-security-md-remediation-script"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-remediation-script"></div>
 #### Remediation Script:
 [Download Script: Set-SMBSecurity.ps1](implementation_scripts/Set-SMBSecurity.ps1)
 
@@ -9954,7 +9955,7 @@ Set-ItemProperty -Path $ClientParamsPath -Name "MinSMB2Dialect" -Value 0x0000030
 Write-Host "SMBv3 minimum dialect rules configured." -ForegroundColor Green
 ```
 
-<a id="04-network-firewall-enforce-smbv3-security-md-audit-script"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-audit-script"></div>
 #### Audit Script:
 [Download Script: Test-SMBSecurity.ps1](audit_scripts/Test-SMBSecurity.ps1)
 
@@ -10040,7 +10041,7 @@ if ($NonCompliantCount -eq 0) {
 
 ---
 
-<a id="04-network-firewall-enforce-smbv3-security-md-sources-compliance-references"></a>
+<div id="04-network-firewall-enforce-smbv3-security-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R21 (Disabling SMBv1), Recommendation R22 (SMB signing and encryption)
 * **CIS Windows Server 2016 Benchmark**: Section 2.3.10.1 (Microsoft network client: Digitally sign communications (always)) and Section 2.3.10.2 (Microsoft network server: Digitally sign communications (always))
@@ -10049,19 +10050,19 @@ if ($NonCompliantCount -eq 0) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-network-firewall-configure-firewall-logging-md"></a>
+<div id="04-network-firewall-configure-firewall-logging-md"></div>
 
-<a id="04-network-firewall-configure-firewall-logging-md-req-net-008-configure-firewall-logging-and-operational-settings"></a>
+<div id="04-network-firewall-configure-firewall-logging-md-req-net-008-configure-firewall-logging-and-operational-settings"></div>
 # [REQ-NET-008] Configure Firewall Logging and Operational Settings
 
-<a id="04-network-firewall-configure-firewall-logging-md-target-scope"></a>
+<div id="04-network-firewall-configure-firewall-logging-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
 
 ---
 
-<a id="04-network-firewall-configure-firewall-logging-md-implementation-details"></a>
+<div id="04-network-firewall-configure-firewall-logging-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -10069,7 +10070,7 @@ if ($NonCompliantCount -eq 0) {
 
 ---
 
-<a id="04-network-firewall-configure-firewall-logging-md-rationale"></a>
+<div id="04-network-firewall-configure-firewall-logging-md-rationale"></div>
 ## Rationale
 Windows Defender Firewall with Advanced Security (WFAS) serves as the host-level stateful firewall protecting Active Directory resources from unauthorized network access. However, without correct logging and behavioral configuration, the firewall does not provide adequate defensive or diagnostic value:
 
@@ -10080,7 +10081,7 @@ Windows Defender Firewall with Advanced Security (WFAS) serves as the host-level
 
 ---
 
-<a id="04-network-firewall-configure-firewall-logging-md-legacy-impact-compatibility"></a>
+<div id="04-network-firewall-configure-firewall-logging-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Operational Impact**: Enabling logging of blocked packets carries negligible CPU and disk I/O overhead on modern storage hardware. Successful connections must not be logged in production, as doing so can trigger disk performance degradation due to logging high-volume network flows.
 * **Local Rule Merging on Domain Controllers**: Setting "Apply local firewall rules" to "No" on Domain Controllers will cause the system to ignore any firewall rules created locally (e.g., via the local netsh, PowerShell, or third-party installers). All required inbound ports for application operations must be centrally managed and distributed via Group Policy.
@@ -10088,10 +10089,10 @@ Windows Defender Firewall with Advanced Security (WFAS) serves as the host-level
 
 ---
 
-<a id="04-network-firewall-configure-firewall-logging-md-implementation-steps"></a>
+<div id="04-network-firewall-configure-firewall-logging-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="04-network-firewall-configure-firewall-logging-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="04-network-firewall-configure-firewall-logging-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -10121,7 +10122,7 @@ Windows Defender Firewall with Advanced Security (WFAS) serves as the host-level
 
 ---
 
-<a id="04-network-firewall-configure-firewall-logging-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="04-network-firewall-configure-firewall-logging-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the setting locally (for testing or standalone systems) or if the control is not manageable via standard GPO GUI interfaces.
@@ -10191,7 +10192,7 @@ Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, Defa
 
 ---
 
-<a id="04-network-firewall-configure-firewall-logging-md-sources-compliance-references"></a>
+<div id="04-network-firewall-configure-firewall-logging-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R7 (Filtering and IPsec on Domain Controllers), Recommendation R8 (Administration network subnets / filtering rules)
 * **CIS Windows Server 2016 Benchmark**: Section 19.1 (Domain Profile), Section 19.2 (Private Profile), Section 19.3 (Public Profile)
@@ -10200,19 +10201,19 @@ Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, Defa
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md"></div>
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-req-net-009-configure-hardened-unc-paths-and-ldap-client-signing"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md-req-net-009-configure-hardened-unc-paths-and-ldap-client-signing"></div>
 # [REQ-NET-009] Configure Hardened UNC Paths and LDAP Client Signing
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-target-scope"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise.
 
 ---
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-implementation-details"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -10227,7 +10228,7 @@ Get-NetFirewallProfile | Select-Object Name, Enabled, DefaultInboundAction, Defa
 
 ---
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-rationale"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md-rationale"></div>
 ## Rationale
 Active Directory clients and servers routinely query Domain Controllers to retrieve Group Policy Objects (GPOs), startup/shutdown scripts, and user logon scripts from the `SYSVOL` and `NETLOGON` shares. By default, these connections are made over standard UNC paths and do not strictly enforce integrity validation (SMB signing) or mutual authentication.
 
@@ -10238,7 +10239,7 @@ Enforcing these channel-level controls mitigates the following threat vectors:
 
 ---
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-legacy-impact-compatibility"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Legacy Client Access**: Non-domain-joined systems or legacy operating systems (prior to Windows Vista/Server 2008) that cannot perform Kerberos mutual authentication will fail to access the `SYSVOL` or `NETLOGON` shares on Domain Controllers.
 * **Third-party SMB Implementation Compatibility**: Virtual machines or network storage devices that access SYSVOL for GPO processing must support SMB v2/v3 with signing.
@@ -10246,13 +10247,13 @@ Enforcing these channel-level controls mitigates the following threat vectors:
 
 ---
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-implementation-steps"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-1-configure-hardened-unc-paths"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md-1-configure-hardened-unc-paths"></div>
 #### 1. Configure Hardened UNC Paths
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to all target computers (e.g., `GPO_Computer_Hardening_Baseline`).
@@ -10265,14 +10266,14 @@ Enforcing these channel-level controls mitigates the following threat vectors:
    * **Value name**: `\\*\SYSVOL` | **Value**: `RequireIntegrity=1,RequireMutualAuthentication=1`
 7. Click **OK**.
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-2-disable-insecure-guest-logons"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md-2-disable-insecure-guest-logons"></div>
 #### 2. Disable Insecure Guest Logons
 1. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\Network\Lanman Workstation`
 2. Double-click **Enable insecure guest logons**.
 3. Set it to **Disabled** and click **OK**.
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-3-enforce-ldap-client-signing"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md-3-enforce-ldap-client-signing"></div>
 #### 3. Enforce LDAP Client Signing
 1. Navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
@@ -10281,7 +10282,7 @@ Enforcing these channel-level controls mitigates the following threat vectors:
 
 ---
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to apply the hardened network provider, Lanman Workstation, and LDAP client configurations.
@@ -10361,7 +10362,7 @@ Write-Host "    - LDAP Client Integrity (Signing): $LdapSetting (Expected: 1 - N
 
 ---
 
-<a id="04-network-firewall-configure-hardened-unc-paths-md-sources-compliance-references"></a>
+<div id="04-network-firewall-configure-hardened-unc-paths-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R19 (Configuration des Hardened UNC Paths pour SYSVOL et NETLOGON)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.2.1 (Lanman Workstation), Section 18.1.1 (Network Provider)
@@ -10370,19 +10371,19 @@ Write-Host "    - LDAP Client Integrity (Signing): $LdapSetting (Expected: 1 - N
 
 <div style="page-break-before: always;"></div>
 
-<a id="04-network-firewall-harden-winrm-service-md"></a>
+<div id="04-network-firewall-harden-winrm-service-md"></div>
 
-<a id="04-network-firewall-harden-winrm-service-md-req-net-010-harden-winrm-service-and-restrict-remote-rpc-clients"></a>
+<div id="04-network-firewall-harden-winrm-service-md-req-net-010-harden-winrm-service-and-restrict-remote-rpc-clients"></div>
 # [REQ-NET-010] Harden WinRM Service and Restrict Remote RPC Clients
 
-<a id="04-network-firewall-harden-winrm-service-md-target-scope"></a>
+<div id="04-network-firewall-harden-winrm-service-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise.
 
 ---
 
-<a id="04-network-firewall-harden-winrm-service-md-implementation-details"></a>
+<div id="04-network-firewall-harden-winrm-service-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -10407,7 +10408,7 @@ Write-Host "    - LDAP Client Integrity (Signing): $LdapSetting (Expected: 1 - N
 
 ---
 
-<a id="04-network-firewall-harden-winrm-service-md-rationale"></a>
+<div id="04-network-firewall-harden-winrm-service-md-rationale"></div>
 ## Rationale
 Windows Remote Management (WinRM) and Remote Procedure Call (RPC) are standard management interfaces in Windows environments. However, by default, these interfaces allow backward-compatible configurations that pose significant security risks.
 
@@ -10419,20 +10420,20 @@ Hardening these service channels blocks the following exploit vectors:
 
 ---
 
-<a id="04-network-firewall-harden-winrm-service-md-legacy-impact-compatibility"></a>
+<div id="04-network-firewall-harden-winrm-service-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Administrative Tooling**: WinRM scripts, monitoring agents, or cross-domain management frameworks that rely on local accounts and Basic authentication to establish connections will fail. All administrative connections must be migrated to Kerberos or HTTPS with client certificate authentication.
 * **RPC Queries**: Third-party scanners or legacy network devices that query RPC interfaces without authenticating will be blocked from accessing RPC data on hardened hosts.
 
 ---
 
-<a id="04-network-firewall-harden-winrm-service-md-implementation-steps"></a>
+<div id="04-network-firewall-harden-winrm-service-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="04-network-firewall-harden-winrm-service-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="04-network-firewall-harden-winrm-service-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="04-network-firewall-harden-winrm-service-md-1-configure-winrm-client-settings"></a>
+<div id="04-network-firewall-harden-winrm-service-md-1-configure-winrm-client-settings"></div>
 #### 1. Configure WinRM Client Settings
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO targeting all computers (e.g., `GPO_Computer_Hardening_Baseline`).
@@ -10443,7 +10444,7 @@ Hardening these service channels blocks the following exploit vectors:
    * **Policy**: `Allow unencrypted traffic` -> **Disabled**
    * **Policy**: `Disallow Digest authentication` -> **Enabled**
 
-<a id="04-network-firewall-harden-winrm-service-md-2-configure-winrm-service-settings"></a>
+<div id="04-network-firewall-harden-winrm-service-md-2-configure-winrm-service-settings"></div>
 #### 2. Configure WinRM Service Settings
 1. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Remote Management (WinRM)\WinRM Service`
@@ -10452,7 +10453,7 @@ Hardening these service channels blocks the following exploit vectors:
    * **Policy**: `Allow unencrypted traffic` -> **Disabled**
    * **Policy**: `Disallow WinRM from storing RunAs credentials` -> **Enabled**
 
-<a id="04-network-firewall-harden-winrm-service-md-3-configure-rpc-client-restrictions"></a>
+<div id="04-network-firewall-harden-winrm-service-md-3-configure-rpc-client-restrictions"></div>
 #### 3. Configure RPC Client Restrictions
 1. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call`
@@ -10463,7 +10464,7 @@ Hardening these service channels blocks the following exploit vectors:
 
 ---
 
-<a id="04-network-firewall-harden-winrm-service-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="04-network-firewall-harden-winrm-service-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to enforce WinRM client/service and RPC restrictions in the registry.
@@ -10562,7 +10563,7 @@ Write-Host "    - RPC RestrictRemoteClients: $RpcSetting (Expected: 1)" -Foregro
 
 ---
 
-<a id="04-network-firewall-harden-winrm-service-md-sources-compliance-references"></a>
+<div id="04-network-firewall-harden-winrm-service-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9 (Windows Remote Management), Section 18.1.2 (Remote Procedure Call)
 * **ANSSI AD Hardening Guide**: Security guidelines regarding remote management and RPC access controls.
@@ -10570,41 +10571,41 @@ Write-Host "    - RPC RestrictRemoteClients: $RpcSetting (Expected: 1)" -Foregro
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-logging-monitoring-README-md"></a>
+<div id="05-logging-monitoring-README-md"></div>
 
-<a id="05-logging-monitoring-README-md-module-5-logging-monitoring-siem"></a>
+<div id="05-logging-monitoring-README-md-module-5-logging-monitoring-siem"></div>
 # Module 5: Logging, Monitoring & SIEM
 
 This directory contains configuration policies for security log auditing, PowerShell transcription, and host monitoring for detection systems in isolated networks.
 
-1. **[REQ-LOG-001 - Configure Advanced Security Audit Policies](#05-logging-monitoring-README-md-05-logging-monitoring-configure-advanced-audit-policies-md)**
+1. **[REQ-LOG-001 - Configure Advanced Security Audit Policies](#05-logging-monitoring-configure-advanced-audit-policies-md)**
    Enforces granular Windows security audit policies (including logons, Kerberos authentication operations, group memberships, policy changes, and process execution) to log critical threat telemetry.
 
-2. **[REQ-LOG-002 - Configure PowerShell and Command-Line Auditing](#05-logging-monitoring-README-md-05-logging-monitoring-configure-powershell-and-command-line-auditing-md)**
+2. **[REQ-LOG-002 - Configure PowerShell and Command-Line Auditing](#05-logging-monitoring-configure-powershell-and-command-line-auditing-md)**
    Enforces process command-line argument auditing and verbose PowerShell logging (Script Block, Module, and Transcription logging) with a write-only, hardened transcript folder.
 
-3. **[REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](#05-logging-monitoring-README-md-05-logging-monitoring-deploy-and-harden-sysmon-md)**
+3. **[REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](#05-logging-monitoring-deploy-and-harden-sysmon-md)**
    Deploys Sysmon with a hardened telemetry configuration and configures aggressive service recovery settings to auto-restart the service if stopped by adversaries.
 
-4. **[REQ-LOG-004 - Configure Secure SIEM Log Shipping](#05-logging-monitoring-README-md-05-logging-monitoring-configure-siem-log-shipping-md)**
+4. **[REQ-LOG-004 - Configure Secure SIEM Log Shipping](#05-logging-monitoring-configure-siem-log-shipping-md)**
    Configures secured log shipping agents (Winlogbeat and Wazuh) utilizing TLS encryption, authenticated CA checks, local configuration file ACL protections, and buffer queue size limits to prevent local disk space exhaustion.
 
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md"></div>
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-req-log-001-configure-advanced-security-audit-policies"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-req-log-001-configure-advanced-security-audit-policies"></div>
 # [REQ-LOG-001] Configure Advanced Security Audit Policies
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-target-scope"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise.
 
 ---
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-implementation-details"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -10616,7 +10617,7 @@ This directory contains configuration policies for security log auditing, PowerS
 
 ---
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-rationale"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-rationale"></div>
 ## Rationale
 Standard Windows event logging is basic and fails to capture critical event vectors, leading to visibility gaps during compromises. Configuring Advanced Security Audit Policies allows precise logging of Success/Failure states for critical areas without overloading local event log storage.
 
@@ -10629,7 +10630,7 @@ Enforcing advanced auditing policies provides the following security coverages:
 
 ---
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-legacy-impact-compatibility"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Event Log Volume**: Enabling these detailed policies will increase log volume. The local Security Event Log size must be sized appropriately (minimum 1GB on Domain Controllers, 512MB on Member Servers and Workstations) to prevent logs from rotating out too quickly.
 * **Override Enforcement**: Forcing advanced policies to override legacy settings ensures that older group policies do not accidentally weaken system visibility. Ensure that this GPO setting is applied across all organizational units.
@@ -10637,13 +10638,13 @@ Enforcing advanced auditing policies provides the following security coverages:
 
 ---
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-implementation-steps"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-1-enforce-advanced-audit-overrides"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-1-enforce-advanced-audit-overrides"></div>
 #### 1. Enforce Advanced Audit Overrides
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to the target systems (e.g., `GPO_Hardening_Logging_Baseline`).
@@ -10653,7 +10654,7 @@ Enforcing advanced auditing policies provides the following security coverages:
    * **Policy**: `Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings`
    * **Setting**: `Enabled`
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-2-configure-advanced-audit-policy-settings"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-2-configure-advanced-audit-policy-settings"></div>
 #### 2. Configure Advanced Audit Policy Settings
 1. In the same GPO, navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
@@ -10691,7 +10692,7 @@ Enforcing advanced auditing policies provides the following security coverages:
 | **System** | `Audit Security System Extension` | Success |
 | **System** | `Audit System Integrity` | Success and Failure |
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-3-deploy-kerberos-loglevel-registry-settings-via-gpo-preferences"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-3-deploy-kerberos-loglevel-registry-settings-via-gpo-preferences"></div>
 #### 3. Deploy Kerberos LogLevel Registry Settings via GPO Preferences
 To ensure verbose Kerberos debug logging is disabled in production, deploy the setting via Registry GPO Preferences:
 1. Within the logging GPO, navigate to:
@@ -10707,7 +10708,7 @@ To ensure verbose Kerberos debug logging is disabled in production, deploy the s
 
 ---
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to query and enforce Advanced Security Audit Policies.
@@ -10897,7 +10898,7 @@ foreach ($Policy in $RequiredPolicies) {
 
 ---
 
-<a id="05-logging-monitoring-configure-advanced-audit-policies-md-sources-compliance-references"></a>
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R48 (Audit Policy)
 * **CIS Benchmark**: CIS Windows Server 2016 Benchmark v2.0.0 - Section 9 (Audit Policy)
@@ -10906,19 +10907,19 @@ foreach ($Policy in $RequiredPolicies) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md"></a>
+<div id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md"></div>
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-req-log-002-configure-powershell-and-command-line-auditing"></a>
+<div id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-req-log-002-configure-powershell-and-command-line-auditing"></div>
 # [REQ-LOG-002] Configure PowerShell and Command-Line Auditing
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-target-scope"></a>
+<div id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise.
 
 ---
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-implementation-details"></a>
+<div id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -10937,7 +10938,7 @@ foreach ($Policy in $RequiredPolicies) {
 
 ---
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-rationale"></a>
+<div id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-rationale"></div>
 ## Rationale
 Adversaries make extensive use of built-in system tools (LOLBins) and PowerShell script execution to perform reconnaissance, privilege escalation, and lateral movement. Because PowerShell code can be dynamically obfuscated or executed directly in memory without writing to disk, traditional file-based detection mechanisms are easily bypassed.
 
@@ -10949,20 +10950,20 @@ Enforcing advanced execution logging mitigates these threat vectors:
 
 ---
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-legacy-impact-compatibility"></a>
+<div id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Disk Space Utilization**: Transcription files and verbose script block logs consume disk storage and create disk I/O. System administrators must ensure that the transcript destination directory is regularly audited, and that logs are forwarded to a SIEM and purged to prevent disk exhaustion.
 * **Sensitive Telemetry**: Transcripts can accidentally log sensitive data like passwords typed in cleartext or API keys passed on the command line. Securing the transcription folder using strict NTFS ACLs is mandatory.
 
 ---
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-implementation-steps"></a>
+<div id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-1-configure-process-command-line-logging"></a>
+<div id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-1-configure-process-command-line-logging"></div>
 #### 1. Configure Process Command-Line Logging
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to target systems (e.g., `GPO_Hardening_Logging_Baseline`).
@@ -10972,7 +10973,7 @@ Enforcing advanced execution logging mitigates these threat vectors:
    * **Policy**: `Include command line in process creation events`
    * **Setting**: `Enabled`
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-2-configure-powershell-audit-settings"></a>
+<div id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-2-configure-powershell-audit-settings"></div>
 #### 2. Configure PowerShell Audit Settings
 1. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows PowerShell`
@@ -10990,7 +10991,7 @@ Enforcing advanced execution logging mitigates these threat vectors:
 
 ---
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to configure command line process creation, PowerShell logging registry keys, and create the hardened transcript directory with write-only NTFS permissions.
@@ -11205,7 +11206,7 @@ if ($TransDir) {
 
 ---
 
-<a id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-sources-compliance-references"></a>
+<div id="05-logging-monitoring-configure-powershell-and-command-line-auditing-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R50 (PowerShell logging configuration)
 * **CIS Benchmark**: CIS Windows Server 2016 Benchmark v2.0.0 - Section 18.8 (PowerShell Logging)
@@ -11214,19 +11215,19 @@ if ($TransDir) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md"></a>
+<div id="05-logging-monitoring-deploy-and-harden-sysmon-md"></div>
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-req-log-003-deploy-and-harden-microsoft-sysmon"></a>
+<div id="05-logging-monitoring-deploy-and-harden-sysmon-md-req-log-003-deploy-and-harden-microsoft-sysmon"></div>
 # [REQ-LOG-003] Deploy and Harden Microsoft Sysmon
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-target-scope"></a>
+<div id="05-logging-monitoring-deploy-and-harden-sysmon-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise.
 
 ---
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-implementation-details"></a>
+<div id="05-logging-monitoring-deploy-and-harden-sysmon-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
@@ -11235,7 +11236,7 @@ if ($TransDir) {
 
 ---
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-rationale"></a>
+<div id="05-logging-monitoring-deploy-and-harden-sysmon-md-rationale"></div>
 ## Rationale
 Windows Security event logs lack detailed telemetry on low-level operating system actions, such as process memory reads (e.g., LSASS dumping via Mimikatz), thread injection, network connections associated with process IDs, and driver loading. Microsoft Sysmon (System Monitor) bridges this gap by writing rich system monitoring telemetry to the `Microsoft-Windows-Sysmon/Operational` event log channel.
 
@@ -11247,20 +11248,20 @@ Hardening Sysmon involves:
 
 ---
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-legacy-impact-compatibility"></a>
+<div id="05-logging-monitoring-deploy-and-harden-sysmon-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Driver Performance**: Sysmon loads a kernel-mode filter driver (`SysmonDrv`). This driver must be tested in staging environments on Domain Controllers and high-load servers to ensure compatibility and that it does not introduce performance bottlenecks.
 * **Log Rotation**: Sysmon logs generate substantial volume. The `Microsoft-Windows-Sysmon/Operational` event log channel must be sized to at least 1GB on domain controllers and critical systems to prevent loss of telemetry due to wrap-around log overwriting.
 
 ---
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-implementation-steps"></a>
+<div id="05-logging-monitoring-deploy-and-harden-sysmon-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-option-a-installation-and-service-configuration"></a>
+<div id="05-logging-monitoring-deploy-and-harden-sysmon-md-option-a-installation-and-service-configuration"></div>
 ### Option A: Installation and Service Configuration
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-1-install-sysmon-with-hardened-xml-base-configuration"></a>
+<div id="05-logging-monitoring-deploy-and-harden-sysmon-md-1-install-sysmon-with-hardened-xml-base-configuration"></div>
 #### 1. Install Sysmon with Hardened XML Base Configuration
 Deploy Sysmon using the command line with a local XML configuration file. Save the following template as `sysmon-config.xml` in a secure administrative path:
 
@@ -11322,7 +11323,7 @@ Run the installer via administrative command line:
 Sysmon64.exe -i sysmon-config.xml -accepteula
 ```
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-2-enforce-service-recovery-settings"></a>
+<div id="05-logging-monitoring-deploy-and-harden-sysmon-md-2-enforce-service-recovery-settings"></div>
 #### 2. Enforce Service Recovery settings
 Configure the Windows Service Control Manager to automatically restart the Sysmon service if it is terminated:
 ```cmd
@@ -11332,7 +11333,7 @@ sc.exe failure Sysmon actions= restart/60000/restart/60000/restart/60000 reset= 
 
 ---
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="05-logging-monitoring-deploy-and-harden-sysmon-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to deploy/configure Sysmon and verify its operational state.
@@ -11412,7 +11413,7 @@ Write-Host "    - Recovery Configuration: ResetConfigured=$($HasReset), RestartA
 
 ---
 
-<a id="05-logging-monitoring-deploy-and-harden-sysmon-md-sources-compliance-references"></a>
+<div id="05-logging-monitoring-deploy-and-harden-sysmon-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R52 (Use of Sysmon and host log analysis)
 * **CIS Benchmark**: Recommended baseline practice for advanced security monitoring
@@ -11421,19 +11422,19 @@ Write-Host "    - Recovery Configuration: ResetConfigured=$($HasReset), RestartA
 
 <div style="page-break-before: always;"></div>
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md"></a>
+<div id="05-logging-monitoring-configure-siem-log-shipping-md"></div>
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-req-log-004-configure-secure-siem-log-shipping"></a>
+<div id="05-logging-monitoring-configure-siem-log-shipping-md-req-log-004-configure-secure-siem-log-shipping"></div>
 # [REQ-LOG-004] Configure Secure SIEM Log Shipping
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-target-scope"></a>
+<div id="05-logging-monitoring-configure-siem-log-shipping-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise.
 
 ---
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-implementation-details"></a>
+<div id="05-logging-monitoring-configure-siem-log-shipping-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
@@ -11444,7 +11445,7 @@ Write-Host "    - Recovery Configuration: ResetConfigured=$($HasReset), RestartA
 
 ---
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-rationale"></a>
+<div id="05-logging-monitoring-configure-siem-log-shipping-md-rationale"></div>
 ## Rationale
 In high-security, isolated environments, local log storage is vulnerable to tampering. Attackers who obtain elevated privileges will attempt to clear or modify the Security Event Logs (e.g., via `wevtutil cl Security`) to destroy evidence of their activities. Shipping event logs in real-time to a dedicated offline SIEM (such as an ELK Stack or Wazuh Manager) ensures that forensic logs are preserved.
 
@@ -11455,20 +11456,20 @@ To prevent adversaries from intercepting, redirecting, or tampering with log tel
 
 ---
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-legacy-impact-compatibility"></a>
+<div id="05-logging-monitoring-configure-siem-log-shipping-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **PKI Dependencies**: Configuring full verification of the SSL/TLS certificate chain requires that the internal Active Directory Certificate Services (AD CS) CA certificate is distributed to all shipping agents and that the SIEM receiver possesses a certificate signed by this CA.
 * **Network Overhead**: Encrypting and transmitting large volumes of security event logs introduces minor CPU and network utilization. Network links, especially in isolated subnets, must be monitored.
 
 ---
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-implementation-steps"></a>
+<div id="05-logging-monitoring-configure-siem-log-shipping-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-option-a-agent-configuration"></a>
+<div id="05-logging-monitoring-configure-siem-log-shipping-md-option-a-agent-configuration"></div>
 ### Option A: Agent Configuration
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-1-secure-winlogbeat-configuration"></a>
+<div id="05-logging-monitoring-configure-siem-log-shipping-md-1-secure-winlogbeat-configuration"></div>
 #### 1. Secure Winlogbeat Configuration
 Edit `winlogbeat.yml` (located by default under `%ProgramFiles%\Winlogbeat\winlogbeat.yml`) to enforce TLS 1.2/1.3, configure local queue limits, and forward the key log channels:
 
@@ -11495,7 +11496,7 @@ output.logstash:
   ssl.key: "C:\\ProgramData\\Winlogbeat\\certs\\client.key"
 ```
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-2-secure-wazuh-agent-configuration"></a>
+<div id="05-logging-monitoring-configure-siem-log-shipping-md-2-secure-wazuh-agent-configuration"></div>
 #### 2. Secure Wazuh Agent Configuration
 Edit `ossec.conf` (located by default under `%ProgramFiles(x86)%\ossec-agent\ossec.conf`) to secure log verification and specify localized channels:
 
@@ -11541,7 +11542,7 @@ Edit `ossec.conf` (located by default under `%ProgramFiles(x86)%\ossec-agent\oss
 
 ---
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="05-logging-monitoring-configure-siem-log-shipping-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to secure agent configuration files and verify SIEM shipping services status.
@@ -11655,7 +11656,7 @@ foreach ($File in $ConfigFiles) {
 
 ---
 
-<a id="05-logging-monitoring-configure-siem-log-shipping-md-sources-compliance-references"></a>
+<div id="05-logging-monitoring-configure-siem-log-shipping-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R52 (Sysmon and log shipping recommendations)
 * **CIS Benchmark**: Recommended settings for centralized log shipping configurations
@@ -11664,53 +11665,53 @@ foreach ($File in $ConfigFiles) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-operations-maintenance-README-md"></a>
+<div id="06-operations-maintenance-README-md"></div>
 
-<a id="06-operations-maintenance-README-md-module-6-secure-operations-maintenance"></a>
+<div id="06-operations-maintenance-README-md-module-6-secure-operations-maintenance"></div>
 # Module 6: Secure Operations & Maintenance
 
 This directory contains operational procedures and configuration baselines for system backups, offline patch distribution, and regular security auditing.
 
-<a id="06-operations-maintenance-README-md-technical-hardening-controls"></a>
+<div id="06-operations-maintenance-README-md-technical-hardening-controls"></div>
 ## Technical Hardening Controls
 
-1. **[Secure Operations and Maintenance Baseline](#06-operations-maintenance-README-md-06-operations-maintenance-ops-and-maintenance-md)**
+1. **[Secure Operations and Maintenance Baseline](#06-operations-maintenance-ops-and-maintenance-md)**
    Detailed requirement documenting Active Directory System State Backup and bare-metal restoration workflows, offline WSUS patch synchronization ("sneakernet" imports/exports), and continuous security analysis using offline tools (such as PingCastle and ADRecon).
 
-2. **[REQ-OPS-001 - Enforce KRBTGT Password Rotation](#06-operations-maintenance-README-md-06-operations-maintenance-enforce-krbtgt-password-rotation-md)**
+2. **[REQ-OPS-001 - Enforce KRBTGT Password Rotation](#06-operations-maintenance-enforce-krbtgt-password-rotation-md)**
    Enforces and audits periodic rotation of the domain KRBTGT account password to prevent Golden Ticket attacks.
 
-3. **[REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](#06-operations-maintenance-README-md-06-operations-maintenance-enable-recycle-bin-md)**
+3. **[REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](#06-operations-maintenance-enable-recycle-bin-md)**
    Enables the forest-wide Recycle Bin optional feature to preserve all link-valued attributes and permit rapid recovery of deleted objects.
 
-4. **[REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#06-operations-maintenance-README-md-06-operations-maintenance-maintain-gpo-templates-md)**
+4. **[REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#06-operations-maintenance-maintain-gpo-templates-md)**
    Centralizes ADMX administrative templates within the SYSVOL share to prevent console drift and version mismatches.
 
-5. **[REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](#06-operations-maintenance-README-md-06-operations-maintenance-use-third-party-templates-md)**
+5. **[REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](#06-operations-maintenance-use-third-party-templates-md)**
    Enforces standardized configuration templates to lock down third-party application configurations (browsers, reader software, security guides).
 
-6. **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#06-operations-maintenance-README-md-06-operations-maintenance-configure-dedicated-tier0-wsus-md)**
+6. **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#06-operations-maintenance-configure-dedicated-tier0-wsus-md)**
    Establishes and secures dedicated WSUS update server endpoints for Tier 0 assets to prevent cross-tier update spoofing.
 
 
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-operations-maintenance-ops-and-maintenance-md"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md"></div>
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-module-6-secure-operations-maintenance"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-module-6-secure-operations-maintenance"></div>
 # Module 6: Secure Operations & Maintenance
 
 This module defines the processes and tools required to securely operate, maintain, and assess an isolated Active Directory environment over time. In air-gapped networks, tasks like patching and security assessments must be performed entirely offline.
 
 ---
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-1-backup-disaster-recovery-anssi-r54"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-1-backup-disaster-recovery-anssi-r54"></div>
 ## 1. Backup & Disaster Recovery (ANSSI R54)
 
 Disaster Recovery is a core pillar of Active Directory security. If Domain Controllers are corrupted or compromised, administrators must recover from trusted, clean states.
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-system-state-backups"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-system-state-backups"></div>
 ### System State Backups
 * **Frequency**: Create **System State Backups** daily on at least two Domain Controllers.
 * **Content**: The System State contains the Active Directory database (`ntds.dit`), the SYSVOL share, registry settings, certificates, and DNS records.
@@ -11719,12 +11720,12 @@ Disaster Recovery is a core pillar of Active Directory security. If Domain Contr
 
 ---
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-2-offline-patch-management-wsus-offline"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-2-offline-patch-management-wsus-offline"></div>
 ## 2. Offline Patch Management (WSUS Offline)
 
 Keeping Domain Controllers and clients patched is critical to resolve OS and RPC vulnerabilities. In air-gapped systems, this requires a sneakernet approach utilizing **Windows Server Update Services (WSUS) import/export**.
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-wsus-importexport-protocol"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-wsus-importexport-protocol"></div>
 ### WSUS Import/Export Protocol
 
 ```mermaid
@@ -11742,7 +11743,7 @@ sequenceDiagram
     Note over OfflineWSUS: Approves and deploys patches to DCs/Clients
 ```
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-wsusutil-commands"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-wsusutil-commands"></div>
 ### wsusutil Commands
 1. **On the Internet-connected WSUS Server**:
    * Export the metadata file:
@@ -11759,15 +11760,15 @@ sequenceDiagram
 
 ---
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-3-continuous-security-assessments-anssi-r57"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-3-continuous-security-assessments-anssi-r57"></div>
 ## 3. Continuous Security Assessments (ANSSI R57)
 
 Administrators must actively search for misconfigurations, weak permissions, and signs of compromise in Active Directory. In an isolated, air-gapped network, online scanning is impossible, requiring all diagnostic tools to run natively and extract results offline.
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-recommended-offline-assessment-tools-execution-guides"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-recommended-offline-assessment-tools-execution-guides"></div>
 ### Recommended Offline Assessment Tools & Execution Guides
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-1-pingcastle-active-directory-health-security-auditing"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-1-pingcastle-active-directory-health-security-auditing"></div>
 #### 1. PingCastle (Active Directory Health & Security Auditing)
 PingCastle evaluates the security posture of an Active Directory domain by querying the directory database via LDAP and generating a comprehensive HTML report with a security score and recommendations mapped to ANSSI guidelines.
 * **Execution Interval**: Run monthly, or after any major schema or GPO changes.
@@ -11777,7 +11778,7 @@ PingCastle evaluates the security posture of an Active Directory domain by query
   ```
 * **Post-Execution**: Transfer the generated HTML report and XML output to a secure auditing platform. Analyze the security score, paying close attention to anomalous Trust relationships and Delegation paths.
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-2-bloodhound-sharphound-lateral-movement-graph-analysis"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-2-bloodhound-sharphound-lateral-movement-graph-analysis"></div>
 #### 2. BloodHound & SharpHound (Lateral Movement Graph Analysis)
 BloodHound uses graph theory to reveal hidden relationships and complex attack paths within an Active Directory environment. SharpHound is the offline data collector.
 * **Execution Interval**: Run quarterly, or during dedicated red/blue team security reviews.
@@ -11787,7 +11788,7 @@ BloodHound uses graph theory to reveal hidden relationships and complex attack p
   ```
 * **Data Processing**: Securely copy the output `.zip` file from the isolated environment. Import the JSON files into the offline BloodHound GUI dashboard to query for attack paths (e.g. finding paths from Domain Users to Domain Admins).
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-3-oradad-offline-active-directory-database-analysis"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-3-oradad-offline-active-directory-database-analysis"></div>
 #### 3. ORADAD (Offline Active Directory Database Analysis)
 ORADAD allows administrators to perform offline analysis of Active Directory configurations and database objects, helping audit and flag anomalous permissions or structural variations.
 * **Execution Interval**: Run semi-annually, or during forensic investigation scenarios.
@@ -11795,7 +11796,7 @@ ORADAD allows administrators to perform offline analysis of Active Directory con
 
 ---
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-4-crash-control-troubleshooting-bsod-detailed-display"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-4-crash-control-troubleshooting-bsod-detailed-display"></div>
 ## 4. Crash Control & Troubleshooting (BSOD Detailed Display)
 
 During critical system failures, Windows by default displays a simplified Blue Screen of Death (BSOD) screen. Enabling detailed stop error parameters ensures that critical diagnostic information (such as the stop code and parameters) is immediately visible on the physical or virtual console screen. This is crucial for administrators in isolated, air-gapped environments who must troubleshoot system failures without access to online analysis tools or automatic crash dumps.
@@ -11805,10 +11806,10 @@ During critical system failures, Windows by default displays a simplified Blue S
 
 ---
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-powershell-implementation-guide"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-powershell-implementation-guide"></div>
 ## PowerShell Implementation Guide
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-1-auditing-system-state-backup-status-audit"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-1-auditing-system-state-backup-status-audit"></div>
 ### 1. Auditing System State Backup Status (Audit)
 
 Run this script locally on a Domain Controller to query the status and location of recent System State backups using the Windows Server Backup module.
@@ -11847,7 +11848,7 @@ try {
 }
 ```
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-2-creating-an-automated-system-state-backup-remediation"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-2-creating-an-automated-system-state-backup-remediation"></div>
 ### 2. Creating an Automated System State Backup (Remediation)
 
 Execute the following PowerShell script to install the Windows Server Backup feature, configure a System State backup policy, and execute an immediate System State backup to a designated disk volume (e.g. `E:`).
@@ -11911,7 +11912,7 @@ if ($finalJob.JobState -eq "Completed") {
 }
 ```
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-3-auditing-crash-control-settings-audit"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-3-auditing-crash-control-settings-audit"></div>
 ### 3. Auditing Crash Control Settings (Audit)
 
 [Download Script: Audit-CrashControl.ps1](audit_scripts/Audit-CrashControl.ps1)
@@ -11937,7 +11938,7 @@ if (Test-Path $Path) {
 }
 ```
 
-<a id="06-operations-maintenance-ops-and-maintenance-md-4-configuring-crash-control-settings-remediation"></a>
+<div id="06-operations-maintenance-ops-and-maintenance-md-4-configuring-crash-control-settings-remediation"></div>
 ### 4. Configuring Crash Control Settings (Remediation)
 
 [Download Script: Set-CrashControl.ps1](implementation_scripts/Set-CrashControl.ps1)
@@ -11961,19 +11962,19 @@ Write-Host "[+] Detailed BSOD stop parameters configured successfully." -Foregro
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md"></a>
+<div id="06-operations-maintenance-enforce-krbtgt-password-rotation-md"></div>
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-req-ops-001-enforce-krbtgt-password-rotation"></a>
+<div id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-req-ops-001-enforce-krbtgt-password-rotation"></div>
 # [REQ-OPS-001] Enforce KRBTGT Password Rotation
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-target-scope"></a>
+<div id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
 
 ---
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-implementation-details"></a>
+<div id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory Object Management (krbtgt account object in the Users container: `CN=krbtgt,CN=Users,DC=[Domain]`)
@@ -11986,7 +11987,7 @@ Write-Host "[+] Detailed BSOD stop parameters configured successfully." -Foregro
 
 ---
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-rationale"></a>
+<div id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-rationale"></div>
 ## Rationale
 The `krbtgt` account is a built-in local service account that serves as the Key Distribution Center (KDC) service account in Active Directory. The password hash of the `krbtgt` account is used to sign and encrypt all Kerberos Ticket Granting Tickets (TGTs) issued within the domain. 
 
@@ -11998,7 +11999,7 @@ Therefore, a complete rotation requires resetting the password twice. The resets
 
 ---
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-legacy-impact-compatibility"></a>
+<div id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Authentication Outages**: Resetting the `krbtgt` password twice in rapid succession (without waiting for replication and Kerberos ticket lifetimes to elapse) will invalidate all active TGTs immediately. This will cause widespread authentication failures across the domain for all users, services, and trust relationships.
 * **Operational Wait Time**: A minimum of 10 hours (24 hours is recommended in production) must be observed between the first and second reset to allow replication to converge and existing tickets to naturally expire or renew.
@@ -12006,10 +12007,10 @@ Therefore, a complete rotation requires resetting the password twice. The resets
 
 ---
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-implementation-steps"></a>
+<div id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 Note: This control cannot be implemented or managed via standard Group Policy Objects (GPO). The KRBTGT password rotation is an operational database task performed directly on the Active Directory objects. 
@@ -12029,7 +12030,7 @@ To execute the manual graphical procedure using Active Directory Users and Compu
 
 ---
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use the following scripts to audit the age of the `krbtgt` password and programmatically perform a reset.
@@ -12114,7 +12115,7 @@ if ($Krbtgt) {
 
 ---
 
-<a id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-sources-compliance-references"></a>
+<div id="06-operations-maintenance-enforce-krbtgt-password-rotation-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Section on secrets renewal (Renouvellement des secrets de l'Active Directory)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark (General guidance on periodic Kerberos key rotation)
@@ -12124,26 +12125,26 @@ if ($Krbtgt) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-operations-maintenance-enable-recycle-bin-md"></a>
+<div id="06-operations-maintenance-enable-recycle-bin-md"></div>
 
-<a id="06-operations-maintenance-enable-recycle-bin-md-req-ops-002-enable-and-configure-the-active-directory-recycle-bin"></a>
+<div id="06-operations-maintenance-enable-recycle-bin-md-req-ops-002-enable-and-configure-the-active-directory-recycle-bin"></div>
 # [REQ-OPS-002] Enable and Configure the Active Directory Recycle Bin
 
-<a id="06-operations-maintenance-enable-recycle-bin-md-target-scope"></a>
+<div id="06-operations-maintenance-enable-recycle-bin-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers (Forest-wide configuration)
 * **Operating Systems**: Windows Server 2016 and above
 
 ---
 
-<a id="06-operations-maintenance-enable-recycle-bin-md-implementation-details"></a>
+<div id="06-operations-maintenance-enable-recycle-bin-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Active Directory Optional Features Configuration
 
 ---
 
-<a id="06-operations-maintenance-enable-recycle-bin-md-rationale"></a>
+<div id="06-operations-maintenance-enable-recycle-bin-md-rationale"></div>
 ## Rationale
 The Active Directory (AD) Recycle Bin is a critical availability and recovery component in an enterprise environment. It addresses risks related to accidental deletions, administrative scripting errors, and malicious insider sabotage targeting directory objects.
 
@@ -12154,7 +12155,7 @@ Enabling this feature provides several key benefits:
 
 ---
 
-<a id="06-operations-maintenance-enable-recycle-bin-md-legacy-impact-compatibility"></a>
+<div id="06-operations-maintenance-enable-recycle-bin-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Irreversibility**: Enabling the Active Directory Recycle Bin is a permanent forest-wide action that cannot be disabled once activated.
 * **Functional Level Pre-requisite**: The Forest Functional Level must be Windows Server 2008 R2 or higher.
@@ -12162,10 +12163,10 @@ Enabling this feature provides several key benefits:
 
 ---
 
-<a id="06-operations-maintenance-enable-recycle-bin-md-implementation-steps"></a>
+<div id="06-operations-maintenance-enable-recycle-bin-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="06-operations-maintenance-enable-recycle-bin-md-option-a-active-directory-administrative-center-preferred"></a>
+<div id="06-operations-maintenance-enable-recycle-bin-md-option-a-active-directory-administrative-center-preferred"></div>
 ### Option A: Active Directory Administrative Center (Preferred)
 
 1. Log on to a Domain Controller with **Enterprise Admins** credentials.
@@ -12178,12 +12179,12 @@ Enabling this feature provides several key benefits:
 
 ---
 
-<a id="06-operations-maintenance-enable-recycle-bin-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="06-operations-maintenance-enable-recycle-bin-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts to audit and activate the optional feature forest-wide.
 
-<a id="06-operations-maintenance-enable-recycle-bin-md-1-local-audit-audit-adrecyclebinps1"></a>
+<div id="06-operations-maintenance-enable-recycle-bin-md-1-local-audit-audit-adrecyclebinps1"></div>
 #### 1. Local Audit (Audit-ADRecycleBin.ps1)
 
 [Download Script: Audit-ADRecycleBin.ps1](audit_scripts/Audit-ADRecycleBin.ps1)
@@ -12210,7 +12211,7 @@ try {
 }
 ```
 
-<a id="06-operations-maintenance-enable-recycle-bin-md-2-local-remediation-enable-adrecyclebinps1"></a>
+<div id="06-operations-maintenance-enable-recycle-bin-md-2-local-remediation-enable-adrecyclebinps1"></div>
 #### 2. Local Remediation (Enable-ADRecycleBin.ps1)
 
 [Download Script: Enable-ADRecycleBin.ps1](implementation_scripts/Enable-ADRecycleBin.ps1)
@@ -12242,7 +12243,7 @@ try {
 
 ---
 
-<a id="06-operations-maintenance-enable-recycle-bin-md-sources-compliance-references"></a>
+<div id="06-operations-maintenance-enable-recycle-bin-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Section on Active Directory Recycle Bin and backup/restore.
 * **Microsoft Best Practices**: Active Directory Recycle Bin Step-by-Step Guide.
@@ -12250,26 +12251,26 @@ try {
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md"></a>
+<div id="06-operations-maintenance-maintain-gpo-templates-md"></div>
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md-req-ops-003-establish-and-maintain-group-policy-admx-central-store"></a>
+<div id="06-operations-maintenance-maintain-gpo-templates-md-req-ops-003-establish-and-maintain-group-policy-admx-central-store"></div>
 # [REQ-OPS-003] Establish and Maintain Group Policy ADMX Central Store
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md-target-scope"></a>
+<div id="06-operations-maintenance-maintain-gpo-templates-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers (SYSVOL Share)
 * **Operating Systems**: Windows Server 2016 and above
 
 ---
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md-implementation-details"></a>
+<div id="06-operations-maintenance-maintain-gpo-templates-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**: SYSVOL PolicyDefinitions Store (`\\<Domain_FQDN>\SYSVOL\<Domain_FQDN>\Policies\PolicyDefinitions`)
 
 ---
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md-rationale"></a>
+<div id="06-operations-maintenance-maintain-gpo-templates-md-rationale"></div>
 ## Rationale
 Group Policy Objects (GPOs) rely on XML-based Administrative Template files (`.admx`) and language-specific resource files (`.adml`) to display registry-based policy settings within administrative tools.
 
@@ -12281,17 +12282,17 @@ Establishing the **Central Store** in the SYSVOL share ensures that all administ
 
 ---
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md-legacy-impact-compatibility"></a>
+<div id="06-operations-maintenance-maintain-gpo-templates-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Replication Load**: Placing templates in the SYSVOL share triggers File Replication Service (FRS) or DFS Replication (DFSR) to replicate the files to all Domain Controllers. The store typically contains 10–50 MB of data, which has minimal impact on modern replication networks.
 * **Consoles Compatibility**: Older administrative consoles (such as Windows Server 2008 R2) may display errors when opening GPOs edited with newer templates, but the settings themselves will still apply correctly to target machines.
 
 ---
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md-implementation-steps"></a>
+<div id="06-operations-maintenance-maintain-gpo-templates-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md-option-a-manual-central-store-establishment-preferred"></a>
+<div id="06-operations-maintenance-maintain-gpo-templates-md-option-a-manual-central-store-establishment-preferred"></div>
 ### Option A: Manual Central Store Establishment (Preferred)
 
 1. Log on to a Domain Controller with **Schema Admins** or **Domain Admins** credentials.
@@ -12305,12 +12306,12 @@ Establishing the **Central Store** in the SYSVOL share ensures that all administ
 
 ---
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="06-operations-maintenance-maintain-gpo-templates-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts to audit and initialize the Central Store folder structure.
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md-1-local-audit-audit-gpocentralstoreps1"></a>
+<div id="06-operations-maintenance-maintain-gpo-templates-md-1-local-audit-audit-gpocentralstoreps1"></div>
 #### 1. Local Audit (Audit-GPOCentralStore.ps1)
 
 [Download Script: Audit-GPOCentralStore.ps1](audit_scripts/Audit-GPOCentralStore.ps1)
@@ -12342,7 +12343,7 @@ try {
 }
 ```
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md-2-local-remediation-create-gpocentralstoreps1"></a>
+<div id="06-operations-maintenance-maintain-gpo-templates-md-2-local-remediation-create-gpocentralstoreps1"></div>
 #### 2. Local Remediation (Create-GPOCentralStore.ps1)
 
 [Download Script: Create-GPOCentralStore.ps1](implementation_scripts/Create-GPOCentralStore.ps1)
@@ -12377,7 +12378,7 @@ try {
 
 ---
 
-<a id="06-operations-maintenance-maintain-gpo-templates-md-sources-compliance-references"></a>
+<div id="06-operations-maintenance-maintain-gpo-templates-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **Microsoft Guidance**: How to create and manage the Central Store for Group Policy Administrative Templates.
 * **ANSSI AD Hardening Guide**: Section on Group Policy template maintenance and update management.
@@ -12385,26 +12386,26 @@ try {
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-operations-maintenance-use-third-party-templates-md"></a>
+<div id="06-operations-maintenance-use-third-party-templates-md"></div>
 
-<a id="06-operations-maintenance-use-third-party-templates-md-req-ops-004-implement-third-party-and-custom-gpo-templates-for-cots-hardening"></a>
+<div id="06-operations-maintenance-use-third-party-templates-md-req-ops-004-implement-third-party-and-custom-gpo-templates-for-cots-hardening"></div>
 # [REQ-OPS-004] Implement Third-Party and Custom GPO Templates for COTS Hardening
 
-<a id="06-operations-maintenance-use-third-party-templates-md-target-scope"></a>
+<div id="06-operations-maintenance-use-third-party-templates-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Members (Clients and Servers)
 * **Operating Systems**: Windows 10/11, Windows Server 2016 and above
 
 ---
 
-<a id="06-operations-maintenance-use-third-party-templates-md-implementation-details"></a>
+<div id="06-operations-maintenance-use-third-party-templates-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**: SYSVOL PolicyDefinitions Store / Local Administrative Templates
 
 ---
 
-<a id="06-operations-maintenance-use-third-party-templates-md-rationale"></a>
+<div id="06-operations-maintenance-use-third-party-templates-md-rationale"></div>
 ## Rationale
 Group Policy Objects (GPOs) natively manage core Windows operating system components but lack administrative control definitions for third-party Commercial Off-The-Shelf (COTS) software (such as Google Chrome, Microsoft Edge, Adobe Acrobat Reader) and advanced security guide extensions.
 
@@ -12415,17 +12416,17 @@ Implementing third-party and custom GPO templates provides the following benefit
 
 ---
 
-<a id="06-operations-maintenance-use-third-party-templates-md-legacy-impact-compatibility"></a>
+<div id="06-operations-maintenance-use-third-party-templates-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Application Interoperability**: Enforcing strict configurations on third-party software (such as blocking legacy TLS, enforcing browser extension whitelists, or restricting PDF javascript execution) may impact business applications or legacy intranet sites. All templates and settings must be fully validated in a testing sandbox prior to production deployment.
 * **Template Updates**: As applications update, vendors release newer ADMX template versions. Administrators must periodically update the templates in the Central Store to support newer settings.
 
 ---
 
-<a id="06-operations-maintenance-use-third-party-templates-md-implementation-steps"></a>
+<div id="06-operations-maintenance-use-third-party-templates-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="06-operations-maintenance-use-third-party-templates-md-option-a-manual-central-store-importing-preferred"></a>
+<div id="06-operations-maintenance-use-third-party-templates-md-option-a-manual-central-store-importing-preferred"></div>
 ### Option A: Manual Central Store Importing (Preferred)
 
 1. Log on to a management workstation or Domain Controller with **Domain Admins** credentials.
@@ -12439,12 +12440,12 @@ Implementing third-party and custom GPO templates provides the following benefit
 
 ---
 
-<a id="06-operations-maintenance-use-third-party-templates-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="06-operations-maintenance-use-third-party-templates-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts to audit and import custom templates.
 
-<a id="06-operations-maintenance-use-third-party-templates-md-1-local-audit-audit-thirdpartytemplatesps1"></a>
+<div id="06-operations-maintenance-use-third-party-templates-md-1-local-audit-audit-thirdpartytemplatesps1"></div>
 #### 1. Local Audit (Audit-ThirdPartyTemplates.ps1)
 
 [Download Script: Audit-ThirdPartyTemplates.ps1](audit_scripts/Audit-ThirdPartyTemplates.ps1)
@@ -12488,7 +12489,7 @@ try {
 }
 ```
 
-<a id="06-operations-maintenance-use-third-party-templates-md-2-local-remediation-import-thirdpartytemplateps1"></a>
+<div id="06-operations-maintenance-use-third-party-templates-md-2-local-remediation-import-thirdpartytemplateps1"></div>
 #### 2. Local Remediation (Import-ThirdPartyTemplate.ps1)
 
 [Download Script: Import-ThirdPartyTemplate.ps1](implementation_scripts/Import-ThirdPartyTemplate.ps1)
@@ -12536,7 +12537,7 @@ try {
 
 ---
 
-<a id="06-operations-maintenance-use-third-party-templates-md-sources-compliance-references"></a>
+<div id="06-operations-maintenance-use-third-party-templates-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **Security-ADMX Project**: Custom GPO templates for hardening Windows client and server environments. Available at the [Security-ADMX GitHub Repository](https://github.com/Harvester57/Security-ADMX).
 * **CIS Microsoft Windows Server Benchmarks**: Sections recommending the use of administrative templates to control third-party browser settings.
@@ -12545,19 +12546,19 @@ try {
 
 <div style="page-break-before: always;"></div>
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md"></a>
+<div id="06-operations-maintenance-configure-dedicated-tier0-wsus-md"></div>
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-req-ops-005-configure-dedicated-wsus-for-tier-0"></a>
+<div id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-req-ops-005-configure-dedicated-wsus-for-tier-0"></div>
 # [REQ-OPS-005] Configure Dedicated WSUS for Tier 0
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-target-scope"></a>
+<div id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Tier 0 Administration Workstations (PAWs)
 * **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10/11 Enterprise
 
 ---
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-implementation-details"></a>
+<div id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**: 
@@ -12566,7 +12567,7 @@ try {
 
 ---
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-rationale"></a>
+<div id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-rationale"></div>
 ## Rationale
 The Windows Server Update Services (WSUS) role allows administrators to centralize the approval and distribution of security updates and patches. However, update services execute code with system privileges.
 
@@ -12579,7 +12580,7 @@ To mitigate these threats, Tier 0 Domain Controllers and PAWs must pull updates 
 
 ---
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-legacy-impact-compatibility"></a>
+<div id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Operational Overhead**: Dedicating a separate WSUS server for Tier 0 assets means updates must be reviewed, approved, and synchronized separately from standard enterprise updates.
 * **Network Traffic**: Ensure that firewall rules permit the dedicated Tier 0 WSUS server to connect outbound to Microsoft Update servers to synchronize updates.
@@ -12587,13 +12588,13 @@ To mitigate these threats, Tier 0 Domain Controllers and PAWs must pull updates 
 
 ---
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-implementation-steps"></a>
+<div id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-option-a-group-policy-object-gpo-configuration"></a>
+<div id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-option-a-group-policy-object-gpo-configuration"></div>
 ### Option A: Group Policy Object (GPO) Configuration
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-1-enforce-https-for-wsus-in-gpo"></a>
+<div id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-1-enforce-https-for-wsus-in-gpo"></div>
 #### 1. Enforce HTTPS for WSUS in GPO
 1. Open **Group Policy Management** (`gpmc.msc`).
 2. Create or edit a GPO targeting Tier 0 systems (e.g., `GPO_Hardening_DomainControllers`).
@@ -12607,7 +12608,7 @@ To mitigate these threats, Tier 0 Domain Controllers and PAWs must pull updates 
    * **Set the alternate download server**: `https://wsust0.corp.local:8531`
 7. Click **OK** and link the GPO to the Domain Controllers and PAW OUs.
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-2-configure-ssl-on-the-wsus-server"></a>
+<div id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-2-configure-ssl-on-the-wsus-server"></div>
 #### 2. Configure SSL on the WSUS Server
 On the dedicated Tier 0 WSUS server:
 1. Open **IIS Manager** (`inetmgr.exe`).
@@ -12619,7 +12620,7 @@ On the dedicated Tier 0 WSUS server:
 
 ---
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following script block to apply the dedicated WSUS target server configuration locally via registry parameters.
@@ -12685,7 +12686,7 @@ if (Test-Path $WsusRegPath) {
 
 ---
 
-<a id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-sources-compliance-references"></a>
+<div id="06-operations-maintenance-configure-dedicated-tier0-wsus-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Section 3.6.2 (Windows Server Update Services), Section 9
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 3.d (Page 23), Section 7 (Page 46)
@@ -12694,53 +12695,53 @@ if (Test-Path $WsusRegPath) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-README-md"></a>
+<div id="07-paws-README-md"></div>
 
-<a id="07-paws-README-md-module-7-privileged-access-workstations-paws-hardening"></a>
+<div id="07-paws-README-md-module-7-privileged-access-workstations-paws-hardening"></div>
 # Module 7: Privileged Access Workstations (PAWs) Hardening
 
 This directory contains the physical isolation policies and operating system security configurations required to protect Tier 0 administrative workstations.
 
-<a id="07-paws-README-md-technical-hardening-controls"></a>
+<div id="07-paws-README-md-technical-hardening-controls"></div>
 ## Technical Hardening Controls
 
-1. **[REQ-PAW-001 - Configure AppLocker Policies for PAWs](#07-paws-README-md-07-paws-configure-applocker-policies-md)**
+1. **[REQ-PAW-001 - Configure AppLocker Policies for PAWs](#07-paws-configure-applocker-policies-md)**
    Enforces strict AppLocker application control policies, restricting execution of unauthorized binaries to approved administrative groups.
 
-2. **[REQ-PAW-002 - Enable LSA Protection for PAWs](#07-paws-README-md-07-paws-enable-lsa-protection-md)**
+2. **[REQ-PAW-002 - Enable LSA Protection for PAWs](#07-paws-enable-lsa-protection-md)**
    Configures LSASS to run as a protected process (PPL) to block credential dumping tools from harvesting secrets from LSA memory.
 
-3. **[REQ-PAW-003 - Restrict Local Administrators Group for PAWs](#07-paws-README-md-07-paws-restrict-local-administrators-md)**
+3. **[REQ-PAW-003 - Restrict Local Administrators Group for PAWs](#07-paws-restrict-local-administrators-md)**
    Restricts and audits membership in the local Administrators group on PAWs to prevent unauthorized local administrative access.
 
-4. **[REQ-PAW-004 - Enforce BitLocker with TPM and Startup PIN for PAWs](#07-paws-README-md-07-paws-enable-bitlocker-md)**
+4. **[REQ-PAW-004 - Enforce BitLocker with TPM and Startup PIN for PAWs](#07-paws-enable-bitlocker-md)**
    Configures highly stringent BitLocker policies specifically for PAWs, requiring TPM + pre-boot Startup PIN (no Network Unlock allowed), disabling sleep/standby states (S1-S3) to prevent DMA attacks, enabling Kernel DMA Protection, and enforcing enhanced PIN rules and automatic AD recovery password rotation.
 
-5. **[REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-README-md-07-paws-configure-uefi-security-md)**
+5. **[REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-configure-uefi-security-md)**
    Enforces UEFI firmware locking, setting a strong BIOS administrator password, disabling CSM/Legacy boot, locking the boot order, and protecting against BIOS rollbacks.
 
-6. **[REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-README-md-07-paws-enable-hardware-virtualization-and-dma-protection-md)**
+6. **[REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-hardware-virtualization-and-dma-protection-md)**
    Enables hardware CPU virtualization, IOMMU/DMA protection at the firmware level, and TPM 2.0 to provide the necessary platform integrity foundation for Virtualization-Based Security (VBS).
 
-7. **[REQ-PAW-007 - Disable Windows Platform Binary Table (WPBT)](#07-paws-README-md-07-paws-disable-wpbt-md)**
+7. **[REQ-PAW-007 - Disable Windows Platform Binary Table (WPBT)](#07-paws-disable-wpbt-md)**
    Disables execution of binaries supplied by the Windows Platform Binary Table (WPBT) ACPI firmware table to mitigate boot-level security bypasses.
 
-8. **[REQ-PAW-008 - Windows Defender Antivirus PAW Baseline and Exploit Guard](#07-paws-README-md-07-paws-defender-antivirus-md)**
+8. **[REQ-PAW-008 - Windows Defender Antivirus PAW Baseline and Exploit Guard](#07-paws-defender-antivirus-md)**
    Configures Windows Defender Antivirus on PAWs, enabling real-time scanning, behavioral monitoring, preventing local exclusion modifications, enforcing all ASR rules in strict Block mode, activating Tamper Protection, and enabling AppContainer sandbox isolation.
 
-9. **[REQ-PAW-009 - Configure User Rights Assignments for PAWs](#07-paws-README-md-07-paws-configure-user-rights-assignments-md)**
+9. **[REQ-PAW-009 - Configure User Rights Assignments for PAWs](#07-paws-configure-user-rights-assignments-md)**
    Restricts critical user rights assignments (URAs) such as debugging programs, token impersonation, and denying network/interactive logon permissions for standard accounts on PAWs.
 
-10. **[REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#07-paws-README-md-07-paws-enable-vbs-credential-guard-md)**
+10. **[REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#07-paws-enable-vbs-credential-guard-md)**
     Configures Virtualization-Based Security (VBS), Credential Guard (with UEFI Lock), System Guard Secure Launch, and memory protections to shield LSASS from credential dumping attacks on PAWs.
 
-11. **[REQ-PAW-011 - Harden DMA and Physical Security for PAWs](#07-paws-README-md-07-paws-harden-dma-and-physical-security-md)**
+11. **[REQ-PAW-011 - Harden DMA and Physical Security for PAWs](#07-paws-harden-dma-and-physical-security-md)**
     Mitigates physical access threat vectors by disabling sleep standby states (S1-S3), disabling external DMA device enumeration under lock, enforcing a strict block-all device enumeration policy, and blocking legacy SBP-2 device classes.
 
-12. **[REQ-PAW-012 - Enable WDAC Driver Blocklist](#07-paws-README-md-07-paws-enable-wdac-driver-blocklist-md)**
+12. **[REQ-PAW-012 - Enable WDAC Driver Blocklist](#07-paws-enable-wdac-driver-blocklist-md)**
     Enforces the Microsoft Vulnerable Driver Blocklist using Windows Defender Application Control (WDAC) to protect the kernel from Bring Your Own Vulnerable Driver (BYOVD) attacks.
 
-13. **[REQ-PAW-013 - Configure Account and Password Policies for PAWs](#07-paws-README-md-07-paws-configure-account-policies-md)**
+13. **[REQ-PAW-013 - Configure Account and Password Policies for PAWs](#07-paws-configure-account-policies-md)**
     Configures robust local account lockout, local password complexity, and 20-character minimum length policies, and references Active Directory Fine-Grained Password Policies (FGPP) for Tier 0 Administrators.
 
 
@@ -12750,26 +12751,26 @@ This directory contains the physical isolation policies and operating system sec
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-configure-applocker-policies-md"></a>
+<div id="07-paws-configure-applocker-policies-md"></div>
 
-<a id="07-paws-configure-applocker-policies-md-req-paw-001-configure-applocker-policies-for-paws"></a>
+<div id="07-paws-configure-applocker-policies-md-req-paw-001-configure-applocker-policies-for-paws"></div>
 # [REQ-PAW-001] Configure AppLocker Policies for PAWs
 
-<a id="07-paws-configure-applocker-policies-md-target-scope"></a>
+<div id="07-paws-configure-applocker-policies-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
-<a id="07-paws-configure-applocker-policies-md-implementation-details"></a>
+<div id="07-paws-configure-applocker-policies-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Computer Configuration\Policies\Windows Settings\Security Settings\Application Control Policies\AppLocker
 
 ---
 
-<a id="07-paws-configure-applocker-policies-md-rationale"></a>
+<div id="07-paws-configure-applocker-policies-md-rationale"></div>
 ## Rationale
 Privileged Access Workstations (PAWs) host highly sensitive Tier 0 credentials. If administrative workstations are allowed to execute arbitrary binaries, scripts, or installation packages, they become highly susceptible to malware infections, remote access trojans, and credential harvesting tools (like Mimikatz).
 
@@ -12781,7 +12782,7 @@ Enforcing strict execution controls via AppLocker ensures that:
 
 ---
 
-<a id="07-paws-configure-applocker-policies-md-legacy-impact-compatibility"></a>
+<div id="07-paws-configure-applocker-policies-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Authorized Software Only**: Only administrative tools, management consoles, and approved software can be run on the PAW. Users will be unable to run portable utilities or install unapproved tools.
 * **AppLocker Service Requirement**: The Application Identity service (`AppIDSvc`) must be configured to start automatically and run continuously to enforce AppLocker policies. If the service is stopped, rules are not enforced.
@@ -12789,10 +12790,10 @@ Enforcing strict execution controls via AppLocker ensures that:
 
 ---
 
-<a id="07-paws-configure-applocker-policies-md-implementation-steps"></a>
+<div id="07-paws-configure-applocker-policies-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-configure-applocker-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="07-paws-configure-applocker-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -12855,7 +12856,7 @@ Enforcing strict execution controls via AppLocker ensures that:
 
 ---
 
-<a id="07-paws-configure-applocker-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-configure-applocker-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Configure the Application Identity service (`AppIDSvc`) and import the robust AppLocker policy locally.
@@ -13092,7 +13093,7 @@ if (Test-Path $NtvdmPath) {
 
 ---
 
-<a id="07-paws-configure-applocker-policies-md-sources-compliance-references"></a>
+<div id="07-paws-configure-applocker-policies-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R58 (Use of Privileged Access Workstations), DAT-NT-13 Note Technique (R8, R10, R15, R16, R20)
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.9 (AppLocker Application Control)
@@ -13102,19 +13103,19 @@ if (Test-Path $NtvdmPath) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-enable-lsa-protection-md"></a>
+<div id="07-paws-enable-lsa-protection-md"></div>
 
-<a id="07-paws-enable-lsa-protection-md-req-paw-002-enable-lsa-protection-for-paws"></a>
+<div id="07-paws-enable-lsa-protection-md-req-paw-002-enable-lsa-protection-for-paws"></div>
 # [REQ-PAW-002] Enable LSA Protection for PAWs
 
-<a id="07-paws-enable-lsa-protection-md-target-scope"></a>
+<div id="07-paws-enable-lsa-protection-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
-<a id="07-paws-enable-lsa-protection-md-implementation-details"></a>
+<div id="07-paws-enable-lsa-protection-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -13124,7 +13125,7 @@ if (Test-Path $NtvdmPath) {
 
 ---
 
-<a id="07-paws-enable-lsa-protection-md-rationale"></a>
+<div id="07-paws-enable-lsa-protection-md-rationale"></div>
 ## Rationale
 The Local Security Authority Subsystem Service (LSASS) process manages security policies, user authentication, and credential tokens on Windows systems. Attackers targeting administrative workstations commonly attempt to extract plain-text credentials or NT hashes from LSASS memory using debugging tools (e.g., Mimikatz, Procdump).
 
@@ -13135,7 +13136,7 @@ Enabling LSA Protection ensures that:
 
 ---
 
-<a id="07-paws-enable-lsa-protection-md-legacy-impact-compatibility"></a>
+<div id="07-paws-enable-lsa-protection-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Driver Signing**: Any custom authentication packages or third-party smart card drivers that load into LSASS must be digitally signed with a Microsoft signature. Unsigned drivers will be blocked from loading.
 * **Reboot Required**: Enabling or disabling LSA Protection requires a system restart to take effect.
@@ -13143,10 +13144,10 @@ Enabling LSA Protection ensures that:
 
 ---
 
-<a id="07-paws-enable-lsa-protection-md-implementation-steps"></a>
+<div id="07-paws-enable-lsa-protection-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-enable-lsa-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="07-paws-enable-lsa-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -13161,7 +13162,7 @@ Enabling LSA Protection ensures that:
 
 ---
 
-<a id="07-paws-enable-lsa-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-enable-lsa-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Configure the local registry key on the PAW to run LSASS as a protected process.
@@ -13206,7 +13207,7 @@ if ($RunAsPPL -eq 1) {
 
 ---
 
-<a id="07-paws-enable-lsa-protection-md-sources-compliance-references"></a>
+<div id="07-paws-enable-lsa-protection-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Section on administrative workstation protection and LSASS security.
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.2.1 (LSA Protection)
@@ -13215,26 +13216,26 @@ if ($RunAsPPL -eq 1) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-restrict-local-administrators-md"></a>
+<div id="07-paws-restrict-local-administrators-md"></div>
 
-<a id="07-paws-restrict-local-administrators-md-req-paw-003-restrict-local-administrators-group-for-paws"></a>
+<div id="07-paws-restrict-local-administrators-md-req-paw-003-restrict-local-administrators-group-for-paws"></div>
 # [REQ-PAW-003] Restrict Local Administrators Group for PAWs
 
-<a id="07-paws-restrict-local-administrators-md-target-scope"></a>
+<div id="07-paws-restrict-local-administrators-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
-<a id="07-paws-restrict-local-administrators-md-implementation-details"></a>
+<div id="07-paws-restrict-local-administrators-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Computer Configuration\Policies\Windows Settings\Security Settings\Restricted Groups
 
 ---
 
-<a id="07-paws-restrict-local-administrators-md-rationale"></a>
+<div id="07-paws-restrict-local-administrators-md-rationale"></div>
 ## Rationale
 Privileged Access Workstations (PAWs) represent Tier 0 administrative assets. Any user or group that has local administrative rights on a PAW can bypass operating system security boundaries, disable system protections, capture keystrokes, or extract cached credentials.
 
@@ -13245,7 +13246,7 @@ Restricting local Administrators group membership ensures that:
 
 ---
 
-<a id="07-paws-restrict-local-administrators-md-legacy-impact-compatibility"></a>
+<div id="07-paws-restrict-local-administrators-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Daily Work Limitation**: Lower-tier support personnel cannot log on to or troubleshoot the PAW.
 * **Dedicated Administrative Accounts**: Administrators must authenticate using their dedicated Tier 0 administrative account (e.g., `a0-admin`). Standard accounts are blocked from gaining administrative access.
@@ -13253,10 +13254,10 @@ Restricting local Administrators group membership ensures that:
 
 ---
 
-<a id="07-paws-restrict-local-administrators-md-implementation-steps"></a>
+<div id="07-paws-restrict-local-administrators-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-restrict-local-administrators-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="07-paws-restrict-local-administrators-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 Deploy Restricted Groups via GPO to enforce local administrators group memberships:
@@ -13274,7 +13275,7 @@ Deploy Restricted Groups via GPO to enforce local administrators group membershi
 
 ---
 
-<a id="07-paws-restrict-local-administrators-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-restrict-local-administrators-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to audit and remediate unauthorized administrative accounts in the local Administrators group.
@@ -13359,7 +13360,7 @@ if ($LocalAdmins) {
 
 ---
 
-<a id="07-paws-restrict-local-administrators-md-sources-compliance-references"></a>
+<div id="07-paws-restrict-local-administrators-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations on administrative isolation and local admin restriction.
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 5.5 (Ensure only authorized accounts are members of the Administrators group)
@@ -13368,19 +13369,19 @@ if ($LocalAdmins) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-enable-bitlocker-md"></a>
+<div id="07-paws-enable-bitlocker-md"></div>
 
-<a id="07-paws-enable-bitlocker-md-req-paw-004-enforce-bitlocker-with-tpm-and-startup-pin-for-paws"></a>
+<div id="07-paws-enable-bitlocker-md-req-paw-004-enforce-bitlocker-with-tpm-and-startup-pin-for-paws"></div>
 # [REQ-PAW-004] Enforce BitLocker with TPM and Startup PIN for PAWs
 
-<a id="07-paws-enable-bitlocker-md-target-scope"></a>
+<div id="07-paws-enable-bitlocker-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 0 Privileged Access Workstations (PAWs).
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
-<a id="07-paws-enable-bitlocker-md-implementation-details"></a>
+<div id="07-paws-enable-bitlocker-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -13394,7 +13395,7 @@ if ($LocalAdmins) {
 
 ---
 
-<a id="07-paws-enable-bitlocker-md-rationale"></a>
+<div id="07-paws-enable-bitlocker-md-rationale"></div>
 ## Rationale
 Privileged Access Workstations (PAWs) serve as the secure root of trust for administering Tier 0 Active Directory resources. Because these devices are physical endpoints, they are susceptible to theft, loss, and unauthorized physical access. 
 
@@ -13407,7 +13408,7 @@ To achieve maximum protection, the PAW BitLocker configuration enforces a signif
 
 ---
 
-<a id="07-paws-enable-bitlocker-md-legacy-impact-compatibility"></a>
+<div id="07-paws-enable-bitlocker-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Administrator Overhead**: PAW administrators must enter the Startup PIN on every boot and every resume from hibernation.
 * **Hibernation Support**: Hardware must support hibernation, and it must be enabled on the operating system (`powercfg /h on`).
@@ -13416,13 +13417,13 @@ To achieve maximum protection, the PAW BitLocker configuration enforces a signif
 
 ---
 
-<a id="07-paws-enable-bitlocker-md-implementation-steps"></a>
+<div id="07-paws-enable-bitlocker-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-enable-bitlocker-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="07-paws-enable-bitlocker-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="07-paws-enable-bitlocker-md-step-1-enforce-bitlocker-encryption-strength"></a>
+<div id="07-paws-enable-bitlocker-md-step-1-enforce-bitlocker-encryption-strength"></div>
 #### Step 1: Enforce BitLocker Encryption Strength
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit the GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
@@ -13433,7 +13434,7 @@ To achieve maximum protection, the PAW BitLocker configuration enforces a signif
    * **Setting**: `Enabled`
    * **Select the encryption method**: `XTS-AES 256-bit` (for Operating System drives)
 
-<a id="07-paws-enable-bitlocker-md-step-2-enforce-tpm-startup-pin-and-enhanced-pin-policies"></a>
+<div id="07-paws-enable-bitlocker-md-step-2-enforce-tpm-startup-pin-and-enhanced-pin-policies"></div>
 #### Step 2: Enforce TPM + Startup PIN and Enhanced PIN Policies
 1. In the same GPO, navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption\Operating System Drives`
@@ -13452,7 +13453,7 @@ To achieve maximum protection, the PAW BitLocker configuration enforces a signif
    * **Setting**: `Enabled`
    * **Minimum characters**: `8` (or higher depending on local organizational policy)
 
-<a id="07-paws-enable-bitlocker-md-step-3-configure-active-directory-backup-and-key-rotation"></a>
+<div id="07-paws-enable-bitlocker-md-step-3-configure-active-directory-backup-and-key-rotation"></div>
 #### Step 3: Configure Active Directory Backup and Key Rotation
 1. In the same OS Drives folder, configure the following settings:
    * **Policy**: `Choose how BitLocker-protected operating system drives can be recovered`
@@ -13466,7 +13467,7 @@ To achieve maximum protection, the PAW BitLocker configuration enforces a signif
    * **Setting**: `Enabled`
    * **Rotation options**: `Must rotate the recovery password for OS drives and fixed data drives`
 
-<a id="07-paws-enable-bitlocker-md-step-4-disable-sleepstandby-states-s1-s3"></a>
+<div id="07-paws-enable-bitlocker-md-step-4-disable-sleepstandby-states-s1-s3"></div>
 #### Step 4: Disable Sleep/Standby States (S1-S3)
 1. In the GPO, navigate to:
    `Computer Configuration\Administrative Templates\System\Power Management\Sleep Settings`
@@ -13476,7 +13477,7 @@ To achieve maximum protection, the PAW BitLocker configuration enforces a signif
    * **Policy**: `Allow standby states (S1-S3) when sleeping (on battery)`
    * **Setting**: `Disabled`
 
-<a id="07-paws-enable-bitlocker-md-step-5-enable-kernel-dma-protection"></a>
+<div id="07-paws-enable-bitlocker-md-step-5-enable-kernel-dma-protection"></div>
 #### Step 5: Enable Kernel DMA Protection
 1. In the GPO, navigate to:
    `Computer Configuration\Administrative Templates\System\Kernel DMA Protection`
@@ -13486,7 +13487,7 @@ To achieve maximum protection, the PAW BitLocker configuration enforces a signif
 
 ---
 
-<a id="07-paws-enable-bitlocker-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-enable-bitlocker-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally on the PAW to apply registry configuration baselines and enable BitLocker.
@@ -13618,7 +13619,7 @@ if ($DmaVal -and $DmaVal.DeviceEnumerationPolicy -eq 0) {
 
 ---
 
-<a id="07-paws-enable-bitlocker-md-sources-compliance-references"></a>
+<div id="07-paws-enable-bitlocker-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R58 (Use of Privileged Access Workstations), Recommendation R9 (LAPS context for BitLocker recovery keys protection).
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.2.1.1 (Require additional authentication at startup), Section 18.2.1.2 (Configure use of enhanced PINs for startup), Section 18.2.1.3 (Configure minimum PIN length for startup), Section 18.2.1.4 (Configure recovery password rotation).
@@ -13627,26 +13628,26 @@ if ($DmaVal -and $DmaVal.DeviceEnumerationPolicy -eq 0) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-configure-uefi-security-md"></a>
+<div id="07-paws-configure-uefi-security-md"></div>
 
-<a id="07-paws-configure-uefi-security-md-req-paw-005-uefi-firmware-security-hardening"></a>
+<div id="07-paws-configure-uefi-security-md-req-paw-005-uefi-firmware-security-hardening"></div>
 # [REQ-PAW-005] UEFI Firmware Security Hardening
 
-<a id="07-paws-configure-uefi-security-md-target-scope"></a>
+<div id="07-paws-configure-uefi-security-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
-<a id="07-paws-configure-uefi-security-md-implementation-details"></a>
+<div id="07-paws-configure-uefi-security-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Hardware/UEFI Firmware Configuration Menu
 
 ---
 
-<a id="07-paws-configure-uefi-security-md-rationale"></a>
+<div id="07-paws-configure-uefi-security-md-rationale"></div>
 ## Rationale
 Privileged Access Workstations (PAWs) form the administrative root of trust for the Active Directory forest. If an attacker gains physical access to a PAW, they can attempt to compromise the operating system offline, bypass disk encryption, or load malicious code prior to the OS boot phase.
 
@@ -13660,7 +13661,7 @@ Securing the firmware level ensures:
 
 ---
 
-<a id="07-paws-configure-uefi-security-md-legacy-impact-compatibility"></a>
+<div id="07-paws-configure-uefi-security-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Administrative Overhead**: Technicians must enter the UEFI administrator password to make hardware changes or perform local diagnostics. This password must be securely generated and stored in a central, encrypted vault.
 * **Legacy OS Incompatibility**: Operating systems or recovery environments that do not support native UEFI boot will fail to start. This is acceptable as PAWs must only run modern, authorized Windows Enterprise installations.
@@ -13668,10 +13669,10 @@ Securing the firmware level ensures:
 
 ---
 
-<a id="07-paws-configure-uefi-security-md-implementation-steps"></a>
+<div id="07-paws-configure-uefi-security-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-configure-uefi-security-md-option-a-manual-uefi-firmware-configuration-preferred"></a>
+<div id="07-paws-configure-uefi-security-md-option-a-manual-uefi-firmware-configuration-preferred"></div>
 ### Option A: Manual UEFI Firmware Configuration (Preferred)
 
 UEFI settings must be configured directly within the hardware platform firmware interface during system startup.
@@ -13704,7 +13705,7 @@ UEFI settings must be configured directly within the hardware platform firmware 
 
 ---
 
-<a id="07-paws-configure-uefi-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-configure-uefi-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Since firmware password and boot order configurations are set at the hardware level, they cannot be directly configured from within the Windows operating system. However, the system's UEFI boot environment and BIOS specifications must be programmatically audited.
@@ -13761,7 +13762,7 @@ if ($BiosDetails) {
 
 ---
 
-<a id="07-paws-configure-uefi-security-md-sources-compliance-references"></a>
+<div id="07-paws-configure-uefi-security-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R58 (Use of Privileged Access Workstations)
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8 (Device Guard/VBS prerequisites)
@@ -13770,19 +13771,19 @@ if ($BiosDetails) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md"></a>
+<div id="07-paws-enable-hardware-virtualization-and-dma-protection-md"></div>
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-req-paw-006-enable-hardware-virtualization-and-dma-protection"></a>
+<div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-req-paw-006-enable-hardware-virtualization-and-dma-protection"></div>
 # [REQ-PAW-006] Enable Hardware Virtualization and DMA Protection
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-target-scope"></a>
+<div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-implementation-details"></a>
+<div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -13791,7 +13792,7 @@ if ($BiosDetails) {
 
 ---
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-rationale"></a>
+<div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-rationale"></div>
 ## Rationale
 Virtualization-Based Security (VBS) and Windows Defender Credential Guard isolate sensitive security processes (like LSA) inside a hardware-virtualized container to prevent memory dumping and credential harvesting. However, these OS-level security boundaries are entirely reliant on hardware-level protections.
 
@@ -13802,7 +13803,7 @@ Enabling hardware virtualization and DMA protection guarantees:
 
 ---
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-legacy-impact-compatibility"></a>
+<div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Hardware Baseline**: Systems must support CPU virtualization, Second Level Address Translation (SLAT), and input-output memory management (IOMMU). Unsupported hardware will prevent VBS and Credential Guard from initiating.
 * **Peripheral Compatibility**: Older or non-certified Thunderbolt/PCIe devices that do not support DMA-remapping (DMA routing checks) may be blocked from functioning when Kernel DMA Protection is active. This is acceptable for a PAW, where external hardware connections must be strictly restricted.
@@ -13810,10 +13811,10 @@ Enabling hardware virtualization and DMA protection guarantees:
 
 ---
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-implementation-steps"></a>
+<div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 To enforce Kernel DMA Protection across the PAW infrastructure, implement the following GPO settings:
@@ -13831,12 +13832,12 @@ To enforce Kernel DMA Protection across the PAW infrastructure, implement the fo
 
 ---
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Configure local registry keys to enforce Kernel DMA Protection and programmatically audit the hardware security baseline.
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-1-local-remediation-enforce-kernel-dma-protection"></a>
+<div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-1-local-remediation-enforce-kernel-dma-protection"></div>
 #### 1. Local Remediation (Enforce Kernel DMA Protection)
 
 Run the following script to enforce the DMA Protection policy locally:
@@ -13859,7 +13860,7 @@ Set-ItemProperty -Path $RegPath -Name "DeviceEnumerationPolicy" -Value 0 -Type D
 Write-Host "Status: Kernel DMA Protection registry configuration applied." -ForegroundColor Green
 ```
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-2-local-audit-tpm-virtualization-and-dma-support"></a>
+<div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-2-local-audit-tpm-virtualization-and-dma-support"></div>
 #### 2. Local Audit (TPM, Virtualization, and DMA Support)
 
 Run the following script to audit the status of the required hardware security components:
@@ -13923,7 +13924,7 @@ try {
 
 ---
 
-<a id="07-paws-enable-hardware-virtualization-and-dma-protection-md-sources-compliance-references"></a>
+<div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R58 (Use of Privileged Access Workstations)
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.19.1 (Configure Enable Kernel DMA Protection), Section 18.8.14.1 (Turn On Virtualization Based Security)
@@ -13932,19 +13933,19 @@ try {
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-disable-wpbt-md"></a>
+<div id="07-paws-disable-wpbt-md"></div>
 
-<a id="07-paws-disable-wpbt-md-req-paw-007-disable-windows-platform-binary-table-wpbt"></a>
+<div id="07-paws-disable-wpbt-md-req-paw-007-disable-windows-platform-binary-table-wpbt"></div>
 # [REQ-PAW-007] Disable Windows Platform Binary Table (WPBT)
 
-<a id="07-paws-disable-wpbt-md-target-scope"></a>
+<div id="07-paws-disable-wpbt-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
-<a id="07-paws-disable-wpbt-md-implementation-details"></a>
+<div id="07-paws-disable-wpbt-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
@@ -13953,7 +13954,7 @@ try {
 
 ---
 
-<a id="07-paws-disable-wpbt-md-rationale"></a>
+<div id="07-paws-disable-wpbt-md-rationale"></div>
 ## Rationale
 The Windows Platform Binary Table (WPBT) is an ACPI firmware table that allows hardware manufacturers (OEMs) to execute proprietary binaries in kernel space during the Windows boot phase. Windows automatically extracts the binary from the table and runs it with system privileges before security software, third-party agents, or standard driver verifications are fully initialized.
 
@@ -13966,17 +13967,17 @@ Disabling WPBT execution prevents Windows from parsing the ACPI table and runnin
 
 ---
 
-<a id="07-paws-disable-wpbt-md-legacy-impact-compatibility"></a>
+<div id="07-paws-disable-wpbt-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **OEM Software Functionality**: Disabling the WPBT will stop manufacturer-embedded software (such as automated support assistants, system registration tools, or OEM-specific recovery software) from installing on a fresh OS deployment. System installation pipelines must manually deploy any validated, business-essential hardware utility packages rather than relying on automatic firmware injection.
 * **Deployment Timing**: The registry setting `DisableWpbtExecution` must be present prior to the initial Windows boot sequence to completely block WPBT payload execution on a newly installed OS. Applying the registry key via GPO will prevent subsequent runs or updates but will not retroactively clean up files that were already executed during the initial setup. For maximum protection, this registry modification should be integrated directly into reference installation media (e.g., via `autounattend.xml` or custom WIM injection).
 
 ---
 
-<a id="07-paws-disable-wpbt-md-implementation-steps"></a>
+<div id="07-paws-disable-wpbt-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-disable-wpbt-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="07-paws-disable-wpbt-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 Because there is no default ADMX administrative template to manage WPBT execution, the setting must be configured as a Registry Preference under the PAW policy:
@@ -13997,7 +13998,7 @@ Because there is no default ADMX administrative template to manage WPBT executio
 
 ---
 
-<a id="07-paws-disable-wpbt-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-disable-wpbt-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following script to configure the registry setting locally on the system:
@@ -14051,7 +14052,7 @@ if ($RegistryValue) {
 
 ---
 
-<a id="07-paws-disable-wpbt-md-sources-compliance-references"></a>
+<div id="07-paws-disable-wpbt-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
 * **Microsoft Windows Security**: Device Guard and UEFI Platform Security guidelines.
@@ -14059,19 +14060,19 @@ if ($RegistryValue) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-defender-antivirus-md"></a>
+<div id="07-paws-defender-antivirus-md"></div>
 
-<a id="07-paws-defender-antivirus-md-req-paw-008-windows-defender-antivirus-paw-baseline-and-exploit-guard"></a>
+<div id="07-paws-defender-antivirus-md-req-paw-008-windows-defender-antivirus-paw-baseline-and-exploit-guard"></div>
 # [REQ-PAW-008] Windows Defender Antivirus PAW Baseline and Exploit Guard
 
-<a id="07-paws-defender-antivirus-md-target-scope"></a>
+<div id="07-paws-defender-antivirus-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
-<a id="07-paws-defender-antivirus-md-implementation-details"></a>
+<div id="07-paws-defender-antivirus-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -14086,7 +14087,7 @@ if ($RegistryValue) {
 
 ---
 
-<a id="07-paws-defender-antivirus-md-rationale"></a>
+<div id="07-paws-defender-antivirus-md-rationale"></div>
 ## Rationale
 Privileged Access Workstations (PAWs) represent the highest security boundary on the endpoint layer, serving as isolated systems dedicated solely to Tier 0 directory administration. If a PAW is compromised, the entire AD forest is compromised. Therefore, the built-in antimalware and exploit prevention controls must be hardened to their absolute maximum threshold.
 
@@ -14097,17 +14098,17 @@ This control introduces a highly restrictive protective barrier on PAWs:
 
 ---
 
-<a id="07-paws-defender-antivirus-md-legacy-impact-compatibility"></a>
+<div id="07-paws-defender-antivirus-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Administrative Operations**: Enabling the WMI/PSExec block rule means administrative scripts must be run locally or orchestrated via secure WinRM endpoints. Traditional PSExec commands from remote management consoles will be blocked, enforcing proper tier-isolated remote administration.
 * **Execution Restrictions**: Since productivity suites (e.g., Office, Outlook) are strictly banned from PAWs, ASR rules targeting Microsoft Office applications are enforced as a defensive measure to prevent shadow installations or bypasses.
 
 ---
 
-<a id="07-paws-defender-antivirus-md-implementation-steps"></a>
+<div id="07-paws-defender-antivirus-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-defender-antivirus-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="07-paws-defender-antivirus-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -14257,7 +14258,7 @@ This control introduces a highly restrictive protective barrier on PAWs:
 
 ---
 
-<a id="07-paws-defender-antivirus-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-defender-antivirus-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally on the PAW to configure Windows Defender baseline, ASR rules, Tamper Protection, and Sandbox execution.
@@ -14567,7 +14568,7 @@ foreach ($KeyName in $CheckKeys.Keys) {
 
 ---
 
-<a id="07-paws-defender-antivirus-md-sources-compliance-references"></a>
+<div id="07-paws-defender-antivirus-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.9.47 (Exclusions restrictions), Section 18.9.30 (ASR Rules), Section 18.9.47.11 (Real-time protection)
 * **ANSSI Active Directory Hardening Guide**: Recommendations regarding administrative workstation isolation and endpoint agent security
@@ -14576,19 +14577,19 @@ foreach ($KeyName in $CheckKeys.Keys) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-configure-user-rights-assignments-md"></a>
+<div id="07-paws-configure-user-rights-assignments-md"></div>
 
-<a id="07-paws-configure-user-rights-assignments-md-req-paw-009-configure-user-rights-assignments-for-paws"></a>
+<div id="07-paws-configure-user-rights-assignments-md-req-paw-009-configure-user-rights-assignments-for-paws"></div>
 # [REQ-PAW-009] Configure User Rights Assignments for PAWs
 
-<a id="07-paws-configure-user-rights-assignments-md-target-scope"></a>
+<div id="07-paws-configure-user-rights-assignments-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
-<a id="07-paws-configure-user-rights-assignments-md-implementation-details"></a>
+<div id="07-paws-configure-user-rights-assignments-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -14597,7 +14598,7 @@ foreach ($KeyName in $CheckKeys.Keys) {
 
 ---
 
-<a id="07-paws-configure-user-rights-assignments-md-rationale"></a>
+<div id="07-paws-configure-user-rights-assignments-md-rationale"></div>
 ## Rationale
 Privileged Access Workstations (PAWs) host the most sensitive credentials in the enterprise. To prevent credential theft, session hijacking, or administrative privilege escalation, User Rights Assignments (URAs) must be hardened to the highest standard:
 
@@ -14607,17 +14608,17 @@ Privileged Access Workstations (PAWs) host the most sensitive credentials in the
 
 ---
 
-<a id="07-paws-configure-user-rights-assignments-md-legacy-impact-compatibility"></a>
+<div id="07-paws-configure-user-rights-assignments-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Dedicated Admin Accounts Required**: Administrators must use dedicated Tier 0 administrative accounts to authenticate to the console of a PAW. Standard domain user accounts will be blocked from logging on.
 * **Management Overhead**: Service mappings must be verified. All operations on PAWs must execute under the local Administrator or authorized administrative accounts.
 
 ---
 
-<a id="07-paws-configure-user-rights-assignments-md-implementation-steps"></a>
+<div id="07-paws-configure-user-rights-assignments-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-configure-user-rights-assignments-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="07-paws-configure-user-rights-assignments-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -14654,7 +14655,7 @@ Privileged Access Workstations (PAWs) host the most sensitive credentials in the
 
 ---
 
-<a id="07-paws-configure-user-rights-assignments-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-configure-user-rights-assignments-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Configure User Rights Assignments locally on the PAW using `secedit.exe` and PowerShell.
@@ -14844,7 +14845,7 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 ---
 
-<a id="07-paws-configure-user-rights-assignments-md-sources-compliance-references"></a>
+<div id="07-paws-configure-user-rights-assignments-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 2.2 (User Rights Assignment)
 * **ANSSI AD Hardening Guide**: Recommendations on administrative workstation isolation and URA restrictions
@@ -14852,19 +14853,19 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-enable-vbs-credential-guard-md"></a>
+<div id="07-paws-enable-vbs-credential-guard-md"></div>
 
-<a id="07-paws-enable-vbs-credential-guard-md-req-paw-010-enable-vbs-and-credential-guard-for-paws"></a>
+<div id="07-paws-enable-vbs-credential-guard-md-req-paw-010-enable-vbs-and-credential-guard-for-paws"></div>
 # [REQ-PAW-010] Enable VBS and Credential Guard for PAWs
 
-<a id="07-paws-enable-vbs-credential-guard-md-target-scope"></a>
+<div id="07-paws-enable-vbs-credential-guard-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
-<a id="07-paws-enable-vbs-credential-guard-md-implementation-details"></a>
+<div id="07-paws-enable-vbs-credential-guard-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -14879,7 +14880,7 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 ---
 
-<a id="07-paws-enable-vbs-credential-guard-md-rationale"></a>
+<div id="07-paws-enable-vbs-credential-guard-md-rationale"></div>
 ## Rationale
 Privileged Access Workstations (PAWs) contain Tier 0 administrative tokens. A compromise of a PAW leads to a direct compromise of the Active Directory database (NTDS.dit) and full domain domain control. Mitigating credential dumping is the single most critical security objective for a PAW.
 
@@ -14890,17 +14891,17 @@ Privileged Access Workstations (PAWs) contain Tier 0 administrative tokens. A co
 
 ---
 
-<a id="07-paws-enable-vbs-credential-guard-md-legacy-impact-compatibility"></a>
+<div id="07-paws-enable-vbs-credential-guard-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Firmware Requirements**: PAWs must use modern UEFI firmware, native UEFI boot (Legacy CSM disabled), Secure Boot, IOMMU (Intel VT-d or AMD-Vi), CPU Virtualization (Intel VT-x or AMD-V), and TPM 2.0. Enabling Secure Boot and virtualization functions is a strict pre-requisite. Refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-enable-vbs-credential-guard-md-07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-vbs-credential-guard-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) to secure these features in the firmware. If physical hardware does not meet these criteria, it is unfit for use as a PAW.
+* **Firmware Requirements**: PAWs must use modern UEFI firmware, native UEFI boot (Legacy CSM disabled), Secure Boot, IOMMU (Intel VT-d or AMD-Vi), CPU Virtualization (Intel VT-x or AMD-V), and TPM 2.0. Enabling Secure Boot and virtualization functions is a strict pre-requisite. Refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-hardware-virtualization-and-dma-protection-md) to secure these features in the firmware. If physical hardware does not meet these criteria, it is unfit for use as a PAW.
 * **Hypervisor Conflicts**: Standard Windows virtualization layers will be required. Running non-compliant third-party hypervisors (such as older VirtualBox or VMware Workstation configurations) that do not support nested virtualization on Hyper-V will fail.
 
 ---
 
-<a id="07-paws-enable-vbs-credential-guard-md-implementation-steps"></a>
+<div id="07-paws-enable-vbs-credential-guard-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-enable-vbs-credential-guard-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="07-paws-enable-vbs-credential-guard-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -14919,7 +14920,7 @@ Privileged Access Workstations (PAWs) contain Tier 0 administrative tokens. A co
 
 ---
 
-<a id="07-paws-enable-vbs-credential-guard-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-enable-vbs-credential-guard-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Configure the local registry parameters to activate VBS, Credential Guard, and Secure Launch.
@@ -14994,7 +14995,7 @@ try {
 
 ---
 
-<a id="07-paws-enable-vbs-credential-guard-md-sources-compliance-references"></a>
+<div id="07-paws-enable-vbs-credential-guard-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.14.1 (Turn On Virtualization Based Security), Section 18.8.14.2 (Turn On Virtualization Based Security: Credential Guard Configuration)
 * **ANSSI AD Hardening Guide**: Recommendations regarding administrative workstation isolation and credential protections.
@@ -15002,19 +15003,19 @@ try {
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-harden-dma-and-physical-security-md"></a>
+<div id="07-paws-harden-dma-and-physical-security-md"></div>
 
-<a id="07-paws-harden-dma-and-physical-security-md-req-paw-011-harden-dma-and-physical-security-for-paws"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-req-paw-011-harden-dma-and-physical-security-for-paws"></div>
 # [REQ-PAW-011] Harden DMA and Physical Security for PAWs
 
-<a id="07-paws-harden-dma-and-physical-security-md-target-scope"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
-<a id="07-paws-harden-dma-and-physical-security-md-implementation-details"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Paths / Registry Locations**:
@@ -15041,7 +15042,7 @@ try {
 
 ---
 
-<a id="07-paws-harden-dma-and-physical-security-md-rationale"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-rationale"></div>
 ## Rationale
 Privileged Access Workstations (PAWs) represent Tier 0 boundary systems. Because they handle the highest levels of domain authorization, physical threat vectors must be mitigated to the absolute maximum threshold:
 
@@ -15054,7 +15055,7 @@ Privileged Access Workstations (PAWs) represent Tier 0 boundary systems. Because
 
 ---
 
-<a id="07-paws-harden-dma-and-physical-security-md-legacy-impact-compatibility"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Standby and Resume**: Standby states (S1-S3) are disabled. PAWs will hibernate when closed or idle. Session restoration will require a full TPM check and secure boot validation, which adds a brief delay during startup.
 * **External Device Blocking**: External devices requiring DMA (e.g., external GPUs, specialized expansion boxes, or legacy docks) are permanently blocked. Administrators must use native motherboard ports and authorized docks.
@@ -15062,17 +15063,17 @@ Privileged Access Workstations (PAWs) represent Tier 0 boundary systems. Because
 
 ---
 
-<a id="07-paws-harden-dma-and-physical-security-md-implementation-steps"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-harden-dma-and-physical-security-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit the PAW GPO (e.g., `GPO_Hardening_PAW`).
 3. Configure the following settings:
 
-<a id="07-paws-harden-dma-and-physical-security-md-1-power-management-disable-standby"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-1-power-management-disable-standby"></div>
 #### 1. Power Management (Disable Standby)
 Navigate to:
 `Computer Configuration\Administrative Templates\System\Power Management\Sleep Settings`
@@ -15081,7 +15082,7 @@ Navigate to:
 * **Policy**: `Require a password when a computer wakes (plugged in)` -> **Enabled**
 * **Policy**: `Require a password when a computer wakes (on battery)` -> **Enabled**
 
-<a id="07-paws-harden-dma-and-physical-security-md-2-bitlocker-removable-storage-dma"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-2-bitlocker-removable-storage-dma"></div>
 #### 2. BitLocker Removable Storage & DMA
 Navigate to:
 `Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption`
@@ -15092,7 +15093,7 @@ Navigate to:
 * **Policy**: `Deny write access to removable drives not protected by BitLocker` -> **Enabled**
   * Check **Do not allow write access to devices configured in another organization** -> **Disabled** (value 0 / False)
 
-<a id="07-paws-harden-dma-and-physical-security-md-3-device-installation-restrictions-block-sbp-2-setup-class"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-3-device-installation-restrictions-block-sbp-2-setup-class"></div>
 #### 3. Device Installation Restrictions (Block SBP-2 Setup Class)
 Navigate to:
 `Computer Configuration\Administrative Templates\System\Device Installation\Device Installation Restrictions`
@@ -15100,7 +15101,7 @@ Navigate to:
   * Click **Show...** and enter: `{d48179be-ec20-11d1-b6b8-00c04fa372a7}`
   * Check **Also apply to matching devices that are already installed** -> **Enabled** (value 1 / True)
 
-<a id="07-paws-harden-dma-and-physical-security-md-4-kernel-dma-protection-block-all"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-4-kernel-dma-protection-block-all"></div>
 #### 4. Kernel DMA Protection (Block All)
 Navigate to:
 `Computer Configuration\Administrative Templates\System\Kernel DMA Protection`
@@ -15109,7 +15110,7 @@ Navigate to:
 
 ---
 
-<a id="07-paws-harden-dma-and-physical-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally on the PAW to apply DMA, Sleep, and BitLocker USB registry parameters.
@@ -15244,7 +15245,7 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block
 
 ---
 
-<a id="07-paws-harden-dma-and-physical-security-md-sources-compliance-references"></a>
+<div id="07-paws-harden-dma-and-physical-security-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.2.1 (BitLocker settings), Section 18.8.19.1 (Kernel DMA Protection), Section 18.8.21.3 (Device Installation restrictions)
 * **ANSSI AD Hardening Guide**: Recommendations on storage encryption and hardware interface security for administrative workstations
@@ -15252,19 +15253,19 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-enable-wdac-driver-blocklist-md"></a>
+<div id="07-paws-enable-wdac-driver-blocklist-md"></div>
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-req-paw-012-enable-wdac-driver-blocklist"></a>
+<div id="07-paws-enable-wdac-driver-blocklist-md-req-paw-012-enable-wdac-driver-blocklist"></div>
 # [REQ-PAW-012] Enable WDAC Driver Blocklist
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-target-scope"></a>
+<div id="07-paws-enable-wdac-driver-blocklist-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs)
 * **Operating Systems**: Windows 10, Windows 11 (Enterprise and Professional editions)
 
 ---
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-implementation-details"></a>
+<div id="07-paws-enable-wdac-driver-blocklist-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -15273,7 +15274,7 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block
 
 ---
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-rationale"></a>
+<div id="07-paws-enable-wdac-driver-blocklist-md-rationale"></div>
 ## Rationale
 Attackers frequently employ "Bring Your Own Vulnerable Driver" (BYOVD) attacks to bypass Windows kernel protections on high-value administrative assets like Privileged Access Workstations (PAWs). In a BYOVD attack, an adversary with administrative privileges installs a legitimate, cryptographically signed third-party driver that contains a known, exploitable vulnerability. The attacker then exploits this vulnerability to execute arbitrary code with kernel privileges, allowing them to disable security agents, dump LSASS memory, or tamper with system integrity.
 
@@ -15281,18 +15282,18 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
 
 ---
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-legacy-impact-compatibility"></a>
+<div id="07-paws-enable-wdac-driver-blocklist-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#07-paws-enable-wdac-driver-blocklist-md-07-paws-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-enable-wdac-driver-blocklist-md-07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-wdac-driver-blocklist-md-07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware configuration.
+* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#07-paws-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware configuration.
 * **Compatibility with Legacy Drivers**: Third-party backup, monitoring, or hardware administration software running deprecated, vulnerable drivers may fail to load. All such software must be updated to use secure, modern drivers.
 * **Deployment Testing**: To prevent system instability, the WDAC blocklist policy should be deployed in **Audit Mode** initially to verify that no critical operational drivers are blocked in production before shifting to enforcement mode.
 
 ---
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-implementation-steps"></a>
+<div id="07-paws-enable-wdac-driver-blocklist-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="07-paws-enable-wdac-driver-blocklist-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 To enforce the driver blocklist across all PAWs, you can deploy the Microsoft recommended block rules as a custom WDAC policy.
@@ -15321,7 +15322,7 @@ ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\DriverBlocklist.xml" -BinaryFilePath 
 
 ---
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-enable-wdac-driver-blocklist-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to enable the Vulnerable Driver Blocklist registry key and ensure proper configuration.
@@ -15415,7 +15416,7 @@ if ($Vulnerable) {
 
 ---
 
-<a id="07-paws-enable-wdac-driver-blocklist-md-sources-compliance-references"></a>
+<div id="07-paws-enable-wdac-driver-blocklist-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI Active Directory Hardening Guide**: Recommendations on system component code integrity and driver signature enforcement.
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.14.3 / 18.9.31.2 (Deploy Windows Defender Application Control / Memory Integrity).
@@ -15424,19 +15425,19 @@ if ($Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="07-paws-configure-account-policies-md"></a>
+<div id="07-paws-configure-account-policies-md"></div>
 
-<a id="07-paws-configure-account-policies-md-req-paw-013-configure-account-and-password-policies-for-paws"></a>
+<div id="07-paws-configure-account-policies-md-req-paw-013-configure-account-and-password-policies-for-paws"></div>
 # [REQ-PAW-013] Configure Account and Password Policies for PAWs
 
-<a id="07-paws-configure-account-policies-md-target-scope"></a>
+<div id="07-paws-configure-account-policies-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
 * **Operating Systems**: Windows 10/11 Enterprise
 
 ---
 
-<a id="07-paws-configure-account-policies-md-implementation-details"></a>
+<div id="07-paws-configure-account-policies-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Paths / Registry Locations**:
@@ -15496,7 +15497,7 @@ if ($Vulnerable) {
 
 ---
 
-<a id="07-paws-configure-account-policies-md-rationale"></a>
+<div id="07-paws-configure-account-policies-md-rationale"></div>
 ## Rationale
 Securing authentication parameters and account controls reduces the risk of password attacks and session hijackings on high-value administrative endpoints:
 
@@ -15509,11 +15510,11 @@ Securing authentication parameters and account controls reduces the risk of pass
 7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
 8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
 9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, and requiring NTLMv2 and 128-bit encryption block legacy protocol exploitation.
-10. **Fine-Grained Password Policies (FGPP)**: While local accounts are secured on the machine, the Active Directory user accounts of the Tier 0 Administrators who logon to these PAWs must also be protected by a domain-level Fine-Grained Password Policy (FGPP / PSO) of at least 20 characters, as configured in [REQ-ID-001 - Enforce Fine-Grained Password Policies](#07-paws-configure-account-policies-md-03-identities-services-enforce-fgpp-md).
+10. **Fine-Grained Password Policies (FGPP)**: While local accounts are secured on the machine, the Active Directory user accounts of the Tier 0 Administrators who logon to these PAWs must also be protected by a domain-level Fine-Grained Password Policy (FGPP / PSO) of at least 20 characters, as configured in [REQ-ID-001 - Enforce Fine-Grained Password Policies](#03-identities-services-enforce-fgpp-md).
 
 ---
 
-<a id="07-paws-configure-account-policies-md-legacy-impact-compatibility"></a>
+<div id="07-paws-configure-account-policies-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Account Lockouts**: Legitimate administrators who forget their passwords may lock themselves out. Standard procedures must exist for administrative reset of locked accounts by another Tier 0 administrator.
 * **Smart Card Removal**: Administrators must be trained to carry their smart cards with them, which automatically locks the session. Re-authenticating requires inserting the card and entering the PIN.
@@ -15523,13 +15524,13 @@ Securing authentication parameters and account controls reduces the risk of pass
 
 ---
 
-<a id="07-paws-configure-account-policies-md-implementation-steps"></a>
+<div id="07-paws-configure-account-policies-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="07-paws-configure-account-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="07-paws-configure-account-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="07-paws-configure-account-policies-md-step-1-configure-lockout-and-password-policies-domain-wide-or-paw-gpo"></a>
+<div id="07-paws-configure-account-policies-md-step-1-configure-lockout-and-password-policies-domain-wide-or-paw-gpo"></div>
 #### Step 1: Configure Lockout and Password Policies (Domain-wide or PAW GPO)
 These settings must be configured in a dedicated GPO linked to the PAW Organizational Unit (OU) (e.g., `GPO_Hardening_PAWs`):
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -15549,7 +15550,7 @@ These settings must be configured in a dedicated GPO linked to the PAW Organizat
      * **Password must meet complexity requirements**: `Enabled`
      * **Store passwords using reversible encryption**: `Disabled`
 
-<a id="07-paws-configure-account-policies-md-step-2-configure-local-security-options"></a>
+<div id="07-paws-configure-account-policies-md-step-2-configure-local-security-options"></div>
 #### Step 2: Configure Local Security Options
 In the PAW GPO, navigate to:
 `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
@@ -15562,7 +15563,7 @@ In the PAW GPO, navigate to:
 * **Policy**: `Network access: Allow anonymous SID/Name translation` -> Set to **Disabled** (value 0)
 * **Policy**: `Network security: Allow LocalSystem NULL session fallback` -> Set to **Disabled** (value 0)
 
-<a id="07-paws-configure-account-policies-md-step-3-configure-hello-for-business-pin-and-microsoft-account-policies"></a>
+<div id="07-paws-configure-account-policies-md-step-3-configure-hello-for-business-pin-and-microsoft-account-policies"></div>
 #### Step 3: Configure Hello for Business, PIN and Microsoft Account Policies
 Navigate to:
 `Computer Configuration\Administrative Templates\System\PIN Complexity`
@@ -15578,7 +15579,7 @@ Navigate to:
 * **Policy**: `Use convenience PIN sign-in` -> Set to **Disabled** (value 0)
 * **Policy**: `Allow Microsoft accounts to be optional` -> Set to **Enabled** (value 1)
 
-<a id="07-paws-configure-account-policies-md-step-4-configure-pbkdf2-iteration-count-via-gpo-preferences"></a>
+<div id="07-paws-configure-account-policies-md-step-4-configure-pbkdf2-iteration-count-via-gpo-preferences"></div>
 #### Step 4: Configure PBKDF2 Iteration Count via GPO Preferences
 Since the PBKDF2 iteration count setting is not exposed in standard ADMX templates, deploy it via Registry GPO Preferences:
 1. Within the PAW GPO, navigate to:
@@ -15594,7 +15595,7 @@ Since the PBKDF2 iteration count setting is not exposed in standard ADMX templat
 
 ---
 
-<a id="07-paws-configure-account-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="07-paws-configure-account-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the settings locally (for testing or standalone PAW systems) or if the control is not manageable via standard GPO GUI interfaces.
@@ -15929,7 +15930,7 @@ if ($script:Vulnerable) {
 
 ---
 
-<a id="07-paws-configure-account-policies-md-sources-compliance-references"></a>
+<div id="07-paws-configure-account-policies-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations on password complexity, reversible encryption blocks, lockout management, and domain member secure channels.
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 2.3.7.3 (Accounts: Limit local account use of blank passwords...), Section 2.3.9.5 (Interactive logon: Smart card removal behavior), Section 2.3.10.2 (Microsoft network client: Send unencrypted password), Section 2.3.11.8 (Network access: Allow anonymous SID/Name translation), Section 2.3.11.10 (Network security: Allow LocalSystem NULL session fallback).
@@ -15938,101 +15939,101 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-README-md"></a>
+<div id="08-endpoints-README-md"></div>
 
-<a id="08-endpoints-README-md-module-8-endpoint-hardening"></a>
+<div id="08-endpoints-README-md-module-8-endpoint-hardening"></div>
 # Module 8: Endpoint Hardening
 
 This directory defines the technical security baselines for standard client workstations (Tier 2 endpoints) operating in isolated, air-gapped domains. 
 
 To prevent initial access and lateral movement, the following unitary technical hardening controls must be implemented:
 
-<a id="08-endpoints-README-md-technical-hardening-controls"></a>
+<div id="08-endpoints-README-md-technical-hardening-controls"></div>
 ## Technical Hardening Controls
 
-1. **[REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](#08-endpoints-README-md-08-endpoints-harden-network-and-name-resolution-md)**
+1. **[REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](#08-endpoints-harden-network-and-name-resolution-md)**
    Disables Link-Local Multicast Name Resolution (LLMNR), NetBIOS over TCP/IP, and mDNS, and secures TCP/IP parameters to prevent local credential harvesting and protocol exploits.
 
-2. **[REQ-END-002 - Configure User Account Control Policies](#08-endpoints-README-md-08-endpoints-configure-uac-policies-md)**
+2. **[REQ-END-002 - Configure User Account Control Policies](#08-endpoints-configure-uac-policies-md)**
    Enforces maximum UAC security behavior, requiring credential entry on the secure desktop for administrators and automatically denying elevation prompts for standard users.
 
-3. **[REQ-END-003 - Disable AutoPlay and AutoRun](#08-endpoints-README-md-08-endpoints-disable-autoplay-autorun-md)**
+3. **[REQ-END-003 - Disable AutoPlay and AutoRun](#08-endpoints-disable-autoplay-autorun-md)**
    Turns off AutoPlay and AutoRun features across all drive types to prevent automatic execution of files and payloads from external media.
 
-4. **[REQ-END-004 - Block Removable Storage](#08-endpoints-README-md-08-endpoints-block-removable-storage-md)**
+4. **[REQ-END-004 - Block Removable Storage](#08-endpoints-block-removable-storage-md)**
    Blocks read and write access to USB drives and other removable media classes to mitigate data leakage and malware propagation.
 
-5. **[REQ-END-005 - Restrict Remote Desktop Access](#08-endpoints-README-md-08-endpoints-restrict-rdp-access-md)**
+5. **[REQ-END-005 - Restrict Remote Desktop Access](#08-endpoints-restrict-rdp-access-md)**
    Blocks incoming RDP connections to standard workstations by default, or restricts allowed connection sources to authorized administrative subnets with Network Level Authentication (NLA) enabled.
 
-6. **[REQ-END-006 - Restrict Local Administrators Group](#08-endpoints-README-md-08-endpoints-restrict-local-admins-md)**
+6. **[REQ-END-006 - Restrict Local Administrators Group](#08-endpoints-restrict-local-admins-md)**
    Locks down local workstation administrative privileges, removing standard domain users and enforcing administrative segregation utilizing LAPS.
 
-7. **[REQ-END-007 - Windows Defender Antivirus Baseline and Exploit Guard](#08-endpoints-README-md-08-endpoints-defender-antivirus-md)**
+7. **[REQ-END-007 - Windows Defender Antivirus Baseline and Exploit Guard](#08-endpoints-defender-antivirus-md)**
    Configures Windows Defender Antivirus, enabling real-time scanning, behavioral monitoring, preventing local exclusion modifications, enforcing Attack Surface Reduction (ASR) rules, activating Tamper Protection, and enabling AppContainer sandbox isolation.
 
-8. **[REQ-END-008 - WSUS Client Configuration](#08-endpoints-README-md-08-endpoints-wsus-client-config-md)**
+8. **[REQ-END-008 - WSUS Client Configuration](#08-endpoints-wsus-client-config-md)**
    Enforces update client registry baselines to ensure workstations pull OS patches and security signatures exclusively from the local, offline WSUS server.
 
-9. **[REQ-END-009 - Enable Secure Boot](#08-endpoints-README-md-08-endpoints-enable-secure-boot-md)**
+9. **[REQ-END-009 - Enable Secure Boot](#08-endpoints-enable-secure-boot-md)**
    Mandates hardware-rooted platform integrity checks, preventing bootkits, rootkits, and unauthorized bootloader modifications.
 
-10. **[REQ-END-010 - Enable VBS and Credential Guard](#08-endpoints-README-md-08-endpoints-enable-vbs-credential-guard-md)**
+10. **[REQ-END-010 - Enable VBS and Credential Guard](#08-endpoints-enable-vbs-credential-guard-md)**
     Activates Virtualization-Based Security (VBS) and Credential Guard to protect password hashes and Kerberos tickets in an isolated virtual container, mitigating LSASS dumping.
 
-11. **[REQ-END-011 - Configure Windows Defender Application Control](#08-endpoints-README-md-08-endpoints-configure-wdac-md)**
+11. **[REQ-END-011 - Configure Windows Defender Application Control](#08-endpoints-configure-wdac-md)**
     Deploys application control baselines and the Microsoft Vulnerable Driver Blocklist to enforce code integrity policies, restricting the system to run only signed, authorized binaries, scripts, and secure drivers.
 
-12. **[REQ-END-012 - Enable BitLocker and Network Unlock](#08-endpoints-README-md-08-endpoints-enable-bitlocker-md)**
+12. **[REQ-END-012 - Enable BitLocker and Network Unlock](#08-endpoints-enable-bitlocker-md)**
     Enforces full disk encryption with TPM and enables secure Network Unlock capabilities for standard client workstations.
 
-13. **[REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-README-md-08-endpoints-configure-uefi-security-md)**
+13. **[REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-configure-uefi-security-md)**
     Enforces password protection, disables Compatibility Support Module (CSM)/Legacy Boot, locks boot order, and configures secure firmware update policies.
 
-14. **[REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-README-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md)**
+14. **[REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-enable-hardware-virtualization-and-dma-protection-md)**
     Enables CPU virtualization (VT-x/AMD-V) and IOMMU (VT-d/AMD-Vi) to provide the hardware-rooted platform integrity required for VBS and Kernel DMA protection.
 
-15. **[REQ-END-015 - Disable Windows Platform Binary Table (WPBT)](#08-endpoints-README-md-08-endpoints-disable-wpbt-md)**
+15. **[REQ-END-015 - Disable Windows Platform Binary Table (WPBT)](#08-endpoints-disable-wpbt-md)**
     Disables execution of binaries supplied by the Windows Platform Binary Table (WPBT) ACPI firmware table to mitigate boot-level security bypasses.
 
-16. **[REQ-END-016 - Configure User Rights Assignments](#08-endpoints-README-md-08-endpoints-configure-user-rights-assignments-md)**
+16. **[REQ-END-016 - Configure User Rights Assignments](#08-endpoints-configure-user-rights-assignments-md)**
     Restricts critical user rights assignments (URAs) such as debugging programs, token impersonation, and local logon permissions on standard client endpoints.
 
-17. **[REQ-END-017 - Harden DMA and Physical Security](#08-endpoints-README-md-08-endpoints-harden-dma-and-physical-security-md)**
+17. **[REQ-END-017 - Harden DMA and Physical Security](#08-endpoints-harden-dma-and-physical-security-md)**
     Mitigates physical access threat vectors by disabling standby sleep states (S1-S3), disabling external DMA device enumeration under lock, blocking legacy SBP-2 device classes, and denying write access to removable drives without BitLocker protection.
 
-18. **[REQ-END-018 - Configure Account and Password Policies](#08-endpoints-README-md-08-endpoints-configure-account-policies-md)**
+18. **[REQ-END-018 - Configure Account and Password Policies](#08-endpoints-configure-account-policies-md)**
     Enforces local and domain-wide account settings, including account lockout thresholds, lockout observation windows, smart card removal actions, and disabling reversible password encryption.
 
-19. **[REQ-END-019 - Configure User Profile Restrictions](#08-endpoints-README-md-08-endpoints-configure-user-profile-restrictions-md)**
+19. **[REQ-END-019 - Configure User Profile Restrictions](#08-endpoints-configure-user-profile-restrictions-md)**
     Locks down user profile registry settings (HKCU) to disable toast notifications on the lock screen and block third-party application suggestions.
 
-20. **[REQ-END-020 - Configure Exploit Protection Profile](#08-endpoints-README-md-08-endpoints-configure-exploit-protection-md)**
+20. **[REQ-END-020 - Configure Exploit Protection Profile](#08-endpoints-configure-exploit-protection-md)**
     Configures and enforces a system-wide Microsoft Defender Exploit Protection profile to apply advanced memory mitigations (DEP, ASLR, CFG, SEHOP, Heap Integrity) on all endpoints.
 
-21. **[REQ-END-021 - Restrict Safe Mode Access to Administrators](#08-endpoints-README-md-08-endpoints-disable-safe-mode-for-standard-users-md)**
+21. **[REQ-END-021 - Restrict Safe Mode Access to Administrators](#08-endpoints-disable-safe-mode-for-standard-users-md)**
     Prevents standard (non-administrative) users from logging into the system while in Safe Mode by setting SafeModeBlockNonAdmins to 1.
 
-22. **[REQ-END-022 - Block Outbound Traffic for Known LOLBins](#08-endpoints-README-md-08-endpoints-block-lolbins-outbound-traffic-md)**
+22. **[REQ-END-022 - Block Outbound Traffic for Known LOLBins](#08-endpoints-block-lolbins-outbound-traffic-md)**
     Enforces Windows Defender Firewall outbound rules to block known Living Off the Land Binaries (LOLBins) from initiating outgoing network connections.
 
 
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-harden-network-and-name-resolution-md"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md"></div>
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-req-end-001-harden-network-parameters-and-disable-legacy-name-resolution"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md-req-end-001-harden-network-parameters-and-disable-legacy-name-resolution"></div>
 # [REQ-END-001] Harden Network Parameters and Disable Legacy Name Resolution
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-target-scope"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-implementation-details"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -16070,7 +16071,7 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 ---
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-rationale"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md-rationale"></div>
 ## Rationale
 Legacy name resolution protocols and insecure default network configurations are heavily targeted by attackers for credential harvesting and man-in-the-middle (MitM) positioning:
 
@@ -16081,20 +16082,20 @@ Legacy name resolution protocols and insecure default network configurations are
 
 ---
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **DNS Dependency**: Disabling LLMNR and NetBIOS requires a fully operational DNS infrastructure. Any internal local network resource names must be registered in the AD DNS zones. Ad-hoc name resolution (such as workgroup-based peer file sharing) will no longer function.
 * **Standby Subnets**: Disabling ICMP redirects means systems will rely on static routing tables and default gateway definitions. This is the standard operational stance for secure enterprise subnets.
 
 ---
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-implementation-steps"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-step-1-turn-off-llmnr"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-1-turn-off-llmnr"></div>
 #### Step 1: Turn Off LLMNR
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
@@ -16104,13 +16105,13 @@ Legacy name resolution protocols and insecure default network configurations are
    * **Policy**: `Turn off Multicast Name Resolution`
    * **Setting**: `Enabled`
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-step-2-disable-netbios-via-dhcp-scope-options"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-2-disable-netbios-via-dhcp-scope-options"></div>
 #### Step 2: Disable NetBIOS (via DHCP Scope Options)
 1. Open the **DHCP Management Console** (`dhcpmgmt.msc`).
 2. Under Scope Options, select **Configure Options**.
 3. Add **Option 043 (Vendor Specific Info)** and set the NetBIOS over TCP/IP value to `0x2` (Disable NetBIOS over TCP/IP).
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-step-3-configure-registry-network-settings-via-gpo-preferences"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-3-configure-registry-network-settings-via-gpo-preferences"></div>
 #### Step 3: Configure Registry network settings via GPO Preferences
 1. Under the target workstations GPO, navigate to:
    `Computer Configuration\Preferences\Windows Settings\Registry`
@@ -16214,7 +16215,7 @@ Legacy name resolution protocols and insecure default network configurations are
 
 ---
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to disable legacy resolution and enforce secure TCP/IP registry parameters.
@@ -16367,7 +16368,7 @@ if ($script:Vulnerable) {
 
 ---
 
-<a id="08-endpoints-harden-network-and-name-resolution-md-sources-compliance-references"></a>
+<div id="08-endpoints-harden-network-and-name-resolution-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 9.1 (Disable LLMNR), Section 18.8.44.1 (Configure EnableICMPRedirect), Section 18.8.44.2 (Configure DisableIPSourceRouting)
 * **ANSSI AD Hardening Guide**: Recommendation R19 (LDAP and name resolution security recommendations)
@@ -16377,19 +16378,19 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-configure-uac-policies-md"></a>
+<div id="08-endpoints-configure-uac-policies-md"></div>
 
-<a id="08-endpoints-configure-uac-policies-md-req-end-002-configure-user-account-control-policies"></a>
+<div id="08-endpoints-configure-uac-policies-md-req-end-002-configure-user-account-control-policies"></div>
 # [REQ-END-002] Configure User Account Control Policies
 
-<a id="08-endpoints-configure-uac-policies-md-target-scope"></a>
+<div id="08-endpoints-configure-uac-policies-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-configure-uac-policies-md-implementation-details"></a>
+<div id="08-endpoints-configure-uac-policies-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -16399,7 +16400,7 @@ if ($script:Vulnerable) {
 
 ---
 
-<a id="08-endpoints-configure-uac-policies-md-rationale"></a>
+<div id="08-endpoints-configure-uac-policies-md-rationale"></div>
 ## Rationale
 User Account Control (UAC) is a fundamental defense mechanism in Windows. It limits the privilege levels of running applications, executing administrative actions with standard user tokens unless elevated privileges are explicitly approved.
 
@@ -16411,7 +16412,7 @@ Hardening UAC settings ensures:
 
 ---
 
-<a id="08-endpoints-configure-uac-policies-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-configure-uac-policies-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **User Experience**: Standard users will not be able to install software or change system settings that require administrative credentials. Support technicians must log on as local administrators to perform maintenance tasks or use remote tools.
 * **Script and Installer Behaviors**: Legacy scripts and administrative install tasks that run programmatically without secure-desktop awareness may fail or hang if they trigger elevation prompts that cannot be programmatically bypassed.
@@ -16419,10 +16420,10 @@ Hardening UAC settings ensures:
 
 ---
 
-<a id="08-endpoints-configure-uac-policies-md-implementation-steps"></a>
+<div id="08-endpoints-configure-uac-policies-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-configure-uac-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-configure-uac-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -16444,7 +16445,7 @@ Hardening UAC settings ensures:
 
 ---
 
-<a id="08-endpoints-configure-uac-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-configure-uac-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to configure maximum security parameters for UAC in the system registry.
@@ -16526,7 +16527,7 @@ if (Test-Path $SudoPath) {
 
 ---
 
-<a id="08-endpoints-configure-uac-policies-md-sources-compliance-references"></a>
+<div id="08-endpoints-configure-uac-policies-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 2.3.17.1 (ConsentPromptBehaviorAdmin), Section 2.3.17.2 (ConsentPromptBehaviorUser), Section 2.3.17.5 (EnableLUA)
 * **Microsoft Security Baselines**: Windows Client Security baseline registry settings.
@@ -16534,19 +16535,19 @@ if (Test-Path $SudoPath) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-disable-autoplay-autorun-md"></a>
+<div id="08-endpoints-disable-autoplay-autorun-md"></div>
 
-<a id="08-endpoints-disable-autoplay-autorun-md-req-end-003-disable-autoplay-and-autorun"></a>
+<div id="08-endpoints-disable-autoplay-autorun-md-req-end-003-disable-autoplay-and-autorun"></div>
 # [REQ-END-003] Disable AutoPlay and AutoRun
 
-<a id="08-endpoints-disable-autoplay-autorun-md-target-scope"></a>
+<div id="08-endpoints-disable-autoplay-autorun-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-disable-autoplay-autorun-md-implementation-details"></a>
+<div id="08-endpoints-disable-autoplay-autorun-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -16560,7 +16561,7 @@ if (Test-Path $SudoPath) {
 
 ---
 
-<a id="08-endpoints-disable-autoplay-autorun-md-rationale"></a>
+<div id="08-endpoints-disable-autoplay-autorun-md-rationale"></div>
 ## Rationale
 The AutoPlay and AutoRun features in Windows are designed to automatically execute programs or open media when a removable drive, network share, or CD-ROM is inserted or connected. 
 
@@ -16570,17 +16571,17 @@ Additionally, non-volume devices (such as mobile phones, cameras, or media playe
 
 ---
 
-<a id="08-endpoints-disable-autoplay-autorun-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-disable-autoplay-autorun-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **User Experience**: Users will not see pop-up choices or automated actions when connecting USB sticks, DVDs, or external drives. They must manually open File Explorer and navigate to the drive to read or open files.
 * **Installer Media**: Software installers located on optical disks or external media will not start automatically; users must double-click the setup application manually.
 
 ---
 
-<a id="08-endpoints-disable-autoplay-autorun-md-implementation-steps"></a>
+<div id="08-endpoints-disable-autoplay-autorun-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-disable-autoplay-autorun-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-disable-autoplay-autorun-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -16599,7 +16600,7 @@ Additionally, non-volume devices (such as mobile phones, cameras, or media playe
 
 ---
 
-<a id="08-endpoints-disable-autoplay-autorun-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-disable-autoplay-autorun-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to configure Explorer registry keys to disable AutoPlay, AutoRun, and AutoPlay for non-volume devices.
@@ -16665,7 +16666,7 @@ Write-Host "    - NoAutoplayfornonVolume: $NoNonVolVal (Required = 1)" -Foregrou
 
 ---
 
-<a id="08-endpoints-disable-autoplay-autorun-md-sources-compliance-references"></a>
+<div id="08-endpoints-disable-autoplay-autorun-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.3.1 (Turn off AutoPlay), Section 18.3.2 (Set the default behavior for AutoRun)
 * **Microsoft Security Baselines**: Windows Client Explorer configuration standards.
@@ -16674,19 +16675,19 @@ Write-Host "    - NoAutoplayfornonVolume: $NoNonVolVal (Required = 1)" -Foregrou
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-block-removable-storage-md"></a>
+<div id="08-endpoints-block-removable-storage-md"></div>
 
-<a id="08-endpoints-block-removable-storage-md-req-end-004-block-removable-storage"></a>
+<div id="08-endpoints-block-removable-storage-md-req-end-004-block-removable-storage"></div>
 # [REQ-END-004] Block Removable Storage
 
-<a id="08-endpoints-block-removable-storage-md-target-scope"></a>
+<div id="08-endpoints-block-removable-storage-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional.
 
 ---
 
-<a id="08-endpoints-block-removable-storage-md-implementation-details"></a>
+<div id="08-endpoints-block-removable-storage-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -16695,7 +16696,7 @@ Write-Host "    - NoAutoplayfornonVolume: $NoNonVolVal (Required = 1)" -Foregrou
 
 ---
 
-<a id="08-endpoints-block-removable-storage-md-rationale"></a>
+<div id="08-endpoints-block-removable-storage-md-rationale"></div>
 ## Rationale
 Removable storage media, such as USB flash drives, external SSDs, and optical discs, represent a significant risk vector for corporate network environments. 
 
@@ -16703,7 +16704,7 @@ Attackers use USB drives to bypass network-based security boundaries (such as fi
 
 ---
 
-<a id="08-endpoints-block-removable-storage-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-block-removable-storage-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **User Restrictions**: Users cannot read from or write to external USB storage devices, SD cards, or external CD/DVD readers. Any connected mass storage device will be rejected by the file system.
 * **Administrative Tools**: Support technicians must use network-based shares, administrative shares, or secure file-transfer systems to deploy scripts or updates to client workstations.
@@ -16711,10 +16712,10 @@ Attackers use USB drives to bypass network-based security boundaries (such as fi
 
 ---
 
-<a id="08-endpoints-block-removable-storage-md-implementation-steps"></a>
+<div id="08-endpoints-block-removable-storage-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-block-removable-storage-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-block-removable-storage-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -16730,7 +16731,7 @@ Attackers use USB drives to bypass network-based security boundaries (such as fi
 
 ---
 
-<a id="08-endpoints-block-removable-storage-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-block-removable-storage-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to configure registry keys to block all removable storage devices.
@@ -16775,7 +16776,7 @@ Write-Host "    - Removable Storage Deny_All: $DenyAllVal (Required = 1)" -Foreg
 
 ---
 
-<a id="08-endpoints-block-removable-storage-md-sources-compliance-references"></a>
+<div id="08-endpoints-block-removable-storage-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.9.82 (All Removable Storage classes: Deny all access)
 * **ANSSI AD Hardening Guide**: Section on hardware and external communication control.
@@ -16783,19 +16784,19 @@ Write-Host "    - Removable Storage Deny_All: $DenyAllVal (Required = 1)" -Foreg
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-restrict-rdp-access-md"></a>
+<div id="08-endpoints-restrict-rdp-access-md"></div>
 
-<a id="08-endpoints-restrict-rdp-access-md-req-end-005-restrict-remote-desktop-access"></a>
+<div id="08-endpoints-restrict-rdp-access-md-req-end-005-restrict-remote-desktop-access"></div>
 # [REQ-END-005] Restrict Remote Desktop Access
 
-<a id="08-endpoints-restrict-rdp-access-md-target-scope"></a>
+<div id="08-endpoints-restrict-rdp-access-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-restrict-rdp-access-md-implementation-details"></a>
+<div id="08-endpoints-restrict-rdp-access-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -16817,7 +16818,7 @@ Write-Host "    - Removable Storage Deny_All: $DenyAllVal (Required = 1)" -Foreg
 
 ---
 
-<a id="08-endpoints-restrict-rdp-access-md-rationale"></a>
+<div id="08-endpoints-restrict-rdp-access-md-rationale"></div>
 ## Rationale
 Remote Desktop Protocol (RDP) is one of the primary mechanisms used by attackers for lateral movement and administrative session hijacking. If inbound RDP is enabled globally on workstations:
 1. **Lateral Movement**: An attacker who compromises a single standard user's credentials with administrative permissions on other machines can RDP from workstation to workstation across the network.
@@ -16830,20 +16831,20 @@ The safest configuration is to disable Remote Desktop Services and Remote Assist
 
 ---
 
-<a id="08-endpoints-restrict-rdp-access-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-restrict-rdp-access-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Remote Administration**: Support technicians cannot connect to workstations via RDP unless they connect from an IP address inside the authorized administrative subnet (e.g., from a PAW or Jump Host).
 * **User Assistance**: Standard users cannot use Remote Desktop or Remote Assistance to share screens or assist one another. Alternate secure remote assistance tools (which require local user approval and do not open listener ports) must be used.
 
 ---
 
-<a id="08-endpoints-restrict-rdp-access-md-implementation-steps"></a>
+<div id="08-endpoints-restrict-rdp-access-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-restrict-rdp-access-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-restrict-rdp-access-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="08-endpoints-restrict-rdp-access-md-1-disable-inbound-remote-desktop-connections-default-hardening"></a>
+<div id="08-endpoints-restrict-rdp-access-md-1-disable-inbound-remote-desktop-connections-default-hardening"></div>
 #### 1. Disable Inbound Remote Desktop Connections (Default Hardening)
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
@@ -16853,7 +16854,7 @@ The safest configuration is to disable Remote Desktop Services and Remote Assist
    * **Policy**: `Allow users to connect remotely by using Remote Desktop Services`
    * **Setting**: `Disabled`
 
-<a id="08-endpoints-restrict-rdp-access-md-2-enforce-nla-and-high-encryption-if-rdp-is-required-for-admins"></a>
+<div id="08-endpoints-restrict-rdp-access-md-2-enforce-nla-and-high-encryption-if-rdp-is-required-for-admins"></div>
 #### 2. Enforce NLA and High Encryption (If RDP is Required for Admins)
 If RDP is strictly required, enable it but restrict it using the following settings:
 1. Under the same path:
@@ -16867,7 +16868,7 @@ If RDP is strictly required, enable it but restrict it using the following setti
    * **Setting**: `Enabled` (Select `High Level` in the options dropdown)
 4. Deploy local firewall rules via GPO to restrict TCP port 3389 inbound to administrative subnet ranges only.
 
-<a id="08-endpoints-restrict-rdp-access-md-3-disable-solicited-remote-assistance"></a>
+<div id="08-endpoints-restrict-rdp-access-md-3-disable-solicited-remote-assistance"></div>
 #### 3. Disable Solicited Remote Assistance
 1. Navigate to:
    `Computer Configuration\Administrative Templates\System\Remote Assistance`
@@ -16877,7 +16878,7 @@ If RDP is strictly required, enable it but restrict it using the following setti
 
 ---
 
-<a id="08-endpoints-restrict-rdp-access-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-restrict-rdp-access-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to disable Remote Desktop and Remote Assistance, and enforce NLA and secure registry keys.
@@ -16984,7 +16985,7 @@ if (Test-Path $TSPoliciesPath) {
 
 ---
 
-<a id="08-endpoints-restrict-rdp-access-md-sources-compliance-references"></a>
+<div id="08-endpoints-restrict-rdp-access-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.2.1 (Require user authentication for remote connections by using Network Level Authentication)
 * **ANSSI AD Hardening Guide**: Security guidelines regarding Remote Desktop access and management protocols.
@@ -16993,19 +16994,19 @@ if (Test-Path $TSPoliciesPath) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-restrict-local-admins-md"></a>
+<div id="08-endpoints-restrict-local-admins-md"></div>
 
-<a id="08-endpoints-restrict-local-admins-md-req-end-006-restrict-local-administrators-group"></a>
+<div id="08-endpoints-restrict-local-admins-md-req-end-006-restrict-local-administrators-group"></div>
 # [REQ-END-006] Restrict Local Administrators Group
 
-<a id="08-endpoints-restrict-local-admins-md-target-scope"></a>
+<div id="08-endpoints-restrict-local-admins-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional.
 
 ---
 
-<a id="08-endpoints-restrict-local-admins-md-implementation-details"></a>
+<div id="08-endpoints-restrict-local-admins-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -17015,7 +17016,7 @@ if (Test-Path $TSPoliciesPath) {
 
 ---
 
-<a id="08-endpoints-restrict-local-admins-md-rationale"></a>
+<div id="08-endpoints-restrict-local-admins-md-rationale"></div>
 ## Rationale
 Local administrator rights on workstations are a significant source of operational vulnerability. If standard end-users run as local administrators:
 1. **Malware Propagation**: Malware executed by the user runs in an administrative context, allowing it to bypass local firewalls, alter registry hives, disable security controls (like Windows Defender), and persist across reboots.
@@ -17026,17 +17027,17 @@ Securing the local Administrators group ensures only local security accounts (li
 
 ---
 
-<a id="08-endpoints-restrict-local-admins-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-restrict-local-admins-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **User Restrictions**: Users cannot install software, update system drivers, or modify local network configurations. Support staff must assist users with system modifications or use automated software distribution channels.
 * **Legacy Apps**: Applications that require local administrator privileges to write data directly to the `%ProgramFiles%` directory or local registry keys will fail. These applications must be reconfigured to write to user-profile locations (e.g., `%APPDATA%`) or run under service account privileges.
 
 ---
 
-<a id="08-endpoints-restrict-local-admins-md-implementation-steps"></a>
+<div id="08-endpoints-restrict-local-admins-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-restrict-local-admins-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-restrict-local-admins-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 Enforce local Administrators group membership and restrict remote execution via local accounts (UAC remote restrictions):
@@ -17063,7 +17064,7 @@ Enforce local Administrators group membership and restrict remote execution via 
 
 ---
 
-<a id="08-endpoints-restrict-local-admins-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-restrict-local-admins-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to audit and remediate unauthorized administrative accounts in the local Administrators group and enforce local account remote token restrictions.
@@ -17172,7 +17173,7 @@ if (Test-Path $RegistryPath) {
 
 ---
 
-<a id="08-endpoints-restrict-local-admins-md-sources-compliance-references"></a>
+<div id="08-endpoints-restrict-local-admins-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 5.5 (Ensure only authorized accounts are members of the Administrators group)
 * **ANSSI AD Hardening Guide**: Recommendations regarding local administration restriction and tiering boundaries.
@@ -17180,19 +17181,19 @@ if (Test-Path $RegistryPath) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-defender-antivirus-md"></a>
+<div id="08-endpoints-defender-antivirus-md"></div>
 
-<a id="08-endpoints-defender-antivirus-md-req-end-007-windows-defender-antivirus-baseline-and-exploit-guard"></a>
+<div id="08-endpoints-defender-antivirus-md-req-end-007-windows-defender-antivirus-baseline-and-exploit-guard"></div>
 # [REQ-END-007] Windows Defender Antivirus Baseline and Exploit Guard
 
-<a id="08-endpoints-defender-antivirus-md-target-scope"></a>
+<div id="08-endpoints-defender-antivirus-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-defender-antivirus-md-implementation-details"></a>
+<div id="08-endpoints-defender-antivirus-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -17214,7 +17215,7 @@ if (Test-Path $RegistryPath) {
 
 ---
 
-<a id="08-endpoints-defender-antivirus-md-rationale"></a>
+<div id="08-endpoints-defender-antivirus-md-rationale"></div>
 ## Rationale
 Windows Defender Antivirus is the primary endpoint protection suite on Windows platforms. To establish a robust defense-in-depth posture against modern endpoint threat vectors, the basic protection must be augmented with Exploit Guard, Tamper Protection, SmartScreen, and process isolation.
 
@@ -17227,7 +17228,7 @@ This control introduces four primary hardening mechanisms:
 
 ---
 
-<a id="08-endpoints-defender-antivirus-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-defender-antivirus-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **ASR Administrative Impact**: Enabling ASR rules can block legacy administrative scripts or third-party orchestration tools that rely on WMI/PSExec or execute obfuscated administrative wrappers. Extensive audit testing is recommended prior to broad enforcement.
 * **Office Application Rules**: Rules related to Microsoft Office (e.g., blocking child processes) apply only to endpoints where productivity suites are installed. They will have no impact on member servers without Office.
@@ -17237,10 +17238,10 @@ This control introduces four primary hardening mechanisms:
 
 ---
 
-<a id="08-endpoints-defender-antivirus-md-implementation-steps"></a>
+<div id="08-endpoints-defender-antivirus-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-defender-antivirus-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-defender-antivirus-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -17394,7 +17395,7 @@ This control introduces four primary hardening mechanisms:
      * **Setting**: `Enabled`
      * **Options**: Select `Require approval from an administrator before running unrecognized software` (forces `ShellSmartScreenLevel` to `Block` and `EnableSmartScreen` to `1`)
 
-<a id="08-endpoints-defender-antivirus-md-step-36-deploy-amsi-authenticode-verification-via-gpo-preferences"></a>
+<div id="08-endpoints-defender-antivirus-md-step-36-deploy-amsi-authenticode-verification-via-gpo-preferences"></div>
 #### Step 36: Deploy AMSI Authenticode Verification via GPO Preferences
 Since AMSI provider signature verification is not exposed in standard ADMX templates, deploy it via Registry GPO Preferences:
 1. Within the endpoints GPO, navigate to:
@@ -17410,7 +17411,7 @@ Since AMSI provider signature verification is not exposed in standard ADMX templ
 
 ---
 
-<a id="08-endpoints-defender-antivirus-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-defender-antivirus-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to configure Windows Defender baseline protection, Attack Surface Reduction rules, Tamper Protection, SmartScreen, and Sandbox execution.
@@ -17763,7 +17764,7 @@ if (Test-Path $AmsiPath) {
 
 ---
 
-<a id="08-endpoints-defender-antivirus-md-sources-compliance-references"></a>
+<div id="08-endpoints-defender-antivirus-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.9.47 (Exclusions restrictions), Section 18.9.30 (ASR Rules), Section 18.9.47.11 (Real-time protection)
 * **Microsoft Security Baselines**: Windows Defender Exploit Guard deployment guide
@@ -17773,19 +17774,19 @@ if (Test-Path $AmsiPath) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-wsus-client-config-md"></a>
+<div id="08-endpoints-wsus-client-config-md"></div>
 
-<a id="08-endpoints-wsus-client-config-md-req-end-008-wsus-client-configuration"></a>
+<div id="08-endpoints-wsus-client-config-md-req-end-008-wsus-client-configuration"></div>
 # [REQ-END-008] WSUS Client Configuration
 
-<a id="08-endpoints-wsus-client-config-md-target-scope"></a>
+<div id="08-endpoints-wsus-client-config-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-wsus-client-config-md-implementation-details"></a>
+<div id="08-endpoints-wsus-client-config-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -17806,7 +17807,7 @@ if (Test-Path $AmsiPath) {
 
 ---
 
-<a id="08-endpoints-wsus-client-config-md-rationale"></a>
+<div id="08-endpoints-wsus-client-config-md-rationale"></div>
 ## Rationale
 In an isolated, air-gapped network, workstations cannot connect directly to Microsoft's online Update servers. If the system is left in its default configuration:
 1. **DNS/Firewall Pollution**: Workstations will continuously attempt to resolve and connect to public Windows Update URLs (e.g., `*.update.microsoft.com`), filling firewall and local DNS resolver cache logs with timeouts and block events.
@@ -17817,7 +17818,7 @@ Enforcing the intranet update service location redirects all system update queri
 
 ---
 
-<a id="08-endpoints-wsus-client-config-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-wsus-client-config-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **WSUS Dependency**: The local Windows Server Update Services (WSUS) server must remain online and functional. If the WSUS server is unreachable, workstations will be unable to query, download, or apply security patches.
 * **Administrative Burden**: Enterprise administrators must manually synchronize the WSUS database (sneakernet transfer of metadata and updates) to ensure new patches are made available to clients.
@@ -17825,10 +17826,10 @@ Enforcing the intranet update service location redirects all system update queri
 
 ---
 
-<a id="08-endpoints-wsus-client-config-md-implementation-steps"></a>
+<div id="08-endpoints-wsus-client-config-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-wsus-client-config-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-wsus-client-config-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -17856,7 +17857,7 @@ Enforcing the intranet update service location redirects all system update queri
 
 ---
 
-<a id="08-endpoints-wsus-client-config-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-wsus-client-config-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to configure registry keys to enforce local WSUS parameters and Delivery Optimization download mode.
@@ -17939,7 +17940,7 @@ Write-Host "    - Delivery Optimization DODownloadMode: $($DOVal | Out-String).T
 
 ---
 
-<a id="08-endpoints-wsus-client-config-md-sources-compliance-references"></a>
+<div id="08-endpoints-wsus-client-config-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.2.2 (Specify intranet Microsoft update service location), Section 18.2.3 (Do not connect to any Windows Update Internet locations)
 * **Microsoft Security Baselines**: Windows Update client baseline policies.
@@ -17948,19 +17949,19 @@ Write-Host "    - Delivery Optimization DODownloadMode: $($DOVal | Out-String).T
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-enable-secure-boot-md"></a>
+<div id="08-endpoints-enable-secure-boot-md"></div>
 
-<a id="08-endpoints-enable-secure-boot-md-req-end-009-enable-secure-boot"></a>
+<div id="08-endpoints-enable-secure-boot-md-req-end-009-enable-secure-boot"></div>
 # [REQ-END-009] Enable Secure Boot
 
-<a id="08-endpoints-enable-secure-boot-md-target-scope"></a>
+<div id="08-endpoints-enable-secure-boot-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-enable-secure-boot-md-implementation-details"></a>
+<div id="08-endpoints-enable-secure-boot-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -17970,7 +17971,7 @@ Write-Host "    - Delivery Optimization DODownloadMode: $($DOVal | Out-String).T
 
 ---
 
-<a id="08-endpoints-enable-secure-boot-md-rationale"></a>
+<div id="08-endpoints-enable-secure-boot-md-rationale"></div>
 ## Rationale
 Secure Boot is a security standard developed by members of the PC industry to help ensure that a device boots using only software that is trusted by the Original Equipment Manufacturer (OEM). 
 
@@ -17983,18 +17984,18 @@ If Secure Boot is disabled:
 
 ---
 
-<a id="08-endpoints-enable-secure-boot-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-enable-secure-boot-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **BIOS Mode Conversion**: Systems running in legacy BIOS mode (Compatibility Support Module - CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires changing partition styles from MBR to GPT (using tools like `MBR2GPT.exe`) and changing firmware settings; refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-enable-secure-boot-md-08-endpoints-configure-uefi-security-md) for firmware settings. Improper conversion can cause boot failures if not executed correctly.
+* **BIOS Mode Conversion**: Systems running in legacy BIOS mode (Compatibility Support Module - CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires changing partition styles from MBR to GPT (using tools like `MBR2GPT.exe`) and changing firmware settings; refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-configure-uefi-security-md) for firmware settings. Improper conversion can cause boot failures if not executed correctly.
 * **Dual-Boot Systems**: If the workstation dual-boots with unsigned Linux distributions or runs legacy recovery media, the firmware will reject the bootloader, preventing boot.
 * **BlackLotus Mitigation Risks**: Enforcing the BlackLotus DBX and SVN updates is a permanent, non-reversible action once written to the device firmware. If an administrator attempts to boot the machine using older, unpatched Windows installation media or recovery disks, the system will reject the boot manager and fail to boot. All recovery and deployment media must be updated with current security patches before applying these mitigations.
 
 ---
 
-<a id="08-endpoints-enable-secure-boot-md-implementation-steps"></a>
+<div id="08-endpoints-enable-secure-boot-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-enable-secure-boot-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-enable-secure-boot-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 UEFI Secure Boot must be enabled in the hardware firmware menu directly (BIOS settings). However, you can enforce policies to audit and lock VBS to require Secure Boot:
@@ -18008,7 +18009,7 @@ UEFI Secure Boot must be enabled in the hardware firmware menu directly (BIOS se
    * **Setting**: `Enabled`
     * **Select Platform Security Level**: Select `Secure Boot` or `Secure Boot and DMA Protection` in the dropdown menu.
 
-<a id="08-endpoints-enable-secure-boot-md-2-deploy-blacklotus-revocation-registry-keys-via-gpo-preferences"></a>
+<div id="08-endpoints-enable-secure-boot-md-2-deploy-blacklotus-revocation-registry-keys-via-gpo-preferences"></div>
 #### 2. Deploy BlackLotus Revocation Registry Keys via GPO Preferences
 To configure the update triggers for the DBX and Code Integrity boot manager revocations, define Registry GPO Preferences inside the endpoints GPO:
 1. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
@@ -18021,7 +18022,7 @@ To configure the update triggers for the DBX and Code Integrity boot manager rev
 
 ---
 
-<a id="08-endpoints-enable-secure-boot-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-enable-secure-boot-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Since Secure Boot is a hardware firmware configuration, it cannot be turned on from within Windows using registry settings. However, you can programmatically audit the state of Secure Boot to flag non-compliant hardware.
@@ -18095,7 +18096,7 @@ if ($BootType) {
 
 ---
 
-<a id="08-endpoints-enable-secure-boot-md-remediation-script"></a>
+<div id="08-endpoints-enable-secure-boot-md-remediation-script"></div>
 ### Remediation Script
 
 [Download Script: Set-SecureBoot.ps1](implementation_scripts/Set-SecureBoot.ps1)
@@ -18119,7 +18120,7 @@ Write-Host "[+] BlackLotus DBX revocation update configured in registry. A syste
 
 ---
 
-<a id="08-endpoints-enable-secure-boot-md-sources-compliance-references"></a>
+<div id="08-endpoints-enable-secure-boot-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.8.14.1 (Configure Turn On Virtualization Based Security: Select Platform Security Level)
 * **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
@@ -18127,19 +18128,19 @@ Write-Host "[+] BlackLotus DBX revocation update configured in registry. A syste
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-enable-vbs-credential-guard-md"></a>
+<div id="08-endpoints-enable-vbs-credential-guard-md"></div>
 
-<a id="08-endpoints-enable-vbs-credential-guard-md-req-end-010-enable-vbs-and-credential-guard"></a>
+<div id="08-endpoints-enable-vbs-credential-guard-md-req-end-010-enable-vbs-and-credential-guard"></div>
 # [REQ-END-010] Enable VBS and Credential Guard
 
-<a id="08-endpoints-enable-vbs-credential-guard-md-target-scope"></a>
+<div id="08-endpoints-enable-vbs-credential-guard-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-enable-vbs-credential-guard-md-implementation-details"></a>
+<div id="08-endpoints-enable-vbs-credential-guard-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -18154,7 +18155,7 @@ Write-Host "[+] BlackLotus DBX revocation update configured in registry. A syste
 
 ---
 
-<a id="08-endpoints-enable-vbs-credential-guard-md-rationale"></a>
+<div id="08-endpoints-enable-vbs-credential-guard-md-rationale"></div>
 ## Rationale
 Virtualization-Based Security (VBS) uses hardware virtualization features to create and isolate a secure region of memory from the normal operating system. 
 
@@ -18168,17 +18169,17 @@ Enforcing VBS and Credential Guard prevents in-memory credential harvesting, bre
 
 ---
 
-<a id="08-endpoints-enable-vbs-credential-guard-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-enable-vbs-credential-guard-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Virtualization Conflicts**: Third-party virtualization software (such as legacy versions of VMware Workstation or VirtualBox) that do not support nested virtualization or integration with Windows Hyper-V will fail to run when VBS is active.
-* **Hardware Requirements**: Systems must support CPU virtualization (Intel VT-x or AMD-V), Second Level Address Translation (SLAT), and have secure firmware (UEFI, Secure Boot, IOMMU / DMA protection) as strict pre-requisites. Refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-enable-vbs-credential-guard-md-08-endpoints-configure-uefi-security-md) and [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-enable-vbs-credential-guard-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md) to ensure these platform security features are fully enabled in the firmware. Older client hardware that does not support these specifications cannot run Credential Guard.
+* **Hardware Requirements**: Systems must support CPU virtualization (Intel VT-x or AMD-V), Second Level Address Translation (SLAT), and have secure firmware (UEFI, Secure Boot, IOMMU / DMA protection) as strict pre-requisites. Refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-configure-uefi-security-md) and [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-enable-hardware-virtualization-and-dma-protection-md) to ensure these platform security features are fully enabled in the firmware. Older client hardware that does not support these specifications cannot run Credential Guard.
 
 ---
 
-<a id="08-endpoints-enable-vbs-credential-guard-md-implementation-steps"></a>
+<div id="08-endpoints-enable-vbs-credential-guard-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-enable-vbs-credential-guard-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-enable-vbs-credential-guard-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -18198,7 +18199,7 @@ Enforcing VBS and Credential Guard prevents in-memory credential harvesting, bre
 
 ---
 
-<a id="08-endpoints-enable-vbs-credential-guard-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-enable-vbs-credential-guard-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to configure registry keys to enable VBS and Credential Guard.
@@ -18273,7 +18274,7 @@ try {
 
 ---
 
-<a id="08-endpoints-enable-vbs-credential-guard-md-sources-compliance-references"></a>
+<div id="08-endpoints-enable-vbs-credential-guard-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.8.14.1 (Turn On Virtualization Based Security), Section 18.8.14.2 (Turn On Virtualization Based Security: Credential Guard Configuration)
 * **ANSSI AD Hardening Guide**: Recommendations regarding LSA Protection and Credential Guard deployment.
@@ -18281,19 +18282,19 @@ try {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-configure-wdac-md"></a>
+<div id="08-endpoints-configure-wdac-md"></div>
 
-<a id="08-endpoints-configure-wdac-md-req-end-011-configure-windows-defender-application-control"></a>
+<div id="08-endpoints-configure-wdac-md-req-end-011-configure-windows-defender-application-control"></div>
 # [REQ-END-011] Configure Windows Defender Application Control
 
-<a id="08-endpoints-configure-wdac-md-target-scope"></a>
+<div id="08-endpoints-configure-wdac-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional.
 
 ---
 
-<a id="08-endpoints-configure-wdac-md-implementation-details"></a>
+<div id="08-endpoints-configure-wdac-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -18303,7 +18304,7 @@ try {
 
 ---
 
-<a id="08-endpoints-configure-wdac-md-rationale"></a>
+<div id="08-endpoints-configure-wdac-md-rationale"></div>
 ## Rationale
 Traditional signature-based antivirus solutions scan for known malware patterns. However, they are easily bypassed by custom, compiled executables, dynamic scripts, or zero-day payloads.
 
@@ -18318,24 +18319,24 @@ Deploying a strict WDAC baseline ensures that only binaries and scripts signed b
 
 ---
 
-<a id="08-endpoints-configure-wdac-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-configure-wdac-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Pre-requisite (Memory Integrity/HVCI)**: Enforcing the vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-END-010 - Enable VBS and Credential Guard](#08-endpoints-configure-wdac-md-08-endpoints-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-configure-wdac-md-08-endpoints-configure-uefi-security-md) and [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-configure-wdac-md-08-endpoints-enable-hardware-virtualization-and-dma-protection-md) for firmware setup.
+* **Pre-requisite (Memory Integrity/HVCI)**: Enforcing the vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-END-010 - Enable VBS and Credential Guard](#08-endpoints-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-configure-uefi-security-md) and [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-enable-hardware-virtualization-and-dma-protection-md) for firmware setup.
 * **Administrative Overhead**: Any new enterprise software must be added to the code integrity trust policy (by digital signature or folder exceptions). Deploying unapproved third-party software will trigger blocks.
 * **User Script Blocks**: Administrators and power users cannot write and run custom PowerShell or VBS scripts locally unless the scripts are digitally signed by a trusted certificate in the WDAC policy or run in a directory excluded by the rules.
 * **Audit Phase Mandate**: To prevent severe business disruption, WDAC policies must always be deployed in **Audit Mode** first. This logs would-be blocks to the Event Viewer without interrupting execution, allowing administrators to gather a list of required applications and construct rules before shifting to **Enforced Mode**.
 
 ---
 
-<a id="08-endpoints-configure-wdac-md-implementation-steps"></a>
+<div id="08-endpoints-configure-wdac-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-configure-wdac-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-configure-wdac-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 To deploy WDAC via Group Policy, the policy XML must first be generated, compiled, and placed in a shared intranet network share.
 
-<a id="08-endpoints-configure-wdac-md-1-generate-and-compile-the-policy-on-a-reference-machine"></a>
+<div id="08-endpoints-configure-wdac-md-1-generate-and-compile-the-policy-on-a-reference-machine"></div>
 #### 1. Generate and Compile the Policy (on a Reference Machine)
 Run the following PowerShell commands to generate the Microsoft Default Windows baseline policy:
 ```powershell
@@ -18346,7 +18347,7 @@ New-CIPolicy -MultiplePolicyFormat -Level FilePublisher -FilePath "C:\WDAC\Basel
 ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\BaselinePolicy.xml" -BinaryFilePath "C:\WDAC\BaselinePolicy.cip"
 ```
 
-<a id="08-endpoints-configure-wdac-md-2-deploy-the-policy-via-gpo"></a>
+<div id="08-endpoints-configure-wdac-md-2-deploy-the-policy-via-gpo"></div>
 #### 2. Deploy the Policy via GPO
 1. Copy the compiled `BaselinePolicy.cip` file to a local secure directory on the target clients (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b`) or host it on a network path.
 2. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -18367,7 +18368,7 @@ ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\BaselinePolicy.xml" -BinaryFilePath "
 
 ---
 
-<a id="08-endpoints-configure-wdac-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-configure-wdac-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to generate a baseline WDAC policy, enable Audit Mode, and configure local registry parameters.
@@ -18482,7 +18483,7 @@ if ($Vulnerable) {
 
 ---
 
-<a id="08-endpoints-configure-wdac-md-sources-compliance-references"></a>
+<div id="08-endpoints-configure-wdac-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.8.14.3 (Deploy Windows Defender Application Control)
 * **ANSSI AD Hardening Guide**: Recommendations regarding application security and driver/code signing enforcement.
@@ -18490,19 +18491,19 @@ if ($Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-enable-bitlocker-md"></a>
+<div id="08-endpoints-enable-bitlocker-md"></div>
 
-<a id="08-endpoints-enable-bitlocker-md-req-end-012-enable-bitlocker-and-network-unlock"></a>
+<div id="08-endpoints-enable-bitlocker-md-req-end-012-enable-bitlocker-and-network-unlock"></div>
 # [REQ-END-012] Enable BitLocker and Network Unlock
 
-<a id="08-endpoints-enable-bitlocker-md-target-scope"></a>
+<div id="08-endpoints-enable-bitlocker-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional.
 
 ---
 
-<a id="08-endpoints-enable-bitlocker-md-implementation-details"></a>
+<div id="08-endpoints-enable-bitlocker-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -18520,7 +18521,7 @@ if ($Vulnerable) {
 
 ---
 
-<a id="08-endpoints-enable-bitlocker-md-rationale"></a>
+<div id="08-endpoints-enable-bitlocker-md-rationale"></div>
 ## Rationale
 BitLocker Drive Encryption protects the operating system volume from offline attacks, data tampering, and data theft when the device is powered off or stolen. Without full disk encryption, an attacker with physical access to a workstation can extract the hard drive, mount it on a non-secure system, bypass operating system security controls, dump local password databases (SAM), and access cached domain credentials.
 
@@ -18528,7 +18529,7 @@ Enforcing specific BitLocker startup parameters, such as a minimum PIN length of
 
 To maximize security, standard endpoints (Tier 2) should use **BitLocker Network Unlock** to prevent operational overhead in managing startup PINs for thousands of workstations. 
 
-<a id="08-endpoints-enable-bitlocker-md-how-bitlocker-network-unlock-works"></a>
+<div id="08-endpoints-enable-bitlocker-md-how-bitlocker-network-unlock-works"></div>
 ### How BitLocker Network Unlock Works
 BitLocker Network Unlock allows domain-joined workstations connected to the wired corporate LAN to automatically unlock their OS drives on reboot, while still requiring a backup PIN or recovery key when disconnected from the corporate network.
 
@@ -18553,7 +18554,7 @@ If the workstation is stolen or boots outside the local LAN (e.g., on a public n
 
 ---
 
-<a id="08-endpoints-enable-bitlocker-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-enable-bitlocker-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Wired Network Required**: Network Unlock operates in the pre-boot UEFI phase. Wireless network adapters are not active at this stage; workstations must be connected to the physical corporate switch via an Ethernet cable.
 * **UEFI and TPM Requirements**: Client computers must support UEFI DHCP drivers, native UEFI boot (Legacy CSM disabled), and have an active TPM 1.2 or 2.0 chip.
@@ -18561,13 +18562,13 @@ If the workstation is stolen or boots outside the local LAN (e.g., on a public n
 
 ---
 
-<a id="08-endpoints-enable-bitlocker-md-implementation-steps"></a>
+<div id="08-endpoints-enable-bitlocker-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-enable-bitlocker-md-option-a-group-policy-and-server-configuration-preferred"></a>
+<div id="08-endpoints-enable-bitlocker-md-option-a-group-policy-and-server-configuration-preferred"></div>
 ### Option A: Group Policy and Server Configuration (Preferred)
 
-<a id="08-endpoints-enable-bitlocker-md-step-1-configure-the-wds-server-for-network-unlock"></a>
+<div id="08-endpoints-enable-bitlocker-md-step-1-configure-the-wds-server-for-network-unlock"></div>
 #### Step 1: Configure the WDS Server for Network Unlock
 1. Install the **Windows Deployment Services (WDS)** role on an internal Windows Server.
 2. In Server Manager, select **Add Roles and Features** and check **BitLocker Network Unlock** under Features.
@@ -18576,7 +18577,7 @@ If the workstation is stolen or boots outside the local LAN (e.g., on a public n
 5. Import the `.pfx` private key certificate into the local WDS server's **Local Computer\Personal** certificate store.
 6. Restart the WDS service (`wdssvc`).
 
-<a id="08-endpoints-enable-bitlocker-md-step-2-distribute-the-network-unlock-certificate-via-gpo"></a>
+<div id="08-endpoints-enable-bitlocker-md-step-2-distribute-the-network-unlock-certificate-via-gpo"></div>
 #### Step 2: Distribute the Network Unlock Certificate via GPO
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit your GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
@@ -18585,7 +18586,7 @@ If the workstation is stolen or boots outside the local LAN (e.g., on a public n
 4. Right-click **BitLocker Network Unlock** and select **Add Network Unlock Certificate**.
 5. Import the public `.cer` file exported in Step 1.
 
-<a id="08-endpoints-enable-bitlocker-md-step-3-enforce-gpo-bitlocker-settings"></a>
+<div id="08-endpoints-enable-bitlocker-md-step-3-enforce-gpo-bitlocker-settings"></div>
 #### Step 3: Enforce GPO BitLocker Settings
 1. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption\Operating System Drives`
@@ -18606,7 +18607,7 @@ If the workstation is stolen or boots outside the local LAN (e.g., on a public n
 
 ---
 
-<a id="08-endpoints-enable-bitlocker-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-enable-bitlocker-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to audit and configure BitLocker parameters.
@@ -18706,7 +18707,7 @@ if (Test-Path $FveRegPath) {
 
 ---
 
-<a id="08-endpoints-enable-bitlocker-md-sources-compliance-references"></a>
+<div id="08-endpoints-enable-bitlocker-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.2.1.1 (Require additional authentication at startup), Section 18.2.1.5 (Allow Network Unlock at startup)
 * **ANSSI AD Hardening Guide**: Recommendations regarding endpoint encryption and physical key storage security.
@@ -18714,13 +18715,13 @@ if (Test-Path $FveRegPath) {
 
 ---
 
-<a id="08-endpoints-enable-bitlocker-md-rationale"></a>
+<div id="08-endpoints-enable-bitlocker-md-rationale"></div>
 ## Rationale
 BitLocker Drive Encryption protects the operating system volume from offline attacks, data tampering, and data theft when the device is powered off or stolen. Without full disk encryption, an attacker with physical access to a workstation can extract the hard drive, mount it on a non-secure system, bypass operating system security controls, dump local password databases (SAM), and access cached domain credentials.
 
 To maximize security, standard endpoints (Tier 2) should use **BitLocker Network Unlock** to prevent operational overhead in managing startup PINs for thousands of workstations. 
 
-<a id="08-endpoints-enable-bitlocker-md-how-bitlocker-network-unlock-works"></a>
+<div id="08-endpoints-enable-bitlocker-md-how-bitlocker-network-unlock-works"></div>
 ### How BitLocker Network Unlock Works
 BitLocker Network Unlock allows domain-joined workstations connected to the wired corporate LAN to automatically unlock their OS drives on reboot, while still requiring a backup PIN or recovery key when disconnected from the corporate network.
 
@@ -18745,7 +18746,7 @@ If the workstation is stolen or boots outside the local LAN (e.g., on a public n
 
 ---
 
-<a id="08-endpoints-enable-bitlocker-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-enable-bitlocker-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Wired Network Required**: Network Unlock operates in the pre-boot UEFI phase. Wireless network adapters are not active at this stage; workstations must be connected to the physical corporate switch via an Ethernet cable.
 * **UEFI and TPM Requirements**: Client computers must support UEFI DHCP drivers, native UEFI boot (Legacy CSM disabled), and have an active TPM 1.2 or 2.0 chip.
@@ -18753,13 +18754,13 @@ If the workstation is stolen or boots outside the local LAN (e.g., on a public n
 
 ---
 
-<a id="08-endpoints-enable-bitlocker-md-implementation-steps"></a>
+<div id="08-endpoints-enable-bitlocker-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-enable-bitlocker-md-option-a-group-policy-and-server-configuration-preferred"></a>
+<div id="08-endpoints-enable-bitlocker-md-option-a-group-policy-and-server-configuration-preferred"></div>
 ### Option A: Group Policy and Server Configuration (Preferred)
 
-<a id="08-endpoints-enable-bitlocker-md-step-1-configure-the-wds-server-for-network-unlock"></a>
+<div id="08-endpoints-enable-bitlocker-md-step-1-configure-the-wds-server-for-network-unlock"></div>
 #### Step 1: Configure the WDS Server for Network Unlock
 1. Install the **Windows Deployment Services (WDS)** role on an internal Windows Server.
 2. In Server Manager, select **Add Roles and Features** and check **BitLocker Network Unlock** under Features.
@@ -18768,7 +18769,7 @@ If the workstation is stolen or boots outside the local LAN (e.g., on a public n
 5. Import the `.pfx` private key certificate into the local WDS server's **Local Computer\Personal** certificate store.
 6. Restart the WDS service (`wdssvc`).
 
-<a id="08-endpoints-enable-bitlocker-md-step-2-distribute-the-network-unlock-certificate-via-gpo"></a>
+<div id="08-endpoints-enable-bitlocker-md-step-2-distribute-the-network-unlock-certificate-via-gpo"></div>
 #### Step 2: Distribute the Network Unlock Certificate via GPO
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit your GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
@@ -18777,7 +18778,7 @@ If the workstation is stolen or boots outside the local LAN (e.g., on a public n
 4. Right-click **BitLocker Network Unlock** and select **Add Network Unlock Certificate**.
 5. Import the public `.cer` file exported in Step 1.
 
-<a id="08-endpoints-enable-bitlocker-md-step-3-enforce-gpo-bitlocker-settings"></a>
+<div id="08-endpoints-enable-bitlocker-md-step-3-enforce-gpo-bitlocker-settings"></div>
 #### Step 3: Enforce GPO BitLocker Settings
 1. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption\Operating System Drives`
@@ -18792,7 +18793,7 @@ If the workstation is stolen or boots outside the local LAN (e.g., on a public n
 
 ---
 
-<a id="08-endpoints-enable-bitlocker-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-enable-bitlocker-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to audit and configure BitLocker parameters.
@@ -18859,7 +18860,7 @@ Write-Host "`n    - AllowNetworkUnlock Registry Value: $NetUnlockSetting (Requir
 
 ---
 
-<a id="08-endpoints-enable-bitlocker-md-sources-compliance-references"></a>
+<div id="08-endpoints-enable-bitlocker-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.2.1.1 (Require additional authentication at startup), Section 18.2.1.5 (Allow Network Unlock at startup)
 * **ANSSI AD Hardening Guide**: Recommendations regarding endpoint encryption and physical key storage security.
@@ -18867,26 +18868,26 @@ Write-Host "`n    - AllowNetworkUnlock Registry Value: $NetUnlockSetting (Requir
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-configure-uefi-security-md"></a>
+<div id="08-endpoints-configure-uefi-security-md"></div>
 
-<a id="08-endpoints-configure-uefi-security-md-req-end-013-uefi-firmware-security-hardening"></a>
+<div id="08-endpoints-configure-uefi-security-md-req-end-013-uefi-firmware-security-hardening"></div>
 # [REQ-END-013] UEFI Firmware Security Hardening
 
-<a id="08-endpoints-configure-uefi-security-md-target-scope"></a>
+<div id="08-endpoints-configure-uefi-security-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-configure-uefi-security-md-implementation-details"></a>
+<div id="08-endpoints-configure-uefi-security-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**: Hardware/UEFI Firmware Configuration Menu
 
 ---
 
-<a id="08-endpoints-configure-uefi-security-md-rationale"></a>
+<div id="08-endpoints-configure-uefi-security-md-rationale"></div>
 ## Rationale
 Standard Tier 2 endpoints (such as employee laptops and workstations) and member servers are frequently exposed to physical theft, loss, and unauthorized local access in branch offices or remote environments. If the firmware on these systems is left unsecured, an attacker can modify boot settings, bypass operating system security controls, or execute physical DMA and offline decryption attacks.
 
@@ -18900,7 +18901,7 @@ Securing the firmware level ensures:
 
 ---
 
-<a id="08-endpoints-configure-uefi-security-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-configure-uefi-security-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Enterprise Management**: Configuring UEFI passwords manually across thousands of endpoints is administratively impractical. Enterprise deployment tools (such as Dell Command | Configure, HP Client Management Script Library, or Lenovo BIOS WMI interfaces) must be used to automate setting and updating BIOS passwords.
 * **Imaging Workflows**: Standard corporate imaging (PXE boot) requires network boot to be temporarily enabled. If PXE is required, it must be restricted to authorized enterprise subnets and secured with PXE access passwords in the deployment console (e.g., MECM/SCCM).
@@ -18908,15 +18909,15 @@ Securing the firmware level ensures:
 
 ---
 
-<a id="08-endpoints-configure-uefi-security-md-implementation-steps"></a>
+<div id="08-endpoints-configure-uefi-security-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-configure-uefi-security-md-option-a-uefi-firmware-configuration-preferred"></a>
+<div id="08-endpoints-configure-uefi-security-md-option-a-uefi-firmware-configuration-preferred"></div>
 ### Option A: UEFI Firmware Configuration (Preferred)
 
 UEFI parameters can be configured manually on individual systems or programmatically automated using enterprise vendor tools.
 
-<a id="08-endpoints-configure-uefi-security-md-1-manual-uefi-configuration-small-environments-or-standalone-servers"></a>
+<div id="08-endpoints-configure-uefi-security-md-1-manual-uefi-configuration-small-environments-or-standalone-servers"></div>
 #### 1. Manual UEFI Configuration (Small Environments or Standalone Servers)
 1. Restart the system and press the vendor-specific key during startup POST (typically Delete, F2, F10, or F12) to enter the UEFI utility.
 2. Locate the **Security** tab:
@@ -18942,7 +18943,7 @@ UEFI parameters can be configured manually on individual systems or programmatic
    * Locate the option for **BIOS Flash Protection** or **Firmware Rollback Protection** and set it to **Enabled** or **Block Downgrades**.
 7. Save settings and exit the utility.
 
-<a id="08-endpoints-configure-uefi-security-md-2-programmatic-configuration-enterprise-deployment"></a>
+<div id="08-endpoints-configure-uefi-security-md-2-programmatic-configuration-enterprise-deployment"></div>
 #### 2. Programmatic Configuration (Enterprise Deployment)
 Use OEM utilities to deploy the UEFI password and boot configuration:
 * **Dell Systems**: Use Dell Command | Configure (`cctk.exe`):
@@ -18969,7 +18970,7 @@ Set-HPBiosSettingValue -Setting "Memory Overwrite Request" -Value "Enable"
 
 ---
 
-<a id="08-endpoints-configure-uefi-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-configure-uefi-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 While hardware firmware settings cannot be directly written via standard Windows registry keys, the current state of the local UEFI boot environment and system BIOS characteristics can be programmatically audited.
@@ -19026,7 +19027,7 @@ if ($BiosDetails) {
 
 ---
 
-<a id="08-endpoints-configure-uefi-security-md-sources-compliance-references"></a>
+<div id="08-endpoints-configure-uefi-security-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8 (Device Guard/VBS prerequisites)
@@ -19035,19 +19036,19 @@ if ($BiosDetails) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md"></a>
+<div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md"></div>
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-req-end-014-enable-hardware-virtualization-and-dma-protection"></a>
+<div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-req-end-014-enable-hardware-virtualization-and-dma-protection"></div>
 # [REQ-END-014] Enable Hardware Virtualization and DMA Protection
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-target-scope"></a>
+<div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-implementation-details"></a>
+<div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -19056,7 +19057,7 @@ if ($BiosDetails) {
 
 ---
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-rationale"></a>
+<div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-rationale"></div>
 ## Rationale
 Operating-system-level security layers such as Virtualization-Based Security (VBS) and Windows Defender Credential Guard are designed to isolate credentials and kernel code integrity in a virtual secure environment. However, these layers rely entirely on the security of the underlying hardware platform and motherboard architecture.
 
@@ -19067,7 +19068,7 @@ Enabling hardware virtualization and DMA protection ensures:
 
 ---
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Hardware Requirements**: Systems must support CPU virtualization, Second Level Address Translation (SLAT), and input-output memory management (IOMMU). Modern hardware supports these features by default, but older server models or legacy clients may need upgrades.
 * **External Device Blocking**: Enforcing Kernel DMA Protection may prevent non-compliant hot-plug peripherals (such as legacy Thunderbolt docking stations or older external GPUs) from running if they do not support DMA remapping. To balance usability on standard endpoints, policies can be configured to allow external devices only after a user logs on and unlocks the session.
@@ -19075,10 +19076,10 @@ Enabling hardware virtualization and DMA protection ensures:
 
 ---
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-implementation-steps"></a>
+<div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 To enforce Kernel DMA Protection across standard client workstations and member servers, implement the following GPO settings:
@@ -19096,12 +19097,12 @@ To enforce Kernel DMA Protection across standard client workstations and member 
 
 ---
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Configure local registry keys to enforce Kernel DMA Protection and programmatically audit the hardware security baseline.
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-1-local-remediation-enforce-kernel-dma-protection"></a>
+<div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-1-local-remediation-enforce-kernel-dma-protection"></div>
 #### 1. Local Remediation (Enforce Kernel DMA Protection)
 
 Run the following script to configure the Kernel DMA Protection policy locally:
@@ -19125,7 +19126,7 @@ Set-ItemProperty -Path $RegPath -Name "DeviceEnumerationPolicy" -Value 1 -Type D
 Write-Host "Status: Kernel DMA Protection registry configuration applied." -ForegroundColor Green
 ```
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-2-local-audit-tpm-virtualization-and-dma-support"></a>
+<div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-2-local-audit-tpm-virtualization-and-dma-support"></div>
 #### 2. Local Audit (TPM, Virtualization, and DMA Support)
 
 Run the following script to audit the status of the required hardware security components:
@@ -19189,7 +19190,7 @@ try {
 
 ---
 
-<a id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-sources-compliance-references"></a>
+<div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.19.1 (Configure Enable Kernel DMA Protection), Section 18.8.14.1 (Turn On Virtualization Based Security)
@@ -19198,19 +19199,19 @@ try {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-disable-wpbt-md"></a>
+<div id="08-endpoints-disable-wpbt-md"></div>
 
-<a id="08-endpoints-disable-wpbt-md-req-end-015-disable-windows-platform-binary-table-wpbt"></a>
+<div id="08-endpoints-disable-wpbt-md-req-end-015-disable-windows-platform-binary-table-wpbt"></div>
 # [REQ-END-015] Disable Windows Platform Binary Table (WPBT)
 
-<a id="08-endpoints-disable-wpbt-md-target-scope"></a>
+<div id="08-endpoints-disable-wpbt-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-disable-wpbt-md-implementation-details"></a>
+<div id="08-endpoints-disable-wpbt-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
@@ -19219,7 +19220,7 @@ try {
 
 ---
 
-<a id="08-endpoints-disable-wpbt-md-rationale"></a>
+<div id="08-endpoints-disable-wpbt-md-rationale"></div>
 ## Rationale
 The Windows Platform Binary Table (WPBT) is an ACPI firmware table that allows hardware manufacturers (OEMs) to execute proprietary binaries in kernel space during the Windows boot phase. Windows automatically extracts the binary from the table and runs it with system privileges before security software, third-party agents, or standard driver verifications are fully initialized.
 
@@ -19232,17 +19233,17 @@ Disabling WPBT execution prevents Windows from parsing the ACPI table and runnin
 
 ---
 
-<a id="08-endpoints-disable-wpbt-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-disable-wpbt-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **OEM Software Functionality**: Disabling the WPBT will stop manufacturer-embedded software (such as automated support assistants, system registration tools, or OEM-specific recovery software) from installing on a fresh OS deployment. System installation pipelines must manually deploy any validated, business-essential hardware utility packages rather than relying on automatic firmware injection.
 * **Deployment Timing**: The registry setting `DisableWpbtExecution` must be present prior to the initial Windows boot sequence to completely block WPBT payload execution on a newly installed OS. Applying the registry key via GPO will prevent subsequent runs or updates but will not retroactively clean up files that were already executed during the initial setup. For maximum protection, this registry modification should be integrated directly into reference installation media (e.g., via `autounattend.xml` or custom WIM injection).
 
 ---
 
-<a id="08-endpoints-disable-wpbt-md-implementation-steps"></a>
+<div id="08-endpoints-disable-wpbt-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-disable-wpbt-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-disable-wpbt-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 Because there is no default ADMX administrative template to manage WPBT execution, the setting must be configured as a Registry Preference under the endpoint policy:
@@ -19263,7 +19264,7 @@ Because there is no default ADMX administrative template to manage WPBT executio
 
 ---
 
-<a id="08-endpoints-disable-wpbt-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-disable-wpbt-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following script to configure the registry setting locally on the system:
@@ -19317,7 +19318,7 @@ if ($RegistryValue) {
 
 ---
 
-<a id="08-endpoints-disable-wpbt-md-sources-compliance-references"></a>
+<div id="08-endpoints-disable-wpbt-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
 * **Microsoft Windows Security**: Device Guard and UEFI Platform Security guidelines.
@@ -19325,19 +19326,19 @@ if ($RegistryValue) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-configure-user-rights-assignments-md"></a>
+<div id="08-endpoints-configure-user-rights-assignments-md"></div>
 
-<a id="08-endpoints-configure-user-rights-assignments-md-req-end-016-configure-user-rights-assignments"></a>
+<div id="08-endpoints-configure-user-rights-assignments-md-req-end-016-configure-user-rights-assignments"></div>
 # [REQ-END-016] Configure User Rights Assignments
 
-<a id="08-endpoints-configure-user-rights-assignments-md-target-scope"></a>
+<div id="08-endpoints-configure-user-rights-assignments-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
 
 ---
 
-<a id="08-endpoints-configure-user-rights-assignments-md-implementation-details"></a>
+<div id="08-endpoints-configure-user-rights-assignments-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -19346,7 +19347,7 @@ if ($RegistryValue) {
 
 ---
 
-<a id="08-endpoints-configure-user-rights-assignments-md-rationale"></a>
+<div id="08-endpoints-configure-user-rights-assignments-md-rationale"></div>
 ## Rationale
 User Rights Assignments (URAs) govern the specific actions that security principals (users, groups, and service accounts) can perform on a system. Insecure default URA mappings can be abused by attackers to elevate privileges, compromise credentials, or establish persistence:
 
@@ -19357,17 +19358,17 @@ User Rights Assignments (URAs) govern the specific actions that security princip
 
 ---
 
-<a id="08-endpoints-configure-user-rights-assignments-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-configure-user-rights-assignments-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Service Account Operations**: Certain third-party agents, backup programs, database servers, and monitoring platforms require specific privileges (such as `SeBackupPrivilege`, `SeImpersonatePrivilege`, or `SeServiceLogonRight`) to function. Standard service accounts must be analyzed and added to the GPO if legitimate operations fail.
 * **Administrative Tooling**: Administrative tools that require system debugging or hardware level configuration may require `SeDebugPrivilege` or `SeLoadDriverPrivilege` which remain allocated to the local Administrators group.
 
 ---
 
-<a id="08-endpoints-configure-user-rights-assignments-md-implementation-steps"></a>
+<div id="08-endpoints-configure-user-rights-assignments-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-configure-user-rights-assignments-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-configure-user-rights-assignments-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management workstation.
@@ -19406,7 +19407,7 @@ User Rights Assignments (URAs) govern the specific actions that security princip
 
 ---
 
-<a id="08-endpoints-configure-user-rights-assignments-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-configure-user-rights-assignments-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Configure User Rights Assignments locally using `secedit.exe` and PowerShell.
@@ -19605,7 +19606,7 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 ---
 
-<a id="08-endpoints-configure-user-rights-assignments-md-sources-compliance-references"></a>
+<div id="08-endpoints-configure-user-rights-assignments-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 2.2 (User Rights Assignment)
 * **ANSSI AD Hardening Guide**: Recommendations on restricting privileged capabilities and limiting local privileges on administrative workstations
@@ -19614,19 +19615,19 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-harden-dma-and-physical-security-md"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md"></div>
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-req-end-017-harden-dma-and-physical-security"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-req-end-017-harden-dma-and-physical-security"></div>
 # [REQ-END-017] Harden DMA and Physical Security
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-target-scope"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Member Servers, Tier 2 Clients (Workstations / Laptops)
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above)
 
 ---
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-implementation-details"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Paths / Registry Locations**:
@@ -19653,7 +19654,7 @@ Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 
 ---
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-rationale"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-rationale"></div>
 ## Rationale
 Physical access to an endpoint introduces distinct attack vectors that bypass traditional OS privilege separation:
 
@@ -19666,7 +19667,7 @@ Physical access to an endpoint introduces distinct attack vectors that bypass tr
 
 ---
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Standby Disabled**: Workstations and laptops will bypass standby states and enter hibernation when closed or idle. This preserves battery but may increase the time required to resume user sessions by a few seconds.
 * **DMA Device Support**: Non-compliant external peripherals (such as legacy docking stations or external display adapters) that require DMA without supporting remapping may not work until the user logs on, or may be blocked entirely.
@@ -19674,17 +19675,17 @@ Physical access to an endpoint introduces distinct attack vectors that bypass tr
 
 ---
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-implementation-steps"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO targeting endpoints (e.g., `GPO_Hardening_DMA_Physical`).
 3. Configure the following settings:
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-1-power-management-disable-standby"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-1-power-management-disable-standby"></div>
 #### 1. Power Management (Disable Standby)
 Navigate to:
 `Computer Configuration\Administrative Templates\System\Power Management\Sleep Settings`
@@ -19693,7 +19694,7 @@ Navigate to:
 * **Policy**: `Require a password when a computer wakes (plugged in)` -> **Enabled**
 * **Policy**: `Require a password when a computer wakes (on battery)` -> **Enabled**
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-2-bitlocker-removable-storage-dma"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-2-bitlocker-removable-storage-dma"></div>
 #### 2. BitLocker Removable Storage & DMA
 Navigate to:
 `Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption`
@@ -19704,7 +19705,7 @@ Navigate to:
 * **Policy**: `Deny write access to removable drives not protected by BitLocker` -> **Enabled**
   * Check **Do not allow write access to devices configured in another organization** -> **Disabled** (value 0 / False)
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-3-device-installation-restrictions-block-sbp-2-setup-class"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-3-device-installation-restrictions-block-sbp-2-setup-class"></div>
 #### 3. Device Installation Restrictions (Block SBP-2 Setup Class)
 Navigate to:
 `Computer Configuration\Administrative Templates\System\Device Installation\Device Installation Restrictions`
@@ -19712,7 +19713,7 @@ Navigate to:
   * Click **Show...** and enter: `{d48179be-ec20-11d1-b6b8-00c04fa372a7}`
   * Check **Also apply to matching devices that are already installed** -> **Enabled** (value 1 / True)
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-4-kernel-dma-protection"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-4-kernel-dma-protection"></div>
 #### 4. Kernel DMA Protection
 Navigate to:
 `Computer Configuration\Administrative Templates\System\Kernel DMA Protection`
@@ -19720,7 +19721,7 @@ Navigate to:
 
 ---
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following scripts locally to apply DMA, Sleep, and BitLocker USB registry parameters.
@@ -19855,7 +19856,7 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 1 [Block
 
 ---
 
-<a id="08-endpoints-harden-dma-and-physical-security-md-sources-compliance-references"></a>
+<div id="08-endpoints-harden-dma-and-physical-security-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.2.1 (BitLocker settings), Section 18.8.19.1 (Kernel DMA Protection), Section 18.8.21.3 (Device Installation restrictions)
 * **ANSSI AD Hardening Guide**: Recommendations on workstation storage encryption and hardware interface security
@@ -19863,19 +19864,19 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 1 [Block
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-configure-account-policies-md"></a>
+<div id="08-endpoints-configure-account-policies-md"></div>
 
-<a id="08-endpoints-configure-account-policies-md-req-end-018-configure-account-and-password-policies"></a>
+<div id="08-endpoints-configure-account-policies-md-req-end-018-configure-account-and-password-policies"></div>
 # [REQ-END-018] Configure Account and Password Policies
 
-<a id="08-endpoints-configure-account-policies-md-target-scope"></a>
+<div id="08-endpoints-configure-account-policies-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
 
 ---
 
-<a id="08-endpoints-configure-account-policies-md-implementation-details"></a>
+<div id="08-endpoints-configure-account-policies-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Paths / Registry Locations**:
@@ -19932,7 +19933,7 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 1 [Block
 
 ---
 
-<a id="08-endpoints-configure-account-policies-md-rationale"></a>
+<div id="08-endpoints-configure-account-policies-md-rationale"></div>
 ## Rationale
 Securing authentication parameters and account controls reduces the risk of password attacks and session hijackings:
 
@@ -19950,7 +19951,7 @@ Securing authentication parameters and account controls reduces the risk of pass
 
 ---
 
-<a id="08-endpoints-configure-account-policies-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-configure-account-policies-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Account Lockouts**: Legitimate users who forget their passwords may lock themselves out. Standard procedures must exist for administrative reset of locked accounts.
 * **Smart Card Removal**: Users must be trained to carry their smart cards with them, which automatically locks the session. Re-authenticating requires inserting the card and entering the PIN.
@@ -19962,13 +19963,13 @@ Securing authentication parameters and account controls reduces the risk of pass
 
 ---
 
-<a id="08-endpoints-configure-account-policies-md-implementation-steps"></a>
+<div id="08-endpoints-configure-account-policies-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-configure-account-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-configure-account-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="08-endpoints-configure-account-policies-md-step-1-configure-lockout-and-password-policies-domain-wide"></a>
+<div id="08-endpoints-configure-account-policies-md-step-1-configure-lockout-and-password-policies-domain-wide"></div>
 #### Step 1: Configure Lockout and Password Policies (Domain-wide)
 These settings must be configured in the **Default Domain Policy** or a GPO linked to the Domain root to apply domain-wide:
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
@@ -19988,7 +19989,7 @@ These settings must be configured in the **Default Domain Policy** or a GPO link
      * **Password must meet complexity requirements**: `Enabled`
      * **Store passwords using reversible encryption**: `Disabled`
 
-<a id="08-endpoints-configure-account-policies-md-step-2-configure-local-security-options"></a>
+<div id="08-endpoints-configure-account-policies-md-step-2-configure-local-security-options"></div>
 #### Step 2: Configure Local Security Options
 In the endpoints GPO (e.g., `GPO_Hardening_Workstations`), navigate to:
 `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
@@ -20001,7 +20002,7 @@ In the endpoints GPO (e.g., `GPO_Hardening_Workstations`), navigate to:
 * **Policy**: `Network access: Allow anonymous SID/Name translation` -> Set to **Disabled** (value 0)
 * **Policy**: `Network security: Allow LocalSystem NULL session fallback` -> Set to **Disabled** (value 0)
 
-<a id="08-endpoints-configure-account-policies-md-step-3-configure-hello-for-business-pin-and-microsoft-account-policies"></a>
+<div id="08-endpoints-configure-account-policies-md-step-3-configure-hello-for-business-pin-and-microsoft-account-policies"></div>
 #### Step 3: Configure Hello for Business, PIN and Microsoft Account Policies
 Navigate to:
 `Computer Configuration\Administrative Templates\System\PIN Complexity`
@@ -20017,7 +20018,7 @@ Navigate to:
 * **Policy**: `Use convenience PIN sign-in` -> Set to **Disabled** (value 0)
 * **Policy**: `Allow Microsoft accounts to be optional` -> Set to **Enabled** (value 1)
 
-<a id="08-endpoints-configure-account-policies-md-step-4-configure-pbkdf2-iteration-count-via-gpo-preferences"></a>
+<div id="08-endpoints-configure-account-policies-md-step-4-configure-pbkdf2-iteration-count-via-gpo-preferences"></div>
 #### Step 4: Configure PBKDF2 Iteration Count via GPO Preferences
 Since the PBKDF2 iteration count setting is not exposed in standard ADMX templates, deploy it via Registry GPO Preferences:
 1. Within the endpoints GPO, navigate to:
@@ -20033,7 +20034,7 @@ Since the PBKDF2 iteration count setting is not exposed in standard ADMX templat
 
 ---
 
-<a id="08-endpoints-configure-account-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-configure-account-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Enforce the local security settings and SecEdit configuration locally.
@@ -20367,7 +20368,7 @@ if ($script:Vulnerable) {
 
 ---
 
-<a id="08-endpoints-configure-account-policies-md-sources-compliance-references"></a>
+<div id="08-endpoints-configure-account-policies-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 2.3.7.3 (Accounts: Limit local account use of blank passwords...), Section 2.3.9.5 (Interactive logon: Smart card removal behavior), Section 2.3.10.2 (Microsoft network client: Send unencrypted password), Section 2.3.11.8 (Network access: Allow anonymous SID/Name translation), Section 2.3.11.10 (Network security: Allow LocalSystem NULL session fallback)
 * **ANSSI AD Hardening Guide**: Recommendations on password complexity, reversible encryption blocks, lockout management, and domain member secure channels.
@@ -20376,19 +20377,19 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-configure-user-profile-restrictions-md"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md"></div>
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-req-end-019-configure-user-profile-restrictions"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md-req-end-019-configure-user-profile-restrictions"></div>
 # [REQ-END-019] Configure User Profile Restrictions
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-target-scope"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 Client Workstations
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional
 
 ---
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-implementation-details"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Paths / Registry Locations**:
@@ -20477,7 +20478,7 @@ if ($script:Vulnerable) {
 
 ---
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-rationale"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md-rationale"></div>
 ## Rationale
 Securing user profile characteristics and administrative explorer behaviors prevents exposure of sensitive information, restricts arbitrary file execution pathways, disables unapproved telemetry/consumer features, and locks down potential privilege escalation points:
 
@@ -20497,7 +20498,7 @@ Securing user profile characteristics and administrative explorer behaviors prev
 
 ---
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **User Experience**: Users will still receive notifications while logged in and unlocked. However, when the workstation is locked, they will only see system status indicators, not detailed content banners.
 * **Spotlight Aesthetics**: The lock screen background can still show administrative wallpaper choices, but will not query online Microsoft consumer recommendations.
@@ -20510,10 +20511,10 @@ Securing user profile characteristics and administrative explorer behaviors prev
 
 ---
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-implementation-steps"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 To apply user configuration settings, link the GPO to OUs containing user accounts (or enable GPO Loopback Processing on the computer policy).
@@ -20522,7 +20523,7 @@ To apply user configuration settings, link the GPO to OUs containing user accoun
 2. Edit the appropriate endpoint GPO (e.g., `GPO_Hardening_UserProfile_Restrictions`).
 3. Configure the following settings:
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-1-user-configuration"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md-1-user-configuration"></div>
 #### 1. User Configuration
 Navigate to: `User Configuration\Policies\Administrative Templates\Start Menu and Taskbar\Notifications`
 * **Policy**: `Turn off toast notifications on the lock screen` -> Set to **Enabled**
@@ -20530,7 +20531,7 @@ Navigate to: `User Configuration\Policies\Administrative Templates\Start Menu an
 Navigate to: `User Configuration\Policies\Administrative Templates\Windows Components\Cloud Content`
 * **Policy**: `Do not suggest third-party content in Windows spotlight` -> Set to **Enabled**
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-2-computer-configuration-personalization-system-restrictions"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md-2-computer-configuration-personalization-system-restrictions"></div>
 #### 2. Computer Configuration (Personalization & System Restrictions)
 Navigate to: `Computer Configuration\Administrative Templates\Control Panel\Personalization`
 * **Policy**: `Prevent enabling lock screen camera` -> Set to **Enabled**
@@ -20576,7 +20577,7 @@ Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings
 * **Policy**: `System objects: Strengthen default permissions of internal system objects (e.g. Symbolic Links)` -> Set to **Enabled**
 * **Policy**: `Devices: Allowed to format and eject removable media` -> Set to **Administrators**
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-3-deploy-custom-settings-via-gpo-preferences-and-system-mitigations"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md-3-deploy-custom-settings-via-gpo-preferences-and-system-mitigations"></div>
 #### 3. Deploy Custom Settings via GPO Preferences and System Mitigations
 Configure GPO Preferences registry items or Administrative Templates for the remaining custom settings:
 * **ASLR Force Randomization**: Enable in Exploit Guard mitigation policies or set registry `MoveImages` = `4294967295` (0xFFFFFFFF).
@@ -20591,7 +20592,7 @@ Configure GPO Preferences registry items or Administrative Templates for the rem
 
 ---
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Run the following script locally to configure user and system registry restrictions.
@@ -20923,7 +20924,7 @@ if ($script:Vulnerable) {
 
 ---
 
-<a id="08-endpoints-configure-user-profile-restrictions-md-sources-compliance-references"></a>
+<div id="08-endpoints-configure-user-profile-restrictions-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.2.1 (Ensure 'Turn off toast notifications on the lock screen' is set to 'Enabled'), Section 18.8.3.1 (Ensure 'Do not suggest third-party content in Windows spotlight' is set to 'Enabled'), Section 18.8.21.1 (Ensure 'Always install with elevated privileges' is set to 'Disabled')
 * **Microsoft Windows Security Baselines**: User configuration guidelines
@@ -20933,19 +20934,19 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-configure-exploit-protection-md"></a>
+<div id="08-endpoints-configure-exploit-protection-md"></div>
 
-<a id="08-endpoints-configure-exploit-protection-md-req-end-020-configure-exploit-protection-profile"></a>
+<div id="08-endpoints-configure-exploit-protection-md-req-end-020-configure-exploit-protection-profile"></div>
 # [REQ-END-020] Configure Exploit Protection Profile
 
-<a id="08-endpoints-configure-exploit-protection-md-target-scope"></a>
+<div id="08-endpoints-configure-exploit-protection-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-configure-exploit-protection-md-implementation-details"></a>
+<div id="08-endpoints-configure-exploit-protection-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
@@ -20958,7 +20959,7 @@ if ($script:Vulnerable) {
 
 ---
 
-<a id="08-endpoints-configure-exploit-protection-md-rationale"></a>
+<div id="08-endpoints-configure-exploit-protection-md-rationale"></div>
 ## Rationale
 Exploit Protection (the successor to the Enhanced Mitigation Experience Toolkit, or EMET) provides a set of advanced memory and vulnerability mitigations. These mitigations protect both the operating system and applications from memory corruption, buffer overflows, execution redirection, and process hijack attempts. 
 
@@ -20969,7 +20970,7 @@ By enforcing system-wide mitigations:
 4. **Structured Exception Handler Overwrite Protection (SEHOP)**: Blocks exploits that overwrite Structured Exception Handlers (SEH) to gain control of execution paths during error handling.
 5. **Heap Termination on Corruption**: Immediately terminates a process if corruption is detected in its heap. This blocks heap-based buffer overflow exploitation before execution control can be seized.
 
-<a id="08-endpoints-configure-exploit-protection-md-application-specific-hardening"></a>
+<div id="08-endpoints-configure-exploit-protection-md-application-specific-hardening"></div>
 ### Application-Specific Hardening
 In addition to global default policies, specific security mitigations are applied to common productivity applications, browsers, document viewers, and scripting runtimes that represent the primary initial access target vectors:
 * **Microsoft Office (Word, Excel, PowerPoint, Outlook, Access, Publisher, Visio, Lync/Skype)**: High-risk entry points. Enabling advanced Payload protections (Export/Import Address Filtering and Return-Oriented Programming mitigations) prevents memory bypass techniques used in malicious macro files and document exploits. Image loading policies are hardened to block loading of remote libraries from UNC shares.
@@ -20980,7 +20981,7 @@ In addition to global default policies, specific security mitigations are applie
 
 ---
 
-<a id="08-endpoints-configure-exploit-protection-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-configure-exploit-protection-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Application Crashes**: Strict system-wide mitigations, particularly Mandatory ASLR (`ForceRelocateImages`) and DEP, can cause legacy, proprietary, or unsigned applications that are not compiled to support dynamic base relocations to crash upon launching.
 * **Orchestration/Agent Conflicts**: Certain older monitoring agents or custom management wrappers that perform memory hook injections may fail when CFG or strict memory mitigations are enforced.
@@ -20988,13 +20989,13 @@ In addition to global default policies, specific security mitigations are applie
 
 ---
 
-<a id="08-endpoints-configure-exploit-protection-md-implementation-steps"></a>
+<div id="08-endpoints-configure-exploit-protection-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-configure-exploit-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-configure-exploit-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<a id="08-endpoints-configure-exploit-protection-md-step-1-generate-the-reference-xml-configuration-file"></a>
+<div id="08-endpoints-configure-exploit-protection-md-step-1-generate-the-reference-xml-configuration-file"></div>
 #### Step 1: Generate the Reference XML Configuration File
 Before configuring the GPO, you must create a reference XML file containing the desired Exploit Protection mitigations:
 1. On a reference workstation, open the **Windows Security** app.
@@ -21012,7 +21013,7 @@ Before configuring the GPO, you must create a reference XML file containing the 
 6. Save the file as `ExploitProtectionSettings.xml`.
 7. Copy this XML file to a location accessible by target endpoints, or distribute it to local target directories (e.g., `C:\ProgramData\ExploitProtection\ExploitProtectionSettings.xml`) via Group Policy Preferences (Files).
 
-<a id="08-endpoints-configure-exploit-protection-md-step-2-configure-the-group-policy-setting"></a>
+<div id="08-endpoints-configure-exploit-protection-md-step-2-configure-the-group-policy-setting"></div>
 #### Step 2: Configure the Group Policy Setting
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management workstation.
 2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_Endpoints`).
@@ -21026,7 +21027,7 @@ Before configuring the GPO, you must create a reference XML file containing the 
 
 ---
 
-<a id="08-endpoints-configure-exploit-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-configure-exploit-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the exploit protection profile locally on individual systems or standalone hosts.
@@ -21317,7 +21318,7 @@ if ($BaselineFailed) {
 
 ---
 
-<a id="08-endpoints-configure-exploit-protection-md-sources-compliance-references"></a>
+<div id="08-endpoints-configure-exploit-protection-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.9.30 (ASR/Exploit Guard Mitigation Policy configurations)
 * **CIS Microsoft Windows 11 Benchmark**: Section 18.9.30 (ASR/Exploit Guard Mitigation Policy configurations)
@@ -21327,19 +21328,19 @@ if ($BaselineFailed) {
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md"></a>
+<div id="08-endpoints-disable-safe-mode-for-standard-users-md"></div>
 
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-req-end-021-restrict-safe-mode-access-to-administrators"></a>
+<div id="08-endpoints-disable-safe-mode-for-standard-users-md-req-end-021-restrict-safe-mode-access-to-administrators"></div>
 # [REQ-END-021] Restrict Safe Mode Access to Administrators
 
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-target-scope"></a>
+<div id="08-endpoints-disable-safe-mode-for-standard-users-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-implementation-details"></a>
+<div id="08-endpoints-disable-safe-mode-for-standard-users-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
@@ -21351,7 +21352,7 @@ if ($BaselineFailed) {
 
 ---
 
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-rationale"></a>
+<div id="08-endpoints-disable-safe-mode-for-standard-users-md-rationale"></div>
 ## Rationale
 Malicious actors with standard user credentials can potentially bypass local security policies, local endpoint detection and response (EDR) agents, and group policy restrictions by booting the system into Safe Mode. In Safe Mode, many security agents and services do not load, creating an environment where local controls can be circumvented.
 
@@ -21361,17 +21362,17 @@ By configuring `SafeModeBlockNonAdmins = 1`:
 
 ---
 
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-disable-safe-mode-for-standard-users-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Administrative Operations**: This setting does not affect local or domain administrative accounts, which can still log in normally to perform repairs.
 * **Troubleshooting Availability**: If a standard user experiences system issues that require Safe Mode, an administrator must log in to the workstation to troubleshoot, which may slightly increase administrative overhead.
 
 ---
 
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-implementation-steps"></a>
+<div id="08-endpoints-disable-safe-mode-for-standard-users-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-disable-safe-mode-for-standard-users-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 Because there is no native Administrative Template (ADMX) policy for this setting, it must be deployed using Group Policy Preferences (GPP) to configure the registry directly.
@@ -21391,7 +21392,7 @@ Because there is no native Administrative Template (ADMX) policy for this settin
 
 ---
 
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-disable-safe-mode-for-standard-users-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the setting locally on standalone systems or during reference image build phases.
@@ -21443,7 +21444,7 @@ exit 1
 
 ---
 
-<a id="08-endpoints-disable-safe-mode-for-standard-users-md-sources-compliance-references"></a>
+<div id="08-endpoints-disable-safe-mode-for-standard-users-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **Australian Cyber Security Centre (ACSC) / ASD**: Windows Hardening Guidelines (SafeModeBlockNonAdmins configuration).
 * **Microsoft Learn**: Windows policies and registry-based mitigations.
@@ -21451,19 +21452,19 @@ exit 1
 
 <div style="page-break-before: always;"></div>
 
-<a id="08-endpoints-block-lolbins-outbound-traffic-md"></a>
+<div id="08-endpoints-block-lolbins-outbound-traffic-md"></div>
 
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-req-end-022-block-outbound-traffic-for-known-lolbins"></a>
+<div id="08-endpoints-block-lolbins-outbound-traffic-md-req-end-022-block-outbound-traffic-for-known-lolbins"></div>
 # [REQ-END-022] Block Outbound Traffic for Known LOLBins
 
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-target-scope"></a>
+<div id="08-endpoints-block-lolbins-outbound-traffic-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
 
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-implementation-details"></a>
+<div id="08-endpoints-block-lolbins-outbound-traffic-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
@@ -21472,7 +21473,7 @@ exit 1
 
 ---
 
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-rationale"></a>
+<div id="08-endpoints-block-lolbins-outbound-traffic-md-rationale"></div>
 ## Rationale
 Malicious actors frequently abuse built-in Windows administrative utilities (known as Living Off the Land Binaries, or LOLBins) to download malicious payloads, exfiltrate sensitive data, and communicate with external command-and-control (C2) servers. Because these binaries are digitally signed by Microsoft and native to the operating system, they bypass traditional application control and endpoint detection solutions.
 
@@ -21480,17 +21481,17 @@ Blocking outbound network communication for binaries that have no legitimate bus
 
 ---
 
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-legacy-impact-compatibility"></a>
+<div id="08-endpoints-block-lolbins-outbound-traffic-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Legitimate Scripts**: Administrative scripts, third-party software deployment installers, or internal software update tools that execute using `cscript.exe`, `wscript.exe`, or `mshta.exe` and require access to network shares or intranet servers will be blocked.
 * **Testing Phase**: Prior to deployment across the entire active domain, organizations must perform audit-mode or scoped pilot-group testing to identify any line-of-business applications requiring exclusions for these binaries. If exclusions are necessary, they should be restricted to specific destination IP addresses, ports, or authorized AD user groups.
 
 ---
 
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-implementation-steps"></a>
+<div id="08-endpoints-block-lolbins-outbound-traffic-md-implementation-steps"></div>
 ## Implementation Steps
 
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-option-a-group-policy-object-gpo-configuration-preferred"></a>
+<div id="08-endpoints-block-lolbins-outbound-traffic-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 Configure outbound firewall rules under a Group Policy Object to block outbound traffic from the designated LOLBins.
@@ -21510,7 +21511,7 @@ Configure outbound firewall rules under a Group Policy Object to block outbound 
 
 ---
 
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-option-b-powershell-registry-configuration-remediation-non-gpo"></a>
+<div id="08-endpoints-block-lolbins-outbound-traffic-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the rules locally on standalone systems or during reference image build phases.
@@ -21630,9 +21631,153 @@ if ($Vulnerable) {
 
 ---
 
-<a id="08-endpoints-block-lolbins-outbound-traffic-md-sources-compliance-references"></a>
+<div id="08-endpoints-block-lolbins-outbound-traffic-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R8 (Administration network subnets), Recommendation R19 (LDAP and name resolution security recommendations)
 * **CIS Microsoft Windows Server 2016 Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
 * **CIS Microsoft Windows 10 Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
 * **Microsoft Learn**: Windows Defender Firewall with Advanced Security Design Guide
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="compliance-anssi-md"></div>
+
+<div id="compliance-anssi-md-anssi-active-directory-hardening-compliance-matrix"></div>
+# ANSSI Active Directory Hardening Compliance Matrix
+
+This document maps the recommendations of the **ANSSI (French National Agency for the Security of Information Systems)** Active Directory Hardening Guide and related secure administration guides to the technical security controls present in this guidebook.
+
+<div id="compliance-anssi-md-mapped-anssi-recommendations"></div>
+## Mapped ANSSI Recommendations
+
+| ID | Recommendation Description | Category | Status | Mapped Technical Control(s) |
+| :--- | :--- | :--- | :--- | :--- |
+| **R1** | Define and implement a logical partitioning model (Tiering) | Tiering / Admin Boundaries | **Covered** | [REQ-ARCH-001](#01-architecture-restrict-tier-logons-md), [REQ-ARCH-002](#01-architecture-restrict-mgmt-protocols-md), [REQ-ARCH-003](#01-architecture-audit-privileged-groups-md) |
+| **R2** | Limit and control administrative privileges | Account Restrictions | **Covered** | [REQ-ARCH-001](#01-architecture-restrict-tier-logons-md), [REQ-END-006](#08-endpoints-restrict-local-admins-md), [REQ-PAW-003](#07-paws-restrict-local-administrators-md) |
+| **R3** | Use dedicated administrative accounts and secure stations | PAW & Admin Accounts | **Covered** | [REQ-ARCH-001](#01-architecture-restrict-tier-logons-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-PAW-002](#07-paws-enable-lsa-protection-md), [REQ-PAW-003](#07-paws-restrict-local-administrators-md), [REQ-PAW-004](#07-paws-enable-bitlocker-md), [REQ-PAW-005](#07-paws-configure-uefi-security-md), [REQ-PAW-006](#07-paws-enable-hardware-virtualization-and-dma-protection-md), [REQ-PAW-007](#07-paws-disable-wpbt-md), [REQ-PAW-008](#07-paws-defender-antivirus-md), [REQ-PAW-009](#07-paws-configure-user-rights-assignments-md), [REQ-PAW-010](#07-paws-enable-vbs-credential-guard-md), [REQ-PAW-011](#07-paws-harden-dma-and-physical-security-md), [REQ-PAW-012](#07-paws-enable-wdac-driver-blocklist-md), [REQ-PAW-013](#07-paws-configure-account-policies-md) |
+| **R4** | Minimize services and software on Domain Controllers | Service Minimization | **Covered** | [REQ-DC-008](#02-domain-controllers-disable-print-spooler-md), [REQ-DC-012](#02-domain-controllers-disable-unnecessary-services-md) |
+| **R5** | Keep Forest and Domain functional levels up-to-date | Functional Levels | **Covered** | [REQ-ARCH-004](#01-architecture-keep-functional-levels-up-to-date-md) |
+| **R6** | Restrict membership of default administrative groups | Privileged Group Audit | **Covered** | [REQ-ARCH-003](#01-architecture-audit-privileged-groups-md), [REQ-ID-010](#03-identities-services-restrict-schema-admins-md) |
+| **R7** | Configure IPsec transport mode for domain isolation | Network Cryptography | **Covered** | [REQ-NET-004](#04-network-firewall-configure-ipsec-domain-isolation-md), [REQ-NET-005](#04-network-firewall-harden-ipsec-cryptography-md) |
+| **R8** | Restrict administration protocols to dedicated subnets and jump hosts | Management Ports & Subnets | **Covered** | [REQ-NET-001](#04-network-firewall-configure-ad-port-matrix-md), [REQ-NET-002](#04-network-firewall-restrict-rpc-dynamic-ports-md), [REQ-NET-003](#04-network-firewall-configure-workstation-isolation-md), [REQ-ARCH-002](#01-architecture-restrict-mgmt-protocols-md) |
+| **R9** | Deploy Local Administrator Password Solution (LAPS) | Local Admin Passwords | **Covered** | [REQ-ID-002](#03-identities-services-enable-laps-md) |
+| **R10** | Restrict authentication delegation and administrative tool execution | AppLocker / Delegation | **Covered** | [REQ-DC-021](#02-domain-controllers-configure-applocker-policies-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md) |
+| **R11** | Enforce NTLM restriction policies | NTLM Restriction | **Covered** | [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md) |
+| **R12** | Disable obsolete name resolution protocols (LLMNR/NetBIOS) | Name Resolution | **Covered** | [REQ-DC-002](#02-domain-controllers-disable-multicast-name-resolution-md), [REQ-END-001](#08-endpoints-harden-network-and-name-resolution-md) |
+| **R13** | Deprecate legacy protocols and enforce transport security | Obsolete Protocols | **Covered** | [REQ-DC-001](#02-domain-controllers-disable-smbv1-md), [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md) |
+| **R14** | Enforce LSA Protection and Credential Guard | Credential Isolation | **Covered** | [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-DC-007](#02-domain-controllers-enable-credential-guard-md) |
+| **R15** | Prohibit unconstrained Kerberos delegation | Kerberos Delegation | **Covered** | [REQ-ID-004](#03-identities-services-restrict-kerberos-delegation-md) |
+| **R16** | Restrict constrained Kerberos delegation | Kerberos Delegation | **Covered** | [REQ-ID-004](#03-identities-services-restrict-kerberos-delegation-md) |
+| **R17** | Enforce strong Kerberos encryption algorithms (AES-only) | Kerberos Encryption | **Covered** | [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md), [REQ-ID-008](#03-identities-services-enforce-user-aes-encryption-md) |
+| **R18** | Harden TLS protocols, cipher suites, and elliptic curves (Schannel) | TLS / Cryptography | **Covered** | [REQ-NET-006](#04-network-firewall-harden-tls-configuration-md) |
+| **R19** | Enforce LDAP server signing and client-side resolution settings | LDAP Security | **Covered** | [REQ-DC-004](#02-domain-controllers-enforce-ldap-signing-md), [REQ-NET-009](#04-network-firewall-configure-hardened-unc-paths-md) |
+| **R20** | Enforce LDAP Channel Binding and Kerberos Armoring | LDAP Channel Binding | **Covered** | [REQ-DC-005](#02-domain-controllers-enforce-ldap-channel-binding-md), [REQ-DC-013](#02-domain-controllers-enable-kerberos-armoring-md) |
+| **R21** | Disable SMBv1 on all network nodes | SMB Security | **Covered** | [REQ-DC-001](#02-domain-controllers-disable-smbv1-md) |
+| **R22** | Enforce SMB signing and encryption | SMB Security | **Covered** | [REQ-DC-009](#02-domain-controllers-enforce-smb-signing-md), [REQ-NET-007](#04-network-firewall-enforce-smbv3-security-md) |
+| **R23** | Harden and protect adminSDHolder permissions | adminSDHolder Permissions | **Covered** | [REQ-DC-016](#02-domain-controllers-harden-adminsdholder-permissions-md), [REQ-ID-013](#03-identities-services-cleanup-admincount-orphans-md) |
+| **R24** | Harden Active Directory Domain Trusts (SID history/filtering) | Domain Trusts | **Covered** | [REQ-ARCH-006](#01-architecture-harden-domain-trusts-md) |
+| **R35** | Implement Group Managed Service Accounts (gMSA) | Service Account Hardening | **Covered** | [REQ-ID-003](#03-identities-services-harden-service-accounts-md), [REQ-ID-014](#03-identities-services-renew-kds-keys-gmsa-secrets-md) |
+| **R36** | Harden Active Directory Certificate Services (ADCS) and PKI | ADCS / PKI Hardening | **Covered** | [REQ-ID-015](#03-identities-services-harden-adcs-pki-md) |
+| **R37** | Revoke obsolete and insecure certificate templates | ADCS / PKI Hardening | **Covered** | [REQ-ID-015](#03-identities-services-harden-adcs-pki-md) |
+| **R47** | Harden virtualization hosts for Domain Controllers | DC Virtualization | **Covered** | [REQ-DC-018](#02-domain-controllers-harden-dc-virtualization-hosts-md) |
+| **R48** | Configure advanced security audit policies | Audit Policies | **Covered** | [REQ-LOG-001](#05-logging-monitoring-configure-advanced-audit-policies-md) |
+| **R50** | Configure PowerShell and command-line auditing | PowerShell Auditing | **Covered** | [REQ-LOG-002](#05-logging-monitoring-configure-powershell-and-command-line-auditing-md) |
+| **R52** | Deploy and harden Sysmon and configure SIEM log shipping | Monitoring & Shipping | **Covered** | [REQ-LOG-003](#05-logging-monitoring-deploy-and-harden-sysmon-md), [REQ-LOG-004](#05-logging-monitoring-configure-siem-log-shipping-md) |
+| **R54** | Establish secure Domain Controller backup and disaster recovery | Disaster Recovery | **Covered** | [REQ-OPS-002](#06-operations-maintenance-enable-recycle-bin-md), [ops-and-maintenance.md](#06-operations-maintenance-ops-and-maintenance-md) |
+| **R57** | Perform continuous security assessments and privileged group audits | Security Assessments | **Covered** | [REQ-ARCH-003](#01-architecture-audit-privileged-groups-md), [ops-and-maintenance.md](#06-operations-maintenance-ops-and-maintenance-md) |
+| **R58** | Deploy and harden Privileged Access Workstations (PAWs) | PAW Deployment | **Covered** | [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-PAW-004](#07-paws-enable-bitlocker-md), [REQ-PAW-005](#07-paws-configure-uefi-security-md), [REQ-PAW-006](#07-paws-enable-hardware-virtualization-and-dma-protection-md) |
+| **R64** | Configure Active Directory Authentication Silos and Policies | Authentication Silos | **Covered** | [REQ-ID-012](#03-identities-services-configure-authentication-silos-md) |
+| **R80** | Configure Authentication Policies for administrative groups | Authentication Silos | **Covered** | [REQ-ID-012](#03-identities-services-configure-authentication-silos-md) |
+
+<div id="compliance-anssi-md-administrative-operational-recommendations-out-of-scope"></div>
+## Administrative / Operational Recommendations (Out of Scope)
+
+The following ANSSI secure administration recommendations relate to organizational policy, administrative processes, physical security, or user training, which are outside the scope of technical GPO or PowerShell controls:
+
+| ID | Recommendation Description | Category | Status | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| **R26** | Inform administrators of security policies | Governance | **Not Covered** | Organizational policy / administrative training. |
+| **R27** | Maintain an up-to-date registry of administrative actions | Operations | **Not Covered** | Operational procedure / manual record-keeping. |
+| **R30** | Periodically audit administration workstations | Operations | **Not Covered** | Process-based vulnerability scans and compliance checks. |
+| **R31** | Physically secure administration environments | Physical Security | **Not Covered** | Server room access controls, locked server racks, etc. |
+| **R32** | Establish separate domain names for administration zones | Architecture | **Not Covered** | Organizational DNS design recommendation. |
+
+<div style="page-break-before: always;"></div>
+
+<div id="compliance-cis-md"></div>
+
+<div id="compliance-cis-md-cis-benchmarks-compliance-mapping-matrix"></div>
+# CIS Benchmarks Compliance Mapping Matrix
+
+This document maps the **CIS Benchmarks** sections for Windows Server (2016, 2019, 2022) and Windows 10/11 Client systems to the technical security controls present in this guidebook.
+
+<div id="compliance-cis-md-mapped-cis-benchmark-sections"></div>
+## Mapped CIS Benchmark Sections
+
+| CIS Section | Section Title / Scope | Benchmark Category | Status | Mapped Technical Control(s) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1.1** | Password Policy (Complexity, Length, Age, History) | Account Policies | **Covered** | [REQ-ID-001](#03-identities-services-enforce-fgpp-md), [REQ-PAW-013](#07-paws-configure-account-policies-md), [REQ-END-018](#08-endpoints-configure-account-policies-md) |
+| **1.2** | Account Lockout Policy (Threshold, Duration) | Account Policies | **Covered** | [REQ-PAW-013](#07-paws-configure-account-policies-md), [REQ-END-018](#08-endpoints-configure-account-policies-md) |
+| **2.2** | User Rights Assignment (Deny logons, Allow logons) | Local Policies | **Covered** | [REQ-ARCH-001](#01-architecture-restrict-tier-logons-md), [REQ-ID-007](#03-identities-services-restrict-service-account-logons-md), [REQ-PAW-009](#07-paws-configure-user-rights-assignments-md), [REQ-END-016](#08-endpoints-configure-user-rights-assignments-md) |
+| **2.3** | Security Options (LSA, LAN Manager, LDAP Signing, SMB Signing) | Local Policies | **Covered** | [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-004](#02-domain-controllers-enforce-ldap-signing-md), [REQ-DC-005](#02-domain-controllers-enforce-ldap-channel-binding-md), [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-DC-009](#02-domain-controllers-enforce-smb-signing-md), [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md), [REQ-DC-011](#02-domain-controllers-restrict-ntds-sam-api-md), [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md) |
+| **9.1** | Windows Defender Firewall Profiles (Domain, Private, Public) | Firewall | **Covered** | [REQ-NET-001](#04-network-firewall-configure-ad-port-matrix-md), [REQ-NET-008](#04-network-firewall-configure-firewall-logging-md) |
+| **18.2** | Local Administrator Password Solution (LAPS) settings | Administrative Templates | **Covered** | [REQ-ID-002](#03-identities-services-enable-laps-md) |
+| **18.3** | AutoPlay and AutoRun settings | Administrative Templates | **Covered** | [REQ-END-003](#08-endpoints-disable-autoplay-autorun-md) |
+| **18.8** | PowerShell Logging, Device Guard, and Virtualization-Based Security | Administrative Templates | **Covered** | [REQ-LOG-002](#05-logging-monitoring-configure-powershell-and-command-line-auditing-md), [REQ-PAW-006](#07-paws-enable-hardware-virtualization-and-dma-protection-md), [REQ-PAW-010](#07-paws-enable-vbs-credential-guard-md), [REQ-END-010](#08-endpoints-enable-vbs-credential-guard-md) |
+| **18.9** | System Services (Print Spooler), AppLocker, and WDAC settings | Administrative Templates | **Covered** | [REQ-DC-001](#02-domain-controllers-disable-smbv1-md), [REQ-DC-008](#02-domain-controllers-disable-print-spooler-md), [REQ-DC-021](#02-domain-controllers-configure-applocker-policies-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-END-011](#08-endpoints-configure-wdac-md) |
+| **19.1** | Windows Defender Firewall port configurations and isolation rules | Firewall Advanced Security | **Covered** | [REQ-NET-001](#04-network-firewall-configure-ad-port-matrix-md), [REQ-NET-003](#04-network-firewall-configure-workstation-isolation-md), [REQ-NET-008](#04-network-firewall-configure-firewall-logging-md) |
+
+<div id="compliance-cis-md-cis-benchmark-sections-outside-active-directory-scope"></div>
+## CIS Benchmark Sections Outside Active Directory Scope
+
+The following CIS Benchmark sections are not covered by this guidebook because they concern standalone workstation settings, user-level privacy options, or non-security features:
+
+| Section | Title / Scope | Category | Status | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| **18.5** | Network / WLAN Settings | Wireless Connections | **Not Covered** | Air-gapped environments typically run on physical cabling or specialized networking. |
+| **18.8.2** | Toast Notifications / Cortana Settings | User Experience | **Not Covered** | Operational/productivity settings, low security impact. |
+| **18.8.3** | Spotlight / Telemetry Options | User Experience | **Not Covered** | Privacy-related settings, not directly related to Active Directory security. |
+| **18.9.1** | Background Intelligent Transfer Service | System Services | **Not Covered** | General operating system background task tuning. |
+
+<div style="page-break-before: always;"></div>
+
+<div id="compliance-microsoft-md"></div>
+
+<div id="compliance-microsoft-md-microsoft-security-baselines-compliance-mapping-matrix"></div>
+# Microsoft Security Baselines Compliance Mapping Matrix
+
+This document maps the focus areas of the **Microsoft Security Baselines** (Domain Controller, Member Server, and Windows Client baselines) to the technical security controls present in this guidebook.
+
+<div id="compliance-microsoft-md-mapped-microsoft-security-baseline-focus-areas"></div>
+## Mapped Microsoft Security Baseline Focus Areas
+
+| Focus Area | Baseline Requirement Description | Baseline Category | Status | Mapped Technical Control(s) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Credential Guard** | Deploy Windows Defender Credential Guard to isolate and protect LSASS credentials. | Credential Isolation | **Covered** | [REQ-DC-007](#02-domain-controllers-enable-credential-guard-md), [REQ-PAW-010](#07-paws-enable-vbs-credential-guard-md), [REQ-END-010](#08-endpoints-enable-vbs-credential-guard-md) |
+| **LSA Protection** | Configure Local Security Authority (LSA) to run as a protected process (LSA Protection). | Credential Isolation | **Covered** | [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-PAW-002](#07-paws-enable-lsa-protection-md) |
+| **Protocol Deprecation** | Disable legacy protocols (SMBv1, NTLMv1, digest authentication) across servers and endpoints. | Legacy Protocols | **Covered** | [REQ-DC-001](#02-domain-controllers-disable-smbv1-md), [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md) |
+| **AppLocker** | Deploy AppLocker application control policies to restrict unauthorized software execution. | Application Control | **Covered** | [REQ-DC-021](#02-domain-controllers-configure-applocker-policies-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md) |
+| **Windows Defender Application Control** | Deploy Windows Defender Application Control (WDAC) and Driver Blocklists. | Application Control | **Covered** | [REQ-DC-022](#02-domain-controllers-enable-wdac-driver-blocklist-md), [REQ-PAW-012](#07-paws-enable-wdac-driver-blocklist-md), [REQ-END-011](#08-endpoints-configure-wdac-md) |
+| **BitLocker** | Enforce BitLocker drive encryption with TPM and Startup PIN configurations. | Data Protection | **Covered** | [REQ-PAW-004](#07-paws-enable-bitlocker-md), [REQ-END-012](#08-endpoints-enable-bitlocker-md) |
+| **DMA Protection** | Enable hardware virtualization-based security and Kernel DMA Protection. | Hardware Integrity | **Covered** | [REQ-PAW-006](#07-paws-enable-hardware-virtualization-and-dma-protection-md), [REQ-END-014](#08-endpoints-enable-hardware-virtualization-and-dma-protection-md) |
+| **Secure Boot** | Enforce UEFI Secure Boot and hardware platform security settings. | Hardware Integrity | **Covered** | [REQ-PAW-005](#07-paws-configure-uefi-security-md), [REQ-END-009](#08-endpoints-enable-secure-boot-md) |
+| **Audit Policies** | Configure advanced security audit policies (DC, member server, and client baselines). | Auditing & Logging | **Covered** | [REQ-LOG-001](#05-logging-monitoring-configure-advanced-audit-policies-md) |
+| **PowerShell Logging** | Configure PowerShell script block logging and transcription. | Auditing & Logging | **Covered** | [REQ-LOG-002](#05-logging-monitoring-configure-powershell-and-command-line-auditing-md) |
+| **UAC Policies** | Configure User Account Control (UAC) baseline settings. | Account Controls | **Covered** | [REQ-END-002](#08-endpoints-configure-uac-policies-md) |
+| **Removable Storage** | Deploy GPOs to block external removable storage devices (USB mass storage). | Data Protection | **Covered** | [REQ-END-004](#08-endpoints-block-removable-storage-md) |
+| **Point and Print** | Configure Point and Print restrictions to prevent PrintNightmare exploits. | Services Hardening | **Covered** | [REQ-ID-016](#03-identities-services-configure-point-and-print-md) |
+| **SYSVOL replication** | Migrate SYSVOL replication from FRS to DFS Replication (DFSR). | DC Hardening | **Covered** | [REQ-DC-015](#02-domain-controllers-migrate-sysvol-replication-dfsr-md) |
+| **adminSDHolder** | Harden adminSDHolder object permissions to prevent privilege persistence. | DC Hardening | **Covered** | [REQ-DC-016](#02-domain-controllers-harden-adminsdholder-permissions-md) |
+| **Services minimization** | Disable unnecessary system services on Domain Controllers. | DC Hardening | **Covered** | [REQ-DC-012](#02-domain-controllers-disable-unnecessary-services-md) |
+
+<div id="compliance-microsoft-md-microsoft-baseline-controls-outside-guidebook-scope"></div>
+## Microsoft Baseline Controls Outside Guidebook Scope
+
+The following Microsoft Security Baseline recommendations are not covered by this guidebook as they are more suited for cloud-managed, internet-connected, or hybrid environments:
+
+| Focus Area | Baseline Requirement Description | Category | Status | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| **Microsoft Defender for Endpoint** | Cloud-based EDR enrollment and configuration | Endpoint Defense | **Not Covered** | Out of scope due to the strict air-gapped (offline) requirement of the environment. |
+| **Windows Update for Business** | Cloud-based patch management and updates | Patch Management | **Not Covered** | Out of scope. Patching must be managed via offline WSUS tiering. |
+| **Microsoft Defender SmartScreen** | Cloud-based reputation screening for downloads | Edge / Web Security | **Not Covered** | No internet connection is present to contact Microsoft reputation services. |

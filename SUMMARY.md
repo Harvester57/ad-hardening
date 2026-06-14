@@ -121,5 +121,10 @@
     * [REQ-END-021 - Restrict Safe Mode Access to Administrators](08-endpoints/disable-safe-mode-for-standard-users.md)
     * [REQ-END-022 - Block Outbound Traffic for Known LOLBins](08-endpoints/block-lolbins-outbound-traffic.md)
 
+## Compliance Mapping
+* [ANSSI Compliance Matrix](compliance/anssi.md)
+* [CIS Benchmarks Compliance Matrix](compliance/cis.md)
+* [Microsoft Security Baselines Compliance Matrix](compliance/microsoft.md)
+
 ## Appendix
 * [Hardening Template](TEMPLATE.md)

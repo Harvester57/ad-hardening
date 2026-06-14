@@ -58,6 +58,18 @@ def main():
         else:
             print(f"Warning: Module README {module_readme} not found.")
 
+    # Add Compliance Matrices
+    compliance_files = [
+        ("ANSSI Compliance Matrix", "compliance/anssi.md"),
+        ("CIS Benchmarks Compliance Matrix", "compliance/cis.md"),
+        ("Microsoft Security Baselines Compliance Matrix", "compliance/microsoft.md")
+    ]
+    summary_lines.append("")
+    summary_lines.append("## Compliance Mapping")
+    for title, path in compliance_files:
+        if os.path.exists(os.path.join(repo_root, path)):
+            summary_lines.append(f"* [{title}]({path})")
+
     # Add TEMPLATE.md at the end as an Appendix
     template_path = "TEMPLATE.md"
     if os.path.exists(os.path.join(repo_root, template_path)):

@@ -46,7 +46,7 @@ def process_file(filepath, repo_root):
         content = f.read()
         
     # Prepend a target anchor for the top of this file
-    processed = f'<a id="{file_id}"></a>\n\n'
+    processed = f'<div id="{file_id}"></div>\n\n'
     
     # Helper match functions and regexes
     def link_replacer(match):
@@ -123,17 +123,17 @@ def process_file(filepath, repo_root):
                     header_text = header_match.group(2)
                     header_slug = slugify(header_text)
                     # Prepend an HTML anchor for header cross-referencing
-                    anchor = f'<a id="{file_id}-{header_slug}"></a>'
+                    anchor = f'<div id="{file_id}-{header_slug}"></div>'
                     new_lines.append(f'{anchor}\n{line}')
                 else:
                     new_lines.append(line)
             segment = '\n'.join(new_lines)
             
-            # 2. Rewrite relative markdown links to HTML anchors: [Text](path.md#anchor)
-            segment = md_link_regex.sub(link_replacer, segment)
-            
-            # 3. Rewrite internal page anchors (e.g. [Step](#step-1)) to make them unique
+            # 2. Rewrite internal page anchors (e.g. [Step](#step-1)) to make them unique
             segment = internal_link_regex.sub(internal_link_replacer, segment)
+            
+            # 3. Rewrite relative markdown links to HTML anchors: [Text](path.md#anchor)
+            segment = md_link_regex.sub(link_replacer, segment)
             
             # 4. Rewrite relative image paths: ![alt](images/pic.png)
             segment = img_regex.sub(img_replacer, segment)
@@ -173,6 +173,11 @@ def main():
     
     # 0. Add Front Matter for md-to-pdf configuration
     front_matter = f"""---
+launch_options:
+  args:
+    - --no-sandbox
+    - --disable-setuid-sandbox
+    - --disable-gpu
 pdf_options:
   format: A4
   margin:
@@ -259,6 +264,23 @@ pdf_options:
                 compiled_lines.append(processed_file_content)
         else:
             print(f"Warning: Module README {module_readme} not found.")
+            
+    # 4. Add Compliance Matrices
+    compliance_files = [
+        "compliance/anssi.md",
+        "compliance/cis.md",
+        "compliance/microsoft.md"
+    ]
+    for comp_file in compliance_files:
+        comp_file_abs = os.path.join(repo_root, comp_file)
+        if os.path.exists(comp_file_abs):
+            print(f"Processing compliance file: {comp_file}...")
+            # Page break before each compliance matrix
+            compiled_lines.append('\n<div style="page-break-before: always;"></div>\n')
+            processed_comp = process_file(comp_file, repo_root)
+            compiled_lines.append(processed_comp)
+        else:
+            print(f"Warning: Compliance file {comp_file} not found.")
             
     # Combine everything and write output
     output_path = os.path.join(repo_root, "AD-Hardening-Guidebook.md")
