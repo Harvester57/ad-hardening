@@ -48,6 +48,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure strict AppLocker rules on Domain Controllers to prevent administrative users from executing unapproved binaries, scripts, installers, or web browsers on Tier 0 systems.
 * **[REQ-DC-022 - Enable WDAC Driver Blocklist](enable-wdac-driver-blocklist.md)**
   Requirement to configure the Windows Defender Application Control (WDAC) driver blocklist to protect kernel memory from Bring Your Own Vulnerable Driver (BYOVD) attacks.
+* **[REQ-DC-023 - Configure User Rights Assignments for Domain Controllers](configure-user-rights-assignments.md)**
+  Requirement to restrict local user rights assignments on Domain Controllers to prevent default operator groups (Print Operators, Server Operators, Backup Operators) from logging on locally, backing up/restoring files, or shutting down Domain Controllers.
 
 
 

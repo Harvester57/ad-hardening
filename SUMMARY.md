@@ -35,6 +35,7 @@
     * [REQ-DC-020 - Windows Defender Antivirus Domain Controller Baseline and Exploit Guard](02-domain-controllers/defender-antivirus.md)
     * [REQ-DC-021 - Configure AppLocker Policies on Domain Controllers](02-domain-controllers/configure-applocker-policies.md)
     * [REQ-DC-022 - Enable WDAC Driver Blocklist](02-domain-controllers/enable-wdac-driver-blocklist.md)
+    * [REQ-DC-023 - Configure User Rights Assignments for Domain Controllers](02-domain-controllers/configure-user-rights-assignments.md)
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)

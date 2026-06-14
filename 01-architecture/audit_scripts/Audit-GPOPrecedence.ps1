@@ -1,11 +1,12 @@
 # Audit-GPOPrecedence.ps1
-# Description: Verifies that a dedicated hardening GPO exists with higher precedence than Default DC Policy.
+# Description: Verifies GPO precedence on DC OU, and checks local EFS and background refresh registry configuration.
 
 Import-Module ActiveDirectory
 Import-Module GroupPolicy
 
-Write-Host "--- Auditing Domain Controllers OU GPO Precedence ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Default Policies and Precedence ---" -ForegroundColor Cyan
 
+# 1. Audit GPO Precedence on Domain Controllers OU
 $DomainInfo = Get-ADDomain
 $DCOUDN = "OU=Domain Controllers,$($DomainInfo.DistinguishedName)"
 
@@ -31,10 +32,28 @@ try {
     }
     
     if ($HardeningGPOFound -and $HardeningOrder -lt $DefaultDCOrder) {
-        Write-Host "`nStatus: Compliant. Custom hardening GPO has higher precedence (Order $HardeningOrder) than Default Domain Controllers Policy (Order $DefaultDCOrder)." -ForegroundColor Green
+        Write-Host "`n[+] GPO Precedence: Compliant. Custom hardening GPO has higher precedence (Order $HardeningOrder) than Default DC Policy (Order $DefaultDCOrder)." -ForegroundColor Green
     } else {
-        Write-Host "`nVULNERABLE: No active dedicated hardening GPO found with higher precedence than the Default Domain Controllers Policy." -ForegroundColor Red
+        Write-Host "`n[!] VULNERABLE: No active dedicated hardening GPO found with higher precedence than Default DC Policy." -ForegroundColor Red
     }
 } catch {
-    Write-Host "VULNERABLE: Could not retrieve GPO information for Domain Controllers OU. Error: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "[!] Could not retrieve GPO information for DC OU. Error: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# 2. Audit EFS Registry status
+$EfsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\EFS"
+$EfsVal = Get-ItemProperty -Path $EfsPath -Name "EfsConfiguration" -ErrorAction SilentlyContinue
+if ($EfsVal -and $EfsVal.EfsConfiguration -eq 1) {
+    Write-Host "[+] EFS Configuration: Secure (Disabled)." -ForegroundColor Green
+} else {
+    Write-Host "[!] VULNERABLE: EFS is not disabled in registry policies." -ForegroundColor Red
+}
+
+# 3. Audit Background Refresh status
+$SysPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$BkgVal = Get-ItemProperty -Path $SysPath -Name "DisableBkGndGroupPolicy" -ErrorAction SilentlyContinue
+if ($BkgVal -and $BkgVal.DisableBkGndGroupPolicy -eq 0) {
+    Write-Host "[+] Group Policy Background Refresh: Secure (Active)." -ForegroundColor Green
+} else {
+    Write-Host "[!] VULNERABLE: Group Policy background refresh is turned off in registry." -ForegroundColor Red
 }

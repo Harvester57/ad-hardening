@@ -76,6 +76,10 @@ Securing authentication parameters and account controls reduces the risk of pass
 7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
 8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
 9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, and requiring NTLMv2 and 128-bit encryption block legacy protocol exploitation.
+10. **Kerberos Security Policy**: Restricting Kerberos ticket lifetimes (e.g. 10 hours max ticket lifetime, 7 days max renewal, 600 minutes max service ticket lifetime) and clock skew tolerance (5 minutes) limits the window of opportunity for stolen ticket abuse (Pass-the-Ticket) and ensures synchronization integrity.
+11. **GPO Background Refresh Security**: Forcing regular Group Policy background reapplication prevents persistent local configuration changes or drift.
+12. **WMI Class Minimization**: Avoiding WMI queries to `Win32_Product` avoids unintended re-installation checks of all MSI packages during GPO processing, protecting host CPU and disk health.
+13. **GPO Commentary**: Requiring descriptive GPO comments ensures structural accountability and documentation parity.
 
 ---
 
@@ -94,8 +98,8 @@ Securing authentication parameters and account controls reduces the risk of pass
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-#### Step 1: Configure Lockout and Password Policies (Domain-wide)
-These settings must be configured in the **Default Domain Policy** or a GPO linked to the Domain root to apply domain-wide:
+#### Step 1: Configure Lockout, Password and Kerberos Policies (Domain-wide)
+These settings must be configured directly within the **Default Domain Policy** to apply domain-wide:
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit the **Default Domain Policy**.
 3. Navigate to:
@@ -112,8 +116,30 @@ These settings must be configured in the **Default Domain Policy** or a GPO link
      * **Minimum password length**: `14` characters
      * **Password must meet complexity requirements**: `Enabled`
      * **Store passwords using reversible encryption**: `Disabled`
+   * **Kerberos Policy**:
+     * **Enforce user logon restrictions**: `Enabled`
+     * **Maximum lifetime for service ticket**: `600` minutes
+     * **Maximum lifetime for user ticket**: `10` hours
+     * **Maximum lifetime for user ticket renewal**: `7` days
+     * **Maximum tolerance for computer clock synchronization**: `5` minutes
 
-#### Step 2: Configure Local Security Options
+#### Step 2: Configure GPO Security Filtering & Delegation (MS16-072 Compliance)
+Following the MS16-072 security update, user-scoped GPOs require computer accounts to have Read access to process the policy. When using Security Filtering to restrict GPOs to specific user groups:
+1. In GPMC, select your user-targeted GPO.
+2. Under the **Scope** tab, in the **Security Filtering** section, select **Authenticated Users** and click **Remove**.
+3. Click **Add**, select your target user security group, and click **OK**.
+4. Click on the **Delegation** tab.
+5. Click **Add**, search for `Domain Computers` (change Object Types to include Computers), and click **OK**.
+6. Set the permissions to **Read** and click **OK**.
+
+#### Step 3: Group Policy WMI Filtering Best Practices
+When using WMI filters to target GPOs:
+* **DO NOT** query the `Win32_Product` WMI class. Calling this class triggers Windows Installer to perform a self-repair validation on every installed MSI package on the system, causing severe CPU spikes and delays during startup and logon. Use lightweight queries such as `Win32_OperatingSystem` instead.
+
+#### Step 4: Mandate GPO Comments for Accountability
+For all GPOs created, add a comment in the **Comment** tab of the GPO properties describing the purpose, author, date, and requirement ID.
+
+#### Step 5: Configure Local Security Options
 In the endpoints GPO (e.g., `GPO_Hardening_Workstations`), navigate to:
 `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
 * **Policy**: `Interactive logon: Smart card removal behavior` -> Set to **Lock Workstation** (value 1)
@@ -306,6 +332,11 @@ $AccountSettings = @{
     "PasswordHistorySize"   = 24
     "MaxPasswordAge"        = 0
     "MinPasswordAge"        = 1
+    "MaxServiceTicketAge"   = 600
+    "MaxTicketAge"          = 10
+    "MaxRenewAge"           = 7
+    "MaxClockSkew"          = 5
+    "TicketValidateClient"  = 1
 }
 
 foreach ($Line in $Lines) {
@@ -458,6 +489,11 @@ $AccountSettings = @{
     "PasswordHistorySize"   = 24
     "MaxPasswordAge"        = 0
     "MinPasswordAge"        = 1
+    "MaxServiceTicketAge"   = 600
+    "MaxTicketAge"          = 10
+    "MaxRenewAge"           = 7
+    "MaxClockSkew"          = 5
+    "TicketValidateClient"  = 1
 }
 
 foreach ($Key in $AccountSettings.Keys) {

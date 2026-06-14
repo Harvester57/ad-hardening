@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: c1a3b4e | Generated: June 14, 2026</span>
+      <span>Commit: b339833 | Generated: June 14, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1072,25 +1072,40 @@ if ($Forest.ForestMode -lt [Microsoft.ActiveDirectory.Management.ADForestMode]::
 <div id="01-architecture-default-policies-recommendations-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**: Group Policy Objects Management (GPMC)
+* **GPO Path / Registry Location**:
+  * **GPO Paths**:
+    * `Default Domain Policy` (GUID: `{31B2F340-016D-11D2-945F-00C04FB984F9}`)
+    * `Default Domain Controllers Policy` (GUID: `{6AC1786C-016F-11D2-945F-00C04fB984F9}`)
+    * **EFS path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Public Key Policies\Encrypting File System`
+    * **Background Refresh path**: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
+  * **Registry Locations**:
+    * **EFS**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\EFS`
+      * `EfsConfiguration` = `1` (REG_DWORD, 1 = Disabled)
+    * **Background Refresh**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+      * `DisableBkGndGroupPolicy` = `0` (REG_DWORD, 0 = Active/Enabled)
 
 ---
 
 <div id="01-architecture-default-policies-recommendations-md-rationale"></div>
 ## Rationale
-Modifying the Default Domain Policy (GUID: {31B2F340-016D-11D2-945F-00C04FB984F9}) and Default Domain Controllers Policy (GUID: {6AC1786C-016F-11D2-945F-00C04fB984F9}) introduces significant operational risks. These default policies define the core directory baseline configurations required for Active Directory to initialize, replicate, and authenticate.
+Modifying the Default Domain Policy (DDP) and Default Domain Controllers Policy (DDCP) introduces significant operational risks. These default policies define the core directory baseline configurations required for Active Directory to initialize, replicate, and authenticate.
 
-Adhering to a modular Group Policy architecture is critical for several security and operational reasons:
-1. **Disaster Recovery**: If a default policy becomes corrupted or misconfigured, it can be reset to its factory state using the `dcgpofix` command-line utility. However, this utility completely overwrites the policy, losing all custom hardening settings.
-2. **Precedence and Troubleshooting**: Link order precedence allows administrators to override default settings cleanly. If a custom hardening configuration causes a system outage, the specific modular GPO can be disabled immediately without affecting basic domain replication and administration.
-3. **Configuration Isolation**: Isolating security settings (such as User Rights Assignment, audit policies, and registry values) into distinct, labeled GPOs provides better visibility, auditability, and ease of management.
+However, a critical exception to modular Group Policy design applies to **Account Policies** (Password, Account Lockout, and Kerberos settings) and **Encrypting File System (EFS)** policies. Windows operating systems only process domain-wide Account Policies from the GPO linked directly to the domain root (by default, the Default Domain Policy). Custom GPOs linked at lower levels containing these settings will be ignored for domain accounts. Therefore, these specific baselines must be configured directly within the Default Domain Policy itself.
+
+All other custom hardening settings (such as local User Rights Assignments, Audit Policies, and registry parameters) should be managed via dedicated modular GPOs (e.g., `SEC_DomainControllers_Hardening`) linked at higher precedence.
+
+Integrating the following controls inside the DDP/DDCP and custom GPOs completes the Active Directory management baseline:
+1. **Disabling Encrypting File System (EFS)**: EFS allows users to encrypt files on local drives. This makes files difficult to recover or back up securely. Enterprise environments should enforce full-disk encryption (BitLocker) rather than user-managed file-level encryption. Disabling EFS prevents unauthorized user-level encryption.
+2. **Enforcing Group Policy Background Refresh**: Ensuring that Group Policy background refresh is active prevents unauthorized local overrides from persisting. Setting the policy `Turn off background refresh of Group Policy` to **Disabled** ensures that GPOs are reapplied every 90 minutes.
+3. **Mandating GPO Comments**: Documenting the purpose, author, and revision history in the GPO comments field ensures accountability and prevents configuration drift.
+4. **Restricting gpupdate /force Overuse**: Running `gpupdate /force` causes endpoints and servers to re-download all applied GPOs from Domain Controllers. In large environments, this can trigger severe network congestion and CPU spikes on DCs. Administrators should use standard `gpupdate` without the `/force` switch unless a full re-application of unchanged policies is required.
 
 ---
 
 <div id="01-architecture-default-policies-recommendations-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Precedence Ordering**: When linking a new hardening GPO, its link order must have a lower number (higher precedence) than the default policies to ensure custom settings override the defaults.
-* **GPO Overlaps**: Settings defined in the custom GPO will take precedence. If a conflict arises with default GPOs, the custom GPO's value will win. Ensure that core required values (such as system access permissions) are not blocked.
+* **EFS Disabling**: Prior to disabling EFS, administrators must scan domain-joined machines for active EFS-encrypted files and decrypt them. If EFS is disabled while encrypted files exist, users will lose access to those files.
+* **GPO Precedence**: The modular hardening GPOs must be linked at the root/OU with a lower link order number (higher precedence) than the default policies to ensure custom settings override defaults cleanly.
 
 ---
 
@@ -1100,25 +1115,47 @@ Adhering to a modular Group Policy architecture is critical for several security
 <div id="01-architecture-default-policies-recommendations-md-option-a-group-policy-management-console-gpmc-preferred"></div>
 ### Option A: Group Policy Management Console (GPMC) (Preferred)
 
+<div id="01-architecture-default-policies-recommendations-md-step-1-configure-default-domain-policy-for-account-and-efs-policies"></div>
+#### Step 1: Configure Default Domain Policy for Account and EFS Policies
 1. Log on to a management workstation or Domain Controller with **Domain Admins** credentials.
 2. Open the **Group Policy Management Console** (`gpmc.msc`).
-3. Create a new hardening GPO:
-   * In the console tree, right-click **Group Policy Objects** and click **New**.
-   * Name the GPO `SEC_DomainControllers_Hardening` (or `SEC_Domain_Hardening` for domain-wide settings) and click **OK**.
-4. Link the new GPO:
-   * Right-click the **Domain Controllers** OU (or the root domain) and select **Link an Existing GPO**.
-   * Select `SEC_DomainControllers_Hardening` from the list and click **OK**.
-5. Adjust Link Order Precedence:
-   * Click on the **Domain Controllers** OU (or root domain) in the console tree.
-   * Navigate to the **Linked Group Policy Objects** tab in the right pane.
-   * Select `SEC_DomainControllers_Hardening` and use the green up arrow to move it to **Link Order 1** (ensuring it has higher precedence than **Default Domain Controllers Policy**).
+3. Right-click the **Default Domain Policy** and select **Edit**.
+4. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Public Key Policies`
+5. Right-click **Encrypting File System** and select **Properties**.
+6. In the **General** tab, under **File encryption using Encrypting File System (EFS)**, select **Disabled** and click **OK**.
+7. Navigate to the Account Policies node to configure domain-wide Password and Lockout parameters as detailed in [configure-account-policies.md](#08-endpoints-configure-account-policies-md).
+
+<div id="01-architecture-default-policies-recommendations-md-step-2-establish-modular-gpos-for-non-account-policies"></div>
+#### Step 2: Establish Modular GPOs for Non-Account Policies
+1. In the `gpmc.msc` console tree, right-click **Group Policy Objects** and select **New**.
+2. Name the GPO `SEC_DomainControllers_Hardening` (and `SEC_Domain_Hardening` for domain members) and click **OK**.
+3. Right-click the **Domain Controllers** OU (or root domain) and select **Link an Existing GPO**.
+4. Select `SEC_DomainControllers_Hardening` and click **OK**.
+5. Select the **Domain Controllers** OU in the left pane, navigate to the **Linked Group Policy Objects** tab, select the custom hardening GPO, and use the green up arrow to set its **Link Order** to **1** (highest precedence).
+
+<div id="01-architecture-default-policies-recommendations-md-step-3-configure-group-policy-background-refresh"></div>
+#### Step 3: Configure Group Policy Background Refresh
+1. Edit your modular hardening GPO (e.g., `SEC_DomainControllers_Hardening` or `SEC_Domain_Hardening`).
+2. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
+3. Double-click the policy **Turn off background refresh of Group Policy** and set it to **Disabled**.
+
+<div id="01-architecture-default-policies-recommendations-md-step-4-mandate-gpo-comments-for-accountability"></div>
+#### Step 4: Mandate GPO Comments for Accountability
+1. In GPMC, right-click your GPO, select **Properties**, and navigate to the **Comment** tab.
+2. Enter a structured comment containing:
+   * **Purpose**: [Brief explanation of GPO controls]
+   * **Author**: [Administrator Name or Security Team]
+   * **Date**: [Creation/Modification Date]
+   * **Reference Requirement**: [e.g., REQ-ARCH-005]
 
 ---
 
 <div id="01-architecture-default-policies-recommendations-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts to audit and set up the GPO structure.
+Run the following scripts to audit and set up the GPO structure, EFS, and background refresh locally.
 
 <div id="01-architecture-default-policies-recommendations-md-1-local-audit-audit-gpoprecedenceps1"></div>
 #### 1. Local Audit (Audit-GPOPrecedence.ps1)
@@ -1127,13 +1164,14 @@ Run the following scripts to audit and set up the GPO structure.
 
 ```powershell
 # Audit-GPOPrecedence.ps1
-# Description: Verifies that a dedicated hardening GPO exists with higher precedence than Default DC Policy.
+# Description: Verifies GPO precedence on DC OU, and checks local EFS and background refresh registry configuration.
 
 Import-Module ActiveDirectory
 Import-Module GroupPolicy
 
-Write-Host "--- Auditing Domain Controllers OU GPO Precedence ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Default Policies and Precedence ---" -ForegroundColor Cyan
 
+# 1. Audit GPO Precedence on Domain Controllers OU
 $DomainInfo = Get-ADDomain
 $DCOUDN = "OU=Domain Controllers,$($DomainInfo.DistinguishedName)"
 
@@ -1159,12 +1197,30 @@ try {
     }
     
     if ($HardeningGPOFound -and $HardeningOrder -lt $DefaultDCOrder) {
-        Write-Host "`nStatus: Compliant. Custom hardening GPO has higher precedence (Order $HardeningOrder) than Default Domain Controllers Policy (Order $DefaultDCOrder)." -ForegroundColor Green
+        Write-Host "`n[+] GPO Precedence: Compliant. Custom hardening GPO has higher precedence (Order $HardeningOrder) than Default DC Policy (Order $DefaultDCOrder)." -ForegroundColor Green
     } else {
-        Write-Host "`nVULNERABLE: No active dedicated hardening GPO found with higher precedence than the Default Domain Controllers Policy." -ForegroundColor Red
+        Write-Host "`n[!] VULNERABLE: No active dedicated hardening GPO found with higher precedence than Default DC Policy." -ForegroundColor Red
     }
 } catch {
-    Write-Host "VULNERABLE: Could not retrieve GPO information for Domain Controllers OU. Error: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "[!] Could not retrieve GPO information for DC OU. Error: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# 2. Audit EFS Registry status
+$EfsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\EFS"
+$EfsVal = Get-ItemProperty -Path $EfsPath -Name "EfsConfiguration" -ErrorAction SilentlyContinue
+if ($EfsVal -and $EfsVal.EfsConfiguration -eq 1) {
+    Write-Host "[+] EFS Configuration: Secure (Disabled)." -ForegroundColor Green
+} else {
+    Write-Host "[!] VULNERABLE: EFS is not disabled in registry policies." -ForegroundColor Red
+}
+
+# 3. Audit Background Refresh status
+$SysPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$BkgVal = Get-ItemProperty -Path $SysPath -Name "DisableBkGndGroupPolicy" -ErrorAction SilentlyContinue
+if ($BkgVal -and $BkgVal.DisableBkGndGroupPolicy -eq 0) {
+    Write-Host "[+] Group Policy Background Refresh: Secure (Active)." -ForegroundColor Green
+} else {
+    Write-Host "[!] VULNERABLE: Group Policy background refresh is turned off in registry." -ForegroundColor Red
 }
 ```
 
@@ -1175,28 +1231,27 @@ try {
 
 ```powershell
 # Set-ADModularGPO.ps1
-# Description: Creates a new, dedicated Domain Controllers hardening GPO and links it with top precedence.
+# Description: Creates DC hardening GPO with top precedence, disables EFS, and enables background refresh locally.
 
 Import-Module ActiveDirectory
 Import-Module GroupPolicy
 
-Write-Host "Applying hardening requirement: Create and link DC Hardening GPO..." -ForegroundColor Cyan
+Write-Host "Applying Default Policies hardening baseline..." -ForegroundColor Cyan
 
+# 1. Create and Link DC Hardening GPO
 $DomainInfo = Get-ADDomain
 $DCOUDN = "OU=Domain Controllers,$($DomainInfo.DistinguishedName)"
 $GPOName = "SEC_DomainControllers_Hardening"
 
 try {
-    # 1. Create the GPO if it doesn't exist
     $GPO = Get-GPO -Name $GPOName -ErrorAction SilentlyContinue
     if (-not $GPO) {
-        $GPO = New-GPO -Name $GPOName -Comment "Dedicated GPO for Domain Controllers hardening settings." -ErrorAction Stop
+        $GPO = New-GPO -Name $GPOName -Comment "Dedicated GPO for Domain Controllers hardening. Requirements: REQ-ARCH-005." -ErrorAction Stop
         Write-Host "[+] GPO '$GPOName' created successfully." -ForegroundColor Green
     } else {
         Write-Host "[+] GPO '$GPOName' already exists." -ForegroundColor Yellow
     }
     
-    # 2. Link the GPO to Domain Controllers OU
     $Links = (Get-GPInheritance -Target $DCOUDN).GpoLinks
     $IsLinked = $false
     foreach ($link in $Links) {
@@ -1213,20 +1268,34 @@ try {
         Write-Host "[+] GPO '$GPOName' is already linked to Domain Controllers OU." -ForegroundColor Yellow
     }
     
-    # 3. Enforce highest precedence (Link Order = 1)
     Set-GPLink -Name $GPOName -Target $DCOUDN -Order 1 -ErrorAction Stop | Out-Null
     Write-Host "[+] GPO '$GPOName' set to link order 1 (highest precedence)." -ForegroundColor Green
-    
 } catch {
-    Write-Error "Failed to configure GPO. Error: $($_.Exception.Message)"
+    Write-Host "[!] Failed to configure GPO structure. Error: $($_.Exception.Message)" -ForegroundColor Red
 }
+
+# 2. Configure Local Registry for EFS (Disable)
+$EfsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\EFS"
+if (-not (Test-Path $EfsPath)) {
+    New-Item -Path $EfsPath -Force | Out-Null
+}
+Set-ItemProperty -Path $EfsPath -Name "EfsConfiguration" -Value 1 -Type DWord -Force
+Write-Host "[+] EFS registry policy configured to Disabled." -ForegroundColor Green
+
+# 3. Configure Local Registry for GP Background Refresh (Active)
+$SysPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+if (-not (Test-Path $SysPath)) {
+    New-Item -Path $SysPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SysPath -Name "DisableBkGndGroupPolicy" -Value 0 -Type DWord -Force
+Write-Host "[+] Group Policy background refresh registry policy enabled." -ForegroundColor Green
 ```
 
 ---
 
 <div id="01-architecture-default-policies-recommendations-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **Microsoft Security Guidance**: Modular GPO Design Best Practices.
+* **CIS Active Directory and Group Policy Management Best Practices**: Section "Default Domain Policy and Default Domain Controller Policy" (Pages 18, 22-24, 37-38)
 * **ANSSI AD Hardening Guide**: Recommendations on directory service configuration management.
 
 
@@ -1414,6 +1483,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure strict AppLocker rules on Domain Controllers to prevent administrative users from executing unapproved binaries, scripts, installers, or web browsers on Tier 0 systems.
 * **[REQ-DC-022 - Enable WDAC Driver Blocklist](#02-domain-controllers-enable-wdac-driver-blocklist-md)**
   Requirement to configure the Windows Defender Application Control (WDAC) driver blocklist to protect kernel memory from Bring Your Own Vulnerable Driver (BYOVD) attacks.
+* **[REQ-DC-023 - Configure User Rights Assignments for Domain Controllers](#02-domain-controllers-configure-user-rights-assignments-md)**
+  Requirement to restrict local user rights assignments on Domain Controllers to prevent default operator groups (Print Operators, Server Operators, Backup Operators) from logging on locally, backing up/restoring files, or shutting down Domain Controllers.
 
 
 
@@ -5526,6 +5597,318 @@ if ($Vulnerable) {
 * **ANSSI Active Directory Hardening Guide**: Recommendations on system component code integrity and driver signature enforcement.
 * **CIS Microsoft Windows Server Benchmark**: Section 18.8.14.3 / 18.9.31.2 (Deploy Windows Defender Application Control / Memory Integrity).
 * **Microsoft Security Guidance**: Microsoft recommended driver block rules documentation.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-configure-user-rights-assignments-md"></div>
+
+<div id="02-domain-controllers-configure-user-rights-assignments-md-req-dc-023-configure-user-rights-assignments-for-domain-controllers"></div>
+# [REQ-DC-023] Configure User Rights Assignments for Domain Controllers
+
+<div id="02-domain-controllers-configure-user-rights-assignments-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers (DCs)
+* **Operating Systems**: Windows Server 2016 and above
+
+---
+
+<div id="02-domain-controllers-configure-user-rights-assignments-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+  * **Registry Location**: Configured via Local Security Database template (`secedit` Privilege Rights area).
+
+---
+
+<div id="02-domain-controllers-configure-user-rights-assignments-md-rationale"></div>
+## Rationale
+User Rights Assignments (URAs) define the actions that groups or individual accounts can perform on Domain Controllers. In a standard installation, default Windows groups such as `Server Operators`, `Backup Operators`, `Print Operators`, and `Account Operators` are granted extensive local privileges. On Domain Controllers, these groups are effectively Tier 0 administration pathways:
+1. **Interactive Logon (`SeInteractiveLogonRight`)**: Default settings allow Print, Server, Account, and Backup Operators to log on locally to Domain Controllers. An attacker who compromises a member of these groups can log on interactively to a Domain Controller and execute commands, bypassing tiering boundaries.
+2. **System Shutdown (`SeShutdownPrivilege` / `SeRemoteShutdownPrivilege`)**: Print, Server, and Backup Operators can shut down Domain Controllers locally or remotely, presenting a denial-of-service vector.
+3. **Backup and Restore (`SeBackupPrivilege` / `SeRestorePrivilege`)**: Server and Backup Operators bypass all NTFS ACLs to back up and restore files. Attackers with these privileges can read the NTDS database (`ntds.dit`) or write files directly to DC directories.
+4. **Device Drivers (`SeLoadDriverPrivilege`)**: Print Operators are allowed to load and unload device drivers on Domain Controllers. This privilege can be exploited to load signed vulnerable drivers (BYOVD) to achieve kernel-mode execution.
+
+To preserve the Tier 0 administrative boundary, these rights must be restricted strictly to local Administrators and essential network services, removing the default operator group assignments.
+
+---
+
+<div id="02-domain-controllers-configure-user-rights-assignments-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Backup Software**: Dedicated backup software or monitoring agents running under service accounts may require `SeBackupPrivilege` or `SeRestorePrivilege` to function. If backups fail on Domain Controllers, configure dedicated, isolated service accounts with these privileges through the DC Hardening GPO.
+* **Server Operators delegation**: Traditional Server Operators will no longer be able to log on interactively or shut down Domain Controllers. All administrative tasks must be delegated via standard Tier 0 accounts and secure jump hosts.
+
+---
+
+<div id="02-domain-controllers-configure-user-rights-assignments-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-configure-user-rights-assignments-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management workstation.
+2. Edit the modular Domain Controllers GPO (e.g., `SEC_DomainControllers_Hardening`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Configure the following policies as specified, removing any default operator group entries (such as Backup Operators, Print Operators, Server Operators, and Account Operators):
+
+| Policy Setting | Allowed Security Principals (SIDs / Groups) |
+| :--- | :--- |
+| **Access this computer from the network** | `BUILTIN\Administrators`, `NT AUTHORITY\Authenticated Users`, `NT AUTHORITY\ENTERPRISE DOMAIN CONTROLLERS` |
+| **Act as part of the operating system** | No one (Empty) |
+| **Add workstations to domain** | `BUILTIN\Administrators` |
+| **Adjust memory quotas for a process** | `BUILTIN\Administrators`, `NT AUTHORITY\LOCAL SERVICE`, `NT AUTHORITY\NETWORK SERVICE` |
+| **Allow log on locally** | `BUILTIN\Administrators`, `NT AUTHORITY\ENTERPRISE DOMAIN CONTROLLERS` |
+| **Back up files and directories** | `BUILTIN\Administrators` |
+| **Bypass traverse checking** | `BUILTIN\Pre-Windows 2000 Compatible Access`, `NT AUTHORITY\Authenticated Users`, `BUILTIN\Administrators`, `NT AUTHORITY\NETWORK SERVICE`, `NT AUTHORITY\LOCAL SERVICE`, `Everyone` |
+| **Change the system time** | `BUILTIN\Administrators`, `NT AUTHORITY\LOCAL SERVICE` |
+| **Create a pagefile** | `BUILTIN\Administrators` |
+| **Create a token object** | No one (Empty) |
+| **Create permanent shared objects** | No one (Empty) |
+| **Debug programs** | `BUILTIN\Administrators` |
+| **Deny access to this computer from the network** | `BUILTIN\Guests` |
+| **Deny log on as a batch job** | `BUILTIN\Guests` |
+| **Deny log on as a service** | `BUILTIN\Guests` |
+| **Deny log on locally** | `BUILTIN\Guests` |
+| **Enable computer and user accounts to be trusted for delegation** | `BUILTIN\Administrators` |
+| **Force shutdown from a remote system** | `BUILTIN\Administrators` |
+| **Load and unload device drivers** | `BUILTIN\Administrators` |
+| **Lock pages in memory** | No one (Empty) |
+| **Log on as a batch job** | `BUILTIN\Administrators` |
+| **Log on as a service** | No one (Empty) |
+| **Manage auditing and security log** | `BUILTIN\Administrators` |
+| **Modify firmware environment values** | `BUILTIN\Administrators` |
+| **Profile single process** | `BUILTIN\Administrators` |
+| **Restore files and directories** | `BUILTIN\Administrators` |
+| **Shut down the system** | `BUILTIN\Administrators` |
+| **Synchronize directory service data** | No one (Empty) |
+| **Take ownership of files or other objects** | `BUILTIN\Administrators` |
+
+5. Ensure the GPO is linked to the **Domain Controllers** OU and has higher precedence (Link Order 1) than the Default Domain Controllers Policy.
+
+---
+
+<div id="02-domain-controllers-configure-user-rights-assignments-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Configure Domain Controller User Rights Assignments locally using `secedit.exe` and PowerShell.
+
+[Download Script: Set-DCUserRightsAssignments.ps1](implementation_scripts/Set-DCUserRightsAssignments.ps1)
+
+```powershell
+# Set-DCUserRightsAssignments.ps1
+# Enforces the local user rights assignments baseline configuration on Domain Controllers using secedit.
+
+Write-Host "Applying Domain Controller User Rights Assignments..." -ForegroundColor Cyan
+
+# 1. Create a secure temporary path for security templates
+$SecTempDir = Join-Path $env:TEMP "DCSecurityTemplates"
+if (-not (Test-Path $SecTempDir)) {
+    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
+}
+
+$CfgFile = Join-Path $SecTempDir "dc_user_rights.cfg"
+$LogFile = Join-Path $SecTempDir "secedit.log"
+$DbFile = Join-Path $SecTempDir "secedit.sdb"
+
+# 2. Export current security configuration
+Write-Host "[*] Exporting current security configuration..." -ForegroundColor Gray
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) {
+    Write-Error "Failed to export current security database settings."
+    return
+}
+
+# 3. Read and modify the configuration file
+$ConfigText = Get-Content -Path $CfgFile -Raw
+$HasPrivilegeSection = $ConfigText -match "\[Privilege Rights\]"
+
+if (-not $HasPrivilegeSection) {
+    $ConfigText += "`r`n[Privilege Rights]`r`n"
+}
+
+# Define the Domain Controller baseline User Rights Assignments
+$BaselineRights = @{
+    "SeNetworkLogonRight"             = "*S-1-5-9,*S-1-5-11,*S-1-5-32-544"
+    "SeTcbPrivilege"                  = ""
+    "SeMachineAccountPrivilege"       = "*S-1-5-32-544"
+    "SeIncreaseQuotaPrivilege"        = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544"
+    "SeInteractiveLogonRight"         = "*S-1-5-9,*S-1-5-32-544"
+    "SeBackupPrivilege"               = "*S-1-5-32-544"
+    "SeChangeNotifyPrivilege"         = "*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0"
+    "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
+    "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
+    "SeCreateTokenPrivilege"          = ""
+    "SeCreatePermanentPrivilege"      = ""
+    "SeDebugPrivilege"                = "*S-1-5-32-544"
+    "SeDenyNetworkLogonRight"         = "*S-1-5-32-546"
+    "SeDenyBatchLogonRight"           = "*S-1-5-32-546"
+    "SeDenyServiceLogonRight"         = "*S-1-5-32-546"
+    "SeDenyInteractiveLogonRight"     = "*S-1-5-32-546"
+    "SeEnableDelegationPrivilege"     = "*S-1-5-32-544"
+    "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
+    "SeLoadDriverPrivilege"           = "*S-1-5-32-544"
+    "SeLockMemoryPrivilege"           = ""
+    "SeBatchLogonRight"               = "*S-1-5-32-544"
+    "SeServiceLogonRight"             = ""
+    "SeSecurityPrivilege"             = "*S-1-5-32-544"
+    "SeSystemEnvironmentPrivilege"    = "*S-1-5-32-544"
+    "SeProfileSingleProcessPrivilege" = "*S-1-5-32-544"
+    "SeRestorePrivilege"              = "*S-1-5-32-544"
+    "SeShutdownPrivilege"             = "*S-1-5-32-544"
+    "SeSyncAgentPrivilege"            = ""
+    "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
+}
+
+# Re-build [Privilege Rights] section line-by-line
+$Lines = $ConfigText -split "`r?`n"
+$NewLines = @()
+$InPrivilegeSection = $false
+
+foreach ($Line in $Lines) {
+    if ($Line -match "^\[(.*)\]$") {
+        $SectionName = $Matches[1]
+        if ($SectionName -eq "Privilege Rights") {
+            $InPrivilegeSection = $true
+            $NewLines += $Line
+            continue
+        } else {
+            $InPrivilegeSection = $false
+        }
+    }
+    
+    if ($InPrivilegeSection) {
+        $IsManaged = $false
+        foreach ($Key in $BaselineRights.Keys) {
+            if ($Line -match "^\s*$($Key)\s*=") {
+                $IsManaged = $true
+                break
+            }
+        }
+        if (-not $IsManaged) {
+            $NewLines += $Line
+        }
+    } else {
+        $NewLines += $Line
+    }
+}
+
+# Append our managed settings
+$FinalLines = @()
+foreach ($Line in $NewLines) {
+    $FinalLines += $Line
+    if ($Line -eq "[Privilege Rights]") {
+        foreach ($Key in $BaselineRights.Keys) {
+            $Val = $BaselineRights[$Key]
+            $FinalLines += "$($Key) = $($Val)"
+        }
+    }
+}
+
+$FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
+
+# 4. Import the modified configuration file
+Write-Host "[*] Importing updated security configuration template..." -ForegroundColor Gray
+$Process = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas USER_RIGHTS /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "[+] DC User Rights Assignments applied successfully." -ForegroundColor Green
+} else {
+    Write-Error "Failed to apply DC user rights assignments. Exit Code: $($Process.ExitCode)"
+}
+
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+```
+
+*To audit local Domain Controller User Rights Assignments:*
+
+[Download Script: Get-DCUserRightsAssignmentsStatus.ps1](audit_scripts/Get-DCUserRightsAssignmentsStatus.ps1)
+
+```powershell
+# Get-DCUserRightsAssignmentsStatus.ps1
+# Description: Exports DC user rights assignments and checks them against the baseline.
+
+Write-Host "--- Auditing DC User Rights Assignments ---" -ForegroundColor Cyan
+
+$SecTempDir = Join-Path $env:TEMP -ChildPath "DCAuditSecurityTemplates"
+if (-not (Test-Path $SecTempDir)) {
+    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
+}
+
+$CfgFile = Join-Path $SecTempDir "dc_user_rights_audit.cfg"
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) {
+    Write-Error "Failed to export current configuration database."
+    return
+}
+
+$ConfigContent = Get-Content -Path $CfgFile -Raw
+$BaselineRights = @{
+    "SeNetworkLogonRight"             = "*S-1-5-9,*S-1-5-11,*S-1-5-32-544"
+    "SeTcbPrivilege"                  = ""
+    "SeMachineAccountPrivilege"       = "*S-1-5-32-544"
+    "SeIncreaseQuotaPrivilege"        = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544"
+    "SeInteractiveLogonRight"         = "*S-1-5-9,*S-1-5-32-544"
+    "SeBackupPrivilege"               = "*S-1-5-32-544"
+    "SeChangeNotifyPrivilege"         = "*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0"
+    "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
+    "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
+    "SeCreateTokenPrivilege"          = ""
+    "SeCreatePermanentPrivilege"      = ""
+    "SeDebugPrivilege"                = "*S-1-5-32-544"
+    "SeDenyNetworkLogonRight"         = "*S-1-5-32-546"
+    "SeDenyBatchLogonRight"           = "*S-1-5-32-546"
+    "SeDenyServiceLogonRight"         = "*S-1-5-32-546"
+    "SeDenyInteractiveLogonRight"     = "*S-1-5-32-546"
+    "SeEnableDelegationPrivilege"     = "*S-1-5-32-544"
+    "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
+    "SeLoadDriverPrivilege"           = "*S-1-5-32-544"
+    "SeLockMemoryPrivilege"           = ""
+    "SeBatchLogonRight"               = "*S-1-5-32-544"
+    "SeServiceLogonRight"             = ""
+    "SeSecurityPrivilege"             = "*S-1-5-32-544"
+    "SeSystemEnvironmentPrivilege"    = "*S-1-5-32-544"
+    "SeProfileSingleProcessPrivilege" = "*S-1-5-32-544"
+    "SeRestorePrivilege"              = "*S-1-5-32-544"
+    "SeShutdownPrivilege"             = "*S-1-5-32-544"
+    "SeSyncAgentPrivilege"            = ""
+    "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
+}
+
+$vulnerable = $false
+
+foreach ($Key in $BaselineRights.Keys) {
+    $Expected = $BaselineRights[$Key]
+    if ($ConfigContent -match "(?m)^\s*$($Key)\s*=\s*(.*)\s*$") {
+        $Actual = $Matches[1].Trim()
+    } else {
+        $Actual = ""
+    }
+    
+    $Color = "Green"
+    if ($Actual -ne $Expected) {
+        $Color = "Red"
+        $vulnerable = $true
+    }
+    Write-Host "    - Privilege: $($Key) | Actual: '$($Actual)' (Expected: '$($Expected)')" -ForegroundColor $Color
+}
+
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+
+if ($vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+}
+```
+
+---
+
+<div id="02-domain-controllers-configure-user-rights-assignments-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **CIS Active Directory and Group Policy Management Best Practices**: Appendix B (Default Domain Controller Policy vs CIS Recommendations) (Page 45)
+* **ANSSI AD Hardening Guide**: Recommendations R2, R4, and general privilege minimization.
+* **DoD Windows Server Domain Controller Security Technical Implementation Guide (STIG)**: DC User Rights Assignment parameters.
 
 
 <div style="page-break-before: always;"></div>
@@ -19948,6 +20331,10 @@ Securing authentication parameters and account controls reduces the risk of pass
 7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
 8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
 9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, and requiring NTLMv2 and 128-bit encryption block legacy protocol exploitation.
+10. **Kerberos Security Policy**: Restricting Kerberos ticket lifetimes (e.g. 10 hours max ticket lifetime, 7 days max renewal, 600 minutes max service ticket lifetime) and clock skew tolerance (5 minutes) limits the window of opportunity for stolen ticket abuse (Pass-the-Ticket) and ensures synchronization integrity.
+11. **GPO Background Refresh Security**: Forcing regular Group Policy background reapplication prevents persistent local configuration changes or drift.
+12. **WMI Class Minimization**: Avoiding WMI queries to `Win32_Product` avoids unintended re-installation checks of all MSI packages during GPO processing, protecting host CPU and disk health.
+13. **GPO Commentary**: Requiring descriptive GPO comments ensures structural accountability and documentation parity.
 
 ---
 
@@ -19969,9 +20356,9 @@ Securing authentication parameters and account controls reduces the risk of pass
 <div id="08-endpoints-configure-account-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<div id="08-endpoints-configure-account-policies-md-step-1-configure-lockout-and-password-policies-domain-wide"></div>
-#### Step 1: Configure Lockout and Password Policies (Domain-wide)
-These settings must be configured in the **Default Domain Policy** or a GPO linked to the Domain root to apply domain-wide:
+<div id="08-endpoints-configure-account-policies-md-step-1-configure-lockout-password-and-kerberos-policies-domain-wide"></div>
+#### Step 1: Configure Lockout, Password and Kerberos Policies (Domain-wide)
+These settings must be configured directly within the **Default Domain Policy** to apply domain-wide:
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit the **Default Domain Policy**.
 3. Navigate to:
@@ -19988,9 +20375,34 @@ These settings must be configured in the **Default Domain Policy** or a GPO link
      * **Minimum password length**: `14` characters
      * **Password must meet complexity requirements**: `Enabled`
      * **Store passwords using reversible encryption**: `Disabled`
+   * **Kerberos Policy**:
+     * **Enforce user logon restrictions**: `Enabled`
+     * **Maximum lifetime for service ticket**: `600` minutes
+     * **Maximum lifetime for user ticket**: `10` hours
+     * **Maximum lifetime for user ticket renewal**: `7` days
+     * **Maximum tolerance for computer clock synchronization**: `5` minutes
 
-<div id="08-endpoints-configure-account-policies-md-step-2-configure-local-security-options"></div>
-#### Step 2: Configure Local Security Options
+<div id="08-endpoints-configure-account-policies-md-step-2-configure-gpo-security-filtering-delegation-ms16-072-compliance"></div>
+#### Step 2: Configure GPO Security Filtering & Delegation (MS16-072 Compliance)
+Following the MS16-072 security update, user-scoped GPOs require computer accounts to have Read access to process the policy. When using Security Filtering to restrict GPOs to specific user groups:
+1. In GPMC, select your user-targeted GPO.
+2. Under the **Scope** tab, in the **Security Filtering** section, select **Authenticated Users** and click **Remove**.
+3. Click **Add**, select your target user security group, and click **OK**.
+4. Click on the **Delegation** tab.
+5. Click **Add**, search for `Domain Computers` (change Object Types to include Computers), and click **OK**.
+6. Set the permissions to **Read** and click **OK**.
+
+<div id="08-endpoints-configure-account-policies-md-step-3-group-policy-wmi-filtering-best-practices"></div>
+#### Step 3: Group Policy WMI Filtering Best Practices
+When using WMI filters to target GPOs:
+* **DO NOT** query the `Win32_Product` WMI class. Calling this class triggers Windows Installer to perform a self-repair validation on every installed MSI package on the system, causing severe CPU spikes and delays during startup and logon. Use lightweight queries such as `Win32_OperatingSystem` instead.
+
+<div id="08-endpoints-configure-account-policies-md-step-4-mandate-gpo-comments-for-accountability"></div>
+#### Step 4: Mandate GPO Comments for Accountability
+For all GPOs created, add a comment in the **Comment** tab of the GPO properties describing the purpose, author, date, and requirement ID.
+
+<div id="08-endpoints-configure-account-policies-md-step-5-configure-local-security-options"></div>
+#### Step 5: Configure Local Security Options
 In the endpoints GPO (e.g., `GPO_Hardening_Workstations`), navigate to:
 `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
 * **Policy**: `Interactive logon: Smart card removal behavior` -> Set to **Lock Workstation** (value 1)
@@ -20186,6 +20598,11 @@ $AccountSettings = @{
     "PasswordHistorySize"   = 24
     "MaxPasswordAge"        = 0
     "MinPasswordAge"        = 1
+    "MaxServiceTicketAge"   = 600
+    "MaxTicketAge"          = 10
+    "MaxRenewAge"           = 7
+    "MaxClockSkew"          = 5
+    "TicketValidateClient"  = 1
 }
 
 foreach ($Line in $Lines) {
@@ -20338,6 +20755,11 @@ $AccountSettings = @{
     "PasswordHistorySize"   = 24
     "MaxPasswordAge"        = 0
     "MinPasswordAge"        = 1
+    "MaxServiceTicketAge"   = 600
+    "MaxTicketAge"          = 10
+    "MaxRenewAge"           = 7
+    "MaxClockSkew"          = 5
+    "TicketValidateClient"  = 1
 }
 
 foreach ($Key in $AccountSettings.Keys) {
@@ -21719,14 +22141,16 @@ This document maps the **CIS Benchmarks** sections for Windows Server (2016, 201
 | :--- | :--- | :--- | :--- | :--- |
 | **1.1** | Password Policy (Complexity, Length, Age, History) | Account Policies | **Covered** | [REQ-ID-001](#03-identities-services-enforce-fgpp-md), [REQ-PAW-013](#07-paws-configure-account-policies-md), [REQ-END-018](#08-endpoints-configure-account-policies-md) |
 | **1.2** | Account Lockout Policy (Threshold, Duration) | Account Policies | **Covered** | [REQ-PAW-013](#07-paws-configure-account-policies-md), [REQ-END-018](#08-endpoints-configure-account-policies-md) |
-| **2.2** | User Rights Assignment (Deny logons, Allow logons) | Local Policies | **Covered** | [REQ-ARCH-001](#01-architecture-restrict-tier-logons-md), [REQ-ID-007](#03-identities-services-restrict-service-account-logons-md), [REQ-PAW-009](#07-paws-configure-user-rights-assignments-md), [REQ-END-016](#08-endpoints-configure-user-rights-assignments-md) |
+| **1.3** | Kerberos Policy (Ticket Lifetimes, Clock Tolerance) | Account Policies | **Covered** | [REQ-END-018](#08-endpoints-configure-account-policies-md) |
+| **2.2** | User Rights Assignment (Deny logons, Allow logons, DC Operator Restrictions) | Local Policies | **Covered** | [REQ-ARCH-001](#01-architecture-restrict-tier-logons-md), [REQ-ID-007](#03-identities-services-restrict-service-account-logons-md), [REQ-DC-023](#02-domain-controllers-configure-user-rights-assignments-md), [REQ-PAW-009](#07-paws-configure-user-rights-assignments-md), [REQ-END-016](#08-endpoints-configure-user-rights-assignments-md) |
 | **2.3** | Security Options (LSA, LAN Manager, LDAP Signing, SMB Signing) | Local Policies | **Covered** | [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-004](#02-domain-controllers-enforce-ldap-signing-md), [REQ-DC-005](#02-domain-controllers-enforce-ldap-channel-binding-md), [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-DC-009](#02-domain-controllers-enforce-smb-signing-md), [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md), [REQ-DC-011](#02-domain-controllers-restrict-ntds-sam-api-md), [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md) |
 | **9.1** | Windows Defender Firewall Profiles (Domain, Private, Public) | Firewall | **Covered** | [REQ-NET-001](#04-network-firewall-configure-ad-port-matrix-md), [REQ-NET-008](#04-network-firewall-configure-firewall-logging-md) |
 | **18.2** | Local Administrator Password Solution (LAPS) settings | Administrative Templates | **Covered** | [REQ-ID-002](#03-identities-services-enable-laps-md) |
 | **18.3** | AutoPlay and AutoRun settings | Administrative Templates | **Covered** | [REQ-END-003](#08-endpoints-disable-autoplay-autorun-md) |
 | **18.8** | PowerShell Logging, Device Guard, and Virtualization-Based Security | Administrative Templates | **Covered** | [REQ-LOG-002](#05-logging-monitoring-configure-powershell-and-command-line-auditing-md), [REQ-PAW-006](#07-paws-enable-hardware-virtualization-and-dma-protection-md), [REQ-PAW-010](#07-paws-enable-vbs-credential-guard-md), [REQ-END-010](#08-endpoints-enable-vbs-credential-guard-md) |
-| **18.9** | System Services (Print Spooler), AppLocker, and WDAC settings | Administrative Templates | **Covered** | [REQ-DC-001](#02-domain-controllers-disable-smbv1-md), [REQ-DC-008](#02-domain-controllers-disable-print-spooler-md), [REQ-DC-021](#02-domain-controllers-configure-applocker-policies-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-END-011](#08-endpoints-configure-wdac-md) |
+| **18.9** | System Services (Print Spooler), AppLocker, WDAC, and GP Refresh settings | Administrative Templates | **Covered** | [REQ-ARCH-005](#01-architecture-default-policies-recommendations-md), [REQ-DC-001](#02-domain-controllers-disable-smbv1-md), [REQ-DC-008](#02-domain-controllers-disable-print-spooler-md), [REQ-DC-021](#02-domain-controllers-configure-applocker-policies-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-END-011](#08-endpoints-configure-wdac-md) |
 | **19.1** | Windows Defender Firewall port configurations and isolation rules | Firewall Advanced Security | **Covered** | [REQ-NET-001](#04-network-firewall-configure-ad-port-matrix-md), [REQ-NET-003](#04-network-firewall-configure-workstation-isolation-md), [REQ-NET-008](#04-network-firewall-configure-firewall-logging-md) |
+| **Public Key** | Encrypting File System (EFS) Settings | Public Key Policies | **Covered** | [REQ-ARCH-005](#01-architecture-default-policies-recommendations-md) |
 
 <div id="compliance-cis-md-cis-benchmark-sections-outside-active-directory-scope"></div>
 ## CIS Benchmark Sections Outside Active Directory Scope

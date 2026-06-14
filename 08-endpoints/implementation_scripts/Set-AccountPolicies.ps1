@@ -142,6 +142,11 @@ $AccountSettings = @{
     "PasswordHistorySize"   = 24
     "MaxPasswordAge"        = 0
     "MinPasswordAge"        = 1
+    "MaxServiceTicketAge"   = 600
+    "MaxTicketAge"          = 10
+    "MaxRenewAge"           = 7
+    "MaxClockSkew"          = 5
+    "TicketValidateClient"  = 1
 }
 
 foreach ($Line in $Lines) {
