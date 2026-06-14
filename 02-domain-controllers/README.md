@@ -50,6 +50,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure the Windows Defender Application Control (WDAC) driver blocklist to protect kernel memory from Bring Your Own Vulnerable Driver (BYOVD) attacks.
 * **[REQ-DC-023 - Configure User Rights Assignments for Domain Controllers](configure-user-rights-assignments.md)**
   Requirement to restrict local user rights assignments on Domain Controllers to prevent default operator groups (Print Operators, Server Operators, Backup Operators) from logging on locally, backing up/restoring files, or shutting down Domain Controllers.
+* **[REQ-DC-024 - Configure dSHeuristics](configure-dsheuristics.md)**
+  Requirement to audit and configure the dSHeuristics forest-wide attribute to reach maximum Level 5 security, blocking anonymous LDAP and NSPI operations, securing adminSDHolder, and enforcing KB5008383 owner implicit rights protections.
 
 
 

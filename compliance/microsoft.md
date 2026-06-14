@@ -20,8 +20,9 @@ This document maps the focus areas of the **Microsoft Security Baselines** (Doma
 | **Removable Storage** | Deploy GPOs to block external removable storage devices (USB mass storage). | Data Protection | **Covered** | [REQ-END-004](../08-endpoints/block-removable-storage.md) |
 | **Point and Print** | Configure Point and Print restrictions to prevent PrintNightmare exploits. | Services Hardening | **Covered** | [REQ-ID-016](../03-identities-services/configure-point-and-print.md) |
 | **SYSVOL replication** | Migrate SYSVOL replication from FRS to DFS Replication (DFSR). | DC Hardening | **Covered** | [REQ-DC-015](../02-domain-controllers/migrate-sysvol-replication-dfsr.md) |
-| **adminSDHolder** | Harden adminSDHolder object permissions to prevent privilege persistence. | DC Hardening | **Covered** | [REQ-DC-016](../02-domain-controllers/harden-adminsdholder-permissions.md) |
+| **adminSDHolder** | Harden adminSDHolder object permissions to prevent privilege persistence. | DC Hardening | **Covered** | [REQ-DC-016](../02-domain-controllers/harden-adminsdholder-permissions.md), [REQ-DC-024](../02-domain-controllers/configure-dsheuristics.md) |
 | **Services minimization** | Disable unnecessary system services on Domain Controllers. | DC Hardening | **Covered** | [REQ-DC-012](../02-domain-controllers/disable-unnecessary-services.md) |
+| **dSHeuristics Hardening** | Configure the forest-wide dSHeuristics attribute to block anonymous operations, secure adminSDHolder, and enforce KB5008383 protections. | DC Hardening | **Covered** | [REQ-DC-024](../02-domain-controllers/configure-dsheuristics.md) |
 
 ## Microsoft Baseline Controls Outside Guidebook Scope
 
