@@ -1,9 +1,25 @@
 # Set-BitLockerEncryption.ps1
-# Enables BitLocker encryption locally and backs up recovery keys to AD.
+# Enables BitLocker encryption locally, configures startup policies/PIN lengths, and backs up recovery keys to AD.
 
 Write-Host "--- Enforcing BitLocker Drive Encryption ---" -ForegroundColor Cyan
 
-# 1. Enable BitLocker on C: drive using TPM protection
+# 1. Configure FVE Registry settings for startup authentication
+$FveRegPath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
+if (-not (Test-Path $FveRegPath)) {
+    New-Item -Path $FveRegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $FveRegPath -Name "AllowNetworkUnlock" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "MinimumPIN" -Value 6 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "EnableBDEWithNoTPM" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "UseTPM" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "UseTPMPIN" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "UseTPMKey" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "UseTPMKeyPIN" -Value 2 -Type DWord -Force
+
+Write-Host "[+] BitLocker startup authentication registry keys configured." -ForegroundColor Green
+
+# 2. Enable BitLocker on C: drive using TPM protection
 $Volume = Get-BitLockerVolume -MountPoint "C:"
 
 # Check if protection is already active

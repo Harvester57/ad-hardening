@@ -1,5 +1,5 @@
 # Test-BitLockerStatus.ps1
-# Audits current BitLocker protection state, key protector types, and Network Unlock configuration.
+# Audits current BitLocker protection state, key protector types, and Network Unlock/Startup PIN configuration.
 
 Write-Host "--- Auditing BitLocker Status ---" -ForegroundColor Cyan
 
@@ -18,9 +18,26 @@ if ($Volume) {
     Write-Error "BitLocker volume information could not be retrieved."
 }
 
-# 2. Check Network Unlock registry configuration
+# 2. Check Network Unlock and Startup Authentication registry configuration
 $FveRegPath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
-$NetUnlockVal = Get-ItemProperty -Path $FveRegPath -Name "AllowNetworkUnlock" -ErrorAction SilentlyContinue
-$NetUnlockSetting = if ($NetUnlockVal) { $NetUnlockVal.AllowNetworkUnlock } else { 0 }
-$NetColor = if ($NetUnlockSetting -eq 1) { "Green" } else { "Yellow" }
-Write-Host "`n    - AllowNetworkUnlock Registry Value: $NetUnlockSetting (Required = 1 if using Network Unlock)" -ForegroundColor $NetColor
+$Params = @(
+    @{ Name = "AllowNetworkUnlock"; Expected = 1 },
+    @{ Name = "MinimumPIN"; Expected = 6 },
+    @{ Name = "EnableBDEWithNoTPM"; Expected = 1 },
+    @{ Name = "UseTPM"; Expected = 2 },
+    @{ Name = "UseTPMPIN"; Expected = 2 },
+    @{ Name = "UseTPMKey"; Expected = 2 },
+    @{ Name = "UseTPMKeyPIN"; Expected = 2 }
+)
+
+Write-Host "`n[*] Auditing Startup Authentication & PIN parameters:" -ForegroundColor Yellow
+if (Test-Path $FveRegPath) {
+    foreach ($Param in $Params) {
+        $Val = Get-ItemProperty -Path $FveRegPath -Name $Param.Name -ErrorAction SilentlyContinue
+        $ActualVal = if ($Val) { $Val.$($Param.Name) } else { $null }
+        $Color = if ($ActualVal -eq $Param.Expected) { "Green" } else { "Red" }
+        Write-Host "    - $($Param.Name): $ActualVal (Expected = $($Param.Expected))" -ForegroundColor $Color
+    }
+} else {
+    Write-Host "    - FVE Registry Policies key does not exist." -ForegroundColor Red
+}

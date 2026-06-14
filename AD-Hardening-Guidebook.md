@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: b339833 | Generated: June 14, 2026</span>
+      <span>Commit: 14d1fe4 | Generated: June 14, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1485,6 +1485,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure the Windows Defender Application Control (WDAC) driver blocklist to protect kernel memory from Bring Your Own Vulnerable Driver (BYOVD) attacks.
 * **[REQ-DC-023 - Configure User Rights Assignments for Domain Controllers](#02-domain-controllers-configure-user-rights-assignments-md)**
   Requirement to restrict local user rights assignments on Domain Controllers to prevent default operator groups (Print Operators, Server Operators, Backup Operators) from logging on locally, backing up/restoring files, or shutting down Domain Controllers.
+* **[REQ-DC-024 - Configure dSHeuristics](#02-domain-controllers-configure-dsheuristics-md)**
+  Requirement to audit and configure the dSHeuristics forest-wide attribute to reach maximum Level 5 security, blocking anonymous LDAP and NSPI operations, securing adminSDHolder, and enforcing KB5008383 owner implicit rights protections.
 
 
 
@@ -5909,6 +5911,297 @@ if ($vulnerable) {
 * **CIS Active Directory and Group Policy Management Best Practices**: Appendix B (Default Domain Controller Policy vs CIS Recommendations) (Page 45)
 * **ANSSI AD Hardening Guide**: Recommendations R2, R4, and general privilege minimization.
 * **DoD Windows Server Domain Controller Security Technical Implementation Guide (STIG)**: DC User Rights Assignment parameters.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-configure-dsheuristics-md"></div>
+
+<div id="02-domain-controllers-configure-dsheuristics-md-req-dc-024-configure-dsheuristics-attribute"></div>
+# [REQ-DC-024] Configure dSHeuristics Attribute
+
+<div id="02-domain-controllers-configure-dsheuristics-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
+
+---
+
+<div id="02-domain-controllers-configure-dsheuristics-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Active Directory Object**: `CN=Directory Service,CN=Windows NT,CN=Services,CN=Configuration,DC=<domain>`
+  * **Attribute**: `dSHeuristics`
+  * **Recommended Value for Level 5 Security**: `0000000001000000000200000001130` (or a customized string with indices 7, 8, 16, 21, 28, 29, 31 set to secure values)
+
+---
+
+<div id="02-domain-controllers-configure-dsheuristics-md-rationale"></div>
+## Rationale
+The `dSHeuristics` attribute is a Unicode string that defines forest-wide heuristic configuration settings for Active Directory. Individual characters at specific indices (1-based) modify security and protocol behaviors on Domain Controllers:
+
+1. **fLDAPBlockAnonOps** (7th character): Controls anonymous LDAP operations. If set to `2`, anonymous binds and searches are permitted, allowing unauthorized users to map out directory structures. Setting it to `0` blocks anonymous operations.
+2. **fAllowAnonNSPI** (8th character): Controls anonymous access to the Name Service Provider Interface (NSPI). If set to `1` or any value other than `0`, anonymous clients can query address books, which allows user enumeration. Setting it to `0` restricts NSPI queries to authenticated users.
+3. **dwAdminSDExMask** (16th character): Excludes administrative groups from the automatic security descriptor protection mechanism (`SDProp`). By default (`0`), groups like Account Operators, Server Operators, Print Operators, and Backup Operators are protected. If set to non-zero, this protection is bypassed, risking privilege escalation.
+4. **DoNotVerifyUPNAndOrSPNUniqueness** (21st character): Controls uniqueness enforcement for User Principal Names (UPN) and Service Principal Names (SPN). Disabling this check (`1` or non-zero) can lead to identity spoofing or credential hijacking by registering duplicate names (KB5008382).
+5. **AttributeAuthorizationOnLDAPAdd** (28th character) and **BlockOwnerImplicitRights** (29th character): Introduced in KB5008383. Setting these to `1` enforces strict authorization validations and auditing during LDAP Add operations, preventing malicious creators from abusing implicit owner privileges.
+6. **DisableConfidentialAttributeEncryptionRequirements** (31st character): Controls connection security requirements for retrieving or writing confidential attributes. Allowing unencrypted connections (non-zero) risks exposing sensitive information such as password hashes or BitLocker recovery keys on the network.
+
+To reach the maximum Level 5 security state, all dangerous features must be disabled, and KB5008383 protections must be explicitly set to `1`.
+
+---
+
+<div id="02-domain-controllers-configure-dsheuristics-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Anonymous Access**: Restricting `fLDAPBlockAnonOps` and `fAllowAnonNSPI` will prevent legacy mail clients (such as Outlook 2003) or older third-party applications from querying the Global Address List (GAL) anonymously. Ensure all applications querying the directory authenticate securely.
+* **KB5008383 Controls**: Explicitly setting `AttributeAuthorizationOnLDAPAdd` and `BlockOwnerImplicitRights` to `1` changes the security validation during LDAP Add operations. Provisions and automation workflows that rely on implicit owner permissions when creating objects must be verified in a staging environment.
+
+---
+
+<div id="02-domain-controllers-configure-dsheuristics-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-configure-dsheuristics-md-option-a-graphical-tools-adsi-edit-ldpexe"></div>
+### Option A: Graphical Tools (ADSI Edit / Ldp.exe)
+
+1. Open **ADSI Edit** (`adsiedit.msc`) with Enterprise Administrator or Domain Administrator (of the forest root) privileges.
+2. Right-click **ADSI Edit** in the left pane and select **Connect to...**.
+3. Under **Connection Point**, choose **Select a well-known Naming Context** and select **Configuration**. Click **OK**.
+4. In the left pane, expand the tree:
+   `Configuration -> CN=Configuration,DC=... -> CN=Services -> CN=Windows NT -> CN=Directory Service`
+5. Right-click `CN=Directory Service` and select **Properties**.
+6. Locate the `dSHeuristics` attribute in the Attribute Editor list and click **Edit**.
+7. If the current value is `<not set>`, set it to the standard Level 5 string:
+   `0000000001000000000200000001130`
+8. If a value is already present, modify it carefully by preserving existing non-security related positions, updating only the specific security positions:
+   * **7th character** (fLDAPBlockAnonOps): Must not be `2` (change to `0`)
+   * **8th character** (fAllowAnonNSPI): Must be `0`
+   * **16th character** (dwAdminSDExMask): Must be `0`
+   * **21st character** (DoNotVerifyUPNAndOrSPNUniqueness): Must be `0`
+   * **28th character** (AttributeAuthorizationOnLDAPAdd): Must be `1`
+   * **29th character** (BlockOwnerImplicitRights): Must be `1`
+   * **31st character** (DisableConfidentialAttributeEncryptionRequirements): Must be `0`
+   * Ensure control characters **10th** is `1`, **20th** is `2`, and **30th** is `3` if the string length reaches those values.
+9. Click **OK** and apply the changes.
+
+---
+
+<div id="02-domain-controllers-configure-dsheuristics-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting programmatically.
+
+[Download Script: Configure-dSHeuristics.ps1](implementation_scripts/Configure-dSHeuristics.ps1)
+
+```powershell
+# Configure-dSHeuristics.ps1
+# Description: Configures the dSHeuristics attribute to reach Level 5 security.
+
+Write-Host "Applying hardening requirement: Configure dSHeuristics..." -ForegroundColor Cyan
+
+# Ensure we can read the Configuration naming context
+$rootDSE = [ADSI]"LDAP://RootDSE"
+$configNamingContext = $rootDSE.configurationNamingContext[0]
+$dsPath = "LDAP://CN=Directory Service,CN=Windows NT,CN=Services,CN=Configuration,$configNamingContext"
+
+$dsObject = [ADSI]$dsPath
+$currentHeuristics = $dsObject.Properties["dSHeuristics"].Value
+
+$newHeuristics = ""
+
+if ($null -eq $currentHeuristics -or $currentHeuristics -eq "") {
+    # Initialize with default 31-character Level 5 string if not already configured
+    $newHeuristics = "0000000001000000000200000001130"
+} else {
+    # If already set, we need to modify specific indices while preserving other values
+    $charArray = $currentHeuristics.ToCharArray()
+    
+    # Pad array to at least 31 characters to support all configurations
+    if ($charArray.Length -lt 31) {
+        $tempArray = [char[]](New-Object char[] 31)
+        for ($i = 0; $i -lt 31; $i++) {
+            if ($i -lt $charArray.Length) {
+                $tempArray[$i] = $charArray[$i]
+            } else {
+                $tempArray[$i] = [char]"0"
+            }
+        }
+        $charArray = $tempArray
+    }
+    
+    # 7: fLDAPBlockAnonOps (Index 6)
+    if ($charArray[6] -eq [char]"2") {
+        $charArray[6] = [char]"0"
+    }
+    
+    # 8: fAllowAnonNSPI (Index 7) -> must be "0"
+    $charArray[7] = [char]"0"
+    
+    # 10: tenthChar (Index 9) -> control character, must be "1"
+    $charArray[9] = [char]"1"
+    
+    # 16: dwAdminSDExMask (Index 15) -> must be "0"
+    $charArray[15] = [char]"0"
+    
+    # 20: twentiethChar (Index 19) -> control character, must be "2"
+    $charArray[19] = [char]"2"
+    
+    # 21: DoNotVerifyUPNAndOrSPNUniqueness (Index 20) -> must be "0"
+    $charArray[20] = [char]"0"
+    
+    # 28: AttributeAuthorizationOnLDAPAdd (Index 27) -> must be "1" for Level 5
+    $charArray[27] = [char]"1"
+    
+    # 29: BlockOwnerImplicitRights (Index 28) -> must be "1" for Level 5
+    $charArray[28] = [char]"1"
+    
+    # 30: thirtiethChar (Index 29) -> control character, must be "3"
+    $charArray[29] = [char]"3"
+    
+    # 31: DisableConfidentialAttributeEncryptionRequirements (Index 30) -> must be "0"
+    $charArray[30] = [char]"0"
+    
+    $newHeuristics = [string]::new($charArray)
+}
+
+if ($currentHeuristics -ne $newHeuristics) {
+    Write-Host "Updating dSHeuristics from '$currentHeuristics' to '$newHeuristics'..." -ForegroundColor Yellow
+    $dsObject.Properties["dSHeuristics"].Value = $newHeuristics
+    $dsObject.CommitChanges()
+    Write-Host "dSHeuristics updated successfully." -ForegroundColor Green
+} else {
+    Write-Host "dSHeuristics is already configured securely ('$currentHeuristics'). No action required." -ForegroundColor Green
+}
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-dSHeuristicsStatus.ps1](audit_scripts/Get-dSHeuristicsStatus.ps1)
+
+```powershell
+# Get-dSHeuristicsStatus.ps1
+# Description: Audits the dSHeuristics attribute settings for security compliance.
+
+Write-Host "--- Auditing dSHeuristics Configuration ---" -ForegroundColor Cyan
+
+$rootDSE = [ADSI]"LDAP://RootDSE"
+$configNamingContext = $rootDSE.configurationNamingContext[0]
+$dsPath = "LDAP://CN=Directory Service,CN=Windows NT,CN=Services,CN=Configuration,$configNamingContext"
+
+$dsObject = [ADSI]$dsPath
+$dsHeuristics = $dsObject.Properties["dSHeuristics"].Value
+
+function Get-HeuristicChar {
+    param(
+        [string]$String,
+        [int]$Index, # 0-based index
+        [char]$Default = [char]"0"
+    )
+    if ($null -ne $String -and $String.Length -gt $Index) {
+        return $String.Substring($Index, 1)
+    }
+    return $Default
+}
+
+$vulnerable = $false
+$nonLevel5 = $false
+
+if ($null -eq $dsHeuristics -or $dsHeuristics -eq "") {
+    Write-Host "[!] dSHeuristics is not set. Default settings apply." -ForegroundColor Yellow
+    Write-Host "    - AttributeAuthorizationOnLDAPAdd: Not Set (defaults to 0, which is Level 3/4 but NOT Level 5)" -ForegroundColor Yellow
+    Write-Host "    - BlockOwnerImplicitRights: Not Set (defaults to 0, which is Level 3/4 but NOT Level 5)" -ForegroundColor Yellow
+    $nonLevel5 = $true
+} else {
+    Write-Host "[+] Current dSHeuristics string: $dsHeuristics" -ForegroundColor Green
+    
+    # 7. fLDAPBlockAnonOps (Index 6)
+    $val = Get-HeuristicChar -String $dsHeuristics -Index 6
+    if ($val -eq "2") {
+        Write-Host "[!] VULNERABLE: fLDAPBlockAnonOps is set to '2' (Allows anonymous LDAP operations)." -ForegroundColor Red
+        $vulnerable = $true
+    } else {
+        Write-Host "[+] fLDAPBlockAnonOps (Index 6): Set to '$val' (Anonymous LDAP operations blocked)." -ForegroundColor Green
+    }
+    
+    # 8. fAllowAnonNSPI (Index 7)
+    $val = Get-HeuristicChar -String $dsHeuristics -Index 7
+    if ($val -ne "0") {
+        Write-Host "[!] VULNERABLE: fAllowAnonNSPI is set to '$val' (Allows anonymous NSPI access; must be 0)." -ForegroundColor Red
+        $vulnerable = $true
+    } else {
+        Write-Host "[+] fAllowAnonNSPI (Index 7): Set to '0' (Anonymous NSPI blocked)." -ForegroundColor Green
+    }
+    
+    # 16. dwAdminSDExMask (Index 15)
+    $val = Get-HeuristicChar -String $dsHeuristics -Index 15
+    if ($val -ne "0") {
+        Write-Host "[!] VULNERABLE: dwAdminSDExMask is set to '$val' (Disables protection for administrative groups; must be 0)." -ForegroundColor Red
+        $vulnerable = $true
+    } else {
+        Write-Host "[+] dwAdminSDExMask (Index 15): Set to '0' (All default admin groups protected)." -ForegroundColor Green
+    }
+    
+    # 21. DoNotVerifyUPNAndOrSPNUniqueness (Index 20)
+    $val = Get-HeuristicChar -String $dsHeuristics -Index 20
+    if ($val -ne "0") {
+        Write-Host "[!] VULNERABLE: DoNotVerifyUPNAndOrSPNUniqueness is set to '$val' (Bypasses UPN/SPN uniqueness checks; must be 0)." -ForegroundColor Red
+        $vulnerable = $true
+    } else {
+        Write-Host "[+] DoNotVerifyUPNAndOrSPNUniqueness (Index 20): Set to '0' (Uniqueness checks active)." -ForegroundColor Green
+    }
+    
+    # 28. AttributeAuthorizationOnLDAPAdd (Index 27)
+    $val = Get-HeuristicChar -String $dsHeuristics -Index 27
+    if ($val -eq "2") {
+        Write-Host "[!] VULNERABLE: AttributeAuthorizationOnLDAPAdd is set to '2' (Bypasses LDAP Add authorization checks)." -ForegroundColor Red
+        $vulnerable = $true
+    } elseif ($val -ne "1") {
+        Write-Host "[!] WARNING: AttributeAuthorizationOnLDAPAdd is set to '$val' (Must be set to '1' for Level 5 security)." -ForegroundColor Yellow
+        $nonLevel5 = $true
+    } else {
+        Write-Host "[+] AttributeAuthorizationOnLDAPAdd (Index 27): Set to '1' (Level 5 secure)." -ForegroundColor Green
+    }
+    
+    # 29. BlockOwnerImplicitRights (Index 28)
+    $val = Get-HeuristicChar -String $dsHeuristics -Index 28
+    if ($val -eq "2") {
+        Write-Host "[!] VULNERABLE: BlockOwnerImplicitRights is set to '2' (Bypasses owner implicit rights protection)." -ForegroundColor Red
+        $vulnerable = $true
+    } elseif ($val -ne "1") {
+        Write-Host "[!] WARNING: BlockOwnerImplicitRights is set to '$val' (Must be set to '1' for Level 5 security)." -ForegroundColor Yellow
+        $nonLevel5 = $true
+    } else {
+        Write-Host "[+] BlockOwnerImplicitRights (Index 28): Set to '1' (Level 5 secure)." -ForegroundColor Green
+    }
+    
+    # 31. DisableConfidentialAttributeEncryptionRequirements (Index 30)
+    $val = Get-HeuristicChar -String $dsHeuristics -Index 30
+    if ($val -ne "0") {
+        Write-Host "[!] VULNERABLE: DisableConfidentialAttributeEncryptionRequirements is set to '$val' (Allows unencrypted transmission of confidential attributes; must be 0)." -ForegroundColor Red
+        $vulnerable = $true
+    } else {
+        Write-Host "[+] DisableConfidentialAttributeEncryptionRequirements (Index 30): Set to '0' (Requires encrypted connection)." -ForegroundColor Green
+    }
+}
+
+if ($vulnerable) {
+    Write-Host "[!] Result: VULNERABLE (Dangerous settings detected in dSHeuristics)." -ForegroundColor Red
+} elseif ($nonLevel5) {
+    Write-Host "[!] Result: Partially Secure (No highly dangerous settings, but Level 5 maximum security is not reached)." -ForegroundColor Yellow
+} else {
+    Write-Host "[+] Result: SECURE (Level 5 security reached)." -ForegroundColor Green
+}
+```
+
+---
+
+<div id="02-domain-controllers-configure-dsheuristics-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Section on dSHeuristics Settings & Tier 0 Protection
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 2.3 (Directory Services / Security Options)
+* **Microsoft Technical Specification**: [MS-ADTS] Section 6.1.1.2.4.1.2 (dSHeuristics)
+* **Microsoft Security Guidance**: KB5008382 (UPN/SPN Uniqueness), KB5008383 (LDAP Add ownership protections)
 
 
 <div style="page-break-before: always;"></div>
@@ -19091,162 +19384,10 @@ if (Test-Path $FveRegPath) {
 ---
 
 <div id="08-endpoints-enable-bitlocker-md-sources-compliance-references"></div>
-## 🔗 Sources & Compliance References
+## Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.2.1.1 (Require additional authentication at startup), Section 18.2.1.5 (Allow Network Unlock at startup)
 * **ANSSI AD Hardening Guide**: Recommendations regarding endpoint encryption and physical key storage security.
 * **DoD Windows 11 STIG**: BitLocker startup option requirements.
-
----
-
-<div id="08-endpoints-enable-bitlocker-md-rationale"></div>
-## Rationale
-BitLocker Drive Encryption protects the operating system volume from offline attacks, data tampering, and data theft when the device is powered off or stolen. Without full disk encryption, an attacker with physical access to a workstation can extract the hard drive, mount it on a non-secure system, bypass operating system security controls, dump local password databases (SAM), and access cached domain credentials.
-
-To maximize security, standard endpoints (Tier 2) should use **BitLocker Network Unlock** to prevent operational overhead in managing startup PINs for thousands of workstations. 
-
-<div id="08-endpoints-enable-bitlocker-md-how-bitlocker-network-unlock-works"></div>
-### How BitLocker Network Unlock Works
-BitLocker Network Unlock allows domain-joined workstations connected to the wired corporate LAN to automatically unlock their OS drives on reboot, while still requiring a backup PIN or recovery key when disconnected from the corporate network.
-
-```text
-[Client PC Boot (UEFI)]
-  |
-  +-- Sends DHCP Request + Encrypted Key Payload (via Wired Ethernet)
-        |
-        v
-[WDS Server (Network Unlock Role)]
-  |
-  +-- Decrypts Payload using Network Unlock Certificate Private Key
-  +-- Sends Decryption Key back via DHCP Reply Option
-        |
-        v
-[Client PC]
-  |
-  +-- Automatically Unlocks OS Volume & Boots Windows
-```
-
-If the workstation is stolen or boots outside the local LAN (e.g., on a public network, Wi-Fi, or offline), the DHCP payload request goes unanswered, the Network Unlock fails, and the workstation falls back to prompting the user for a Startup PIN or Recovery Key.
-
----
-
-<div id="08-endpoints-enable-bitlocker-md-legacy-impact-compatibility"></div>
-## Legacy Impact & Compatibility
-* **Wired Network Required**: Network Unlock operates in the pre-boot UEFI phase. Wireless network adapters are not active at this stage; workstations must be connected to the physical corporate switch via an Ethernet cable.
-* **UEFI and TPM Requirements**: Client computers must support UEFI DHCP drivers, native UEFI boot (Legacy CSM disabled), and have an active TPM 1.2 or 2.0 chip.
-* **PKI Infrastructure**: Deploying Network Unlock requires a functioning Active Directory Certificate Services (AD CS) instance to issue and manage the Network Unlock certificate.
-
----
-
-<div id="08-endpoints-enable-bitlocker-md-implementation-steps"></div>
-## Implementation Steps
-
-<div id="08-endpoints-enable-bitlocker-md-option-a-group-policy-and-server-configuration-preferred"></div>
-### Option A: Group Policy and Server Configuration (Preferred)
-
-<div id="08-endpoints-enable-bitlocker-md-step-1-configure-the-wds-server-for-network-unlock"></div>
-#### Step 1: Configure the WDS Server for Network Unlock
-1. Install the **Windows Deployment Services (WDS)** role on an internal Windows Server.
-2. In Server Manager, select **Add Roles and Features** and check **BitLocker Network Unlock** under Features.
-3. Open the Local PKI CA console (`certsrv.msc`) and issue a certificate using the **BitLocker Network Unlock** template.
-4. Export the certificate public key (`.cer` file) and export the private key (`.pfx` file).
-5. Import the `.pfx` private key certificate into the local WDS server's **Local Computer\Personal** certificate store.
-6. Restart the WDS service (`wdssvc`).
-
-<div id="08-endpoints-enable-bitlocker-md-step-2-distribute-the-network-unlock-certificate-via-gpo"></div>
-#### Step 2: Distribute the Network Unlock Certificate via GPO
-1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit your GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
-3. Navigate to:
-   `Computer Configuration\Policies\Windows Settings\Security Settings\Public Key Policies`
-4. Right-click **BitLocker Network Unlock** and select **Add Network Unlock Certificate**.
-5. Import the public `.cer` file exported in Step 1.
-
-<div id="08-endpoints-enable-bitlocker-md-step-3-enforce-gpo-bitlocker-settings"></div>
-#### Step 3: Enforce GPO BitLocker Settings
-1. Navigate to:
-   `Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption\Operating System Drives`
-2. Configure the following settings:
-   * **Policy**: `Require additional authentication at startup`
-   * **Setting**: `Enabled`
-   * **Configure Options**:
-     * Set `Configure TPM startup`: `Require TPM`.
-     * Check `Allow BitLocker without a compatible TPM` to `Disabled`.
-   * **Policy**: `Allow Network Unlock at startup`
-   * **Setting**: `Enabled`
-
----
-
-<div id="08-endpoints-enable-bitlocker-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
-### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
-
-Run the following scripts locally to audit and configure BitLocker parameters.
-
-[Download Script: Set-BitLockerEncryption.ps1](implementation_scripts/Set-BitLockerEncryption.ps1)
-
-```powershell
-# Set-BitLockerEncryption.ps1
-# Enables BitLocker encryption locally and backs up recovery keys to AD.
-
-Write-Host "--- Enforcing BitLocker Drive Encryption ---" -ForegroundColor Cyan
-
-# 1. Enable BitLocker on C: drive using TPM protection
-$Volume = Get-BitLockerVolume -MountPoint "C:"
-
-# Check if protection is already active
-if ($Volume.ProtectionStatus -eq "Off") {
-    Write-Host "[+] Activating BitLocker on C: drive using XTS-AES 256 encryption..." -ForegroundColor Gray
-    
-    # Enable BitLocker and backup recovery password protector to Active Directory
-    Enable-BitLocker -MountPoint "C:" `
-        -EncryptionMethod XtsAes256 `
-        -UsedSpaceOnly `
-        -TpmProtector `
-        -AdBackupRequired
-        
-    Write-Host "[+] BitLocker encryption initiated. Recovery key backed up to AD." -ForegroundColor Green
-} else {
-    Write-Host "[+] BitLocker is already enabled on C: (Protection Status: $($Volume.ProtectionStatus))." -ForegroundColor Green
-}
-```
-
-*To audit local BitLocker and Network Unlock registry settings:*
-[Download Script: Test-BitLockerStatus.ps1](audit_scripts/Test-BitLockerStatus.ps1)
-
-```powershell
-# Test-BitLockerStatus.ps1
-# Audits current BitLocker protection state, key protector types, and Network Unlock configuration.
-
-Write-Host "--- Auditing BitLocker Status ---" -ForegroundColor Cyan
-
-# 1. Query local BitLocker state
-$Volume = Get-BitLockerVolume -MountPoint "C:" -ErrorAction SilentlyContinue
-if ($Volume) {
-    $StatusColor = if ($Volume.ProtectionStatus -eq "On") { "Green" } else { "Red" }
-    Write-Host "    - Protection Status: $($Volume.ProtectionStatus)" -ForegroundColor $StatusColor
-    Write-Host "    - Encryption Method: $($Volume.EncryptionMethod)" -ForegroundColor White
-    
-    Write-Host "`n[+] Active Key Protectors:" -ForegroundColor Yellow
-    foreach ($Protector in $Volume.KeyProtector) {
-        Write-Host "    - Type: $($Protector.KeyProtectorType) | ID: $($Protector.KeyProtectorId)" -ForegroundColor White
-    }
-} else {
-    Write-Error "BitLocker volume information could not be retrieved."
-}
-
-# 2. Check Network Unlock registry configuration
-$FveRegPath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
-$NetUnlockVal = Get-ItemProperty -Path $FveRegPath -Name "AllowNetworkUnlock" -ErrorAction SilentlyContinue
-$NetUnlockSetting = if ($NetUnlockVal) { $NetUnlockVal.AllowNetworkUnlock } else { 0 }
-$NetColor = if ($NetUnlockSetting -eq 1) { "Green" } else { "Yellow" }
-Write-Host "`n    - AllowNetworkUnlock Registry Value: $NetUnlockSetting (Required = 1 if using Network Unlock)" -ForegroundColor $NetColor
-```
-
----
-
-<div id="08-endpoints-enable-bitlocker-md-sources-compliance-references"></div>
-## 🔗 Sources & Compliance References
-* **CIS Microsoft Windows 10 Benchmark**: Section 18.2.1.1 (Require additional authentication at startup), Section 18.2.1.5 (Allow Network Unlock at startup)
-* **ANSSI AD Hardening Guide**: Recommendations regarding endpoint encryption and physical key storage security.
 
 
 <div style="page-break-before: always;"></div>
@@ -22093,11 +22234,11 @@ This document maps the recommendations of the **ANSSI (French National Agency fo
 | **R16** | Restrict constrained Kerberos delegation | Kerberos Delegation | **Covered** | [REQ-ID-004](#03-identities-services-restrict-kerberos-delegation-md) |
 | **R17** | Enforce strong Kerberos encryption algorithms (AES-only) | Kerberos Encryption | **Covered** | [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md), [REQ-ID-008](#03-identities-services-enforce-user-aes-encryption-md) |
 | **R18** | Harden TLS protocols, cipher suites, and elliptic curves (Schannel) | TLS / Cryptography | **Covered** | [REQ-NET-006](#04-network-firewall-harden-tls-configuration-md) |
-| **R19** | Enforce LDAP server signing and client-side resolution settings | LDAP Security | **Covered** | [REQ-DC-004](#02-domain-controllers-enforce-ldap-signing-md), [REQ-NET-009](#04-network-firewall-configure-hardened-unc-paths-md) |
+| **R19** | Enforce LDAP server signing and client-side resolution settings | LDAP Security | **Covered** | [REQ-DC-004](#02-domain-controllers-enforce-ldap-signing-md), [REQ-DC-024](#02-domain-controllers-configure-dsheuristics-md), [REQ-NET-009](#04-network-firewall-configure-hardened-unc-paths-md) |
 | **R20** | Enforce LDAP Channel Binding and Kerberos Armoring | LDAP Channel Binding | **Covered** | [REQ-DC-005](#02-domain-controllers-enforce-ldap-channel-binding-md), [REQ-DC-013](#02-domain-controllers-enable-kerberos-armoring-md) |
 | **R21** | Disable SMBv1 on all network nodes | SMB Security | **Covered** | [REQ-DC-001](#02-domain-controllers-disable-smbv1-md) |
 | **R22** | Enforce SMB signing and encryption | SMB Security | **Covered** | [REQ-DC-009](#02-domain-controllers-enforce-smb-signing-md), [REQ-NET-007](#04-network-firewall-enforce-smbv3-security-md) |
-| **R23** | Harden and protect adminSDHolder permissions | adminSDHolder Permissions | **Covered** | [REQ-DC-016](#02-domain-controllers-harden-adminsdholder-permissions-md), [REQ-ID-013](#03-identities-services-cleanup-admincount-orphans-md) |
+| **R23** | Harden and protect adminSDHolder permissions | adminSDHolder Permissions | **Covered** | [REQ-DC-016](#02-domain-controllers-harden-adminsdholder-permissions-md), [REQ-DC-024](#02-domain-controllers-configure-dsheuristics-md), [REQ-ID-013](#03-identities-services-cleanup-admincount-orphans-md) |
 | **R24** | Harden Active Directory Domain Trusts (SID history/filtering) | Domain Trusts | **Covered** | [REQ-ARCH-006](#01-architecture-harden-domain-trusts-md) |
 | **R35** | Implement Group Managed Service Accounts (gMSA) | Service Account Hardening | **Covered** | [REQ-ID-003](#03-identities-services-harden-service-accounts-md), [REQ-ID-014](#03-identities-services-renew-kds-keys-gmsa-secrets-md) |
 | **R36** | Harden Active Directory Certificate Services (ADCS) and PKI | ADCS / PKI Hardening | **Covered** | [REQ-ID-015](#03-identities-services-harden-adcs-pki-md) |
@@ -22143,7 +22284,7 @@ This document maps the **CIS Benchmarks** sections for Windows Server (2016, 201
 | **1.2** | Account Lockout Policy (Threshold, Duration) | Account Policies | **Covered** | [REQ-PAW-013](#07-paws-configure-account-policies-md), [REQ-END-018](#08-endpoints-configure-account-policies-md) |
 | **1.3** | Kerberos Policy (Ticket Lifetimes, Clock Tolerance) | Account Policies | **Covered** | [REQ-END-018](#08-endpoints-configure-account-policies-md) |
 | **2.2** | User Rights Assignment (Deny logons, Allow logons, DC Operator Restrictions) | Local Policies | **Covered** | [REQ-ARCH-001](#01-architecture-restrict-tier-logons-md), [REQ-ID-007](#03-identities-services-restrict-service-account-logons-md), [REQ-DC-023](#02-domain-controllers-configure-user-rights-assignments-md), [REQ-PAW-009](#07-paws-configure-user-rights-assignments-md), [REQ-END-016](#08-endpoints-configure-user-rights-assignments-md) |
-| **2.3** | Security Options (LSA, LAN Manager, LDAP Signing, SMB Signing) | Local Policies | **Covered** | [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-004](#02-domain-controllers-enforce-ldap-signing-md), [REQ-DC-005](#02-domain-controllers-enforce-ldap-channel-binding-md), [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-DC-009](#02-domain-controllers-enforce-smb-signing-md), [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md), [REQ-DC-011](#02-domain-controllers-restrict-ntds-sam-api-md), [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md) |
+| **2.3** | Security Options (LSA, LAN Manager, LDAP Signing, SMB Signing) | Local Policies | **Covered** | [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-004](#02-domain-controllers-enforce-ldap-signing-md), [REQ-DC-005](#02-domain-controllers-enforce-ldap-channel-binding-md), [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-DC-009](#02-domain-controllers-enforce-smb-signing-md), [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md), [REQ-DC-011](#02-domain-controllers-restrict-ntds-sam-api-md), [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md), [REQ-DC-024](#02-domain-controllers-configure-dsheuristics-md) |
 | **9.1** | Windows Defender Firewall Profiles (Domain, Private, Public) | Firewall | **Covered** | [REQ-NET-001](#04-network-firewall-configure-ad-port-matrix-md), [REQ-NET-008](#04-network-firewall-configure-firewall-logging-md) |
 | **18.2** | Local Administrator Password Solution (LAPS) settings | Administrative Templates | **Covered** | [REQ-ID-002](#03-identities-services-enable-laps-md) |
 | **18.3** | AutoPlay and AutoRun settings | Administrative Templates | **Covered** | [REQ-END-003](#08-endpoints-disable-autoplay-autorun-md) |
@@ -22192,8 +22333,9 @@ This document maps the focus areas of the **Microsoft Security Baselines** (Doma
 | **Removable Storage** | Deploy GPOs to block external removable storage devices (USB mass storage). | Data Protection | **Covered** | [REQ-END-004](#08-endpoints-block-removable-storage-md) |
 | **Point and Print** | Configure Point and Print restrictions to prevent PrintNightmare exploits. | Services Hardening | **Covered** | [REQ-ID-016](#03-identities-services-configure-point-and-print-md) |
 | **SYSVOL replication** | Migrate SYSVOL replication from FRS to DFS Replication (DFSR). | DC Hardening | **Covered** | [REQ-DC-015](#02-domain-controllers-migrate-sysvol-replication-dfsr-md) |
-| **adminSDHolder** | Harden adminSDHolder object permissions to prevent privilege persistence. | DC Hardening | **Covered** | [REQ-DC-016](#02-domain-controllers-harden-adminsdholder-permissions-md) |
+| **adminSDHolder** | Harden adminSDHolder object permissions to prevent privilege persistence. | DC Hardening | **Covered** | [REQ-DC-016](#02-domain-controllers-harden-adminsdholder-permissions-md), [REQ-DC-024](#02-domain-controllers-configure-dsheuristics-md) |
 | **Services minimization** | Disable unnecessary system services on Domain Controllers. | DC Hardening | **Covered** | [REQ-DC-012](#02-domain-controllers-disable-unnecessary-services-md) |
+| **dSHeuristics Hardening** | Configure the forest-wide dSHeuristics attribute to block anonymous operations, secure adminSDHolder, and enforce KB5008383 protections. | DC Hardening | **Covered** | [REQ-DC-024](#02-domain-controllers-configure-dsheuristics-md) |
 
 <div id="compliance-microsoft-md-microsoft-baseline-controls-outside-guidebook-scope"></div>
 ## Microsoft Baseline Controls Outside Guidebook Scope
