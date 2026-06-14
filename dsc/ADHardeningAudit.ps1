@@ -12,6 +12,9 @@ Configuration ADHardeningAudit {
         [string]$AuditScriptsSourcePath = "C:\ProgramData\ADHardening"
     )
 
+    # Reference the parameter to prevent PSScriptAnalyzer warning in Configuration block
+    $sourcePath = $AuditScriptsSourcePath
+
     Import-DscResource -ModuleName PSDesiredStateConfiguration
 
     # Common scripts apply to all systems
@@ -141,7 +144,7 @@ Configuration ADHardeningAudit {
             $sanitizedResourceName = $scriptFileName -replace '[^a-zA-Z0-9_]', '_'
             
             # Build target path
-            $targetLocalPath = Join-Path $AuditScriptsSourcePath $relativeScriptPath
+            $targetLocalPath = Join-Path $sourcePath $relativeScriptPath
 
             Script "Audit_$sanitizedResourceName" {
                 GetScript = {
@@ -150,7 +153,7 @@ Configuration ADHardeningAudit {
                     }
                 }
                 TestScript = {
-                    $helperPath = Join-Path $using:AuditScriptsSourcePath "Invoke-ADHardeningAudit.ps1"
+                    $helperPath = Join-Path $using:sourcePath "Invoke-ADHardeningAudit.ps1"
                     if (-not (Test-Path -Path $helperPath)) {
                         Write-Error "DSC Audit Helper script not found at target path: $helperPath"
                         return $false

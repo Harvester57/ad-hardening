@@ -74,7 +74,7 @@ if (-not $CompileOnly) {
             Write-Host "  Increased WinRM MaxEnvelopeSizeKB to 8000 KB" -ForegroundColor DarkGray
         }
     } catch {
-        # Silently ignore if WSMan provider is not accessible
+        Write-Debug "WSMan MaxEnvelopeSizeKB configuration skipped: $_"
     }
 
     if (-not (Test-Path -Path $lcmBuildPath)) {

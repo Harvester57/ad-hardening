@@ -82,3 +82,20 @@ Before marking your work as complete, you **must** run this verification script 
 The script will:
 * Check for broken internal markdown links between modules and templates.
 * Extract all `powershell` or `ps1` code blocks from the markdown documents and run them through a syntax analyzer (`[System.Management.Automation.Language.Parser]`) to ensure compile-time validity without executing the instructions.
+
+### Script Linting
+
+Additionally, if any standalone PowerShell scripts (.ps1 files) are modified or added, you must run the PowerShell linter (PSScriptAnalyzer) to verify compliance with repository settings:
+
+```powershell
+$scripts = Get-ChildItem -Path . -Filter *.ps1 -Recurse | Where-Object { $_.FullName -notlike "*\_book*" -and $_.FullName -notlike "*\node_modules*" -and $_.FullName -notlike "*\.git*" -and $_.FullName -notlike "*\.gemini*" }
+if ($scripts) {
+    $results = $scripts | Invoke-ScriptAnalyzer -Settings .\PSScriptAnalyzerSettings.psd1 -Severity Error, Warning
+    if ($results) {
+        $results | Format-Table -AutoSize
+        throw "PSScriptAnalyzer found errors or warnings. Please resolve them."
+    }
+}
+```
+
+Ensure PSScriptAnalyzer runs cleanly with no warnings or errors before committing your changes.

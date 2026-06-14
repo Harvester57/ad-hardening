@@ -19,6 +19,7 @@ $script:hasVulnerableVerdict = $false
 
 # Define custom Write-Host to intercept output details
 function Write-Host {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidOverwritingBuiltInCmdlets', '')]
     param(
         [Parameter(ValueFromPipeline = $true, Position = 0)]
         $Object,
@@ -26,41 +27,49 @@ function Write-Host {
         $BackgroundColor,
         [switch]$NoNewline
     )
-    $text = $Object | Out-String
-    if ($ForegroundColor -eq "Red") {
-        $script:hasVulnerability = $true
+    process {
+        $text = $Object | Out-String
+        if ($ForegroundColor -eq "Red") {
+            $script:hasVulnerability = $true
+        }
+        if ($text -match "Audit [Rr]esult:\s*SECURE" -or $text -match "Verification PASSED" -or $text -match "compliant" -or $text -match "PASSED") {
+            $script:hasSecureVerdict = $true
+        }
+        if ($text -match "Audit [Rr]esult:\s*VULNERABLE" -or $text -match "Verification FAILED" -or $text -match "vulnerable" -or $text -match "FAILED") {
+            $script:hasVulnerableVerdict = $true
+        }
+        Microsoft.PowerShell.Utility\Write-Host @PSBoundParameters
     }
-    if ($text -match "Audit [Rr]esult:\s*SECURE" -or $text -match "Verification PASSED" -or $text -match "compliant" -or $text -match "PASSED") {
-        $script:hasSecureVerdict = $true
-    }
-    if ($text -match "Audit [Rr]esult:\s*VULNERABLE" -or $text -match "Verification FAILED" -or $text -match "vulnerable" -or $text -match "FAILED") {
-        $script:hasVulnerableVerdict = $true
-    }
-    Microsoft.PowerShell.Utility\Write-Host @PSBoundParameters
 }
 
 # Define custom Write-Warning to intercept warnings
 function Write-Warning {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidOverwritingBuiltInCmdlets', '')]
     param(
         [Parameter(ValueFromPipeline = $true, Position = 0)]
         $Message
     )
-    $script:hasVulnerability = $true
-    Microsoft.PowerShell.Utility\Write-Warning @PSBoundParameters
+    process {
+        $script:hasVulnerability = $true
+        Microsoft.PowerShell.Utility\Write-Warning @PSBoundParameters
+    }
 }
 
 # Define custom Write-Error to intercept errors
 function Write-Error {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidOverwritingBuiltInCmdlets', '')]
     param(
         [Parameter(ValueFromPipeline = $true, Position = 0)]
         $Message
     )
-    $script:hasVulnerability = $true
-    Microsoft.PowerShell.Utility\Write-Error @PSBoundParameters
+    process {
+        $script:hasVulnerability = $true
+        Microsoft.PowerShell.Utility\Write-Error @PSBoundParameters
+    }
 }
 
 # Execute the script, capturing stdout, stderr, warning, error, and information streams
-$output = & $Path 6>&1 *>&1 | Out-String
+$null = & $Path 6>&1 *>&1 | Out-String
 
 # Cleanup functions to prevent scope leakage
 Remove-Item Function:\Write-Host -ErrorAction SilentlyContinue
