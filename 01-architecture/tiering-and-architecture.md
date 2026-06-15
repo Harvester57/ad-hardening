@@ -10,7 +10,7 @@ Active Directory directory services run as a shared security database where trus
 
 If an enterprise administrator uses the same administrative credential (e.g., Domain Admin) to manage a Domain Controller (Tier 0) and log on to a standard workstation or application server (Tier 1/2), those high-privilege credentials remain stored in the Local Security Authority Subsystem Service (LSASS) process memory of the lower-tier system. 
 
-If an attacker compromises that lower-tier server or workstation (via email phishing or local web browser exploit), they can dump LSASS memory, steal the Domain Admin credentials, and achieve immediate, full control of the Active Directory database (Tier 0). 
+If an attacker compromises that lower-tier server or workstation, they can dump LSASS memory or the cache, steal the Domain Admin credentials, and achieve immediate, full control of the Active Directory database (Tier 0).
 
 The administrative tiering model prevents this escalation pathway by establishing rigid identity boundaries. It restricts privileged accounts to logging on only to systems within their own security tier or higher, ensuring that Tier 0 credentials never reside on less-secure Tier 1 or Tier 2 machines.
 
