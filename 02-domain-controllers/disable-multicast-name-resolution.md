@@ -21,11 +21,14 @@
     * Value Type: `REG_DWORD`
     * Value Data: `0`
   * **Disable NetBIOS (NBT-NS)**:
-    * Path: `Computer Configuration\Preferences\Windows Settings\Registry`
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\DNS Client`
+    * Policy: `Configure NetBIOS settings`
+    * Setting: `Enabled: Disable NetBIOS name resolution on public networks` (Backed by Registry: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient` -> `EnableNetbios` = `2` [REG_DWORD])
+    * GPO Preference Path: `Computer Configuration\Preferences\Windows Settings\Registry`
     * Key Path: `SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces\<InterfaceKey>`
     * Value Name: `NetbiosOptions`
     * Value Type: `REG_DWORD`
-    * Value Data: `2` (Disables NetBIOS over TCP/IP)
+    * Value Data: `2` (Disables NetBIOS over TCP/IP on adapters)
 
 ---
 
@@ -52,9 +55,11 @@ Configure Group Policy to disable LLMNR, and Group Policy Preferences to disable
 2. Edit the appropriate hardening GPO (e.g., `GPO_Hardening_DomainControllers`).
 3. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\Network\DNS Client`
-4. Set the following policy:
+4. Configure the following policies:
    * **Policy**: `Turn off multicast name resolution`
-   * **Setting**: `Enabled`
+     * **Setting**: `Enabled`
+   * **Policy**: `Configure NetBIOS settings`
+     * **Setting**: `Enabled: Disable NetBIOS name resolution on public networks` (Note: Requires newer Windows 11 / Server 2022 ADMX templates)
 5. Navigate to:
    `Computer Configuration\Preferences\Windows Settings\Registry`
 6. Create a Registry Preference to disable mDNS (Right-click **Registry -> New -> Registry Item**):

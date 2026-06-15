@@ -37,6 +37,7 @@
     * [REQ-DC-022 - Enable WDAC Driver Blocklist](02-domain-controllers/enable-wdac-driver-blocklist.md)
     * [REQ-DC-023 - Configure User Rights Assignments for Domain Controllers](02-domain-controllers/configure-user-rights-assignments.md)
     * [REQ-DC-024 - Configure dSHeuristics](02-domain-controllers/configure-dsheuristics.md)
+    * [REQ-DC-025 - Configure Security Options for Domain Controllers](02-domain-controllers/configure-security-options.md)
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)

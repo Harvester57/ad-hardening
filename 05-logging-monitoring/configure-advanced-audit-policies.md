@@ -61,6 +61,9 @@ Enforcing advanced auditing policies provides the following security coverages:
 | **Account Logon** | `Audit Credential Validation` | Success and Failure |
 | **Account Management** | `Audit User Account Management` | Success and Failure |
 | **Account Management** | `Audit Security Group Management` | Success and Failure |
+| **Account Management** | `Audit Computer Account Management` | Success |
+| **Account Management** | `Audit Distribution Group Management` | Success |
+| **Account Management** | `Audit Other Account Management Events` | Success |
 | **Detailed Tracking** | `Audit Process Creation` | Success and Failure |
 | **Detailed Tracking** | `Audit PNP Activity` | Success |
 | **DS Access** | `Audit Directory Service Changes` | Success and Failure |
@@ -137,6 +140,9 @@ $Policies = @(
     @{ Subcategory = "Credential Validation"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "User Account Management"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Security Group Management"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "Computer Account Management"; Success = "enable"; Failure = "disable" },
+    @{ Subcategory = "Distribution Group Management"; Success = "enable"; Failure = "disable" },
+    @{ Subcategory = "Other Account Management Events"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Process Creation"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "PNP Activity"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Directory Service Changes"; Success = "enable"; Failure = "enable" },
@@ -222,6 +228,9 @@ $RequiredPolicies = @(
     @{ Subcategory = "Credential Validation"; Expected = "Success and Failure" },
     @{ Subcategory = "User Account Management"; Expected = "Success and Failure" },
     @{ Subcategory = "Security Group Management"; Expected = "Success and Failure" },
+    @{ Subcategory = "Computer Account Management"; Expected = "Success" },
+    @{ Subcategory = "Distribution Group Management"; Expected = "Success" },
+    @{ Subcategory = "Other Account Management Events"; Expected = "Success" },
     @{ Subcategory = "Process Creation"; Expected = "Success and Failure" },
     @{ Subcategory = "PNP Activity"; Expected = "Success" },
     @{ Subcategory = "Directory Service Changes"; Expected = "Success and Failure" },

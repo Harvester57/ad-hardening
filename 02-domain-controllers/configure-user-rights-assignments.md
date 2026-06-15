@@ -48,6 +48,7 @@ To preserve the Tier 0 administrative boundary, these rights must be restricted 
 | **Add workstations to domain** | `BUILTIN\Administrators` |
 | **Adjust memory quotas for a process** | `BUILTIN\Administrators`, `NT AUTHORITY\LOCAL SERVICE`, `NT AUTHORITY\NETWORK SERVICE` |
 | **Allow log on locally** | `BUILTIN\Administrators`, `NT AUTHORITY\ENTERPRISE DOMAIN CONTROLLERS` |
+| **Allow log on through Remote Desktop Services** | `BUILTIN\Administrators` |
 | **Back up files and directories** | `BUILTIN\Administrators` |
 | **Bypass traverse checking** | `BUILTIN\Pre-Windows 2000 Compatible Access`, `NT AUTHORITY\Authenticated Users`, `BUILTIN\Administrators`, `NT AUTHORITY\NETWORK SERVICE`, `NT AUTHORITY\LOCAL SERVICE`, `Everyone` |
 | **Change the system time** | `BUILTIN\Administrators`, `NT AUTHORITY\LOCAL SERVICE` |
@@ -59,8 +60,10 @@ To preserve the Tier 0 administrative boundary, these rights must be restricted 
 | **Deny log on as a batch job** | `BUILTIN\Guests` |
 | **Deny log on as a service** | `BUILTIN\Guests` |
 | **Deny log on locally** | `BUILTIN\Guests` |
+| **Deny log on through Remote Desktop Services** | `BUILTIN\Guests` |
 | **Enable computer and user accounts to be trusted for delegation** | `BUILTIN\Administrators` |
 | **Force shutdown from a remote system** | `BUILTIN\Administrators` |
+| **Generate security audits** | `NT AUTHORITY\LOCAL SERVICE`, `NT AUTHORITY\NETWORK SERVICE` |
 | **Load and unload device drivers** | `BUILTIN\Administrators` |
 | **Lock pages in memory** | No one (Empty) |
 | **Log on as a batch job** | `BUILTIN\Administrators` |
@@ -122,6 +125,7 @@ $BaselineRights = @{
     "SeMachineAccountPrivilege"       = "*S-1-5-32-544"
     "SeIncreaseQuotaPrivilege"        = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544"
     "SeInteractiveLogonRight"         = "*S-1-5-9,*S-1-5-32-544"
+    "SeRemoteInteractiveLogonRight"   = "*S-1-5-32-544"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
     "SeChangeNotifyPrivilege"         = "*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0"
     "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
@@ -133,8 +137,10 @@ $BaselineRights = @{
     "SeDenyBatchLogonRight"           = "*S-1-5-32-546"
     "SeDenyServiceLogonRight"         = "*S-1-5-32-546"
     "SeDenyInteractiveLogonRight"     = "*S-1-5-32-546"
+    "SeDenyRemoteInteractiveLogonRight" = "*S-1-5-32-546"
     "SeEnableDelegationPrivilege"     = "*S-1-5-32-544"
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
+    "SeAuditPrivilege"                = "*S-1-5-19,*S-1-5-20"
     "SeLoadDriverPrivilege"           = "*S-1-5-32-544"
     "SeLockMemoryPrivilege"           = ""
     "SeBatchLogonRight"               = "*S-1-5-32-544"
@@ -236,6 +242,7 @@ $BaselineRights = @{
     "SeMachineAccountPrivilege"       = "*S-1-5-32-544"
     "SeIncreaseQuotaPrivilege"        = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544"
     "SeInteractiveLogonRight"         = "*S-1-5-9,*S-1-5-32-544"
+    "SeRemoteInteractiveLogonRight"   = "*S-1-5-32-544"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
     "SeChangeNotifyPrivilege"         = "*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0"
     "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
@@ -247,8 +254,10 @@ $BaselineRights = @{
     "SeDenyBatchLogonRight"           = "*S-1-5-32-546"
     "SeDenyServiceLogonRight"         = "*S-1-5-32-546"
     "SeDenyInteractiveLogonRight"     = "*S-1-5-32-546"
+    "SeDenyRemoteInteractiveLogonRight" = "*S-1-5-32-546"
     "SeEnableDelegationPrivilege"     = "*S-1-5-32-544"
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
+    "SeAuditPrivilege"                = "*S-1-5-19,*S-1-5-20"
     "SeLoadDriverPrivilege"           = "*S-1-5-32-544"
     "SeLockMemoryPrivilege"           = ""
     "SeBatchLogonRight"               = "*S-1-5-32-544"
