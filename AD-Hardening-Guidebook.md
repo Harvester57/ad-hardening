@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: f240164 | Generated: June 15, 2026</span>
+      <span>Commit: 0e2fe80 | Generated: June 15, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -5361,7 +5361,10 @@ $AppLockerXml = @"
       <Exceptions>
         <FilePathCondition Path="%WINDIR%\Temp\*" />
         <FilePathCondition Path="%WINDIR%\Tasks\*" />
+        <FilePathCondition Path="%WINDIR%\tracing\*" />
         <FilePathCondition Path="%WINDIR%\System32\spool\drivers\color\*" />
+        <FilePathCondition Path="%WINDIR%\System32\Tasks\Microsoft\Windows\SyncCenter\*" />
+        <FilePathCondition Path="%WINDIR%\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\*" />
         <FilePathCondition Path="*\msbuild.exe" />
         <FilePathCondition Path="*\installutil.exe" />
         <FilePathCondition Path="*\mshta.exe" />
@@ -5369,6 +5372,29 @@ $AppLockerXml = @"
         <FilePathCondition Path="*\regsvcs.exe" />
         <FilePathCondition Path="*\regsvr32.exe" />
         <FilePathCondition Path="*\rundll32.exe" />
+        <FilePathCondition Path="*\bginfo.exe" />
+        <FilePathCondition Path="*\cdb.exe" />
+        <FilePathCondition Path="*\cmstp.exe" />
+        <FilePathCondition Path="*\control.exe" />
+        <FilePathCondition Path="*\csi.exe" />
+        <FilePathCondition Path="*\dfsvc.exe" />
+        <FilePathCondition Path="*\dnx.exe" />
+        <FilePathCondition Path="*\fsi.exe" />
+        <FilePathCondition Path="*\ie4unit.exe" />
+        <FilePathCondition Path="*\ieexec.exe" />
+        <FilePathCondition Path="*\infdefaultinstall.exe" />
+        <FilePathCondition Path="*\mavinject.exe" />
+        <FilePathCondition Path="*\msdeploy.exe" />
+        <FilePathCondition Path="*\msdt.exe" />
+        <FilePathCondition Path="*\msxsl.exe" />
+        <FilePathCondition Path="*\odbcconf.exe" />
+        <FilePathCondition Path="*\presentationhost.exe" />
+        <FilePathCondition Path="*\rcsi.exe" />
+        <FilePathCondition Path="*\rsi.exe" />
+        <FilePathCondition Path="*\runscripthelper.exe" />
+        <FilePathCondition Path="*\te.exe" />
+        <FilePathCondition Path="*\tracker.exe" />
+        <FilePathCondition Path="*\xwizard.exe" />
       </Exceptions>
     </FilePathRule>
     <FilePathRule Id="fd686d83-a829-4351-8ff4-27c1de5732e9" Name="(Default Rule) All files" Description="Allows members of the local Administrators group to run all applications." UserOrGroupSid="S-1-5-32-544" Action="Allow">
@@ -10541,7 +10567,7 @@ This directory contains network security architectures, active directory port co
    Establishes the minimum permitted ports for Domain Controllers, Member Servers, and Client Workstations, ensuring perimeter and local firewalls block unauthorized inbound traffic.
 
 2. **[REQ-NET-002 - Restrict RPC Dynamic Ports](#04-network-firewall-restrict-rpc-dynamic-ports-md)**
-   Restricts default dynamic RPC ports from a massive range (TCP 49152-65535) to a predictable restricted range (e.g., TCP 50000-50100) or static ports to simplify firewall policies.
+   Binds core directory services (NTDS, Netlogon, DFSR) to specific static ports to allow precise network firewall controls while maintaining the system-wide dynamic RPC port range at default values to prevent socket exhaustion.
 
 3. **[REQ-NET-003 - Configure Workstation and Server Isolation](#04-network-firewall-configure-workstation-isolation-md)**
    Configures local firewall rules on workstations and servers to block inbound SMB, RPC, RDP, and WinRM from peer systems to prevent lateral movement.
@@ -10566,6 +10592,16 @@ This directory contains network security architectures, active directory port co
 
 10. **[REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](#04-network-firewall-harden-winrm-service-md)**
     Disables Basic and Digest authentication, forces encrypted WinRM communications, restricts WinRM credential caching, and blocks anonymous RPC connections.
+
+11. **[REQ-NET-011 - Configure WMI Static Port](#04-network-firewall-configure-wmi-static-port-md)**
+    Binds the WMI service to static TCP port 24158 and isolates it to a standalone host process with packet privacy enabled to limit remote lateral movement exposure.
+
+12. **[REQ-NET-012 - Configure RPC Filters for Named Pipes](#04-network-firewall-configure-rpc-named-pipe-filters-md)**
+    Enforces Windows Firewall RPC Filters to block administrative queries and code execution over SMB named pipes (e.g. SCM, Task Scheduler) from unauthorized subnets.
+
+13. **[REQ-NET-013 - Block Management Traffic Between Domain Controllers](#04-network-firewall-block-intra-dc-management-md)**
+    Excludes Domain Controller IP addresses from allowed management rules (RDP, WinRM, WMI, ADWS) to prevent lateral movement between Tier 0 directory servers.
+
 
 
 
@@ -10644,9 +10680,15 @@ For GPOs targeting Domain Controllers, configure the following inbound rules und
 | TCP | 3269 | Any / Client Subnets | Global Catalog SSL |
 | TCP | 135 | Any / Client Subnets | RPC Endpoint Mapper |
 | TCP | 445 | Any / Client Subnets | SMB (SYSVOL / GPO) |
-| TCP | 49152-65535 | Any / Client Subnets | RPC Dynamic Ports (Replication / DFSR) |
+| TCP | 38901 | Any / Client Subnets | NTDS Static RPC Port |
+| TCP | 38902 | Any / Client Subnets | Netlogon Static RPC Port |
+| TCP | 5722 | Domain Controller Subnets | DFSR Static RPC Port |
 | TCP | 3389 | PAW / Jump Host Subnets | RDP (Management) |
 | TCP | 5985 / 5986 | PAW / Jump Host Subnets | WinRM (Management) |
+
+> **WARNING:**
+> **Static RPC Ports Requirement**:
+> The NTDS (TCP 38901), Netlogon (TCP 38902), and DFSR (TCP 5722) ports listed above require static port configurations to be active on the target Domain Controllers. If these ports are not explicitly configured to be static on the operating system, remote authentication and replication will fail. See [REQ-NET-002: Restrict RPC Dynamic Ports](#04-network-firewall-restrict-rpc-dynamic-ports-md) for GPO and registry configurations to bind these services to their static endpoints.
 
 ---
 
@@ -10663,6 +10705,24 @@ Run the following scripts locally to audit and configure the firewall profiles a
 # Set-ADPortMatrixRules.ps1
 # Configures local Windows Defender Firewall profiles and applies basic AD port matrix baseline rules.
 
+param(
+    [string[]]$ManagementAddresses
+)
+
+# If not passed, prompt user dynamically
+if ($null -eq $ManagementAddresses) {
+    if ([Environment]::UserInteractive) {
+        $inputVal = Read-Host "Enter remote IP addresses/subnets for remote management (comma-separated, e.g. 10.0.0.0/24,192.168.1.50) [leave empty for LocalSubnet]"
+        if ([string]::IsNullOrWhiteSpace($inputVal)) {
+            $ManagementAddresses = @("LocalSubnet")
+        } else {
+            $ManagementAddresses = $inputVal.Split(",") | ForEach-Object { $_.Trim() }
+        }
+    } else {
+        $ManagementAddresses = @("LocalSubnet")
+    }
+}
+
 Write-Host "Applying network firewall baseline policies..." -ForegroundColor Cyan
 
 # 1. Enable firewall and set default block inbound
@@ -10670,28 +10730,34 @@ Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True -DefaultIn
 Write-Host "Firewall profiles enabled with Default Inbound Block." -ForegroundColor Green
 
 # 2. Configure AD Port Matrix inbound rules (for local system role validation)
-# Allow critical outbound by default, construct rules for inbound
 $Rules = @(
-    @{ Name = "AD-DNS-TCP"; Port = 53; Proto = "TCP" },
-    @{ Name = "AD-DNS-UDP"; Port = 53; Proto = "UDP" },
-    @{ Name = "AD-Kerberos-TCP"; Port = 88; Proto = "TCP" },
-    @{ Name = "AD-Kerberos-UDP"; Port = 88; Proto = "UDP" },
-    @{ Name = "AD-NTP-UDP"; Port = 123; Proto = "UDP" },
-    @{ Name = "AD-RPC-Mapper-TCP"; Port = 135; Proto = "TCP" },
-    @{ Name = "AD-LDAP-TCP"; Port = 389; Proto = "TCP" },
-    @{ Name = "AD-LDAP-UDP"; Port = 389; Proto = "UDP" },
-    @{ Name = "AD-SMB-TCP"; Port = 445; Proto = "TCP" },
-    @{ Name = "AD-Kpwd-TCP"; Port = 464; Proto = "TCP" },
-    @{ Name = "AD-Kpwd-UDP"; Port = 464; Proto = "UDP" },
-    @{ Name = "AD-LDAPS-TCP"; Port = 636; Proto = "TCP" },
-    @{ Name = "AD-GC-TCP"; Port = 3268; Proto = "TCP" },
-    @{ Name = "AD-GC-SSL-TCP"; Port = 3269; Proto = "TCP" }
+    @{ Name = "AD-DNS-TCP"; Port = 53; Proto = "TCP"; Remote = "Any" },
+    @{ Name = "AD-DNS-UDP"; Port = 53; Proto = "UDP"; Remote = "Any" },
+    @{ Name = "AD-Kerberos-TCP"; Port = 88; Proto = "TCP"; Remote = "Any" },
+    @{ Name = "AD-Kerberos-UDP"; Port = 88; Proto = "UDP"; Remote = "Any" },
+    @{ Name = "AD-NTP-UDP"; Port = 123; Proto = "UDP"; Remote = "Any" },
+    @{ Name = "AD-RPC-Mapper-TCP"; Port = 135; Proto = "TCP"; Remote = "Any" },
+    @{ Name = "AD-LDAP-TCP"; Port = 389; Proto = "TCP"; Remote = "Any" },
+    @{ Name = "AD-LDAP-UDP"; Port = 389; Proto = "UDP"; Remote = "Any" },
+    @{ Name = "AD-SMB-TCP"; Port = 445; Proto = "TCP"; Remote = "Any" },
+    @{ Name = "AD-Kpwd-TCP"; Port = 464; Proto = "TCP"; Remote = "Any" },
+    @{ Name = "AD-Kpwd-UDP"; Port = 464; Proto = "UDP"; Remote = "Any" },
+    @{ Name = "AD-LDAPS-TCP"; Port = 636; Proto = "TCP"; Remote = "Any" },
+    @{ Name = "AD-GC-TCP"; Port = 3268; Proto = "TCP"; Remote = "Any" },
+    @{ Name = "AD-GC-SSL-TCP"; Port = 3269; Proto = "TCP"; Remote = "Any" },
+    @{ Name = "AD-NTDS-Static-TCP"; Port = 38901; Proto = "TCP"; Remote = "Any" },
+    @{ Name = "AD-Netlogon-Static-TCP"; Port = 38902; Proto = "TCP"; Remote = "Any" },
+    @{ Name = "AD-DFSR-Static-TCP"; Port = 5722; Proto = "TCP"; Remote = "Any" },
+    @{ Name = "AD-RDP-TCP"; Port = 3389; Proto = "TCP"; Remote = $ManagementAddresses },
+    @{ Name = "AD-WinRM-HTTP-TCP"; Port = 5985; Proto = "TCP"; Remote = $ManagementAddresses },
+    @{ Name = "AD-WinRM-HTTPS-TCP"; Port = 5986; Proto = "TCP"; Remote = $ManagementAddresses }
 )
 
 foreach ($Rule in $Rules) {
     $Name = $Rule.Name
     $Port = $Rule.Port
     $Proto = $Rule.Proto
+    $Remote = $Rule.Remote
     
     $Existing = Get-NetFirewallRule -Name $Name -ErrorAction SilentlyContinue
     if ($null -eq $Existing) {
@@ -10700,16 +10766,18 @@ foreach ($Rule in $Rules) {
             -Action Allow `
             -Protocol $Proto `
             -LocalPort $Port `
+            -RemoteAddress $Remote `
             -Profile Domain, Private `
             -Enabled True | Out-Null
-        Write-Host "Inbound rule created: $($Name) on port $($Port) ($($Proto))" -ForegroundColor Green
+        Write-Host "Inbound rule created: $($Name) on port $($Port) ($($Proto)) from remote address: $($Remote -join ', ')" -ForegroundColor Green
     } else {
-        Set-NetFirewallRule -Name $Name -Enabled True -Action Allow | Out-Null
-        Write-Host "Inbound rule verified: $($Name)" -ForegroundColor Gray
+        Set-NetFirewallRule -Name $Name -Enabled True -Action Allow -RemoteAddress $Remote | Out-Null
+        Write-Host "Inbound rule verified: $($Name) restricted to remote address: $($Remote -join ', ')" -ForegroundColor Gray
     }
 }
 
 Write-Host "Firewall port matrix configuration completed successfully." -ForegroundColor Cyan
+
 ```
 
 <div id="04-network-firewall-configure-ad-port-matrix-md-audit-script"></div>
@@ -10752,6 +10820,7 @@ if ($AllProfilesSecure) {
 * **ANSSI AD Hardening Guide**: Recommendation R8 (Administration network subnets)
 * **CIS Windows Server 2016 Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
 * **Microsoft Security Baseline**: Domain Controller and Member Server Baselines
+* **DSInternals AD Firewall Guide (Michael Grafnetter)**: [Active Directory Firewall - Domain Controller Firewall](https://firewall.dsinternals.com/ADDS/)
 
 
 <div style="page-break-before: always;"></div>
@@ -10775,13 +10844,13 @@ if ($AllProfilesSecure) {
   * **NTDS RPC Port (DCs only)**: `HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters`
     * Value Name: `TCP/IP Port`
     * Value Type: `REG_DWORD`
+    * Recommended Value: `38901` (Decimal)
   * **Netlogon RPC Port (DCs only)**: `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters`
     * Value Name: `DCTcpipPort`
     * Value Type: `REG_DWORD`
+    * Recommended Value: `38902` (Decimal)
   * **DFSR Replication Port (DCs/DFS Members)**: DFSR service WMI configuration or `dfsrdiag.exe`.
-  * **System RPC Dynamic Port Range (Global)**:
-    * Command: `netsh int ipv4 set dynamicport tcp` / `netsh int ipv6 set dynamicport tcp`
-    * Registry: `HKLM\SOFTWARE\Microsoft\Rpc\Internet`
+    * Recommended Value: `5722` (Decimal)
 
 ---
 
@@ -10789,17 +10858,21 @@ if ($AllProfilesSecure) {
 ## Rationale
 By default, the RPC runtime utilizes a massive dynamic range of high-order ports (TCP 49152-65535) for communication, including Active Directory replication, netlogon authentication, and DFS replication.
 
-Opening this full port range in perimeter and internal network firewalls exposes a vast, unmonitored attack surface. Threat actors on compromised member endpoints can scan these high-order ports to discover Active Directory services, perform targeted exploits, or intercept unencrypted network transactions.
+Opening this entire dynamic port range in network-based firewalls for all systems exposes an unmonitored attack surface. To mitigate this risk, key domain controller services (NTDS, Netlogon, and DFSR) must be bound to dedicated static ports (TCP 38901, 38902, and 5722 respectively). This allows network administrators to configure precise firewall rules permitting only these ports.
 
-Restricting dynamic RPC to a narrow, predictable range (e.g., TCP 50000-50100) or binding services to specific static ports (e.g., NTDS to TCP 50000, Netlogon to TCP 50001, and DFSR to TCP 50002) allows security engineers to configure extremely tight firewall rules, effectively blocking access to unauthorized high-order TCP ports.
+Crucially, **the system-wide dynamic RPC range must NOT be narrowed** (such as restricting it globally to 50000-50100). Restricting the global dynamic range introduces severe risks:
+1. **Port Exhaustion**: Under standard server load, limiting the global ephemeral range to a small number of ports can exhaust available sockets, resulting in network failures and domain isolation outages.
+2. **Replication Failure**: High volumes of directory transactions can exhaust localized RPC ports.
+3. **No Added Security Value**: Narrowing the dynamic range globally does not mitigate standard exploits, and endpoints communicate with local security authority protocols (LSAD/SAMR) over SMB named pipes (`\PIPE\lsass`) rather than directly via dynamic TCP sockets.
+
+Therefore, the system-wide dynamic RPC port range must remain at its default start port (`49152`) and number of ports (`16384`), and any narrowing configurations must be avoided.
 
 ---
 
 <div id="04-network-firewall-restrict-rpc-dynamic-ports-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Firewall Coordination**: Firewall rules permitting the restricted dynamic range must be active before applying this setting, or replication and authentication failures will occur immediately.
-* **Port Availability**: The chosen static/dynamic ports must not be utilized by any other software running on the servers.
-* **Non-AD RPC Traffic**: Any third-party software on member servers that relies on the default ephemeral port range may need configuration if the system-wide dynamic RPC port range is restricted.
+* **Firewall Coordination**: Network firewall rules permitting TCP ports 38901, 38902, and 5722 must be active and synchronized before configuring these ports, or replication and authentication failures will occur immediately.
+* **DFSR Management Tools**: Configuring the DFSR static port dynamically requires the DFS Management Tools feature (`DfsMgmt`) to be installed on the local DC.
 
 ---
 
@@ -10822,34 +10895,25 @@ Restricting dynamic RPC to a narrow, predictable range (e.g., TCP 50000-50100) o
      * **Key Path**: `SYSTEM\CurrentControlSet\Services\NTDS\Parameters`
      * **Value Name**: `TCP/IP Port`
      * **Value Type**: `REG_DWORD`
-     * **Value Data**: `50000` (Decimal)
+     * **Value Data**: `38901` (Decimal)
    * **Netlogon Static Port**:
      * **Action**: `Update`
      * **Hive**: `HKEY_LOCAL_MACHINE`
      * **Key Path**: `SYSTEM\CurrentControlSet\Services\Netlogon\Parameters`
      * **Value Name**: `DCTcpipPort`
      * **Value Type**: `REG_DWORD`
-     * **Value Data**: `50001` (Decimal)
+     * **Value Data**: `38902` (Decimal)
 
-<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-2-restrict-dynamic-rpc-port-range-system-wide"></div>
-#### 2. Restrict Dynamic RPC Port Range (System-Wide)
-To enforce the dynamic port range restriction across Member Servers and Domain Controllers:
-Create or edit a GPO (e.g., `GPO_Hardening_RPC_Range`) and apply Registry Preferences under:
-`Computer Configuration\Preferences\Windows Settings\Registry`
-
-* **Dynamic Ports Range Configuration**:
-  * **Registry Key**: `HKLM\SOFTWARE\Microsoft\Rpc\Internet`
-  * Add the following values:
-    * Value Name: `Ports` | Type: `REG_MULTI_SZ` | Value Data: `50000-50100`
-    * Value Name: `PortsInternetAvailable` | Type: `REG_SZ` | Value Data: `Y`
-    * Value Name: `UsePorts` | Type: `REG_SZ` | Value Data: `Y`
+<div id="04-network-firewall-restrict-rpc-dynamic-ports-md-2-ensure-system-wide-rpc-port-narrowing-is-disabled"></div>
+#### 2. Ensure System-Wide RPC Port Narrowing is Disabled
+Ensure that the registry key `HKLM\SOFTWARE\Microsoft\Rpc\Internet` does **not** exist in your GPOs, as this key enforces restrictive dynamic range overrides. If present, delete the key to allow systems to fall back to the default Windows Server dynamic range (49152-65535).
 
 ---
 
 <div id="04-network-firewall-restrict-rpc-dynamic-ports-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to audit and restrict the RPC dynamic port configuration.
+Run the following scripts locally to configure the RPC static ports and restore default dynamic ranges.
 
 <div id="04-network-firewall-restrict-rpc-dynamic-ports-md-remediation-script"></div>
 #### Remediation Script:
@@ -10857,64 +10921,69 @@ Run the following scripts locally to audit and restrict the RPC dynamic port con
 
 ```powershell
 # Set-RPCDynamicPorts.ps1
-# Configures static RPC ports for NTDS/Netlogon and restricts system-wide ephemeral range.
+# Description: Configures static RPC ports for NTDS, Netlogon, and DFSR, and ensures system-wide dynamic RPC ranges are at default values.
 
 Write-Host "Configuring RPC dynamic port restrictions..." -ForegroundColor Cyan
 
-# 1. If Domain Controller, configure static ports for NTDS and Netlogon
 $IsDC = (Get-CimInstance -ClassName Win32_ComputerSystem).Roles -contains "Primary_Domain_Controller"
 
 if ($IsDC) {
-    Write-Host "[+] Target is a Domain Controller. Configuring NTDS and Netlogon static ports..." -ForegroundColor Gray
+    Write-Host "[+] Target is a Domain Controller. Configuring static ports..." -ForegroundColor Gray
     
-    # NTDS Static Port -> TCP 50000
+    # NTDS Static Port -> TCP 38901
     $NtdsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters"
     if (-not (Test-Path $NtdsPath)) {
         New-Item -Path $NtdsPath -Force | Out-Null
     }
-    Set-ItemProperty -Path $NtdsPath -Name "TCP/IP Port" -Value 50000 -Type DWord
-    Write-Host "    NTDS Static Port set to TCP 50000." -ForegroundColor Green
+    Set-ItemProperty -Path $NtdsPath -Name "TCP/IP Port" -Value 38901 -Type DWord
+    Write-Host "    NTDS Static Port set to TCP 38901." -ForegroundColor Green
     
-    # Netlogon Static Port -> TCP 50001
+    # Netlogon Static Port -> TCP 38902
     $NetlogonPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters"
     if (-not (Test-Path $NetlogonPath)) {
         New-Item -Path $NetlogonPath -Force | Out-Null
     }
-    Set-ItemProperty -Path $NetlogonPath -Name "DCTcpipPort" -Value 50001 -Type DWord
-    Write-Host "    Netlogon Static Port set to TCP 50001." -ForegroundColor Green
+    Set-ItemProperty -Path $NetlogonPath -Name "DCTcpipPort" -Value 38902 -Type DWord
+    Write-Host "    Netlogon Static Port set to TCP 38902." -ForegroundColor Green
 
-    # DFSR Static Port -> TCP 50002 (if DFSR namespace is present)
+    # DFSR Static Port -> TCP 5722 (if DFSR namespace is present)
     try {
         $DfsrConfig = Get-CimInstance -Namespace "root\MicrosoftDFS" -ClassName DfsrServiceConfiguration -ErrorAction Stop
         if ($null -ne $DfsrConfig) {
-            Set-CimInstance -Query "Select * from DfsrServiceConfiguration" -Namespace "root\MicrosoftDFS" -Property @{ RpcPortAssignment = 50002 } -ErrorAction Stop | Out-Null
-            Write-Host "    DFSR Static Replication Port set to TCP 50002." -ForegroundColor Green
+            Set-CimInstance -Query "Select * from DfsrServiceConfiguration" -Namespace "root\MicrosoftDFS" -Property @{ RpcPortAssignment = 5722 } -ErrorAction Stop | Out-Null
+            Write-Host "    DFSR Static Replication Port set to TCP 5722." -ForegroundColor Green
         }
     } catch {
         Write-Host "    DFSR WMI configuration not accessible or role not installed. Skipping." -ForegroundColor Yellow
     }
 }
 
-# 2. Restrict system-wide dynamic RPC port range (50000 - 50100)
-Write-Host "[+] Enforcing global dynamic RPC ports via Netsh..." -ForegroundColor Gray
+# Ensure system-wide dynamic RPC range is at default (start=49152, num=16384)
+# In accordance with Microsoft Directory Services guidelines to prevent port exhaustion.
+Write-Host "[+] Resetting global dynamic RPC ports to default..." -ForegroundColor Gray
 
-# Configure IPv4 Dynamic Ports
-$ProcV4 = Start-Process netsh -ArgumentList "int ipv4 set dynamicport tcp start=50000 num=100" -Wait -NoNewWindow -PassThru
+$ProcV4 = Start-Process netsh -ArgumentList "int ipv4 set dynamicport tcp start=49152 num=16384" -Wait -NoNewWindow -PassThru
 if ($ProcV4.ExitCode -eq 0) {
-    Write-Host "    IPv4 Dynamic Port Range set to 50000-50100." -ForegroundColor Green
+    Write-Host "    IPv4 Dynamic Port Range reset to default (49152-65535)." -ForegroundColor Green
 } else {
-    Write-Error "    Failed to set IPv4 dynamic port range."
+    Write-Error "    Failed to reset IPv4 dynamic port range."
 }
 
-# Configure IPv6 Dynamic Ports
-$ProcV6 = Start-Process netsh -ArgumentList "int ipv6 set dynamicport tcp start=50000 num=100" -Wait -NoNewWindow -PassThru
+$ProcV6 = Start-Process netsh -ArgumentList "int ipv6 set dynamicport tcp start=49152 num=16384" -Wait -NoNewWindow -PassThru
 if ($ProcV6.ExitCode -eq 0) {
-    Write-Host "    IPv6 Dynamic Port Range set to 50000-50100." -ForegroundColor Green
+    Write-Host "    IPv6 Dynamic Port Range reset to default (49152-65535)." -ForegroundColor Green
 } else {
-    Write-Error "    Failed to set IPv6 dynamic port range."
+    Write-Error "    Failed to reset IPv6 dynamic port range."
 }
 
-Write-Host "RPC Dynamic Port configuration applied successfully." -ForegroundColor Cyan
+# Clean HKLM\SOFTWARE\Microsoft\Rpc\Internet range narrowing if present
+$RpcInternetPath = "HKLM:\SOFTWARE\Microsoft\Rpc\Internet"
+if (Test-Path $RpcInternetPath) {
+    Remove-Item -Path $RpcInternetPath -Force -Recurse | Out-Null
+    Write-Host "    Removed restrictive RPC Internet registry settings to restore defaults." -ForegroundColor Green
+}
+
+Write-Host "RPC dynamic port configuration applied successfully." -ForegroundColor Cyan
 ```
 
 <div id="04-network-firewall-restrict-rpc-dynamic-ports-md-audit-script"></div>
@@ -10923,11 +10992,12 @@ Write-Host "RPC Dynamic Port configuration applied successfully." -ForegroundCol
 
 ```powershell
 # Test-RPCDynamicPorts.ps1
-# Audits dynamic RPC configurations and static ports.
+# Description: Audits dynamic RPC configurations and static ports.
 
 Write-Host "Auditing dynamic RPC configurations..." -ForegroundColor Cyan
 
 $IsDC = (Get-CimInstance -ClassName Win32_ComputerSystem).Roles -contains "Primary_Domain_Controller"
+$vulnerable = $false
 
 if ($IsDC) {
     # 1. NTDS Static Port Audit
@@ -10935,27 +11005,27 @@ if ($IsDC) {
     $NtdsVal = Get-ItemProperty -Path $NtdsPath -Name "TCP/IP Port" -ErrorAction SilentlyContinue
     $NtdsPort = if ($NtdsVal) { $NtdsVal."TCP/IP Port" } else { 0 }
     
-    $NtdsColor = if ($NtdsPort -eq 50000) { "Green" } else { "Red" }
-    Write-Host "    - NTDS Static Port: $($NtdsPort) (Expected = 50000)" -ForegroundColor $NtdsColor
+    $NtdsColor = if ($NtdsPort -eq 38901) { "Green" } else { "Red"; $vulnerable = $true }
+    Write-Host "    - NTDS Static Port: $($NtdsPort) (Expected = 38901)" -ForegroundColor $NtdsColor
     
     # 2. Netlogon Static Port Audit
     $NetlogonPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters"
     $NetlogonVal = Get-ItemProperty -Path $NetlogonPath -Name "DCTcpipPort" -ErrorAction SilentlyContinue
     $NetlogonPort = if ($NetlogonVal) { $NetlogonVal.DCTcpipPort } else { 0 }
     
-    $NetlogonColor = if ($NetlogonPort -eq 50001) { "Green" } else { "Red" }
-    Write-Host "    - Netlogon Static Port: $($NetlogonPort) (Expected = 50001)" -ForegroundColor $NetlogonColor
+    $NetlogonColor = if ($NetlogonPort -eq 38902) { "Green" } else { "Red"; $vulnerable = $true }
+    Write-Host "    - Netlogon Static Port: $($NetlogonPort) (Expected = 38902)" -ForegroundColor $NetlogonColor
 
     # 3. DFSR Port Audit
     try {
         $DfsrConfig = Get-CimInstance -Namespace "root\MicrosoftDFS" -ClassName DfsrServiceConfiguration -ErrorAction Stop
         if ($null -ne $DfsrConfig) {
             $DfsrPort = $DfsrConfig.RpcPortAssignment
-            $DfsrColor = if ($DfsrPort -eq 50002) { "Green" } else { "Red" }
-            Write-Host "    - DFSR Replication Port: $($DfsrPort) (Expected = 50002)" -ForegroundColor $DfsrColor
+            $DfsrColor = if ($DfsrPort -eq 5722) { "Green" } else { "Red"; $vulnerable = $true }
+            Write-Host "    - DFSR Replication Port: $($DfsrPort) (Expected = 5722)" -ForegroundColor $DfsrColor
         }
     } catch {
-        Write-Host "    - DFSR role not available on this server." -ForegroundColor Gray
+        Write-Host "    - DFSR role not active or WMI inaccessible." -ForegroundColor Gray
     }
 }
 
@@ -10965,14 +11035,25 @@ Write-Host "[+] Querying active TCP dynamic port settings..." -ForegroundColor Y
 $IPv4Ports = netsh int ipv4 show dynamicport tcp
 $IPv6Ports = netsh int ipv6 show dynamicport tcp
 
-# Parse netsh output (look for "Start Port" or number of ports)
-$IPv4Match = $IPv4Ports -join "`n"
-$IPv6Match = $IPv6Ports -join "`n"
-
 Write-Host "--- IPv4 Dynamic Port Output ---" -ForegroundColor Gray
-Write-Host $IPv4Match -ForegroundColor DarkGray
+$IPv4Ports | Out-String | Write-Host -ForegroundColor DarkGray
 Write-Host "--- IPv6 Dynamic Port Output ---" -ForegroundColor Gray
-Write-Host $IPv6Match -ForegroundColor DarkGray
+$IPv6Ports | Out-String | Write-Host -ForegroundColor DarkGray
+
+# Verify if dynamic ranges are narrowed
+$RpcInternetPath = "HKLM:\SOFTWARE\Microsoft\Rpc\Internet"
+if (Test-Path $RpcInternetPath) {
+    Write-Host "[!] VULNERABLE: Restrictive RPC Internet registry settings found. Narrowing dynamic ranges is not recommended." -ForegroundColor Red
+    $vulnerable = $true
+} else {
+    Write-Host "[+] Restrictive RPC Internet registry settings are absent." -ForegroundColor Green
+}
+
+if ($vulnerable) {
+    Write-Host "Audit result: NON-COMPLIANT" -ForegroundColor Red
+} else {
+    Write-Host "Audit result: COMPLIANT" -ForegroundColor Green
+}
 ```
 
 ---
@@ -10982,6 +11063,7 @@ Write-Host $IPv6Match -ForegroundColor DarkGray
 * **ANSSI AD Hardening Guide**: Recommendation R8 (Administration network subnets)
 * **Microsoft Security Guidance**: Restricting Active Directory RPC Traffic to a Specific Port
 * **CIS Windows Server 2016 Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
+* **DSInternals AD Firewall Guide (Michael Grafnetter)**: [Active Directory Firewall - Domain Controller Firewall](https://firewall.dsinternals.com/ADDS/)
 
 
 <div style="page-break-before: always;"></div>
@@ -12689,6 +12771,670 @@ Write-Host "    - RPC RestrictRemoteClients: $RpcSetting (Expected: 1)" -Foregro
 
 <div style="page-break-before: always;"></div>
 
+<div id="04-network-firewall-configure-wmi-static-port-md"></div>
+
+<div id="04-network-firewall-configure-wmi-static-port-md-req-net-011-configure-wmi-static-port"></div>
+# [REQ-NET-011] Configure WMI Static Port
+
+<div id="04-network-firewall-configure-wmi-static-port-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers, Member Servers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="04-network-firewall-configure-wmi-static-port-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **WMI DCOM Endpoints Registry Key**: `HKLM\SOFTWARE\Classes\AppID\{8BC3F05E-D86B-11D0-A075-00C04FB68820}`
+    * Value Name: `Endpoints`
+    * Value Type: `REG_MULTI_SZ`
+    * Value Data: `ncacn_ip_tcp,0,24158`
+  * **WMI Service Type Configuration**: `HKLM\SYSTEM\CurrentControlSet\Services\winmgmt`
+    * Value Name: `Type`
+    * Value Type: `REG_DWORD`
+    * Value Data: `16` (Decimal) (SERVICE_WIN32_OWN_PROCESS)
+
+---
+
+<div id="04-network-firewall-configure-wmi-static-port-md-rationale"></div>
+## Rationale
+By default, Windows Management Instrumentation (WMI) runs in a shared svchost.exe process and dynamically allocates high-order TCP ports (49152-65535) for remote connections. This dynamic behavior prevents network administrators from implementing restrictive firewall policies, leaving the entire ephemeral port range exposed to the network.
+
+Restricting WMI to a static port and process solves these security challenges:
+1. **Attack Surface Reduction**: By configuring WMI to run on a static port (TCP 24158), administrators can block access to the generic high-order port range on perimeter firewalls while keeping WMI management accessible.
+2. **Execution Isolation**: Moving WMI to a standalone host process prevents compromised shared services in the same svchost instance from tampering with management functions.
+3. **Authentication Privacy**: Running `winmgmt.exe /standalonehost 6` sets the DCOM authentication level to `RPC_C_AUTHN_LEVEL_PKT_PRIVACY` (6). This enforces packet encryption for all WMI communications, mitigating man-in-the-middle (MITM) session hijacking and credential sniffing attacks.
+
+---
+
+<div id="04-network-firewall-configure-wmi-static-port-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Service Interruption**: Changing the WMI service type and endpoints requires a restart of the `winmgmt` service and its dependent services. Because multiple critical Windows infrastructure services depend on WMI (such as IP Helper, User Access Logging, and SMS Agent Host), a system reboot is recommended to apply this control cleanly.
+* **Network Communication**: Internal firewall appliances and host-based firewalls must have explicit allow rules permitting TCP port 24158 from the management subnets before applying this configuration.
+
+---
+
+<div id="04-network-firewall-configure-wmi-static-port-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="04-network-firewall-configure-wmi-static-port-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+<div id="04-network-firewall-configure-wmi-static-port-md-1-define-static-wmi-port-and-service-type-via-gpo-registry-preferences"></div>
+#### 1. Define Static WMI Port and Service Type via GPO Registry Preferences
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Create or edit a GPO targeting the target systems (e.g., `GPO_Hardening_Firewall_Baseline`).
+3. Navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Define the following **Registry Items**:
+   * **WMI Static Port Assignment**:
+     * **Action**: `Update`
+     * **Hive**: `HKEY_LOCAL_MACHINE`
+     * **Key Path**: `SOFTWARE\Classes\AppID\{8BC3F05E-D86B-11D0-A075-00C04FB68820}`
+     * **Value Name**: `Endpoints`
+     * **Value Type**: `REG_MULTI_SZ`
+     * **Value Data**: `ncacn_ip_tcp,0,24158` (Enter on a single line)
+   * **WMI Standalone Process Type**:
+     * **Action**: `Update`
+     * **Hive**: `HKEY_LOCAL_MACHINE`
+     * **Key Path**: `SYSTEM\CurrentControlSet\Services\winmgmt`
+     * **Value Name**: `Type`
+     * **Value Type**: `REG_DWORD`
+     * **Value Data**: `16` (Decimal)
+
+<div id="04-network-firewall-configure-wmi-static-port-md-2-configure-inbound-windows-firewall-rules"></div>
+#### 2. Configure Inbound Windows Firewall Rules
+Ensure a GPO firewall rule permits inbound TCP port 24158 originating only from authorized management/PAW network ranges.
+
+---
+
+<div id="04-network-firewall-configure-wmi-static-port-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to apply the WMI static port configuration.
+
+<div id="04-network-firewall-configure-wmi-static-port-md-remediation-script"></div>
+#### Remediation Script:
+[Download Script: Set-WMIStaticPort.ps1](implementation_scripts/Set-WMIStaticPort.ps1)
+
+```powershell
+# Set-WMIStaticPort.ps1
+# Description: Configures WMI to run in a standalone host process on static TCP port 24158 with packet privacy.
+
+Write-Host "Applying hardening requirement: Configure WMI Static Port..." -ForegroundColor Cyan
+
+# 1. Configure the static TCP port 24158 for WMI AppID
+$WmiAppIdPath = "HKLM:\SOFTWARE\Classes\AppID\{8BC3F05E-D86B-11D0-A075-00C04FB68820}"
+if (-not (Test-Path $WmiAppIdPath)) {
+    New-Item -Path $WmiAppIdPath -Force | Out-Null
+}
+# Set Endpoints string array
+Set-ItemProperty -Path $WmiAppIdPath -Name "Endpoints" -Value @("ncacn_ip_tcp,0,24158") -Type MultiString
+Write-Host "[+] Configured WMI AppID static endpoint to TCP 24158." -ForegroundColor Green
+
+# 2. Configure WMI to run in a standalone host process with packet privacy
+# This command sets HKLM\SYSTEM\CurrentControlSet\Services\winmgmt\Type to OWN_PROCESS (16)
+# and configures the default authentication level to PKT_PRIVACY (6).
+Write-Host "[+] Configuring WMI service to run as standalone process..." -ForegroundColor Gray
+$Proc = Start-Process -FilePath "winmgmt.exe" -ArgumentList "/standalonehost 6" -Wait -NoNewWindow -PassThru
+
+if ($Proc.ExitCode -eq 0) {
+    Write-Host "[+] WMI standalone host configuration completed successfully." -ForegroundColor Green
+} else {
+    Write-Warning "[-] WMI standalone host configuration exited with code $($Proc.ExitCode)."
+}
+
+Write-Host "[!] Note: A system reboot is recommended to cleanly apply WMI process changes and restart all dependencies." -ForegroundColor Yellow
+```
+
+<div id="04-network-firewall-configure-wmi-static-port-md-audit-script"></div>
+#### Audit Script:
+[Download Script: Test-WMIStaticPort.ps1](audit_scripts/Test-WMIStaticPort.ps1)
+
+```powershell
+# Test-WMIStaticPort.ps1
+# Description: Audits WMI static port registry configuration and standalone host settings.
+
+Write-Host "Auditing WMI static port configuration..." -ForegroundColor Cyan
+$vulnerable = $false
+
+# 1. Audit AppID Endpoints Registry Setting
+$WmiAppIdPath = "HKLM:\SOFTWARE\Classes\AppID\{8BC3F05E-D86B-11D0-A075-00C04FB68820}"
+$EndpointsVal = Get-ItemProperty -Path $WmiAppIdPath -Name "Endpoints" -ErrorAction SilentlyContinue
+
+if ($EndpointsVal) {
+    $Endpoints = $EndpointsVal.Endpoints
+    if ($Endpoints -contains "ncacn_ip_tcp,0,24158") {
+        Write-Host "[+] WMI static port registry endpoint is configured correctly (TCP 24158)." -ForegroundColor Green
+    } else {
+        Write-Host "[!] NON-COMPLIANT: WMI Endpoints registry value is: '$($Endpoints -join ', ')' (Expected: 'ncacn_ip_tcp,0,24158')" -ForegroundColor Red
+        $vulnerable = $true
+    }
+} else {
+    Write-Host "[!] NON-COMPLIANT: Wmi AppID 'Endpoints' value is missing." -ForegroundColor Red
+    $vulnerable = $true
+}
+
+# 2. Audit WMI Service Execution Type
+$WinmgmtPath = "HKLM:\SYSTEM\CurrentControlSet\Services\winmgmt"
+$TypeVal = Get-ItemProperty -Path $WinmgmtPath -Name "Type" -ErrorAction SilentlyContinue
+
+if ($TypeVal) {
+    $Type = $TypeVal.Type
+    if ($Type -eq 16) {
+        Write-Host "[+] WMI is configured to run as a standalone process (Type = 16)." -ForegroundColor Green
+    } else {
+        Write-Host "[!] NON-COMPLIANT: WMI service execution type is: $Type (Expected: 16 [OWN_PROCESS])" -ForegroundColor Red
+        $vulnerable = $true
+    }
+} else {
+    Write-Host "[!] NON-COMPLIANT: WMI service registry key is missing or inaccessible." -ForegroundColor Red
+    $vulnerable = $true
+}
+
+if ($vulnerable) {
+    Write-Host "Audit result: NON-COMPLIANT" -ForegroundColor Red
+} else {
+    Write-Host "Audit result: COMPLIANT" -ForegroundColor Green
+}
+```
+
+---
+
+<div id="04-network-firewall-configure-wmi-static-port-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R7 (Filtering and IPsec on Domain Controllers), Recommendation R8 (Administration network subnets / filtering rules)
+* **CIS Windows Server Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
+* **DSInternals AD Firewall Guide (Michael Grafnetter)**: [Active Directory Firewall - Domain Controller Firewall](https://firewall.dsinternals.com/ADDS/)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md"></div>
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-req-net-012-configure-rpc-filters-for-named-pipes"></div>
+# [REQ-NET-012] Configure RPC Filters for Named Pipes
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers, Member Servers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Startup Script Location**: Computer Configuration\Policies\Windows Settings\Scripts (Startup)
+  * **Netsh Configuration File**: `RpcNamedPipesFilters.txt` (imported via `netsh.exe -f RpcNamedPipesFilters.txt`)
+
+---
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-rationale"></div>
+## Rationale
+Active Directory domains heavily rely on the Server Message Block (SMB) protocol (TCP 445) for distributing group policies and replication via the SYSVOL and NETLOGON file shares. Therefore, SMB cannot simply be blocked at the network level on domain controllers.
+
+However, adversaries and common hacktools (e.g., PSExec, Mimikatz) abuse this exposure. They establish connections to SMB named pipes (such as `\PIPE\svcctl` for the Service Control Manager or `\PIPE\samr` for the Security Account Manager) to remotely execute code, manipulate services, or query administrative APIs.
+
+Implementing Windows Firewall **RPC Filters** solves this vulnerability:
+1. **Granular Control over Named Pipes**: Unlike standard L3/L4 firewall rules which can only allow or block all of TCP 445, RPC Filters inspect the RPC interface UUID inside the SMB payload.
+2. **Selective Blocking**: Filters can block administrative RPC interfaces (like Service Control Manager `[MS-SCMR]`, Task Scheduler `[MS-TSCH]`, and Terminal Services runtime) over the `ncacn_np` (named pipe) transport, while leaving standard file sharing and replication functional.
+3. **Exploit Containment**: By blocking interfaces like the Terminal Services runtime or MimiCom (Mimikatz interface), lateral movement and remote code execution techniques are contained.
+
+---
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Remote Administration Impact**: Applying these filters will block remote administration of services (`sc.exe`), scheduled tasks (`schtasks.exe`), and event logs from unauthorized remote member servers using named pipes. Administrators must use secure TCP/IP management protocols (such as PowerShell Remoting/WinRM or remote MMC consoles utilizing ncacn_ip_tcp transport) from authorized PAWs.
+* **GPO Startup Dependencies**: Since Windows does not provide a standard GPO interface for RPC Filters, they must be imported via startup scripts.
+
+---
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-1-create-the-rpc-filters-definition-file"></div>
+#### 1. Create the RPC Filters Definition File
+Create a text file named `RpcNamedPipesFilters.txt` with the following content:
+```text
+rpc filter
+add rule layer=um actiontype=block filterkey=d0c7640c-9355-4e52-8335-c12835559c10
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=367ABB81-9844-35F1-AD32-98F038001003
+add filter
+
+add rule layer=um actiontype=block filterkey=a43b9dd2-0866-4476-89dc-2e9b200762af
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=86D35949-83C9-4044-B424-DB363231FD0C
+add filter
+
+add rule layer=um actiontype=block filterkey=13518c11-e3d8-4f62-9461-eda11beb540a
+add condition field=if_uuid matchtype=equal data=1FF70682-0A51-30E8-076D-740BE8CEE98B
+add filter
+
+add rule layer=um actiontype=block filterkey=1c079a18-e91f-4698-9868-68a121490636
+add condition field=if_uuid matchtype=equal data=378E52B0-C0A9-11CF-822D-00AA0051E40F
+add filter
+
+add rule layer=um actiontype=block filterkey=dedffabf-db89-4177-be77-1954aa2c0b95
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=f6beaff7-1e19-4fbb-9f8f-b89e2018337c
+add filter
+
+add rule layer=um actiontype=block filterkey=f7f68868-5f50-4cda-a18c-6a7a549652e7
+add condition field=if_uuid matchtype=equal data=82273FDC-E32A-18C3-3F78-827929DC23EA
+add filter
+
+add rule layer=um actiontype=permit filterkey=43873c58-e130-4ffb-8858-d259a673a917
+add condition field=if_uuid matchtype=equal data=4FC742E0-4A10-11CF-8273-00AA004AE673
+add condition field=remote_user_token matchtype=equal data=D:(A;;CC;;;DA)
+add filter
+
+add rule layer=um actiontype=block filterkey=0a239867-73db-45e6-b287-d006fe3c8b18
+add condition field=if_uuid matchtype=equal data=4FC742E0-4A10-11CF-8273-00AA004AE673
+add filter
+
+add rule layer=um actiontype=block filterkey=7966512a-f2f4-4cb1-812d-d967ab83d28a
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=12345678-1234-ABCD-EF00-0123456789AB
+add filter
+
+add rule layer=um actiontype=permit filterkey=d71d00db-3eef-4935-bedf-20cf628abd9e
+add condition field=if_uuid matchtype=equal data=c681d488-d850-11d0-8c52-00c04fd90f7e
+add condition field=auth_type matchtype=equal data=16
+add condition field=auth_level matchtype=equal data=6
+add filter
+
+add rule layer=um actiontype=block filterkey=3a4cce27-a7fa-4248-b8b8-ef6439a2c0ff
+add condition field=if_uuid matchtype=equal data=c681d488-d850-11d0-8c52-00c04fd90f7e
+add filter
+
+add rule layer=um actiontype=permit filterkey=c5cf8020-c83c-4803-9241-8c7f3b10171f
+add condition field=if_uuid matchtype=equal data=df1941c5-fe89-4e79-bf10-463657acf44d
+add condition field=auth_type matchtype=equal data=16
+add condition field=auth_level matchtype=equal data=6
+add filter
+
+add rule layer=um actiontype=block filterkey=9ad23a91-085d-4f99-ae15-85e0ad801278
+add condition field=if_uuid matchtype=equal data=df1941c5-fe89-4e79-bf10-463657acf44d
+add filter
+
+add rule layer=um actiontype=block filterkey=50754fe4-aa2d-42ff-8196-e90ea8fd2527
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=50abc2a4-574d-40b3-9d66-ee4fd5fba076
+add filter
+
+add rule layer=um actiontype=block filterkey=644291ca-9530-4066-b654-e7b838ebdc06
+add condition field=if_uuid matchtype=equal data=17FC11E9-C258-4B8D-8D07-2F4125156244
+add filter
+```
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-2-deploy-via-gpo-startup-script"></div>
+#### 2. Deploy via GPO Startup Script
+1. Save `RpcNamedPipesFilters.txt` inside the GPO's Startup folder.
+2. Create a batch script `Import-RpcFilters.bat` containing:
+   ```cmd
+   @echo off
+   netsh.exe -f "%~dp0RpcNamedPipesFilters.txt"
+   ```
+3. Set the batch script as a Startup Script in the GPO targeting Domain Controllers under:
+   `Computer Configuration\Policies\Windows Settings\Scripts (Startup)`
+
+---
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to import and query RPC named pipe filters.
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-remediation-script"></div>
+#### Remediation Script:
+[Download Script: Set-RpcNamedPipeFilters.ps1](implementation_scripts/Set-RpcNamedPipeFilters.ps1)
+
+```powershell
+# Set-RpcNamedPipeFilters.ps1
+# Description: Generates and imports RPC filters to block remote management over SMB named pipes.
+
+Write-Host "Applying hardening requirement: Configure RPC Named Pipe Filters..." -ForegroundColor Cyan
+
+# Define the path where the filters file will be written
+$FilterFilePath = Join-Path $env:TEMP "RpcNamedPipesFilters.txt"
+
+# Write the netsh RPC filter commands
+$FilterContent = @"
+rpc filter
+add rule layer=um actiontype=block filterkey=d0c7640c-9355-4e52-8335-c12835559c10
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=367ABB81-9844-35F1-AD32-98F038001003
+add filter
+
+add rule layer=um actiontype=block filterkey=a43b9dd2-0866-4476-89dc-2e9b200762af
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=86D35949-83C9-4044-B424-DB363231FD0C
+add filter
+
+add rule layer=um actiontype=block filterkey=13518c11-e3d8-4f62-9461-eda11beb540a
+add condition field=if_uuid matchtype=equal data=1FF70682-0A51-30E8-076D-740BE8CEE98B
+add filter
+
+add rule layer=um actiontype=block filterkey=1c079a18-e91f-4698-9868-68a121490636
+add condition field=if_uuid matchtype=equal data=378E52B0-C0A9-11CF-822D-00AA0051E40F
+add filter
+
+add rule layer=um actiontype=block filterkey=dedffabf-db89-4177-be77-1954aa2c0b95
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=f6beaff7-1e19-4fbb-9f8f-b89e2018337c
+add filter
+
+add rule layer=um actiontype=block filterkey=f7f68868-5f50-4cda-a18c-6a7a549652e7
+add condition field=if_uuid matchtype=equal data=82273FDC-E32A-18C3-3F78-827929DC23EA
+add filter
+
+add rule layer=um actiontype=permit filterkey=43873c58-e130-4ffb-8858-d259a673a917
+add condition field=if_uuid matchtype=equal data=4FC742E0-4A10-11CF-8273-00AA004AE673
+add condition field=remote_user_token matchtype=equal data=D:(A;;CC;;;DA)
+add filter
+
+add rule layer=um actiontype=block filterkey=0a239867-73db-45e6-b287-d006fe3c8b18
+add condition field=if_uuid matchtype=equal data=4FC742E0-4A10-11CF-8273-00AA004AE673
+add filter
+
+add rule layer=um actiontype=block filterkey=7966512a-f2f4-4cb1-812d-d967ab83d28a
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=12345678-1234-ABCD-EF00-0123456789AB
+add filter
+
+add rule layer=um actiontype=permit filterkey=d71d00db-3eef-4935-bedf-20cf628abd9e
+add condition field=if_uuid matchtype=equal data=c681d488-d850-11d0-8c52-00c04fd90f7e
+add condition field=auth_type matchtype=equal data=16
+add condition field=auth_level matchtype=equal data=6
+add filter
+
+add rule layer=um actiontype=block filterkey=3a4cce27-a7fa-4248-b8b8-ef6439a2c0ff
+add condition field=if_uuid matchtype=equal data=c681d488-d850-11d0-8c52-00c04fd90f7e
+add filter
+
+add rule layer=um actiontype=permit filterkey=c5cf8020-c83c-4803-9241-8c7f3b10171f
+add condition field=if_uuid matchtype=equal data=df1941c5-fe89-4e79-bf10-463657acf44d
+add condition field=auth_type matchtype=equal data=16
+add condition field=auth_level matchtype=equal data=6
+add filter
+
+add rule layer=um actiontype=block filterkey=9ad23a91-085d-4f99-ae15-85e0ad801278
+add condition field=if_uuid matchtype=equal data=df1941c5-fe89-4e79-bf10-463657acf44d
+add filter
+
+add rule layer=um actiontype=block filterkey=50754fe4-aa2d-42ff-8196-e90ea8fd2527
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=50abc2a4-574d-40b3-9d66-ee4fd5fba076
+add filter
+
+add rule layer=um actiontype=block filterkey=644291ca-9530-4066-b654-e7b838ebdc06
+add condition field=if_uuid matchtype=equal data=17FC11E9-C258-4B8D-8D07-2F4125156244
+add filter
+"@
+
+# Write filters to temp file
+Set-Content -Path $FilterFilePath -Value $FilterContent -Encoding Ascii
+Write-Host "[+] Generated RPC filters file at: $FilterFilePath" -ForegroundColor Gray
+
+# Import using netsh (requires elevation)
+Write-Host "[+] Importing RPC filters using Netsh..." -ForegroundColor Gray
+$Proc = Start-Process -FilePath "netsh.exe" -ArgumentList "rpc filter import `"$FilterFilePath`"" -Wait -NoNewWindow -PassThru
+
+if ($Proc.ExitCode -eq 0) {
+    Write-Host "[+] RPC filters imported successfully." -ForegroundColor Green
+} else {
+    Write-Error "[-] Failed to import RPC filters. Netsh exit code: $($Proc.ExitCode)."
+}
+
+# Clean up temp file
+if (Test-Path $FilterFilePath) {
+    Remove-Item -Path $FilterFilePath -Force | Out-Null
+}
+```
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-audit-script"></div>
+#### Audit Script:
+[Download Script: Test-RpcNamedPipeFilters.ps1](audit_scripts/Test-RpcNamedPipeFilters.ps1)
+
+```powershell
+# Test-RpcNamedPipeFilters.ps1
+# Description: Audits active RPC filters configuration using Netsh queries.
+
+Write-Host "Auditing RPC filters configuration..." -ForegroundColor Cyan
+
+# Query RPC filters
+$filters = netsh rpc filter show filter
+
+# Check for presence of SCM block rule filterkey or Mimikatz block rule filterkey
+$scmFound = $false
+$mimiFound = $false
+
+foreach ($line in $filters) {
+    if ($line -like "*d0c7640c-9355-4e52-8335-c12835559c10*") {
+        $scmFound = $true
+    }
+    if ($line -like "*644291ca-9530-4066-b654-e7b838ebdc06*") {
+        $mimiFound = $true
+    }
+}
+
+if ($scmFound -and $mimiFound) {
+    Write-Host "[+] RPC Filters for named pipes are active (SCM and Mimikatz filterkeys found)." -ForegroundColor Green
+    Write-Host "Audit result: COMPLIANT" -ForegroundColor Green
+} else {
+    Write-Host "[!] NON-COMPLIANT: Core RPC named pipe filters are missing or inactive." -ForegroundColor Red
+    if (-not $scmFound) {
+        Write-Host "    - Missing SCM Named Pipe Filter (d0c7640c-9355-4e52-8335-c12835559c10)" -ForegroundColor Yellow
+    }
+    if (-not $mimiFound) {
+        Write-Host "    - Missing Mimikatz Filter (644291ca-9530-4066-b654-e7b838ebdc06)" -ForegroundColor Yellow
+    }
+    Write-Host "Audit result: NON-COMPLIANT" -ForegroundColor Red
+}
+```
+
+---
+
+<div id="04-network-firewall-configure-rpc-named-pipe-filters-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R7 (Filtering and IPsec on Domain Controllers), Recommendation R8 (Administration network subnets / filtering rules)
+* **CIS Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
+* **DSInternals AD Firewall Guide (Michael Grafnetter)**: [Active Directory Firewall - Domain Controller Firewall](https://firewall.dsinternals.com/ADDS/)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="04-network-firewall-block-intra-dc-management-md"></div>
+
+<div id="04-network-firewall-block-intra-dc-management-md-req-net-013-block-management-traffic-between-domain-controllers"></div>
+# [REQ-NET-013] Block Management Traffic Between Domain Controllers
+
+<div id="04-network-firewall-block-intra-dc-management-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="04-network-firewall-block-intra-dc-management-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Windows Firewall Inbound Rules**: Exclusion of Domain Controller IP addresses from allowed remote management rules (RDP, WinRM, WMI, ADWS) in the Domain Controllers GPO.
+
+---
+
+<div id="04-network-firewall-block-intra-dc-management-md-rationale"></div>
+## Rationale
+Domain Controllers (DCs) represent the Tier 0 security boundary of an Active Directory forest. In a multi-DC environment, security controls must prevent lateral movement and credential escalation between these core servers.
+
+If an adversary gains administrative control of a single Domain Controller, they will immediately attempt to pivot to other DCs. By default, standard firewall configurations allow remote management protocols (RDP, WinRM, WMI) from all Tier 0 assets—including other Domain Controllers.
+
+Enforcing intra-DC remote management blocking resolves this vector:
+1. **Lateral Movement Containment**: Restricting management traffic between DCs (e.g. blocking RDP TCP 3389, WinRM TCP 5985/5986, WMI TCP 24158, and ADWS TCP 9389 from other DC IP addresses) prevents a compromised DC from being used to compromise other domain controllers.
+2. **Replication Integrity**: Normal Active Directory replication and synchronization protocols (RPC replication, DNS, Kerberos, SMB) remain open and unaffected, while administrative logon and command execution protocols are blocked.
+3. **Zero Trust Tiering**: Assumes that even Tier 0 systems must not trust other Tier 0 systems for remote command execution.
+
+---
+
+<div id="04-network-firewall-block-intra-dc-management-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Administration Workflow**: Administrators cannot RDP or execute remote PowerShell Remoting commands directly from one DC to another. They must manage each DC individually from authorized Privileged Access Workstations (PAWs) or dedicated Tier 0 jump hosts.
+* **Multi-DC Discovery**: For non-GPO scripting configurations, the remediation script dynamically queries Active Directory to identify and block the IP addresses of other DCs.
+
+---
+
+<div id="04-network-firewall-block-intra-dc-management-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="04-network-firewall-block-intra-dc-management-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+Configure the Domain Controllers GPO to restrict source IP addresses for remote management rules:
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Create or edit a GPO targeting Domain Controllers (e.g., `GPO_Hardening_DomainControllers_Firewall`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Windows Defender Firewall with Advanced Security`
+4. Under **Inbound Rules**, configure rules for remote management (RDP, WinRM, WMI, ADWS) to:
+   * Allow connections originating only from **Management/PAW subnets**.
+   * Ensure that **Domain Controller IP addresses** are explicitly excluded from the allowed remote address list.
+   * Alternatively, create explicit inbound **Block Rules** for ports `3389`, `5985`, `5986`, `24158`, and `9389` where the source IP addresses match the list of Domain Controllers.
+
+---
+
+<div id="04-network-firewall-block-intra-dc-management-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally on each DC to implement and audit the block rules.
+
+<div id="04-network-firewall-block-intra-dc-management-md-remediation-script"></div>
+#### Remediation Script:
+[Download Script: Set-IntraDcManagementBlocking.ps1](implementation_scripts/Set-IntraDcManagementBlocking.ps1)
+
+```powershell
+# Set-IntraDcManagementBlocking.ps1
+# Description: Configures local Windows Firewall rules to block remote management traffic (RDP, WinRM, WMI, ADWS) originating from other Domain Controllers to prevent lateral movement.
+
+Write-Host "Applying hardening requirement: Block Management Traffic Between DCs..." -ForegroundColor Cyan
+
+# 1. Get IP addresses of all Domain Controllers in the domain
+$DcIPs = @()
+try {
+    $Dcs = Get-ADDomainController -Filter * -ErrorAction Stop
+    foreach ($Dc in $Dcs) {
+        # Skip local computer
+        if ($Dc.Name -ne $env:COMPUTERNAME) {
+            if ($Dc.IPv4Address) { $DcIPs += $Dc.IPv4Address }
+            if ($Dc.IPv6Address) { $DcIPs += $Dc.IPv6Address }
+        }
+    }
+} catch {
+    Write-Host "    Get-ADDomainController not available or not in AD domain. Skipping dynamic discovery." -ForegroundColor Yellow
+}
+
+if ($DcIPs.Count -eq 0) {
+    Write-Host "    No other Domain Controllers discovered. Blocking rule will be created but inactive." -ForegroundColor Yellow
+    # Fallback to a dummy address to ensure rule structure is correct
+    $DcIPs = @("255.255.255.255")
+} else {
+    Write-Host "    Discovered other DCs: $($DcIPs -join ', ')" -ForegroundColor Gray
+}
+
+# 2. Configure local block rules for DC-to-DC remote management
+$BlockRules = @(
+    @{ Name = "AD-Block-IntraDC-RDP"; Port = 3389; Proto = "TCP" },
+    @{ Name = "AD-Block-IntraDC-WinRM-HTTP"; Port = 5985; Proto = "TCP" },
+    @{ Name = "AD-Block-IntraDC-WinRM-HTTPS"; Port = 5986; Proto = "TCP" },
+    @{ Name = "AD-Block-IntraDC-WMI"; Port = 24158; Proto = "TCP" },
+    @{ Name = "AD-Block-IntraDC-ADWS"; Port = 9389; Proto = "TCP" }
+)
+
+foreach ($Rule in $BlockRules) {
+    $Name = $Rule.Name
+    $Port = $Rule.Port
+    $Proto = $Rule.Proto
+    
+    $Existing = Get-NetFirewallRule -Name $Name -ErrorAction SilentlyContinue
+    if ($null -eq $Existing) {
+        New-NetFirewallRule -Name $Name -DisplayName $Name `
+            -Direction Inbound `
+            -Action Block `
+            -Protocol $Proto `
+            -LocalPort $Port `
+            -RemoteAddress $DcIPs `
+            -Profile Domain, Private `
+            -Enabled True | Out-Null
+        Write-Host "Block rule created: $($Name) on port $($Port) ($($Proto)) from other DCs." -ForegroundColor Green
+    } else {
+        Set-NetFirewallRule -Name $Name -Enabled True -Action Block -RemoteAddress $DcIPs | Out-Null
+        Write-Host "Block rule verified: $($Name) on port $($Port) ($($Proto)) from other DCs." -ForegroundColor Gray
+    }
+}
+
+Write-Host "Intra-DC management blocking rules applied successfully." -ForegroundColor Cyan
+```
+
+<div id="04-network-firewall-block-intra-dc-management-md-audit-script"></div>
+#### Audit Script:
+[Download Script: Test-IntraDcManagementBlocking.ps1](audit_scripts/Test-IntraDcManagementBlocking.ps1)
+
+```powershell
+# Test-IntraDcManagementBlocking.ps1
+# Description: Audits if management traffic from other Domain Controllers is blocked.
+
+Write-Host "Auditing Intra-DC management blocking configurations..." -ForegroundColor Cyan
+
+$vulnerable = $false
+$BlockRules = @(
+    "AD-Block-IntraDC-RDP",
+    "AD-Block-IntraDC-WinRM-HTTP",
+    "AD-Block-IntraDC-WinRM-HTTPS",
+    "AD-Block-IntraDC-WMI",
+    "AD-Block-IntraDC-ADWS"
+)
+
+foreach ($Name in $BlockRules) {
+    $Rule = Get-NetFirewallRule -Name $Name -ErrorAction SilentlyContinue
+    if ($Rule) {
+        if ($Rule.Enabled -eq $true -and $Rule.Action -eq "Block") {
+            Write-Host "[+] Rule $($Name) is active and configured to Block." -ForegroundColor Green
+        } else {
+            Write-Host "[!] NON-COMPLIANT: Rule $($Name) exists but is disabled or not set to Block." -ForegroundColor Red
+            $vulnerable = $true
+        }
+    } else {
+        Write-Host "[!] NON-COMPLIANT: Block rule $($Name) is missing." -ForegroundColor Red
+        $vulnerable = $true
+    }
+}
+
+if ($vulnerable) {
+    Write-Host "Audit result: NON-COMPLIANT" -ForegroundColor Red
+} else {
+    Write-Host "Audit result: COMPLIANT" -ForegroundColor Green
+}
+```
+
+---
+
+<div id="04-network-firewall-block-intra-dc-management-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R7 (Filtering and IPsec on Domain Controllers), Recommendation R8 (Administration network subnets / filtering rules)
+* **CIS Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
+* **DSInternals AD Firewall Guide (Michael Grafnetter)**: [Active Directory Firewall - Domain Controller Firewall](https://firewall.dsinternals.com/ADDS/)
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="05-logging-monitoring-README-md"></div>
 
 <div id="05-logging-monitoring-README-md-module-5-logging-monitoring-siem"></div>
@@ -13827,6 +14573,8 @@ This directory contains operational procedures and configuration baselines for s
 6. **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#06-operations-maintenance-configure-dedicated-tier0-wsus-md)**
    Establishes and secures dedicated WSUS update server endpoints for Tier 0 assets to prevent cross-tier update spoofing.
 
+7. **[REQ-OPS-006 - Redirect Default Users and Computers Containers](#06-operations-maintenance-redirect-default-containers-md)**
+   Redirects newly created user and computer objects to dedicated, deletion-protected Organizational Units (OUs) to enforce policy application.
 
 
 <div style="page-break-before: always;"></div>
@@ -14829,6 +15577,243 @@ if (Test-Path $WsusRegPath) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="06-operations-maintenance-redirect-default-containers-md"></div>
+
+<div id="06-operations-maintenance-redirect-default-containers-md-req-ops-006-redirect-default-users-and-computers-containers"></div>
+# [REQ-OPS-006] Redirect Default Users and Computers Containers
+
+<div id="06-operations-maintenance-redirect-default-containers-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016 and above
+
+---
+
+<div id="06-operations-maintenance-redirect-default-containers-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**: Active Directory Domain Well-Known Objects
+
+---
+
+<div id="06-operations-maintenance-redirect-default-containers-md-rationale"></div>
+## Rationale
+By default, new user and computer objects created in an Active Directory domain are placed in the default containers:
+* **Users**: `CN=Users,DC=domain,DC=com`
+* **Computers**: `CN=Computers,DC=domain,DC=com`
+
+These default paths present significant security and operational issues:
+1. **Lack of GPO Enforcement**: Default containers are generic container objects, not Organizational Units (OUs). Consequently, Group Policy Objects (GPOs) cannot be linked directly to them. Any newly joined computer or newly created user remains unhardened and outside the scope of organizational baseline policies until an administrator manually moves them to an OU.
+2. **Insecure Window of Exposure**: The period between the initial domain join/creation and the manual movement of the object creates a window of vulnerability where systems run without mandatory security controls (e.g., endpoint firewall rules, AppLocker, audit configurations, credential protection).
+3. **Absence of Deletion Protection**: Default containers do not possess the standard accidental deletion protection attributes that can be applied to OUs, increasing the risk of administrative errors.
+
+Redirecting the default creation paths of users and computers to dedicated, hardened OUs ensures that newly created objects immediately inherit appropriate GPOs and are protected against accidental deletion from the moment of creation.
+
+---
+
+<div id="06-operations-maintenance-redirect-default-containers-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Domain Join Permissions**: Under default AD behavior, authenticated users can join up to 10 computer objects to the domain in the `CN=Computers` container (subject to `ms-DS-MachineAccountQuota`). When `CN=Computers` is redirected to an OU, standard users will lack the permission to create computer objects in that new OU by default. However, since the Machine Account Quota is disabled (`ms-DS-MachineAccountQuota` set to `0` as per [[REQ-ID-017]](../03-identities-services/disable-machine-account-quota.md)), only delegated administrators can join systems, making this change consistent with the overall security model.
+* **Legacy Application Mappings**: Some legacy line-of-business applications, provisioning scripts, or identity synchronizers (such as old Entra Connect/Azure AD Connect configurations) might be hardcoded to query or write to `CN=Users` or `CN=Computers`. These systems must be audited and updated to reference the new OUs before enabling redirection.
+* **Domain Functional Level**: The Active Directory domain functional level must be Windows Server 2003 or higher to support redirection.
+
+---
+
+<div id="06-operations-maintenance-redirect-default-containers-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="06-operations-maintenance-redirect-default-containers-md-option-a-active-directory-administrative-tools-cli-preferred"></div>
+### Option A: Active Directory Administrative Tools & CLI (Preferred)
+
+1. Log on to a Domain Controller or a management host with **Domain Admins** or **Enterprise Admins** credentials.
+2. Open **Active Directory Users and Computers** (`dsa.msc`).
+3. Create two new Organizational Units (OUs) at the domain root:
+   * **Name**: `New-Users`
+   * **Name**: `New-Computers`
+4. For both OUs, ensure that accidental deletion protection is enabled:
+   * Right-click the OU, select **Properties**.
+   * Navigate to the **Object** tab (ensure **View -> Advanced Features** is enabled in `dsa.msc` to see this tab).
+   * Check **Protect object from accidental deletion** and click **OK**.
+5. Open an elevated command prompt on a Domain Controller.
+6. Run the following command to redirect the default container for new computer objects:
+   ```cmd
+   redircmp.exe OU=New-Computers,DC=domain,DC=local
+   ```
+   *(Replace `DC=domain,DC=local` with the actual Distinguished Name of your domain).*
+7. Run the following command to redirect the default container for new user objects:
+   ```cmd
+   redirusr.exe OU=New-Users,DC=domain,DC=local
+   ```
+   *(Replace `DC=domain,DC=local` with the actual Distinguished Name of your domain).*
+8. Verify that the output of both commands states: `Redirection was successful.`
+
+---
+
+<div id="06-operations-maintenance-redirect-default-containers-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts on a Domain Controller or administrative system with remote AD management tools.
+
+<div id="06-operations-maintenance-redirect-default-containers-md-1-local-audit"></div>
+#### 1. Local Audit
+
+[Download Script: Audit-DefaultContainers.ps1](audit_scripts/Audit-DefaultContainers.ps1)
+
+```powershell
+# Audit-DefaultContainers.ps1
+# Description: Audits if the default user and computer containers have been redirected to protected OUs.
+
+Import-Module ActiveDirectory
+
+Write-Host "--- Auditing Default User and Computer Containers Redirection ---" -ForegroundColor Cyan
+
+try {
+    $Domain = Get-ADDomain -ErrorAction Stop
+    $DomainDN = $Domain.DistinguishedName
+    $DefaultComputersDN = "CN=Computers,$($DomainDN)"
+    $DefaultUsersDN = "CN=Users,$($DomainDN)"
+    
+    $Compliant = $true
+    
+    # 1. Check Computers Container
+    Write-Host "[+] Current Computers Container: $($Domain.ComputersContainer)" -ForegroundColor Gray
+    if ($Domain.ComputersContainer -eq $DefaultComputersDN) {
+        Write-Host "VULNERABLE: Default Computers container is NOT redirected." -ForegroundColor Red
+        $Compliant = $false
+    } else {
+        # Verify the redirected container is an OU and is protected from deletion
+        $CompOU = Get-ADOrganizationalUnit -Identity $Domain.ComputersContainer -Properties ProtectedFromAccidentalDeletion -ErrorAction SilentlyContinue
+        if ($CompOU) {
+            if ($CompOU.ProtectedFromAccidentalDeletion) {
+                Write-Host "[+] Computers Container redirected to a protected OU (Compliant)." -ForegroundColor Green
+            } else {
+                Write-Host "VULNERABLE: Computers Container redirected to OU '$($CompOU.Name)' but Accidental Deletion Protection is DISABLED." -ForegroundColor Red
+                $Compliant = $false
+            }
+        } else {
+            Write-Host "VULNERABLE: Computers Container is redirected to a non-OU object or the target container does not exist." -ForegroundColor Red
+            $Compliant = $false
+        }
+    }
+    
+    # 2. Check Users Container
+    Write-Host "[+] Current Users Container: $($Domain.UsersContainer)" -ForegroundColor Gray
+    if ($Domain.UsersContainer -eq $DefaultUsersDN) {
+        Write-Host "VULNERABLE: Default Users container is NOT redirected." -ForegroundColor Red
+        $Compliant = $false
+    } else {
+        # Verify the redirected container is an OU and is protected from deletion
+        $UserOU = Get-ADOrganizationalUnit -Identity $Domain.UsersContainer -Properties ProtectedFromAccidentalDeletion -ErrorAction SilentlyContinue
+        if ($UserOU) {
+            if ($UserOU.ProtectedFromAccidentalDeletion) {
+                Write-Host "[+] Users Container redirected to a protected OU (Compliant)." -ForegroundColor Green
+            } else {
+                Write-Host "VULNERABLE: Users Container redirected to OU '$($UserOU.Name)' but Accidental Deletion Protection is DISABLED." -ForegroundColor Red
+                $Compliant = $false
+            }
+        } else {
+            Write-Host "VULNERABLE: Users Container is redirected to a non-OU object or the target container does not exist." -ForegroundColor Red
+            $Compliant = $false
+        }
+    }
+    
+    if ($Compliant) {
+        Write-Host "`nStatus: Compliant. User and Computer default containers are redirected to deletion-protected OUs." -ForegroundColor Green
+        exit 0
+    } else {
+        Write-Host "`nStatus: Non-Compliant. Default containers redirection needs to be configured or corrected." -ForegroundColor Red
+        exit 1
+    }
+} catch {
+    Write-Host "VULNERABLE: Could not query Active Directory Domain settings. Error: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
+}
+```
+
+<div id="06-operations-maintenance-redirect-default-containers-md-2-local-remediation"></div>
+#### 2. Local Remediation
+
+[Download Script: Set-DefaultContainersRedirection.ps1](implementation_scripts/Set-DefaultContainersRedirection.ps1)
+
+```powershell
+# Set-DefaultContainersRedirection.ps1
+# Description: Creates new OUs, protects them from accidental deletion, and redirects default users/computers containers.
+
+Import-Module ActiveDirectory
+
+Write-Host "Applying hardening requirement: Redirect Default Containers to Protected OUs..." -ForegroundColor Cyan
+
+try {
+    $Domain = Get-ADDomain -ErrorAction Stop
+    $DomainDN = $Domain.DistinguishedName
+    $TargetComputersOU = "OU=New-Computers,$($DomainDN)"
+    $TargetUsersOU = "OU=New-Users,$($DomainDN)"
+    
+    # 1. Create and protect target Computers OU
+    if (-not (Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$TargetComputersOU'")) {
+        Write-Host "[+] Creating target Computers OU: New-Computers" -ForegroundColor Yellow
+        New-ADOrganizationalUnit -Name "New-Computers" -Path $DomainDN -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
+        Write-Host "[+] Computers OU created and protected successfully." -ForegroundColor Green
+    } else {
+        Write-Host "[+] Target Computers OU already exists. Ensuring accidental deletion protection is enabled..." -ForegroundColor Yellow
+        Set-ADOrganizationalUnit -Identity $TargetComputersOU -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
+        Write-Host "[+] Accidental deletion protection verified on target Computers OU." -ForegroundColor Green
+    }
+    
+    # 2. Create and protect target Users OU
+    if (-not (Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$TargetUsersOU'")) {
+        Write-Host "[+] Creating target Users OU: New-Users" -ForegroundColor Yellow
+        New-ADOrganizationalUnit -Name "New-Users" -Path $DomainDN -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
+        Write-Host "[+] Users OU created and protected successfully." -ForegroundColor Green
+    } else {
+        Write-Host "[+] Target Users OU already exists. Ensuring accidental deletion protection is enabled..." -ForegroundColor Yellow
+        Set-ADOrganizationalUnit -Identity $TargetUsersOU -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
+        Write-Host "[+] Accidental deletion protection verified on target Users OU." -ForegroundColor Green
+    }
+    
+    # 3. Perform Computers Redirection
+    if ($Domain.ComputersContainer -ne $TargetComputersOU) {
+        Write-Host "[+] Redirecting default Computers container to $TargetComputersOU..." -ForegroundColor Yellow
+        $Output = & redircmp.exe $TargetComputersOU 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[+] Computers container redirected successfully." -ForegroundColor Green
+        } else {
+            throw "Failed to redirect Computers container: $($Output)"
+        }
+    } else {
+        Write-Host "[+] Computers container is already redirected to target OU." -ForegroundColor Green
+    }
+    
+    # 4. Perform Users Redirection
+    if ($Domain.UsersContainer -ne $TargetUsersOU) {
+        Write-Host "[+] Redirecting default Users container to $TargetUsersOU..." -ForegroundColor Yellow
+        $Output = & redirusr.exe $TargetUsersOU 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[+] Users container redirected successfully." -ForegroundColor Green
+        } else {
+            throw "Failed to redirect Users container: $($Output)"
+        }
+    } else {
+        Write-Host "[+] Users container is already redirected to target OU." -ForegroundColor Green
+    }
+    
+    Write-Host "`n[+] Redirection operations completed successfully." -ForegroundColor Green
+} catch {
+    Write-Error "Failed to apply redirection. Error: $($_.Exception.Message)"
+    exit 1
+}
+```
+
+---
+
+<div id="06-operations-maintenance-redirect-default-containers-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Technical Reference**: [Redirecting Users and Computers Containers in Active Directory Domains](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/redirect-users-computers-containers)
+* **ANSSI AD Hardening Guide**: Section on Active Directory structure and logical partitioning.
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="07-paws-README-md"></div>
 
 <div id="07-paws-README-md-module-7-privileged-access-workstations-paws-hardening"></div>
@@ -15030,7 +16015,10 @@ $AppLockerXml = @"
       <Exceptions>
         <FilePathCondition Path="%WINDIR%\Temp\*" />
         <FilePathCondition Path="%WINDIR%\Tasks\*" />
+        <FilePathCondition Path="%WINDIR%\tracing\*" />
         <FilePathCondition Path="%WINDIR%\System32\spool\drivers\color\*" />
+        <FilePathCondition Path="%WINDIR%\System32\Tasks\Microsoft\Windows\SyncCenter\*" />
+        <FilePathCondition Path="%WINDIR%\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\*" />
         <FilePathCondition Path="*\msbuild.exe" />
         <FilePathCondition Path="*\installutil.exe" />
         <FilePathCondition Path="*\mshta.exe" />
@@ -15038,6 +16026,29 @@ $AppLockerXml = @"
         <FilePathCondition Path="*\regsvcs.exe" />
         <FilePathCondition Path="*\regsvr32.exe" />
         <FilePathCondition Path="*\rundll32.exe" />
+        <FilePathCondition Path="*\bginfo.exe" />
+        <FilePathCondition Path="*\cdb.exe" />
+        <FilePathCondition Path="*\cmstp.exe" />
+        <FilePathCondition Path="*\control.exe" />
+        <FilePathCondition Path="*\csi.exe" />
+        <FilePathCondition Path="*\dfsvc.exe" />
+        <FilePathCondition Path="*\dnx.exe" />
+        <FilePathCondition Path="*\fsi.exe" />
+        <FilePathCondition Path="*\ie4unit.exe" />
+        <FilePathCondition Path="*\ieexec.exe" />
+        <FilePathCondition Path="*\infdefaultinstall.exe" />
+        <FilePathCondition Path="*\mavinject.exe" />
+        <FilePathCondition Path="*\msdeploy.exe" />
+        <FilePathCondition Path="*\msdt.exe" />
+        <FilePathCondition Path="*\msxsl.exe" />
+        <FilePathCondition Path="*\odbcconf.exe" />
+        <FilePathCondition Path="*\presentationhost.exe" />
+        <FilePathCondition Path="*\rcsi.exe" />
+        <FilePathCondition Path="*\rsi.exe" />
+        <FilePathCondition Path="*\runscripthelper.exe" />
+        <FilePathCondition Path="*\te.exe" />
+        <FilePathCondition Path="*\tracker.exe" />
+        <FilePathCondition Path="*\xwizard.exe" />
       </Exceptions>
     </FilePathRule>
     <FilePathRule Id="fd686d83-a829-4351-8ff4-27c1de5732e9" Name="(Default Rule) All files" Description="Allows members of the local Administrators group to run all applications." UserOrGroupSid="S-1-5-32-544" Action="Allow">
@@ -25023,96 +26034,151 @@ Administrative templates govern system-wide capabilities, behaviors, and diagnos
 <div id="08-endpoints-configure-system-administrative-templates-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-Configure the administrative template settings in GPMC according to the paths and values detailed below:
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on an administrative workstation.
+2. Edit or create a GPO linked to endpoints (e.g., `GPO_Hardening_Endpoints_SystemTemplates`).
+3. Configure the following policies grouped by their GPO nodes:
 
-| Recommendation | Title | Registry Path | Value Name | Value Type | Expected Value |
-| --- | --- | --- | --- | --- | --- |
-| 18.4.2 | (L1) Ensure 'Configure SMB v1 client driver' is set to 'Enabled: Disable driver (recommended)' | `HKLM\SYSTEM\CurrentControlSet\Services\mrxsmb10` | `Start` | `REG_DWORD` | 0x00000004 (4) |
-| 18.4.3 | (L1) Ensure 'Configure SMB v1 server' is set to 'Disabled' | `HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters` | `SMB1` | `REG_DWORD` | 0x00000000 (0) |
-| 18.4.7 | (L1) Ensure 'NetBT NodeType configuration' is set to 'Enabled: P-node (recommended)' | `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters` | `NodeType` | `REG_DWORD` | 0x00000002 (2) |
-| 18.5.1 | (L1) Ensure 'MSS: (AutoAdminLogon) Enable Automatic Logon' is set to 'Disabled' | `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon` | `AutoAdminLogon` | `REG_SZ` | "0" |
-| 18.5.2 | (L1) Ensure 'MSS: (DisableIPSourceRouting IPv6) IP source routing protection level' is set to 'Enabled: Highest protection, source routing is completely disabled' | `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters` | `DisableIPSourceRouting` | `REG_DWORD` | 0x00000002 (2) |
-| 18.5.3 | (L1) Ensure 'MSS: (DisableIPSourceRouting) IP source routing protection level' is set to 'Enabled: Highest protection, source routing is completely disabled' | `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters` | `DisableIPSourceRouting` | `REG_DWORD` | 0x00000002 (2) |
-| 18.5.5 | (L1) Ensure 'MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes' is set to 'Disabled' | `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters` | `EnableICMPRedirect` | `REG_DWORD` | 0x00000000 (0) |
-| 18.5.7 | (L1) Ensure 'MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers' is set to 'Enabled' | `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters` | `NoNameReleaseOnDemand` | `REG_DWORD` | 0x00000001 (1) |
-| 18.5.9 | (L1) Ensure 'MSS: (SafeDllSearchMode) Enable Safe DLL search mode' is set to 'Enabled' | `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager` | `SafeDllSearchMode` | `REG_DWORD` | 0x00000001 (1) |
-| 18.5.10 | (L1) Ensure 'MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires' is set to 'Enabled: 5 or fewer seconds' | `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon` | `ScreenSaverGracePeriod` | `REG_DWORD` | 0x00000005 (5) |
-| 18.5.13 | (L1) Ensure 'MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning' is set to 'Enabled: 90% or less' | `HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security` | `WarningLevel` | `REG_DWORD` | 0x0000005a (90) |
-| 18.9.7.2 | (L1) Ensure 'Prevent device metadata retrieval from the Internet' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata` | `PreventDeviceMetadataFromNetwork` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.19.2 | (L1) Ensure 'Configure registry policy processing: Do not apply during periodic background processing' is set to 'Enabled: FALSE' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}` | `NoBackgroundPolicy` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.19.3 | (L1) Ensure 'Configure registry policy processing: Process even if the Group Policy objects have not changed' is set to 'Enabled: TRUE' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}` | `NoGPOListChanges` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.19.4 | (L1) Ensure 'Configure security policy processing: Do not apply during periodic background processing' is set to 'Enabled: FALSE' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}` | `NoBackgroundPolicy` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.19.5 | (L1) Ensure 'Configure security policy processing: Process even if the Group Policy objects have not changed' is set to 'Enabled: TRUE' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}` | `NoGPOListChanges` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.19.6 | (L1) Ensure 'Continue experiences on this device' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `EnableCdp` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.20.1.2 | (L1) Ensure 'Turn off downloading of print drivers over HTTP' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers` | `DisableWebPnPDownload` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.20.1.6 | (L1) Ensure 'Turn off Internet download for Web publishing and online ordering wizards' is set to 'Enabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer` | `NoWebServices` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.26.1 | (L1) Ensure 'Allow Custom SSPs and APs to be loaded into LSASS' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `AllowCustomSSPsAPs` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.28.1 | (L1) Ensure 'Block user from showing account details on sign-in' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `BlockUserFromShowingAccountDetailsOnSignin` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.28.2 | (L1) Ensure 'Do not display network selection UI' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `DontDisplayNetworkSelectionUI` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.28.3 | (L1) Ensure 'Do not enumerate connected users on domain-joined computers' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `DontEnumerateConnectedUsers` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.28.5 | (L1) Ensure 'Turn off app notifications on the lock screen' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `DisableLockScreenAppNotifications` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.28.6 | (L1) Ensure 'Turn off picture password sign-in' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `BlockDomainPicturePassword` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.28.7 | (L1) Ensure 'Turn on convenience PIN sign-in' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `AllowDomainPINLogon` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.33.6.1 | (L1) Ensure 'Allow network connectivity during connected-standby (on battery)' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9` | `DCSettingIndex` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.33.6.2 | (L1) Ensure 'Allow network connectivity during connected-standby (plugged in)' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9` | `ACSettingIndex` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.35.1 | (L1) Ensure 'Configure Offer Remote Assistance' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` | `fAllowUnsolicited` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.36.1 | (L1) Ensure 'Enable RPC Endpoint Mapper Client Authentication' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc` | `EnableAuthEpResolution` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.51.1.1 | (L1) Ensure 'Enable Windows NTP Client' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient` | `Enabled` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.51.1.2 | (L1) Ensure 'Enable Windows NTP Server' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer` | `Enabled` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.4.2 | (L1) Ensure 'Not allow per-user unsigned packages to install by default (requires explicitly allow per install)' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx` | `DisablePerUserUnsignedPackagesByDefault` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.4.3 | (L1) Ensure 'Prevent non-admin users from installing packaged Windows apps' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx` | `BlockNonAdminUserInstall` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.9.1.1 | (L1) Ensure 'Configure enhanced anti-spoofing' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures` | `EnhancedAntiSpoofing` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.13.1 | (L1) Ensure 'Turn off cloud consumer account state content' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent` | `DisableConsumerAccountStateContent` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.14.1 | (L1) Ensure 'Require pin for pairing' is set to 'Enabled: First Time' OR 'Enabled: Always' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Connect` | `RequirePinForPairing` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.15.1 | (L1) Ensure 'Do not display the password reveal button' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\CredUI` | `DisablePasswordReveal` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.15.2 | (L1) Ensure 'Enumerate administrator accounts on elevation' is set to 'Disabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI` | `EnumerateAdministrators` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.15.3 | (L1) Ensure 'Prevent the use of security questions for local accounts' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `NoLocalPasswordResetQuestions` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.16.3 | (L1) Ensure 'Disable OneSettings Downloads' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection` | `DisableOneSettingsDownloads` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.16.4 | (L1) Ensure 'Do not show feedback notifications' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection` | `DoNotShowFeedbackNotifications` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.16.5 | (L1) Ensure 'Enable OneSettings Auditing' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection` | `EnableOneSettingsAuditing` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.16.6 | (L1) Ensure 'Limit Diagnostic Log Collection' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection` | `LimitDiagnosticLogCollection` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.16.7 | (L1) Ensure 'Limit Dump Collection' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection` | `LimitDumpCollection` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.16.8 | (L1) Ensure 'Toggle user control over Insider builds' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds` | `AllowBuildPreview` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.18.2 | (L1) Ensure 'Enable App Installer Experimental Features' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller` | `EnableExperimentalFeatures` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.18.3 | (L1) Ensure 'Enable App Installer Hash Override' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller` | `EnableHashOverride` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.18.4 | (L1) Ensure 'Enable App Installer Local Archive Malware Scan Override' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller` | `EnableLocalArchiveMalwareScanOverride` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.18.5 | (L1) Ensure 'Enable App Installer Microsoft Store Source Certificate Validation Bypass' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller` | `EnableBypassCertificatePinningForMicrosoftStore` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.18.6 | (L1) Ensure 'Enable App Installer ms-appinstaller protocol' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller` | `EnableMSAppInstallerProtocol` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.26.1.1 | (L1) Ensure 'Application: Control Event Log behavior when the log file reaches its maximum size' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application` | `Retention` | `REG_SZ` | "0" |
-| 18.10.26.1.2 | (L1) Ensure 'Application: Specify the maximum log file size (KB)' is set to 'Enabled: 32,768 or greater' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application` | `MaxSize` | `REG_DWORD` | 0x00008000 (32768) |
-| 18.10.26.2.1 | (L1) Ensure 'Security: Control Event Log behavior when the log file reaches its maximum size' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security` | `Retention` | `REG_SZ` | "0" |
-| 18.10.26.2.2 | (L1) Ensure 'Security: Specify the maximum log file size (KB)' is set to 'Enabled: 196,608 or greater' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security` | `MaxSize` | `REG_DWORD` | 0x00030000 (196608) |
-| 18.10.26.3.1 | (L1) Ensure 'Setup: Control Event Log behavior when the log file reaches its maximum size' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup` | `Retention` | `REG_SZ` | "0" |
-| 18.10.26.3.2 | (L1) Ensure 'Setup: Specify the maximum log file size (KB)' is set to 'Enabled: 32,768 or greater' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup` | `MaxSize` | `REG_DWORD` | 0x00008000 (32768) |
-| 18.10.26.4.1 | (L1) Ensure 'System: Control Event Log behavior when the log file reaches its maximum size' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System` | `Retention` | `REG_SZ` | "0" |
-| 18.10.26.4.2 | (L1) Ensure 'System: Specify the maximum log file size (KB)' is set to 'Enabled: 32,768 or greater' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System` | `MaxSize` | `REG_DWORD` | 0x00008000 (32768) |
-| 18.10.29.3 | (L1) Ensure 'Do not apply the Mark of the Web tag to files copied from insecure sources' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer` | `DisableMotWOnInsecurePathCopy` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.29.5 | (L1) Ensure 'Turn off shell protocol protected mode' is set to 'Disabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer` | `PreXPSP2ShellProtocolBehavior` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.35.1 | (L1) Ensure 'Disable Internet Explorer 11 as a standalone browser' is set to 'Enabled: Always' | `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main` | `NotifyDisableIEOptions` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.43.11.1.1.2 | (L1) Ensure 'Configure Remote Encryption Protection Mode' is set to 'Enabled: Audit' or higher | `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection` | `BruteForceProtectionConfiguredState` | `REG_DWORD` | 0x00000002 (2) |
-| 18.10.43.13.2 | (L1) Ensure 'Scan packed executables' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Scan` | `DisablePackedExeScanning` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.58.1 | (L1) Ensure 'Prevent downloading of enclosures' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds` | `DisableEnclosureDownload` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.58.2 | (L1) Ensure 'Turn on Basic feed authentication over HTTP' is set to 'Disabled' | `HKLM\Software\Policies\Microsoft\Internet Explorer\Feeds` | `AllowBasicAuthInClear` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.59.3 | (L1) Ensure 'Allow Cortana' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search` | `AllowCortana` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.59.4 | (L1) Ensure 'Allow Cortana above lock screen' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search` | `AllowCortanaAboveLock` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.59.5 | (L1) Ensure 'Allow indexing of encrypted files' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search` | `AllowIndexingEncryptedStoresOrItems` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.59.6 | (L1) Ensure 'Allow search and Cortana to use location' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search` | `AllowSearchToUseLocation` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.66.2 | (L1) Ensure 'Turn off Automatic Download and Install of updates' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore` | `AutoDownload` | `REG_DWORD` | 0x00000004 (4) |
-| 18.10.66.3 | (L1) Ensure 'Turn off the offer to update to the latest version of Windows' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore` | `DisableOSUpgrade` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.72.1 | (L1) Ensure 'Allow widgets' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Dsh` | `AllowNewsAndInterests` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.82.1 | (L1) Ensure 'Configure the transmission of the user's password in the content of MPR notifications sent by winlogon.' is set to 'Disabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System` | `EnableMPR` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.82.2 | (L1) Ensure 'Sign-in and lock last interactive user automatically after a restart' is set to 'Disabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System` | `DisableAutomaticRestartSignOn` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.91.1 | (L1) Ensure 'Allow clipboard sharing with Windows Sandbox' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox` | `AllowClipboardRedirection` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.91.2 | (L1) Ensure 'Allow networking in Windows Sandbox' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox` | `AllowNetworking` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.92.2.1 | (L1) Ensure 'Prevent users from modifying settings' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection` | `DisallowExploitProtectionOverride` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.93.1.1 | (L1) Ensure 'No auto-restart with logged on users for scheduled automatic updates installations' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU` | `NoAutoRebootWithLoggedOnUsers` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.93.2.2 | (L1) Ensure 'Configure Automatic Updates: Scheduled install day' is set to '0 - Every day' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU` | `ScheduledInstallDay` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.93.2.3 | (L1) Ensure 'Remove access to “Pause updates” feature' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate` | `SetDisablePauseUXAccess` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.93.4.1 | (L1) Ensure 'Manage preview builds' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate` | `ManagePreviewBuildsPolicyValue` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.93.4.2 | (L1) Ensure 'Select when Preview Builds and Feature Updates are received' is set to 'Enabled: 180 or more days' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate` | `DeferFeatureUpdates` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.93.4.2 | (L1) Ensure 'Select when Preview Builds and Feature Updates are received' is set to 'Enabled: 180 or more days' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate` | `DeferFeatureUpdatesPeriodInDays` | `REG_DWORD` | 0x000000b4 (180) |
-| 18.10.93.4.3 | (L1) Ensure 'Select when Quality Updates are received' is set to 'Enabled: 0 days' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate` | `DeferQualityUpdates` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.93.4.3 | (L1) Ensure 'Select when Quality Updates are received' is set to 'Enabled: 0 days' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate` | `DeferQualityUpdatesPeriodInDays` | `REG_DWORD` | 0x00000000 (0) |
+<div id="08-endpoints-configure-system-administrative-templates-md-network-tcpip-settings"></div>
+#### Network & TCP/IP Settings
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Workstation`
+  * **Configure SMB v1 client driver**: Set to `Enabled`, select `Disable driver (recommended)` (Recommendation 18.4.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Server`
+  * **Configure SMB v1 server**: Set to `Disabled` (Recommendation 18.4.3)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\TCPIP Settings\Parameters`
+  * **NetBT NodeType configuration**: Set to `Enabled`, select `P-node (recommended)` (Recommendation 18.4.7)
+
+<div id="08-endpoints-configure-system-administrative-templates-md-legacy-security-options-mss-settings"></div>
+#### Legacy Security Options (MSS Settings)
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * Configure the following security settings (alternatively, deploy via GPO Preferences Registry if Custom ADMX templates are not available):
+    * **MSS: (AutoAdminLogon) Enable Automatic Logon**: Set to `Disabled` (Recommendation 18.5.1)
+    * **MSS: (DisableIPSourceRouting IPv6) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled` (Recommendation 18.5.2)
+    * **MSS: (DisableIPSourceRouting) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled` (Recommendation 18.5.3)
+    * **MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes**: Set to `Disabled` (Recommendation 18.5.5)
+    * **MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers**: Set to `Enabled` (Recommendation 18.5.7)
+    * **MSS: (SafeDllSearchMode) Enable Safe DLL search mode**: Set to `Enabled` (Recommendation 18.5.9)
+    * **MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires**: Set to `Enabled: 5 or fewer seconds` (Recommendation 18.5.10)
+    * **MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning**: Set to `Enabled: 90% or less` (Recommendation 18.5.13)
+
+<div id="08-endpoints-configure-system-administrative-templates-md-system-group-policy-settings"></div>
+#### System & Group Policy Settings
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Device Installation`
+  * **Prevent device metadata retrieval from the Internet**: Set to `Enabled` (Recommendation 18.9.7.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
+  * **Configure registry policy processing**: Set to `Enabled`
+    * Uncheck: `Do not apply during periodic background processing` (Recommendation 18.9.19.2)
+    * Check: `Process even if the Group Policy objects have not changed` (Recommendation 18.9.19.3)
+  * **Configure security policy processing**: Set to `Enabled`
+    * Uncheck: `Do not apply during periodic background processing` (Recommendation 18.9.19.4)
+    * Check: `Process even if the Group Policy objects have not changed` (Recommendation 18.9.19.5)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Cross-Device Experiences`
+  * **Continue experiences on this device**: Set to `Disabled` (Recommendation 18.9.19.6)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
+  * **Turn off downloading of print drivers over HTTP**: Set to `Enabled` (Recommendation 18.9.20.1.2)
+  * **Turn off Internet download for Web publishing and online ordering wizards**: Set to `Enabled` (Recommendation 18.9.20.1.6)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Local Security Authority`
+  * **Allow Custom SSPs and APs to be loaded into LSASS**: Set to `Disabled` (Recommendation 18.9.26.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Block user from showing account details on sign-in**: Set to `Enabled` (Recommendation 18.9.28.1)
+  * **Do not display network selection UI**: Set to `Enabled` (Recommendation 18.9.28.2)
+  * **Do not enumerate connected users on domain-joined computers**: Set to `Enabled` (Recommendation 18.9.28.3)
+  * **Turn off app notifications on the lock screen**: Set to `Enabled` (Recommendation 18.9.28.5)
+  * **Turn off picture password sign-in**: Set to `Enabled` (Recommendation 18.9.28.6)
+  * **Turn on convenience PIN sign-in**: Set to `Disabled` (Recommendation 18.9.28.7)
+  * **Prevent the use of security questions for local accounts**: Set to `Enabled` (Recommendation 18.10.15.3)
+  * **Configure the transmission of the user's password in the content of MPR notifications sent by winlogon.**: Set to `Disabled` (Recommendation 18.10.82.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings`
+  * **Allow network connectivity during connected-standby (on battery)**: Set to `Disabled` (Recommendation 18.9.33.6.1)
+  * **Allow network connectivity during connected-standby (plugged in)**: Set to `Disabled` (Recommendation 18.9.33.6.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Assistance`
+  * **Configure Offer Remote Assistance**: Set to `Disabled` (Recommendation 18.9.35.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call`
+  * **Enable RPC Endpoint Mapper Client Authentication**: Set to `Enabled` (Recommendation 18.9.36.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers`
+  * **Enable Windows NTP Client**: Set to `Enabled` (Recommendation 18.9.51.1.1)
+  * **Enable Windows NTP Server**: Set to `Disabled` (Recommendation 18.9.51.1.2)
+
+<div id="08-endpoints-configure-system-administrative-templates-md-windows-components-settings"></div>
+#### Windows Components Settings
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment`
+  * **Not allow per-user unsigned packages to install by default (requires explicitly allow per install)**: Set to `Enabled` (Recommendation 18.10.4.2)
+  * **Prevent non-admin users from installing packaged Windows apps**: Set to `Enabled` (Recommendation 18.10.4.3)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Biometrics\Facial Features`
+  * **Configure enhanced anti-spoofing**: Set to `Enabled` (Recommendation 18.10.9.1.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Cloud Content`
+  * **Turn off cloud consumer account state content**: Set to `Enabled` (Recommendation 18.10.13.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Connect`
+  * **Require pin for pairing**: Set to `Enabled` (Select `First Time` or `Always`) (Recommendation 18.10.14.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface`
+  * **Do not display the password reveal button**: Set to `Enabled` (Recommendation 18.10.15.1)
+  * **Enumerate administrator accounts on elevation**: Set to `Disabled` (Recommendation 18.10.15.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Disable OneSettings Downloads**: Set to `Enabled` (Recommendation 18.10.16.3)
+  * **Do not show feedback notifications**: Set to `Enabled` (Recommendation 18.10.16.4)
+  * **Enable OneSettings Auditing**: Set to `Enabled` (Recommendation 18.10.16.5)
+  * **Limit Diagnostic Log Collection**: Set to `Enabled` (Recommendation 18.10.16.6)
+  * **Limit Dump Collection**: Set to `Enabled` (Recommendation 18.10.16.7)
+  * **Toggle user control over Insider builds**: Set to `Disabled` (Recommendation 18.10.16.8)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
+  * **Enable App Installer Experimental Features**: Set to `Disabled` (Recommendation 18.10.18.2)
+  * **Enable App Installer Hash Override**: Set to `Disabled` (Recommendation 18.10.18.3)
+  * **Enable App Installer Local Archive Malware Scan Override**: Set to `Disabled` (Recommendation 18.10.18.4)
+  * **Enable App Installer Microsoft Store Source Certificate Validation Bypass**: Set to `Disabled` (Recommendation 18.10.18.5)
+  * **Enable App Installer ms-appinstaller protocol**: Set to `Disabled` (Recommendation 18.10.18.6)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled` (Recommendation 18.10.26.1.1)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `32768` (Recommendation 18.10.26.1.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled` (Recommendation 18.10.26.2.1)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `196608` (Recommendation 18.10.26.2.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled` (Recommendation 18.10.26.3.1)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `32768` (Recommendation 18.10.26.3.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled` (Recommendation 18.10.26.4.1)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `32768` (Recommendation 18.10.26.4.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
+  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled` (Recommendation 18.10.29.3)
+  * **Turn off shell protocol protected mode**: Set to `Disabled` (Recommendation 18.10.29.5)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer`
+  * **Disable Internet Explorer 11 as a standalone browser**: Set to `Enabled`, select `Always` (Recommendation 18.10.35.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
+  * **Prevent downloading of enclosures**: Set to `Enabled` (Recommendation 18.10.58.1)
+  * **Turn on Basic feed authentication over HTTP**: Set to `Disabled` (Recommendation 18.10.58.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection`
+  * **Configure Remote Encryption Protection Mode**: Set to `Enabled` (Select `Audit` or higher) (Recommendation 18.10.43.11.1.1.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
+  * **Turn off scanning of packed executables**: Set to `Disabled` (Recommendation 18.10.43.13.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection`
+  * **Prevent users from modifying settings**: Set to `Enabled` (Recommendation 18.10.92.2.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
+  * **Allow Cortana**: Set to `Disabled` (Recommendation 18.10.59.3)
+  * **Allow Cortana above lock screen**: Set to `Disabled` (Recommendation 18.10.59.4)
+  * **Allow indexing of encrypted files**: Set to `Disabled` (Recommendation 18.10.59.5)
+  * **Allow search and Cortana to use location**: Set to `Disabled` (Recommendation 18.10.59.6)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store`
+  * **Turn off Automatic Download and Install of updates**: Set to `Disabled` (Recommendation 18.10.66.2)
+  * **Turn off the offer to update to the latest version of Windows**: Set to `Enabled` (Recommendation 18.10.66.3)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Widgets`
+  * **Allow widgets**: Set to `Disabled` (Recommendation 18.10.72.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Logon Options`
+  * **Sign-in and lock last interactive user automatically after a restart**: Set to `Disabled` (Recommendation 18.10.82.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox`
+  * **Allow clipboard sharing with Windows Sandbox**: Set to `Disabled` (Recommendation 18.10.91.1)
+  * **Allow networking in Windows Sandbox**: Set to `Disabled` (Recommendation 18.10.91.2)
+
+<div id="08-endpoints-configure-system-administrative-templates-md-windows-update-settings"></div>
+#### Windows Update Settings
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update` (or `Windows Update\Manage end user experience` depending on ADMX version)
+  * **Remove access to “Pause updates” feature**: Set to `Enabled` (Recommendation 18.10.93.2.3)
+  * **Manage preview builds**: Set to `Disabled` (Recommendation 18.10.93.4.1)
+  * **Select when Preview Builds and Feature Updates are received**: Set to `Enabled`, set Defer Feature Updates Period in Days to `180` (or more) (Recommendation 18.10.93.4.2)
+  * **Select when Quality Updates are received**: Set to `Enabled`, set Defer Quality Updates Period in Days to `0` (Recommendation 18.10.93.4.3)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience` (or standard `Windows Update\AU` depending on ADMX version)
+  * **Configure Automatic Updates**: Set to `Enabled`, select `Scheduled install day` = `0 - Every day` (Recommendation 18.10.93.2.2)
+  * **No auto-restart with logged on users for scheduled automatic updates installations**: Set to `Disabled` (Recommendation 18.10.93.1.1)
+
+4. Link the GPO to the target Organizational Unit (OU) containing workstations and member servers.
 
 ---
 
@@ -25745,7 +26811,10 @@ $AppLockerXml = @"
       <Exceptions>
         <FilePathCondition Path="%WINDIR%\Temp\*" />
         <FilePathCondition Path="%WINDIR%\Tasks\*" />
+        <FilePathCondition Path="%WINDIR%\tracing\*" />
         <FilePathCondition Path="%WINDIR%\System32\spool\drivers\color\*" />
+        <FilePathCondition Path="%WINDIR%\System32\Tasks\Microsoft\Windows\SyncCenter\*" />
+        <FilePathCondition Path="%WINDIR%\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\*" />
         <FilePathCondition Path="*\msbuild.exe" />
         <FilePathCondition Path="*\installutil.exe" />
         <FilePathCondition Path="*\mshta.exe" />
@@ -25753,6 +26822,29 @@ $AppLockerXml = @"
         <FilePathCondition Path="*\regsvcs.exe" />
         <FilePathCondition Path="*\regsvr32.exe" />
         <FilePathCondition Path="*\rundll32.exe" />
+        <FilePathCondition Path="*\bginfo.exe" />
+        <FilePathCondition Path="*\cdb.exe" />
+        <FilePathCondition Path="*\cmstp.exe" />
+        <FilePathCondition Path="*\control.exe" />
+        <FilePathCondition Path="*\csi.exe" />
+        <FilePathCondition Path="*\dfsvc.exe" />
+        <FilePathCondition Path="*\dnx.exe" />
+        <FilePathCondition Path="*\fsi.exe" />
+        <FilePathCondition Path="*\ie4unit.exe" />
+        <FilePathCondition Path="*\ieexec.exe" />
+        <FilePathCondition Path="*\infdefaultinstall.exe" />
+        <FilePathCondition Path="*\mavinject.exe" />
+        <FilePathCondition Path="*\msdeploy.exe" />
+        <FilePathCondition Path="*\msdt.exe" />
+        <FilePathCondition Path="*\msxsl.exe" />
+        <FilePathCondition Path="*\odbcconf.exe" />
+        <FilePathCondition Path="*\presentationhost.exe" />
+        <FilePathCondition Path="*\rcsi.exe" />
+        <FilePathCondition Path="*\rsi.exe" />
+        <FilePathCondition Path="*\runscripthelper.exe" />
+        <FilePathCondition Path="*\te.exe" />
+        <FilePathCondition Path="*\tracker.exe" />
+        <FilePathCondition Path="*\xwizard.exe" />
       </Exceptions>
     </FilePathRule>
     <FilePathRule Id="fd686d83-a829-4351-8ff4-27c1de5732e9" Name="(Default Rule) All files" Description="Allows members of the local Administrators group to run all applications." UserOrGroupSid="S-1-5-32-544" Action="Allow">

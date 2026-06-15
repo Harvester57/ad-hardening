@@ -22,3 +22,5 @@ This directory contains operational procedures and configuration baselines for s
 6. **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](configure-dedicated-tier0-wsus.md)**
    Establishes and secures dedicated WSUS update server endpoints for Tier 0 assets to prevent cross-tier update spoofing.
 
+7. **[REQ-OPS-006 - Redirect Default Users and Computers Containers](redirect-default-containers.md)**
+   Redirects newly created user and computer objects to dedicated, deletion-protected Organizational Units (OUs) to enforce policy application.
