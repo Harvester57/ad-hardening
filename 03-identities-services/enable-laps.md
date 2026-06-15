@@ -15,18 +15,6 @@
   * **Registry Location (GPO Policies)**: `HKLM\Software\Policies\Microsoft\Windows\LAPS`
   * **Registry Location (Local / CSP Settings)**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS`
 
-| Recommendation | Title | Registry Path | Value Name | Value Type | Expected Value |
-| --- | --- | --- | --- | --- | --- |
-| 18.9.25.1 | (L1) Ensure 'Configure password backup directory' is set to 'Enabled: Active Directory' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `BackupDirectory` | `REG_DWORD` | 0x00000002 (2) |
-| 18.9.25.2 | (L1) Ensure 'Do not allow password expiration time longer than required by policy' is set to 'Enabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `PasswordExpirationProtectionEnabled` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.25.3 | (L1) Ensure 'Enable password encryption' is set to 'Enabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `ADPasswordEncryptionEnabled` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.25.4 | (L1) Ensure 'Password Settings: Password Complexity' is set to 'Enabled: Large letters + small letters + numbers + special characters' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `PasswordComplexity` | `REG_DWORD` | 0x00000004 (4) |
-| 18.9.25.5 | (L1) Ensure 'Password Settings: Password Length' is set to 'Enabled: 15 or more' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `PasswordLength` | `REG_DWORD` | 0x00000014 (20) |
-| 18.9.25.6 | (L1) Ensure 'Password Settings: Password Age (Days)' is set to 'Enabled: 30 or fewer' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `PasswordAgeDays` | `REG_DWORD` | 0x0000001e (30) |
-| 18.9.25.7 | (L1) Ensure 'Post-authentication actions: Grace period (hours)' is set to 'Enabled: 8 or fewer hours, but not 0' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `PostAuthenticationResetDelay` | `REG_DWORD` | 0x00000008 (8) |
-| 18.9.25.8 | (L1) Ensure 'Post-authentication actions: Actions' is set to 'Enabled: Reset the password and logoff the managed account' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `PostAuthenticationActions` | `REG_DWORD` | 0x00000003 (3) |
-| - | (L1) Ensure 'Enable local admin password management' is set to 'Enabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `EnableLAPS` | `REG_DWORD` | 0x00000001 (1) |
-
 ---
 
 ## Rationale
