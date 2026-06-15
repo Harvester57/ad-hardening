@@ -34,6 +34,8 @@ Implementing administrative tiering directly mitigates the most common and criti
 
 Enforcing administrative tiering requires structural separation in Active Directory at the Organizational Unit (OU) level, Group Policy level, and account naming level.
 
+![Active Directory Administrative Tiering Model](images/ad-tiering-model.png)
+
 ### Organizational Unit (OU) Structure
 Active Directory OUs must be organized to group assets logically by security level:
 
@@ -70,10 +72,6 @@ Administrators must use distinct accounts depending on the tier they are managin
 ## 4. Operational Management and Administrative Routing
 
 Managing a tiered environment requires strict adherence to operational routing paths.
-
-### General architecture
-
-![Active Directory Administrative Tiering Model](images/ad-tiering-model.png)
 
 ### Credentials Lifecycle & Hygiene
 1. **Interactive Logons**: Tier 0 administrator credentials (`a0-` prefix) must only be entered interactively on PAWs, Tier 0 Jump Hosts, and Domain Controllers. They must never be used in `RunAs` contexts on Tier 1 or Tier 2 machines.
