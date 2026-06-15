@@ -4,9 +4,12 @@
   "language": "en",
   "plugins": [
     "-sharing",
+    "-lunr",
+    "-search",
     "prism",
     "-highlight",
-    "flexible-alerts"
+    "flexible-alerts",
+    "search-plus"
   ],
   "pluginsConfig": {
     "prism": {
