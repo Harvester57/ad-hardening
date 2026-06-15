@@ -28,10 +28,6 @@ Implementing administrative tiering directly mitigates the most common and criti
 * **Threat**: Windows uses NTLM hashes for local and network authentication. Attackers do not need to decrypt NTLM hashes to authenticate; they can present the captured hash directly to target systems to log on as that user.
 * **Mitigation**: Enforcing explicit boundaries prevents Tier 0 and Tier 1 hashes from being cached on Tier 2 endpoints, meaning there are no high-tier hashes on standard machines for attackers to pass or relay.
 
-### Coercion and Relay Attacks (e.g., PetitPotam, Printer Bug)
-* **Threat**: Attackers coercion tools force a machine account (such as a Domain Controller) to initiate an authentication request to an attacker-controlled listener. The attacker then relays this machine credential to other services (like Active Directory Certificate Services) to generate domain administrator certificates.
-* **Mitigation**: Active Directory tiering, coupled with workstation isolation and network boundaries, blocks cross-tier network protocols (such as SMB/RPC) between workstations and Domain Controllers, preventing the relay path.
-
 ---
 
 ## 3. Theoretical Implementation
