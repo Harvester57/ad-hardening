@@ -17,6 +17,8 @@
   * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR
   * HKLM\SOFTWARE\Microsoft\Windows Defender\Features
   * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
+  * HKLM\SOFTWARE\Microsoft\AMSI
+    * FeatureBits = 2 (REG_DWORD)
 
 ---
 
@@ -27,6 +29,7 @@ This control establishes a server-optimized defense posture:
 1. **Attack Surface Reduction (ASR) Rules**: Enforces key security boundaries on the OS. Specifically, blocking credential harvesting from LSASS (`9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2`) is paramount on Domain Controllers to prevent offline hash-cracking and token manipulation. In addition, blocking the abuse of exploited vulnerable signed drivers (`56a863a9-875e-4185-98a7-b882c64b5ce5`) blocks kernel-mode exploits, while blocking persistence through WMI event subscriptions (`e6db77e5-3df2-4cf1-b95a-636979351e5b`) mitigates common server stealth mechanisms.
 2. **Tamper Protection**: Ensures that attackers cannot use compromised local SYSTEM/admin contexts (such as those obtained via exploit) to disable real-time protection or add exclusions to bypass Defender scanning.
 3. **Sandbox Execution (AppContainer)**: Sandboxes the core scanning service (`MsMpEng.exe`). If an attacker attempts to exploit a parsing vulnerability in the antimalware engine (e.g., using a malformed certificate file or replication data), the exploit is restricted to the AppContainer sandbox, mitigating privilege escalation to local system privileges.
+4. **AMSI Authenticode Signature Verification (FeatureBits)**: Enforces signature verification checks on registered Antimalware Scan Interface (AMSI) providers. This ensures only signed and trusted AMSI provider DLLs can scan script content, preventing attackers from bypass scanning by registering rogue provider DLLs.
 
 ---
 
@@ -34,6 +37,7 @@ This control establishes a server-optimized defense posture:
 * **ASR PSExec and WMI Rule**: Enforcing "Block process creations originating from PSExec and WMI commands" (`d1e49aac-8f56-4280-b9ba-993a6d77406c`) can disrupt enterprise remote administration, monitoring agents, and backup orchestrators. In environments utilizing such orchestrators, this rule should be set to **Audit** mode or configured with explicit process exclusions rather than hard Block mode.
 * **Office Application Rules**: Rules targeting Microsoft Office or Adobe applications are documented but will not affect Domain Controllers, as these applications must never be installed on Tier 0 systems.
 * **Reboot Requirement**: Activating Sandbox Execution via `MP_FORCE_USE_SANDBOX` requires a reboot of the Domain Controllers to take effect. This should be scheduled during standard maintenance windows.
+* **AMSI Provider Signatures**: Any third-party security agents registering as AMSI providers must have a valid, trusted Authenticode signature. Unsigned or self-signed providers will be prevented from loading.
 
 ---
 
@@ -164,6 +168,16 @@ This control establishes a server-optimized defense posture:
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
     * **Value**: `1`
+32. Navigate to:
+    `Computer Configuration\Preferences\Windows Settings\Registry`
+33. Right-click **Registry**, select **New** -> **Registry Item**.
+34. Configure:
+    * **Action**: `Update`
+    * **Hive**: `HKEY_LOCAL_MACHINE`
+    * **Key Path**: `SOFTWARE\Microsoft\AMSI`
+    * **Value name**: `FeatureBits`
+    * **Value type**: `REG_DWORD`
+    * **Value data**: `2` (Decimal)
 
 ---
 
@@ -336,6 +350,14 @@ if (-not (Test-Path $EnvPath)) {
 Set-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -Value "1" -Type String
 Write-Host "Sandbox Execution environment variable configured." -ForegroundColor Green
 
+# 8. Configure AMSI Authenticode Signature Verification (FeatureBits = 2)
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (-not (Test-Path $AmsiPath)) {
+    New-Item -Path $AmsiPath -Force | Out-Null
+}
+Set-ItemProperty -Path $AmsiPath -Name "FeatureBits" -Value 2 -Type DWord -Force
+Write-Host "[+] AMSI Authenticode signature verification enabled." -ForegroundColor Green
+
 Write-Host "Defender Domain Controller baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan
 ```
 
@@ -454,6 +476,17 @@ foreach ($KeyName in $CheckKeys.Keys) {
         $Actual = if ($Val) { $Val.$KeyName } else { "Not Configured" }
         Write-Host "      * Missing/Misconfigured: $KeyName (Expected: $($Target.Expected), Got: $Actual)" -ForegroundColor Yellow
     }
+}
+
+# 6. Audit AMSI Authenticode verification
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (Test-Path $AmsiPath) {
+    $AmsiBits = Get-ItemProperty -Path $AmsiPath -Name "FeatureBits" -ErrorAction SilentlyContinue
+    $AmsiVal = if ($AmsiBits) { $AmsiBits.FeatureBits } else { 0 }
+    $AmsiColor = if ($AmsiVal -eq 2) { "Green" } else { "Red" }
+    Write-Host "    - AMSI Authenticode verification (FeatureBits): $AmsiVal (Expected: 2)" -ForegroundColor $AmsiColor
+} else {
+    Write-Host "    - AMSI Authenticode verification (FeatureBits): NOT ENABLED" -ForegroundColor Red
 }
 ```
 

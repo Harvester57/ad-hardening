@@ -17,6 +17,8 @@
   * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR
   * HKLM\SOFTWARE\Microsoft\Windows Defender\Features
   * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
+  * HKLM\SOFTWARE\Microsoft\AMSI
+    * FeatureBits = 2 (REG_DWORD)
 
 ---
 
@@ -27,12 +29,14 @@ This control introduces a highly restrictive protective barrier on PAWs:
 1. **Attack Surface Reduction (ASR) Rules**: ASR rules block activities commonly used by threat actors to perform remote execution, persistence, and credential theft. On PAWs, all rules are configured to strict Block mode. Crucially, rules blocking LSASS credential stealing (`9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2`) and WMI/PSExec child process creation (`d1e49fe6-3b60-4270-a130-058b290d024a`) are enforced. Since PAWs are reserved for administrative consoles and not daily use software, there is a lower threat of user-facing disruption.
 2. **Tamper Protection**: Restricts any software or unauthorized administrator from disabling real-time scanning, cloud components, behavior monitoring, or exclusions. This blocks malicious actors from trying to disable security controls if they gain command execution.
 3. **Sandbox Execution (AppContainer)**: Sandboxes the core scanning service (`MsMpEng.exe`). If an attacker attempts to exploit a parser flaw in the Defender engine itself using a specifically crafted malicious file, the exploit is restricted to the AppContainer sandbox, mitigating privilege escalation on Tier 0 assets.
+4. **AMSI Authenticode Signature Verification (FeatureBits)**: Enforces signature verification checks on registered Antimalware Scan Interface (AMSI) providers. This ensures only signed and trusted AMSI provider DLLs can scan script content, preventing attackers from bypass scanning by registering rogue provider DLLs.
 
 ---
 
 ## Legacy Impact & Compatibility
 * **Administrative Operations**: Enabling the WMI/PSExec block rule means administrative scripts must be run locally or orchestrated via secure WinRM endpoints. Traditional PSExec commands from remote management consoles will be blocked, enforcing proper tier-isolated remote administration.
 * **Execution Restrictions**: Since productivity suites (e.g., Office, Outlook) are strictly banned from PAWs, ASR rules targeting Microsoft Office applications are enforced as a defensive measure to prevent shadow installations or bypasses.
+* **AMSI Provider Signatures**: Any third-party security agents registering as AMSI providers must have a valid, trusted Authenticode signature. Unsigned or self-signed providers will be prevented from loading.
 
 ---
 
@@ -173,6 +177,16 @@ This control introduces a highly restrictive protective barrier on PAWs:
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
     * **Value**: `1`
+32. Navigate to:
+    `Computer Configuration\Preferences\Windows Settings\Registry`
+33. Right-click **Registry**, select **New** -> **Registry Item**.
+34. Configure:
+    * **Action**: `Update`
+    * **Hive**: `HKEY_LOCAL_MACHINE`
+    * **Key Path**: `SOFTWARE\Microsoft\AMSI`
+    * **Value name**: `FeatureBits`
+    * **Value type**: `REG_DWORD`
+    * **Value data**: `2` (Decimal)
 
 ---
 
@@ -359,6 +373,14 @@ if (-not (Test-Path $EnvPath)) {
 Set-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -Value "1" -Type String
 Write-Host "Sandbox Execution environment variable configured." -ForegroundColor Green
 
+# 8. Configure AMSI Authenticode Signature Verification (FeatureBits = 2)
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (-not (Test-Path $AmsiPath)) {
+    New-Item -Path $AmsiPath -Force | Out-Null
+}
+Set-ItemProperty -Path $AmsiPath -Name "FeatureBits" -Value 2 -Type DWord -Force
+Write-Host "[+] AMSI Authenticode signature verification enabled." -ForegroundColor Green
+
 Write-Host "Defender PAW baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan
 ```
 
@@ -467,6 +489,17 @@ foreach ($KeyName in $CheckKeys.Keys) {
         $Actual = if ($Val) { $Val.$KeyName } else { "Not Configured" }
         Write-Host "      * Missing/Misconfigured: $KeyName (Expected: $($Target.Expected), Got: $Actual)" -ForegroundColor Yellow
     }
+}
+
+# 6. Audit AMSI Authenticode verification
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (Test-Path $AmsiPath) {
+    $AmsiBits = Get-ItemProperty -Path $AmsiPath -Name "FeatureBits" -ErrorAction SilentlyContinue
+    $AmsiVal = if ($AmsiBits) { $AmsiBits.FeatureBits } else { 0 }
+    $AmsiColor = if ($AmsiVal -eq 2) { "Green" } else { "Red" }
+    Write-Host "    - AMSI Authenticode verification (FeatureBits): $AmsiVal (Expected: 2)" -ForegroundColor $AmsiColor
+} else {
+    Write-Host "    - AMSI Authenticode verification (FeatureBits): NOT ENABLED" -ForegroundColor Red
 }
 ```
 
