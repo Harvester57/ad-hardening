@@ -31,7 +31,10 @@ $AppLockerXml = @"
       <Exceptions>
         <FilePathCondition Path="%WINDIR%\Temp\*" />
         <FilePathCondition Path="%WINDIR%\Tasks\*" />
+        <FilePathCondition Path="%WINDIR%\tracing\*" />
         <FilePathCondition Path="%WINDIR%\System32\spool\drivers\color\*" />
+        <FilePathCondition Path="%WINDIR%\System32\Tasks\Microsoft\Windows\SyncCenter\*" />
+        <FilePathCondition Path="%WINDIR%\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\*" />
         <FilePathCondition Path="*\msbuild.exe" />
         <FilePathCondition Path="*\installutil.exe" />
         <FilePathCondition Path="*\mshta.exe" />
@@ -39,6 +42,29 @@ $AppLockerXml = @"
         <FilePathCondition Path="*\regsvcs.exe" />
         <FilePathCondition Path="*\regsvr32.exe" />
         <FilePathCondition Path="*\rundll32.exe" />
+        <FilePathCondition Path="*\bginfo.exe" />
+        <FilePathCondition Path="*\cdb.exe" />
+        <FilePathCondition Path="*\cmstp.exe" />
+        <FilePathCondition Path="*\control.exe" />
+        <FilePathCondition Path="*\csi.exe" />
+        <FilePathCondition Path="*\dfsvc.exe" />
+        <FilePathCondition Path="*\dnx.exe" />
+        <FilePathCondition Path="*\fsi.exe" />
+        <FilePathCondition Path="*\ie4unit.exe" />
+        <FilePathCondition Path="*\ieexec.exe" />
+        <FilePathCondition Path="*\infdefaultinstall.exe" />
+        <FilePathCondition Path="*\mavinject.exe" />
+        <FilePathCondition Path="*\msdeploy.exe" />
+        <FilePathCondition Path="*\msdt.exe" />
+        <FilePathCondition Path="*\msxsl.exe" />
+        <FilePathCondition Path="*\odbcconf.exe" />
+        <FilePathCondition Path="*\presentationhost.exe" />
+        <FilePathCondition Path="*\rcsi.exe" />
+        <FilePathCondition Path="*\rsi.exe" />
+        <FilePathCondition Path="*\runscripthelper.exe" />
+        <FilePathCondition Path="*\te.exe" />
+        <FilePathCondition Path="*\tracker.exe" />
+        <FilePathCondition Path="*\xwizard.exe" />
       </Exceptions>
     </FilePathRule>
     <FilePathRule Id="fd686d83-a829-4351-8ff4-27c1de5732e9" Name="(Default Rule) All files" Description="Allows members of the local Administrators group to run all applications." UserOrGroupSid="S-1-5-32-544" Action="Allow">
