@@ -52,6 +52,12 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to restrict local user rights assignments on Domain Controllers to prevent default operator groups (Print Operators, Server Operators, Backup Operators) from logging on locally, backing up/restoring files, or shutting down Domain Controllers.
 * **[REQ-DC-024 - Configure dSHeuristics](configure-dsheuristics.md)**
   Requirement to audit and configure the dSHeuristics forest-wide attribute to reach maximum Level 5 security, blocking anonymous LDAP and NSPI operations, securing adminSDHolder, and enforcing KB5008383 owner implicit rights protections.
+* **[REQ-DC-025 - Configure Security Options for Domain Controllers](configure-security-options.md)**
+  Requirement to configure baseline administrative template Security Options, disabling anonymous access to SAM/shares and enforcing credential policies.
+* **[REQ-DC-026 - Configure TCP/IP and Network Parameter Hardening for Domain Controllers](harden-network-parameters.md)**
+  Requirement to configure hardened network configurations, TCP/IP MSS parameters, disabling LLTDIO/RSPNDR drivers, Peer-to-Peer, and Windows Connect Now.
+* **[REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](configure-telemetry-privacy.md)**
+  Requirement to restrict telemetry collection, online diagnostics, advertising IDs, diagnostic tools, and cloud content integration.
 
 
 

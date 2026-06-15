@@ -16,9 +16,13 @@
     * **Registry Location**: `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters` -> `EnableCbacAndArmor` = `1` (Supported) or `3` (Fail unarmored) (REG_DWORD)
   * **Client Settings (Workstations & Member Servers)**:
     * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Kerberos`
-    * **Policy**: `Kerberos client support for claims, compound authentication and Kerberos armoring`
-    * **Setting**: `Enabled`
-    * **Registry Location**: `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters` -> `EnableCbacAndArmor` = `1` (REG_DWORD)
+    * **Policies**:
+      * `Kerberos client support for claims, compound authentication and Kerberos armoring` -> Enabled
+      * `Support device authentication using certificate` -> Enabled: Automatic
+    * **Registry Location**: `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters`
+      * `EnableCbacAndArmor` = `1` (REG_DWORD)
+      * `DevicePKInitEnabled` = `1` (REG_DWORD)
+      * `DevicePKInitBehavior` = `0` (REG_DWORD)
 
 ---
 
@@ -57,9 +61,9 @@ Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Cont
 1. In the **Group Policy Management Console**, edit the GPO applied to clients and member servers (e.g., `GPO_Hardening_Clients`).
 2. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Kerberos`
-3. Configure the following setting:
-   * **Policy**: `Kerberos client support for claims, compound authentication and Kerberos armoring`
-   * **Setting**: `Enabled`
+3. Configure the following settings:
+   * **Policy**: `Kerberos client support for claims, compound authentication and Kerberos armoring` -> **Enabled**
+   * **Policy**: `Support device authentication using certificate` -> **Enabled** (Select `Automatic` in options)
 4. Link the GPO to the appropriate OUs containing workstations and member servers.
 
 ---
@@ -84,7 +88,9 @@ if (-not (Test-Path $ClientRegPath)) {
     New-Item -Path $ClientRegPath -Force | Out-Null
 }
 Set-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -Value 1 -Type DWord
-Write-Host "Client-side Kerberos Armoring enabled successfully." -ForegroundColor Green
+Set-ItemProperty -Path $ClientRegPath -Name "DevicePKInitEnabled" -Value 1 -Type DWord
+Set-ItemProperty -Path $ClientRegPath -Name "DevicePKInitBehavior" -Value 0 -Type DWord
+Write-Host "Client-side Kerberos Armoring and Device Certificate Authentication enabled successfully." -ForegroundColor Green
 
 # Determine if the host is a Domain Controller
 $DomainRole = (Get-CimInstance -ClassName Win32_ComputerSystem).DomainRole
@@ -119,16 +125,19 @@ $KdcRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\K
 
 # 1. Audit Client-side support
 $ClientValue = Get-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -ErrorAction SilentlyContinue
+$DevicePKInit = Get-ItemProperty -Path $ClientRegPath -Name "DevicePKInitEnabled" -ErrorAction SilentlyContinue
+$DeviceBehavior = Get-ItemProperty -Path $ClientRegPath -Name "DevicePKInitBehavior" -ErrorAction SilentlyContinue
 
-if ($null -ne $ClientValue) {
-    $ClientState = $ClientValue.EnableCbacAndArmor
-    if ($ClientState -eq 1) {
-        Write-Host "[+] Client-side Kerberos Armoring is ENABLED (EnableCbacAndArmor = 1)." -ForegroundColor Green
-    } else {
-        Write-Host "[!] Client-side Kerberos Armoring is DISABLED (EnableCbacAndArmor = $($ClientState))." -ForegroundColor Red
-    }
+if ($null -ne $ClientValue -and $ClientValue.EnableCbacAndArmor -eq 1) {
+    Write-Host "[+] Client-side Kerberos Armoring is ENABLED (EnableCbacAndArmor = 1)." -ForegroundColor Green
 } else {
-    Write-Host "[!] Client-side Kerberos Armoring configuration is MISSING (Disabled by default)." -ForegroundColor Red
+    Write-Host "[!] Client-side Kerberos Armoring is DISABLED/MISSING." -ForegroundColor Red
+}
+
+if ($null -ne $DevicePKInit -and $DevicePKInit.DevicePKInitEnabled -eq 1 -and $null -ne $DeviceBehavior -and $DeviceBehavior.DevicePKInitBehavior -eq 0) {
+    Write-Host "[+] Certificate device authentication is ENABLED: Automatic." -ForegroundColor Green
+} else {
+    Write-Host "[!] Certificate device authentication is NOT compliant or not configured." -ForegroundColor Red
 }
 
 # 2. Audit KDC support if Domain Controller
@@ -156,5 +165,5 @@ if ($IsDC) {
 
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R20 (Claims, compound authentication, and Kerberos armoring)
-* **CIS Benchmark**: CIS Microsoft Windows Server 2016 Benchmark - Section 18.9.4.1 (Ensure 'KDC support for claims, compound authentication and Kerberos armoring' is configured) & Section 18.9.11.1 (Ensure 'Kerberos client support for claims, compound authentication and Kerberos armoring' is configured)
+* **CIS Benchmark**: CIS Microsoft Windows Server 2016 Benchmark - Section 18.9.4.1 (Ensure 'KDC support for claims, compound authentication and Kerberos armoring' is configured) & Section 18.9.11.1 (Ensure 'Kerberos client support for claims, compound authentication and Kerberos armoring' is configured) & Section 18.9.11.2 (Ensure 'Support device authentication using certificate' is configured)
 * **Microsoft Security Baseline Focus**: KDC and Kerberos Administrative Templates

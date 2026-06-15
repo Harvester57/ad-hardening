@@ -89,6 +89,7 @@ $CheckKeys = @{
     "AllowSwitchToAsyncInspection" = @{ Path = "$DefenderPoliciesPath\NIS"; Expected = 1 }
     "OobeEnableRtpAndSigUpdate" = @{ Path = "$DefenderPoliciesPath\Real-Time Protection"; Expected = 1 }
     "EnableDynamicSignatureDroppedEventReporting" = @{ Path = "$DefenderPoliciesPath\Reporting"; Expected = 1 }
+    "DisableGenericRePorts" = @{ Path = "$DefenderPoliciesPath\Reporting"; Expected = 1 }
     "QuickScanIncludeExclusions" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 1 }
     "DisablePackedExeScanning" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
     "ScheduleDay" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
@@ -98,6 +99,9 @@ $CheckKeys = @{
     "AVSignatureDue" = @{ Path = "$DefenderPoliciesPath\Signature Updates"; Expected = 7 }
     "Threats_ThreatSeverityDefaultAction" = @{ Path = "$DefenderPoliciesPath\Threats"; Expected = 1 }
     "UILockdown" = @{ Path = "$DefenderPoliciesPath\Windows Defender Security Center\Family options"; Expected = 1 }
+    "SpynetReporting" = @{ Path = "$DefenderPoliciesPath\Spynet"; Expected = 0 }
+    "BruteForceProtectionAggressiveness" = @{ Path = "$DefenderPoliciesPath\Remediation\Behavioral Network Blocks\Brute Force Protection"; Expected = 1 }
+    "RemoteEncryptionProtectionAggressiveness" = @{ Path = "$DefenderPoliciesPath\Remediation\Behavioral Network Blocks\Remote Encryption Protection"; Expected = 1 }
 }
 
 foreach ($KeyName in $CheckKeys.Keys) {

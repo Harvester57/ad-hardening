@@ -24,10 +24,16 @@ $RdpPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
 
 $ExpectedRdpSettings = @{
     "DisablePasswordSaving" = 1
+    "fSingleSessionPerUser" = 1
     "fDisableCdm"           = 1
+    "fDisableCcm"           = 1
+    "fDisableLpt"           = 1
+    "fDisablePNPRedir"      = 1
     "fPromptForPassword"    = 1
     "fEncryptRPCTraffic"    = 1
     "MinEncryptionLevel"    = 3
+    "MaxIdleTime"           = 900000
+    "MaxDisconnectionTime"  = 60000
 }
 
 if (Test-Path $RdpPolicyPath) {

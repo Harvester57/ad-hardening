@@ -30,6 +30,11 @@ if (Test-DwordValue -Path "HKLM:\System\CurrentControlSet\Control\Lsa" -ValueNam
     $vulnerable = $true
 }
 
+# 1b. Network access: Do not allow storage of passwords and credentials for network authentication (DisableDomainCreds = 1)
+if (Test-DwordValue -Path "HKLM:\System\CurrentControlSet\Control\Lsa" -ValueName "DisableDomainCreds" -ExpectedValue 1) {
+    $vulnerable = $true
+}
+
 # 2. Domain controller: Allow vulnerable Netlogon connections (AllowVulnerableChannel = 0)
 if (Test-DwordValue -Path "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters" -ValueName "AllowVulnerableChannel" -ExpectedValue 0) {
     $vulnerable = $true

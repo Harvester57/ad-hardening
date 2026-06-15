@@ -19,6 +19,10 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Set-MpPreference -DisablePackedExeScanning $false
     Set-MpPreference -DisableEmailScanning $false
     Set-MpPreference -DisableHeuristics $false
+    Set-MpPreference -MAPSReporting 0 -ErrorAction SilentlyContinue
+    Set-MpPreference -SubmitSamplesConsent 0 -ErrorAction SilentlyContinue
+    Set-MpPreference -BruteForceProtectionAggressiveness 1 -ErrorAction SilentlyContinue
+    Set-MpPreference -RemoteEncryptionProtectionAggressiveness 1 -ErrorAction SilentlyContinue
 } else {
     Write-Warning "Set-MpPreference cmdlet is not available."
 }
@@ -78,6 +82,25 @@ if (-not (Test-Path $RepPath)) {
     New-Item -Path $RepPath -Force | Out-Null
 }
 Set-ItemProperty -Path $RepPath -Name "EnableDynamicSignatureDroppedEventReporting" -Value 1 -Type DWord
+Set-ItemProperty -Path $RepPath -Name "DisableGenericRePorts" -Value 1 -Type DWord
+
+$SpynetPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet"
+if (-not (Test-Path $SpynetPath)) {
+    New-Item -Path $SpynetPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SpynetPath -Name "SpynetReporting" -Value 0 -Type DWord
+
+$BrutePath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+if (-not (Test-Path $BrutePath)) {
+    New-Item -Path $BrutePath -Force | Out-Null
+}
+Set-ItemProperty -Path $BrutePath -Name "BruteForceProtectionAggressiveness" -Value 1 -Type DWord
+
+$EncryptPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Remote Encryption Protection"
+if (-not (Test-Path $EncryptPath)) {
+    New-Item -Path $EncryptPath -Force | Out-Null
+}
+Set-ItemProperty -Path $EncryptPath -Name "RemoteEncryptionProtectionAggressiveness" -Value 1 -Type DWord
 
 $ScanPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
 if (-not (Test-Path $ScanPath)) {

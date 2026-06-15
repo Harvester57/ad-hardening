@@ -41,7 +41,18 @@ if (Test-Path $ServicePath) {
     Write-Host "    - WinRM Service Registry: NOT FOUND" -ForegroundColor Red
 }
 
-# 3. Audit RPC Clients
+# 3. Audit Windows Remote Shell
+$WinRsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\WinRS"
+if (Test-Path $WinRsPath) {
+    $WinRsReg = Get-ItemProperty -Path $WinRsPath -ErrorAction SilentlyContinue
+    $RsVal = $WinRsReg.AllowRemoteShellAccess
+    $RsColor = if ($RsVal -eq 0) { "Green" } else { "Red" }
+    Write-Host "    - Windows Remote Shell AllowRemoteShellAccess: $RsVal (Expected: 0)" -ForegroundColor $RsColor
+} else {
+    Write-Host "    - Windows Remote Shell Registry: NOT FOUND" -ForegroundColor Red
+}
+
+# 4. Audit RPC Clients
 $RpcPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
 $RpcVal = Get-ItemProperty -Path $RpcPath -Name "RestrictRemoteClients" -ErrorAction SilentlyContinue
 $RpcSetting = if ($RpcVal) { $RpcVal.RestrictRemoteClients } else { 0 }

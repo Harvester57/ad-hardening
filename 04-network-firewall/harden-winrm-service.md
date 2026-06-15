@@ -17,6 +17,8 @@
     * `Allow Basic authentication` -> Disabled
     * `Allow unencrypted traffic` -> Disabled
     * `Disallow WinRM from storing RunAs credentials` -> Enabled
+  * **Windows Remote Shell GPO**: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Remote Shell`
+    * `Allow Remote Shell Access` -> Disabled
   * **RPC Client Restraints GPO**: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call\Restrict Unauthenticated RPC clients` -> Enabled (Set option to **Authenticated**)
   * **Registry Location (WinRM Client)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client`
     * `AllowBasic` = `0` (REG_DWORD)
@@ -26,6 +28,8 @@
     * `AllowBasic` = `0` (REG_DWORD)
     * `AllowUnencryptedTraffic` = `0` (REG_DWORD)
     * `DisableRunAs` = `1` (REG_DWORD)
+  * **Registry Location (Windows Remote Shell)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\WinRS`
+    * `AllowRemoteShellAccess` = `0` (REG_DWORD)
   * **Registry Location (RPC Clients)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc` -> `RestrictRemoteClients` = `1` (REG_DWORD)
 
 ---
@@ -69,7 +73,13 @@ Hardening these service channels blocks the following exploit vectors:
    * **Policy**: `Allow unencrypted traffic` -> **Disabled**
    * **Policy**: `Disallow WinRM from storing RunAs credentials` -> **Enabled**
 
-#### 3. Configure RPC Client Restrictions
+#### 3. Configure Windows Remote Shell Settings
+1. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Remote Shell`
+2. Configure the settings:
+   * **Policy**: `Allow Remote Shell Access` -> **Disabled**
+
+#### 4. Configure RPC Client Restrictions
 1. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call`
 2. Double-click **Restrict Unauthenticated RPC clients**.
@@ -111,7 +121,15 @@ Set-ItemProperty -Path $ServicePath -Name "AllowUnencryptedTraffic" -Value 0 -Ty
 Set-ItemProperty -Path $ServicePath -Name "DisableRunAs" -Value 1 -Type DWord -ErrorAction Stop
 Write-Host "[+] WinRM Service parameters hardened." -ForegroundColor Green
 
-# 3. RPC Client Restrictions
+# 3. Windows Remote Shell Hardening
+$WinRsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\WinRS"
+if (-not (Test-Path $WinRsPath)) {
+    New-Item -Path $WinRsPath -Force | Out-Null
+}
+Set-ItemProperty -Path $WinRsPath -Name "AllowRemoteShellAccess" -Value 0 -Type DWord -ErrorAction Stop
+Write-Host "[+] Windows Remote Shell access disabled." -ForegroundColor Green
+
+# 4. RPC Client Restrictions
 $RpcPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
 if (-not (Test-Path $RpcPath)) {
     New-Item -Path $RpcPath -Force | Out-Null
@@ -167,7 +185,18 @@ if (Test-Path $ServicePath) {
     Write-Host "    - WinRM Service Registry: NOT FOUND" -ForegroundColor Red
 }
 
-# 3. Audit RPC Clients
+# 3. Audit Windows Remote Shell
+$WinRsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\WinRS"
+if (Test-Path $WinRsPath) {
+    $WinRsReg = Get-ItemProperty -Path $WinRsPath -ErrorAction SilentlyContinue
+    $RsVal = $WinRsReg.AllowRemoteShellAccess
+    $RsColor = if ($RsVal -eq 0) { "Green" } else { "Red" }
+    Write-Host "    - Windows Remote Shell AllowRemoteShellAccess: $RsVal (Expected: 0)" -ForegroundColor $RsColor
+} else {
+    Write-Host "    - Windows Remote Shell Registry: NOT FOUND" -ForegroundColor Red
+}
+
+# 4. Audit RPC Clients
 $RpcPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
 $RpcVal = Get-ItemProperty -Path $RpcPath -Name "RestrictRemoteClients" -ErrorAction SilentlyContinue
 $RpcSetting = if ($RpcVal) { $RpcVal.RestrictRemoteClients } else { 0 }

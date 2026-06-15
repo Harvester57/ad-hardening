@@ -12,6 +12,7 @@
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
   * **Registry Locations**:
     * `HKLM\System\CurrentControlSet\Control\Lsa\SubmitQueue`
+    * `HKLM\System\CurrentControlSet\Control\Lsa\DisableDomainCreds`
     * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\AllowVulnerableChannel`
     * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\RefusePasswordChange`
     * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange`
@@ -32,6 +33,7 @@ Specifically, the following settings are configured to protect the Tier 0 admini
 3. **Machine Password Change (`RefusePasswordChange` / `DisablePasswordChange` / `MaximumPasswordAge`)**: Ensuring domain members rotate machine account passwords at regular intervals prevents offline account hijacking while forcing the DC to process password changes correctly.
 4. **Anonymous Named Pipe Restricting (`NullSessionPipes`)**: Setting NullSessionPipes to a minimum required list prevents anonymous callers from enumerating user SIDs or directories on Domain Controllers.
 5. **Remote Registry Restrictions (`winreg` Exact Paths and Paths)**: Restricting remote WinReg operations prevents information disclosure and configuration scanning.
+6. **Network Credentials Storage Restrictions (`DisableDomainCreds`)**: Blocking the local storage of credentials or passwords for network authentication prevents local security databases from caching reusable network hashes, hindering lateral movement.
 
 ---
 
@@ -59,6 +61,7 @@ Specifically, the following settings are configured to protect the Tier 0 admini
 | **Domain member: Disable machine account password changes** | `Disabled` |
 | **Domain member: Maximum machine account password age** | `30` |
 | **Domain member: Require strong (Windows 2000 or later) session key** | `Enabled` |
+| **Network access: Do not allow storage of passwords and credentials for network authentication** | `Enabled` |
 | **Network access: Named Pipes that can be accessed anonymously** | `netlogon`, `samr`, `lsarpc` |
 | **Network access: Remotely accessible registry paths** | `System\CurrentControlSet\Control\ProductOptions`, `System\CurrentControlSet\Control\Server Applications`, `Software\Microsoft\Windows NT\CurrentVersion` |
 | **Network access: Remotely accessible registry paths and sub-paths** | `System\CurrentControlSet\Control\Print\Printers`, `System\CurrentControlSet\Services\Eventlog`, `Software\Microsoft\OLAP Server`, `Software\Microsoft\Windows NT\CurrentVersion\Print`, `Software\Microsoft\Windows NT\CurrentVersion\Windows`, `System\CurrentControlSet\Control\ContentIndex`, `System\CurrentControlSet\Control\Terminal Server`, `System\CurrentControlSet\Control\Terminal Server\UserConfig`, `System\CurrentControlSet\Control\Terminal Server\DefaultUserConfiguration`, `Software\Microsoft\Windows NT\CurrentVersion\Perflib`, `System\CurrentControlSet\Services\SysmonLog` |
@@ -86,6 +89,10 @@ if (-not (Test-Path $LsaPath)) {
 }
 Set-ItemProperty -Path $LsaPath -Name "SubmitQueue" -Value 0 -Type DWord -Force
 Write-Host "    Domain controller: Allow server operators to schedule tasks set to Disabled." -ForegroundColor Green
+
+# 1b. Network access: Do not allow storage of passwords and credentials for network authentication = Enabled (DisableDomainCreds = 1)
+Set-ItemProperty -Path $LsaPath -Name "DisableDomainCreds" -Value 1 -Type DWord -Force
+Write-Host "    Network access: Do not allow storage of credentials set to Enabled." -ForegroundColor Green
 
 # 2. Domain controller: Allow vulnerable Netlogon secure channel connections = Not Configured / Explicitly Blocked
 $NetlogonParamsPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
@@ -204,6 +211,11 @@ function Test-DwordValue {
 
 # 1. Domain controller: Allow server operators to schedule tasks (SubmitQueue = 0)
 if (Test-DwordValue -Path "HKLM:\System\CurrentControlSet\Control\Lsa" -ValueName "SubmitQueue" -ExpectedValue 0) {
+    $vulnerable = $true
+}
+
+# 1b. Network access: Do not allow storage of passwords and credentials for network authentication (DisableDomainCreds = 1)
+if (Test-DwordValue -Path "HKLM:\System\CurrentControlSet\Control\Lsa" -ValueName "DisableDomainCreds" -ExpectedValue 1) {
     $vulnerable = $true
 }
 
@@ -331,5 +343,5 @@ if ($vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Server 2016 Benchmark v2.0.0 - Section 2.3.5.1, Section 2.3.5.2, Section 2.3.5.5, Section 2.3.6.4, Section 2.3.6.5, Section 2.3.6.6, Section 2.3.10.6, Section 2.3.10.8, Section 2.3.10.9
+* **CIS Benchmark**: CIS Microsoft Windows Server 2016 Benchmark v2.0.0 - Section 2.3.5.1, Section 2.3.5.2, Section 2.3.5.5, Section 2.3.6.4, Section 2.3.6.5, Section 2.3.6.6, Section 2.3.10.4, Section 2.3.10.6, Section 2.3.10.8, Section 2.3.10.9
 * **ANSSI AD Hardening Guide**: Section on Active Directory configuration and secure channels

@@ -23,7 +23,15 @@ Set-ItemProperty -Path $ServicePath -Name "AllowUnencryptedTraffic" -Value 0 -Ty
 Set-ItemProperty -Path $ServicePath -Name "DisableRunAs" -Value 1 -Type DWord -ErrorAction Stop
 Write-Host "[+] WinRM Service parameters hardened." -ForegroundColor Green
 
-# 3. RPC Client Restrictions
+# 3. Windows Remote Shell Hardening
+$WinRsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\WinRS"
+if (-not (Test-Path $WinRsPath)) {
+    New-Item -Path $WinRsPath -Force | Out-Null
+}
+Set-ItemProperty -Path $WinRsPath -Name "AllowRemoteShellAccess" -Value 0 -Type DWord -ErrorAction Stop
+Write-Host "[+] Windows Remote Shell access disabled." -ForegroundColor Green
+
+# 4. RPC Client Restrictions
 $RpcPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
 if (-not (Test-Path $RpcPath)) {
     New-Item -Path $RpcPath -Force | Out-Null

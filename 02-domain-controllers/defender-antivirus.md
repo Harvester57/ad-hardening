@@ -19,6 +19,14 @@
   * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
   * HKLM\SOFTWARE\Microsoft\AMSI
     * FeatureBits = 2 (REG_DWORD)
+  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet
+    * SpynetReporting = 0 (REG_DWORD)
+  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Reporting
+    * DisableGenericRePorts = 1 (REG_DWORD)
+  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection
+    * BruteForceProtectionAggressiveness = 1 (REG_DWORD)
+  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Remote Encryption Protection
+    * RemoteEncryptionProtectionAggressiveness = 1 (REG_DWORD)
 
 ---
 
@@ -161,23 +169,75 @@ This control establishes a server-optimized defense posture:
     * **Policy**: `Protect Windows Security settings from tampering`
     * **Setting**: `Enabled` (Select **Block** or **On** depending on ADMX version)
 29. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MAPS`
+30. Configure the setting:
+    * **Policy**: `Join Microsoft MAPS`
+    * **Setting**: `Disabled`
+31. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Reporting`
+32. Configure the setting:
+    * **Policy**: `Configure Watson events`
+    * **Setting**: `Disabled`
+33. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute-Force Protection`
+34. Configure the setting:
+    * **Policy**: `Configure Brute-Force Protection aggressiveness`
+    * **Setting**: `Enabled` (Select **Medium** in options)
+35. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Remote Encryption Protection`
+36. Configure the setting:
+    * **Policy**: `Configure how aggressively Remote Encryption Protection blocks threats`
+    * **Setting**: `Enabled` (Select **Medium** in options)
+37. Navigate to:
     `Computer Configuration\Preferences\Windows Settings\Environment`
-30. Right-click **Environment**, select **New -> Environment Variable**.
-31. Configure the following properties:
+38. Right-click **Environment**, select **New -> Environment Variable**.
+39. Configure the following properties:
     * **Action**: `Update`
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
     * **Value**: `1`
-32. Navigate to:
+40. Navigate to:
     `Computer Configuration\Preferences\Windows Settings\Registry`
-33. Right-click **Registry**, select **New** -> **Registry Item**.
-34. Configure:
+41. Right-click **Registry**, select **New** -> **Registry Item**.
+42. Configure:
     * **Action**: `Update`
     * **Hive**: `HKEY_LOCAL_MACHINE`
     * **Key Path**: `SOFTWARE\Microsoft\AMSI`
     * **Value name**: `FeatureBits`
     * **Value type**: `REG_DWORD`
     * **Value data**: `2` (Decimal)
+43. Right-click **Registry**, select **New** -> **Registry Item**.
+44. Configure:
+    * **Action**: `Update`
+    * **Hive**: `HKEY_LOCAL_MACHINE`
+    * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows Defender\Spynet`
+    * **Value name**: `SpynetReporting`
+    * **Value type**: `REG_DWORD`
+    * **Value data**: `0` (Decimal)
+45. Right-click **Registry**, select **New** -> **Registry Item**.
+46. Configure:
+    * **Action**: `Update`
+    * **Hive**: `HKEY_LOCAL_MACHINE`
+    * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows Defender\Reporting`
+    * **Value name**: `DisableGenericRePorts`
+    * **Value type**: `REG_DWORD`
+    * **Value data**: `1` (Decimal)
+47. Right-click **Registry**, select **New** -> **Registry Item**.
+48. Configure:
+    * **Action**: `Update`
+    * **Hive**: `HKEY_LOCAL_MACHINE`
+    * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection`
+    * **Value name**: `BruteForceProtectionAggressiveness`
+    * **Value type**: `REG_DWORD`
+    * **Value data**: `1` (Decimal)
+49. Right-click **Registry**, select **New** -> **Registry Item**.
+50. Configure:
+    * **Action**: `Update`
+    * **Hive**: `HKEY_LOCAL_MACHINE`
+    * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Remote Encryption Protection`
+    * **Value name**: `RemoteEncryptionProtectionAggressiveness`
+    * **Value type**: `REG_DWORD`
+    * **Value data**: `1` (Decimal)
 
 ---
 
@@ -209,6 +269,10 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Set-MpPreference -DisablePackedExeScanning $false
     Set-MpPreference -DisableEmailScanning $false
     Set-MpPreference -DisableHeuristics $false
+    Set-MpPreference -MAPSReporting 0 -ErrorAction SilentlyContinue
+    Set-MpPreference -SubmitSamplesConsent 0 -ErrorAction SilentlyContinue
+    Set-MpPreference -BruteForceProtectionAggressiveness 1 -ErrorAction SilentlyContinue
+    Set-MpPreference -RemoteEncryptionProtectionAggressiveness 1 -ErrorAction SilentlyContinue
 } else {
     Write-Warning "Set-MpPreference cmdlet is not available."
 }
@@ -268,6 +332,25 @@ if (-not (Test-Path $RepPath)) {
     New-Item -Path $RepPath -Force | Out-Null
 }
 Set-ItemProperty -Path $RepPath -Name "EnableDynamicSignatureDroppedEventReporting" -Value 1 -Type DWord
+Set-ItemProperty -Path $RepPath -Name "DisableGenericRePorts" -Value 1 -Type DWord
+
+$SpynetPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet"
+if (-not (Test-Path $SpynetPath)) {
+    New-Item -Path $SpynetPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SpynetPath -Name "SpynetReporting" -Value 0 -Type DWord
+
+$BrutePath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+if (-not (Test-Path $BrutePath)) {
+    New-Item -Path $BrutePath -Force | Out-Null
+}
+Set-ItemProperty -Path $BrutePath -Name "BruteForceProtectionAggressiveness" -Value 1 -Type DWord
+
+$EncryptPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Remote Encryption Protection"
+if (-not (Test-Path $EncryptPath)) {
+    New-Item -Path $EncryptPath -Force | Out-Null
+}
+Set-ItemProperty -Path $EncryptPath -Name "RemoteEncryptionProtectionAggressiveness" -Value 1 -Type DWord
 
 $ScanPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
 if (-not (Test-Path $ScanPath)) {
@@ -456,6 +539,7 @@ $CheckKeys = @{
     "AllowSwitchToAsyncInspection" = @{ Path = "$DefenderPoliciesPath\NIS"; Expected = 1 }
     "OobeEnableRtpAndSigUpdate" = @{ Path = "$DefenderPoliciesPath\Real-Time Protection"; Expected = 1 }
     "EnableDynamicSignatureDroppedEventReporting" = @{ Path = "$DefenderPoliciesPath\Reporting"; Expected = 1 }
+    "DisableGenericRePorts" = @{ Path = "$DefenderPoliciesPath\Reporting"; Expected = 1 }
     "QuickScanIncludeExclusions" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 1 }
     "DisablePackedExeScanning" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
     "ScheduleDay" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
@@ -465,6 +549,9 @@ $CheckKeys = @{
     "AVSignatureDue" = @{ Path = "$DefenderPoliciesPath\Signature Updates"; Expected = 7 }
     "Threats_ThreatSeverityDefaultAction" = @{ Path = "$DefenderPoliciesPath\Threats"; Expected = 1 }
     "UILockdown" = @{ Path = "$DefenderPoliciesPath\Windows Defender Security Center\Family options"; Expected = 1 }
+    "SpynetReporting" = @{ Path = "$DefenderPoliciesPath\Spynet"; Expected = 0 }
+    "BruteForceProtectionAggressiveness" = @{ Path = "$DefenderPoliciesPath\Remediation\Behavioral Network Blocks\Brute Force Protection"; Expected = 1 }
+    "RemoteEncryptionProtectionAggressiveness" = @{ Path = "$DefenderPoliciesPath\Remediation\Behavioral Network Blocks\Remote Encryption Protection"; Expected = 1 }
 }
 
 foreach ($KeyName in $CheckKeys.Keys) {

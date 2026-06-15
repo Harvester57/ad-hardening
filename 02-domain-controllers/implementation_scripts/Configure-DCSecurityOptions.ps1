@@ -11,6 +11,10 @@ if (-not (Test-Path $LsaPath)) {
 Set-ItemProperty -Path $LsaPath -Name "SubmitQueue" -Value 0 -Type DWord -Force
 Write-Host "    Domain controller: Allow server operators to schedule tasks set to Disabled." -ForegroundColor Green
 
+# 1b. Network access: Do not allow storage of passwords and credentials for network authentication = Enabled (DisableDomainCreds = 1)
+Set-ItemProperty -Path $LsaPath -Name "DisableDomainCreds" -Value 1 -Type DWord -Force
+Write-Host "    Network access: Do not allow storage of credentials set to Enabled." -ForegroundColor Green
+
 # 2. Domain controller: Allow vulnerable Netlogon secure channel connections = Not Configured / Explicitly Blocked
 $NetlogonParamsPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
 if (-not (Test-Path $NetlogonParamsPath)) {

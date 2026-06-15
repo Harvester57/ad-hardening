@@ -10,16 +10,19 @@ $KdcRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\K
 
 # 1. Audit Client-side support
 $ClientValue = Get-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -ErrorAction SilentlyContinue
+$DevicePKInit = Get-ItemProperty -Path $ClientRegPath -Name "DevicePKInitEnabled" -ErrorAction SilentlyContinue
+$DeviceBehavior = Get-ItemProperty -Path $ClientRegPath -Name "DevicePKInitBehavior" -ErrorAction SilentlyContinue
 
-if ($null -ne $ClientValue) {
-    $ClientState = $ClientValue.EnableCbacAndArmor
-    if ($ClientState -eq 1) {
-        Write-Host "[+] Client-side Kerberos Armoring is ENABLED (EnableCbacAndArmor = 1)." -ForegroundColor Green
-    } else {
-        Write-Host "[!] Client-side Kerberos Armoring is DISABLED (EnableCbacAndArmor = $($ClientState))." -ForegroundColor Red
-    }
+if ($null -ne $ClientValue -and $ClientValue.EnableCbacAndArmor -eq 1) {
+    Write-Host "[+] Client-side Kerberos Armoring is ENABLED (EnableCbacAndArmor = 1)." -ForegroundColor Green
 } else {
-    Write-Host "[!] Client-side Kerberos Armoring configuration is MISSING (Disabled by default)." -ForegroundColor Red
+    Write-Host "[!] Client-side Kerberos Armoring is DISABLED/MISSING." -ForegroundColor Red
+}
+
+if ($null -ne $DevicePKInit -and $DevicePKInit.DevicePKInitEnabled -eq 1 -and $null -ne $DeviceBehavior -and $DeviceBehavior.DevicePKInitBehavior -eq 0) {
+    Write-Host "[+] Certificate device authentication is ENABLED: Automatic." -ForegroundColor Green
+} else {
+    Write-Host "[!] Certificate device authentication is NOT compliant or not configured." -ForegroundColor Red
 }
 
 # 2. Audit KDC support if Domain Controller

@@ -12,17 +12,29 @@
   * **Client Configuration (GPO)**: `Computer Configuration\Policies\Administrative Templates\System\Credentials Delegation\Restrict delegation of credentials to remote servers` -> Enabled (Require Restricted Admin)
   * **RDP Session Security GPO**:
     * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Connection Client\Do not allow passwords to be saved` -> Enabled
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Connections\Restrict Remote Desktop Services users to a single Remote Desktop Services session` -> Enabled
     * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Device and Resource Redirection\Do not allow drive redirection` -> Enabled
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Device and Resource Redirection\Do not allow COM port redirection` -> Enabled
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Device and Resource Redirection\Do not allow LPT port redirection` -> Enabled
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Device and Resource Redirection\Do not allow supported Plug and Play device redirection` -> Enabled
     * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Security\Always prompt for password upon connection` -> Enabled
     * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Security\Require secure RPC communication` -> Enabled
     * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Security\Set client connection encryption level` -> Enabled (Encryption Level: High Level)
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Session Time Limits\Set time limit for active but idle Remote Desktop Services sessions` -> Enabled: 15 minutes or less, but not Never (0)
+    * `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Session Time Limits\Set time limit for disconnected sessions` -> Enabled: 1 minute
   * **Server Configuration (Registry)**:
     * `HKLM\System\CurrentControlSet\Control\Lsa\DisableRestrictedAdmin` -> `0` (DWORD)
     * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `DisablePasswordSaving` = `1` (DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `fSingleSessionPerUser` = `1` (DWORD)
     * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `fDisableCdm` = `1` (DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `fDisableCcm` = `1` (DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `fDisableLpt` = `1` (DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `fDisablePNPRedir` = `1` (DWORD)
     * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `fPromptForPassword` = `1` (DWORD)
     * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `fEncryptRPCTraffic` = `1` (DWORD)
     * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `MinEncryptionLevel` = `3` (DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `MaxIdleTime` = `900000` (DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` -> `MaxDisconnectionTime` = `60000` (DWORD)
 
 ---
 
@@ -72,22 +84,31 @@ Ensure that all target hosts are configured to permit Restricted Admin connectio
 7. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Connection Client`
 8. Configure the setting:
-   * **Policy**: `Do not allow passwords to be saved`
-   * **Setting**: `Enabled`
+    * **Policy**: `Do not allow passwords to be saved`
+    * **Setting**: `Enabled`
+8b. Navigate to:
+   `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Connections`
+8c. Configure the setting:
+    * **Policy**: `Restrict Remote Desktop Services users to a single Remote Desktop Services session`
+    * **Setting**: `Enabled`
 9. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Device and Resource Redirection`
-10. Configure the setting:
-    * **Policy**: `Do not allow drive redirection`
-    * **Setting**: `Enabled`
+10. Configure the settings:
+    * **Policy**: `Do not allow drive redirection` -> **Enabled**
+    * **Policy**: `Do not allow COM port redirection` -> **Enabled**
+    * **Policy**: `Do not allow LPT port redirection` -> **Enabled**
+    * **Policy**: `Do not allow supported Plug and Play device redirection` -> **Enabled**
 11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Security`
 12. Configure the following settings:
-    * **Policy**: `Always prompt for password upon connection`
-    * **Setting**: `Enabled`
-    * **Policy**: `Require secure RPC communication`
-    * **Setting**: `Enabled`
-    * **Policy**: `Set client connection encryption level`
-    * **Setting**: `Enabled` (Select `High Level` in the options dropdown)
+    * **Policy**: `Always prompt for password upon connection` -> **Enabled**
+    * **Policy**: `Require secure RPC communication` -> **Enabled**
+    * **Policy**: `Set client connection encryption level` -> **Enabled** (Select `High Level` in the options dropdown)
+12b. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Session Time Limits`
+12c. Configure the following settings:
+    * **Policy**: `Set time limit for active but idle Remote Desktop Services sessions` -> **Enabled** (Select `15 minutes` in the options dropdown)
+    * **Policy**: `Set time limit for disconnected sessions` -> **Enabled** (Select `1 minute` in the options dropdown)
 13. Click **OK** and link the GPO to your Domain Controllers and Member Servers OUs.
 
 ---
@@ -124,10 +145,16 @@ if (-not (Test-Path $RdpPolicyPath)) {
 
 $RdpSettings = @{
     "DisablePasswordSaving" = 1
+    "fSingleSessionPerUser" = 1
     "fDisableCdm"           = 1
+    "fDisableCcm"           = 1
+    "fDisableLpt"           = 1
+    "fDisablePNPRedir"      = 1
     "fPromptForPassword"    = 1
     "fEncryptRPCTraffic"    = 1
     "MinEncryptionLevel"    = 3
+    "MaxIdleTime"           = 900000
+    "MaxDisconnectionTime"  = 60000
 }
 
 foreach ($Setting in $RdpSettings.Keys) {
@@ -166,10 +193,16 @@ $RdpPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
 
 $ExpectedRdpSettings = @{
     "DisablePasswordSaving" = 1
+    "fSingleSessionPerUser" = 1
     "fDisableCdm"           = 1
+    "fDisableCcm"           = 1
+    "fDisableLpt"           = 1
+    "fDisablePNPRedir"      = 1
     "fPromptForPassword"    = 1
     "fEncryptRPCTraffic"    = 1
     "MinEncryptionLevel"    = 3
+    "MaxIdleTime"           = 900000
+    "MaxDisconnectionTime"  = 60000
 }
 
 if (Test-Path $RdpPolicyPath) {
@@ -196,4 +229,4 @@ mstsc.exe /RestrictedAdmin
 * **ANSSI AD Hardening Guide**: Section 4.7, Section 4.9 (Connexions distantes), Annexe E
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 10.g (Page 40), Section 5.1 (Page 104)
 * **Microsoft Security Guidance**: Mitigating Pass-the-Hash Attacks - Section 4.3 (Restricted Admin RDP)
-* **CIS Benchmark**: Section 18.4 (Credentials Delegation Configuration)
+* **CIS Benchmark**: Section 18.4 (Credentials Delegation Configuration), Section 18.10.57.3.2.1, Section 18.10.57.3.3.1, Section 18.10.57.3.3.3, Section 18.10.57.3.3.4, Section 18.10.57.3.10.1, Section 18.10.57.3.10.2

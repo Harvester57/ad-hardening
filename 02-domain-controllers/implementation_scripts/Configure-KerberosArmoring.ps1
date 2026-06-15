@@ -11,7 +11,9 @@ if (-not (Test-Path $ClientRegPath)) {
     New-Item -Path $ClientRegPath -Force | Out-Null
 }
 Set-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -Value 1 -Type DWord
-Write-Host "Client-side Kerberos Armoring enabled successfully." -ForegroundColor Green
+Set-ItemProperty -Path $ClientRegPath -Name "DevicePKInitEnabled" -Value 1 -Type DWord
+Set-ItemProperty -Path $ClientRegPath -Name "DevicePKInitBehavior" -Value 0 -Type DWord
+Write-Host "Client-side Kerberos Armoring and Device Certificate Authentication enabled successfully." -ForegroundColor Green
 
 # Determine if the host is a Domain Controller
 $DomainRole = (Get-CimInstance -ClassName Win32_ComputerSystem).DomainRole

@@ -38,6 +38,8 @@
     * [REQ-DC-023 - Configure User Rights Assignments for Domain Controllers](02-domain-controllers/configure-user-rights-assignments.md)
     * [REQ-DC-024 - Configure dSHeuristics](02-domain-controllers/configure-dsheuristics.md)
     * [REQ-DC-025 - Configure Security Options for Domain Controllers](02-domain-controllers/configure-security-options.md)
+    * [REQ-DC-026 - Configure TCP/IP and Network Parameter Hardening for Domain Controllers](02-domain-controllers/harden-network-parameters.md)
+    * [REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](02-domain-controllers/configure-telemetry-privacy.md)
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)
