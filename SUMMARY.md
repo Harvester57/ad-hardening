@@ -72,6 +72,9 @@
     * [REQ-NET-008 - Configure Firewall Logging and Operational Settings](04-network-firewall/configure-firewall-logging.md)
     * [REQ-NET-009 - Configure Hardened UNC Paths and LDAP Client Signing](04-network-firewall/configure-hardened-unc-paths.md)
     * [REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](04-network-firewall/harden-winrm-service.md)
+    * [REQ-NET-011 - Configure WMI Static Port](04-network-firewall/configure-wmi-static-port.md)
+    * [REQ-NET-012 - Configure RPC Filters for Named Pipes](04-network-firewall/configure-rpc-named-pipe-filters.md)
+    * [REQ-NET-013 - Block Management Traffic Between Domain Controllers](04-network-firewall/block-intra-dc-management.md)
 ## Module 5: Logging, Monitoring & SIEM
 * [Module 5: Logging, Monitoring & SIEM](05-logging-monitoring/README.md)
     * [REQ-LOG-001 - Configure Advanced Security Audit Policies](05-logging-monitoring/configure-advanced-audit-policies.md)

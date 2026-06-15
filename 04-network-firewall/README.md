@@ -8,7 +8,7 @@ This directory contains network security architectures, active directory port co
    Establishes the minimum permitted ports for Domain Controllers, Member Servers, and Client Workstations, ensuring perimeter and local firewalls block unauthorized inbound traffic.
 
 2. **[REQ-NET-002 - Restrict RPC Dynamic Ports](restrict-rpc-dynamic-ports.md)**
-   Restricts default dynamic RPC ports from a massive range (TCP 49152-65535) to a predictable restricted range (e.g., TCP 50000-50100) or static ports to simplify firewall policies.
+   Binds core directory services (NTDS, Netlogon, DFSR) to specific static ports to allow precise network firewall controls while maintaining the system-wide dynamic RPC port range at default values to prevent socket exhaustion.
 
 3. **[REQ-NET-003 - Configure Workstation and Server Isolation](configure-workstation-isolation.md)**
    Configures local firewall rules on workstations and servers to block inbound SMB, RPC, RDP, and WinRM from peer systems to prevent lateral movement.
@@ -33,4 +33,14 @@ This directory contains network security architectures, active directory port co
 
 10. **[REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](harden-winrm-service.md)**
     Disables Basic and Digest authentication, forces encrypted WinRM communications, restricts WinRM credential caching, and blocks anonymous RPC connections.
+
+11. **[REQ-NET-011 - Configure WMI Static Port](configure-wmi-static-port.md)**
+    Binds the WMI service to static TCP port 24158 and isolates it to a standalone host process with packet privacy enabled to limit remote lateral movement exposure.
+
+12. **[REQ-NET-012 - Configure RPC Filters for Named Pipes](configure-rpc-named-pipe-filters.md)**
+    Enforces Windows Firewall RPC Filters to block administrative queries and code execution over SMB named pipes (e.g. SCM, Task Scheduler) from unauthorized subnets.
+
+13. **[REQ-NET-013 - Block Management Traffic Between Domain Controllers](block-intra-dc-management.md)**
+    Excludes Domain Controller IP addresses from allowed management rules (RDP, WinRM, WMI, ADWS) to prevent lateral movement between Tier 0 directory servers.
+
 
