@@ -71,20 +71,9 @@ Administrators must use distinct accounts depending on the tier they are managin
 
 Managing a tiered environment requires strict adherence to operational routing paths.
 
-### Management Routing: PAW to Jump Host to DC
-Administrators must never connect directly to Domain Controllers from standard workstations. All administrative access must follow this path:
+### General architecture
 
-```text
-[Daily Workstation] -> Email, web browsing, documentation (No admin tasks allowed)
-       |
-[Physical PAW] -> Tier 0 management host (No internet access, strict AppLocker)
-       |  (RDP / WinRM over secure subnet)
-       v
-[Tier 0 Jump Host] -> Isolated server used as a proxy console
-       |  (Restricted RDP / RSAT tools)
-       v
-[Domain Controller] -> Tier 0 database server
-```
+![Active Directory Administrative Tiering Model](images/ad-tiering-model.png)
 
 ### Credentials Lifecycle & Hygiene
 1. **Interactive Logons**: Tier 0 administrator credentials (`a0-` prefix) must only be entered interactively on PAWs, Tier 0 Jump Hosts, and Domain Controllers. They must never be used in `RunAs` contexts on Tier 1 or Tier 2 machines.
