@@ -69,6 +69,31 @@ When adding or modifying a technical control:
 
 ---
 
+## Desired State Configuration (DSC) Policy Integration
+
+When adding, removing, or changing technical controls in this repository, you must update the PowerShell DSC configuration to keep the audit framework synchronized.
+
+To align the DSC policy:
+1. Open the primary DSC configuration file: `dsc/ADHardeningAudit.ps1`.
+2. Update the appropriate script array:
+   * If a control is common (applies to Domain Controllers, PAWs, and Endpoints), add the script's module-relative path to the `$commonScripts` array.
+   * If a control is profile-specific, add the script's module-relative path to the `$profileScripts` array under the corresponding profile condition:
+     * `DomainController` profile: For scripts targeting Domain Controllers or Member Servers.
+     * `PAW` profile: For scripts targeting Privileged Access Workstations.
+     * `Endpoint` profile: For scripts targeting standard client workstations.
+3. Ensure the script paths are sorted alphabetically within their respective array sections.
+4. Verify compilation by running the deployment script with the `-CompileOnly` flag for each profile to confirm that the configuration MOF files compile without errors:
+
+```powershell
+cd dsc
+.\Deploy-ADHardeningAudit.ps1 -Profile DomainController -CompileOnly
+.\Deploy-ADHardeningAudit.ps1 -Profile PAW -CompileOnly
+.\Deploy-ADHardeningAudit.ps1 -Profile Endpoint -CompileOnly
+cd ..
+```
+
+---
+
 ## Validation Before Committing
 
 This repository contains a programmatic validator: **[Verify-ADHardeningDocs.ps1](Verify-ADHardeningDocs.ps1)**.
