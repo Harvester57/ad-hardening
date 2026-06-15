@@ -35,96 +35,146 @@ Administrative templates govern system-wide capabilities, behaviors, and diagnos
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-Configure the administrative template settings in GPMC according to the paths and values detailed below:
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on an administrative workstation.
+2. Edit or create a GPO linked to endpoints (e.g., `GPO_Hardening_Endpoints_SystemTemplates`).
+3. Configure the following policies grouped by their GPO nodes:
 
-| Recommendation | Title | Registry Path | Value Name | Value Type | Expected Value |
-| --- | --- | --- | --- | --- | --- |
-| 18.4.2 | (L1) Ensure 'Configure SMB v1 client driver' is set to 'Enabled: Disable driver (recommended)' | `HKLM\SYSTEM\CurrentControlSet\Services\mrxsmb10` | `Start` | `REG_DWORD` | 0x00000004 (4) |
-| 18.4.3 | (L1) Ensure 'Configure SMB v1 server' is set to 'Disabled' | `HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters` | `SMB1` | `REG_DWORD` | 0x00000000 (0) |
-| 18.4.7 | (L1) Ensure 'NetBT NodeType configuration' is set to 'Enabled: P-node (recommended)' | `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters` | `NodeType` | `REG_DWORD` | 0x00000002 (2) |
-| 18.5.1 | (L1) Ensure 'MSS: (AutoAdminLogon) Enable Automatic Logon' is set to 'Disabled' | `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon` | `AutoAdminLogon` | `REG_SZ` | "0" |
-| 18.5.2 | (L1) Ensure 'MSS: (DisableIPSourceRouting IPv6) IP source routing protection level' is set to 'Enabled: Highest protection, source routing is completely disabled' | `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters` | `DisableIPSourceRouting` | `REG_DWORD` | 0x00000002 (2) |
-| 18.5.3 | (L1) Ensure 'MSS: (DisableIPSourceRouting) IP source routing protection level' is set to 'Enabled: Highest protection, source routing is completely disabled' | `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters` | `DisableIPSourceRouting` | `REG_DWORD` | 0x00000002 (2) |
-| 18.5.5 | (L1) Ensure 'MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes' is set to 'Disabled' | `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters` | `EnableICMPRedirect` | `REG_DWORD` | 0x00000000 (0) |
-| 18.5.7 | (L1) Ensure 'MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers' is set to 'Enabled' | `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters` | `NoNameReleaseOnDemand` | `REG_DWORD` | 0x00000001 (1) |
-| 18.5.9 | (L1) Ensure 'MSS: (SafeDllSearchMode) Enable Safe DLL search mode' is set to 'Enabled' | `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager` | `SafeDllSearchMode` | `REG_DWORD` | 0x00000001 (1) |
-| 18.5.10 | (L1) Ensure 'MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires' is set to 'Enabled: 5 or fewer seconds' | `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon` | `ScreenSaverGracePeriod` | `REG_DWORD` | 0x00000005 (5) |
-| 18.5.13 | (L1) Ensure 'MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning' is set to 'Enabled: 90% or less' | `HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security` | `WarningLevel` | `REG_DWORD` | 0x0000005a (90) |
-| 18.9.7.2 | (L1) Ensure 'Prevent device metadata retrieval from the Internet' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata` | `PreventDeviceMetadataFromNetwork` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.19.2 | (L1) Ensure 'Configure registry policy processing: Do not apply during periodic background processing' is set to 'Enabled: FALSE' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}` | `NoBackgroundPolicy` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.19.3 | (L1) Ensure 'Configure registry policy processing: Process even if the Group Policy objects have not changed' is set to 'Enabled: TRUE' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}` | `NoGPOListChanges` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.19.4 | (L1) Ensure 'Configure security policy processing: Do not apply during periodic background processing' is set to 'Enabled: FALSE' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}` | `NoBackgroundPolicy` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.19.5 | (L1) Ensure 'Configure security policy processing: Process even if the Group Policy objects have not changed' is set to 'Enabled: TRUE' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}` | `NoGPOListChanges` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.19.6 | (L1) Ensure 'Continue experiences on this device' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `EnableCdp` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.20.1.2 | (L1) Ensure 'Turn off downloading of print drivers over HTTP' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers` | `DisableWebPnPDownload` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.20.1.6 | (L1) Ensure 'Turn off Internet download for Web publishing and online ordering wizards' is set to 'Enabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer` | `NoWebServices` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.26.1 | (L1) Ensure 'Allow Custom SSPs and APs to be loaded into LSASS' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `AllowCustomSSPsAPs` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.28.1 | (L1) Ensure 'Block user from showing account details on sign-in' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `BlockUserFromShowingAccountDetailsOnSignin` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.28.2 | (L1) Ensure 'Do not display network selection UI' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `DontDisplayNetworkSelectionUI` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.28.3 | (L1) Ensure 'Do not enumerate connected users on domain-joined computers' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `DontEnumerateConnectedUsers` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.28.5 | (L1) Ensure 'Turn off app notifications on the lock screen' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `DisableLockScreenAppNotifications` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.28.6 | (L1) Ensure 'Turn off picture password sign-in' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `BlockDomainPicturePassword` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.28.7 | (L1) Ensure 'Turn on convenience PIN sign-in' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `AllowDomainPINLogon` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.33.6.1 | (L1) Ensure 'Allow network connectivity during connected-standby (on battery)' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9` | `DCSettingIndex` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.33.6.2 | (L1) Ensure 'Allow network connectivity during connected-standby (plugged in)' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9` | `ACSettingIndex` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.35.1 | (L1) Ensure 'Configure Offer Remote Assistance' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services` | `fAllowUnsolicited` | `REG_DWORD` | 0x00000000 (0) |
-| 18.9.36.1 | (L1) Ensure 'Enable RPC Endpoint Mapper Client Authentication' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc` | `EnableAuthEpResolution` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.51.1.1 | (L1) Ensure 'Enable Windows NTP Client' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient` | `Enabled` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.51.1.2 | (L1) Ensure 'Enable Windows NTP Server' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer` | `Enabled` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.4.2 | (L1) Ensure 'Not allow per-user unsigned packages to install by default (requires explicitly allow per install)' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx` | `DisablePerUserUnsignedPackagesByDefault` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.4.3 | (L1) Ensure 'Prevent non-admin users from installing packaged Windows apps' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx` | `BlockNonAdminUserInstall` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.9.1.1 | (L1) Ensure 'Configure enhanced anti-spoofing' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures` | `EnhancedAntiSpoofing` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.13.1 | (L1) Ensure 'Turn off cloud consumer account state content' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent` | `DisableConsumerAccountStateContent` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.14.1 | (L1) Ensure 'Require pin for pairing' is set to 'Enabled: First Time' OR 'Enabled: Always' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Connect` | `RequirePinForPairing` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.15.1 | (L1) Ensure 'Do not display the password reveal button' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\CredUI` | `DisablePasswordReveal` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.15.2 | (L1) Ensure 'Enumerate administrator accounts on elevation' is set to 'Disabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI` | `EnumerateAdministrators` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.15.3 | (L1) Ensure 'Prevent the use of security questions for local accounts' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` | `NoLocalPasswordResetQuestions` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.16.3 | (L1) Ensure 'Disable OneSettings Downloads' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection` | `DisableOneSettingsDownloads` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.16.4 | (L1) Ensure 'Do not show feedback notifications' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection` | `DoNotShowFeedbackNotifications` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.16.5 | (L1) Ensure 'Enable OneSettings Auditing' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection` | `EnableOneSettingsAuditing` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.16.6 | (L1) Ensure 'Limit Diagnostic Log Collection' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection` | `LimitDiagnosticLogCollection` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.16.7 | (L1) Ensure 'Limit Dump Collection' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection` | `LimitDumpCollection` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.16.8 | (L1) Ensure 'Toggle user control over Insider builds' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds` | `AllowBuildPreview` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.18.2 | (L1) Ensure 'Enable App Installer Experimental Features' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller` | `EnableExperimentalFeatures` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.18.3 | (L1) Ensure 'Enable App Installer Hash Override' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller` | `EnableHashOverride` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.18.4 | (L1) Ensure 'Enable App Installer Local Archive Malware Scan Override' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller` | `EnableLocalArchiveMalwareScanOverride` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.18.5 | (L1) Ensure 'Enable App Installer Microsoft Store Source Certificate Validation Bypass' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller` | `EnableBypassCertificatePinningForMicrosoftStore` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.18.6 | (L1) Ensure 'Enable App Installer ms-appinstaller protocol' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller` | `EnableMSAppInstallerProtocol` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.26.1.1 | (L1) Ensure 'Application: Control Event Log behavior when the log file reaches its maximum size' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application` | `Retention` | `REG_SZ` | "0" |
-| 18.10.26.1.2 | (L1) Ensure 'Application: Specify the maximum log file size (KB)' is set to 'Enabled: 32,768 or greater' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application` | `MaxSize` | `REG_DWORD` | 0x00008000 (32768) |
-| 18.10.26.2.1 | (L1) Ensure 'Security: Control Event Log behavior when the log file reaches its maximum size' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security` | `Retention` | `REG_SZ` | "0" |
-| 18.10.26.2.2 | (L1) Ensure 'Security: Specify the maximum log file size (KB)' is set to 'Enabled: 196,608 or greater' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security` | `MaxSize` | `REG_DWORD` | 0x00030000 (196608) |
-| 18.10.26.3.1 | (L1) Ensure 'Setup: Control Event Log behavior when the log file reaches its maximum size' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup` | `Retention` | `REG_SZ` | "0" |
-| 18.10.26.3.2 | (L1) Ensure 'Setup: Specify the maximum log file size (KB)' is set to 'Enabled: 32,768 or greater' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup` | `MaxSize` | `REG_DWORD` | 0x00008000 (32768) |
-| 18.10.26.4.1 | (L1) Ensure 'System: Control Event Log behavior when the log file reaches its maximum size' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System` | `Retention` | `REG_SZ` | "0" |
-| 18.10.26.4.2 | (L1) Ensure 'System: Specify the maximum log file size (KB)' is set to 'Enabled: 32,768 or greater' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System` | `MaxSize` | `REG_DWORD` | 0x00008000 (32768) |
-| 18.10.29.3 | (L1) Ensure 'Do not apply the Mark of the Web tag to files copied from insecure sources' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer` | `DisableMotWOnInsecurePathCopy` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.29.5 | (L1) Ensure 'Turn off shell protocol protected mode' is set to 'Disabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer` | `PreXPSP2ShellProtocolBehavior` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.35.1 | (L1) Ensure 'Disable Internet Explorer 11 as a standalone browser' is set to 'Enabled: Always' | `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main` | `NotifyDisableIEOptions` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.43.11.1.1.2 | (L1) Ensure 'Configure Remote Encryption Protection Mode' is set to 'Enabled: Audit' or higher | `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection` | `BruteForceProtectionConfiguredState` | `REG_DWORD` | 0x00000002 (2) |
-| 18.10.43.13.2 | (L1) Ensure 'Scan packed executables' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Scan` | `DisablePackedExeScanning` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.58.1 | (L1) Ensure 'Prevent downloading of enclosures' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds` | `DisableEnclosureDownload` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.58.2 | (L1) Ensure 'Turn on Basic feed authentication over HTTP' is set to 'Disabled' | `HKLM\Software\Policies\Microsoft\Internet Explorer\Feeds` | `AllowBasicAuthInClear` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.59.3 | (L1) Ensure 'Allow Cortana' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search` | `AllowCortana` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.59.4 | (L1) Ensure 'Allow Cortana above lock screen' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search` | `AllowCortanaAboveLock` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.59.5 | (L1) Ensure 'Allow indexing of encrypted files' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search` | `AllowIndexingEncryptedStoresOrItems` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.59.6 | (L1) Ensure 'Allow search and Cortana to use location' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search` | `AllowSearchToUseLocation` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.66.2 | (L1) Ensure 'Turn off Automatic Download and Install of updates' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore` | `AutoDownload` | `REG_DWORD` | 0x00000004 (4) |
-| 18.10.66.3 | (L1) Ensure 'Turn off the offer to update to the latest version of Windows' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore` | `DisableOSUpgrade` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.72.1 | (L1) Ensure 'Allow widgets' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Dsh` | `AllowNewsAndInterests` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.82.1 | (L1) Ensure 'Configure the transmission of the user's password in the content of MPR notifications sent by winlogon.' is set to 'Disabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System` | `EnableMPR` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.82.2 | (L1) Ensure 'Sign-in and lock last interactive user automatically after a restart' is set to 'Disabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System` | `DisableAutomaticRestartSignOn` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.91.1 | (L1) Ensure 'Allow clipboard sharing with Windows Sandbox' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox` | `AllowClipboardRedirection` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.91.2 | (L1) Ensure 'Allow networking in Windows Sandbox' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox` | `AllowNetworking` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.92.2.1 | (L1) Ensure 'Prevent users from modifying settings' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection` | `DisallowExploitProtectionOverride` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.93.1.1 | (L1) Ensure 'No auto-restart with logged on users for scheduled automatic updates installations' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU` | `NoAutoRebootWithLoggedOnUsers` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.93.2.2 | (L1) Ensure 'Configure Automatic Updates: Scheduled install day' is set to '0 - Every day' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU` | `ScheduledInstallDay` | `REG_DWORD` | 0x00000000 (0) |
-| 18.10.93.2.3 | (L1) Ensure 'Remove access to “Pause updates” feature' is set to 'Enabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate` | `SetDisablePauseUXAccess` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.93.4.1 | (L1) Ensure 'Manage preview builds' is set to 'Disabled' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate` | `ManagePreviewBuildsPolicyValue` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.93.4.2 | (L1) Ensure 'Select when Preview Builds and Feature Updates are received' is set to 'Enabled: 180 or more days' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate` | `DeferFeatureUpdates` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.93.4.2 | (L1) Ensure 'Select when Preview Builds and Feature Updates are received' is set to 'Enabled: 180 or more days' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate` | `DeferFeatureUpdatesPeriodInDays` | `REG_DWORD` | 0x000000b4 (180) |
-| 18.10.93.4.3 | (L1) Ensure 'Select when Quality Updates are received' is set to 'Enabled: 0 days' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate` | `DeferQualityUpdates` | `REG_DWORD` | 0x00000001 (1) |
-| 18.10.93.4.3 | (L1) Ensure 'Select when Quality Updates are received' is set to 'Enabled: 0 days' | `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate` | `DeferQualityUpdatesPeriodInDays` | `REG_DWORD` | 0x00000000 (0) |
+#### Network & TCP/IP Settings
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Workstation`
+  * **Configure SMB v1 client driver**: Set to `Enabled`, select `Disable driver (recommended)` (Recommendation 18.4.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Server`
+  * **Configure SMB v1 server**: Set to `Disabled` (Recommendation 18.4.3)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\TCPIP Settings\Parameters`
+  * **NetBT NodeType configuration**: Set to `Enabled`, select `P-node (recommended)` (Recommendation 18.4.7)
+
+#### Legacy Security Options (MSS Settings)
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * Configure the following security settings (alternatively, deploy via GPO Preferences Registry if Custom ADMX templates are not available):
+    * **MSS: (AutoAdminLogon) Enable Automatic Logon**: Set to `Disabled` (Recommendation 18.5.1)
+    * **MSS: (DisableIPSourceRouting IPv6) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled` (Recommendation 18.5.2)
+    * **MSS: (DisableIPSourceRouting) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled` (Recommendation 18.5.3)
+    * **MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes**: Set to `Disabled` (Recommendation 18.5.5)
+    * **MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers**: Set to `Enabled` (Recommendation 18.5.7)
+    * **MSS: (SafeDllSearchMode) Enable Safe DLL search mode**: Set to `Enabled` (Recommendation 18.5.9)
+    * **MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires**: Set to `Enabled: 5 or fewer seconds` (Recommendation 18.5.10)
+    * **MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning**: Set to `Enabled: 90% or less` (Recommendation 18.5.13)
+
+#### System & Group Policy Settings
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Device Installation`
+  * **Prevent device metadata retrieval from the Internet**: Set to `Enabled` (Recommendation 18.9.7.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
+  * **Configure registry policy processing**: Set to `Enabled`
+    * Uncheck: `Do not apply during periodic background processing` (Recommendation 18.9.19.2)
+    * Check: `Process even if the Group Policy objects have not changed` (Recommendation 18.9.19.3)
+  * **Configure security policy processing**: Set to `Enabled`
+    * Uncheck: `Do not apply during periodic background processing` (Recommendation 18.9.19.4)
+    * Check: `Process even if the Group Policy objects have not changed` (Recommendation 18.9.19.5)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Cross-Device Experiences`
+  * **Continue experiences on this device**: Set to `Disabled` (Recommendation 18.9.19.6)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
+  * **Turn off downloading of print drivers over HTTP**: Set to `Enabled` (Recommendation 18.9.20.1.2)
+  * **Turn off Internet download for Web publishing and online ordering wizards**: Set to `Enabled` (Recommendation 18.9.20.1.6)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Local Security Authority`
+  * **Allow Custom SSPs and APs to be loaded into LSASS**: Set to `Disabled` (Recommendation 18.9.26.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Block user from showing account details on sign-in**: Set to `Enabled` (Recommendation 18.9.28.1)
+  * **Do not display network selection UI**: Set to `Enabled` (Recommendation 18.9.28.2)
+  * **Do not enumerate connected users on domain-joined computers**: Set to `Enabled` (Recommendation 18.9.28.3)
+  * **Turn off app notifications on the lock screen**: Set to `Enabled` (Recommendation 18.9.28.5)
+  * **Turn off picture password sign-in**: Set to `Enabled` (Recommendation 18.9.28.6)
+  * **Turn on convenience PIN sign-in**: Set to `Disabled` (Recommendation 18.9.28.7)
+  * **Prevent the use of security questions for local accounts**: Set to `Enabled` (Recommendation 18.10.15.3)
+  * **Configure the transmission of the user's password in the content of MPR notifications sent by winlogon.**: Set to `Disabled` (Recommendation 18.10.82.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings`
+  * **Allow network connectivity during connected-standby (on battery)**: Set to `Disabled` (Recommendation 18.9.33.6.1)
+  * **Allow network connectivity during connected-standby (plugged in)**: Set to `Disabled` (Recommendation 18.9.33.6.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Assistance`
+  * **Configure Offer Remote Assistance**: Set to `Disabled` (Recommendation 18.9.35.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call`
+  * **Enable RPC Endpoint Mapper Client Authentication**: Set to `Enabled` (Recommendation 18.9.36.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers`
+  * **Enable Windows NTP Client**: Set to `Enabled` (Recommendation 18.9.51.1.1)
+  * **Enable Windows NTP Server**: Set to `Disabled` (Recommendation 18.9.51.1.2)
+
+#### Windows Components Settings
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment`
+  * **Not allow per-user unsigned packages to install by default (requires explicitly allow per install)**: Set to `Enabled` (Recommendation 18.10.4.2)
+  * **Prevent non-admin users from installing packaged Windows apps**: Set to `Enabled` (Recommendation 18.10.4.3)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Biometrics\Facial Features`
+  * **Configure enhanced anti-spoofing**: Set to `Enabled` (Recommendation 18.10.9.1.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Cloud Content`
+  * **Turn off cloud consumer account state content**: Set to `Enabled` (Recommendation 18.10.13.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Connect`
+  * **Require pin for pairing**: Set to `Enabled` (Select `First Time` or `Always`) (Recommendation 18.10.14.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface`
+  * **Do not display the password reveal button**: Set to `Enabled` (Recommendation 18.10.15.1)
+  * **Enumerate administrator accounts on elevation**: Set to `Disabled` (Recommendation 18.10.15.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Disable OneSettings Downloads**: Set to `Enabled` (Recommendation 18.10.16.3)
+  * **Do not show feedback notifications**: Set to `Enabled` (Recommendation 18.10.16.4)
+  * **Enable OneSettings Auditing**: Set to `Enabled` (Recommendation 18.10.16.5)
+  * **Limit Diagnostic Log Collection**: Set to `Enabled` (Recommendation 18.10.16.6)
+  * **Limit Dump Collection**: Set to `Enabled` (Recommendation 18.10.16.7)
+  * **Toggle user control over Insider builds**: Set to `Disabled` (Recommendation 18.10.16.8)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
+  * **Enable App Installer Experimental Features**: Set to `Disabled` (Recommendation 18.10.18.2)
+  * **Enable App Installer Hash Override**: Set to `Disabled` (Recommendation 18.10.18.3)
+  * **Enable App Installer Local Archive Malware Scan Override**: Set to `Disabled` (Recommendation 18.10.18.4)
+  * **Enable App Installer Microsoft Store Source Certificate Validation Bypass**: Set to `Disabled` (Recommendation 18.10.18.5)
+  * **Enable App Installer ms-appinstaller protocol**: Set to `Disabled` (Recommendation 18.10.18.6)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled` (Recommendation 18.10.26.1.1)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `32768` (Recommendation 18.10.26.1.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled` (Recommendation 18.10.26.2.1)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `196608` (Recommendation 18.10.26.2.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled` (Recommendation 18.10.26.3.1)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `32768` (Recommendation 18.10.26.3.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled` (Recommendation 18.10.26.4.1)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `32768` (Recommendation 18.10.26.4.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
+  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled` (Recommendation 18.10.29.3)
+  * **Turn off shell protocol protected mode**: Set to `Disabled` (Recommendation 18.10.29.5)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer`
+  * **Disable Internet Explorer 11 as a standalone browser**: Set to `Enabled`, select `Always` (Recommendation 18.10.35.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
+  * **Prevent downloading of enclosures**: Set to `Enabled` (Recommendation 18.10.58.1)
+  * **Turn on Basic feed authentication over HTTP**: Set to `Disabled` (Recommendation 18.10.58.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection`
+  * **Configure Remote Encryption Protection Mode**: Set to `Enabled` (Select `Audit` or higher) (Recommendation 18.10.43.11.1.1.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
+  * **Turn off scanning of packed executables**: Set to `Disabled` (Recommendation 18.10.43.13.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection`
+  * **Prevent users from modifying settings**: Set to `Enabled` (Recommendation 18.10.92.2.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
+  * **Allow Cortana**: Set to `Disabled` (Recommendation 18.10.59.3)
+  * **Allow Cortana above lock screen**: Set to `Disabled` (Recommendation 18.10.59.4)
+  * **Allow indexing of encrypted files**: Set to `Disabled` (Recommendation 18.10.59.5)
+  * **Allow search and Cortana to use location**: Set to `Disabled` (Recommendation 18.10.59.6)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store`
+  * **Turn off Automatic Download and Install of updates**: Set to `Disabled` (Recommendation 18.10.66.2)
+  * **Turn off the offer to update to the latest version of Windows**: Set to `Enabled` (Recommendation 18.10.66.3)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Widgets`
+  * **Allow widgets**: Set to `Disabled` (Recommendation 18.10.72.1)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Logon Options`
+  * **Sign-in and lock last interactive user automatically after a restart**: Set to `Disabled` (Recommendation 18.10.82.2)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox`
+  * **Allow clipboard sharing with Windows Sandbox**: Set to `Disabled` (Recommendation 18.10.91.1)
+  * **Allow networking in Windows Sandbox**: Set to `Disabled` (Recommendation 18.10.91.2)
+
+#### Windows Update Settings
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update` (or `Windows Update\Manage end user experience` depending on ADMX version)
+  * **Remove access to “Pause updates” feature**: Set to `Enabled` (Recommendation 18.10.93.2.3)
+  * **Manage preview builds**: Set to `Disabled` (Recommendation 18.10.93.4.1)
+  * **Select when Preview Builds and Feature Updates are received**: Set to `Enabled`, set Defer Feature Updates Period in Days to `180` (or more) (Recommendation 18.10.93.4.2)
+  * **Select when Quality Updates are received**: Set to `Enabled`, set Defer Quality Updates Period in Days to `0` (Recommendation 18.10.93.4.3)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience` (or standard `Windows Update\AU` depending on ADMX version)
+  * **Configure Automatic Updates**: Set to `Enabled`, select `Scheduled install day` = `0 - Every day` (Recommendation 18.10.93.2.2)
+  * **No auto-restart with logged on users for scheduled automatic updates installations**: Set to `Disabled` (Recommendation 18.10.93.1.1)
+
+4. Link the GPO to the target Organizational Unit (OU) containing workstations and member servers.
 
 ---
 
