@@ -1,7 +1,7 @@
-# Configure-CredentialGuard.ps1
-# Description: Enables Virtualization-Based Security (VBS) and Credential Guard in the registry.
+# Configure-DisableCredentialGuard.ps1
+# Description: Enables Virtualization-Based Security (VBS) and disables Credential Guard in the registry.
 
-Write-Host "Applying hardening requirement: Enable Credential Guard and VBS Baseline..." -ForegroundColor Cyan
+Write-Host "Applying hardening requirement: Enable VBS Baseline and Disable Credential Guard..." -ForegroundColor Cyan
 
 # 1. Enable Virtualization-Based Security and related hypervisor options
 $vbsPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard"
@@ -22,12 +22,12 @@ foreach ($Setting in $vbsSettings.Keys) {
 }
 Write-Host "Virtualization-Based Security parameters enabled in registry." -ForegroundColor Green
 
-# 2. Configure Credential Guard (LsaCfgFlags: 1 = UEFI Lock, 2 = No UEFI Lock)
+# 2. Disable Credential Guard (LsaCfgFlags: 0 = Disabled)
 $lsaPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
 if (-not (Test-Path $lsaPath)) {
     New-Item -Path $lsaPath -Force | Out-Null
 }
-Set-ItemProperty -Path $lsaPath -Name "LsaCfgFlags" -Value 1 -Type DWord
-Write-Host "Credential Guard configured with UEFI lock in registry." -ForegroundColor Green
+Set-ItemProperty -Path $lsaPath -Name "LsaCfgFlags" -Value 0 -Type DWord
+Write-Host "Credential Guard configured to Disabled in registry." -ForegroundColor Green
 
 Write-Host "Hardening applied successfully. A system reboot is required." -ForegroundColor Green

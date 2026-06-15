@@ -36,7 +36,7 @@ The guidebook is organized into eight functional modules:
      * [REQ-DC-004 - Enforce LDAP Server Signing](02-domain-controllers/enforce-ldap-signing.md)
      * [REQ-DC-005 - Enforce LDAP Channel Binding](02-domain-controllers/enforce-ldap-channel-binding.md)
      * [REQ-DC-006 - Enable LSA Protection](02-domain-controllers/enable-lsa-protection.md)
-     * [REQ-DC-007 - Enable Credential Guard](02-domain-controllers/enable-credential-guard.md)
+     * [REQ-DC-007 - Disable Credential Guard](02-domain-controllers/disable-credential-guard.md)
      * [REQ-DC-008 - Disable Print Spooler Service](02-domain-controllers/disable-print-spooler.md)
      * [REQ-DC-009 - Enforce SMB Message Signing](02-domain-controllers/enforce-smb-signing.md)
      * [REQ-DC-010 - Restrict Kerberos Encryption Types](02-domain-controllers/restrict-kerberos-encryption.md)

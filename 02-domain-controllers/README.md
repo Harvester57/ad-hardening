@@ -16,8 +16,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to enforce LDAP Channel Binding Tokens (CBT) over secure LDAPS connections to prevent authentication relay attacks.
 * **[REQ-DC-006 - Enable LSA Protection](enable-lsa-protection.md)**
   Requirement to configure the Local Security Authority (LSA) process to run as a Protected Process Light (PPL) to protect credential secrets from LSASS memory dumps.
-* **[REQ-DC-007 - Enable Credential Guard](enable-credential-guard.md)**
-  Requirement to enable Windows Defender Credential Guard using Virtualization-Based Security (VBS) to hardware-isolate credential secrets.
+* **[REQ-DC-007 - Disable Credential Guard](disable-credential-guard.md)**
+  Requirement to disable Windows Defender Credential Guard on Domain Controllers in accordance with Microsoft recommendations while keeping Virtualization-Based Security (VBS) enabled.
 * **[REQ-DC-008 - Disable Print Spooler Service](disable-print-spooler.md)**
   Requirement to stop and disable the Print Spooler service on Domain Controllers to prevent remote execution and coercive authentication attacks.
 * **[REQ-DC-009 - Enforce SMB Message Signing](enforce-smb-signing.md)**

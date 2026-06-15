@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 82c6594 | Generated: June 15, 2026</span>
+      <span>Commit: ebc9ff7 | Generated: June 15, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -84,7 +84,7 @@ The guidebook is organized into eight functional modules:
      * [REQ-DC-004 - Enforce LDAP Server Signing](#02-domain-controllers-enforce-ldap-signing-md)
      * [REQ-DC-005 - Enforce LDAP Channel Binding](#02-domain-controllers-enforce-ldap-channel-binding-md)
      * [REQ-DC-006 - Enable LSA Protection](#02-domain-controllers-enable-lsa-protection-md)
-     * [REQ-DC-007 - Enable Credential Guard](#02-domain-controllers-enable-credential-guard-md)
+     * [REQ-DC-007 - Disable Credential Guard](#02-domain-controllers-disable-credential-guard-md)
      * [REQ-DC-008 - Disable Print Spooler Service](#02-domain-controllers-disable-print-spooler-md)
      * [REQ-DC-009 - Enforce SMB Message Signing](#02-domain-controllers-enforce-smb-signing-md)
      * [REQ-DC-010 - Restrict Kerberos Encryption Types](#02-domain-controllers-restrict-kerberos-encryption-md)
@@ -1432,8 +1432,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to enforce LDAP Channel Binding Tokens (CBT) over secure LDAPS connections to prevent authentication relay attacks.
 * **[REQ-DC-006 - Enable LSA Protection](#02-domain-controllers-enable-lsa-protection-md)**
   Requirement to configure the Local Security Authority (LSA) process to run as a Protected Process Light (PPL) to protect credential secrets from LSASS memory dumps.
-* **[REQ-DC-007 - Enable Credential Guard](#02-domain-controllers-enable-credential-guard-md)**
-  Requirement to enable Windows Defender Credential Guard using Virtualization-Based Security (VBS) to hardware-isolate credential secrets.
+* **[REQ-DC-007 - Disable Credential Guard](#02-domain-controllers-disable-credential-guard-md)**
+  Requirement to disable Windows Defender Credential Guard on Domain Controllers in accordance with Microsoft recommendations while keeping Virtualization-Based Security (VBS) enabled.
 * **[REQ-DC-008 - Disable Print Spooler Service](#02-domain-controllers-disable-print-spooler-md)**
   Requirement to stop and disable the Print Spooler service on Domain Controllers to prevent remote execution and coercive authentication attacks.
 * **[REQ-DC-009 - Enforce SMB Message Signing](#02-domain-controllers-enforce-smb-signing-md)**
@@ -1674,11 +1674,14 @@ if ($vulnerable) {
     * Value Type: `REG_DWORD`
     * Value Data: `0`
   * **Disable NetBIOS (NBT-NS)**:
-    * Path: `Computer Configuration\Preferences\Windows Settings\Registry`
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\DNS Client`
+    * Policy: `Configure NetBIOS settings`
+    * Setting: `Enabled: Disable NetBIOS name resolution on public networks` (Backed by Registry: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient` -> `EnableNetbios` = `2` [REG_DWORD])
+    * GPO Preference Path: `Computer Configuration\Preferences\Windows Settings\Registry`
     * Key Path: `SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces\<InterfaceKey>`
     * Value Name: `NetbiosOptions`
     * Value Type: `REG_DWORD`
-    * Value Data: `2` (Disables NetBIOS over TCP/IP)
+    * Value Data: `2` (Disables NetBIOS over TCP/IP on adapters)
 
 ---
 
@@ -1709,9 +1712,11 @@ Configure Group Policy to disable LLMNR, and Group Policy Preferences to disable
 2. Edit the appropriate hardening GPO (e.g., `GPO_Hardening_DomainControllers`).
 3. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\Network\DNS Client`
-4. Set the following policy:
+4. Configure the following policies:
    * **Policy**: `Turn off multicast name resolution`
-   * **Setting**: `Enabled`
+     * **Setting**: `Enabled`
+   * **Policy**: `Configure NetBIOS settings`
+     * **Setting**: `Enabled: Disable NetBIOS name resolution on public networks` (Note: Requires newer Windows 11 / Server 2022 ADMX templates)
 5. Navigate to:
    `Computer Configuration\Preferences\Windows Settings\Registry`
 6. Create a Registry Preference to disable mDNS (Right-click **Registry -> New -> Registry Item**):
@@ -2310,19 +2315,19 @@ if ($lsaReg) {
 
 <div style="page-break-before: always;"></div>
 
-<div id="02-domain-controllers-enable-credential-guard-md"></div>
+<div id="02-domain-controllers-disable-credential-guard-md"></div>
 
-<div id="02-domain-controllers-enable-credential-guard-md-req-dc-007-enable-credential-guard"></div>
-# [REQ-DC-007] Enable Credential Guard
+<div id="02-domain-controllers-disable-credential-guard-md-req-dc-007-disable-credential-guard"></div>
+# [REQ-DC-007] Disable Credential Guard
 
-<div id="02-domain-controllers-enable-credential-guard-md-target-scope"></div>
+<div id="02-domain-controllers-disable-credential-guard-md-target-scope"></div>
 ## Target Scope
-* **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
-* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11 (Enterprise and Datacenter editions)
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025
 
 ---
 
-<div id="02-domain-controllers-enable-credential-guard-md-implementation-details"></div>
+<div id="02-domain-controllers-disable-credential-guard-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -2330,7 +2335,7 @@ if ($lsaReg) {
   * **Policy**: `Turn On Virtualization-Based Security`
   * **Setting**: `Enabled`
     * **Virtualization Based Protection of Code Integrity**: `Enabled with UEFI lock`
-    * **Credential Guard Configuration**: `Enabled with UEFI lock`
+    * **Credential Guard Configuration**: `Disabled`
     * **Require UEFI Memory Attributes Table**: `Enabled`
     * **Secure Launch Configuration**: `Enabled`
     * **Select Platform Security Level**: `Secure Boot`
@@ -2340,31 +2345,34 @@ if ($lsaReg) {
     * `ConfigureSystemGuardLaunch` = `1` (REG_DWORD)
     * `RequirePlatformSecurityFeatures` = `1` (REG_DWORD)
     * `HypervisorEnforcedCodeIntegrity` = `1` (REG_DWORD)
-  * **Registry Location (Credential Guard)**: `HKLM\SYSTEM\CurrentControlSet\Control\Lsa` -> `LsaCfgFlags` = `1` (REG_DWORD, Enabled with UEFI lock) or `2` (REG_DWORD, Enabled without UEFI lock)
+  * **Registry Location (Credential Guard)**: `HKLM\SYSTEM\CurrentControlSet\Control\Lsa` -> `LsaCfgFlags` = `0` (REG_DWORD)
 
 ---
 
-<div id="02-domain-controllers-enable-credential-guard-md-rationale"></div>
+<div id="02-domain-controllers-disable-credential-guard-md-rationale"></div>
 ## Rationale
-Windows Defender Credential Guard uses virtualization-based security (VBS) to isolate secrets (such as NTLM password hashes and Kerberos Ticket Granting Tickets) in a secure, hypervisor-protected environment running parallel to the standard Windows kernel. 
+Virtualization-Based Security (VBS) and Hypervisor-Protected Code Integrity (HVCI) should be enabled on Domain Controllers to protect the integrity of the operating system kernel and enforce driver blocklists.
 
-By running LSA in a secure container separate from the main LSASS process, Credential Guard ensures that even if the host's operating system kernel is fully compromised by an administrative attacker (e.g., via kernel exploitation or driver execution), the attacker cannot retrieve plaintext secrets or NTLM password hashes from memory. This completely blocks common credential extraction techniques and tools.
+However, Windows Defender Credential Guard must **not** be deployed on Active Directory domain controllers. Credential Guard is designed to isolate LSA secrets to prevent credential-dumping tools from harvesting password hashes from local memory. Domain controllers do not store user credentials in LSASS memory in the same way member servers do; instead, credentials are stored securely in the Active Directory database (ntds.dit). Furthermore, domain controllers run LSASS in a manner that requires active cryptographic operations and delegation capabilities that are incompatible with the restrictions imposed by Credential Guard.
+
+Enabling Credential Guard on a domain controller can lead to authentication failures, block Kerberos delegation features, and cause operational instability without providing any security benefits.
+
+For official warnings and product specifications, refer to the Microsoft documentation:
+[Microsoft Security Guidance: Windows Defender Credential Guard Warnings](https://learn.microsoft.com/en-us/windows/security/identity-protection/credential-guard/)
 
 ---
 
-<div id="02-domain-controllers-enable-credential-guard-md-legacy-impact-compatibility"></div>
+<div id="02-domain-controllers-disable-credential-guard-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Hardware Requirements**: Enabling UEFI Secure Boot and CPU virtualization features is a strict pre-requisite for Credential Guard. For physical systems, refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-hardware-virtualization-and-dma-protection-md) to secure these configurations.
-* **Virtualization Support**: If the target server is a virtual machine, the hypervisor must support nested virtualization, and the virtual machine configuration must have VBS features enabled.
-* **Authentication Protocol Impact**: Enabling Credential Guard disables NTLMv1, MS-CHAPv2, CredSSP single sign-on, and unconstrained Kerberos delegation. Applications that rely on these insecure delegation or authentication methods will fail.
-* **Smart Card Requirement**: Kerberos authentication using smart cards is fully supported, but the smart card drivers must be compatible with VBS environment constraints.
+* **Virtualization-Based Security**: Enabling VBS and Memory Integrity (HVCI) requires compliant virtualization hardware (Secure Boot, SLAT, IOMMU). Ensure hypervisors and host environments are fully compatible prior to deployment.
+* **Domain Controller Functionality**: Disabling Credential Guard on domain controllers is the standard, officially supported Microsoft configuration. It ensures that critical Active Directory services, authentication protocols, and delegation features operate without restriction or compatibility failures.
 
 ---
 
-<div id="02-domain-controllers-enable-credential-guard-md-implementation-steps"></div>
+<div id="02-domain-controllers-disable-credential-guard-md-implementation-steps"></div>
 ## Implementation Steps
 
-<div id="02-domain-controllers-enable-credential-guard-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+<div id="02-domain-controllers-disable-credential-guard-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
@@ -2375,23 +2383,26 @@ By running LSA in a secure container separate from the main LSASS process, Crede
    * **Policy**: `Turn On Virtualization-Based Security`
    * **Setting**: `Enabled`
    * **Virtualization Based Protection of Code Integrity**: `Enabled with UEFI lock`
-   * **Credential Guard Configuration**: `Enabled with UEFI lock` (Note: UEFI lock prevents remote registry modification of these settings; use `Enabled without UEFI lock` if you require remote management capabilities to disable the control if needed).
+   * **Credential Guard Configuration**: `Disabled`
+   * **Require UEFI Memory Attributes Table**: `Enabled`
+   * **Secure Launch Configuration**: `Enabled`
+   * **Select Platform Security Level**: `Secure Boot`
 5. Link the GPO to the appropriate Organizational Unit (OU) containing the target assets.
 
 ---
 
-<div id="02-domain-controllers-enable-credential-guard-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+<div id="02-domain-controllers-disable-credential-guard-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this method to apply the settings locally.
 
-[Download Script: Configure-CredentialGuard.ps1](implementation_scripts/Configure-CredentialGuard.ps1)
+[Download Script: Configure-DisableCredentialGuard.ps1](implementation_scripts/Configure-DisableCredentialGuard.ps1)
 
 ```powershell
-# Configure-CredentialGuard.ps1
-# Description: Enables Virtualization-Based Security (VBS) and Credential Guard in the registry.
+# Configure-DisableCredentialGuard.ps1
+# Description: Enables Virtualization-Based Security (VBS) and disables Credential Guard in the registry.
 
-Write-Host "Applying hardening requirement: Enable Credential Guard and VBS Baseline..." -ForegroundColor Cyan
+Write-Host "Applying hardening requirement: Enable VBS Baseline and Disable Credential Guard..." -ForegroundColor Cyan
 
 # 1. Enable Virtualization-Based Security and related hypervisor options
 $vbsPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard"
@@ -2412,25 +2423,26 @@ foreach ($Setting in $vbsSettings.Keys) {
 }
 Write-Host "Virtualization-Based Security parameters enabled in registry." -ForegroundColor Green
 
-# 2. Configure Credential Guard (LsaCfgFlags: 1 = UEFI Lock, 2 = No UEFI Lock)
+# 2. Disable Credential Guard (LsaCfgFlags: 0 = Disabled)
 $lsaPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
 if (-not (Test-Path $lsaPath)) {
     New-Item -Path $lsaPath -Force | Out-Null
 }
-Set-ItemProperty -Path $lsaPath -Name "LsaCfgFlags" -Value 1 -Type DWord
-Write-Host "Credential Guard configured with UEFI lock in registry." -ForegroundColor Green
+Set-ItemProperty -Path $lsaPath -Name "LsaCfgFlags" -Value 0 -Type DWord
+Write-Host "Credential Guard configured to Disabled in registry." -ForegroundColor Green
 
 Write-Host "Hardening applied successfully. A system reboot is required." -ForegroundColor Green
 ```
 
-*To verify the setting has been applied:*
+*To audit VBS and Credential Guard status using Registry and WMI:*
+
 [Download Script: Get-CredentialGuardStatus.ps1](audit_scripts/Get-CredentialGuardStatus.ps1)
 
 ```powershell
 # Get-CredentialGuardStatus.ps1
-# Description: Audits the configuration and operational status of Credential Guard.
+# Description: Audits the configuration and operational status of VBS and ensures Credential Guard is disabled.
 
-Write-Host "--- Auditing Credential Guard ---" -ForegroundColor Cyan
+Write-Host "--- Auditing VBS and Credential Guard Status ---" -ForegroundColor Cyan
 $vulnerable = $false
 
 # 1. Audit Registry Settings
@@ -2462,60 +2474,49 @@ if (Test-Path $vbsRegPath) {
     $vulnerable = $true
 }
 
-if ($lsaReg -and ($lsaReg.LsaCfgFlags -eq 1 -or $lsaReg.LsaCfgFlags -eq 2)) {
-    Write-Host "[+] Credential Guard registry key is configured (LsaCfgFlags = $($lsaReg.LsaCfgFlags))." -ForegroundColor Green
-} else {
-    Write-Host "[!] VULNERABLE: Credential Guard registry key 'LsaCfgFlags' is missing or set to 0." -ForegroundColor Red
+# For DCs, Credential Guard (LsaCfgFlags) must be set to 0 (Disabled)
+if ($null -ne $lsaReg -and $lsaReg.LsaCfgFlags -ne 0) {
+    Write-Host "[!] VULNERABLE: Credential Guard is enabled in registry (LsaCfgFlags = $($lsaReg.LsaCfgFlags))." -ForegroundColor Red
     $vulnerable = $true
+} else {
+    $val = if ($null -eq $lsaReg) { "Not configured (Disabled)" } else { $lsaReg.LsaCfgFlags }
+    Write-Host "[+] Credential Guard registry key 'LsaCfgFlags' is correctly set to disabled ($val)." -ForegroundColor Green
 }
 
 # 2. Audit WMI Operational State (if running)
 $deviceGuard = Get-CimInstance -Namespace "root\cimv2" -ClassName "Win32_DeviceGuard" -ErrorAction SilentlyContinue
 if ($deviceGuard) {
-    # SecurityServicesConfigured: 1 = Credential Guard
-    $servicesConfigured = $deviceGuard.SecurityServicesConfigured
     # SecurityServicesRunning: 1 = Credential Guard
     $servicesRunning = $deviceGuard.SecurityServicesRunning
-    
-    $cgConfigured = $false
     $cgRunning = $false
-    
-    foreach ($service in $servicesConfigured) {
-        if ($service -eq 1) { $cgConfigured = $true }
-    }
     foreach ($service in $servicesRunning) {
         if ($service -eq 1) { $cgRunning = $true }
     }
     
-    if ($cgConfigured) {
-        Write-Host "[+] Credential Guard is configured operationally." -ForegroundColor Green
-    } else {
-        Write-Host "[-] Credential Guard is not configured in WMI (requires reboot/hardware compatibility)." -ForegroundColor Yellow
-    }
-    
     if ($cgRunning) {
-        Write-Host "[+] Credential Guard is running." -ForegroundColor Green
+        Write-Host "[!] VULNERABLE: Credential Guard is running operationally on this Domain Controller." -ForegroundColor Red
+        $vulnerable = $true
     } else {
-        Write-Host "[-] Credential Guard is not running in WMI (requires reboot/hardware compatibility)." -ForegroundColor Yellow
+        Write-Host "[+] Credential Guard is not running on this Domain Controller." -ForegroundColor Green
     }
 } else {
-    Write-Host "[-] WMI class Win32_DeviceGuard is not available (common on older OS or without Hyper-V features installed)." -ForegroundColor Yellow
+    Write-Host "[-] WMI class Win32_DeviceGuard is not available." -ForegroundColor Yellow
 }
 
 if ($vulnerable) {
-    Write-Host "Audit result: VULNERABLE (Registry configurations missing)" -ForegroundColor Red
+    Write-Host "Audit result: VULNERABLE (Credential Guard enabled or VBS misconfigured)" -ForegroundColor Red
 } else {
-    Write-Host "Audit result: SECURE (Registry configurations applied)" -ForegroundColor Green
+    Write-Host "Audit result: SECURE (Credential Guard disabled and VBS configured)" -ForegroundColor Green
 }
 ```
 
 ---
 
-<div id="02-domain-controllers-enable-credential-guard-md-sources-compliance-references"></div>
+<div id="02-domain-controllers-disable-credential-guard-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Recommendation R14 (LSA Protection and credential isolation defenses)
-* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9.31.2 (Ensure 'Turn On Virtualization-Based Security: Select Credential Guard Configuration' is set to 'Enabled with UEFI lock')
-* **Microsoft Security Guidance**: Windows Defender Credential Guard requirements and deployment
+* **Microsoft Security Guidance**: [Windows Defender Credential Guard Warnings and Exclusions](https://learn.microsoft.com/en-us/windows/security/identity-protection/credential-guard/)
+* **ANSSI AD Hardening Guide**: Recommendation R14 (acknowledging that Credential Guard is excluded from Domain Controllers due to compatibility constraints, while LSA protection remains active)
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9.31.2 (noting that Credential Guard is restricted to compatible systems and excludes Active Directory Domain Controllers)
 
 
 <div style="page-break-before: always;"></div>
@@ -4567,6 +4568,8 @@ mstsc.exe /RestrictedAdmin
   * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR
   * HKLM\SOFTWARE\Microsoft\Windows Defender\Features
   * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
+  * HKLM\SOFTWARE\Microsoft\AMSI
+    * FeatureBits = 2 (REG_DWORD)
 
 ---
 
@@ -4578,6 +4581,7 @@ This control establishes a server-optimized defense posture:
 1. **Attack Surface Reduction (ASR) Rules**: Enforces key security boundaries on the OS. Specifically, blocking credential harvesting from LSASS (`9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2`) is paramount on Domain Controllers to prevent offline hash-cracking and token manipulation. In addition, blocking the abuse of exploited vulnerable signed drivers (`56a863a9-875e-4185-98a7-b882c64b5ce5`) blocks kernel-mode exploits, while blocking persistence through WMI event subscriptions (`e6db77e5-3df2-4cf1-b95a-636979351e5b`) mitigates common server stealth mechanisms.
 2. **Tamper Protection**: Ensures that attackers cannot use compromised local SYSTEM/admin contexts (such as those obtained via exploit) to disable real-time protection or add exclusions to bypass Defender scanning.
 3. **Sandbox Execution (AppContainer)**: Sandboxes the core scanning service (`MsMpEng.exe`). If an attacker attempts to exploit a parsing vulnerability in the antimalware engine (e.g., using a malformed certificate file or replication data), the exploit is restricted to the AppContainer sandbox, mitigating privilege escalation to local system privileges.
+4. **AMSI Authenticode Signature Verification (FeatureBits)**: Enforces signature verification checks on registered Antimalware Scan Interface (AMSI) providers. This ensures only signed and trusted AMSI provider DLLs can scan script content, preventing attackers from bypass scanning by registering rogue provider DLLs.
 
 ---
 
@@ -4586,6 +4590,7 @@ This control establishes a server-optimized defense posture:
 * **ASR PSExec and WMI Rule**: Enforcing "Block process creations originating from PSExec and WMI commands" (`d1e49aac-8f56-4280-b9ba-993a6d77406c`) can disrupt enterprise remote administration, monitoring agents, and backup orchestrators. In environments utilizing such orchestrators, this rule should be set to **Audit** mode or configured with explicit process exclusions rather than hard Block mode.
 * **Office Application Rules**: Rules targeting Microsoft Office or Adobe applications are documented but will not affect Domain Controllers, as these applications must never be installed on Tier 0 systems.
 * **Reboot Requirement**: Activating Sandbox Execution via `MP_FORCE_USE_SANDBOX` requires a reboot of the Domain Controllers to take effect. This should be scheduled during standard maintenance windows.
+* **AMSI Provider Signatures**: Any third-party security agents registering as AMSI providers must have a valid, trusted Authenticode signature. Unsigned or self-signed providers will be prevented from loading.
 
 ---
 
@@ -4718,6 +4723,16 @@ This control establishes a server-optimized defense posture:
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
     * **Value**: `1`
+32. Navigate to:
+    `Computer Configuration\Preferences\Windows Settings\Registry`
+33. Right-click **Registry**, select **New** -> **Registry Item**.
+34. Configure:
+    * **Action**: `Update`
+    * **Hive**: `HKEY_LOCAL_MACHINE`
+    * **Key Path**: `SOFTWARE\Microsoft\AMSI`
+    * **Value name**: `FeatureBits`
+    * **Value type**: `REG_DWORD`
+    * **Value data**: `2` (Decimal)
 
 ---
 
@@ -4891,6 +4906,14 @@ if (-not (Test-Path $EnvPath)) {
 Set-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -Value "1" -Type String
 Write-Host "Sandbox Execution environment variable configured." -ForegroundColor Green
 
+# 8. Configure AMSI Authenticode Signature Verification (FeatureBits = 2)
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (-not (Test-Path $AmsiPath)) {
+    New-Item -Path $AmsiPath -Force | Out-Null
+}
+Set-ItemProperty -Path $AmsiPath -Name "FeatureBits" -Value 2 -Type DWord -Force
+Write-Host "[+] AMSI Authenticode signature verification enabled." -ForegroundColor Green
+
 Write-Host "Defender Domain Controller baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan
 ```
 
@@ -5009,6 +5032,17 @@ foreach ($KeyName in $CheckKeys.Keys) {
         $Actual = if ($Val) { $Val.$KeyName } else { "Not Configured" }
         Write-Host "      * Missing/Misconfigured: $KeyName (Expected: $($Target.Expected), Got: $Actual)" -ForegroundColor Yellow
     }
+}
+
+# 6. Audit AMSI Authenticode verification
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (Test-Path $AmsiPath) {
+    $AmsiBits = Get-ItemProperty -Path $AmsiPath -Name "FeatureBits" -ErrorAction SilentlyContinue
+    $AmsiVal = if ($AmsiBits) { $AmsiBits.FeatureBits } else { 0 }
+    $AmsiColor = if ($AmsiVal -eq 2) { "Green" } else { "Red" }
+    Write-Host "    - AMSI Authenticode verification (FeatureBits): $AmsiVal (Expected: 2)" -ForegroundColor $AmsiColor
+} else {
+    Write-Host "    - AMSI Authenticode verification (FeatureBits): NOT ENABLED" -ForegroundColor Red
 }
 ```
 
@@ -5443,7 +5477,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
 
 <div id="02-domain-controllers-enable-wdac-driver-blocklist-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-DC-007 - Enable Credential Guard](#02-domain-controllers-enable-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Enabling Secure Boot and CPU virtualization features is a strict pre-requisite; refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware settings.
+* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-DC-007 - Disable Credential Guard](#02-domain-controllers-disable-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled (while ensuring Credential Guard is kept disabled). Enabling Secure Boot and CPU virtualization features is a strict pre-requisite; refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware settings.
 * **Compatibility with Legacy Drivers**: Third-party backup, monitoring, or hardware administration software running deprecated, vulnerable drivers may fail to load. All such software must be updated to use secure, modern drivers.
 * **Deployment Testing**: To prevent system instability, the WDAC blocklist policy should be deployed in **Audit Mode** initially to verify that no critical operational drivers are blocked in production before shifting to enforcement mode.
 
@@ -5643,6 +5677,7 @@ To preserve the Tier 0 administrative boundary, these rights must be restricted 
 | **Add workstations to domain** | `BUILTIN\Administrators` |
 | **Adjust memory quotas for a process** | `BUILTIN\Administrators`, `NT AUTHORITY\LOCAL SERVICE`, `NT AUTHORITY\NETWORK SERVICE` |
 | **Allow log on locally** | `BUILTIN\Administrators`, `NT AUTHORITY\ENTERPRISE DOMAIN CONTROLLERS` |
+| **Allow log on through Remote Desktop Services** | `BUILTIN\Administrators` |
 | **Back up files and directories** | `BUILTIN\Administrators` |
 | **Bypass traverse checking** | `BUILTIN\Pre-Windows 2000 Compatible Access`, `NT AUTHORITY\Authenticated Users`, `BUILTIN\Administrators`, `NT AUTHORITY\NETWORK SERVICE`, `NT AUTHORITY\LOCAL SERVICE`, `Everyone` |
 | **Change the system time** | `BUILTIN\Administrators`, `NT AUTHORITY\LOCAL SERVICE` |
@@ -5654,8 +5689,10 @@ To preserve the Tier 0 administrative boundary, these rights must be restricted 
 | **Deny log on as a batch job** | `BUILTIN\Guests` |
 | **Deny log on as a service** | `BUILTIN\Guests` |
 | **Deny log on locally** | `BUILTIN\Guests` |
+| **Deny log on through Remote Desktop Services** | `BUILTIN\Guests` |
 | **Enable computer and user accounts to be trusted for delegation** | `BUILTIN\Administrators` |
 | **Force shutdown from a remote system** | `BUILTIN\Administrators` |
+| **Generate security audits** | `NT AUTHORITY\LOCAL SERVICE`, `NT AUTHORITY\NETWORK SERVICE` |
 | **Load and unload device drivers** | `BUILTIN\Administrators` |
 | **Lock pages in memory** | No one (Empty) |
 | **Log on as a batch job** | `BUILTIN\Administrators` |
@@ -5718,6 +5755,7 @@ $BaselineRights = @{
     "SeMachineAccountPrivilege"       = "*S-1-5-32-544"
     "SeIncreaseQuotaPrivilege"        = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544"
     "SeInteractiveLogonRight"         = "*S-1-5-9,*S-1-5-32-544"
+    "SeRemoteInteractiveLogonRight"   = "*S-1-5-32-544"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
     "SeChangeNotifyPrivilege"         = "*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0"
     "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
@@ -5729,8 +5767,10 @@ $BaselineRights = @{
     "SeDenyBatchLogonRight"           = "*S-1-5-32-546"
     "SeDenyServiceLogonRight"         = "*S-1-5-32-546"
     "SeDenyInteractiveLogonRight"     = "*S-1-5-32-546"
+    "SeDenyRemoteInteractiveLogonRight" = "*S-1-5-32-546"
     "SeEnableDelegationPrivilege"     = "*S-1-5-32-544"
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
+    "SeAuditPrivilege"                = "*S-1-5-19,*S-1-5-20"
     "SeLoadDriverPrivilege"           = "*S-1-5-32-544"
     "SeLockMemoryPrivilege"           = ""
     "SeBatchLogonRight"               = "*S-1-5-32-544"
@@ -5832,6 +5872,7 @@ $BaselineRights = @{
     "SeMachineAccountPrivilege"       = "*S-1-5-32-544"
     "SeIncreaseQuotaPrivilege"        = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544"
     "SeInteractiveLogonRight"         = "*S-1-5-9,*S-1-5-32-544"
+    "SeRemoteInteractiveLogonRight"   = "*S-1-5-32-544"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
     "SeChangeNotifyPrivilege"         = "*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0"
     "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
@@ -5843,8 +5884,10 @@ $BaselineRights = @{
     "SeDenyBatchLogonRight"           = "*S-1-5-32-546"
     "SeDenyServiceLogonRight"         = "*S-1-5-32-546"
     "SeDenyInteractiveLogonRight"     = "*S-1-5-32-546"
+    "SeDenyRemoteInteractiveLogonRight" = "*S-1-5-32-546"
     "SeEnableDelegationPrivilege"     = "*S-1-5-32-544"
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
+    "SeAuditPrivilege"                = "*S-1-5-19,*S-1-5-20"
     "SeLoadDriverPrivilege"           = "*S-1-5-32-544"
     "SeLockMemoryPrivilege"           = ""
     "SeBatchLogonRight"               = "*S-1-5-32-544"
@@ -6984,12 +7027,12 @@ Run the following script to disable the local Administrator and Guest accounts l
 
 ```powershell
 # Set-HardenDefaultAccounts.ps1
-# Description: Disables the built-in local Administrator and Guest accounts locally.
+# Description: Disables and renames the built-in local Administrator and Guest accounts locally.
 
 Write-Host "Applying hardening requirement: Rename and Disable Default Accounts..." -ForegroundColor Cyan
 
-# 1. Disable built-in local Administrator account
-$adminAccount = Get-LocalUser -SID "S-1-5-32-544" | Where-Object { $_.SID -like "*-500" }
+# 1. Disable and rename built-in local Administrator account
+$adminAccount = Get-LocalUser | Where-Object { $_.SID -like "*-500" }
 if ($adminAccount) {
     if ($adminAccount.Enabled) {
         Disable-LocalUser -Name $adminAccount.Name
@@ -6997,23 +7040,32 @@ if ($adminAccount) {
     } else {
         Write-Host "[-] Local Administrator account ($($adminAccount.Name)) is already disabled." -ForegroundColor Yellow
     }
+    
+    if ($adminAccount.Name -eq "Administrator") {
+        Rename-LocalUser -Name "Administrator" -NewName "LocalMgmtAdmin"
+        Write-Host "[+] Local Administrator account renamed to LocalMgmtAdmin." -ForegroundColor Green
+    } else {
+        Write-Host "[-] Local Administrator account is already renamed ($($adminAccount.Name))." -ForegroundColor Yellow
+    }
 } else {
     Write-Warning "Built-in local Administrator account not found."
 }
 
-# 2. Disable built-in local Guest account
-$guestAccount = Get-LocalUser -SID "S-1-5-32-544" | Where-Object { $_.SID -like "*-501" }
-# Fallback to standard check if SID group matches local guest
-if (-not $guestAccount) {
-    $guestAccount = Get-LocalUser | Where-Object { $_.SID -like "*-501" }
-}
-
+# 2. Disable and rename built-in local Guest account
+$guestAccount = Get-LocalUser | Where-Object { $_.SID -like "*-501" }
 if ($guestAccount) {
     if ($guestAccount.Enabled) {
         Disable-LocalUser -Name $guestAccount.Name
         Write-Host "[+] Local Guest account ($($guestAccount.Name)) disabled." -ForegroundColor Green
     } else {
         Write-Host "[-] Local Guest account ($($guestAccount.Name)) is already disabled." -ForegroundColor Yellow
+    }
+    
+    if ($guestAccount.Name -eq "Guest") {
+        Rename-LocalUser -Name "Guest" -NewName "LocalMgmtGuest"
+        Write-Host "[+] Local Guest account renamed to LocalMgmtGuest." -ForegroundColor Green
+    } else {
+        Write-Host "[-] Local Guest account is already renamed ($($guestAccount.Name))." -ForegroundColor Yellow
     }
 } else {
     Write-Warning "Built-in local Guest account not found."
@@ -11324,6 +11376,9 @@ Enforcing advanced auditing policies provides the following security coverages:
 | **Account Logon** | `Audit Credential Validation` | Success and Failure |
 | **Account Management** | `Audit User Account Management` | Success and Failure |
 | **Account Management** | `Audit Security Group Management` | Success and Failure |
+| **Account Management** | `Audit Computer Account Management` | Success |
+| **Account Management** | `Audit Distribution Group Management` | Success |
+| **Account Management** | `Audit Other Account Management Events` | Success |
 | **Detailed Tracking** | `Audit Process Creation` | Success and Failure |
 | **Detailed Tracking** | `Audit PNP Activity` | Success |
 | **DS Access** | `Audit Directory Service Changes` | Success and Failure |
@@ -11402,6 +11457,9 @@ $Policies = @(
     @{ Subcategory = "Credential Validation"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "User Account Management"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Security Group Management"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "Computer Account Management"; Success = "enable"; Failure = "disable" },
+    @{ Subcategory = "Distribution Group Management"; Success = "enable"; Failure = "disable" },
+    @{ Subcategory = "Other Account Management Events"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Process Creation"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "PNP Activity"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Directory Service Changes"; Success = "enable"; Failure = "enable" },
@@ -11487,6 +11545,9 @@ $RequiredPolicies = @(
     @{ Subcategory = "Credential Validation"; Expected = "Success and Failure" },
     @{ Subcategory = "User Account Management"; Expected = "Success and Failure" },
     @{ Subcategory = "Security Group Management"; Expected = "Success and Failure" },
+    @{ Subcategory = "Computer Account Management"; Expected = "Success" },
+    @{ Subcategory = "Distribution Group Management"; Expected = "Success" },
+    @{ Subcategory = "Other Account Management Events"; Expected = "Success" },
     @{ Subcategory = "Process Creation"; Expected = "Success and Failure" },
     @{ Subcategory = "PNP Activity"; Expected = "Success" },
     @{ Subcategory = "Directory Service Changes"; Expected = "Success and Failure" },
@@ -14765,6 +14826,8 @@ if ($RegistryValue) {
   * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR
   * HKLM\SOFTWARE\Microsoft\Windows Defender\Features
   * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
+  * HKLM\SOFTWARE\Microsoft\AMSI
+    * FeatureBits = 2 (REG_DWORD)
 
 ---
 
@@ -14776,6 +14839,7 @@ This control introduces a highly restrictive protective barrier on PAWs:
 1. **Attack Surface Reduction (ASR) Rules**: ASR rules block activities commonly used by threat actors to perform remote execution, persistence, and credential theft. On PAWs, all rules are configured to strict Block mode. Crucially, rules blocking LSASS credential stealing (`9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2`) and WMI/PSExec child process creation (`d1e49fe6-3b60-4270-a130-058b290d024a`) are enforced. Since PAWs are reserved for administrative consoles and not daily use software, there is a lower threat of user-facing disruption.
 2. **Tamper Protection**: Restricts any software or unauthorized administrator from disabling real-time scanning, cloud components, behavior monitoring, or exclusions. This blocks malicious actors from trying to disable security controls if they gain command execution.
 3. **Sandbox Execution (AppContainer)**: Sandboxes the core scanning service (`MsMpEng.exe`). If an attacker attempts to exploit a parser flaw in the Defender engine itself using a specifically crafted malicious file, the exploit is restricted to the AppContainer sandbox, mitigating privilege escalation on Tier 0 assets.
+4. **AMSI Authenticode Signature Verification (FeatureBits)**: Enforces signature verification checks on registered Antimalware Scan Interface (AMSI) providers. This ensures only signed and trusted AMSI provider DLLs can scan script content, preventing attackers from bypass scanning by registering rogue provider DLLs.
 
 ---
 
@@ -14783,6 +14847,7 @@ This control introduces a highly restrictive protective barrier on PAWs:
 ## Legacy Impact & Compatibility
 * **Administrative Operations**: Enabling the WMI/PSExec block rule means administrative scripts must be run locally or orchestrated via secure WinRM endpoints. Traditional PSExec commands from remote management consoles will be blocked, enforcing proper tier-isolated remote administration.
 * **Execution Restrictions**: Since productivity suites (e.g., Office, Outlook) are strictly banned from PAWs, ASR rules targeting Microsoft Office applications are enforced as a defensive measure to prevent shadow installations or bypasses.
+* **AMSI Provider Signatures**: Any third-party security agents registering as AMSI providers must have a valid, trusted Authenticode signature. Unsigned or self-signed providers will be prevented from loading.
 
 ---
 
@@ -14925,6 +14990,16 @@ This control introduces a highly restrictive protective barrier on PAWs:
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
     * **Value**: `1`
+32. Navigate to:
+    `Computer Configuration\Preferences\Windows Settings\Registry`
+33. Right-click **Registry**, select **New** -> **Registry Item**.
+34. Configure:
+    * **Action**: `Update`
+    * **Hive**: `HKEY_LOCAL_MACHINE`
+    * **Key Path**: `SOFTWARE\Microsoft\AMSI`
+    * **Value name**: `FeatureBits`
+    * **Value type**: `REG_DWORD`
+    * **Value data**: `2` (Decimal)
 
 ---
 
@@ -15112,6 +15187,14 @@ if (-not (Test-Path $EnvPath)) {
 Set-ItemProperty -Path $EnvPath -Name "MP_FORCE_USE_SANDBOX" -Value "1" -Type String
 Write-Host "Sandbox Execution environment variable configured." -ForegroundColor Green
 
+# 8. Configure AMSI Authenticode Signature Verification (FeatureBits = 2)
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (-not (Test-Path $AmsiPath)) {
+    New-Item -Path $AmsiPath -Force | Out-Null
+}
+Set-ItemProperty -Path $AmsiPath -Name "FeatureBits" -Value 2 -Type DWord -Force
+Write-Host "[+] AMSI Authenticode signature verification enabled." -ForegroundColor Green
+
 Write-Host "Defender PAW baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan
 ```
 
@@ -15220,6 +15303,17 @@ foreach ($KeyName in $CheckKeys.Keys) {
         $Actual = if ($Val) { $Val.$KeyName } else { "Not Configured" }
         Write-Host "      * Missing/Misconfigured: $KeyName (Expected: $($Target.Expected), Got: $Actual)" -ForegroundColor Yellow
     }
+}
+
+# 6. Audit AMSI Authenticode verification
+$AmsiPath = "HKLM:\SOFTWARE\Microsoft\AMSI"
+if (Test-Path $AmsiPath) {
+    $AmsiBits = Get-ItemProperty -Path $AmsiPath -Name "FeatureBits" -ErrorAction SilentlyContinue
+    $AmsiVal = if ($AmsiBits) { $AmsiBits.FeatureBits } else { 0 }
+    $AmsiColor = if ($AmsiVal -eq 2) { "Green" } else { "Red" }
+    Write-Host "    - AMSI Authenticode verification (FeatureBits): $AmsiVal (Expected: 2)" -ForegroundColor $AmsiColor
+} else {
+    Write-Host "    - AMSI Authenticode verification (FeatureBits): NOT ENABLED" -ForegroundColor Red
 }
 ```
 
@@ -22186,7 +22280,7 @@ This document maps the recommendations of the **ANSSI (French National Agency fo
 | **R11** | Enforce NTLM restriction policies | NTLM Restriction | **Covered** | [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md) |
 | **R12** | Disable obsolete name resolution protocols (LLMNR/NetBIOS) | Name Resolution | **Covered** | [REQ-DC-002](#02-domain-controllers-disable-multicast-name-resolution-md), [REQ-END-001](#08-endpoints-harden-network-and-name-resolution-md) |
 | **R13** | Deprecate legacy protocols and enforce transport security | Obsolete Protocols | **Covered** | [REQ-DC-001](#02-domain-controllers-disable-smbv1-md), [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md) |
-| **R14** | Enforce LSA Protection and Credential Guard | Credential Isolation | **Covered** | [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-DC-007](#02-domain-controllers-enable-credential-guard-md) |
+| **R14** | Enforce LSA Protection and Credential Guard | Credential Isolation | **Covered** | [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-DC-007](#02-domain-controllers-disable-credential-guard-md) |
 | **R15** | Prohibit unconstrained Kerberos delegation | Kerberos Delegation | **Covered** | [REQ-ID-004](#03-identities-services-restrict-kerberos-delegation-md) |
 | **R16** | Restrict constrained Kerberos delegation | Kerberos Delegation | **Covered** | [REQ-ID-004](#03-identities-services-restrict-kerberos-delegation-md) |
 | **R17** | Enforce strong Kerberos encryption algorithms (AES-only) | Kerberos Encryption | **Covered** | [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md), [REQ-ID-008](#03-identities-services-enforce-user-aes-encryption-md) |
@@ -22241,10 +22335,11 @@ This document maps the **CIS Benchmarks** sections for Windows Server (2016, 201
 | **1.2** | Account Lockout Policy (Threshold, Duration) | Account Policies | **Covered** | [REQ-PAW-013](#07-paws-configure-account-policies-md), [REQ-END-018](#08-endpoints-configure-account-policies-md) |
 | **1.3** | Kerberos Policy (Ticket Lifetimes, Clock Tolerance) | Account Policies | **Covered** | [REQ-END-018](#08-endpoints-configure-account-policies-md) |
 | **2.2** | User Rights Assignment (Deny logons, Allow logons, DC Operator Restrictions) | Local Policies | **Covered** | [REQ-ARCH-001](#01-architecture-restrict-tier-logons-md), [REQ-ID-007](#03-identities-services-restrict-service-account-logons-md), [REQ-DC-023](#02-domain-controllers-configure-user-rights-assignments-md), [REQ-PAW-009](#07-paws-configure-user-rights-assignments-md), [REQ-END-016](#08-endpoints-configure-user-rights-assignments-md) |
-| **2.3** | Security Options (LSA, LAN Manager, LDAP Signing, SMB Signing) | Local Policies | **Covered** | [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-004](#02-domain-controllers-enforce-ldap-signing-md), [REQ-DC-005](#02-domain-controllers-enforce-ldap-channel-binding-md), [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-DC-009](#02-domain-controllers-enforce-smb-signing-md), [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md), [REQ-DC-011](#02-domain-controllers-restrict-ntds-sam-api-md), [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md), [REQ-DC-024](#02-domain-controllers-configure-dsheuristics-md) |
+| **2.3** | Security Options (LSA, LAN Manager, LDAP Signing, SMB Signing) | Local Policies | **Covered** | [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-004](#02-domain-controllers-enforce-ldap-signing-md), [REQ-DC-005](#02-domain-controllers-enforce-ldap-channel-binding-md), [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-DC-009](#02-domain-controllers-enforce-smb-signing-md), [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md), [REQ-DC-011](#02-domain-controllers-restrict-ntds-sam-api-md), [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md), [REQ-DC-024](#02-domain-controllers-configure-dsheuristics-md), [REQ-DC-025](#02-domain-controllers-configure-security-options-md) |
 | **9.1** | Windows Defender Firewall Profiles (Domain, Private, Public) | Firewall | **Covered** | [REQ-NET-001](#04-network-firewall-configure-ad-port-matrix-md), [REQ-NET-008](#04-network-firewall-configure-firewall-logging-md) |
 | **18.2** | Local Administrator Password Solution (LAPS) settings | Administrative Templates | **Covered** | [REQ-ID-002](#03-identities-services-enable-laps-md) |
 | **18.3** | AutoPlay and AutoRun settings | Administrative Templates | **Covered** | [REQ-END-003](#08-endpoints-disable-autoplay-autorun-md) |
+| **18.6** | DNS Client Name Resolution Template settings | Administrative Templates | **Covered** | [REQ-DC-002](#02-domain-controllers-disable-multicast-name-resolution-md) |
 | **18.8** | PowerShell Logging, Device Guard, and Virtualization-Based Security | Administrative Templates | **Covered** | [REQ-LOG-002](#05-logging-monitoring-configure-powershell-and-command-line-auditing-md), [REQ-PAW-006](#07-paws-enable-hardware-virtualization-and-dma-protection-md), [REQ-PAW-010](#07-paws-enable-vbs-credential-guard-md), [REQ-END-010](#08-endpoints-enable-vbs-credential-guard-md) |
 | **18.9** | System Services (Print Spooler), AppLocker, WDAC, and GP Refresh settings | Administrative Templates | **Covered** | [REQ-ARCH-005](#01-architecture-default-policies-recommendations-md), [REQ-DC-001](#02-domain-controllers-disable-smbv1-md), [REQ-DC-008](#02-domain-controllers-disable-print-spooler-md), [REQ-DC-021](#02-domain-controllers-configure-applocker-policies-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-END-011](#08-endpoints-configure-wdac-md) |
 | **19.1** | Windows Defender Firewall port configurations and isolation rules | Firewall Advanced Security | **Covered** | [REQ-NET-001](#04-network-firewall-configure-ad-port-matrix-md), [REQ-NET-003](#04-network-firewall-configure-workstation-isolation-md), [REQ-NET-008](#04-network-firewall-configure-firewall-logging-md) |
@@ -22276,7 +22371,7 @@ This document maps the focus areas of the **Microsoft Security Baselines** (Doma
 
 | Focus Area | Baseline Requirement Description | Baseline Category | Status | Mapped Technical Control(s) |
 | :--- | :--- | :--- | :--- | :--- |
-| **Credential Guard** | Deploy Windows Defender Credential Guard to isolate and protect LSASS credentials. | Credential Isolation | **Covered** | [REQ-DC-007](#02-domain-controllers-enable-credential-guard-md), [REQ-PAW-010](#07-paws-enable-vbs-credential-guard-md), [REQ-END-010](#08-endpoints-enable-vbs-credential-guard-md) |
+| **Credential Guard** | Deploy Windows Defender Credential Guard to isolate and protect LSASS credentials (disabled on Domain Controllers as per Microsoft recommendations). | Credential Isolation | **Covered** | [REQ-DC-007](#02-domain-controllers-disable-credential-guard-md), [REQ-PAW-010](#07-paws-enable-vbs-credential-guard-md), [REQ-END-010](#08-endpoints-enable-vbs-credential-guard-md) |
 | **LSA Protection** | Configure Local Security Authority (LSA) to run as a protected process (LSA Protection). | Credential Isolation | **Covered** | [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-PAW-002](#07-paws-enable-lsa-protection-md) |
 | **Protocol Deprecation** | Disable legacy protocols (SMBv1, NTLMv1, digest authentication) across servers and endpoints. | Legacy Protocols | **Covered** | [REQ-DC-001](#02-domain-controllers-disable-smbv1-md), [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md) |
 | **AppLocker** | Deploy AppLocker application control policies to restrict unauthorized software execution. | Application Control | **Covered** | [REQ-DC-021](#02-domain-controllers-configure-applocker-policies-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md) |
