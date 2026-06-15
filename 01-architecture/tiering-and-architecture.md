@@ -39,41 +39,7 @@ Enforcing administrative tiering requires structural separation in Active Direct
 ### Organizational Unit (OU) Structure
 Active Directory OUs must be organized to group assets logically by security level:
 
-```mermaid
-graph TD
-    %% Nodes and hierarchy
-    Root["Domain Root (domain.local)"] --> AdminOU["Administrative OUs"]
-
-    AdminOU --> Tier0["Tier 0 Assets"]
-    AdminOU --> Tier1["Tier 1 Assets"]
-    AdminOU --> Tier2["Tier 2 Assets"]
-
-    Tier0 --> T0_DCs["Domain Controllers"]
-    Tier0 --> T0_Admins["Tier 0 Administrators"]
-    Tier0 --> T0_PAWs["PAWs (Privileged Access Workstations)"]
-
-    Tier1 --> T1_Servers["Member Servers"]
-    Tier1 --> T1_Admins["Tier 1 Administrators"]
-
-    Tier2 --> T2_Workstations["Workstations"]
-    Tier2 --> T2_Users["Standard Users"]
-    Tier2 --> T2_Admins["Tier 2 Local Administrators"]
-
-    %% Styling
-    classDef rootStyle fill:#1e293b,stroke:#475569,stroke-width:2px,color:#f8fafc;
-    classDef ouStyle fill:#334155,stroke:#64748b,stroke-width:2px,color:#f1f5f9;
-    classDef tier0Style fill:#7f1d1d,stroke:#b91c1c,stroke-width:2px,color:#fee2e2;
-    classDef tier1Style fill:#7c2d12,stroke:#c2410c,stroke-width:2px,color:#ffedd5;
-    classDef tier2Style fill:#14532d,stroke:#15803d,stroke-width:2px,color:#dcfce7;
-    classDef assetStyle fill:#0f172a,stroke:#334155,stroke-width:1px,color:#cbd5e1;
-
-    class Root rootStyle;
-    class AdminOU ouStyle;
-    class Tier0 tier0Style;
-    class Tier1 tier1Style;
-    class Tier2 tier2Style;
-    class T0_DCs,T0_Admins,T0_PAWs,T1_Servers,T1_Admins,T2_Workstations,T2_Users,T2_Admins assetStyle;
-```
+![Active Directory Organizational Unit Hierarchy](images/ad-ou-structure.png)
 
 ### Group Policy Object (GPO) Separation
 Separate, distinct GPOs must be created and linked to each tier's OU. Cross-linking GPOs is prohibited:
