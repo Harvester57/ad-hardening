@@ -13,7 +13,7 @@
     "gitbook-plugin-flexible-alerts": "^1.0.4",
     "honkit": "^6.2.1",
     "honkit-plugin-prism": "^2.5.4",
-    "honkit-plugin-search-plus": "^1.0.1",
+    "honkit-plugin-search-plus": "^1.0.0",
     "md-to-pdf": "^5.2.5"
   }
 }
