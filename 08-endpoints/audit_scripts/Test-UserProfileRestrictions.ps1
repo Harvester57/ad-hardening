@@ -21,8 +21,15 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
 # 1. Audit Current User Settings
 $PushPath = "HKCU:\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
 $CloudPath = "HKCU:\Software\Policies\Microsoft\Windows\CloudContent"
+$CopilotPath = "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot"
+$ExplorerPoliciesPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+
 Test-RegistryValue $PushPath "NoToastApplicationNotificationOnLockScreen" 1
 Test-RegistryValue $CloudPath "DisableThirdPartySuggestions" 1
+Test-RegistryValue $CloudPath "ConfigureWindowsSpotlight" 2
+Test-RegistryValue $CloudPath "DisableSpotlightCollectionOnDesktop" 1
+Test-RegistryValue $CopilotPath "TurnOffWindowsCopilot" 1
+Test-RegistryValue $ExplorerPoliciesPath "NoInplaceSharing" 1
 
 # 2. Audit Computer HKLM Settings
 $ClassBat = "HKLM:\SOFTWARE\Classes\batfile\shell\runasuser"
@@ -36,6 +43,10 @@ Test-RegistryValue $ClassMsc "SuppressionPolicy" 4096
 
 $SessionKernel = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel"
 Test-RegistryValue $SessionKernel "DisableExceptionChainValidation" 0
+
+# Input Personalization and Attachment Manager
+Test-RegistryValue "HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization" "AllowInputPersonalization" 0
+Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" 2
 
 $Personalization = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization"
 Test-RegistryValue $Personalization "NoLockScreenCamera" 1

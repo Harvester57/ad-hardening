@@ -24,14 +24,23 @@
       * `MaxPasswordAge` = `0` (Password does not expire / disabled)
       * `MinPasswordAge` = `1` (1 day minimum)
       * `ClearTextPassword` = `0` (Reversible encryption disabled)
+      * `RelaxMinPasswordLengthLimits` = `1` (Relax minimum password length limits enabled)
+      * `AllowAdministratorLockout` = `1` (Allow Administrator account lockout enabled)
     * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon`
       * `ScRemoveOption` = `"1"` (REG_SZ, 1 = Lock Workstation)
       * `CachedLogonsCount` = `0` (REG_DWORD)
+      * `PasswordExpiryWarning` = `14` (REG_DWORD, prompt user to change password before expiration)
     * `HKLM\SECURITY\Cache`
       * `NL$IterationCount` = `1954` (REG_DWORD, 1954 = 2,000,896 rounds of PBKDF2-SHA1)
     * `HKLM\System\CurrentControlSet\Control\Lsa`
       * `LimitBlankPasswordUse` = `1` (REG_DWORD)
       * `NoLMHash` = `1` (REG_DWORD)
+      * `RestrictAnonymousSAM` = `1` (REG_DWORD, restrict anonymous enumeration of SAM)
+      * `RestrictAnonymous` = `1` (REG_DWORD, restrict anonymous enumeration of shares)
+      * `ForceNetworkLogon` = `0` (REG_DWORD, sharing and security model Classic)
+      * `ObaseCaseInsensitive` = `1` (REG_DWORD, require case insensitivity for non-Windows subsystems)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters`
+      * `AllowPKU2U` = `0` (REG_DWORD, Allow PKU2U requests disabled)
     * `HKLM\System\CurrentControlSet\Control\SecurityProviders\WDigest`
       * `UseLogonCredential` = `0` (REG_DWORD)
     * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
@@ -41,6 +50,9 @@
     * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
       * `MSAOptional` = `1` (REG_DWORD)
       * `MaxDevicePasswordFailedAttempts` = `10` (REG_DWORD, 10 or fewer invalid logon attempts, but not 0)
+      * `CrashOnAuditFail` = `0` (REG_DWORD, shut down system if unable to log audits disabled)
+      * `DisableCAD` = `0` (REG_DWORD, CTRL+ALT+DEL required)
+      * `DontDisplayLastUserName` = `1` (REG_DWORD, Don't display last signed-in enabled)
     * `HKLM\SOFTWARE\Policies\Microsoft\MicrosoftAccount`
       * `DisableUserAuth` = `1` (REG_DWORD)
     * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork`
@@ -54,8 +66,13 @@
       * `DisablePasswordChange` = `0` (REG_DWORD)
       * `MaximumPasswordAge` = `30` (REG_DWORD)
       * `RequireStrongKey` = `1` (REG_DWORD)
+      * `ForceLogoffWhenHourExpire` = `1` (REG_DWORD, force logoff when logon hours expire enabled)
     * `HKLM\System\CurrentControlSet\Services\LanmanWorkstation\Parameters`
       * `EnablePlainTextPassword` = `0` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\LanmanServer\Parameters`
+      * `AutoDisconnect` = `15` (REG_DWORD, idle time before suspending session in minutes)
+      * `EnableForcedLogoff` = `1` (REG_DWORD, disconnect clients when logon hours expire enabled)
+      * `NullSessionShares` = `""` (REG_MULTI_SZ, shares that can be accessed anonymously -> none)
     * `HKLM\System\CurrentControlSet\Control\Lsa\MSV1_0`
       * `allownullsessionfallback` = `0` (REG_DWORD)
       * `NTLMMinClientSec` = `537395200` (REG_DWORD)
@@ -107,9 +124,10 @@ These settings must be configured directly within the **Default Domain Policy** 
    `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies`
 4. Configure the settings:
    * **Account Lockout Policy**:
-     * **Account lockout threshold**: `10` invalid logon attempts
-     * **Reset account lockout counter after**: `15` minutes
-     * **Account lockout duration**: `15` minutes (Must be greater than or equal to reset time)
+      * **Account lockout threshold**: `10` invalid logon attempts
+      * **Reset account lockout counter after**: `15` minutes
+      * **Account lockout duration**: `15` minutes (Must be greater than or equal to reset time)
+      * **Allow Administrator account lockout**: `Enabled`
    * **Password Policy**:
      * **Enforce password history**: `24` passwords remembered
      * **Maximum password age**: `0` days (never expire)
@@ -117,6 +135,7 @@ These settings must be configured directly within the **Default Domain Policy** 
      * **Minimum password length**: `14` characters
      * **Password must meet complexity requirements**: `Enabled`
      * **Store passwords using reversible encryption**: `Disabled`
+     * **Relax minimum password length limits**: `Enabled`
    * **Kerberos Policy**:
      * **Enforce user logon restrictions**: `Enabled`
      * **Maximum lifetime for service ticket**: `600` minutes
@@ -152,6 +171,19 @@ In the endpoints GPO (e.g., `GPO_Hardening_Workstations`), navigate to:
 * **Policy**: `Network access: Allow anonymous SID/Name translation` -> Set to **Disabled** (value 0)
 * **Policy**: `Network security: Allow LocalSystem NULL session fallback` -> Set to **Disabled** (value 0)
 * **Policy**: `Interactive logon: Machine account lockout threshold` -> Set to **10** (or fewer invalid logon attempts, but not 0)
+* **Policy**: `Audit: Shut down system immediately if unable to log security audits` -> Set to **Disabled** (value 0)
+* **Policy**: `Interactive logon: Do not require CTRL+ALT+DEL` -> Set to **Disabled** (value 0)
+* **Policy**: `Interactive logon: Don't display last signed-in` -> Set to **Enabled** (value 1)
+* **Policy**: `Interactive logon: Prompt user to change password before expiration` -> Set to **14** days (or between 5 and 14 days)
+* **Policy**: `Microsoft network client: Send unencrypted password to third-party SMB servers` -> Set to **Disabled** (value 0)
+* **Policy**: `Microsoft network server: Amount of idle time required before suspending session` -> Set to **15** or fewer minutes
+* **Policy**: `Microsoft network server: Disconnect clients when logon hours expire` -> Set to **Enabled** (value 1)
+* **Policy**: `Network access: Do not allow anonymous enumeration of SAM accounts and shares` -> Set to **Enabled** (value 1)
+* **Policy**: `Network access: Shares that can be accessed anonymously` -> Set to **None**
+* **Policy**: `Network access: Sharing and security model for local accounts` -> Set to **Classic - local users authenticate as themselves**
+* **Policy**: `Network Security: Allow PKU2U authentication requests to this computer to use online identities` -> Set to **Disabled** (value 0)
+* **Policy**: `Network security: Force logoff when logon hours expire` -> Set to **Enabled** (value 1)
+* **Policy**: `System objects: Require case insensitivity for non-Windows subsystems` -> Set to **Enabled** (value 1)
 
 #### Step 3: Configure Hello for Business, PIN and Microsoft Account Policies
 Navigate to:
@@ -297,6 +329,39 @@ Set-ItemProperty -Path $MsvPath -Name "NTLMMinClientSec" -Value 537395200 -Type 
 Set-ItemProperty -Path $MsvPath -Name "NTLMMinServerSec" -Value 537395200 -Type DWord -Force
 Write-Host "[+] Network authentication security and NTLM session settings applied." -ForegroundColor Green
 
+# Additional local security options for endpoints
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+if (-not (Test-Path $SystemPath)) {
+    New-Item -Path $SystemPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SystemPath -Name "CrashOnAuditFail" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $SystemPath -Name "DisableCAD" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $SystemPath -Name "DontDisplayLastUserName" -Value 1 -Type DWord -Force
+
+Set-ItemProperty -Path $WinlogonPath -Name "PasswordExpiryWarning" -Value 14 -Type DWord -Force
+
+Set-ItemProperty -Path $LsaPath -Name "RestrictAnonymousSAM" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "RestrictAnonymous" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "ForceNetworkLogon" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "ObaseCaseInsensitive" -Value 1 -Type DWord -Force
+
+$KerbParamsPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+if (-not (Test-Path $KerbParamsPath)) {
+    New-Item -Path $KerbParamsPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KerbParamsPath -Name "AllowPKU2U" -Value 0 -Type DWord -Force
+
+$LanmanServerPath = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
+if (-not (Test-Path $LanmanServerPath)) {
+    New-Item -Path $LanmanServerPath -Force | Out-Null
+}
+Set-ItemProperty -Path $LanmanServerPath -Name "AutoDisconnect" -Value 15 -Type DWord -Force
+Set-ItemProperty -Path $LanmanServerPath -Name "EnableForcedLogoff" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LanmanServerPath -Name "NullSessionShares" -Value @() -Type MultiString -Force
+
+Set-ItemProperty -Path $NetlogonPath -Name "ForceLogoffWhenHourExpire" -Value 1 -Type DWord -Force
+Write-Host "[+] Additional network and interactive security options applied." -ForegroundColor Green
+
 # 2. Enforce Account Lockout and Password Policy via secedit
 $SecTempDir = Join-Path $env:TEMP "AccountSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
@@ -326,20 +391,22 @@ $NewLines = @()
 $InSystemAccess = $false
 
 $AccountSettings = @{
-    "LockoutBadCount"       = 10
-    "ResetLockoutCount"     = 15
-    "LockoutDuration"       = 15
-    "ClearTextPassword"     = 0
-    "MinimumPasswordLength" = 14
-    "PasswordComplexity"    = 1
-    "PasswordHistorySize"   = 24
-    "MaxPasswordAge"        = 0
-    "MinPasswordAge"        = 1
-    "MaxServiceTicketAge"   = 600
-    "MaxTicketAge"          = 10
-    "MaxRenewAge"           = 7
-    "MaxClockSkew"          = 5
-    "TicketValidateClient"  = 1
+    "LockoutBadCount"              = 10
+    "ResetLockoutCount"            = 15
+    "LockoutDuration"              = 15
+    "ClearTextPassword"            = 0
+    "MinimumPasswordLength"        = 14
+    "PasswordComplexity"           = 1
+    "PasswordHistorySize"          = 24
+    "MaxPasswordAge"               = 0
+    "MinPasswordAge"               = 1
+    "RelaxMinPasswordLengthLimits" = 1
+    "AllowAdministratorLockout"    = 1
+    "MaxServiceTicketAge"          = 600
+    "MaxTicketAge"                 = 10
+    "MaxRenewAge"                  = 7
+    "MaxClockSkew"                 = 5
+    "TicketValidateClient"         = 1
 }
 
 foreach ($Line in $Lines) {
@@ -469,6 +536,40 @@ Test-RegistryValue $MsvPath "allownullsessionfallback" 0
 Test-RegistryValue $MsvPath "NTLMMinClientSec" 537395200
 Test-RegistryValue $MsvPath "NTLMMinServerSec" 537395200
 
+# Audit Additional security options
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+Test-RegistryValue $SystemPath "CrashOnAuditFail" 0
+Test-RegistryValue $SystemPath "DisableCAD" 0
+Test-RegistryValue $SystemPath "DontDisplayLastUserName" 1
+
+Test-RegistryValue $WinlogonPath "PasswordExpiryWarning" 14
+
+$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+Test-RegistryValue $LsaPath "RestrictAnonymousSAM" 1
+Test-RegistryValue $LsaPath "RestrictAnonymous" 1
+Test-RegistryValue $LsaPath "ForceNetworkLogon" 0
+Test-RegistryValue $LsaPath "ObaseCaseInsensitive" 1
+
+$KerbParamsPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+Test-RegistryValue $KerbParamsPath "AllowPKU2U" 0
+
+$LanmanServerPath = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
+Test-RegistryValue $LanmanServerPath "AutoDisconnect" 15
+Test-RegistryValue $LanmanServerPath "EnableForcedLogoff" 1
+
+# Audit NullSessionShares
+$NullSessionVal = Get-ItemProperty -Path $LanmanServerPath -Name "NullSessionShares" -ErrorAction SilentlyContinue
+$NullSessionActual = if ($NullSessionVal) { $NullSessionVal.NullSessionShares } else { "" }
+$NullSessionColor = "Red"
+if ($null -eq $NullSessionActual -or $NullSessionActual -eq "" -or $NullSessionActual.Count -eq 0 -or ($NullSessionActual.Count -eq 1 -and $NullSessionActual[0] -eq "")) {
+    $NullSessionColor = "Green"
+} else {
+    $script:Vulnerable = $true
+}
+Write-Host "    - Registry Setting: NullSessionShares | Actual: '$NullSessionActual' (Expected: empty/None)" -ForegroundColor $NullSessionColor
+
+Test-RegistryValue $NetlogonPath "ForceLogoffWhenHourExpire" 1
+
 # 2. Audit SecEdit Settings
 $SecTempDir = Join-Path $env:TEMP "AccountAuditSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
@@ -484,20 +585,22 @@ if ($Process.ExitCode -ne 0) {
 
 $ConfigContent = Get-Content -Path $CfgFile -Raw
 $AccountSettings = @{
-    "LockoutBadCount"       = 10
-    "ResetLockoutCount"     = 15
-    "LockoutDuration"       = 15
-    "ClearTextPassword"     = 0
-    "MinimumPasswordLength" = 14
-    "PasswordComplexity"    = 1
-    "PasswordHistorySize"   = 24
-    "MaxPasswordAge"        = 0
-    "MinPasswordAge"        = 1
-    "MaxServiceTicketAge"   = 600
-    "MaxTicketAge"          = 10
-    "MaxRenewAge"           = 7
-    "MaxClockSkew"          = 5
-    "TicketValidateClient"  = 1
+    "LockoutBadCount"              = 10
+    "ResetLockoutCount"            = 15
+    "LockoutDuration"              = 15
+    "ClearTextPassword"            = 0
+    "MinimumPasswordLength"        = 14
+    "PasswordComplexity"           = 1
+    "PasswordHistorySize"          = 24
+    "MaxPasswordAge"               = 0
+    "MinPasswordAge"               = 1
+    "RelaxMinPasswordLengthLimits" = 1
+    "AllowAdministratorLockout"    = 1
+    "MaxServiceTicketAge"          = 600
+    "MaxTicketAge"                 = 10
+    "MaxRenewAge"                  = 7
+    "MaxClockSkew"                 = 5
+    "TicketValidateClient"         = 1
 }
 
 foreach ($Key in $AccountSettings.Keys) {
@@ -529,6 +632,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10/11 Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 2.3.7.3 (Accounts: Limit local account use of blank passwords...), Section 2.3.9.5 (Interactive logon: Smart card removal behavior), Section 2.3.10.2 (Microsoft network client: Send unencrypted password), Section 2.3.11.8 (Network access: Allow anonymous SID/Name translation), Section 2.3.11.10 (Network security: Allow LocalSystem NULL session fallback)
+* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 2.3.2.2 (CrashOnAuditFail), Section 2.3.7.1 (DisableCAD), Section 2.3.7.2 (DontDisplayLastUserName), Section 2.3.7.3 (blank passwords), Section 2.3.7.8 (PasswordExpiryWarning), Section 2.3.9.1 (AutoDisconnect), Section 2.3.9.4 (EnableForcedLogoff), Section 2.3.9.5 (Smart card behavior), Section 2.3.10.3 (RestrictAnonymousSAM), Section 2.3.10.11 (NullSessionShares), Section 2.3.10.12 (ForceNetworkLogon), Section 2.3.11.3 (AllowPKU2U), Section 2.3.11.6 (ForceLogoffWhenHourExpire), Section 2.3.11.8 (anonymous translation), Section 2.3.11.10 (null session fallback), Section 2.3.15.1 (ObaseCaseInsensitive).
+* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 1.1.6 (RelaxMinPasswordLengthLimits), Section 1.2.3 (AllowAdministratorLockout).
 * **ANSSI AD Hardening Guide**: Recommendations on password complexity, reversible encryption blocks, lockout management, and domain member secure channels.
 * **DoD Windows 11 Computer STIG v2r6**: Various account policy, PIN complexity, Windows Hello for Business, Microsoft account restrictions, WDigest disabled, and Netlogon secure channel parameters.

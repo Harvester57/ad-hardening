@@ -20,6 +20,7 @@
   * **Registry Locations**:
     * HKLM\Software\Policies\Microsoft\Windows NT\DNSClient
       * `EnableMulticast` = `0` (REG_DWORD, Disables LLMNR)
+      * `EnablemDNS` = `0` (REG_DWORD, Disables mDNS)
     * HKLM\SYSTEM\CurrentControlSet\Services\Netbt\Parameters
       * `NoNameReleaseOnDemand` = `1` (REG_DWORD)
       * `NodeType` = `2` (REG_DWORD)
@@ -30,6 +31,8 @@
       * `DisableIPSourceRouting` = `2` (REG_DWORD)
     * HKLM\SOFTWARE\Policies\Microsoft\Windows\Network Connections
       * `NC_ShowSharedAccessUI` = `0` (REG_DWORD)
+      * `NC_AllowNetBridge_NLA` = `0` (REG_DWORD, Prohibit Network Bridge)
+      * `NC_StdUserAllowedToSetNetworkLocation` = `0` (REG_DWORD, Require elevation to set network location)
     * HKLM\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy
       * `fMinimizeConnections` = `3` (REG_DWORD)
       * `fBlockNonDomain` = `1` (REG_DWORD)
@@ -63,14 +66,14 @@ Legacy name resolution protocols and insecure default network configurations are
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-#### Step 1: Turn Off LLMNR
+#### Step 1: Turn Off LLMNR and mDNS
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
+2. Edit the target endpoints GPO.
 3. Navigate to:
    `Computer Configuration\Administrative Templates\Network\DNS Client`
-4. Configure the setting:
-   * **Policy**: `Turn off Multicast Name Resolution`
-   * **Setting**: `Enabled`
+4. Configure the settings:
+   * **Policy**: `Turn off Multicast Name Resolution` -> **Enabled**
+   * **Policy**: `Configure multicast DNS (mDNS) protocol` -> **Enabled** with option set to **Disabled**
 
 #### Step 2: Disable NetBIOS (via DHCP Scope Options)
 1. Open the **DHCP Management Console** (`dhcpmgmt.msc`).
@@ -127,6 +130,22 @@ Legacy name resolution protocols and insecure default network configurations are
       * **Hive**: `HKEY_LOCAL_MACHINE`
       * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\Network Connections`
       * **Value Name**: `NC_ShowSharedAccessUI`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `0`
+
+    * **Prohibit Network Bridge**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\Network Connections`
+      * **Value Name**: `NC_AllowNetBridge_NLA`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `0`
+
+    * **Require elevation to set network location**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\Network Connections`
+      * **Value Name**: `NC_StdUserAllowedToSetNetworkLocation`
       * **Value Type**: `REG_DWORD`
       * **Value Data**: `0`
 
@@ -212,9 +231,10 @@ function Set-RegDWord {
     }
 }
 
-# 1. Disable LLMNR
+# 1. Disable LLMNR and mDNS
 Set-RegDWord "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" "EnableMulticast" 0
-Write-Host "[+] LLMNR (Multicast Name Resolution) disabled." -ForegroundColor Green
+Set-RegDWord "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" "EnablemDNS" 0
+Write-Host "[+] LLMNR (Multicast Name Resolution) and mDNS disabled." -ForegroundColor Green
 
 # 2. Configure NetBIOS Parameters
 $NetbtPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netbt\Parameters"
@@ -245,10 +265,12 @@ Write-Host "[+] IPv6 TCP/IP parameter source routing disabled." -ForegroundColor
 
 # 5. Prevent Network Connection Sharing and Dual-Homing Bridging
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_ShowSharedAccessUI" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_AllowNetBridge_NLA" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdUserAllowedToSetNetworkLocation" 0
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fMinimizeConnections" 3
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fBlockNonDomain" 1
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config" "AutoConnectAllowedOEM" 0
-Write-Host "[+] Network connections, sharing, and hotspot settings configured." -ForegroundColor Green
+Write-Host "[+] Network connections, sharing, bridging, elevation, and hotspot settings configured." -ForegroundColor Green
 
 # 6. Printing Spooler Web Downloads and HTTP printing block
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" "DisableWebPnPDownload" 1
@@ -286,9 +308,10 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
 
-# 1. Audit LLMNR
+# 1. Audit LLMNR and mDNS
 $DnsPath = "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient"
 Test-RegistryValue $DnsPath "EnableMulticast" 0
+Test-RegistryValue $DnsPath "EnablemDNS" 0
 
 # 2. Audit NetBIOS Parameters
 $NetbtPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netbt\Parameters"
@@ -306,6 +329,8 @@ Test-RegistryValue $Tcpip6Path "DisableIPSourceRouting" 2
 # 4. Audit Connection Sharing & Dual-Homing Settings
 $NetConnPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections"
 Test-RegistryValue $NetConnPath "NC_ShowSharedAccessUI" 0
+Test-RegistryValue $NetConnPath "NC_AllowNetBridge_NLA" 0
+Test-RegistryValue $NetConnPath "NC_StdUserAllowedToSetNetworkLocation" 0
 
 $WcmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy"
 Test-RegistryValue $WcmPath "fMinimizeConnections" 3
@@ -333,7 +358,8 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10 Benchmark**: Section 9.1 (Disable LLMNR), Section 18.8.44.1 (Configure EnableICMPRedirect), Section 18.8.44.2 (Configure DisableIPSourceRouting)
-* **ANSSI AD Hardening Guide**: Recommendation R19 (LDAP and name resolution security recommendations)
+* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 18.6.4.1 (EnablemDNS), Section 18.6.11.2 (NC_AllowNetBridge_NLA), Section 18.6.11.3 (NC_ShowSharedAccessUI), Section 18.6.11.4 (NC_StdUserAllowedToSetNetworkLocation), Section 18.6.21.1 & 18.6.21.2 (fMinimizeConnections & fBlockNonDomain), Section 18.6.23.2.1 (AutoConnectAllowedOEM).
+* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 9.1 (Disable LLMNR), Section 18.8.44.1 (Configure EnableICMPRedirect), Section 18.8.44.2 (Configure DisableIPSourceRouting).
+* **ANSSI AD Hardening Guide**: Recommendation R19 (LDAP and name resolution security recommendations).
 * **DoD Windows 11 Computer STIG v2r6**: Various print driver download limits, HTTP printing blocks, internet connection sharing prohibitions, hotspot connection rules, and null session restrictions.
 

@@ -69,10 +69,23 @@ To prevent initial access and lateral movement, the following unitary technical 
 21. **[REQ-END-021 - Restrict Safe Mode Access to Administrators](disable-safe-mode-for-standard-users.md)**
     Prevents standard (non-administrative) users from logging into the system while in Safe Mode by setting SafeModeBlockNonAdmins to 1.
 
-22. **[REQ-END-022 - Block Outbound Traffic for Known LOLBins](block-lolbins-outbound-traffic.md)**
-    Enforces Windows Defender Firewall outbound rules to block known Living Off the Land Binaries (LOLBins) from initiating outgoing network connections.
+22. **[REQ-END-022 - Configure Windows Defender Firewall and Block LOLBins](configure-windows-firewall.md)**
+    Configures Domain, Private, and Public firewall profile states, logging, and notifications, and enforces outbound rules to block known Living Off the Land Binaries (LOLBins) from initiating outgoing network connections.
 
 23. **[REQ-END-023 - Enable LSA Protection with UEFI Lock](enable-lsa-protection.md)**
     Configures the LSA Protection setting to run the LSASS process as a Protected Process Light (PPL) with UEFI Lock, preventing credential harvesting from LSASS memory.
+
+24. **[REQ-END-024 - Disable Unnecessary System Services](disable-unnecessary-system-services.md)**
+    Disables unnecessary and high-risk system services to minimize the attack surface of standard client endpoints and member servers.
+
+25. **[REQ-END-025 - Configure Secure Printing and Print Spooler Policies](configure-printing-and-spooler.md)**
+    Configures printing security, RPC over TCP communication, Point and Print restrictions, and Redirection Guard, and disables incoming print spooler connections.
+
+26. **[REQ-END-026 - Configure System Administrative Templates](configure-system-administrative-templates.md)**
+    Enforces 91 administrative template settings including SMBv1 driver blocks, event log size extensions, and Windows Update scheduling.
+
+27. **[REQ-END-027 - Configure AppLocker Policies](configure-applocker-policies.md)**
+    Deploys AppLocker application control policies to restrict unauthorized software and script execution, and prevents default AppLocker bypasses.
+
 
 

@@ -4,33 +4,46 @@
 Write-Host "--- Auditing User Account Control Policies ---" -ForegroundColor Cyan
 
 $SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$script:Vulnerable = $false
 
-$AdminPrompt = Get-ItemProperty -Path $SystemPath -Name "ConsentPromptBehaviorAdmin" -ErrorAction SilentlyContinue
-$UserPrompt = Get-ItemProperty -Path $SystemPath -Name "ConsentPromptBehaviorUser" -ErrorAction SilentlyContinue
-$LuaState = Get-ItemProperty -Path $SystemPath -Name "EnableLUA" -ErrorAction SilentlyContinue
-$SecureDesk = Get-ItemProperty -Path $SystemPath -Name "PromptOnSecureDesktop" -ErrorAction SilentlyContinue
+function Test-UACRegistryValue ($name, $expected, $message) {
+    $val = Get-ItemProperty -Path $SystemPath -Name $name -ErrorAction SilentlyContinue
+    $actual = if ($val) { $val.$name } else { $null }
+    $color = "Red"
+    if ($actual -eq $expected) {
+        $color = "Green"
+    } else {
+        $script:Vulnerable = $true
+    }
+    Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expected') | $message" -ForegroundColor $color
+}
 
-$AdminVal = if ($AdminPrompt) { $AdminPrompt.ConsentPromptBehaviorAdmin } else { 0 }
-$UserVal = if ($UserPrompt) { $UserPrompt.ConsentPromptBehaviorUser } else { 3 }
-$LuaVal = if ($LuaState) { $LuaState.EnableLUA } else { 0 }
-$SecureVal = if ($SecureDesk) { $SecureDesk.PromptOnSecureDesktop } else { 0 }
+Test-UACRegistryValue "ConsentPromptBehaviorAdmin" 1 "Behavior of elevation prompt for administrators"
+Test-UACRegistryValue "ConsentPromptBehaviorUser" 0 "Behavior of elevation prompt for standard users"
+Test-UACRegistryValue "EnableLUA" 1 "Run all administrators in Admin Approval Mode"
+Test-UACRegistryValue "PromptOnSecureDesktop" 1 "Switch to secure desktop when prompting"
+Test-UACRegistryValue "LocalAccountTokenFilterPolicy" 0 "UAC network restrictions"
+Test-UACRegistryValue "EnableInstallDetection" 1 "Installer detection"
+Test-UACRegistryValue "EnableVirtualization" 1 "UAC virtualization"
 
-$AdminColor = if ($AdminVal -eq 1 -or $AdminVal -eq 3) { "Green" } else { "Red" }
-$UserColor = if ($UserVal -eq 0) { "Green" } else { "Red" }
-$LuaColor = if ($LuaVal -eq 1) { "Green" } else { "Red" }
-$SecureColor = if ($SecureVal -eq 1) { "Green" } else { "Red" }
-
-Write-Host "    - ConsentPromptBehaviorAdmin: $AdminVal (Required = 1 [Prompt for Creds] or 3 [Prompt for Consent on Secure Desktop])" -ForegroundColor $AdminColor
-Write-Host "    - ConsentPromptBehaviorUser: $UserVal (Required = 0 [Auto Deny])" -ForegroundColor $UserColor
-Write-Host "    - EnableLUA: $LuaVal (Required = 1)" -ForegroundColor $LuaColor
-Write-Host "    - PromptOnSecureDesktop: $SecureVal (Required = 1)" -ForegroundColor $SecureColor
-
+# Audit Sudo command
 $SudoPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sudo"
 if (Test-Path $SudoPath) {
     $SudoState = Get-ItemProperty -Path $SudoPath -Name "Enabled" -ErrorAction SilentlyContinue
     $SudoVal = if ($SudoState) { $SudoState.Enabled } else { 0 }
     $SudoColor = if ($SudoVal -eq 0 -or $SudoVal -eq 1) { "Green" } else { "Red" }
     Write-Host "    - Sudo Command Enabled state: $SudoVal (Required = 1 [New Window] or 0 [Disabled])" -ForegroundColor $SudoColor
+    if ($SudoVal -ne 0 -and $SudoVal -ne 1) {
+        $script:Vulnerable = $true
+    }
 } else {
-    Write-Host "    - Sudo Command Enabled state: Not Configured (Default/Compliant as it inherits disabled or default elevation window)." -ForegroundColor Green
+    Write-Host "    - Sudo Command Enabled state: Not Configured (Default/Compliant as it inherits disabled)" -ForegroundColor Green
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
 }

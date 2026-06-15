@@ -1,4 +1,4 @@
-# Hardening Requirement: Configure AppLocker Policies for Endpoints
+# [REQ-END-027] Configure AppLocker Policies
 
 ## Target Scope
 * **Applicable Systems**: Tier 2 client workstations and member servers.

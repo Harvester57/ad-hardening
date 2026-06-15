@@ -136,21 +136,34 @@ Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Mana
 # Kernel-level Shadow Stacks
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
+# Speech Recognition (AllowInputPersonalization = 0)
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization" "AllowInputPersonalization" 0
+
+# Attachment Manager (SaveZoneInformation = 2)
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" 2
+
 Write-Host "[+] Local computer system restrictions applied." -ForegroundColor Green
 
 # 2. Enforce HKCU Settings on Current User
 $PushPath = "HKCU:\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
 $CloudPath = "HKCU:\Software\Policies\Microsoft\Windows\CloudContent"
+$CopilotPath = "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot"
+$ExplorerPoliciesPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
 
-if (-not (Test-Path $PushPath)) {
-    New-Item -Path $PushPath -Force | Out-Null
-}
-Set-ItemProperty -Path $PushPath -Name "NoToastApplicationNotificationOnLockScreen" -Value 1 -Type DWord
+if (-not (Test-Path $PushPath)) { New-Item -Path $PushPath -Force | Out-Null }
+Set-ItemProperty -Path $PushPath -Name "NoToastApplicationNotificationOnLockScreen" -Value 1 -Type DWord -Force
 
-if (-not (Test-Path $CloudPath)) {
-    New-Item -Path $CloudPath -Force | Out-Null
-}
-Set-ItemProperty -Path $CloudPath -Name "DisableThirdPartySuggestions" -Value 1 -Type DWord
+if (-not (Test-Path $CloudPath)) { New-Item -Path $CloudPath -Force | Out-Null }
+Set-ItemProperty -Path $CloudPath -Name "DisableThirdPartySuggestions" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $CloudPath -Name "ConfigureWindowsSpotlight" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $CloudPath -Name "DisableSpotlightCollectionOnDesktop" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path $CopilotPath)) { New-Item -Path $CopilotPath -Force | Out-Null }
+Set-ItemProperty -Path $CopilotPath -Name "TurnOffWindowsCopilot" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path $ExplorerPoliciesPath)) { New-Item -Path $ExplorerPoliciesPath -Force | Out-Null }
+Set-ItemProperty -Path $ExplorerPoliciesPath -Name "NoInplaceSharing" -Value 1 -Type DWord -Force
+
 Write-Host "[+] Current user profile restrictions applied successfully." -ForegroundColor Green
 
 # 3. Enforce HKCU Settings on Default User Hive (For all future user profiles on this machine)
@@ -163,16 +176,22 @@ if (Test-Path $DefaultHivePath) {
     
     $DefaultPush = "Registry::HKU\DefaultUser\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
     $DefaultCloud = "Registry::HKU\DefaultUser\Software\Policies\Microsoft\Windows\CloudContent"
+    $DefaultCopilot = "Registry::HKU\DefaultUser\Software\Policies\Microsoft\Windows\WindowsCopilot"
+    $DefaultExplorer = "Registry::HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
     
-    if (-not (Test-Path $DefaultPush)) {
-        New-Item -Path $DefaultPush -Force | Out-Null
-    }
-    Set-ItemProperty -Path $DefaultPush -Name "NoToastApplicationNotificationOnLockScreen" -Value 1 -Type DWord
+    if (-not (Test-Path $DefaultPush)) { New-Item -Path $DefaultPush -Force | Out-Null }
+    Set-ItemProperty -Path $DefaultPush -Name "NoToastApplicationNotificationOnLockScreen" -Value 1 -Type DWord -Force
     
-    if (-not (Test-Path $DefaultCloud)) {
-        New-Item -Path $DefaultCloud -Force | Out-Null
-    }
-    Set-ItemProperty -Path $DefaultCloud -Name "DisableThirdPartySuggestions" -Value 1 -Type DWord
+    if (-not (Test-Path $DefaultCloud)) { New-Item -Path $DefaultCloud -Force | Out-Null }
+    Set-ItemProperty -Path $DefaultCloud -Name "DisableThirdPartySuggestions" -Value 1 -Type DWord -Force
+    Set-ItemProperty -Path $DefaultCloud -Name "ConfigureWindowsSpotlight" -Value 2 -Type DWord -Force
+    Set-ItemProperty -Path $DefaultCloud -Name "DisableSpotlightCollectionOnDesktop" -Value 1 -Type DWord -Force
+
+    if (-not (Test-Path $DefaultCopilot)) { New-Item -Path $DefaultCopilot -Force | Out-Null }
+    Set-ItemProperty -Path $DefaultCopilot -Name "TurnOffWindowsCopilot" -Value 1 -Type DWord -Force
+
+    if (-not (Test-Path $DefaultExplorer)) { New-Item -Path $DefaultExplorer -Force | Out-Null }
+    Set-ItemProperty -Path $DefaultExplorer -Name "NoInplaceSharing" -Value 1 -Type DWord -Force
     
     # Unload default hive
     [GC]::Collect()

@@ -137,7 +137,13 @@ The guidebook is organized into eight functional modules:
      * [REQ-END-017 - Harden DMA and Physical Security](08-endpoints/harden-dma-and-physical-security.md)
      * [REQ-END-018 - Configure Account and Password Policies](08-endpoints/configure-account-policies.md)
      * [REQ-END-019 - Configure User Profile Restrictions](08-endpoints/configure-user-profile-restrictions.md)
-     * [REQ-END-022 - Block Outbound Traffic for Known LOLBins](08-endpoints/block-lolbins-outbound-traffic.md)
+     * [REQ-END-020 - Configure Exploit Protection Profile](08-endpoints/configure-exploit-protection.md)
+     * [REQ-END-021 - Restrict Safe Mode Access to Administrators](08-endpoints/disable-safe-mode-for-standard-users.md)
+     * [REQ-END-022 - Configure Windows Defender Firewall and Block LOLBins](08-endpoints/configure-windows-firewall.md)
+     * [REQ-END-023 - Enable LSA Protection with UEFI Lock](08-endpoints/enable-lsa-protection.md)
+     * [REQ-END-024 - Disable Unnecessary System Services](08-endpoints/disable-unnecessary-system-services.md)
+     * [REQ-END-025 - Configure Secure Printing and Print Spooler Policies](08-endpoints/configure-printing-and-spooler.md)
+     * [REQ-END-026 - Configure System Administrative Templates](08-endpoints/configure-system-administrative-templates.md)
 
 ---
 

@@ -18,9 +18,10 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
 
-# 1. Audit LLMNR
+# 1. Audit LLMNR and mDNS
 $DnsPath = "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient"
 Test-RegistryValue $DnsPath "EnableMulticast" 0
+Test-RegistryValue $DnsPath "EnablemDNS" 0
 
 # 2. Audit NetBIOS Parameters
 $NetbtPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netbt\Parameters"
@@ -38,6 +39,8 @@ Test-RegistryValue $Tcpip6Path "DisableIPSourceRouting" 2
 # 4. Audit Connection Sharing & Dual-Homing Settings
 $NetConnPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections"
 Test-RegistryValue $NetConnPath "NC_ShowSharedAccessUI" 0
+Test-RegistryValue $NetConnPath "NC_AllowNetBridge_NLA" 0
+Test-RegistryValue $NetConnPath "NC_StdUserAllowedToSetNetworkLocation" 0
 
 $WcmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy"
 Test-RegistryValue $WcmPath "fMinimizeConnections" 3

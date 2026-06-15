@@ -23,6 +23,7 @@ $BaselineRights = @{
     "SeInteractiveLogonRight"         = "*S-1-5-32-544,*S-1-5-32-545"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
     "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
+    "SeTimeZonePrivilege"             = "*S-1-5-32-544,*S-1-5-19,*S-1-5-32-545"
     "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
     "SeCreateTokenPrivilege"          = ""
     "SeCreateGlobalPrivilege"         = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
@@ -32,14 +33,18 @@ $BaselineRights = @{
     "SeEnableDelegationPrivilege"     = ""
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
     "SeImpersonatePrivilege"          = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
+    "SeIncreaseBasePriorityPrivilege" = "*S-1-5-32-544,*S-1-5-90-0"
     "SeLoadDriverPrivilege"           = "*S-1-5-32-544"
     "SeLockMemoryPrivilege"           = ""
     "SeSecurityPrivilege"             = "*S-1-5-32-544"
     "SeSystemEnvironmentPrivilege"    = "*S-1-5-32-544"
     "SeManageVolumePrivilege"         = "*S-1-5-32-544"
     "SeProfileSingleProcessPrivilege" = "*S-1-5-32-544"
+    "SeSystemProfilePrivilege"        = "*S-1-5-32-544,*S-1-5-80-3139157870-2983391045-3678747466-658725712-1809340420"
+    "SeAssignPrimaryTokenPrivilege"   = "*S-1-5-19,*S-1-5-20"
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
+    "SeRelabelPrivilege"              = ""
 }
 
 foreach ($Key in $BaselineRights.Keys) {

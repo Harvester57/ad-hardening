@@ -83,18 +83,28 @@ This control introduces four primary hardening mechanisms:
 8. Configure the following settings:
    * **Policy**: `Prevent users from configuring exclusions`
      * **Setting**: `Enabled`
-   * **Policy**: `Control whether or not exclusions are visible to Local Admins`
+   * **Policy**: `Control whether exclusions are visible to local users` / `Control whether or not exclusions are visible to Local Admins`
      * **Setting**: `Enabled`
    * **Policy**: `Turn off Auto Exclusions`
      * **Setting**: `Disabled` (ensures automatic exclusions remain active)
 9. Navigate to:
-    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Features`
 10. Configure the setting:
-    * **Policy**: `Enable file hash computation feature`
+    * **Policy**: `Enable EDR in block mode`
       * **Setting**: `Enabled`
 11. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MAPS`
+12. Configure the setting:
+    * **Policy**: `Configure local setting override for reporting to Microsoft MAPS`
+      * **Setting**: `Disabled`
+13. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
+14. Configure the setting:
+    * **Policy**: `Enable file hash computation feature`
+      * **Setting**: `Enabled`
+15. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
-12. Configure the following settings:
+16. Configure the following settings:
     * **Policy**: `Scan removable drives`
       * **Setting**: `Enabled`
     * **Policy**: `Scan excluded files and directories during quick scans`
@@ -107,16 +117,18 @@ This control introduces four primary hardening mechanisms:
       * **Setting**: `Enabled`
     * **Policy**: `Turn on heuristics`
       * **Setting**: `Enabled`
-13. Navigate to:
+    * **Policy**: `Trigger a quick scan after X days without any scans`
+      * **Setting**: `Enabled: 7`
+17. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Network Protection`
-14. Configure the following settings:
+18. Configure the following settings:
     * **Policy**: `Prevent users and apps from accessing dangerous websites`
       * **Setting**: `Enabled` (Select `Block` in options)
     * **Policy**: `This setting controls whether Network Protection is allowed to be configured into block or audit mode on Windows Server`
       * **Setting**: `Enabled`
-15. Navigate to:
+19. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
-16. Configure the setting:
+20. Configure the setting:
     * **Policy**: `Configure Attack Surface Reduction rules`
       * **Setting**: `Enabled`
       * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block):
@@ -136,63 +148,73 @@ This control introduces four primary hardening mechanisms:
         * `b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4` (Block untrusted and unsigned processes that run from USB)
         * `92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b` (Block Win32 API calls from Office macros)
         * `c1db55ab-c21a-4637-bb3f-a12568109d35` (Use advanced protection against ransomware)
-17. Navigate to:
+21. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Network Inspection System`
-18. Configure the following settings:
+22. Configure the following settings:
     * **Policy**: `Convert warn verdict to block`
       * **Setting**: `Enabled`
     * **Policy**: `Turn on asynchronous inspection`
       * **Setting**: `Enabled`
-19. Navigate to:
+23. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Reporting`
-20. Configure the setting:
+24. Configure the setting:
     * **Policy**: `Configure whether to report Dynamic Signature dropped events`
       * **Setting**: `Enabled`
-21. Navigate to:
-    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Security Intelligence Updates`
-22. Configure the following settings:
-    * **Policy**: `Define the number of days before spyware security intelligence is considered out of date`
-      * **Setting**: `Enabled` (Select `7` days in options)
-    * **Policy**: `Define the number of days before virus security intelligence is considered out of date`
-      * **Setting**: `Enabled` (Select `7` days in options)
-    * **Policy**: `Specify the day of the week to check for security intelligence updates`
-      * **Setting**: `Enabled` (Select `Every day` or `0` in options)
-23. Navigate to:
-    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Threats`
-24. Configure the settings:
-    * **Policy**: `Specify threat alert levels at which default action should not be taken when detected`
-      * **Setting**: `Enabled`
-      * Click **Show...** and enter the following threat levels as Value Names, with Value set to `2` (Quarantine):
-        * `1` (Low severity) -> `2`
-        * `2` (Medium severity) -> `2`
-        * `4` (High severity) -> `2`
-        * `5` (Severe severity) -> `2`
 25. Navigate to:
-    `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Family options`
-26. Configure the setting:
-    * **Policy**: `Hide the Family options area`
-      * **Setting**: `Enabled`
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Security Intelligence Updates`
+26. Configure the following settings:
+     * **Policy**: `Define the number of days before spyware security intelligence is considered out of date`
+       * **Setting**: `Enabled` (Select `7` days in options)
+     * **Policy**: `Define the number of days before virus security intelligence is considered out of date`
+       * **Setting**: `Enabled` (Select `7` days in options)
+     * **Policy**: `Specify the day of the week to check for security intelligence updates`
+       * **Setting**: `Enabled` (Select `Every day` or `0` in options)
 27. Navigate to:
-    `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
-28. Configure the setting:
-    * **Policy**: `Protect Windows Security settings from tampering`
-      * **Setting**: `Enabled` (Select **Block** or **On** depending on ADMX version)
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Threats`
+28. Configure the settings:
+     * **Policy**: `Specify threat alert levels at which default action should not be taken when detected`
+       * **Setting**: `Enabled`
+       * Click **Show...** and enter the following threat levels as Value Names, with Value set to `2` (Quarantine):
+         * `1` (Low severity) -> `2`
+         * `2` (Medium severity) -> `2`
+         * `4` (High severity) -> `2`
+         * `5` (Severe severity) -> `2`
 29. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Family options`
+30. Configure the setting:
+     * **Policy**: `Hide the Family options area`
+       * **Setting**: `Enabled`
+31. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
+32. Configure the setting:
+     * **Policy**: `Protect Windows Security settings from tampering`
+       * **Setting**: `Enabled` (Select **Block** or **On** depending on ADMX version)
+33. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\OneDrive`
+34. Configure the setting:
+     * **Policy**: `Prevent the usage of OneDrive for file storage`
+       * **Setting**: `Enabled`
+35. Navigate to:
+    `User Configuration\Administrative Templates\Windows Components\Attachment Manager`
+36. Configure the setting:
+     * **Policy**: `Notify antivirus programs when opening attachments`
+       * **Setting**: `Enabled`
+37. Navigate to:
     `Computer Configuration\Preferences\Windows Settings\Environment`
-30. Right-click **Environment**, select **New -> Environment Variable**.
-31. Configure the following properties:
-    * **Action**: `Update`
-    * **Type**: `System`
-    * **Name**: `MP_FORCE_USE_SANDBOX`
-    * **Value**: `1`
-32. Navigate to:
-   `Computer Configuration\Administrative Templates\Windows Components\File Explorer`
-33. Configure the following setting:
-   * **Policy**: `Configure Windows Defender SmartScreen`
-     * **Setting**: `Enabled`
-     * **Options**: Select `Require approval from an administrator before running unrecognized software` (forces `ShellSmartScreenLevel` to `Block` and `EnableSmartScreen` to `1`)
+38. Right-click **Environment**, select **New -> Environment Variable**.
+39. Configure the following properties:
+     * **Action**: `Update`
+     * **Type**: `System`
+     * **Name**: `MP_FORCE_USE_SANDBOX`
+     * **Value**: `1`
+40. Navigate to:
+    `Computer Configuration\Administrative Templates\Windows Components\File Explorer`
+41. Configure the following setting:
+    * **Policy**: `Configure Windows Defender SmartScreen`
+      * **Setting**: `Enabled`
+      * **Options**: Select `Require approval from an administrator before running unrecognized software` (forces `ShellSmartScreenLevel` to `Block` and `EnableSmartScreen` to `1`)
 
-#### Step 34: Deploy AMSI Authenticode Verification via GPO Preferences
+#### Step 42: Deploy AMSI Authenticode Verification via GPO Preferences
 Since AMSI provider signature verification is not exposed in standard ADMX templates, deploy it via Registry GPO Preferences:
 1. Within the endpoints GPO, navigate to:
    `Computer Configuration\Preferences\Windows Settings\Registry`
@@ -257,6 +279,13 @@ if (-not (Test-Path $ExclPath)) {
 Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $ExclPath -Name "DisableAutoExclusions" -Value 0 -Type DWord -Force
 
+# 2b. Configure MAPS local setting override prevention in Registry
+$SpynetPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet"
+if (-not (Test-Path $SpynetPath)) {
+    New-Item -Path $SpynetPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SpynetPath -Name "LocalSettingOverrideSpynetReporting" -Value 0 -Type DWord -Force
+
 # 3. Configure NIS, Reporting, Engine, and Scan Settings in Registry
 $FeaturesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
@@ -304,6 +333,7 @@ Set-ItemProperty -Path $ScanPath -Name "DisablePackedExeScanning" -Value 0 -Type
 Set-ItemProperty -Path $ScanPath -Name "ScheduleDay" -Value 0 -Type DWord -Force
 Set-ItemProperty -Path $ScanPath -Name "DisableEmailScanning" -Value 0 -Type DWord -Force
 Set-ItemProperty -Path $ScanPath -Name "DisableHeuristics" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $ScanPath -Name "DaysWithoutCatchupQuickScan" -Value 7 -Type DWord -Force
 
 $SigPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates"
 if (-not (Test-Path $SigPath)) {
@@ -406,6 +436,22 @@ if (-not (Test-Path $AmsiPath)) {
 }
 Set-ItemProperty -Path $AmsiPath -Name "FeatureBits" -Value 2 -Type DWord -Force
 Write-Host "[+] AMSI Authenticode signature verification enabled." -ForegroundColor Green
+
+# 10. Prevent OneDrive usage
+$OneDrivePath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive"
+if (-not (Test-Path $OneDrivePath)) {
+    New-Item -Path $OneDrivePath -Force | Out-Null
+}
+Set-ItemProperty -Path $OneDrivePath -Name "DisableFileSyncNGSC" -Value 1 -Type DWord -Force
+Write-Host "[+] OneDrive file storage disabled in registry." -ForegroundColor Green
+
+# 11. Notify Antivirus on opening attachments
+$AttachmentsPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments"
+if (-not (Test-Path $AttachmentsPath)) {
+    New-Item -Path $AttachmentsPath -Force | Out-Null
+}
+Set-ItemProperty -Path $AttachmentsPath -Name "ScanWithAntiVirus" -Value 3 -Type DWord -Force
+Write-Host "[+] Antivirus notification on opening attachments enabled." -ForegroundColor Green
 
 Write-Host "Defender advanced baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan
 ```
@@ -515,10 +561,14 @@ $CheckKeys = @{
     "ScheduleDay" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
     "DisableEmailScanning" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
     "DisableHeuristics" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
+    "DaysWithoutCatchupQuickScan" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 7 }
     "ASSignatureDue" = @{ Path = "$DefenderPoliciesPath\Signature Updates"; Expected = 7 }
     "AVSignatureDue" = @{ Path = "$DefenderPoliciesPath\Signature Updates"; Expected = 7 }
+    "LocalSettingOverrideSpynetReporting" = @{ Path = "$DefenderPoliciesPath\Spynet"; Expected = 0 }
     "Threats_ThreatSeverityDefaultAction" = @{ Path = "$DefenderPoliciesPath\Threats"; Expected = 1 }
     "UILockdown" = @{ Path = "$DefenderPoliciesPath\Windows Defender Security Center\Family options"; Expected = 1 }
+    "DisableFileSyncNGSC" = @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive"; Expected = 1 }
+    "ScanWithAntiVirus" = @{ Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments"; Expected = 3 }
 }
 
 foreach ($KeyName in $CheckKeys.Keys) {

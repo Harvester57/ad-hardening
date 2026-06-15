@@ -99,10 +99,14 @@ $CheckKeys = @{
     "ScheduleDay" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
     "DisableEmailScanning" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
     "DisableHeuristics" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 0 }
+    "DaysWithoutCatchupQuickScan" = @{ Path = "$DefenderPoliciesPath\Scan"; Expected = 7 }
     "ASSignatureDue" = @{ Path = "$DefenderPoliciesPath\Signature Updates"; Expected = 7 }
     "AVSignatureDue" = @{ Path = "$DefenderPoliciesPath\Signature Updates"; Expected = 7 }
+    "LocalSettingOverrideSpynetReporting" = @{ Path = "$DefenderPoliciesPath\Spynet"; Expected = 0 }
     "Threats_ThreatSeverityDefaultAction" = @{ Path = "$DefenderPoliciesPath\Threats"; Expected = 1 }
     "UILockdown" = @{ Path = "$DefenderPoliciesPath\Windows Defender Security Center\Family options"; Expected = 1 }
+    "DisableFileSyncNGSC" = @{ Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive"; Expected = 1 }
+    "ScanWithAntiVirus" = @{ Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments"; Expected = 3 }
 }
 
 foreach ($KeyName in $CheckKeys.Keys) {

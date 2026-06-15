@@ -41,6 +41,13 @@ if (-not (Test-Path $ExclPath)) {
 Set-ItemProperty -Path $ExclPath -Name "DisableLocalAdminConfiguration" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $ExclPath -Name "DisableAutoExclusions" -Value 0 -Type DWord -Force
 
+# 2b. Configure MAPS local setting override prevention in Registry
+$SpynetPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet"
+if (-not (Test-Path $SpynetPath)) {
+    New-Item -Path $SpynetPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SpynetPath -Name "LocalSettingOverrideSpynetReporting" -Value 0 -Type DWord -Force
+
 # 3. Configure NIS, Reporting, Engine, and Scan Settings in Registry
 $FeaturesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Features"
 if (-not (Test-Path $FeaturesPath)) {
@@ -88,6 +95,7 @@ Set-ItemProperty -Path $ScanPath -Name "DisablePackedExeScanning" -Value 0 -Type
 Set-ItemProperty -Path $ScanPath -Name "ScheduleDay" -Value 0 -Type DWord -Force
 Set-ItemProperty -Path $ScanPath -Name "DisableEmailScanning" -Value 0 -Type DWord -Force
 Set-ItemProperty -Path $ScanPath -Name "DisableHeuristics" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $ScanPath -Name "DaysWithoutCatchupQuickScan" -Value 7 -Type DWord -Force
 
 $SigPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates"
 if (-not (Test-Path $SigPath)) {
@@ -190,5 +198,21 @@ if (-not (Test-Path $AmsiPath)) {
 }
 Set-ItemProperty -Path $AmsiPath -Name "FeatureBits" -Value 2 -Type DWord -Force
 Write-Host "[+] AMSI Authenticode signature verification enabled." -ForegroundColor Green
+
+# 10. Prevent OneDrive usage
+$OneDrivePath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive"
+if (-not (Test-Path $OneDrivePath)) {
+    New-Item -Path $OneDrivePath -Force | Out-Null
+}
+Set-ItemProperty -Path $OneDrivePath -Name "DisableFileSyncNGSC" -Value 1 -Type DWord -Force
+Write-Host "[+] OneDrive file storage disabled in registry." -ForegroundColor Green
+
+# 11. Notify Antivirus on opening attachments
+$AttachmentsPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments"
+if (-not (Test-Path $AttachmentsPath)) {
+    New-Item -Path $AttachmentsPath -Force | Out-Null
+}
+Set-ItemProperty -Path $AttachmentsPath -Name "ScanWithAntiVirus" -Value 3 -Type DWord -Force
+Write-Host "[+] Antivirus notification on opening attachments enabled." -ForegroundColor Green
 
 Write-Host "Defender advanced baseline configuration completed. A reboot is required to initialize Sandbox Execution." -ForegroundColor Cyan

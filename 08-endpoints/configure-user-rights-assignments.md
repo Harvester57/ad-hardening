@@ -48,6 +48,7 @@ User Rights Assignments (URAs) govern the specific actions that security princip
 | **Allow log on locally** | `BUILTIN\Administrators`, `BUILTIN\Users` |
 | **Back up files and directories** | `BUILTIN\Administrators` |
 | **Change the system time** | `BUILTIN\Administrators`, `NT SERVICE\LocalService` |
+| **Change the time zone** | `BUILTIN\Administrators`, `NT SERVICE\LocalService`, `BUILTIN\Users` |
 | **Create a pagefile** | `BUILTIN\Administrators` |
 | **Create a token object** | No one (Empty) |
 | **Create global objects** | `Administrators`, `LOCAL SERVICE`, `NETWORK SERVICE`, `SERVICE` |
@@ -57,12 +58,16 @@ User Rights Assignments (URAs) govern the specific actions that security princip
 | **Enable computer and user accounts to be trusted for delegation** | No one (Empty) |
 | **Force shutdown from a remote system** | `BUILTIN\Administrators` |
 | **Impersonate a client after authentication** | `Administrators`, `LOCAL SERVICE`, `NETWORK SERVICE`, `SERVICE` |
+| **Increase scheduling priority** | `BUILTIN\Administrators`, `Window Manager\Window Manager Group` |
 | **Load and unload device drivers** | `BUILTIN\Administrators` |
 | **Lock pages in memory** | No one (Empty) |
 | **Manage auditing and security log** | `BUILTIN\Administrators` |
+| **Modify an object label** | No one (Empty) |
 | **Modify firmware environment values** | `BUILTIN\Administrators` |
 | **Perform volume maintenance tasks** | `BUILTIN\Administrators` |
 | **Profile single process** | `BUILTIN\Administrators` |
+| **Profile system performance** | `BUILTIN\Administrators`, `NT SERVICE\WdiServiceHost` |
+| **Replace a process level token** | `LOCAL SERVICE`, `NETWORK SERVICE` |
 | **Restore files and directories** | `BUILTIN\Administrators` |
 | **Take ownership of files or other objects** | `BUILTIN\Administrators` |
 
@@ -116,6 +121,7 @@ $BaselineRights = @{
     "SeInteractiveLogonRight"         = "*S-1-5-32-544,*S-1-5-32-545"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
     "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
+    "SeTimeZonePrivilege"             = "*S-1-5-32-544,*S-1-5-19,*S-1-5-32-545"
     "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
     "SeCreateTokenPrivilege"          = ""
     "SeCreateGlobalPrivilege"         = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
@@ -125,14 +131,18 @@ $BaselineRights = @{
     "SeEnableDelegationPrivilege"     = ""
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
     "SeImpersonatePrivilege"          = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
+    "SeIncreaseBasePriorityPrivilege" = "*S-1-5-32-544,*S-1-5-90-0"
     "SeLoadDriverPrivilege"           = "*S-1-5-32-544"
     "SeLockMemoryPrivilege"           = ""
     "SeSecurityPrivilege"             = "*S-1-5-32-544"
     "SeSystemEnvironmentPrivilege"    = "*S-1-5-32-544"
     "SeManageVolumePrivilege"         = "*S-1-5-32-544"
     "SeProfileSingleProcessPrivilege" = "*S-1-5-32-544"
+    "SeSystemProfilePrivilege"        = "*S-1-5-32-544,*S-1-5-80-3139157870-2983391045-3678747466-658725712-1809340420"
+    "SeAssignPrimaryTokenPrivilege"   = "*S-1-5-19,*S-1-5-20"
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
+    "SeRelabelPrivilege"              = ""
 }
 
 # Re-build [Privilege Rights] section line-by-line
@@ -225,6 +235,7 @@ $BaselineRights = @{
     "SeInteractiveLogonRight"         = "*S-1-5-32-544,*S-1-5-32-545"
     "SeBackupPrivilege"               = "*S-1-5-32-544"
     "SeSystemtimePrivilege"           = "*S-1-5-32-544,*S-1-5-19"
+    "SeTimeZonePrivilege"             = "*S-1-5-32-544,*S-1-5-19,*S-1-5-32-545"
     "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
     "SeCreateTokenPrivilege"          = ""
     "SeCreateGlobalPrivilege"         = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
@@ -234,14 +245,18 @@ $BaselineRights = @{
     "SeEnableDelegationPrivilege"     = ""
     "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
     "SeImpersonatePrivilege"          = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
+    "SeIncreaseBasePriorityPrivilege" = "*S-1-5-32-544,*S-1-5-90-0"
     "SeLoadDriverPrivilege"           = "*S-1-5-32-544"
     "SeLockMemoryPrivilege"           = ""
     "SeSecurityPrivilege"             = "*S-1-5-32-544"
     "SeSystemEnvironmentPrivilege"    = "*S-1-5-32-544"
     "SeManageVolumePrivilege"         = "*S-1-5-32-544"
     "SeProfileSingleProcessPrivilege" = "*S-1-5-32-544"
+    "SeSystemProfilePrivilege"        = "*S-1-5-32-544,*S-1-5-80-3139157870-2983391045-3678747466-658725712-1809340420"
+    "SeAssignPrimaryTokenPrivilege"   = "*S-1-5-19,*S-1-5-20"
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
+    "SeRelabelPrivilege"              = ""
 }
 
 foreach ($Key in $BaselineRights.Keys) {

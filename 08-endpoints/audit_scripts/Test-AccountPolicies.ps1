@@ -68,6 +68,40 @@ Test-RegistryValue $MsvPath "allownullsessionfallback" 0
 Test-RegistryValue $MsvPath "NTLMMinClientSec" 537395200
 Test-RegistryValue $MsvPath "NTLMMinServerSec" 537395200
 
+# Audit Additional security options
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+Test-RegistryValue $SystemPath "CrashOnAuditFail" 0
+Test-RegistryValue $SystemPath "DisableCAD" 0
+Test-RegistryValue $SystemPath "DontDisplayLastUserName" 1
+
+Test-RegistryValue $WinlogonPath "PasswordExpiryWarning" 14
+
+$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+Test-RegistryValue $LsaPath "RestrictAnonymousSAM" 1
+Test-RegistryValue $LsaPath "RestrictAnonymous" 1
+Test-RegistryValue $LsaPath "ForceNetworkLogon" 0
+Test-RegistryValue $LsaPath "ObaseCaseInsensitive" 1
+
+$KerbParamsPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+Test-RegistryValue $KerbParamsPath "AllowPKU2U" 0
+
+$LanmanServerPath = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
+Test-RegistryValue $LanmanServerPath "AutoDisconnect" 15
+Test-RegistryValue $LanmanServerPath "EnableForcedLogoff" 1
+
+# Audit NullSessionShares
+$NullSessionVal = Get-ItemProperty -Path $LanmanServerPath -Name "NullSessionShares" -ErrorAction SilentlyContinue
+$NullSessionActual = if ($NullSessionVal) { $NullSessionVal.NullSessionShares } else { "" }
+$NullSessionColor = "Red"
+if ($null -eq $NullSessionActual -or $NullSessionActual -eq "" -or $NullSessionActual.Count -eq 0 -or ($NullSessionActual.Count -eq 1 -and $NullSessionActual[0] -eq "")) {
+    $NullSessionColor = "Green"
+} else {
+    $script:Vulnerable = $true
+}
+Write-Host "    - Registry Setting: NullSessionShares | Actual: '$NullSessionActual' (Expected: empty/None)" -ForegroundColor $NullSessionColor
+
+Test-RegistryValue $NetlogonPath "ForceLogoffWhenHourExpire" 1
+
 # 2. Audit SecEdit Settings
 $SecTempDir = Join-Path $env:TEMP "AccountAuditSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
@@ -83,20 +117,22 @@ if ($Process.ExitCode -ne 0) {
 
 $ConfigContent = Get-Content -Path $CfgFile -Raw
 $AccountSettings = @{
-    "LockoutBadCount"       = 10
-    "ResetLockoutCount"     = 15
-    "LockoutDuration"       = 15
-    "ClearTextPassword"     = 0
-    "MinimumPasswordLength" = 14
-    "PasswordComplexity"    = 1
-    "PasswordHistorySize"   = 24
-    "MaxPasswordAge"        = 0
-    "MinPasswordAge"        = 1
-    "MaxServiceTicketAge"   = 600
-    "MaxTicketAge"          = 10
-    "MaxRenewAge"           = 7
-    "MaxClockSkew"          = 5
-    "TicketValidateClient"  = 1
+    "LockoutBadCount"              = 10
+    "ResetLockoutCount"            = 15
+    "LockoutDuration"              = 15
+    "ClearTextPassword"            = 0
+    "MinimumPasswordLength"        = 14
+    "PasswordComplexity"           = 1
+    "PasswordHistorySize"          = 24
+    "MaxPasswordAge"               = 0
+    "MinPasswordAge"               = 1
+    "RelaxMinPasswordLengthLimits" = 1
+    "AllowAdministratorLockout"    = 1
+    "MaxServiceTicketAge"          = 600
+    "MaxTicketAge"                 = 10
+    "MaxRenewAge"                  = 7
+    "MaxClockSkew"                 = 5
+    "TicketValidateClient"         = 1
 }
 
 foreach ($Key in $AccountSettings.Keys) {

@@ -69,9 +69,18 @@ If RDP is strictly required, enable it but restrict it using the following setti
    * **Setting**: `Enabled`
    * **Policy**: `Set client connection encryption level`
    * **Setting**: `Enabled` (Select `High Level` in the options dropdown)
+   * **Policy**: `Require use of specific security layer for remote (RDP) connections`
+   * **Setting**: `Enabled: SSL`
 4. Deploy local firewall rules via GPO to restrict TCP port 3389 inbound to administrative subnet ranges only.
 
-#### 3. Disable Solicited Remote Assistance
+#### 3. Configure Temporary Folders Deletion on Exit
+1. Navigate to:
+   `Computer Configuration\Administrative Templates\Windows Components\Remote Desktop Services\Remote Desktop Session Host\Temporary Folders`
+2. Configure the setting:
+   * **Policy**: `Do not delete temp folders upon exit`
+   * **Setting**: `Disabled` (ensures session temporary directories are deleted when users log off)
+
+#### 4. Disable Solicited Remote Assistance
 1. Navigate to:
    `Computer Configuration\Administrative Templates\System\Remote Assistance`
 2. Configure the setting:
@@ -88,7 +97,7 @@ Run the following scripts locally to disable Remote Desktop and Remote Assistanc
 
 ```powershell
 # Disable-RemoteDesktop.ps1
-# Disables Remote Desktop and Solicited Remote Assistance connections, sets NLA requirements, and cleans parameters.
+# Disables Remote Desktop and Solicited Remote Assistance connections, sets NLA requirements, sets Security Layer to SSL, configures temp folder deletion, and cleans parameters.
 
 Write-Host "--- Restricting Remote Desktop and Remote Assistance Access ---" -ForegroundColor Cyan
 
@@ -108,12 +117,14 @@ if (Test-Path $RdpSecPath) {
 # 3. Disable Remote Assistance (fAllowToGetHelp = 0)
 Set-ItemProperty -Path $RdpPath -Name "fAllowToGetHelp" -Value 0 -Type DWord -Force
 
-# 4. Disable and clean Solicited Remote Assistance Policies
-$TSPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services"
+# 4. Disable and clean Solicited Remote Assistance Policies, set SSL, and delete temp folders
+$TSPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
 if (-not (Test-Path $TSPoliciesPath)) {
     New-Item -Path $TSPoliciesPath -Force | Out-Null
 }
 Set-ItemProperty -Path $TSPoliciesPath -Name "fAllowToGetHelp" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $TSPoliciesPath -Name "SecurityLayer" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $TSPoliciesPath -Name "DeleteTempDirsOnExit" -Value 1 -Type DWord -Force
 
 $ParamsToDelete = @("MaxTicketExpiryUnits", "MaxTicketExpiry", "fUseMailto", "fAllowFullControl")
 foreach ($Param in $ParamsToDelete) {
@@ -121,7 +132,7 @@ foreach ($Param in $ParamsToDelete) {
         Remove-ItemProperty -Path $TSPoliciesPath -Name $Param -Force -ErrorAction SilentlyContinue
     }
 }
-Write-Host "[+] Solicited Remote Assistance policies disabled and cleaned." -ForegroundColor Green
+Write-Host "[+] Remote Desktop policies (SSL, Temp folders, Solicited Help) configured and cleaned." -ForegroundColor Green
 ```
 
 *To audit Remote Desktop and Remote Assistance status:*
@@ -129,13 +140,13 @@ Write-Host "[+] Solicited Remote Assistance policies disabled and cleaned." -For
 
 ```powershell
 # Test-RemoteDesktopStatus.ps1
-# Audits local RDP, Remote Assistance, and NLA registry configuration and listening firewall ports.
+# Audits local RDP, Remote Assistance, security layer, temp folders, and NLA registry configuration and listening firewall ports.
 
 Write-Host "--- Auditing Remote Desktop Configuration ---" -ForegroundColor Cyan
 
 $RdpPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server"
 $RdpSecPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp"
-$TSPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services"
+$TSPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
 
 $DenyTS = Get-ItemProperty -Path $RdpPath -Name "fDenyTSConnections" -ErrorAction SilentlyContinue
 $DenyVal = if ($DenyTS) { $DenyTS.fDenyTSConnections } else { 1 }
@@ -162,14 +173,24 @@ $GetHelpTSVal = if ($GetHelpTS) { $GetHelpTS.fAllowToGetHelp } else { 0 }
 $HelpColor = if ($GetHelpTSVal -eq 0) { "Green" } else { "Red" }
 Write-Host "    - fAllowToGetHelp (Terminal Server): $GetHelpTSVal (Recommended = 0)" -ForegroundColor $HelpColor
 
-# Audit Solicited Remote Assistance Policy
+# Audit Solicited Remote Assistance Policy, Security Layer, and Temp Folders
 if (Test-Path $TSPoliciesPath) {
     $PolGetHelp = Get-ItemProperty -Path $TSPoliciesPath -Name "fAllowToGetHelp" -ErrorAction SilentlyContinue
     $PolGetHelpVal = if ($PolGetHelp) { $PolGetHelp.fAllowToGetHelp } else { $null }
     
     $PolHelpColor = if ($PolGetHelpVal -eq 0) { "Green" } else { "Red" }
-    Write-Host "    - fAllowToGetHelp (Policies): $($PolGetHelpVal | Out-String).Trim() (Recommended = 0)" -ForegroundColor $PolHelpColor
+    Write-Host "    - fAllowToGetHelp (Policies): $PolGetHelpVal (Recommended = 0)" -ForegroundColor $PolHelpColor
     
+    $SecurityLayerProp = Get-ItemProperty -Path $TSPoliciesPath -Name "SecurityLayer" -ErrorAction SilentlyContinue
+    $SecurityLayerVal = if ($SecurityLayerProp) { $SecurityLayerProp.SecurityLayer } else { $null }
+    $SecLayerColor = if ($SecurityLayerVal -eq 2) { "Green" } else { "Red" }
+    Write-Host "    - SecurityLayer (SSL): $SecurityLayerVal (Required = 2)" -ForegroundColor $SecLayerColor
+
+    $DeleteTempProp = Get-ItemProperty -Path $TSPoliciesPath -Name "DeleteTempDirsOnExit" -ErrorAction SilentlyContinue
+    $DeleteTempVal = if ($DeleteTempProp) { $DeleteTempProp.DeleteTempDirsOnExit } else { $null }
+    $DeleteTempColor = if ($DeleteTempVal -eq 1) { "Green" } else { "Red" }
+    Write-Host "    - DeleteTempDirsOnExit (Temp Folders): $DeleteTempVal (Required = 1)" -ForegroundColor $DeleteTempColor
+
     $Params = @("MaxTicketExpiryUnits", "MaxTicketExpiry", "fUseMailto", "fAllowFullControl")
     foreach ($Param in $Params) {
         $Val = (Get-ItemProperty -Path $TSPoliciesPath -Name $Param -ErrorAction SilentlyContinue).$Param
@@ -180,7 +201,7 @@ if (Test-Path $TSPoliciesPath) {
         }
     }
 } else {
-    Write-Host "    - Solicited Remote Assistance Policy Path does not exist (Expected fAllowToGetHelp = 0)" -ForegroundColor Red
+    Write-Host "    - Solicited Remote Assistance Policy Path does not exist" -ForegroundColor Red
 }
 ```
 

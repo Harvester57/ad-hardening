@@ -105,6 +105,39 @@ Set-ItemProperty -Path $MsvPath -Name "NTLMMinClientSec" -Value 537395200 -Type 
 Set-ItemProperty -Path $MsvPath -Name "NTLMMinServerSec" -Value 537395200 -Type DWord -Force
 Write-Host "[+] Network authentication security and NTLM session settings applied." -ForegroundColor Green
 
+# Additional local security options for endpoints
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+if (-not (Test-Path $SystemPath)) {
+    New-Item -Path $SystemPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SystemPath -Name "CrashOnAuditFail" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $SystemPath -Name "DisableCAD" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $SystemPath -Name "DontDisplayLastUserName" -Value 1 -Type DWord -Force
+
+Set-ItemProperty -Path $WinlogonPath -Name "PasswordExpiryWarning" -Value 14 -Type DWord -Force
+
+Set-ItemProperty -Path $LsaPath -Name "RestrictAnonymousSAM" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "RestrictAnonymous" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "ForceNetworkLogon" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "ObaseCaseInsensitive" -Value 1 -Type DWord -Force
+
+$KerbParamsPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+if (-not (Test-Path $KerbParamsPath)) {
+    New-Item -Path $KerbParamsPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KerbParamsPath -Name "AllowPKU2U" -Value 0 -Type DWord -Force
+
+$LanmanServerPath = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
+if (-not (Test-Path $LanmanServerPath)) {
+    New-Item -Path $LanmanServerPath -Force | Out-Null
+}
+Set-ItemProperty -Path $LanmanServerPath -Name "AutoDisconnect" -Value 15 -Type DWord -Force
+Set-ItemProperty -Path $LanmanServerPath -Name "EnableForcedLogoff" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LanmanServerPath -Name "NullSessionShares" -Value @() -Type MultiString -Force
+
+Set-ItemProperty -Path $NetlogonPath -Name "ForceLogoffWhenHourExpire" -Value 1 -Type DWord -Force
+Write-Host "[+] Additional network and interactive security options applied." -ForegroundColor Green
+
 # 2. Enforce Account Lockout and Password Policy via secedit
 $SecTempDir = Join-Path $env:TEMP "AccountSecurityTemplates"
 if (-not (Test-Path $SecTempDir)) {
@@ -134,20 +167,22 @@ $NewLines = @()
 $InSystemAccess = $false
 
 $AccountSettings = @{
-    "LockoutBadCount"       = 10
-    "ResetLockoutCount"     = 15
-    "LockoutDuration"       = 15
-    "ClearTextPassword"     = 0
-    "MinimumPasswordLength" = 14
-    "PasswordComplexity"    = 1
-    "PasswordHistorySize"   = 24
-    "MaxPasswordAge"        = 0
-    "MinPasswordAge"        = 1
-    "MaxServiceTicketAge"   = 600
-    "MaxTicketAge"          = 10
-    "MaxRenewAge"           = 7
-    "MaxClockSkew"          = 5
-    "TicketValidateClient"  = 1
+    "LockoutBadCount"              = 10
+    "ResetLockoutCount"            = 15
+    "LockoutDuration"              = 15
+    "ClearTextPassword"            = 0
+    "MinimumPasswordLength"        = 14
+    "PasswordComplexity"           = 1
+    "PasswordHistorySize"          = 24
+    "MaxPasswordAge"               = 0
+    "MinPasswordAge"               = 1
+    "RelaxMinPasswordLengthLimits" = 1
+    "AllowAdministratorLockout"    = 1
+    "MaxServiceTicketAge"          = 600
+    "MaxTicketAge"                 = 10
+    "MaxRenewAge"                  = 7
+    "MaxClockSkew"                 = 5
+    "TicketValidateClient"         = 1
 }
 
 foreach ($Line in $Lines) {

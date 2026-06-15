@@ -12,6 +12,9 @@
   * **GPO Paths**:
     * User Configuration\Policies\Administrative Templates\Start Menu and Taskbar\Notifications
     * User Configuration\Policies\Administrative Templates\Windows Components\Cloud Content
+    * User Configuration\Policies\Administrative Templates\Control Panel\Regional and Language Options
+    * User Configuration\Policies\Administrative Templates\Windows Components\Attachment Manager
+    * User Configuration\Policies\Administrative Templates\Windows Components\Network Sharing
     * Computer Configuration\Administrative Templates\Control Panel\Personalization
     * Computer Configuration\Administrative Templates\System\Group Policy
     * Computer Configuration\Administrative Templates\Windows Components\App Privacy
@@ -27,6 +30,16 @@
       * `NoToastApplicationNotificationOnLockScreen` = `1` (REG_DWORD)
     * HKCU\Software\Policies\Microsoft\Windows\CloudContent
       * `DisableThirdPartySuggestions` = `1` (REG_DWORD)
+      * `ConfigureWindowsSpotlight` = `2` (REG_DWORD)
+      * `DisableSpotlightCollectionOnDesktop` = `1` (REG_DWORD)
+    * HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot
+      * `TurnOffWindowsCopilot` = `1` (REG_DWORD)
+    * HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer
+      * `NoInplaceSharing` = `1` (REG_DWORD)
+    * HKLM\SOFTWARE\Policies\Microsoft\InputPersonalization
+      * `AllowInputPersonalization` = `0` (REG_DWORD)
+    * HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments
+      * `SaveZoneInformation` = `2` (REG_DWORD)
     * HKLM\SOFTWARE\Classes\batfile\shell\runasuser, cmdfile\shell\runasuser, exefile\shell\runasuser, mscfile\shell\runasuser
       * `SuppressionPolicy` = `4096` (REG_DWORD)
     * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel
@@ -91,7 +104,6 @@
       * `DisableCoInstallers` = `1` (REG_DWORD, block driver co-installer execution)
     * HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks
       * `Enabled` = `1` (REG_DWORD, enable hardware-enforced stack protection)
-
 ---
 
 ## Rationale
@@ -141,6 +153,18 @@ Navigate to: `User Configuration\Policies\Administrative Templates\Start Menu an
 
 Navigate to: `User Configuration\Policies\Administrative Templates\Windows Components\Cloud Content`
 * **Policy**: `Do not suggest third-party content in Windows spotlight` -> Set to **Enabled**
+* **Policy**: `Configure Windows spotlight on lock screen` -> Set to **Disabled**
+* **Policy**: `Turn off Spotlight collection on Desktop` -> Set to **Enabled**
+* **Policy**: `Turn off Windows Copilot` -> Set to **Enabled**
+
+Navigate to: `User Configuration\Policies\Administrative Templates\Control Panel\Regional and Language Options`
+* **Policy**: `Allow users to enable online speech recognition services` -> Set to **Disabled**
+
+Navigate to: `User Configuration\Policies\Administrative Templates\Windows Components\Attachment Manager`
+* **Policy**: `Do not preserve zone information in file attachments` -> Set to **Disabled**
+
+Navigate to: `User Configuration\Policies\Administrative Templates\Windows Components\Network Sharing`
+* **Policy**: `Prevent users from sharing files within their profile.` -> Set to **Enabled**
 
 #### 2. Computer Configuration (Personalization & System Restrictions)
 Navigate to: `Computer Configuration\Administrative Templates\Control Panel\Personalization`
@@ -346,21 +370,34 @@ Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Mana
 # Kernel-level Shadow Stacks
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
+# Speech Recognition (AllowInputPersonalization = 0)
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization" "AllowInputPersonalization" 0
+
+# Attachment Manager (SaveZoneInformation = 2)
+Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" 2
+
 Write-Host "[+] Local computer system restrictions applied." -ForegroundColor Green
 
 # 2. Enforce HKCU Settings on Current User
 $PushPath = "HKCU:\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
 $CloudPath = "HKCU:\Software\Policies\Microsoft\Windows\CloudContent"
+$CopilotPath = "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot"
+$ExplorerPoliciesPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
 
-if (-not (Test-Path $PushPath)) {
-    New-Item -Path $PushPath -Force | Out-Null
-}
-Set-ItemProperty -Path $PushPath -Name "NoToastApplicationNotificationOnLockScreen" -Value 1 -Type DWord
+if (-not (Test-Path $PushPath)) { New-Item -Path $PushPath -Force | Out-Null }
+Set-ItemProperty -Path $PushPath -Name "NoToastApplicationNotificationOnLockScreen" -Value 1 -Type DWord -Force
 
-if (-not (Test-Path $CloudPath)) {
-    New-Item -Path $CloudPath -Force | Out-Null
-}
-Set-ItemProperty -Path $CloudPath -Name "DisableThirdPartySuggestions" -Value 1 -Type DWord
+if (-not (Test-Path $CloudPath)) { New-Item -Path $CloudPath -Force | Out-Null }
+Set-ItemProperty -Path $CloudPath -Name "DisableThirdPartySuggestions" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $CloudPath -Name "ConfigureWindowsSpotlight" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $CloudPath -Name "DisableSpotlightCollectionOnDesktop" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path $CopilotPath)) { New-Item -Path $CopilotPath -Force | Out-Null }
+Set-ItemProperty -Path $CopilotPath -Name "TurnOffWindowsCopilot" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path $ExplorerPoliciesPath)) { New-Item -Path $ExplorerPoliciesPath -Force | Out-Null }
+Set-ItemProperty -Path $ExplorerPoliciesPath -Name "NoInplaceSharing" -Value 1 -Type DWord -Force
+
 Write-Host "[+] Current user profile restrictions applied successfully." -ForegroundColor Green
 
 # 3. Enforce HKCU Settings on Default User Hive (For all future user profiles on this machine)
@@ -373,16 +410,22 @@ if (Test-Path $DefaultHivePath) {
     
     $DefaultPush = "Registry::HKU\DefaultUser\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
     $DefaultCloud = "Registry::HKU\DefaultUser\Software\Policies\Microsoft\Windows\CloudContent"
+    $DefaultCopilot = "Registry::HKU\DefaultUser\Software\Policies\Microsoft\Windows\WindowsCopilot"
+    $DefaultExplorer = "Registry::HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
     
-    if (-not (Test-Path $DefaultPush)) {
-        New-Item -Path $DefaultPush -Force | Out-Null
-    }
-    Set-ItemProperty -Path $DefaultPush -Name "NoToastApplicationNotificationOnLockScreen" -Value 1 -Type DWord
+    if (-not (Test-Path $DefaultPush)) { New-Item -Path $DefaultPush -Force | Out-Null }
+    Set-ItemProperty -Path $DefaultPush -Name "NoToastApplicationNotificationOnLockScreen" -Value 1 -Type DWord -Force
     
-    if (-not (Test-Path $DefaultCloud)) {
-        New-Item -Path $DefaultCloud -Force | Out-Null
-    }
-    Set-ItemProperty -Path $DefaultCloud -Name "DisableThirdPartySuggestions" -Value 1 -Type DWord
+    if (-not (Test-Path $DefaultCloud)) { New-Item -Path $DefaultCloud -Force | Out-Null }
+    Set-ItemProperty -Path $DefaultCloud -Name "DisableThirdPartySuggestions" -Value 1 -Type DWord -Force
+    Set-ItemProperty -Path $DefaultCloud -Name "ConfigureWindowsSpotlight" -Value 2 -Type DWord -Force
+    Set-ItemProperty -Path $DefaultCloud -Name "DisableSpotlightCollectionOnDesktop" -Value 1 -Type DWord -Force
+
+    if (-not (Test-Path $DefaultCopilot)) { New-Item -Path $DefaultCopilot -Force | Out-Null }
+    Set-ItemProperty -Path $DefaultCopilot -Name "TurnOffWindowsCopilot" -Value 1 -Type DWord -Force
+
+    if (-not (Test-Path $DefaultExplorer)) { New-Item -Path $DefaultExplorer -Force | Out-Null }
+    Set-ItemProperty -Path $DefaultExplorer -Name "NoInplaceSharing" -Value 1 -Type DWord -Force
     
     # Unload default hive
     [GC]::Collect()
@@ -422,8 +465,15 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
 # 1. Audit Current User Settings
 $PushPath = "HKCU:\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
 $CloudPath = "HKCU:\Software\Policies\Microsoft\Windows\CloudContent"
+$CopilotPath = "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot"
+$ExplorerPoliciesPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+
 Test-RegistryValue $PushPath "NoToastApplicationNotificationOnLockScreen" 1
 Test-RegistryValue $CloudPath "DisableThirdPartySuggestions" 1
+Test-RegistryValue $CloudPath "ConfigureWindowsSpotlight" 2
+Test-RegistryValue $CloudPath "DisableSpotlightCollectionOnDesktop" 1
+Test-RegistryValue $CopilotPath "TurnOffWindowsCopilot" 1
+Test-RegistryValue $ExplorerPoliciesPath "NoInplaceSharing" 1
 
 # 2. Audit Computer HKLM Settings
 $ClassBat = "HKLM:\SOFTWARE\Classes\batfile\shell\runasuser"
@@ -437,6 +487,10 @@ Test-RegistryValue $ClassMsc "SuppressionPolicy" 4096
 
 $SessionKernel = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel"
 Test-RegistryValue $SessionKernel "DisableExceptionChainValidation" 0
+
+# Input Personalization and Attachment Manager
+Test-RegistryValue "HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization" "AllowInputPersonalization" 0
+Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" 2
 
 $Personalization = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization"
 Test-RegistryValue $Personalization "NoLockScreenCamera" 1

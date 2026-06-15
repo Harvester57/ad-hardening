@@ -61,6 +61,7 @@ Enforcing advanced auditing policies provides the following security coverages:
 | **Account Logon** | `Audit Credential Validation` | Success and Failure |
 | **Account Management** | `Audit User Account Management` | Success and Failure |
 | **Account Management** | `Audit Security Group Management` | Success and Failure |
+| **Account Management** | `Audit Application Group Management` | Success and Failure |
 | **Account Management** | `Audit Computer Account Management` | Success |
 | **Account Management** | `Audit Distribution Group Management` | Success |
 | **Account Management** | `Audit Other Account Management Events` | Success |
@@ -75,6 +76,7 @@ Enforcing advanced auditing policies provides the following security coverages:
 | **Logon/Logoff** | `Audit Other Logon/Logoff Events` | Success and Failure |
 | **Object Access** | `Audit Handle Manipulation` | Success and Failure |
 | **Object Access** | `Audit Registry` | Success and Failure |
+| **Object Access** | `Audit File Share` | Success and Failure |
 | **Object Access** | `Audit Detailed File Share` | Failure |
 | **Object Access** | `Audit Other Object Access Events` | Success and Failure |
 | **Policy Change** | `Audit Policy Change` | Success and Failure |
@@ -140,6 +142,7 @@ $Policies = @(
     @{ Subcategory = "Credential Validation"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "User Account Management"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Security Group Management"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "Application Group Management"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Computer Account Management"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Distribution Group Management"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Other Account Management Events"; Success = "enable"; Failure = "disable" },
@@ -155,6 +158,7 @@ $Policies = @(
     @{ Subcategory = "Other Logon/Logoff Events"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Handle Manipulation"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Registry"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "File Share"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Detailed File Share"; Success = "disable"; Failure = "enable" },
     @{ Subcategory = "Other Object Access Events"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Authentication Policy Change"; Success = "enable"; Failure = "disable" },
@@ -228,6 +232,7 @@ $RequiredPolicies = @(
     @{ Subcategory = "Credential Validation"; Expected = "Success and Failure" },
     @{ Subcategory = "User Account Management"; Expected = "Success and Failure" },
     @{ Subcategory = "Security Group Management"; Expected = "Success and Failure" },
+    @{ Subcategory = "Application Group Management"; Expected = "Success and Failure" },
     @{ Subcategory = "Computer Account Management"; Expected = "Success" },
     @{ Subcategory = "Distribution Group Management"; Expected = "Success" },
     @{ Subcategory = "Other Account Management Events"; Expected = "Success" },
@@ -243,6 +248,7 @@ $RequiredPolicies = @(
     @{ Subcategory = "Other Logon/Logoff Events"; Expected = "Success and Failure" },
     @{ Subcategory = "Handle Manipulation"; Expected = "Success and Failure" },
     @{ Subcategory = "Registry"; Expected = "Success and Failure" },
+    @{ Subcategory = "File Share"; Expected = "Success and Failure" },
     @{ Subcategory = "Detailed File Share"; Expected = "Failure" },
     @{ Subcategory = "Other Object Access Events"; Expected = "Success and Failure" },
     @{ Subcategory = "Authentication Policy Change"; Expected = "Success" },
@@ -301,5 +307,6 @@ foreach ($Policy in $RequiredPolicies) {
 
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R48 (Audit Policy)
-* **CIS Benchmark**: CIS Windows Server 2016 Benchmark v2.0.0 - Section 9 (Audit Policy)
+* **CIS Microsoft Windows Server 2016/2019/2022 Benchmark**: Section 9 (Audit Policy)
+* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 17 (Advanced Audit Policy Configuration) including 17.1.1, 17.2.1, 17.2.2, 17.2.4, 17.5.1, 17.5.2, 17.6.2, 17.7.1
 * **Microsoft Security Baseline Focus**: Windows Server and Member Server Audit Policies
