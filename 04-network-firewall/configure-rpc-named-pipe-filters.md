@@ -278,4 +278,4 @@ if ($scmFound -and $mimiFound) {
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R7 (Filtering and IPsec on Domain Controllers), Recommendation R8 (Administration network subnets / filtering rules)
 * **CIS Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
-* **DSInternals AD Firewall Guide**: RPC Filters (firewall.dsinternals.com/ADDS/)
+* **DSInternals AD Firewall Guide (Michael Grafnetter)**: [Active Directory Firewall - Domain Controller Firewall](https://firewall.dsinternals.com/ADDS/)

@@ -196,3 +196,4 @@ if ($AllProfilesSecure) {
 * **ANSSI AD Hardening Guide**: Recommendation R8 (Administration network subnets)
 * **CIS Windows Server 2016 Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
 * **Microsoft Security Baseline**: Domain Controller and Member Server Baselines
+* **DSInternals AD Firewall Guide (Michael Grafnetter)**: [Active Directory Firewall - Domain Controller Firewall](https://firewall.dsinternals.com/ADDS/)

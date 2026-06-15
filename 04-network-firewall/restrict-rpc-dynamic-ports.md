@@ -221,5 +221,4 @@ if ($vulnerable) {
 * **ANSSI AD Hardening Guide**: Recommendation R8 (Administration network subnets)
 * **Microsoft Security Guidance**: Restricting Active Directory RPC Traffic to a Specific Port
 * **CIS Windows Server 2016 Benchmark**: Section 19 (Windows Defender Firewall with Advanced Security)
-* **DSInternals AD Firewall Guide**: RPC Dynamic Port Allocation and Static RPC Ports (firewall.dsinternals.com/ADDS/)
-
+* **DSInternals AD Firewall Guide (Michael Grafnetter)**: [Active Directory Firewall - Domain Controller Firewall](https://firewall.dsinternals.com/ADDS/)
