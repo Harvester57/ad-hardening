@@ -57,49 +57,50 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
    * **Packaged app rules** -> Select **Enforce rules** (or **Audit only**)
 4. Click **OK**.
 
-#### 3. Create Default and Block Rules
+#### 3. Create Default and Exception Rules
 1. Expand **AppLocker** and select **Executable Rules**.
 2. Right-click **Executable Rules** and select **Create Default Rules** (allows all files in Windows and Program Files directories, and allows local Administrators to run all files).
-3. To block LOLBins and writeable directories, create explicit **Deny** rules for **Everyone**:
-   * **Writeable Directories (Path Rules)**:
-     * Deny `%WINDIR%\Tasks\*`
-     * Deny `%WINDIR%\Temp\*`
-     * Deny `%WINDIR%\tracing\*`
-     * Deny `%WINDIR%\System32\spool\drivers\color\*`
-     * Deny `%WINDIR%\System32\Tasks\Microsoft\Windows\SyncCenter\*`
-     * Deny `%WINDIR%\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\*`
-   * **Bypass Binaries (Publisher or Path Rules)**:
-     * Deny `*\msbuild.exe`
-     * Deny `*\installutil.exe`
-     * Deny `*\mshta.exe`
-     * Deny `*\regasm.exe`
-     * Deny `*\regsvcs.exe`
-     * Deny `*\regsvr32.exe`
-     * Deny `*\rundll32.exe`
-     * Deny `*\bginfo.exe`
-     * Deny `*\cdb.exe`
-     * Deny `*\cmstp.exe`
-     * Deny `*\control.exe`
-     * Deny `*\csi.exe`
-     * Deny `*\dfsvc.exe`
-     * Deny `*\dnx.exe`
-     * Deny `*\fsi.exe`
-     * Deny `*\ie4unit.exe`
-     * Deny `*\ieexec.exe`
-     * Deny `*\infdefaultinstall.exe`
-     * Deny `*\mavinject.exe`
-     * Deny `*\msdeploy.exe`
-     * Deny `*\msdt.exe`
-     * Deny `*\msxsl.exe`
-     * Deny `*\odbcconf.exe`
-     * Deny `*\presentationhost.exe`
-     * Deny `*\rcsi.exe`
-     * Deny `*\rsi.exe`
-     * Deny `*\runscripthelper.exe`
-     * Deny `*\te.exe`
-     * Deny `*\tracker.exe`
-     * Deny `*\xwizard.exe`
-4. Repeat the process for **Script Rules** by creating default rules and adding Deny rules for script execution from the same user-writeable paths (such as `%WINDIR%\Temp\*` and `%WINDIR%\Tasks\*`).
+3. Per **ANSSI R2** recommendation, do not create standalone Deny rules. Instead, configure the following path **Exceptions** on the default Allow rule for the Windows folder:
+   * Right-click the rule `(Default Rule) All files located in the Windows folder` and select **Properties**.
+   * On the **Exceptions** tab, add path exceptions for writeable directories under `%WINDIR%`:
+     * `%WINDIR%\Tasks\*`
+     * `%WINDIR%\Temp\*`
+     * `%WINDIR%\tracing\*`
+     * `%WINDIR%\System32\spool\drivers\color\*`
+     * `%WINDIR%\System32\Tasks\Microsoft\Windows\SyncCenter\*`
+     * `%WINDIR%\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\*`
+   * On the same **Exceptions** tab, add path exceptions for the following bypass binaries (LOLBins):
+     * `*\msbuild.exe`
+     * `*\installutil.exe`
+     * `*\mshta.exe`
+     * `*\regasm.exe`
+     * `*\regsvcs.exe`
+     * `*\regsvr32.exe`
+     * `*\rundll32.exe`
+     * `*\bginfo.exe`
+     * `*\cdb.exe`
+     * `*\cmstp.exe`
+     * `*\control.exe`
+     * `*\csi.exe`
+     * `*\dfsvc.exe`
+     * `*\dnx.exe`
+     * `*\fsi.exe`
+     * `*\ie4unit.exe`
+     * `*\ieexec.exe`
+     * `*\infdefaultinstall.exe`
+     * `*\mavinject.exe`
+     * `*\msdeploy.exe`
+     * `*\msdt.exe`
+     * `*\msxsl.exe`
+     * `*\odbcconf.exe`
+     * `*\presentationhost.exe`
+     * `*\rcsi.exe`
+     * `*\rsi.exe`
+     * `*\runscripthelper.exe`
+     * `*\te.exe`
+     * `*\tracker.exe`
+     * `*\xwizard.exe`
+4. Repeat the process for **Script Rules** by creating default rules and adding exceptions to the `%WINDIR%\*` Allow rule for script execution from user-writeable paths (such as `%WINDIR%\Temp\*` and `%WINDIR%\Tasks\*`).
 5. Disable NTVDM (16-bit application support) to prevent AppLocker bypasses via 16-bit binaries:
    * Navigate to: `Computer Configuration\Administrative Templates\System\16-bit Application Compatibility`
    * Configure **Prevent access to 16-bit applications** to **Enabled**.
@@ -143,60 +144,22 @@ $AppLockerXml = @"
       <Conditions>
         <FilePathCondition Path="%WINDIR%\*" />
       </Conditions>
+      <Exceptions>
+        <FilePathCondition Path="%WINDIR%\Temp\*" />
+        <FilePathCondition Path="%WINDIR%\Tasks\*" />
+        <FilePathCondition Path="%WINDIR%\System32\spool\drivers\color\*" />
+        <FilePathCondition Path="*\msbuild.exe" />
+        <FilePathCondition Path="*\installutil.exe" />
+        <FilePathCondition Path="*\mshta.exe" />
+        <FilePathCondition Path="*\regasm.exe" />
+        <FilePathCondition Path="*\regsvcs.exe" />
+        <FilePathCondition Path="*\regsvr32.exe" />
+        <FilePathCondition Path="*\rundll32.exe" />
+      </Exceptions>
     </FilePathRule>
     <FilePathRule Id="fd686d83-a829-4351-8ff4-27c1de5732e9" Name="(Default Rule) All files" Description="Allows members of the local Administrators group to run all applications." UserOrGroupSid="S-1-5-32-544" Action="Allow">
       <Conditions>
         <FilePathCondition Path="*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="1e8fa8b3-3a5e-4c7a-9cb8-b223ff9db261" Name="Block User Writeable Temp" Description="Block execution from Temp folder to prevent bypasses." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\Temp\*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="2e8fa8b3-3a5e-4c7a-9cb8-b223ff9db262" Name="Block User Writeable Tasks" Description="Block execution from Tasks folder to prevent bypasses." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\Tasks\*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="3e8fa8b3-3a5e-4c7a-9cb8-b223ff9db263" Name="Block User Writeable spool color" Description="Block execution from spool color folder." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\System32\spool\drivers\color\*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="4e8fa8b3-3a5e-4c7a-9cb8-b223ff9db264" Name="Block Msbuild" Description="Block msbuild.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\msbuild.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="5e8fa8b3-3a5e-4c7a-9cb8-b223ff9db265" Name="Block Installutil" Description="Block installutil.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\installutil.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="6e8fa8b3-3a5e-4c7a-9cb8-b223ff9db266" Name="Block Mshta" Description="Block mshta.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\mshta.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="7e8fa8b3-3a5e-4c7a-9cb8-b223ff9db267" Name="Block Regasm" Description="Block regasm.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\regasm.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="8e8fa8b3-3a5e-4c7a-9cb8-b223ff9db268" Name="Block Regsvcs" Description="Block regsvcs.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\regsvcs.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="ae8fa8b3-3a5e-4c7a-9cb8-b223ff9db269" Name="Block Regsvr32" Description="Block regsvr32.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\regsvr32.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="be8fa8b3-3a5e-4c7a-9cb8-b223ff9db270" Name="Block Rundll32" Description="Block rundll32.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\rundll32.exe" />
       </Conditions>
     </FilePathRule>
   </RuleCollection>
@@ -227,20 +190,14 @@ $AppLockerXml = @"
       <Conditions>
         <FilePathCondition Path="%WINDIR%\*" />
       </Conditions>
+      <Exceptions>
+        <FilePathCondition Path="%WINDIR%\Temp\*" />
+        <FilePathCondition Path="%WINDIR%\Tasks\*" />
+      </Exceptions>
     </FilePathRule>
     <FilePathRule Id="3c8fa8b3-3a5e-4c7a-9cb8-b223ff9db276" Name="(Default Rule) All scripts" Description="Allows administrators to run all scripts." UserOrGroupSid="S-1-5-32-544" Action="Allow">
       <Conditions>
         <FilePathCondition Path="*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="4c8fa8b3-3a5e-4c7a-9cb8-b223ff9db277" Name="Block scripts in Temp" Description="Block script execution from Temp." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\Temp\*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="5c8fa8b3-3a5e-4c7a-9cb8-b223ff9db278" Name="Block scripts in Tasks" Description="Block script execution from Tasks." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\Tasks\*" />
       </Conditions>
     </FilePathRule>
   </RuleCollection>
@@ -260,8 +217,75 @@ $AppLockerXml = @"
 $TempPath = Join-Path -Path $env:TEMP -ChildPath "AppLockerDCPolicy.xml"
 $AppLockerXml | Out-File -FilePath $TempPath -Encoding UTF8 -Force
 
+# 3. Validate policy using Test-AppLockerPolicy before importing
 try {
     Import-Module AppLocker -ErrorAction Stop
+} catch {
+    Write-Error "AppLocker module is not available on this system. Cannot configure or validate policy."
+    if (Test-Path $TempPath) {
+        Remove-Item -Path $TempPath -Force
+    }
+    return
+}
+
+$TestPaths = @(
+    # Expected: Allowed
+    "$env:windir\System32\cmd.exe",
+    "$env:windir\System32\WindowsPowerShell\v1.0\powershell.exe",
+    # Expected: DeniedByDefault or ExplicitlyDenied (since it is an exception to an Allow rule)
+    "$env:USERPROFILE\Downloads\tool.exe",
+    "$env:windir\Temp\malware.exe",
+    "$env:windir\Tasks\evil.exe",
+    "$env:windir\System32\msbuild.exe"
+)
+
+$ValidationFailed = $false
+try {
+    $TestResults = Test-AppLockerPolicy -XmlPolicy $TempPath -Path $TestPaths -User Everyone -ErrorAction Stop
+    $ExpectedAllow = @(
+        "$env:windir\System32\cmd.exe",
+        "$env:windir\System32\WindowsPowerShell\v1.0\powershell.exe"
+    )
+    $ExpectedDeny = @(
+        "$env:USERPROFILE\Downloads\tool.exe",
+        "$env:windir\Temp\malware.exe",
+        "$env:windir\Tasks\evil.exe",
+        "$env:windir\System32\msbuild.exe"
+    )
+
+    foreach ($Result in $TestResults) {
+        $Path = $Result.FilePath
+        $Decision = $Result.PolicyDecision
+        if ($ExpectedAllow -contains $Path) {
+            if ($Decision -ne "Allowed") {
+                Write-Warning "[VALIDATION FAIL] Expected Allow for: $Path (got: $Decision)"
+                $ValidationFailed = $true
+            }
+        }
+        if ($ExpectedDeny -contains $Path) {
+            if ($Decision -eq "Allowed") {
+                Write-Warning "[VALIDATION FAIL] Expected Deny/Not Allowed for: $Path (got: $Decision)"
+                $ValidationFailed = $true
+            }
+        }
+    }
+} catch {
+    Write-Warning "Could not perform policy validation tests: $($_.Exception.Message)"
+    $ValidationFailed = $true
+}
+
+if ($ValidationFailed) {
+    Write-Error "AppLocker policy validation failed. Policy was NOT imported."
+    if (Test-Path $TempPath) {
+        Remove-Item -Path $TempPath -Force
+    }
+    return
+}
+
+Write-Host "[+] AppLocker policy validation passed. Proceeding with import." -ForegroundColor Green
+
+# 4. Import the validated AppLocker policy
+try {
     Set-AppLockerPolicy -XmlPolicy $TempPath -ErrorAction Stop
     Write-Host "[+] Local AppLocker policy imported and enforced successfully." -ForegroundColor Green
 } catch {
@@ -272,7 +296,7 @@ try {
     }
 }
 
-# 3. Disable NTVDM (16-bit compatibility) via Registry
+# 5. Disable NTVDM (16-bit compatibility) via Registry
 $NtvdmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
 if (-not (Test-Path $NtvdmPath)) {
     New-Item -Path $NtvdmPath -Force | Out-Null
@@ -340,7 +364,7 @@ if (Test-Path $NtvdmPath) {
 ---
 
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Recommendations Section 3.1.2 (System hardening and configuration baseline controls), DAT-NT-13 Note Technique (R8, R10, R15, R16, R20)
+* **ANSSI AD Hardening Guide**: Recommendations Section 3.1.2 (System hardening and configuration baseline controls), DAT-NT-13 Note Technique (R2, R8, R10, R15, R16, R20)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9 (Application Control Policies / AppLocker)
 * **Microsoft Security Baseline Focus**: Domain Controller Security baseline - AppLocker configurations
 * **Ultimate AppLocker Bypass List**: Generic & Verified AppLocker Bypasses
