@@ -25,10 +25,15 @@
     * HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions
       * `DenyDeviceClasses` = `1` (REG_DWORD)
       * `DenyDeviceClassesRetroactive` = `1` (REG_DWORD)
+      * `DenyDeviceIDs` = `1` (REG_DWORD)
+      * `DenyDeviceIDsRetroactive` = `1` (REG_DWORD)
     * HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses
       * `1` = `{d48179be-ec20-11d1-b6b8-00c04fa372a7}` (REG_SZ, SBP-2 device setup class)
+    * HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs
+      * `1` = `PCI\CC_0C0A` (REG_SZ, Blocks Thunderbolt 1 and 2 controllers)
+      * `2` = `PCI\CC_0C0010` (REG_SZ, Blocks IEEE 1394 OHCI compliant Firewire controllers)
     * HKLM\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection
-      * `DeviceEnumerationPolicy` = `1` (REG_DWORD, Block until user logon)
+      * `DeviceEnumerationPolicy` = `0` (REG_DWORD, Block all)
 
 ---
 
@@ -38,7 +43,7 @@ Physical access to an endpoint introduces distinct attack vectors that bypass tr
 1. **Direct Memory Access (DMA) Attacks**: Hot-plug buses (like FireWire, Thunderbolt, and USB4) permit devices to read and write directly to system memory without operating system mediation. Attackers connect specialized hardware (e.g., PCILeech) to hot-plug ports to extract BitLocker encryption keys or session tokens directly from RAM.
    * Disabling the Serial Bus Protocol 2 (SBP-2) setup class (`{d48179be-ec20-11d1-b6b8-00c04fa372a7}`) blocks FireWire/IEEE 1394 DMA controllers.
    * Enforcing `DisableExternalDMAUnderLock` prevents DMA requests when the screen is locked.
-   * `DeviceEnumerationPolicy` restricts external DMA execution until user authentication occurs.
+   * `DeviceEnumerationPolicy` restricts external DMA execution (set to Block all).
 2. **Cold Boot Attacks**: When a system enters standby sleep states (S1-S3), the system RAM remains powered. If a laptop is stolen while in standby, an attacker can quickly reboot the machine or cool the RAM chips to dump their contents, extracting credentials or disk encryption keys. Disabling standby forces the system to either remain fully active or enter Hibernation (S4)/Shutdown, where memory contents are encrypted on disk or cleared.
 3. **USB Data Exfiltration**: Blocking write access to removable drives unless they are encrypted with BitLocker (`RDVDenyWriteAccess`) prevents users or malicious agents from copying confidential data to unauthorized USB media.
 
@@ -77,17 +82,21 @@ Navigate to:
 * **Policy**: `Deny write access to removable drives not protected by BitLocker` -> **Enabled**
   * Check **Do not allow write access to devices configured in another organization** -> **Disabled** (value 0 / False)
 
-#### 3. Device Installation Restrictions (Block SBP-2 Setup Class)
+#### 3. Device Installation Restrictions (Block SBP-2 Setup Class & PCI Device IDs)
 Navigate to:
 `Computer Configuration\Administrative Templates\System\Device Installation\Device Installation Restrictions`
 * **Policy**: `Prevent installation of devices using drivers that match these device setup classes` -> **Enabled**
   * Click **Show...** and enter: `{d48179be-ec20-11d1-b6b8-00c04fa372a7}`
+  * Check **Also apply to matching devices that are already installed** -> **Enabled** (value 1 / True)
+* **Policy**: `Prevent installation of devices that match any of these device IDs` -> **Enabled**
+  * Click **Show...** and enter: `PCI\CC_0C0A` and `PCI\CC_0C0010`
   * Check **Also apply to matching devices that are already installed** -> **Enabled** (value 1 / True)
 
 #### 4. Kernel DMA Protection
 Navigate to:
 `Computer Configuration\Administrative Templates\System\Kernel DMA Protection`
 * **Policy**: `Enable Kernel DMA Protection` -> **Enabled**
+  * **Enumeration policy**: Set to **Block all** (value 0)
 
 ---
 
@@ -136,28 +145,37 @@ if (-not (Test-Path $FvePolicyPath)) {
 Set-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -Value 1 -Type DWord
 Write-Host "[+] BitLocker DMA under lock and unencrypted USB write blocks configured." -ForegroundColor Green
 
-# 4. Device Installation Restrictions (Block SBP-2 class)
+# 4. Device Installation Restrictions (Block SBP-2 class and PCI\CC_0C0A device ID)
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 if (-not (Test-Path $RestrictPath)) {
     New-Item -Path $RestrictPath -Force | Out-Null
 }
 Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -Value 1 -Type DWord
 Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceClassesRetroactive" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDs" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDsRetroactive" -Value 1 -Type DWord
 
 $DenyClassPath = Join-Path $RestrictPath "DenyDeviceClasses"
 if (-not (Test-Path $DenyClassPath)) {
     New-Item -Path $DenyClassPath -Force | Out-Null
 }
 Set-ItemProperty -Path $DenyClassPath -Name "1" -Value "{d48179be-ec20-11d1-b6b8-00c04fa372a7}" -Type String
-Write-Host "[+] Device installation blocks for SBP-2 class enabled." -ForegroundColor Green
 
-# 5. Kernel DMA Protection (Block until logon for standard clients)
+$DenyIDPath = Join-Path $RestrictPath "DenyDeviceIDs"
+if (-not (Test-Path $DenyIDPath)) {
+    New-Item -Path $DenyIDPath -Force | Out-Null
+}
+Set-ItemProperty -Path $DenyIDPath -Name "1" -Value "PCI\CC_0C0A" -Type String
+Set-ItemProperty -Path $DenyIDPath -Name "2" -Value "PCI\CC_0C0010" -Type String
+Write-Host "[+] Device installation blocks for SBP-2 class, PCI\CC_0C0A, and PCI\CC_0C0010 enabled." -ForegroundColor Green
+
+# 5. Kernel DMA Protection (Block all external DMA)
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 if (-not (Test-Path $KDmaPath)) {
     New-Item -Path $KDmaPath -Force | Out-Null
 }
-Set-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -Value 1 -Type DWord
-Write-Host "[+] Kernel DMA Protection DeviceEnumerationPolicy set to 1 (Block until logon)." -ForegroundColor Green
+Set-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
+Write-Host "[+] Kernel DMA Protection DeviceEnumerationPolicy set to 0 (Block all)." -ForegroundColor Green
 
 Write-Host "DMA and physical security settings applied successfully." -ForegroundColor Green
 ```
@@ -205,7 +223,12 @@ $DenyDev = Get-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -Error
 $DenyDevVal = if ($DenyDev) { $DenyDev.DenyDeviceClasses } else { 0 }
 $DenyDevColor = if ($DenyDevVal -eq 1) { "Green" } else { "Red" }
 
+$DenyID = Get-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDs" -ErrorAction SilentlyContinue
+$DenyIDVal = if ($DenyID) { $DenyID.DenyDeviceIDs } else { 0 }
+$DenyIDColor = if ($DenyIDVal -eq 1) { "Green" } else { "Red" }
+
 Write-Host "    - Prevent Device Setup Class Installation: $DenyDevVal (Required = 1)" -ForegroundColor $DenyDevColor
+Write-Host "    - Prevent Device ID Installation: $DenyIDVal (Required = 1)" -ForegroundColor $DenyIDColor
 
 $DenyClassPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses"
 $Sbp2 = Get-ItemProperty -Path $DenyClassPath -Name "1" -ErrorAction SilentlyContinue
@@ -214,13 +237,25 @@ $Sbp2Color = if ($Sbp2Val -eq "{d48179be-ec20-11d1-b6b8-00c04fa372a7}") { "Green
 
 Write-Host "    - Blocked SBP-2 Setup Class: '$Sbp2Val' (Required = '{d48179be-ec20-11d1-b6b8-00c04fa372a7}')" -ForegroundColor $Sbp2Color
 
+$DenyIDPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs"
+$DId1 = Get-ItemProperty -Path $DenyIDPath -Name "1" -ErrorAction SilentlyContinue
+$DId1Val = if ($DId1) { $DId1."1" } else { "" }
+$DId1Color = if ($DId1Val -eq "PCI\CC_0C0A") { "Green" } else { "Red" }
+
+$DId2 = Get-ItemProperty -Path $DenyIDPath -Name "2" -ErrorAction SilentlyContinue
+$DId2Val = if ($DId2) { $DId2."2" } else { "" }
+$DId2Color = if ($DId2Val -eq "PCI\CC_0C0010") { "Green" } else { "Red" }
+
+Write-Host "    - Blocked Device ID PCI\CC_0C0A: '$DId1Val' (Required = 'PCI\CC_0C0A')" -ForegroundColor $DId1Color
+Write-Host "    - Blocked Device ID PCI\CC_0C0010: '$DId2Val' (Required = 'PCI\CC_0C0010')" -ForegroundColor $DId2Color
+
 # 4. Audit Kernel DMA Protection Setting
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 $EnumPol = Get-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -ErrorAction SilentlyContinue
 $EnumPolVal = if ($EnumPol) { $EnumPol.DeviceEnumerationPolicy } else { 2 }
-$EnumPolColor = if ($EnumPolVal -eq 1) { "Green" } else { "Red" }
+$EnumPolColor = if ($EnumPolVal -eq 0) { "Green" } else { "Red" }
 
-Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 1 [Block until logon])" -ForegroundColor $EnumPolColor
+Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block all])" -ForegroundColor $EnumPolColor
 ```
 
 ---

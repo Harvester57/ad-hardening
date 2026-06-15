@@ -37,7 +37,12 @@ $DenyDev = Get-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -Error
 $DenyDevVal = if ($DenyDev) { $DenyDev.DenyDeviceClasses } else { 0 }
 $DenyDevColor = if ($DenyDevVal -eq 1) { "Green" } else { "Red" }
 
+$DenyID = Get-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDs" -ErrorAction SilentlyContinue
+$DenyIDVal = if ($DenyID) { $DenyID.DenyDeviceIDs } else { 0 }
+$DenyIDColor = if ($DenyIDVal -eq 1) { "Green" } else { "Red" }
+
 Write-Host "    - Prevent Device Setup Class Installation: $DenyDevVal (Required = 1)" -ForegroundColor $DenyDevColor
+Write-Host "    - Prevent Device ID Installation: $DenyIDVal (Required = 1)" -ForegroundColor $DenyIDColor
 
 $DenyClassPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses"
 $Sbp2 = Get-ItemProperty -Path $DenyClassPath -Name "1" -ErrorAction SilentlyContinue
@@ -46,10 +51,22 @@ $Sbp2Color = if ($Sbp2Val -eq "{d48179be-ec20-11d1-b6b8-00c04fa372a7}") { "Green
 
 Write-Host "    - Blocked SBP-2 Setup Class: '$Sbp2Val' (Required = '{d48179be-ec20-11d1-b6b8-00c04fa372a7}')" -ForegroundColor $Sbp2Color
 
+$DenyIDPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs"
+$DId1 = Get-ItemProperty -Path $DenyIDPath -Name "1" -ErrorAction SilentlyContinue
+$DId1Val = if ($DId1) { $DId1."1" } else { "" }
+$DId1Color = if ($DId1Val -eq "PCI\CC_0C0A") { "Green" } else { "Red" }
+
+$DId2 = Get-ItemProperty -Path $DenyIDPath -Name "2" -ErrorAction SilentlyContinue
+$DId2Val = if ($DId2) { $DId2."2" } else { "" }
+$DId2Color = if ($DId2Val -eq "PCI\CC_0C0010") { "Green" } else { "Red" }
+
+Write-Host "    - Blocked Device ID PCI\CC_0C0A: '$DId1Val' (Required = 'PCI\CC_0C0A')" -ForegroundColor $DId1Color
+Write-Host "    - Blocked Device ID PCI\CC_0C0010: '$DId2Val' (Required = 'PCI\CC_0C0010')" -ForegroundColor $DId2Color
+
 # 4. Audit Kernel DMA Protection Setting
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 $EnumPol = Get-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -ErrorAction SilentlyContinue
 $EnumPolVal = if ($EnumPol) { $EnumPol.DeviceEnumerationPolicy } else { 2 }
-$EnumPolColor = if ($EnumPolVal -eq 1) { "Green" } else { "Red" }
+$EnumPolColor = if ($EnumPolVal -eq 0) { "Green" } else { "Red" }
 
-Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 1 [Block until logon])" -ForegroundColor $EnumPolColor
+Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block all])" -ForegroundColor $EnumPolColor

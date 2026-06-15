@@ -72,3 +72,7 @@ To prevent initial access and lateral movement, the following unitary technical 
 22. **[REQ-END-022 - Block Outbound Traffic for Known LOLBins](block-lolbins-outbound-traffic.md)**
     Enforces Windows Defender Firewall outbound rules to block known Living Off the Land Binaries (LOLBins) from initiating outgoing network connections.
 
+23. **[REQ-END-023 - Enable LSA Protection with UEFI Lock](enable-lsa-protection.md)**
+    Configures the LSA Protection setting to run the LSASS process as a Protected Process Light (PPL) with UEFI Lock, preventing credential harvesting from LSASS memory.
+
+

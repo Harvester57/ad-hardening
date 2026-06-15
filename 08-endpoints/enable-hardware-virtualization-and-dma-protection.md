@@ -41,9 +41,9 @@ To enforce Kernel DMA Protection across standard client workstations and member 
 2. Create or edit a GPO linked to the target workstations and servers OUs (e.g., `GPO_Hardening_Endpoints`).
 3. Navigate to:
    `Computer Configuration\Administrative Templates\System\Kernel DMA Protection`
-4. Configure the following setting:
-   * **Policy**: `Enable Kernel DMA Protection`
-   * **Setting**: `Enabled`
+4. Configure the following settings:
+   * **Policy**: `Enable Kernel DMA Protection` -> **Enabled**
+   * **Policy**: `Enumeration policy for external devices incompatible with Kernel DMA Protection` -> **Enabled: Block All** (value 0)
 5. Link the GPO to the appropriate OUs.
 
 *Note: In addition to the GPO policy, ensure CPU Virtualization (VT-x/AMD-V), IOMMU (VT-d/AMD-Vi), and TPM 2.0 are manually enabled in the UEFI configuration menu of the systems.*
@@ -71,9 +71,8 @@ if (-not (Test-Path $RegPath)) {
     New-Item -Path $RegPath -Force | Out-Null
 }
 
-# DeviceEnumerationPolicy = 1 (Block all external DMA devices until a user logs on)
-# Note: For maximum security, set to 0 (Block all). Value 1 is standard for standard endpoints.
-Set-ItemProperty -Path $RegPath -Name "DeviceEnumerationPolicy" -Value 1 -Type DWord
+# DeviceEnumerationPolicy = 0 (Block all external DMA devices)
+Set-ItemProperty -Path $RegPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
 Write-Host "Status: Kernel DMA Protection registry configuration applied." -ForegroundColor Green
 ```
 

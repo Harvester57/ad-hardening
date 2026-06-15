@@ -7,19 +7,64 @@
 ---
 
 ## Implementation Details
-* **Priority**: High
-* **GPO Path / Registry Location**:
+* **GPO Paths / Registry Locations**:
   * **GPO Paths**:
-    * `Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption\Operating System Drives`
+    * `Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption` (General and OS, Fixed, and Removable subkeys)
     * `Computer Configuration\Policies\Windows Settings\Security Settings\Public Key Policies\BitLocker Network Unlock`
-  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\FVE`
-    * `AllowNetworkUnlock` = `1` (REG_DWORD)
-    * `MinimumPIN` = `6` (REG_DWORD)
-    * `EnableBDEWithNoTPM` = `1` (REG_DWORD)
-    * `UseTPM` = `2` (REG_DWORD, Allowed / Required depending on baseline)
-    * `UseTPMPIN` = `2` (REG_DWORD, Allowed)
-    * `UseTPMKey` = `2` (REG_DWORD, Allowed)
-    * `UseTPMKeyPIN` = `2` (REG_DWORD, Allowed)
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\FVE` (General Startup & Encryption Policies)
+      * `AllowNetworkUnlock` = `1` (REG_DWORD)
+      * `MinimumPIN` = `6` (REG_DWORD)
+      * `UseEnhancedPin` = `1` (REG_DWORD)
+      * `UseTPM` = `2` (REG_DWORD)
+      * `UseTPMPIN` = `2` (REG_DWORD)
+      * `UseTPMKey` = `2` (REG_DWORD)
+      * `UseTPMKeyPIN` = `2` (REG_DWORD)
+      * `UseAdvancedStartup` = `1` (REG_DWORD)
+      * `EnableBDEWithNoTPM` = `0` (REG_DWORD, Enforce TPM)
+    * `HKLM\SOFTWARE\Policies\Microsoft\FVE` (Operating System Drives `OS...` keys)
+      * `OSAllowSecureBootForIntegrity` = `1` (REG_DWORD)
+      * `OSRecovery` = `1` (REG_DWORD)
+      * `OSManageDRA` = `0` (REG_DWORD)
+      * `OSRecoveryPassword` = `1` (REG_DWORD, Require 48-digit)
+      * `OSRecoveryKey` = `0` (REG_DWORD, Do not allow)
+      * `OSHideRecoveryPage` = `1` (REG_DWORD)
+      * `OSActiveDirectoryBackup` = `1` (REG_DWORD)
+      * `OSActiveDirectoryInfoToStore` = `1` (REG_DWORD)
+      * `OSRequireActiveDirectoryBackup` = `1` (REG_DWORD)
+      * `OSHardwareEncryption` = `0` (REG_DWORD, Disable hardware encryption)
+      * `OSPassphrase` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\FVE` (Fixed Data Drives `FDV...` keys)
+      * `FDVDiscoveryVolumeType` = `""` (REG_SZ, blank string)
+      * `FDVRecovery` = `1` (REG_DWORD)
+      * `FDVManageDRA` = `1` (REG_DWORD)
+      * `FDVRecoveryPassword` = `2` (REG_DWORD, Allow 48-digit)
+      * `FDVRecoveryKey` = `2` (REG_DWORD, Allow 256-bit)
+      * `FDVHideRecoveryPage` = `1` (REG_DWORD)
+      * `FDVActiveDirectoryBackup` = `1` (REG_DWORD, Backup to AD DS enabled)
+      * `FDVActiveDirectoryInfoToStore` = `1` (REG_DWORD)
+      * `FDVRequireActiveDirectoryBackup` = `1` (REG_DWORD, Require AD backup)
+      * `FDVHardwareEncryption` = `0` (REG_DWORD, Disable hardware encryption)
+      * `FDVPassphrase` = `0` (REG_DWORD)
+      * `FDVAllowUserCert` = `1` (REG_DWORD)
+      * `FDVEnforceUserCert` = `1` (REG_DWORD, Require smart cards)
+    * `HKLM\SOFTWARE\Policies\Microsoft\FVE` (Removable Data Drives `RDV...` keys)
+      * `RDVDiscoveryVolumeType` = `""` (REG_SZ, blank string)
+      * `RDVRecovery` = `1` (REG_DWORD)
+      * `RDVManageDRA` = `1` (REG_DWORD)
+      * `RDVRecoveryPassword` = `0` (REG_DWORD, Do not allow)
+      * `RDVRecoveryKey` = `0` (REG_DWORD, Do not allow)
+      * `RDVHideRecoveryPage` = `1` (REG_DWORD)
+      * `RDVActiveDirectoryBackup` = `0` (REG_DWORD)
+      * `RDVActiveDirectoryInfoToStore` = `1` (REG_DWORD)
+      * `RDVRequireActiveDirectoryBackup` = `0` (REG_DWORD)
+      * `RDVHardwareEncryption` = `0` (REG_DWORD)
+      * `RDVPassphrase` = `0` (REG_DWORD)
+      * `RDVAllowUserCert` = `1` (REG_DWORD)
+      * `RDVEnforceUserCert` = `1` (REG_DWORD)
+      * `RDVDenyCrossOrg` = `0` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Policies\Microsoft\FVE`
+      * `RDVDenyWriteAccess` = `1` (REG_DWORD)
 
 ---
 
@@ -82,22 +127,67 @@ If the workstation is stolen or boots outside the local LAN (e.g., on a public n
 5. Import the public `.cer` file exported in Step 1.
 
 #### Step 3: Enforce GPO BitLocker Settings
-1. Navigate to:
-   `Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption\Operating System Drives`
-2. Configure the following settings:
-   * **Policy**: `Require additional authentication at startup`
-     * **Setting**: `Enabled`
-     * **Configure Options**:
-       * Set `Configure TPM startup`: `Require TPM` (or `Allow TPM`).
-       * Set `Configure TPM startup PIN`: `Allow startup PIN with TPM` (or `Require startup PIN with TPM` based on risk assessment).
-       * Set `Configure TPM startup key`: `Allow startup key with TPM`.
-       * Set `Configure TPM startup key and PIN`: `Allow startup key and PIN with TPM`.
-       * Check `Allow BitLocker without a compatible TPM` to `Disabled` (or `Enabled` if required by hardware compatibility).
-   * **Policy**: `Allow Network Unlock at startup`
-     * **Setting**: `Enabled`
-   * **Policy**: `Configure minimum PIN length for startup`
-     * **Setting**: `Enabled`
-     * **Minimum characters**: `6`
+Navigate to `Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption` and configure:
+
+##### 1. General Settings
+* **Policy**: `Allow Network Unlock at startup` -> **Enabled**
+* **Policy**: `Configure minimum PIN length for startup` -> **Enabled** (Minimum characters: **6**)
+* **Policy**: `Choose drive encryption method and cipher strength (Windows 10 [Version 1511] and later)` -> **Enabled** (OS, Fixed, and Removable: **XTS-AES 256-bit**)
+
+##### 2. Operating System Drives
+Navigate to `Operating System Drives` subfolder:
+* **Policy**: `Require additional authentication at startup` -> **Enabled**
+  * `Allow BitLocker without a compatible TPM` -> **Disabled** (unchecked)
+  * `Configure TPM startup` -> **Require TPM**
+  * `Configure TPM startup PIN` -> **Allow startup PIN with TPM** (Allows Network Unlock auto-unlock)
+  * `Configure TPM startup key` -> **Allow startup key with TPM**
+  * `Configure TPM startup key and PIN` -> **Allow startup key and PIN with TPM**
+* **Policy**: `Allow enhanced PINs for startup` -> **Enabled**
+* **Policy**: `Allow Secure Boot for integrity validation` -> **Enabled**
+* **Policy**: `Choose how BitLocker-protected operating system drives can be recovered` -> **Enabled**
+  * `Allow data recovery agent` -> **Disabled** (unchecked)
+  * `Configure user storage of BitLocker recovery information` -> **Require 48-digit recovery password**
+  * `Configure user storage of BitLocker recovery key` -> **Do not allow 256-bit recovery key**
+  * `Omit recovery options from the BitLocker setup wizard` -> **Enabled** (checked)
+  * `Save BitLocker recovery information to AD DS for operating system drives` -> **Enabled** (checked)
+  * `Configure storage of BitLocker recovery information to AD DS` -> **Store recovery passwords and key packages**
+  * `Do not enable BitLocker until recovery information is stored to AD DS for operating system drives` -> **Enabled** (checked)
+* **Policy**: `Configure use of hardware-based encryption for operating system drives` -> **Disabled**
+* **Policy**: `Configure use of passwords for operating system drives` -> **Disabled**
+
+##### 3. Fixed Data Drives
+Navigate to `Fixed Data Drives` subfolder:
+* **Policy**: `Allow access to BitLocker-protected fixed data drives from earlier versions of Windows` -> **Disabled**
+* **Policy**: `Choose how BitLocker-protected fixed drives can be recovered` -> **Enabled**
+  * `Allow data recovery agent` -> **Enabled** (checked)
+  * `Configure user storage of BitLocker recovery information` -> **Allow 48-digit recovery password**
+  * `Configure user storage of BitLocker recovery key` -> **Allow 256-bit recovery key**
+  * `Omit recovery options from the BitLocker setup wizard` -> **Enabled** (checked)
+  * `Save BitLocker recovery information to AD DS for fixed data drives` -> **Enabled** (checked - overridden per user decision)
+  * `Configure storage of BitLocker recovery information to AD DS` -> **Backup recovery passwords and key packages**
+  * `Do not enable BitLocker until recovery information is stored to AD DS for fixed data drives` -> **Enabled** (checked - overridden to enforce AD backup)
+* **Policy**: `Configure use of hardware-based encryption for fixed data drives` -> **Disabled**
+* **Policy**: `Configure use of passwords for fixed data drives` -> **Disabled**
+* **Policy**: `Configure use of smart cards on fixed data drives` -> **Enabled**
+  * `Require use of smart cards on fixed data drives` -> **Enabled** (checked)
+
+##### 4. Removable Data Drives
+Navigate to `Removable Data Drives` subfolder:
+* **Policy**: `Allow access to BitLocker-protected removable data drives from earlier versions of Windows` -> **Disabled**
+* **Policy**: `Choose how BitLocker-protected removable drives can be recovered` -> **Enabled**
+  * `Allow data recovery agent` -> **Enabled** (checked)
+  * `Configure user storage of BitLocker recovery information` -> **Do not allow 48-digit recovery password**
+  * `Configure user storage of BitLocker recovery key` -> **Do not allow 256-bit recovery key**
+  * `Omit recovery options from the BitLocker setup wizard` -> **Enabled** (checked)
+  * `Save BitLocker recovery information to AD DS for removable data drives` -> **Disabled** (unchecked)
+  * `Configure storage of BitLocker recovery information to AD DS` -> **Backup recovery passwords and key packages**
+  * `Do not enable BitLocker until recovery information is stored to AD DS for removable data drives` -> **Disabled** (unchecked)
+* **Policy**: `Configure use of hardware-based encryption for removable data drives` -> **Disabled**
+* **Policy**: `Configure use of passwords for removable data drives` -> **Disabled**
+* **Policy**: `Configure use of smart cards on removable data drives` -> **Enabled**
+  * `Require use of smart cards on removable data drives` -> **Enabled** (checked)
+* **Policy**: `Deny write access to removable drives not protected by BitLocker` -> **Enabled**
+  * `Do not allow write access to devices configured in another organization` -> **Disabled** (unchecked)
 
 ---
 
@@ -113,21 +203,75 @@ Run the following scripts locally to audit and configure BitLocker parameters.
 
 Write-Host "--- Enforcing BitLocker Drive Encryption ---" -ForegroundColor Cyan
 
-# 1. Configure FVE Registry settings for startup authentication
+# 1. Configure FVE Registry settings
 $FveRegPath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
 if (-not (Test-Path $FveRegPath)) {
     New-Item -Path $FveRegPath -Force | Out-Null
 }
 
+# General Startup and Network Unlock settings
 Set-ItemProperty -Path $FveRegPath -Name "AllowNetworkUnlock" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $FveRegPath -Name "MinimumPIN" -Value 6 -Type DWord -Force
-Set-ItemProperty -Path $FveRegPath -Name "EnableBDEWithNoTPM" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $FveRegPath -Name "UseTPM" -Value 2 -Type DWord -Force
 Set-ItemProperty -Path $FveRegPath -Name "UseTPMPIN" -Value 2 -Type DWord -Force
 Set-ItemProperty -Path $FveRegPath -Name "UseTPMKey" -Value 2 -Type DWord -Force
 Set-ItemProperty -Path $FveRegPath -Name "UseTPMKeyPIN" -Value 2 -Type DWord -Force
 
-Write-Host "[+] BitLocker startup authentication registry keys configured." -ForegroundColor Green
+# OS Drive Settings (18.10.10.2.x)
+Set-ItemProperty -Path $FveRegPath -Name "UseEnhancedPin" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "OSAllowSecureBootForIntegrity" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "OSRecovery" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "OSManageDRA" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "OSRecoveryPassword" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "OSRecoveryKey" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "OSHideRecoveryPage" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "OSActiveDirectoryBackup" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "OSActiveDirectoryInfoToStore" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "OSRequireActiveDirectoryBackup" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "OSHardwareEncryption" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "OSPassphrase" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "UseAdvancedStartup" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "EnableBDEWithNoTPM" -Value 0 -Type DWord -Force
+
+# Fixed Drive Settings (18.10.10.1.x)
+Set-ItemProperty -Path $FveRegPath -Name "FDVDiscoveryVolumeType" -Value "" -Type String -Force
+Set-ItemProperty -Path $FveRegPath -Name "FDVRecovery" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "FDVManageDRA" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "FDVRecoveryPassword" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "FDVRecoveryKey" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "FDVHideRecoveryPage" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "FDVActiveDirectoryBackup" -Value 1 -Type DWord -Force  # Overridden to enable AD backups
+Set-ItemProperty -Path $FveRegPath -Name "FDVActiveDirectoryInfoToStore" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "FDVRequireActiveDirectoryBackup" -Value 1 -Type DWord -Force  # Overridden to require AD backups
+Set-ItemProperty -Path $FveRegPath -Name "FDVHardwareEncryption" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "FDVPassphrase" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "FDVAllowUserCert" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "FDVEnforceUserCert" -Value 1 -Type DWord -Force
+
+# Removable Drive Settings (18.10.10.3.x)
+Set-ItemProperty -Path $FveRegPath -Name "RDVDiscoveryVolumeType" -Value "" -Type String -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVRecovery" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVManageDRA" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVRecoveryPassword" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVRecoveryKey" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVHideRecoveryPage" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVActiveDirectoryBackup" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVActiveDirectoryInfoToStore" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVRequireActiveDirectoryBackup" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVHardwareEncryption" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVPassphrase" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVAllowUserCert" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVEnforceUserCert" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $FveRegPath -Name "RDVDenyCrossOrg" -Value 0 -Type DWord -Force
+
+# Removable Drive Write Blocks (System FVE Policies)
+$FveSystemPath = "HKLM:\System\CurrentControlSet\Policies\Microsoft\FVE"
+if (-not (Test-Path $FveSystemPath)) {
+    New-Item -Path $FveSystemPath -Force | Out-Null
+}
+Set-ItemProperty -Path $FveSystemPath -Name "RDVDenyWriteAccess" -Value 1 -Type DWord -Force
+
+Write-Host "[+] BitLocker startup authentication and volume encryption policies configured." -ForegroundColor Green
 
 # 2. Enable BitLocker on C: drive using TPM protection
 $Volume = Get-BitLockerVolume -MountPoint "C:"
@@ -175,32 +319,100 @@ if ($Volume) {
 
 # 2. Check Network Unlock and Startup Authentication registry configuration
 $FveRegPath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
+$FveSysPath = "HKLM:\System\CurrentControlSet\Policies\Microsoft\FVE"
+
 $Params = @(
-    @{ Name = "AllowNetworkUnlock"; Expected = 1 },
-    @{ Name = "MinimumPIN"; Expected = 6 },
-    @{ Name = "EnableBDEWithNoTPM"; Expected = 1 },
-    @{ Name = "UseTPM"; Expected = 2 },
-    @{ Name = "UseTPMPIN"; Expected = 2 },
-    @{ Name = "UseTPMKey"; Expected = 2 },
-    @{ Name = "UseTPMKeyPIN"; Expected = 2 }
+    @{ Name = "AllowNetworkUnlock"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "MinimumPIN"; Expected = 6; Path = $FveRegPath },
+    @{ Name = "UseTPM"; Expected = 2; Path = $FveRegPath },
+    @{ Name = "UseTPMPIN"; Expected = 2; Path = $FveRegPath },
+    @{ Name = "UseTPMKey"; Expected = 2; Path = $FveRegPath },
+    @{ Name = "UseTPMKeyPIN"; Expected = 2; Path = $FveRegPath },
+    
+    # OS Drives
+    @{ Name = "UseEnhancedPin"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "OSAllowSecureBootForIntegrity"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "OSRecovery"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "OSManageDRA"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "OSRecoveryPassword"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "OSRecoveryKey"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "OSHideRecoveryPage"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "OSActiveDirectoryBackup"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "OSActiveDirectoryInfoToStore"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "OSRequireActiveDirectoryBackup"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "OSHardwareEncryption"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "OSPassphrase"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "UseAdvancedStartup"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "EnableBDEWithNoTPM"; Expected = 0; Path = $FveRegPath },
+    
+    # Fixed Drives
+    @{ Name = "FDVDiscoveryVolumeType"; Expected = ""; Path = $FveRegPath },
+    @{ Name = "FDVRecovery"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "FDVManageDRA"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "FDVRecoveryPassword"; Expected = 2; Path = $FveRegPath },
+    @{ Name = "FDVRecoveryKey"; Expected = 2; Path = $FveRegPath },
+    @{ Name = "FDVHideRecoveryPage"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "FDVActiveDirectoryBackup"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "FDVActiveDirectoryInfoToStore"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "FDVRequireActiveDirectoryBackup"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "FDVHardwareEncryption"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "FDVPassphrase"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "FDVAllowUserCert"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "FDVEnforceUserCert"; Expected = 1; Path = $FveRegPath },
+    
+    # Removable Drives
+    @{ Name = "RDVDiscoveryVolumeType"; Expected = ""; Path = $FveRegPath },
+    @{ Name = "RDVRecovery"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "RDVManageDRA"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "RDVRecoveryPassword"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "RDVRecoveryKey"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "RDVHideRecoveryPage"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "RDVActiveDirectoryBackup"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "RDVActiveDirectoryInfoToStore"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "RDVRequireActiveDirectoryBackup"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "RDVHardwareEncryption"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "RDVPassphrase"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "RDVAllowUserCert"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "RDVEnforceUserCert"; Expected = 1; Path = $FveRegPath },
+    @{ Name = "RDVDenyCrossOrg"; Expected = 0; Path = $FveRegPath },
+    @{ Name = "RDVDenyWriteAccess"; Expected = 1; Path = $FveSysPath }
 )
 
-Write-Host "`n[*] Auditing Startup Authentication & PIN parameters:" -ForegroundColor Yellow
-if (Test-Path $FveRegPath) {
-    foreach ($Param in $Params) {
-        $Val = Get-ItemProperty -Path $FveRegPath -Name $Param.Name -ErrorAction SilentlyContinue
+Write-Host "`n[*] Auditing BitLocker settings:" -ForegroundColor Yellow
+$script:Vulnerable = $false
+
+foreach ($Param in $Params) {
+    if (Test-Path $Param.Path) {
+        $Val = Get-ItemProperty -Path $Param.Path -Name $Param.Name -ErrorAction SilentlyContinue
         $ActualVal = if ($Val) { $Val.$($Param.Name) } else { $null }
-        $Color = if ($ActualVal -eq $Param.Expected) { "Green" } else { "Red" }
+        
+        $IsMatch = $false
+        if ($Param.Expected -eq "") {
+            $IsMatch = ($null -eq $ActualVal -or $ActualVal -eq "")
+        } else {
+            $IsMatch = ($ActualVal -eq $Param.Expected)
+        }
+        
+        $Color = if ($IsMatch) { "Green" } else { "Red" }
+        if (-not $IsMatch) { $script:Vulnerable = $true }
+        
         Write-Host "    - $($Param.Name): $ActualVal (Expected = $($Param.Expected))" -ForegroundColor $Color
+    } else {
+        Write-Host "    - Policy key $($Param.Path) does not exist." -ForegroundColor Red
+        $script:Vulnerable = $true
     }
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
 } else {
-    Write-Host "    - FVE Registry Policies key does not exist." -ForegroundColor Red
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
 }
 ```
 
 ---
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10 Benchmark**: Section 18.2.1.1 (Require additional authentication at startup), Section 18.2.1.5 (Allow Network Unlock at startup)
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.2.1 (BitLocker Drive Encryption settings)
 * **ANSSI AD Hardening Guide**: Recommendations regarding endpoint encryption and physical key storage security.
-* **DoD Windows 11 STIG**: BitLocker startup option requirements.
+* **DoD Windows 11 STIG**: BitLocker startup option requirements and fixed/removable drive recovery rules.

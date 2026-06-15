@@ -36,27 +36,36 @@ if (-not (Test-Path $FvePolicyPath)) {
 Set-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -Value 1 -Type DWord
 Write-Host "[+] BitLocker DMA under lock and unencrypted USB write blocks configured." -ForegroundColor Green
 
-# 4. Device Installation Restrictions (Block SBP-2 class)
+# 4. Device Installation Restrictions (Block SBP-2 class and PCI\CC_0C0A device ID)
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 if (-not (Test-Path $RestrictPath)) {
     New-Item -Path $RestrictPath -Force | Out-Null
 }
 Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -Value 1 -Type DWord
 Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceClassesRetroactive" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDs" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDsRetroactive" -Value 1 -Type DWord
 
 $DenyClassPath = Join-Path $RestrictPath "DenyDeviceClasses"
 if (-not (Test-Path $DenyClassPath)) {
     New-Item -Path $DenyClassPath -Force | Out-Null
 }
 Set-ItemProperty -Path $DenyClassPath -Name "1" -Value "{d48179be-ec20-11d1-b6b8-00c04fa372a7}" -Type String
-Write-Host "[+] Device installation blocks for SBP-2 class enabled." -ForegroundColor Green
 
-# 5. Kernel DMA Protection (Block until logon for standard clients)
+$DenyIDPath = Join-Path $RestrictPath "DenyDeviceIDs"
+if (-not (Test-Path $DenyIDPath)) {
+    New-Item -Path $DenyIDPath -Force | Out-Null
+}
+Set-ItemProperty -Path $DenyIDPath -Name "1" -Value "PCI\CC_0C0A" -Type String
+Set-ItemProperty -Path $DenyIDPath -Name "2" -Value "PCI\CC_0C0010" -Type String
+Write-Host "[+] Device installation blocks for SBP-2 class, PCI\CC_0C0A, and PCI\CC_0C0010 enabled." -ForegroundColor Green
+
+# 5. Kernel DMA Protection (Block all external DMA)
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 if (-not (Test-Path $KDmaPath)) {
     New-Item -Path $KDmaPath -Force | Out-Null
 }
-Set-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -Value 1 -Type DWord
-Write-Host "[+] Kernel DMA Protection DeviceEnumerationPolicy set to 1 (Block until logon)." -ForegroundColor Green
+Set-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
+Write-Host "[+] Kernel DMA Protection DeviceEnumerationPolicy set to 0 (Block all)." -ForegroundColor Green
 
 Write-Host "DMA and physical security settings applied successfully." -ForegroundColor Green

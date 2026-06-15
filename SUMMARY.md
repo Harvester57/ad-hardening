@@ -125,6 +125,8 @@
     * [REQ-END-020 - Configure Exploit Protection Profile](08-endpoints/configure-exploit-protection.md)
     * [REQ-END-021 - Restrict Safe Mode Access to Administrators](08-endpoints/disable-safe-mode-for-standard-users.md)
     * [REQ-END-022 - Block Outbound Traffic for Known LOLBins](08-endpoints/block-lolbins-outbound-traffic.md)
+    * [REQ-END-023 - Enable LSA Protection with UEFI Lock](08-endpoints/enable-lsa-protection.md)
+
 
 ## Compliance Mapping
 * [ANSSI Compliance Matrix](compliance/anssi.md)

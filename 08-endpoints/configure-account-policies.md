@@ -40,6 +40,7 @@
       * `MinimumPINLength` = `6` (REG_DWORD)
     * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
       * `MSAOptional` = `1` (REG_DWORD)
+      * `MaxDevicePasswordFailedAttempts` = `10` (REG_DWORD, 10 or fewer invalid logon attempts, but not 0)
     * `HKLM\SOFTWARE\Policies\Microsoft\MicrosoftAccount`
       * `DisableUserAuth` = `1` (REG_DWORD)
     * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork`
@@ -150,6 +151,7 @@ In the endpoints GPO (e.g., `GPO_Hardening_Workstations`), navigate to:
 * **Policy**: `Network security: Minimum session security for NTLM SSP based (including secure RPC) servers` -> Set to **Require NTLMv2 session security, Require 128-bit encryption** (value 537395200)
 * **Policy**: `Network access: Allow anonymous SID/Name translation` -> Set to **Disabled** (value 0)
 * **Policy**: `Network security: Allow LocalSystem NULL session fallback` -> Set to **Disabled** (value 0)
+* **Policy**: `Interactive logon: Machine account lockout threshold` -> Set to **10** (or fewer invalid logon attempts, but not 0)
 
 #### Step 3: Configure Hello for Business, PIN and Microsoft Account Policies
 Navigate to:
@@ -244,6 +246,7 @@ if (-not (Test-Path $SystemPath)) {
     New-Item -Path $SystemPath -Force | Out-Null
 }
 Set-ItemProperty -Path $SystemPath -Name "MSAOptional" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $SystemPath -Name "MaxDevicePasswordFailedAttempts" -Value 10 -Type DWord -Force
 
 $MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
 if (-not (Test-Path $MsaPath)) {
@@ -439,6 +442,7 @@ Test-RegistryValue $PinComplexityPath "MinimumPINLength" 6
 
 $SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
 Test-RegistryValue $SystemPath "MSAOptional" 1
+Test-RegistryValue $SystemPath "MaxDevicePasswordFailedAttempts" 10
 
 $MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
 Test-RegistryValue $MsaPath "DisableUserAuth" 1

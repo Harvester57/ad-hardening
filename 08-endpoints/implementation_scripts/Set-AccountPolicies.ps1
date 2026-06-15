@@ -54,6 +54,7 @@ if (-not (Test-Path $SystemPath)) {
     New-Item -Path $SystemPath -Force | Out-Null
 }
 Set-ItemProperty -Path $SystemPath -Name "MSAOptional" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $SystemPath -Name "MaxDevicePasswordFailedAttempts" -Value 10 -Type DWord -Force
 
 $MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
 if (-not (Test-Path $MsaPath)) {

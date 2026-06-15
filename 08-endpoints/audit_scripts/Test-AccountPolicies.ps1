@@ -41,6 +41,7 @@ Test-RegistryValue $PinComplexityPath "MinimumPINLength" 6
 
 $SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
 Test-RegistryValue $SystemPath "MSAOptional" 1
+Test-RegistryValue $SystemPath "MaxDevicePasswordFailedAttempts" 10
 
 $MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
 Test-RegistryValue $MsaPath "DisableUserAuth" 1
