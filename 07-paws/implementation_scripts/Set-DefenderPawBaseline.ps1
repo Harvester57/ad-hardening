@@ -9,17 +9,12 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Set-MpPreference -DisableRealtimeMonitoring $false
     Set-MpPreference -DisableBehaviorMonitoring $false
     Set-MpPreference -DisableIOAVProtection $false
-    Set-MpPreference -DisableBlockAtFirstSeen $false
-    Set-MpPreference -MAPSReporting 2
-    Set-MpPreference -SubmitSamplesConsent 1
-    Set-MpPreference -MpCloudBlockLevel 2
     Set-MpPreference -DisableScriptScanning $false
     Set-MpPreference -DisableRemovableDriveScanning $false
     Set-MpPreference -EnableNetworkProtection 1
     Set-MpPreference -PUAProtection 1
     Set-MpPreference -DisableExclusionRestriction $false
     Set-MpPreference -DisableLocalAdminMerge $true
-    Set-MpPreference -MpBafsExtendedTimeout 50
     Set-MpPreference -EnableFileHashComputation $true
     Set-MpPreference -DisablePackedExeScanning $false
     Set-MpPreference -DisableEmailScanning $false
@@ -63,7 +58,6 @@ $MpEnginePath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\MpEngin
 if (-not (Test-Path $MpEnginePath)) {
     New-Item -Path $MpEnginePath -Force | Out-Null
 }
-Set-ItemProperty -Path $MpEnginePath -Name "MpBafsExtendedTimeout" -Value 50 -Type DWord
 Set-ItemProperty -Path $MpEnginePath -Name "EnableFileHashComputation" -Value 1 -Type DWord
 
 $NisPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\NIS"

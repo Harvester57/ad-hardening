@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 14d1fe4 | Generated: June 14, 2026</span>
+      <span>Commit: 82c6594 | Generated: June 15, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -39,7 +39,7 @@ pdf_options:
     <li>Tier 2 Client Workstations: Windows 10 and above</li>
   </ul>
   <hr>
-  <p><em>Generated dynamically on: June 14, 2026</em></p>
+  <p><em>Generated dynamically on: June 15, 2026</em></p>
 </div>
 
 <div id="README-md"></div>
@@ -275,7 +275,7 @@ Active Directory directory services run as a shared security database where trus
 
 If an enterprise administrator uses the same administrative credential (e.g., Domain Admin) to manage a Domain Controller (Tier 0) and log on to a standard workstation or application server (Tier 1/2), those high-privilege credentials remain stored in the Local Security Authority Subsystem Service (LSASS) process memory of the lower-tier system. 
 
-If an attacker compromises that lower-tier server or workstation (via email phishing or local web browser exploit), they can dump LSASS memory, steal the Domain Admin credentials, and achieve immediate, full control of the Active Directory database (Tier 0). 
+If an attacker compromises that lower-tier server or workstation, they can dump LSASS memory or the cache, steal the Domain Admin credentials, and achieve immediate, full control of the Active Directory database (Tier 0).
 
 The administrative tiering model prevents this escalation pathway by establishing rigid identity boundaries. It restricts privileged accounts to logging on only to systems within their own security tier or higher, ensuring that Tier 0 credentials never reside on less-secure Tier 1 or Tier 2 machines.
 
@@ -296,17 +296,14 @@ Implementing administrative tiering directly mitigates the most common and criti
 * **Threat**: Windows uses NTLM hashes for local and network authentication. Attackers do not need to decrypt NTLM hashes to authenticate; they can present the captured hash directly to target systems to log on as that user.
 * **Mitigation**: Enforcing explicit boundaries prevents Tier 0 and Tier 1 hashes from being cached on Tier 2 endpoints, meaning there are no high-tier hashes on standard machines for attackers to pass or relay.
 
-<div id="01-architecture-tiering-and-architecture-md-coercion-and-relay-attacks-eg-petitpotam-printer-bug"></div>
-### Coercion and Relay Attacks (e.g., PetitPotam, Printer Bug)
-* **Threat**: Attackers coercion tools force a machine account (such as a Domain Controller) to initiate an authentication request to an attacker-controlled listener. The attacker then relays this machine credential to other services (like Active Directory Certificate Services) to generate domain administrator certificates.
-* **Mitigation**: Active Directory tiering, coupled with workstation isolation and network boundaries, blocks cross-tier network protocols (such as SMB/RPC) between workstations and Domain Controllers, preventing the relay path.
-
 ---
 
 <div id="01-architecture-tiering-and-architecture-md-3-theoretical-implementation"></div>
 ## 3. Theoretical Implementation
 
 Enforcing administrative tiering requires structural separation in Active Directory at the Organizational Unit (OU) level, Group Policy level, and account naming level.
+
+![Active Directory Administrative Tiering Model](01-architecture/images/ad-tiering-model.png)
 
 <div id="01-architecture-tiering-and-architecture-md-organizational-unit-ou-structure"></div>
 ### Organizational Unit (OU) Structure
@@ -348,22 +345,6 @@ Administrators must use distinct accounts depending on the tier they are managin
 ## 4. Operational Management and Administrative Routing
 
 Managing a tiered environment requires strict adherence to operational routing paths.
-
-<div id="01-architecture-tiering-and-architecture-md-management-routing-paw-to-jump-host-to-dc"></div>
-### Management Routing: PAW to Jump Host to DC
-Administrators must never connect directly to Domain Controllers from standard workstations. All administrative access must follow this path:
-
-```text
-[Daily Workstation] -> Email, web browsing, documentation (No admin tasks allowed)
-       |
-[Physical PAW] -> Tier 0 management host (No internet access, strict AppLocker)
-       |  (RDP / WinRM over secure subnet)
-       v
-[Tier 0 Jump Host] -> Isolated server used as a proxy console
-       |  (Restricted RDP / RSAT tools)
-       v
-[Domain Controller] -> Tier 0 database server
-```
 
 <div id="01-architecture-tiering-and-architecture-md-credentials-lifecycle-hygiene"></div>
 ### Credentials Lifecycle & Hygiene
@@ -4650,24 +4631,13 @@ This control establishes a server-optimized defense posture:
    * **Policy**: `Turn off Auto Exclusions`
    * **Setting**: `Disabled` (ensures automatic Server role exclusions remain active)
 9. Navigate to:
-   `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MAPS`
-10. Configure the following settings:
-    * **Policy**: `Join Microsoft MAPS`
-    * **Setting**: `Enabled` (Select `Advanced MAPS` in options)
-    * **Policy**: `Send file samples when further analysis is required`
-    * **Setting**: `Enabled` (Select `Send safe samples` in options)
-11. Navigate to:
-    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
-12. Configure the following settings:
-    * **Policy**: `Select cloud protection level`
-    * **Setting**: `Enabled` (Select `High blocking level` in options)
-    * **Policy**: `Configure extended cloud check`
-    * **Setting**: `Enabled` (Select `50` seconds in options)
+   `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
+10. Configure the setting:
     * **Policy**: `Enable file hash computation feature`
     * **Setting**: `Enabled`
-13. Navigate to:
+11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
-14. Configure the following settings:
+12. Configure the following settings:
     * **Policy**: `Scan removable drives`
     * **Setting**: `Enabled`
     * **Policy**: `Scan excluded files and directories during quick scans`
@@ -4680,16 +4650,16 @@ This control establishes a server-optimized defense posture:
     * **Setting**: `Enabled`
     * **Policy**: `Turn on heuristics`
     * **Setting**: `Enabled`
-15. Navigate to:
+13. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Network Protection`
-16. Configure the following settings:
+14. Configure the following settings:
     * **Policy**: `Prevent users and apps from accessing dangerous websites`
     * **Setting**: `Enabled` (Select `Block` in options)
     * **Policy**: `This setting controls whether Network Protection is allowed to be configured into block or audit mode on Windows Server`
     * **Setting**: `Enabled`
-17. Navigate to:
+15. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
-18. Configure the setting:
+16. Configure the setting:
     * **Policy**: `Configure Attack Surface Reduction rules`
     * **Setting**: `Enabled`
     * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block) or `2` (Audit) as detailed:
@@ -4699,30 +4669,30 @@ This control establishes a server-optimized defense posture:
       * `e6db77e5-3df2-4cf1-b95a-636979351e5b` (Block persistence through WMI event subscription) -> `1` (Block)
       * `d1e49aac-8f56-4280-b9ba-993a6d77406c` (Block process creations originating from PSExec and WMI commands) -> `2` (Audit) (Recommended for DCs to prevent remote management disruptions; configure to `1` only if orchestration is fully migrated to WinRM)
       * `c1db55ab-c21a-4637-bb3f-a12568109d35` (Use advanced protection against ransomware) -> `1` (Block)
-19. Navigate to:
+17. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Network Inspection System`
-20. Configure the following settings:
+18. Configure the following settings:
     * **Policy**: `Convert warn verdict to block`
     * **Setting**: `Enabled`
     * **Policy**: `Turn on asynchronous inspection`
     * **Setting**: `Enabled`
-21. Navigate to:
+19. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Reporting`
-22. Configure the setting:
+20. Configure the setting:
     * **Policy**: `Configure whether to report Dynamic Signature dropped events`
     * **Setting**: `Enabled`
-23. Navigate to:
+21. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Security Intelligence Updates`
-24. Configure the following settings:
+22. Configure the following settings:
     * **Policy**: `Define the number of days before spyware security intelligence is considered out of date`
     * **Setting**: `Enabled` (Select `7` days in options)
     * **Policy**: `Define the number of days before virus security intelligence is considered out of date`
     * **Setting**: `Enabled` (Select `7` days in options)
     * **Policy**: `Specify the day of the week to check for security intelligence updates`
     * **Setting**: `Enabled` (Select `Every day` or `0` in options)
-25. Navigate to:
+23. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Threats`
-26. Configure the settings:
+24. Configure the settings:
     * **Policy**: `Specify threat alert levels at which default action should not be taken when detected`
     * **Setting**: `Enabled`
     * Click **Show...** and enter the following threat levels as Value Names, with Value set to `2` (Quarantine):
@@ -4730,20 +4700,20 @@ This control establishes a server-optimized defense posture:
       * `2` (Medium severity) -> `2`
       * `4` (High severity) -> `2`
       * `5` (Severe severity) -> `2`
-27. Navigate to:
+25. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Family options`
-28. Configure the setting:
+26. Configure the setting:
     * **Policy**: `Hide the Family options area`
     * **Setting**: `Enabled`
-29. Navigate to:
+27. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
-30. Configure the setting:
+28. Configure the setting:
     * **Policy**: `Protect Windows Security settings from tampering`
     * **Setting**: `Enabled` (Select **Block** or **On** depending on ADMX version)
-31. Navigate to:
+29. Navigate to:
     `Computer Configuration\Preferences\Windows Settings\Environment`
-32. Right-click **Environment**, select **New -> Environment Variable**.
-33. Configure the following properties:
+30. Right-click **Environment**, select **New -> Environment Variable**.
+31. Configure the following properties:
     * **Action**: `Update`
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
@@ -4770,17 +4740,12 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Set-MpPreference -DisableRealtimeMonitoring $false
     Set-MpPreference -DisableBehaviorMonitoring $false
     Set-MpPreference -DisableIOAVProtection $false
-    Set-MpPreference -DisableBlockAtFirstSeen $false
-    Set-MpPreference -MAPSReporting 2
-    Set-MpPreference -SubmitSamplesConsent 1
-    Set-MpPreference -MpCloudBlockLevel 2
     Set-MpPreference -DisableScriptScanning $false
     Set-MpPreference -DisableRemovableDriveScanning $false
     Set-MpPreference -EnableNetworkProtection 1
     Set-MpPreference -DisableExclusionRestriction $false
     Set-MpPreference -PUAProtection 1
     Set-MpPreference -DisableLocalAdminMerge $true
-    Set-MpPreference -MpBafsExtendedTimeout 50
     Set-MpPreference -EnableFileHashComputation $true
     Set-MpPreference -DisablePackedExeScanning $false
     Set-MpPreference -DisableEmailScanning $false
@@ -4824,7 +4789,6 @@ $MpEnginePath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine"
 if (-not (Test-Path $MpEnginePath)) {
     New-Item -Path $MpEnginePath -Force | Out-Null
 }
-Set-ItemProperty -Path $MpEnginePath -Name "MpBafsExtendedTimeout" -Value 50 -Type DWord
 Set-ItemProperty -Path $MpEnginePath -Name "EnableFileHashComputation" -Value 1 -Type DWord
 
 $NisPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\NIS"
@@ -4946,9 +4910,6 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     $RealtimeColor = if ($Pref.DisableRealtimeMonitoring -eq $false) { "Green" } else { "Red" }
     $BehaviorColor = if ($Pref.DisableBehaviorMonitoring -eq $false) { "Green" } else { "Red" }
     $ExclColor = if ($Pref.DisableLocalAdminConfiguration -eq 1 -or $Pref.DisableLocalAdminConfiguration -eq $true) { "Green" } else { "Red" }
-    $MapsColor = if ($Pref.MAPSReporting -eq 2) { "Green" } else { "Red" }
-    $SamplesColor = if ($Pref.SubmitSamplesConsent -eq 1) { "Green" } else { "Red" }
-    $CloudColor = if ($Pref.MpCloudBlockLevel -eq 2) { "Green" } else { "Red" }
     $ScriptColor = if ($Pref.DisableScriptScanning -eq $false) { "Green" } else { "Red" }
     $RemovableColor = if ($Pref.DisableRemovableDriveScanning -eq $false) { "Green" } else { "Red" }
     $NetProtColor = if ($Pref.EnableNetworkProtection -eq 1) { "Green" } else { "Red" }
@@ -4957,9 +4918,6 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     Write-Host "    - Real-Time Monitoring Active: $(!$Pref.DisableRealtimeMonitoring) (Required: True)" -ForegroundColor $RealtimeColor
     Write-Host "    - Behavior Monitoring Active: $(!$Pref.DisableBehaviorMonitoring) (Required: True)" -ForegroundColor $BehaviorColor
     Write-Host "    - Exclusions Blocked: $($Pref.DisableLocalAdminConfiguration) (Required: True)" -ForegroundColor $ExclColor
-    Write-Host "    - MAPS Reporting (Advanced): $($Pref.MAPSReporting) (Required: 2)" -ForegroundColor $MapsColor
-    Write-Host "    - Submit Samples (Safe): $($Pref.SubmitSamplesConsent) (Required: 1)" -ForegroundColor $SamplesColor
-    Write-Host "    - Cloud Protection Level: $($Pref.MpCloudBlockLevel) (Required: 2)" -ForegroundColor $CloudColor
     Write-Host "    - Script Scanning: $(!$Pref.DisableScriptScanning) (Required: True)" -ForegroundColor $ScriptColor
     Write-Host "    - Removable Drive Scanning: $(!$Pref.DisableRemovableDriveScanning) (Required: True)" -ForegroundColor $RemovableColor
     Write-Host "    - Network Protection: $($Pref.EnableNetworkProtection) (Required: 1)" -ForegroundColor $NetProtColor
@@ -5026,7 +4984,6 @@ $CheckKeys = @{
     "DisableAutoExclusions" = @{ Path = "$DefenderPoliciesPath\Exclusions"; Expected = 0 }
     "PassiveRemediation" = @{ Path = "$DefenderPoliciesPath\Features"; Expected = 1 }
     "AllowNetworkProtectionOnWinServer" = @{ Path = "$DefenderPoliciesPath\Windows Defender Exploit Guard\Network Protection"; Expected = 1 }
-    "MpBafsExtendedTimeout" = @{ Path = "$DefenderPoliciesPath\MpEngine"; Expected = 50 }
     "EnableFileHashComputation" = @{ Path = "$DefenderPoliciesPath\MpEngine"; Expected = 1 }
     "EnableConvertWarnToBlock" = @{ Path = "$DefenderPoliciesPath\NIS"; Expected = 1 }
     "AllowSwitchToAsyncInspection" = @{ Path = "$DefenderPoliciesPath\NIS"; Expected = 1 }
@@ -5137,50 +5094,51 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
    * **Packaged app rules** -> Select **Enforce rules** (or **Audit only**)
 4. Click **OK**.
 
-<div id="02-domain-controllers-configure-applocker-policies-md-3-create-default-and-block-rules"></div>
-#### 3. Create Default and Block Rules
+<div id="02-domain-controllers-configure-applocker-policies-md-3-create-default-and-exception-rules"></div>
+#### 3. Create Default and Exception Rules
 1. Expand **AppLocker** and select **Executable Rules**.
 2. Right-click **Executable Rules** and select **Create Default Rules** (allows all files in Windows and Program Files directories, and allows local Administrators to run all files).
-3. To block LOLBins and writeable directories, create explicit **Deny** rules for **Everyone**:
-   * **Writeable Directories (Path Rules)**:
-     * Deny `%WINDIR%\Tasks\*`
-     * Deny `%WINDIR%\Temp\*`
-     * Deny `%WINDIR%\tracing\*`
-     * Deny `%WINDIR%\System32\spool\drivers\color\*`
-     * Deny `%WINDIR%\System32\Tasks\Microsoft\Windows\SyncCenter\*`
-     * Deny `%WINDIR%\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\*`
-   * **Bypass Binaries (Publisher or Path Rules)**:
-     * Deny `*\msbuild.exe`
-     * Deny `*\installutil.exe`
-     * Deny `*\mshta.exe`
-     * Deny `*\regasm.exe`
-     * Deny `*\regsvcs.exe`
-     * Deny `*\regsvr32.exe`
-     * Deny `*\rundll32.exe`
-     * Deny `*\bginfo.exe`
-     * Deny `*\cdb.exe`
-     * Deny `*\cmstp.exe`
-     * Deny `*\control.exe`
-     * Deny `*\csi.exe`
-     * Deny `*\dfsvc.exe`
-     * Deny `*\dnx.exe`
-     * Deny `*\fsi.exe`
-     * Deny `*\ie4unit.exe`
-     * Deny `*\ieexec.exe`
-     * Deny `*\infdefaultinstall.exe`
-     * Deny `*\mavinject.exe`
-     * Deny `*\msdeploy.exe`
-     * Deny `*\msdt.exe`
-     * Deny `*\msxsl.exe`
-     * Deny `*\odbcconf.exe`
-     * Deny `*\presentationhost.exe`
-     * Deny `*\rcsi.exe`
-     * Deny `*\rsi.exe`
-     * Deny `*\runscripthelper.exe`
-     * Deny `*\te.exe`
-     * Deny `*\tracker.exe`
-     * Deny `*\xwizard.exe`
-4. Repeat the process for **Script Rules** by creating default rules and adding Deny rules for script execution from the same user-writeable paths (such as `%WINDIR%\Temp\*` and `%WINDIR%\Tasks\*`).
+3. Per **ANSSI R2** recommendation, do not create standalone Deny rules. Instead, configure the following path **Exceptions** on the default Allow rule for the Windows folder:
+   * Right-click the rule `(Default Rule) All files located in the Windows folder` and select **Properties**.
+   * On the **Exceptions** tab, add path exceptions for writeable directories under `%WINDIR%`:
+     * `%WINDIR%\Tasks\*`
+     * `%WINDIR%\Temp\*`
+     * `%WINDIR%\tracing\*`
+     * `%WINDIR%\System32\spool\drivers\color\*`
+     * `%WINDIR%\System32\Tasks\Microsoft\Windows\SyncCenter\*`
+     * `%WINDIR%\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\*`
+   * On the same **Exceptions** tab, add path exceptions for the following bypass binaries (LOLBins):
+     * `*\msbuild.exe`
+     * `*\installutil.exe`
+     * `*\mshta.exe`
+     * `*\regasm.exe`
+     * `*\regsvcs.exe`
+     * `*\regsvr32.exe`
+     * `*\rundll32.exe`
+     * `*\bginfo.exe`
+     * `*\cdb.exe`
+     * `*\cmstp.exe`
+     * `*\control.exe`
+     * `*\csi.exe`
+     * `*\dfsvc.exe`
+     * `*\dnx.exe`
+     * `*\fsi.exe`
+     * `*\ie4unit.exe`
+     * `*\ieexec.exe`
+     * `*\infdefaultinstall.exe`
+     * `*\mavinject.exe`
+     * `*\msdeploy.exe`
+     * `*\msdt.exe`
+     * `*\msxsl.exe`
+     * `*\odbcconf.exe`
+     * `*\presentationhost.exe`
+     * `*\rcsi.exe`
+     * `*\rsi.exe`
+     * `*\runscripthelper.exe`
+     * `*\te.exe`
+     * `*\tracker.exe`
+     * `*\xwizard.exe`
+4. Repeat the process for **Script Rules** by creating default rules and adding exceptions to the `%WINDIR%\*` Allow rule for script execution from user-writeable paths (such as `%WINDIR%\Temp\*` and `%WINDIR%\Tasks\*`).
 5. Disable NTVDM (16-bit application support) to prevent AppLocker bypasses via 16-bit binaries:
    * Navigate to: `Computer Configuration\Administrative Templates\System\16-bit Application Compatibility`
    * Configure **Prevent access to 16-bit applications** to **Enabled**.
@@ -5225,60 +5183,22 @@ $AppLockerXml = @"
       <Conditions>
         <FilePathCondition Path="%WINDIR%\*" />
       </Conditions>
+      <Exceptions>
+        <FilePathCondition Path="%WINDIR%\Temp\*" />
+        <FilePathCondition Path="%WINDIR%\Tasks\*" />
+        <FilePathCondition Path="%WINDIR%\System32\spool\drivers\color\*" />
+        <FilePathCondition Path="*\msbuild.exe" />
+        <FilePathCondition Path="*\installutil.exe" />
+        <FilePathCondition Path="*\mshta.exe" />
+        <FilePathCondition Path="*\regasm.exe" />
+        <FilePathCondition Path="*\regsvcs.exe" />
+        <FilePathCondition Path="*\regsvr32.exe" />
+        <FilePathCondition Path="*\rundll32.exe" />
+      </Exceptions>
     </FilePathRule>
     <FilePathRule Id="fd686d83-a829-4351-8ff4-27c1de5732e9" Name="(Default Rule) All files" Description="Allows members of the local Administrators group to run all applications." UserOrGroupSid="S-1-5-32-544" Action="Allow">
       <Conditions>
         <FilePathCondition Path="*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="1e8fa8b3-3a5e-4c7a-9cb8-b223ff9db261" Name="Block User Writeable Temp" Description="Block execution from Temp folder to prevent bypasses." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\Temp\*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="2e8fa8b3-3a5e-4c7a-9cb8-b223ff9db262" Name="Block User Writeable Tasks" Description="Block execution from Tasks folder to prevent bypasses." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\Tasks\*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="3e8fa8b3-3a5e-4c7a-9cb8-b223ff9db263" Name="Block User Writeable spool color" Description="Block execution from spool color folder." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\System32\spool\drivers\color\*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="4e8fa8b3-3a5e-4c7a-9cb8-b223ff9db264" Name="Block Msbuild" Description="Block msbuild.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\msbuild.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="5e8fa8b3-3a5e-4c7a-9cb8-b223ff9db265" Name="Block Installutil" Description="Block installutil.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\installutil.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="6e8fa8b3-3a5e-4c7a-9cb8-b223ff9db266" Name="Block Mshta" Description="Block mshta.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\mshta.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="7e8fa8b3-3a5e-4c7a-9cb8-b223ff9db267" Name="Block Regasm" Description="Block regasm.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\regasm.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="8e8fa8b3-3a5e-4c7a-9cb8-b223ff9db268" Name="Block Regsvcs" Description="Block regsvcs.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\regsvcs.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="ae8fa8b3-3a5e-4c7a-9cb8-b223ff9db269" Name="Block Regsvr32" Description="Block regsvr32.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\regsvr32.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="be8fa8b3-3a5e-4c7a-9cb8-b223ff9db270" Name="Block Rundll32" Description="Block rundll32.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\rundll32.exe" />
       </Conditions>
     </FilePathRule>
   </RuleCollection>
@@ -5309,20 +5229,14 @@ $AppLockerXml = @"
       <Conditions>
         <FilePathCondition Path="%WINDIR%\*" />
       </Conditions>
+      <Exceptions>
+        <FilePathCondition Path="%WINDIR%\Temp\*" />
+        <FilePathCondition Path="%WINDIR%\Tasks\*" />
+      </Exceptions>
     </FilePathRule>
     <FilePathRule Id="3c8fa8b3-3a5e-4c7a-9cb8-b223ff9db276" Name="(Default Rule) All scripts" Description="Allows administrators to run all scripts." UserOrGroupSid="S-1-5-32-544" Action="Allow">
       <Conditions>
         <FilePathCondition Path="*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="4c8fa8b3-3a5e-4c7a-9cb8-b223ff9db277" Name="Block scripts in Temp" Description="Block script execution from Temp." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\Temp\*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="5c8fa8b3-3a5e-4c7a-9cb8-b223ff9db278" Name="Block scripts in Tasks" Description="Block script execution from Tasks." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\Tasks\*" />
       </Conditions>
     </FilePathRule>
   </RuleCollection>
@@ -5342,8 +5256,75 @@ $AppLockerXml = @"
 $TempPath = Join-Path -Path $env:TEMP -ChildPath "AppLockerDCPolicy.xml"
 $AppLockerXml | Out-File -FilePath $TempPath -Encoding UTF8 -Force
 
+# 3. Validate policy using Test-AppLockerPolicy before importing
 try {
     Import-Module AppLocker -ErrorAction Stop
+} catch {
+    Write-Error "AppLocker module is not available on this system. Cannot configure or validate policy."
+    if (Test-Path $TempPath) {
+        Remove-Item -Path $TempPath -Force
+    }
+    return
+}
+
+$TestPaths = @(
+    # Expected: Allowed
+    "$env:windir\System32\cmd.exe",
+    "$env:windir\System32\WindowsPowerShell\v1.0\powershell.exe",
+    # Expected: DeniedByDefault or ExplicitlyDenied (since it is an exception to an Allow rule)
+    "$env:USERPROFILE\Downloads\tool.exe",
+    "$env:windir\Temp\malware.exe",
+    "$env:windir\Tasks\evil.exe",
+    "$env:windir\System32\msbuild.exe"
+)
+
+$ValidationFailed = $false
+try {
+    $TestResults = Test-AppLockerPolicy -XmlPolicy $TempPath -Path $TestPaths -User Everyone -ErrorAction Stop
+    $ExpectedAllow = @(
+        "$env:windir\System32\cmd.exe",
+        "$env:windir\System32\WindowsPowerShell\v1.0\powershell.exe"
+    )
+    $ExpectedDeny = @(
+        "$env:USERPROFILE\Downloads\tool.exe",
+        "$env:windir\Temp\malware.exe",
+        "$env:windir\Tasks\evil.exe",
+        "$env:windir\System32\msbuild.exe"
+    )
+
+    foreach ($Result in $TestResults) {
+        $Path = $Result.FilePath
+        $Decision = $Result.PolicyDecision
+        if ($ExpectedAllow -contains $Path) {
+            if ($Decision -ne "Allowed") {
+                Write-Warning "[VALIDATION FAIL] Expected Allow for: $Path (got: $Decision)"
+                $ValidationFailed = $true
+            }
+        }
+        if ($ExpectedDeny -contains $Path) {
+            if ($Decision -eq "Allowed") {
+                Write-Warning "[VALIDATION FAIL] Expected Deny/Not Allowed for: $Path (got: $Decision)"
+                $ValidationFailed = $true
+            }
+        }
+    }
+} catch {
+    Write-Warning "Could not perform policy validation tests: $($_.Exception.Message)"
+    $ValidationFailed = $true
+}
+
+if ($ValidationFailed) {
+    Write-Error "AppLocker policy validation failed. Policy was NOT imported."
+    if (Test-Path $TempPath) {
+        Remove-Item -Path $TempPath -Force
+    }
+    return
+}
+
+Write-Host "[+] AppLocker policy validation passed. Proceeding with import." -ForegroundColor Green
+
+# 4. Import the validated AppLocker policy
+try {
     Set-AppLockerPolicy -XmlPolicy $TempPath -ErrorAction Stop
     Write-Host "[+] Local AppLocker policy imported and enforced successfully." -ForegroundColor Green
 } catch {
@@ -5354,7 +5335,7 @@ try {
     }
 }
 
-# 3. Disable NTVDM (16-bit compatibility) via Registry
+# 5. Disable NTVDM (16-bit compatibility) via Registry
 $NtvdmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
 if (-not (Test-Path $NtvdmPath)) {
     New-Item -Path $NtvdmPath -Force | Out-Null
@@ -5423,7 +5404,7 @@ if (Test-Path $NtvdmPath) {
 
 <div id="02-domain-controllers-configure-applocker-policies-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Recommendations Section 3.1.2 (System hardening and configuration baseline controls), DAT-NT-13 Note Technique (R8, R10, R15, R16, R20)
+* **ANSSI AD Hardening Guide**: Recommendations Section 3.1.2 (System hardening and configuration baseline controls), DAT-NT-13 Note Technique (R2, R8, R10, R15, R16, R20)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9 (Application Control Policies / AppLocker)
 * **Microsoft Security Baseline Focus**: Domain Controller Security baseline - AppLocker configurations
 * **Ultimate AppLocker Bypass List**: Generic & Verified AppLocker Bypasses
@@ -13485,46 +13466,47 @@ Enforcing strict execution controls via AppLocker ensures that:
      * **Packaged app rules** -> Select **Enforce rules**
 5. Right-click **Executable Rules** and select **Create Default Rules** (this permits Windows files and program files).
 6. Delete the default rule allowing "Everyone" to run files in all locations, and replace it with a rule allowing only authorized administrative groups (e.g., `Tier0-Admins`) to run binaries outside the default system locations.
-7. To block LOLBins and writeable directories, create explicit **Deny** rules for **Everyone**:
-   * **Writeable Directories (Path Rules)**:
-     * Deny `%WINDIR%\Tasks\*`
-     * Deny `%WINDIR%\Temp\*`
-     * Deny `%WINDIR%\tracing\*`
-     * Deny `%WINDIR%\System32\spool\drivers\color\*`
-     * Deny `%WINDIR%\System32\Tasks\Microsoft\Windows\SyncCenter\*`
-     * Deny `%WINDIR%\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\*`
-   * **Bypass Binaries (Publisher or Path Rules)**:
-     * Deny `*\msbuild.exe`
-     * Deny `*\installutil.exe`
-     * Deny `*\mshta.exe`
-     * Deny `*\regasm.exe`
-     * Deny `*\regsvcs.exe`
-     * Deny `*\regsvr32.exe`
-     * Deny `*\rundll32.exe`
-     * Deny `*\bginfo.exe`
-     * Deny `*\cdb.exe`
-     * Deny `*\cmstp.exe`
-     * Deny `*\control.exe`
-     * Deny `*\csi.exe`
-     * Deny `*\dfsvc.exe`
-     * Deny `*\dnx.exe`
-     * Deny `*\fsi.exe`
-     * Deny `*\ie4unit.exe`
-     * Deny `*\ieexec.exe`
-     * Deny `*\infdefaultinstall.exe`
-     * Deny `*\mavinject.exe`
-     * Deny `*\msdeploy.exe`
-     * Deny `*\msdt.exe`
-     * Deny `*\msxsl.exe`
-     * Deny `*\odbcconf.exe`
-     * Deny `*\presentationhost.exe`
-     * Deny `*\rcsi.exe`
-     * Deny `*\rsi.exe`
-     * Deny `*\runscripthelper.exe`
-     * Deny `*\te.exe`
-     * Deny `*\tracker.exe`
-     * Deny `*\xwizard.exe`
-8. Repeat the process for **Script Rules** by creating default rules and adding Deny rules for script execution from the same user-writeable paths (such as `%WINDIR%\Temp\*` and `%WINDIR%\Tasks\*`).
+7. Per **ANSSI R2** recommendation, do not create standalone Deny rules. Instead, configure the following path **Exceptions** on the default Allow rule for the Windows folder:
+   * Right-click the rule `(Default Rule) All files located in the Windows folder` and select **Properties**.
+   * On the **Exceptions** tab, add path exceptions for writeable directories under `%WINDIR%`:
+     * `%WINDIR%\Tasks\*`
+     * `%WINDIR%\Temp\*`
+     * `%WINDIR%\tracing\*`
+     * `%WINDIR%\System32\spool\drivers\color\*`
+     * `%WINDIR%\System32\Tasks\Microsoft\Windows\SyncCenter\*`
+     * `%WINDIR%\SysWOW64\Tasks\Microsoft\Windows\SyncCenter\*`
+   * On the same **Exceptions** tab, add path exceptions for the following bypass binaries (LOLBins):
+     * `*\msbuild.exe`
+     * `*\installutil.exe`
+     * `*\mshta.exe`
+     * `*\regasm.exe`
+     * `*\regsvcs.exe`
+     * `*\regsvr32.exe`
+     * `*\rundll32.exe`
+     * `*\bginfo.exe`
+     * `*\cdb.exe`
+     * `*\cmstp.exe`
+     * `*\control.exe`
+     * `*\csi.exe`
+     * `*\dfsvc.exe`
+     * `*\dnx.exe`
+     * `*\fsi.exe`
+     * `*\ie4unit.exe`
+     * `*\ieexec.exe`
+     * `*\infdefaultinstall.exe`
+     * `*\mavinject.exe`
+     * `*\msdeploy.exe`
+     * `*\msdt.exe`
+     * `*\msxsl.exe`
+     * `*\odbcconf.exe`
+     * `*\presentationhost.exe`
+     * `*\rcsi.exe`
+     * `*\rsi.exe`
+     * `*\runscripthelper.exe`
+     * `*\te.exe`
+     * `*\tracker.exe`
+     * `*\xwizard.exe`
+8. Repeat the process for **Script Rules** by creating default rules and adding exceptions to the `%WINDIR%\*` Allow rule for script execution from user-writeable paths (such as `%WINDIR%\Temp\*` and `%WINDIR%\Tasks\*`).
 9. Disable NTVDM (16-bit application support) to prevent AppLocker bypasses via 16-bit binaries:
    * Navigate to: `Computer Configuration\Administrative Templates\System\16-bit Application Compatibility`
    * Configure **Prevent access to 16-bit applications** to **Enabled**.
@@ -13568,60 +13550,22 @@ $AppLockerXml = @"
       <Conditions>
         <FilePathCondition Path="%WINDIR%\*" />
       </Conditions>
+      <Exceptions>
+        <FilePathCondition Path="%WINDIR%\Temp\*" />
+        <FilePathCondition Path="%WINDIR%\Tasks\*" />
+        <FilePathCondition Path="%WINDIR%\System32\spool\drivers\color\*" />
+        <FilePathCondition Path="*\msbuild.exe" />
+        <FilePathCondition Path="*\installutil.exe" />
+        <FilePathCondition Path="*\mshta.exe" />
+        <FilePathCondition Path="*\regasm.exe" />
+        <FilePathCondition Path="*\regsvcs.exe" />
+        <FilePathCondition Path="*\regsvr32.exe" />
+        <FilePathCondition Path="*\rundll32.exe" />
+      </Exceptions>
     </FilePathRule>
     <FilePathRule Id="fd686d83-a829-4351-8ff4-27c1de5732e9" Name="(Default Rule) All files" Description="Allows members of the local Administrators group to run all applications." UserOrGroupSid="S-1-5-32-544" Action="Allow">
       <Conditions>
         <FilePathCondition Path="*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="1e8fa8b3-3a5e-4c7a-9cb8-b223ff9db261" Name="Block User Writeable Temp" Description="Block execution from Temp folder to prevent bypasses." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\Temp\*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="2e8fa8b3-3a5e-4c7a-9cb8-b223ff9db262" Name="Block User Writeable Tasks" Description="Block execution from Tasks folder to prevent bypasses." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\Tasks\*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="3e8fa8b3-3a5e-4c7a-9cb8-b223ff9db263" Name="Block User Writeable spool color" Description="Block execution from spool color folder." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\System32\spool\drivers\color\*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="4e8fa8b3-3a5e-4c7a-9cb8-b223ff9db264" Name="Block Msbuild" Description="Block msbuild.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\msbuild.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="5e8fa8b3-3a5e-4c7a-9cb8-b223ff9db265" Name="Block Installutil" Description="Block installutil.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\installutil.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="6e8fa8b3-3a5e-4c7a-9cb8-b223ff9db266" Name="Block Mshta" Description="Block mshta.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\mshta.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="7e8fa8b3-3a5e-4c7a-9cb8-b223ff9db267" Name="Block Regasm" Description="Block regasm.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\regasm.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="8e8fa8b3-3a5e-4c7a-9cb8-b223ff9db268" Name="Block Regsvcs" Description="Block regsvcs.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\regsvcs.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="ae8fa8b3-3a5e-4c7a-9cb8-b223ff9db269" Name="Block Regsvr32" Description="Block regsvr32.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\regsvr32.exe" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="be8fa8b3-3a5e-4c7a-9cb8-b223ff9db270" Name="Block Rundll32" Description="Block rundll32.exe to prevent bypass." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="*\rundll32.exe" />
       </Conditions>
     </FilePathRule>
   </RuleCollection>
@@ -13652,20 +13596,14 @@ $AppLockerXml = @"
       <Conditions>
         <FilePathCondition Path="%WINDIR%\*" />
       </Conditions>
+      <Exceptions>
+        <FilePathCondition Path="%WINDIR%\Temp\*" />
+        <FilePathCondition Path="%WINDIR%\Tasks\*" />
+      </Exceptions>
     </FilePathRule>
     <FilePathRule Id="3c8fa8b3-3a5e-4c7a-9cb8-b223ff9db276" Name="(Default Rule) All scripts" Description="Allows administrators to run all scripts." UserOrGroupSid="S-1-5-32-544" Action="Allow">
       <Conditions>
         <FilePathCondition Path="*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="4c8fa8b3-3a5e-4c7a-9cb8-b223ff9db277" Name="Block scripts in Temp" Description="Block script execution from Temp." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\Temp\*" />
-      </Conditions>
-    </FilePathRule>
-    <FilePathRule Id="5c8fa8b3-3a5e-4c7a-9cb8-b223ff9db278" Name="Block scripts in Tasks" Description="Block script execution from Tasks." UserOrGroupSid="S-1-1-0" Action="Deny">
-      <Conditions>
-        <FilePathCondition Path="%WINDIR%\Tasks\*" />
       </Conditions>
     </FilePathRule>
   </RuleCollection>
@@ -13685,8 +13623,75 @@ $AppLockerXml = @"
 $TempPath = Join-Path -Path $env:TEMP -ChildPath "AppLockerPawPolicy.xml"
 $AppLockerXml | Out-File -FilePath $TempPath -Encoding UTF8 -Force
 
+# 3. Validate policy using Test-AppLockerPolicy before importing
 try {
     Import-Module AppLocker -ErrorAction Stop
+} catch {
+    Write-Error "AppLocker module is not available on this system. Cannot configure or validate policy."
+    if (Test-Path $TempPath) {
+        Remove-Item -Path $TempPath -Force
+    }
+    return
+}
+
+$TestPaths = @(
+    # Expected: Allowed
+    "$env:windir\System32\cmd.exe",
+    "$env:windir\System32\WindowsPowerShell\v1.0\powershell.exe",
+    # Expected: DeniedByDefault or ExplicitlyDenied (since it is an exception to an Allow rule)
+    "$env:USERPROFILE\Downloads\tool.exe",
+    "$env:windir\Temp\malware.exe",
+    "$env:windir\Tasks\evil.exe",
+    "$env:windir\System32\msbuild.exe"
+)
+
+$ValidationFailed = $false
+try {
+    $TestResults = Test-AppLockerPolicy -XmlPolicy $TempPath -Path $TestPaths -User Everyone -ErrorAction Stop
+    $ExpectedAllow = @(
+        "$env:windir\System32\cmd.exe",
+        "$env:windir\System32\WindowsPowerShell\v1.0\powershell.exe"
+    )
+    $ExpectedDeny = @(
+        "$env:USERPROFILE\Downloads\tool.exe",
+        "$env:windir\Temp\malware.exe",
+        "$env:windir\Tasks\evil.exe",
+        "$env:windir\System32\msbuild.exe"
+    )
+
+    foreach ($Result in $TestResults) {
+        $Path = $Result.FilePath
+        $Decision = $Result.PolicyDecision
+        if ($ExpectedAllow -contains $Path) {
+            if ($Decision -ne "Allowed") {
+                Write-Warning "[VALIDATION FAIL] Expected Allow for: $Path (got: $Decision)"
+                $ValidationFailed = $true
+            }
+        }
+        if ($ExpectedDeny -contains $Path) {
+            if ($Decision -eq "Allowed") {
+                Write-Warning "[VALIDATION FAIL] Expected Deny/Not Allowed for: $Path (got: $Decision)"
+                $ValidationFailed = $true
+            }
+        }
+    }
+} catch {
+    Write-Warning "Could not perform policy validation tests: $($_.Exception.Message)"
+    $ValidationFailed = $true
+}
+
+if ($ValidationFailed) {
+    Write-Error "AppLocker policy validation failed. Policy was NOT imported."
+    if (Test-Path $TempPath) {
+        Remove-Item -Path $TempPath -Force
+    }
+    return
+}
+
+Write-Host "[+] AppLocker policy validation passed. Proceeding with import." -ForegroundColor Green
+
+# 4. Import the validated AppLocker policy
+try {
     Set-AppLockerPolicy -XmlPolicy $TempPath -ErrorAction Stop
     Write-Host "[+] Local AppLocker policy imported and enforced successfully." -ForegroundColor Green
 } catch {
@@ -13697,7 +13702,7 @@ try {
     }
 }
 
-# 3. Disable NTVDM (16-bit compatibility) via Registry
+# 5. Disable NTVDM (16-bit compatibility) via Registry
 $NtvdmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppCompat"
 if (-not (Test-Path $NtvdmPath)) {
     New-Item -Path $NtvdmPath -Force | Out-Null
@@ -13771,7 +13776,7 @@ if (Test-Path $NtvdmPath) {
 
 <div id="07-paws-configure-applocker-policies-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Recommendation R58 (Use of Privileged Access Workstations), DAT-NT-13 Note Technique (R8, R10, R15, R16, R20)
+* **ANSSI AD Hardening Guide**: Recommendation R58 (Use of Privileged Access Workstations), DAT-NT-13 Note Technique (R2, R8, R10, R15, R16, R20)
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.9 (AppLocker Application Control)
 * **Microsoft Security Baselines**: AppLocker deployment guidance for high-security environments.
 * **Ultimate AppLocker Bypass List**: Generic & Verified AppLocker Bypasses
@@ -14823,24 +14828,13 @@ This control introduces a highly restrictive protective barrier on PAWs:
    * **Policy**: `Turn off Auto Exclusions`
    * **Setting**: `Disabled` (ensures automatic exclusions remain active)
 9. Navigate to:
-   `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MAPS`
-10. Configure the following settings:
-    * **Policy**: `Join Microsoft MAPS`
-    * **Setting**: `Enabled` (Select `Advanced MAPS` in options)
-    * **Policy**: `Send file samples when further analysis is required`
-    * **Setting**: `Enabled` (Select `Send safe samples` in options)
-11. Navigate to:
-    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
-12. Configure the following settings:
-    * **Policy**: `Select cloud protection level`
-    * **Setting**: `Enabled` (Select `High blocking level` in options)
-    * **Policy**: `Configure extended cloud check`
-    * **Setting**: `Enabled` (Select `50` seconds in options)
+   `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
+10. Configure the setting:
     * **Policy**: `Enable file hash computation feature`
     * **Setting**: `Enabled`
-13. Navigate to:
+11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
-14. Configure the following settings:
+12. Configure the following settings:
     * **Policy**: `Scan removable drives`
     * **Setting**: `Enabled`
     * **Policy**: `Scan excluded files and directories during quick scans`
@@ -14853,16 +14847,16 @@ This control introduces a highly restrictive protective barrier on PAWs:
     * **Setting**: `Enabled`
     * **Policy**: `Turn on heuristics`
     * **Setting**: `Enabled`
-15. Navigate to:
+13. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Network Protection`
-16. Configure the following settings:
+14. Configure the following settings:
     * **Policy**: `Prevent users and apps from accessing dangerous websites`
     * **Setting**: `Enabled` (Select `Block` in options)
     * **Policy**: `This setting controls whether Network Protection is allowed to be configured into block or audit mode on Windows Server`
     * **Setting**: `Enabled`
-17. Navigate to:
+15. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
-18. Configure the setting:
+16. Configure the setting:
     * **Policy**: `Configure Attack Surface Reduction rules`
     * **Setting**: `Enabled`
     * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block):
@@ -14882,30 +14876,30 @@ This control introduces a highly restrictive protective barrier on PAWs:
       * `b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4` (Block untrusted and unsigned processes that run from USB)
       * `92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b` (Block Win32 API calls from Office macros)
       * `c1db55ab-c21a-4637-bb3f-a12568109d35` (Use advanced protection against ransomware)
-19. Navigate to:
+17. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Network Inspection System`
-20. Configure the following settings:
+18. Configure the following settings:
     * **Policy**: `Convert warn verdict to block`
     * **Setting**: `Enabled`
     * **Policy**: `Turn on asynchronous inspection`
     * **Setting**: `Enabled`
-21. Navigate to:
+19. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Reporting`
-22. Configure the setting:
+20. Configure the setting:
     * **Policy**: `Configure whether to report Dynamic Signature dropped events`
     * **Setting**: `Enabled`
-23. Navigate to:
+21. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Security Intelligence Updates`
-24. Configure the following settings:
+22. Configure the following settings:
     * **Policy**: `Define the number of days before spyware security intelligence is considered out of date`
     * **Setting**: `Enabled` (Select `7` days in options)
     * **Policy**: `Define the number of days before virus security intelligence is considered out of date`
     * **Setting**: `Enabled` (Select `7` days in options)
     * **Policy**: `Specify the day of the week to check for security intelligence updates`
     * **Setting**: `Enabled` (Select `Every day` or `0` in options)
-25. Navigate to:
+23. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Threats`
-26. Configure the settings:
+24. Configure the settings:
     * **Policy**: `Specify threat alert levels at which default action should not be taken when detected`
     * **Setting**: `Enabled`
     * Click **Show...** and enter the following threat levels as Value Names, with Value set to `2` (Quarantine):
@@ -14913,20 +14907,20 @@ This control introduces a highly restrictive protective barrier on PAWs:
       * `2` (Medium severity) -> `2`
       * `4` (High severity) -> `2`
       * `5` (Severe severity) -> `2`
-27. Navigate to:
+25. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Family options`
-28. Configure the setting:
+26. Configure the setting:
     * **Policy**: `Hide the Family options area`
     * **Setting**: `Enabled`
-29. Navigate to:
+27. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
-30. Configure the setting:
+28. Configure the setting:
     * **Policy**: `Protect Windows Security settings from tampering`
     * **Setting**: `Enabled` (Select **Block** or **On** depending on ADMX version)
-31. Navigate to:
+29. Navigate to:
     `Computer Configuration\Preferences\Windows Settings\Environment`
-32. Right-click **Environment**, select **New -> Environment Variable**.
-33. Configure the following properties:
+30. Right-click **Environment**, select **New -> Environment Variable**.
+31. Configure the following properties:
     * **Action**: `Update`
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
@@ -14953,17 +14947,12 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Set-MpPreference -DisableRealtimeMonitoring $false
     Set-MpPreference -DisableBehaviorMonitoring $false
     Set-MpPreference -DisableIOAVProtection $false
-    Set-MpPreference -DisableBlockAtFirstSeen $false
-    Set-MpPreference -MAPSReporting 2
-    Set-MpPreference -SubmitSamplesConsent 1
-    Set-MpPreference -MpCloudBlockLevel 2
     Set-MpPreference -DisableScriptScanning $false
     Set-MpPreference -DisableRemovableDriveScanning $false
     Set-MpPreference -EnableNetworkProtection 1
     Set-MpPreference -PUAProtection 1
     Set-MpPreference -DisableExclusionRestriction $false
     Set-MpPreference -DisableLocalAdminMerge $true
-    Set-MpPreference -MpBafsExtendedTimeout 50
     Set-MpPreference -EnableFileHashComputation $true
     Set-MpPreference -DisablePackedExeScanning $false
     Set-MpPreference -DisableEmailScanning $false
@@ -15007,7 +14996,6 @@ $MpEnginePath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\MpEngin
 if (-not (Test-Path $MpEnginePath)) {
     New-Item -Path $MpEnginePath -Force | Out-Null
 }
-Set-ItemProperty -Path $MpEnginePath -Name "MpBafsExtendedTimeout" -Value 50 -Type DWord
 Set-ItemProperty -Path $MpEnginePath -Name "EnableFileHashComputation" -Value 1 -Type DWord
 
 $NisPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\NIS"
@@ -15143,9 +15131,6 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     $RealtimeColor = if ($Pref.DisableRealtimeMonitoring -eq $false) { "Green" } else { "Red" }
     $BehaviorColor = if ($Pref.DisableBehaviorMonitoring -eq $false) { "Green" } else { "Red" }
     $ExclColor = if ($Pref.DisableLocalAdminConfiguration -eq 1 -or $Pref.DisableLocalAdminConfiguration -eq $true) { "Green" } else { "Red" }
-    $MapsColor = if ($Pref.MAPSReporting -eq 2) { "Green" } else { "Red" }
-    $SamplesColor = if ($Pref.SubmitSamplesConsent -eq 1) { "Green" } else { "Red" }
-    $CloudColor = if ($Pref.MpCloudBlockLevel -eq 2) { "Green" } else { "Red" }
     $RemovableColor = if ($Pref.DisableRemovableDriveScanning -eq $false) { "Green" } else { "Red" }
     $NetProtColor = if ($Pref.EnableNetworkProtection -eq 1 -or $Pref.EnableNetworkProtection -eq $true) { "Green" } else { "Red" }
     $PuaColor = if ($Pref.PUAProtection -eq 1) { "Green" } else { "Red" }
@@ -15154,9 +15139,6 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     Write-Host "    - Real-Time Monitoring Active: $(!$Pref.DisableRealtimeMonitoring) (Required: True)" -ForegroundColor $RealtimeColor
     Write-Host "    - Behavior Monitoring Active: $(!$Pref.DisableBehaviorMonitoring) (Required: True)" -ForegroundColor $BehaviorColor
     Write-Host "    - Exclusions Blocked: $($Pref.DisableLocalAdminConfiguration) (Required: True)" -ForegroundColor $ExclColor
-    Write-Host "    - MAPS Reporting (Advanced): $($Pref.MAPSReporting) (Required: 2)" -ForegroundColor $MapsColor
-    Write-Host "    - Submit Samples (Safe): $($Pref.SubmitSamplesConsent) (Required: 1)" -ForegroundColor $SamplesColor
-    Write-Host "    - Cloud Protection Level: $($Pref.MpCloudBlockLevel) (Required: 2)" -ForegroundColor $CloudColor
     Write-Host "    - Removable Drive Scanning: $(!$Pref.DisableRemovableDriveScanning) (Required: True)" -ForegroundColor $RemovableColor
     Write-Host "    - Network Protection: $($Pref.EnableNetworkProtection) (Required: 1)" -ForegroundColor $NetProtColor
     Write-Host "    - PUA Protection: $($Pref.PUAProtection) (Required: 1)" -ForegroundColor $PuaColor
@@ -15213,7 +15195,6 @@ $CheckKeys = @{
     "DisableAutoExclusions" = @{ Path = "$DefenderPoliciesPath\\Exclusions"; Expected = 0 }
     "PassiveRemediation" = @{ Path = "$DefenderPoliciesPath\\Features"; Expected = 1 }
     "AllowNetworkProtectionOnWinServer" = @{ Path = "$DefenderPoliciesPath\\Windows Defender Exploit Guard\\Network Protection"; Expected = 1 }
-    "MpBafsExtendedTimeout" = @{ Path = "$DefenderPoliciesPath\\MpEngine"; Expected = 50 }
     "EnableFileHashComputation" = @{ Path = "$DefenderPoliciesPath\\MpEngine"; Expected = 1 }
     "EnableConvertWarnToBlock" = @{ Path = "$DefenderPoliciesPath\\NIS"; Expected = 1 }
     "AllowSwitchToAsyncInspection" = @{ Path = "$DefenderPoliciesPath\\NIS"; Expected = 1 }
@@ -17956,24 +17937,13 @@ This control introduces four primary hardening mechanisms:
    * **Policy**: `Turn off Auto Exclusions`
      * **Setting**: `Disabled` (ensures automatic exclusions remain active)
 9. Navigate to:
-   `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MAPS`
-10. Configure the following settings:
-    * **Policy**: `Join Microsoft MAPS`
-      * **Setting**: `Enabled` (Select `Advanced MAPS` in options)
-    * **Policy**: `Send file samples when further analysis is required`
-      * **Setting**: `Enabled` (Select `Send safe samples` in options)
-11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
-12. Configure the following settings:
-    * **Policy**: `Select cloud protection level`
-      * **Setting**: `Enabled` (Select `High blocking level` in options)
-    * **Policy**: `Configure extended cloud check`
-      * **Setting**: `Enabled` (Select `50` seconds in options)
+10. Configure the setting:
     * **Policy**: `Enable file hash computation feature`
       * **Setting**: `Enabled`
-13. Navigate to:
+11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
-14. Configure the following settings:
+12. Configure the following settings:
     * **Policy**: `Scan removable drives`
       * **Setting**: `Enabled`
     * **Policy**: `Scan excluded files and directories during quick scans`
@@ -17986,16 +17956,16 @@ This control introduces four primary hardening mechanisms:
       * **Setting**: `Enabled`
     * **Policy**: `Turn on heuristics`
       * **Setting**: `Enabled`
-15. Navigate to:
+13. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Network Protection`
-16. Configure the following settings:
+14. Configure the following settings:
     * **Policy**: `Prevent users and apps from accessing dangerous websites`
       * **Setting**: `Enabled` (Select `Block` in options)
     * **Policy**: `This setting controls whether Network Protection is allowed to be configured into block or audit mode on Windows Server`
       * **Setting**: `Enabled`
-17. Navigate to:
+15. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
-18. Configure the setting:
+16. Configure the setting:
     * **Policy**: `Configure Attack Surface Reduction rules`
       * **Setting**: `Enabled`
       * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block):
@@ -18015,30 +17985,30 @@ This control introduces four primary hardening mechanisms:
         * `b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4` (Block untrusted and unsigned processes that run from USB)
         * `92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b` (Block Win32 API calls from Office macros)
         * `c1db55ab-c21a-4637-bb3f-a12568109d35` (Use advanced protection against ransomware)
-19. Navigate to:
+17. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Network Inspection System`
-20. Configure the following settings:
+18. Configure the following settings:
     * **Policy**: `Convert warn verdict to block`
       * **Setting**: `Enabled`
     * **Policy**: `Turn on asynchronous inspection`
       * **Setting**: `Enabled`
-21. Navigate to:
+19. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Reporting`
-22. Configure the setting:
+20. Configure the setting:
     * **Policy**: `Configure whether to report Dynamic Signature dropped events`
       * **Setting**: `Enabled`
-23. Navigate to:
+21. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Security Intelligence Updates`
-24. Configure the following settings:
+22. Configure the following settings:
     * **Policy**: `Define the number of days before spyware security intelligence is considered out of date`
       * **Setting**: `Enabled` (Select `7` days in options)
     * **Policy**: `Define the number of days before virus security intelligence is considered out of date`
       * **Setting**: `Enabled` (Select `7` days in options)
     * **Policy**: `Specify the day of the week to check for security intelligence updates`
       * **Setting**: `Enabled` (Select `Every day` or `0` in options)
-25. Navigate to:
+23. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Threats`
-26. Configure the settings:
+24. Configure the settings:
     * **Policy**: `Specify threat alert levels at which default action should not be taken when detected`
       * **Setting**: `Enabled`
       * Click **Show...** and enter the following threat levels as Value Names, with Value set to `2` (Quarantine):
@@ -18046,33 +18016,33 @@ This control introduces four primary hardening mechanisms:
         * `2` (Medium severity) -> `2`
         * `4` (High severity) -> `2`
         * `5` (Severe severity) -> `2`
-27. Navigate to:
+25. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Family options`
-28. Configure the setting:
+26. Configure the setting:
     * **Policy**: `Hide the Family options area`
       * **Setting**: `Enabled`
-29. Navigate to:
+27. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
-30. Configure the setting:
+28. Configure the setting:
     * **Policy**: `Protect Windows Security settings from tampering`
       * **Setting**: `Enabled` (Select **Block** or **On** depending on ADMX version)
-31. Navigate to:
+29. Navigate to:
     `Computer Configuration\Preferences\Windows Settings\Environment`
-32. Right-click **Environment**, select **New -> Environment Variable**.
-33. Configure the following properties:
+30. Right-click **Environment**, select **New -> Environment Variable**.
+31. Configure the following properties:
     * **Action**: `Update`
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
     * **Value**: `1`
-34. Navigate to:
+32. Navigate to:
    `Computer Configuration\Administrative Templates\Windows Components\File Explorer`
-35. Configure the following setting:
+33. Configure the following setting:
    * **Policy**: `Configure Windows Defender SmartScreen`
      * **Setting**: `Enabled`
      * **Options**: Select `Require approval from an administrator before running unrecognized software` (forces `ShellSmartScreenLevel` to `Block` and `EnableSmartScreen` to `1`)
 
-<div id="08-endpoints-defender-antivirus-md-step-36-deploy-amsi-authenticode-verification-via-gpo-preferences"></div>
-#### Step 36: Deploy AMSI Authenticode Verification via GPO Preferences
+<div id="08-endpoints-defender-antivirus-md-step-34-deploy-amsi-authenticode-verification-via-gpo-preferences"></div>
+#### Step 34: Deploy AMSI Authenticode Verification via GPO Preferences
 Since AMSI provider signature verification is not exposed in standard ADMX templates, deploy it via Registry GPO Preferences:
 1. Within the endpoints GPO, navigate to:
    `Computer Configuration\Preferences\Windows Settings\Registry`
@@ -18106,17 +18076,12 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Set-MpPreference -DisableRealtimeMonitoring $false
     Set-MpPreference -DisableBehaviorMonitoring $false
     Set-MpPreference -DisableIOAVProtection $false
-    Set-MpPreference -DisableBlockAtFirstSeen $false
-    Set-MpPreference -MAPSReporting 2
-    Set-MpPreference -SubmitSamplesConsent 1
-    Set-MpPreference -MpCloudBlockLevel 2
     Set-MpPreference -DisableScriptScanning $false
     Set-MpPreference -DisableRemovableDriveScanning $false
     Set-MpPreference -EnableNetworkProtection 1
     Set-MpPreference -PUAProtection 1
     Set-MpPreference -DisableExclusionRestriction $false
     Set-MpPreference -DisableLocalAdminMerge $true
-    Set-MpPreference -MpBafsExtendedTimeout 50
     Set-MpPreference -EnableFileHashComputation $true
     Set-MpPreference -DisablePackedExeScanning $false
     Set-MpPreference -DisableEmailScanning $false
@@ -18160,7 +18125,6 @@ $MpEnginePath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine"
 if (-not (Test-Path $MpEnginePath)) {
     New-Item -Path $MpEnginePath -Force | Out-Null
 }
-Set-ItemProperty -Path $MpEnginePath -Name "MpBafsExtendedTimeout" -Value 50 -Type DWord -Force
 Set-ItemProperty -Path $MpEnginePath -Name "EnableFileHashComputation" -Value 1 -Type DWord -Force
 
 $NisPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\NIS"
@@ -18313,9 +18277,6 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     $RealtimeColor = if ($Pref.DisableRealtimeMonitoring -eq $false) { "Green" } else { "Red" }
     $BehaviorColor = if ($Pref.DisableBehaviorMonitoring -eq $false) { "Green" } else { "Red" }
     $ExclColor = if ($Pref.DisableLocalAdminConfiguration -eq 1 -or $Pref.DisableLocalAdminConfiguration -eq $true) { "Green" } else { "Red" }
-    $MapsColor = if ($Pref.MAPSReporting -eq 2) { "Green" } else { "Red" }
-    $SamplesColor = if ($Pref.SubmitSamplesConsent -eq 1) { "Green" } else { "Red" }
-    $CloudColor = if ($Pref.MpCloudBlockLevel -eq 2) { "Green" } else { "Red" }
     $RemovableColor = if ($Pref.DisableRemovableDriveScanning -eq $false) { "Green" } else { "Red" }
     $NetProtColor = if ($Pref.EnableNetworkProtection -eq 1 -or $Pref.EnableNetworkProtection -eq $true) { "Green" } else { "Red" }
     $PuaColor = if ($Pref.PUAProtection -eq 1) { "Green" } else { "Red" }
@@ -18324,9 +18285,6 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     Write-Host "    - Real-Time Monitoring Active: $(!$Pref.DisableRealtimeMonitoring) (Required: True)" -ForegroundColor $RealtimeColor
     Write-Host "    - Behavior Monitoring Active: $(!$Pref.DisableBehaviorMonitoring) (Required: True)" -ForegroundColor $BehaviorColor
     Write-Host "    - Exclusions Blocked: $($Pref.DisableLocalAdminConfiguration) (Required: True)" -ForegroundColor $ExclColor
-    Write-Host "    - MAPS Reporting (Advanced): $($Pref.MAPSReporting) (Required: 2)" -ForegroundColor $MapsColor
-    Write-Host "    - Submit Samples (Safe): $($Pref.SubmitSamplesConsent) (Required: 1)" -ForegroundColor $SamplesColor
-    Write-Host "    - Cloud Protection Level: $($Pref.MpCloudBlockLevel) (Required: 2)" -ForegroundColor $CloudColor
     Write-Host "    - Removable Drive Scanning: $(!$Pref.DisableRemovableDriveScanning) (Required: True)" -ForegroundColor $RemovableColor
     Write-Host "    - Network Protection: $($Pref.EnableNetworkProtection) (Required: 1)" -ForegroundColor $NetProtColor
     Write-Host "    - PUA Protection: $($Pref.PUAProtection) (Required: 1)" -ForegroundColor $PuaColor
@@ -18398,7 +18356,6 @@ $CheckKeys = @{
     "DisableAutoExclusions" = @{ Path = "$DefenderPoliciesPath\Exclusions"; Expected = 0 }
     "PassiveRemediation" = @{ Path = "$DefenderPoliciesPath\Features"; Expected = 1 }
     "AllowNetworkProtectionOnWinServer" = @{ Path = "$DefenderPoliciesPath\Windows Defender Exploit Guard\Network Protection"; Expected = 1 }
-    "MpBafsExtendedTimeout" = @{ Path = "$DefenderPoliciesPath\MpEngine"; Expected = 50 }
     "EnableFileHashComputation" = @{ Path = "$DefenderPoliciesPath\MpEngine"; Expected = 1 }
     "EnableConvertWarnToBlock" = @{ Path = "$DefenderPoliciesPath\NIS"; Expected = 1 }
     "AllowSwitchToAsyncInspection" = @{ Path = "$DefenderPoliciesPath\NIS"; Expected = 1 }

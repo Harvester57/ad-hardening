@@ -77,24 +77,13 @@ This control establishes a server-optimized defense posture:
    * **Policy**: `Turn off Auto Exclusions`
    * **Setting**: `Disabled` (ensures automatic Server role exclusions remain active)
 9. Navigate to:
-   `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MAPS`
-10. Configure the following settings:
-    * **Policy**: `Join Microsoft MAPS`
-    * **Setting**: `Enabled` (Select `Advanced MAPS` in options)
-    * **Policy**: `Send file samples when further analysis is required`
-    * **Setting**: `Enabled` (Select `Send safe samples` in options)
-11. Navigate to:
-    `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
-12. Configure the following settings:
-    * **Policy**: `Select cloud protection level`
-    * **Setting**: `Enabled` (Select `High blocking level` in options)
-    * **Policy**: `Configure extended cloud check`
-    * **Setting**: `Enabled` (Select `50` seconds in options)
+   `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\MpEngine`
+10. Configure the setting:
     * **Policy**: `Enable file hash computation feature`
     * **Setting**: `Enabled`
-13. Navigate to:
+11. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
-14. Configure the following settings:
+12. Configure the following settings:
     * **Policy**: `Scan removable drives`
     * **Setting**: `Enabled`
     * **Policy**: `Scan excluded files and directories during quick scans`
@@ -107,16 +96,16 @@ This control establishes a server-optimized defense posture:
     * **Setting**: `Enabled`
     * **Policy**: `Turn on heuristics`
     * **Setting**: `Enabled`
-15. Navigate to:
+13. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Network Protection`
-16. Configure the following settings:
+14. Configure the following settings:
     * **Policy**: `Prevent users and apps from accessing dangerous websites`
     * **Setting**: `Enabled` (Select `Block` in options)
     * **Policy**: `This setting controls whether Network Protection is allowed to be configured into block or audit mode on Windows Server`
     * **Setting**: `Enabled`
-17. Navigate to:
+15. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
-18. Configure the setting:
+16. Configure the setting:
     * **Policy**: `Configure Attack Surface Reduction rules`
     * **Setting**: `Enabled`
     * Click **Show...** and enter the following GUIDs as Value Names, with Value set to `1` (Block) or `2` (Audit) as detailed:
@@ -126,30 +115,30 @@ This control establishes a server-optimized defense posture:
       * `e6db77e5-3df2-4cf1-b95a-636979351e5b` (Block persistence through WMI event subscription) -> `1` (Block)
       * `d1e49aac-8f56-4280-b9ba-993a6d77406c` (Block process creations originating from PSExec and WMI commands) -> `2` (Audit) (Recommended for DCs to prevent remote management disruptions; configure to `1` only if orchestration is fully migrated to WinRM)
       * `c1db55ab-c21a-4637-bb3f-a12568109d35` (Use advanced protection against ransomware) -> `1` (Block)
-19. Navigate to:
+17. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Network Inspection System`
-20. Configure the following settings:
+18. Configure the following settings:
     * **Policy**: `Convert warn verdict to block`
     * **Setting**: `Enabled`
     * **Policy**: `Turn on asynchronous inspection`
     * **Setting**: `Enabled`
-21. Navigate to:
+19. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Reporting`
-22. Configure the setting:
+20. Configure the setting:
     * **Policy**: `Configure whether to report Dynamic Signature dropped events`
     * **Setting**: `Enabled`
-23. Navigate to:
+21. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Security Intelligence Updates`
-24. Configure the following settings:
+22. Configure the following settings:
     * **Policy**: `Define the number of days before spyware security intelligence is considered out of date`
     * **Setting**: `Enabled` (Select `7` days in options)
     * **Policy**: `Define the number of days before virus security intelligence is considered out of date`
     * **Setting**: `Enabled` (Select `7` days in options)
     * **Policy**: `Specify the day of the week to check for security intelligence updates`
     * **Setting**: `Enabled` (Select `Every day` or `0` in options)
-25. Navigate to:
+23. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Threats`
-26. Configure the settings:
+24. Configure the settings:
     * **Policy**: `Specify threat alert levels at which default action should not be taken when detected`
     * **Setting**: `Enabled`
     * Click **Show...** and enter the following threat levels as Value Names, with Value set to `2` (Quarantine):
@@ -157,20 +146,20 @@ This control establishes a server-optimized defense posture:
       * `2` (Medium severity) -> `2`
       * `4` (High severity) -> `2`
       * `5` (Severe severity) -> `2`
-27. Navigate to:
+25. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Family options`
-28. Configure the setting:
+26. Configure the setting:
     * **Policy**: `Hide the Family options area`
     * **Setting**: `Enabled`
-29. Navigate to:
+27. Navigate to:
     `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
-30. Configure the setting:
+28. Configure the setting:
     * **Policy**: `Protect Windows Security settings from tampering`
     * **Setting**: `Enabled` (Select **Block** or **On** depending on ADMX version)
-31. Navigate to:
+29. Navigate to:
     `Computer Configuration\Preferences\Windows Settings\Environment`
-32. Right-click **Environment**, select **New -> Environment Variable**.
-33. Configure the following properties:
+30. Right-click **Environment**, select **New -> Environment Variable**.
+31. Configure the following properties:
     * **Action**: `Update`
     * **Type**: `System`
     * **Name**: `MP_FORCE_USE_SANDBOX`
@@ -196,17 +185,12 @@ if (Get-Command Set-MpPreference -ErrorAction SilentlyContinue) {
     Set-MpPreference -DisableRealtimeMonitoring $false
     Set-MpPreference -DisableBehaviorMonitoring $false
     Set-MpPreference -DisableIOAVProtection $false
-    Set-MpPreference -DisableBlockAtFirstSeen $false
-    Set-MpPreference -MAPSReporting 2
-    Set-MpPreference -SubmitSamplesConsent 1
-    Set-MpPreference -MpCloudBlockLevel 2
     Set-MpPreference -DisableScriptScanning $false
     Set-MpPreference -DisableRemovableDriveScanning $false
     Set-MpPreference -EnableNetworkProtection 1
     Set-MpPreference -DisableExclusionRestriction $false
     Set-MpPreference -PUAProtection 1
     Set-MpPreference -DisableLocalAdminMerge $true
-    Set-MpPreference -MpBafsExtendedTimeout 50
     Set-MpPreference -EnableFileHashComputation $true
     Set-MpPreference -DisablePackedExeScanning $false
     Set-MpPreference -DisableEmailScanning $false
@@ -250,7 +234,6 @@ $MpEnginePath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine"
 if (-not (Test-Path $MpEnginePath)) {
     New-Item -Path $MpEnginePath -Force | Out-Null
 }
-Set-ItemProperty -Path $MpEnginePath -Name "MpBafsExtendedTimeout" -Value 50 -Type DWord
 Set-ItemProperty -Path $MpEnginePath -Name "EnableFileHashComputation" -Value 1 -Type DWord
 
 $NisPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\NIS"
@@ -372,9 +355,6 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     $RealtimeColor = if ($Pref.DisableRealtimeMonitoring -eq $false) { "Green" } else { "Red" }
     $BehaviorColor = if ($Pref.DisableBehaviorMonitoring -eq $false) { "Green" } else { "Red" }
     $ExclColor = if ($Pref.DisableLocalAdminConfiguration -eq 1 -or $Pref.DisableLocalAdminConfiguration -eq $true) { "Green" } else { "Red" }
-    $MapsColor = if ($Pref.MAPSReporting -eq 2) { "Green" } else { "Red" }
-    $SamplesColor = if ($Pref.SubmitSamplesConsent -eq 1) { "Green" } else { "Red" }
-    $CloudColor = if ($Pref.MpCloudBlockLevel -eq 2) { "Green" } else { "Red" }
     $ScriptColor = if ($Pref.DisableScriptScanning -eq $false) { "Green" } else { "Red" }
     $RemovableColor = if ($Pref.DisableRemovableDriveScanning -eq $false) { "Green" } else { "Red" }
     $NetProtColor = if ($Pref.EnableNetworkProtection -eq 1) { "Green" } else { "Red" }
@@ -383,9 +363,6 @@ if (Get-Command Get-MpPreference -ErrorAction SilentlyContinue) {
     Write-Host "    - Real-Time Monitoring Active: $(!$Pref.DisableRealtimeMonitoring) (Required: True)" -ForegroundColor $RealtimeColor
     Write-Host "    - Behavior Monitoring Active: $(!$Pref.DisableBehaviorMonitoring) (Required: True)" -ForegroundColor $BehaviorColor
     Write-Host "    - Exclusions Blocked: $($Pref.DisableLocalAdminConfiguration) (Required: True)" -ForegroundColor $ExclColor
-    Write-Host "    - MAPS Reporting (Advanced): $($Pref.MAPSReporting) (Required: 2)" -ForegroundColor $MapsColor
-    Write-Host "    - Submit Samples (Safe): $($Pref.SubmitSamplesConsent) (Required: 1)" -ForegroundColor $SamplesColor
-    Write-Host "    - Cloud Protection Level: $($Pref.MpCloudBlockLevel) (Required: 2)" -ForegroundColor $CloudColor
     Write-Host "    - Script Scanning: $(!$Pref.DisableScriptScanning) (Required: True)" -ForegroundColor $ScriptColor
     Write-Host "    - Removable Drive Scanning: $(!$Pref.DisableRemovableDriveScanning) (Required: True)" -ForegroundColor $RemovableColor
     Write-Host "    - Network Protection: $($Pref.EnableNetworkProtection) (Required: 1)" -ForegroundColor $NetProtColor
@@ -452,7 +429,6 @@ $CheckKeys = @{
     "DisableAutoExclusions" = @{ Path = "$DefenderPoliciesPath\Exclusions"; Expected = 0 }
     "PassiveRemediation" = @{ Path = "$DefenderPoliciesPath\Features"; Expected = 1 }
     "AllowNetworkProtectionOnWinServer" = @{ Path = "$DefenderPoliciesPath\Windows Defender Exploit Guard\Network Protection"; Expected = 1 }
-    "MpBafsExtendedTimeout" = @{ Path = "$DefenderPoliciesPath\MpEngine"; Expected = 50 }
     "EnableFileHashComputation" = @{ Path = "$DefenderPoliciesPath\MpEngine"; Expected = 1 }
     "EnableConvertWarnToBlock" = @{ Path = "$DefenderPoliciesPath\NIS"; Expected = 1 }
     "AllowSwitchToAsyncInspection" = @{ Path = "$DefenderPoliciesPath\NIS"; Expected = 1 }
