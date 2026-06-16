@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 1b40a4d | Generated: June 17, 2026</span>
+      <span>Commit: 81c9997 | Generated: June 17, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1474,6 +1474,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to restrict telemetry collection, online diagnostics, advertising IDs, diagnostic tools, and cloud content integration.
 * **[REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](#02-domain-controllers-configure-untrusted-font-blocking-md)**
   Requirement to configure the Untrusted Font Blocking mitigation on Domain Controllers to prevent kernel font parser exploits.
+* **[REQ-DC-029 - Configure svchost.exe Mitigation Options](#02-domain-controllers-configure-svchost-mitigation-md)**
+  Requirement to configure svchost.exe mitigation options on Domain Controllers and Member Servers to restrict binary loading to Microsoft-signed code and block dynamic code execution.
 
 
 
@@ -7521,6 +7523,126 @@ exit 1
 ## Sources & Compliance References
 * **Microsoft Learn**: Block untrusted fonts in an enterprise (MitigationOptions registry configurations)
 * **CIS Benchmark**: CIS Windows Server Benchmark (Section 18.9.30.1 - Mitigation Options)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md"></div>
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-req-dc-029-configure-svchostexe-mitigation-options"></div>
+# [REQ-DC-029] Configure svchost.exe Mitigation Options
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers and Member Servers.
+* **Operating Systems**: Windows Server 2022 (and above), Windows Server Semi-Annual Channel (1903 and above).
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings\Enable svchost.exe mitigation options`
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\SCMConfig`
+    * **Value Name**: `EnableSvchostMitigationPolicy`
+    * **Value Type**: `REG_DWORD`
+    * **Value Data**: `1`
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-rationale"></div>
+## Rationale
+The Service Host (`svchost.exe`) process is a critical system component responsible for hosting multiple Windows services. Because `svchost.exe` runs with elevated privileges (such as `SYSTEM`, `Network Service`, or `Local Service`) and handles sensitive system tasks, it is a prime target for security evasion techniques, process hollowing, and DLL injection.
+
+Enabling `svchost.exe` mitigation options restricts the behavior of the `svchost.exe` process to enhance security:
+1. **Microsoft-Only Binary Enforcement**: Requires all binaries and dynamic-link libraries (DLLs) loaded into `svchost.exe` to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into `svchost.exe` instances.
+2. **Dynamic Code Blocking**: Prevents the execution of dynamically generated code (such as Just-In-Time compiled code) within `svchost.exe` processes, neutralizing typical in-memory exploitation vectors.
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Third-Party Compatibility**: This policy requires all binaries loaded by `svchost.exe` to be Microsoft-signed. Any third-party software, security agents, or system drivers that attempt to run services inside the `svchost.exe` process space using non-Microsoft DLLs will fail to load. This has historically caused issues with legacy antivirus, third-party authentication plugins, or specialized management utilities.
+* **Operating System Support**: This policy has no effect on Windows Server versions prior to 1903 (such as Windows Server 2016 and Windows Server 2019).
+* **Deployment Validation**: It is recommended to perform extensive baseline testing on a representative subset of member servers running third-party software before deploying this configuration across the entire production domain.
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings`
+4. Configure the following setting:
+   * **Policy**: `Enable svchost.exe mitigation options`
+   * **Setting**: `Enabled`
+5. Link the GPO to the Domain Controllers and Member Servers Organizational Units (OUs) containing the target systems.
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-SvchostMitigation.ps1](implementation_scripts/Configure-SvchostMitigation.ps1)
+
+```powershell
+# Configure-SvchostMitigation.ps1
+# Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code.
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
+$ValueName = "EnableSvchostMitigationPolicy"
+$ValueData = 1
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
+Write-Host "Hardening applied successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-SvchostMitigationStatus.ps1](audit_scripts/Get-SvchostMitigationStatus.ps1)
+
+```powershell
+# Get-SvchostMitigationStatus.ps1
+# Description: Audits the configuration state of svchost.exe mitigation options.
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
+$ValueName = "EnableSvchostMitigationPolicy"
+$ExpectedValue = 1
+
+Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+if (Test-Path $RegPath) {
+    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. svchost.exe mitigation options are enabled." -ForegroundColor Green
+        exit 0
+    }
+}
+
+Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured." -ForegroundColor Red
+exit 1
+```
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Learn**: Group Policy settings reference - Service Control Manager Settings
+* **Microsoft Security Guidance**: Removing "Enable svchost.exe mitigation options" from baseline recommendations (for compatibility awareness)
 
 
 <div style="page-break-before: always;"></div>
@@ -15945,6 +16067,12 @@ This directory contains the physical isolation policies and operating system sec
 16. **[REQ-PAW-016 - Configure Untrusted Font Blocking for PAWs](#07-paws-configure-untrusted-font-blocking-md)**
     Configures the Untrusted Font Blocking mitigation on PAWs to prevent font parsing exploits.
 
+17. **[REQ-PAW-017 - Configure svchost.exe Mitigation Options for PAWs](#07-paws-configure-svchost-mitigation-md)**
+    Configures svchost.exe mitigation options on PAWs to restrict binary loading to Microsoft-signed code and block dynamic code execution.
+
+18. **[REQ-PAW-018 - Enable Kernel-Mode Hardware-Enforced Stack Protection for PAWs](#07-paws-enable-kernel-shadow-stacks-md)**
+    Configures Kernel-mode Hardware-enforced Stack Protection to enforce hardware-backed control-flow integrity and mitigate kernel Return-Oriented Programming (ROP) execution hijacks.
+
 
 
 <div style="page-break-before: always;"></div>
@@ -19599,6 +19727,265 @@ exit 1
 
 <div style="page-break-before: always;"></div>
 
+<div id="07-paws-configure-svchost-mitigation-md"></div>
+
+<div id="07-paws-configure-svchost-mitigation-md-req-paw-017-configure-svchostexe-mitigation-options-for-paws"></div>
+# [REQ-PAW-017] Configure svchost.exe Mitigation Options for PAWs
+
+<div id="07-paws-configure-svchost-mitigation-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs).
+* **Operating Systems**: Windows 10 (1903 and above), Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings\Enable svchost.exe mitigation options`
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\SCMConfig`
+    * **Value Name**: `EnableSvchostMitigationPolicy`
+    * **Value Type**: `REG_DWORD`
+    * **Value Data**: `1`
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-rationale"></div>
+## Rationale
+Privileged Access Workstations (PAWs) host highly sensitive administrative sessions and credentials. Securing the Service Host (`svchost.exe`) process is critical to preventing kernel-level security evasion and credential harvesting techniques.
+
+Enabling `svchost.exe` mitigation options on PAWs restricts the behavior of the `svchost.exe` process to enhance security:
+1. **Microsoft-Only Binary Enforcement**: Requires all binaries and dynamic-link libraries (DLLs) loaded into `svchost.exe` to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into `svchost.exe` instances to tamper with administrative service processes.
+2. **Dynamic Code Blocking**: Prevents the execution of dynamically generated code (such as Just-In-Time compiled code) within `svchost.exe` processes, neutralizing typical in-memory exploitation vectors.
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Third-Party Compatibility**: This policy requires all binaries loaded by `svchost.exe` to be Microsoft-signed. Since PAWs are strictly controlled, single-purpose administrative machines, they should run minimal third-party software. However, any security tools, smart card readers, or system drivers that attempt to run services inside the `svchost.exe` process space using non-Microsoft DLLs will fail to load.
+* **Operating System Support**: This policy has no effect on Windows 10 versions prior to 1903.
+* **Deployment Validation**: Ensure that any administrative agents or hardware verification drivers are fully certified and Microsoft-signed before enforcing this control.
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-configure-svchost-mitigation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings`
+4. Configure the following setting:
+   * **Policy**: `Enable svchost.exe mitigation options`
+   * **Setting**: `Enabled`
+5. Link the GPO to the PAW Organizational Unit (OU) containing the target systems.
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-SvchostMitigation.ps1](implementation_scripts/Configure-SvchostMitigation.ps1)
+
+```powershell
+# Configure-SvchostMitigation.ps1
+# Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code on PAWs.
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
+$ValueName = "EnableSvchostMitigationPolicy"
+$ValueData = 1
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
+Write-Host "Hardening applied successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-SvchostMitigationStatus.ps1](audit_scripts/Get-SvchostMitigationStatus.ps1)
+
+```powershell
+# Get-SvchostMitigationStatus.ps1
+# Description: Audits the configuration state of svchost.exe mitigation options on PAWs.
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
+$ValueName = "EnableSvchostMitigationPolicy"
+$ExpectedValue = 1
+
+Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+if (Test-Path $RegPath) {
+    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. svchost.exe mitigation options are enabled." -ForegroundColor Green
+        exit 0
+    }
+}
+
+Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured." -ForegroundColor Red
+exit 1
+```
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Learn**: Group Policy settings reference - Service Control Manager Settings
+* **Microsoft Security Guidance**: Removing "Enable svchost.exe mitigation options" from baseline recommendations (for compatibility awareness)
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark (Section 18.9.30.1 - Mitigation Options reference)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-enable-kernel-shadow-stacks-md"></div>
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-req-paw-018-enable-kernel-mode-hardware-enforced-stack-protection-for-paws"></div>
+# [REQ-PAW-018] Enable Kernel-Mode Hardware-Enforced Stack Protection for PAWs
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 11 (and above) Enterprise/Professional
+
+---
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Turn On Virtualization Based Security -> Set **Kernel-level shadow stacks** to **Enabled**
+  * **Registry Location**: HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks
+    * `Enabled` = `1` (REG_DWORD)
+
+---
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-rationale"></div>
+## Rationale
+Kernel-mode Hardware-enforced Stack Protection uses CPU hardware features to protect the operating system kernel from memory corruption exploits, specifically Return-Oriented Programming (ROP) attacks.
+
+On highly critical endpoints such as Privileged Access Workstations (PAWs), attackers aim to achieve kernel-mode execution to subvert administrative separation controls, bypass Endpoint Detection and Response (EDR) software, and extract domain credential secrets from isolated zones.
+
+Intel Control-flow Enforcement Technology (CET) and AMD Shadow Stack technologies create a separate, hardware-secured copy of the call stack (the "shadow stack"). Before returning from a function, the CPU compares the return address on the standard stack with the address stored on the hardware-secured shadow stack. If a mismatch is detected, the processor terminates the thread or crashes the system, neutralizing control-flow hijacking attempts.
+
+Deploying Kernel-mode Hardware-enforced Stack Protection on PAWs guarantees that the administrative gateway machines remain resilient against advanced kernel exploits.
+
+---
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Hardware Requirements**: Systems must support hardware shadow stacks. This requires Intel 11th Gen Core (Tiger Lake) or newer processors, or AMD Zen 3 (Ryzen 5000) or newer processors.
+* **Firmware & OS Requirements**: The system must run Windows 11 version 22H2 or newer. Additionally, the system must use UEFI BIOS with Secure Boot enabled.
+* **Dependencies**: Virtualization-Based Security (VBS) and Hypervisor-Enforced Code Integrity (HVCI / Memory Integrity) must be enabled and active.
+* **Driver Compatibility**: This feature enforces strict rules on kernel-mode code. Older, legacy, or improperly signed drivers—often associated with kernel-level anti-cheat software, legacy hardware, or debugging tools—will fail to load or may trigger system crashes (BSOD). PAW hardware should be carefully standardized on modern platforms to prevent driver compatibility issues.
+
+---
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the appropriate PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Administrative Templates\System\Device Guard`
+4. Configure the setting:
+   * **Policy**: `Turn On Virtualization Based Security` -> Set to **Enabled**
+   * Check **Kernel-level shadow stacks** -> Set to **Enabled** (or set registry `Enabled` = `1`)
+
+---
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the registry and activate Kernel-mode Hardware-enforced Stack Protection.
+
+[Download Script: Enable-PawKernelShadowStacks.ps1](implementation_scripts/Enable-PawKernelShadowStacks.ps1)
+
+```powershell
+# Enable-PawKernelShadowStacks.ps1
+# Description: Configures HKLM registry to enable Kernel-mode Hardware-enforced Stack Protection (Kernel Shadow Stacks) for PAWs.
+
+Write-Host "Enabling Kernel-mode Hardware-enforced Stack Protection for PAWs..." -ForegroundColor Cyan
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks"
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name "Enabled" -Value 1 -Type DWord
+Write-Host "[+] Registry setting for PAW Kernel Shadow Stacks enabled. (Reboot required)." -ForegroundColor Green
+```
+
+*To audit the state of Kernel-mode Hardware-enforced Stack Protection:*
+
+[Download Script: Test-PawKernelShadowStacks.ps1](audit_scripts/Test-PawKernelShadowStacks.ps1)
+
+```powershell
+# Test-PawKernelShadowStacks.ps1
+# Description: Audits the registry status of Kernel-mode Hardware-enforced Stack Protection (Kernel Shadow Stacks) for PAWs.
+
+Write-Host "--- Auditing PAW Kernel-mode Hardware-enforced Stack Protection ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks"
+
+# Check registry value
+$val = Get-ItemProperty -Path $RegPath -Name "Enabled" -ErrorAction SilentlyContinue
+$actual = if ($val) { $val.Enabled } else { "" }
+
+if ($actual -eq 1) {
+    Write-Host "    - Registry Setting: KernelShadowStacks Enabled | Actual: '1' (Expected: '1')" -ForegroundColor Green
+} else {
+    $script:Vulnerable = $true
+    Write-Host "    - Registry Setting: KernelShadowStacks Enabled | Actual: '$actual' (Expected: '1')" -ForegroundColor Red
+}
+
+# Verify VBS dependency is met
+try {
+    $DG = Get-CimInstance -Namespace "Root\Microsoft\Windows\DeviceGuard" -ClassName "Win32_DeviceGuard" -ErrorAction Stop
+    if ($DG.VirtualizationBasedSecurityStatus -eq 2) {
+        Write-Host "    - VBS Status: Running" -ForegroundColor Green
+    } else {
+        $script:Vulnerable = $true
+        Write-Host "    - VBS Status: Not Running (VBS is required for Kernel Shadow Stacks)" -ForegroundColor Red
+    }
+} catch {
+    $script:Vulnerable = $true
+    Write-Host "    - DeviceGuard WMI class query failed. VBS is likely disabled." -ForegroundColor Red
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+}
+```
+
+---
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Windows Security Baselines**: Core Isolation Security Baseline
+* **ANSSI AD Hardening Guide**: Section on hardware virtualization and kernel exploitation mitigation
+* **DoD Windows 11 Computer STIG**: Device Guard / Virtualization-Based Security policies
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="08-endpoints-README-md"></div>
 
 <div id="08-endpoints-README-md-module-8-endpoint-hardening"></div>
@@ -19697,6 +20084,13 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 29. **[REQ-END-029 - Configure Untrusted Font Blocking](#08-endpoints-configure-untrusted-font-blocking-md)**
     Configures the Untrusted Font Blocking mitigation to prevent loading of fonts outside the system fonts directory.
+
+30. **[REQ-END-030 - Configure svchost.exe Mitigation Options](#08-endpoints-configure-svchost-mitigation-md)**
+    Configures svchost.exe mitigation options on Tier 2 client workstations to restrict binary loading to Microsoft-signed code and block dynamic code execution.
+
+31. **[REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](#08-endpoints-enable-kernel-shadow-stacks-md)**
+    Configures Kernel-mode Hardware-enforced Stack Protection to enforce hardware-backed control-flow integrity and mitigate kernel Return-Oriented Programming (ROP) execution hijacks.
+
 
 
 <div style="page-break-before: always;"></div>
@@ -24541,8 +24935,6 @@ if ($script:Vulnerable) {
       * `LoadAppInit_DLLs` = `0` (REG_DWORD, disable custom DLL loading list)
     * HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer
       * `DisableCoInstallers` = `1` (REG_DWORD, block driver co-installer execution)
-    * HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks
-      * `Enabled` = `1` (REG_DWORD, enable hardware-enforced stack protection)
 ---
 
 <div id="08-endpoints-configure-user-profile-restrictions-md-rationale"></div>
@@ -24561,7 +24953,6 @@ Securing user profile characteristics and administrative explorer behaviors prev
 10. **Disable Debugging & Telemetry abuse (`RecordingPolicy`, `DisableCoInstallers`, `LoadAppInit_DLLs`)**: Disabling Time-Travel Debugging prevents adversaries from dumping memory or executing arbitrary binaries. Disabling custom DLL loading (AppInit_DLLs) blocks persistent user-mode DLL injection. Disabling driver co-installers prevents unauthorized executable downloads during peripheral plugin.
 11. **Standard User Root Certificate Restriction (`Flags` under `ProtectedRoots`)**: Restricting certificate store installation to administrators prevents standard users from importing rogue root certificate authorities into their personal store, which blocks internal MitM or code-signing forgery attacks.
 12. **Spectre & Meltdown CPU Mitigations (`FeatureSettingsOverride`)**: Hardware-level speculative execution vulnerabilities can allow a malicious process to leak kernel memory. Enforcing modern speculative execution overrides blocks these side-channel exploitation paths.
-13. **Kernel-Level Shadow Stacks (`Enabled` under `KernelShadowStacks`)**: Enforces hardware-backed control flow integrity (Intel CET/AMD Shadow Stack) to prevent Return-Oriented Programming (ROP) execution hijacks.
 
 ---
 
@@ -24573,7 +24964,7 @@ Securing user profile characteristics and administrative explorer behaviors prev
 * **Driver Installations**: Blocking co-installers means manufacturer companion software for USB devices (gaming mouses, keyboards, headsets) must be downloaded and installed manually by an administrator.
 * **Legacy Application Compatibility**:
   * Some legacy software relying on custom DLL injection via AppInit_DLLs will fail to load their helper libraries.
-  * Forcing ASLR or enabling Kernel Shadow Stacks may cause stability issues in older 32-bit executables or unsigned drivers. Proper sandbox verification is required.
+  * Forcing ASLR may cause stability issues in older 32-bit executables or unsigned drivers. Proper sandbox verification is required.
   * Batch files that are dynamically self-modifying during runtime will fail when secure batch processing is enabled due to opportunistic file locks.
 
 ---
@@ -24660,7 +25051,6 @@ Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings
 #### 3. Deploy Custom Settings via GPO Preferences and System Mitigations
 Configure GPO Preferences registry items or Administrative Templates for the remaining custom settings:
 * **ASLR Force Randomization**: Enable in Exploit Guard mitigation policies or set registry `MoveImages` = `4294967295` (0xFFFFFFFF).
-* **Kernel Shadow Stacks**: Navigate to: `Computer Configuration\Administrative Templates\System\Device Guard` -> `Turn on Virtualization-Based Security` -> Set **Kernel-level shadow stacks** to **Enabled** (or set registry `Enabled` = `1`).
 * **Spectre & Meltdown CPU Mitigations**: Configure registry `FeatureSettingsOverride` = `72` and `FeatureSettingsOverrideMask` = `3`.
 * **LockBatchFilesWhenInUse**: Configure registry `LockBatchFilesWhenInUse` = `1` under `HKLM\SOFTWARE\Microsoft\Command Processor`.
 * **EnableCertPaddingCheck**: Configure registry `EnableCertPaddingCheck` = `1` under `HKLM\Software\Microsoft\Cryptography\Wintrust\Config` (and Wow6432Node).
@@ -24813,9 +25203,6 @@ Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" 
 # Spectre/Meltdown speculative execution mitigations
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" 72
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" 3
-
-# Kernel-level Shadow Stacks
-Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
 # Speech Recognition (AllowInputPersonalization = 0)
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization" "AllowInputPersonalization" 0
@@ -25020,9 +25407,6 @@ Test-RegistryValue "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" 
 
 # Block driver co-installers
 Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" "DisableCoInstallers" 1
-
-# Kernel-level Shadow Stacks
-Test-RegistryValue "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
@@ -27829,6 +28213,265 @@ exit 1
 ## Sources & Compliance References
 * **Microsoft Learn**: Block untrusted fonts in an enterprise (MitigationOptions registry configurations)
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.9.30.1 (System Options / Mitigation Options)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-configure-svchost-mitigation-md"></div>
+
+<div id="08-endpoints-configure-svchost-mitigation-md-req-end-030-configure-svchostexe-mitigation-options"></div>
+# [REQ-END-030] Configure svchost.exe Mitigation Options
+
+<div id="08-endpoints-configure-svchost-mitigation-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations.
+* **Operating Systems**: Windows 10 (1903 and above), Windows 11 Enterprise/Professional.
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings\Enable svchost.exe mitigation options`
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\SCMConfig`
+    * **Value Name**: `EnableSvchostMitigationPolicy`
+    * **Value Type**: `REG_DWORD`
+    * **Value Data**: `1`
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-rationale"></div>
+## Rationale
+The Service Host (`svchost.exe`) process runs multiple system services. Because these services execute with high privileges, they are frequently targeted for process injection, hollowing, or spoofing to execute arbitrary code or harvest credentials.
+
+Enabling `svchost.exe` mitigation options restricts the behavior of the `svchost.exe` process to enhance security:
+1. **Microsoft-Only Binary Enforcement**: Requires all binaries and dynamic-link libraries (DLLs) loaded into `svchost.exe` to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into `svchost.exe` instances.
+2. **Dynamic Code Blocking**: Prevents the execution of dynamically generated code (such as Just-In-Time compiled code) within `svchost.exe` processes, neutralizing typical in-memory exploitation vectors.
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Third-Party Compatibility**: This policy requires all binaries loaded by `svchost.exe` to be Microsoft-signed. Any third-party software, security agents, or system drivers that attempt to run services inside the `svchost.exe` process space using non-Microsoft DLLs will fail to load. This has historically caused issues with legacy antivirus, third-party authentication plugins, or specialized management utilities on client systems.
+* **Operating System Support**: This policy has no effect on Windows 10 versions prior to 1903.
+* **Deployment Validation**: It is recommended to perform extensive baseline testing on a representative subset of workstations running third-party software before deploying this configuration across the entire production domain.
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-configure-svchost-mitigation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings`
+4. Configure the following setting:
+   * **Policy**: `Enable svchost.exe mitigation options`
+   * **Setting**: `Enabled`
+5. Link the GPO to the appropriate Organizational Unit (OU) containing the target client endpoints.
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-SvchostMitigation.ps1](implementation_scripts/Configure-SvchostMitigation.ps1)
+
+```powershell
+# Configure-SvchostMitigation.ps1
+# Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code.
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
+$ValueName = "EnableSvchostMitigationPolicy"
+$ValueData = 1
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
+Write-Host "Hardening applied successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-SvchostMitigationStatus.ps1](audit_scripts/Get-SvchostMitigationStatus.ps1)
+
+```powershell
+# Get-SvchostMitigationStatus.ps1
+# Description: Audits the configuration state of svchost.exe mitigation options.
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
+$ValueName = "EnableSvchostMitigationPolicy"
+$ExpectedValue = 1
+
+Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+if (Test-Path $RegPath) {
+    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. svchost.exe mitigation options are enabled." -ForegroundColor Green
+        exit 0
+    }
+}
+
+Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured." -ForegroundColor Red
+exit 1
+```
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Learn**: Group Policy settings reference - Service Control Manager Settings
+* **Microsoft Security Guidance**: Removing "Enable svchost.exe mitigation options" from baseline recommendations (for compatibility awareness)
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark (Section 18.9.30.1 - Mitigation Options reference)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md"></div>
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-req-end-031-enable-kernel-mode-hardware-enforced-stack-protection"></div>
+# [REQ-END-031] Enable Kernel-Mode Hardware-Enforced Stack Protection
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 11 (and above) Enterprise/Professional
+
+---
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Turn On Virtualization Based Security -> Set **Kernel-level shadow stacks** to **Enabled**
+  * **Registry Location**: HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks
+    * `Enabled` = `1` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-rationale"></div>
+## Rationale
+Kernel-mode Hardware-enforced Stack Protection uses CPU hardware features to protect the operating system kernel from memory corruption exploits, specifically Return-Oriented Programming (ROP) attacks. 
+
+An adversary attempting privilege escalation or remote code execution often hijacks the control flow of kernel-mode components by overwriting return addresses on the stack. Intel Control-flow Enforcement Technology (CET) and AMD Shadow Stack technologies create a separate, hardware-secured copy of the call stack (the "shadow stack"). 
+
+Before returning from a function, the CPU compares the return address on the standard stack with the address stored on the hardware-secured shadow stack. If the addresses do not match, the processor detects a control flow violation, terminates the process, or triggers a system crash to prevent execution of malicious payloads.
+
+Enforcing Kernel-mode Hardware-enforced Stack Protection provides hardware-backed control-flow integrity, neutralizing key vectors of kernel exploitation.
+
+---
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Hardware Requirements**: Systems must support hardware shadow stacks. This requires Intel 11th Gen Core (Tiger Lake) or newer processors, or AMD Zen 3 (Ryzen 5000) or newer processors.
+* **Firmware & OS Requirements**: The system must run Windows 11 version 22H2 or newer. Additionally, the system must use UEFI BIOS with Secure Boot enabled.
+* **Dependencies**: Virtualization-Based Security (VBS) and Hypervisor-Enforced Code Integrity (HVCI / Memory Integrity) must be enabled and active.
+* **Driver Compatibility**: This feature enforces strict rules on kernel-mode code. Older, legacy, or improperly signed drivers—often associated with kernel-level anti-cheat software, legacy hardware, or debugging tools—will fail to load or may trigger system crashes (BSOD). Verify driver compatibility in a representative sandbox environment prior to enterprise-wide enforcement.
+
+---
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the appropriate endpoint GPO (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to:
+   `Computer Configuration\Administrative Templates\System\Device Guard`
+4. Configure the setting:
+   * **Policy**: `Turn On Virtualization Based Security` -> Set to **Enabled**
+   * Check **Kernel-level shadow stacks** -> Set to **Enabled** (or set registry `Enabled` = `1`)
+
+---
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the registry and activate Kernel-mode Hardware-enforced Stack Protection.
+
+[Download Script: Enable-KernelShadowStacks.ps1](implementation_scripts/Enable-KernelShadowStacks.ps1)
+
+```powershell
+# Enable-KernelShadowStacks.ps1
+# Description: Configures HKLM registry to enable Kernel-mode Hardware-enforced Stack Protection (Kernel Shadow Stacks).
+
+Write-Host "Enabling Kernel-mode Hardware-enforced Stack Protection..." -ForegroundColor Cyan
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks"
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name "Enabled" -Value 1 -Type DWord
+Write-Host "[+] Registry setting for Kernel Shadow Stacks enabled. (Reboot required)." -ForegroundColor Green
+```
+
+*To audit the state of Kernel-mode Hardware-enforced Stack Protection:*
+
+[Download Script: Test-KernelShadowStacks.ps1](audit_scripts/Test-KernelShadowStacks.ps1)
+
+```powershell
+# Test-KernelShadowStacks.ps1
+# Description: Audits the registry status of Kernel-mode Hardware-enforced Stack Protection (Kernel Shadow Stacks).
+
+Write-Host "--- Auditing Kernel-mode Hardware-enforced Stack Protection ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks"
+
+# Check registry value
+$val = Get-ItemProperty -Path $RegPath -Name "Enabled" -ErrorAction SilentlyContinue
+$actual = if ($val) { $val.Enabled } else { "" }
+
+if ($actual -eq 1) {
+    Write-Host "    - Registry Setting: KernelShadowStacks Enabled | Actual: '1' (Expected: '1')" -ForegroundColor Green
+} else {
+    $script:Vulnerable = $true
+    Write-Host "    - Registry Setting: KernelShadowStacks Enabled | Actual: '$actual' (Expected: '1')" -ForegroundColor Red
+}
+
+# Verify VBS dependency is met
+try {
+    $DG = Get-CimInstance -Namespace "Root\Microsoft\Windows\DeviceGuard" -ClassName "Win32_DeviceGuard" -ErrorAction Stop
+    if ($DG.VirtualizationBasedSecurityStatus -eq 2) {
+        Write-Host "    - VBS Status: Running" -ForegroundColor Green
+    } else {
+        $script:Vulnerable = $true
+        Write-Host "    - VBS Status: Not Running (VBS is required for Kernel Shadow Stacks)" -ForegroundColor Red
+    }
+} catch {
+    $script:Vulnerable = $true
+    Write-Host "    - DeviceGuard WMI class query failed. VBS is likely disabled." -ForegroundColor Red
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+}
+```
+
+---
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Windows Security Baselines**: Core Isolation Security Baseline
+* **ANSSI AD Hardening Guide**: Section on hardware virtualization and kernel exploitation mitigation
+* **DoD Windows 11 Computer STIG**: Device Guard / Virtualization-Based Security policies
 
 
 <div style="page-break-before: always;"></div>

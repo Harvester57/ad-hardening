@@ -102,8 +102,6 @@
       * `LoadAppInit_DLLs` = `0` (REG_DWORD, disable custom DLL loading list)
     * HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer
       * `DisableCoInstallers` = `1` (REG_DWORD, block driver co-installer execution)
-    * HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks
-      * `Enabled` = `1` (REG_DWORD, enable hardware-enforced stack protection)
 ---
 
 ## Rationale
@@ -121,7 +119,6 @@ Securing user profile characteristics and administrative explorer behaviors prev
 10. **Disable Debugging & Telemetry abuse (`RecordingPolicy`, `DisableCoInstallers`, `LoadAppInit_DLLs`)**: Disabling Time-Travel Debugging prevents adversaries from dumping memory or executing arbitrary binaries. Disabling custom DLL loading (AppInit_DLLs) blocks persistent user-mode DLL injection. Disabling driver co-installers prevents unauthorized executable downloads during peripheral plugin.
 11. **Standard User Root Certificate Restriction (`Flags` under `ProtectedRoots`)**: Restricting certificate store installation to administrators prevents standard users from importing rogue root certificate authorities into their personal store, which blocks internal MitM or code-signing forgery attacks.
 12. **Spectre & Meltdown CPU Mitigations (`FeatureSettingsOverride`)**: Hardware-level speculative execution vulnerabilities can allow a malicious process to leak kernel memory. Enforcing modern speculative execution overrides blocks these side-channel exploitation paths.
-13. **Kernel-Level Shadow Stacks (`Enabled` under `KernelShadowStacks`)**: Enforces hardware-backed control flow integrity (Intel CET/AMD Shadow Stack) to prevent Return-Oriented Programming (ROP) execution hijacks.
 
 ---
 
@@ -132,7 +129,7 @@ Securing user profile characteristics and administrative explorer behaviors prev
 * **Driver Installations**: Blocking co-installers means manufacturer companion software for USB devices (gaming mouses, keyboards, headsets) must be downloaded and installed manually by an administrator.
 * **Legacy Application Compatibility**:
   * Some legacy software relying on custom DLL injection via AppInit_DLLs will fail to load their helper libraries.
-  * Forcing ASLR or enabling Kernel Shadow Stacks may cause stability issues in older 32-bit executables or unsigned drivers. Proper sandbox verification is required.
+  * Forcing ASLR may cause stability issues in older 32-bit executables or unsigned drivers. Proper sandbox verification is required.
   * Batch files that are dynamically self-modifying during runtime will fail when secure batch processing is enabled due to opportunistic file locks.
 
 ---
@@ -214,7 +211,6 @@ Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings
 #### 3. Deploy Custom Settings via GPO Preferences and System Mitigations
 Configure GPO Preferences registry items or Administrative Templates for the remaining custom settings:
 * **ASLR Force Randomization**: Enable in Exploit Guard mitigation policies or set registry `MoveImages` = `4294967295` (0xFFFFFFFF).
-* **Kernel Shadow Stacks**: Navigate to: `Computer Configuration\Administrative Templates\System\Device Guard` -> `Turn on Virtualization-Based Security` -> Set **Kernel-level shadow stacks** to **Enabled** (or set registry `Enabled` = `1`).
 * **Spectre & Meltdown CPU Mitigations**: Configure registry `FeatureSettingsOverride` = `72` and `FeatureSettingsOverrideMask` = `3`.
 * **LockBatchFilesWhenInUse**: Configure registry `LockBatchFilesWhenInUse` = `1` under `HKLM\SOFTWARE\Microsoft\Command Processor`.
 * **EnableCertPaddingCheck**: Configure registry `EnableCertPaddingCheck` = `1` under `HKLM\Software\Microsoft\Cryptography\Wintrust\Config` (and Wow6432Node).
@@ -366,9 +362,6 @@ Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" 
 # Spectre/Meltdown speculative execution mitigations
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" 72
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" 3
-
-# Kernel-level Shadow Stacks
-Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
 # Speech Recognition (AllowInputPersonalization = 0)
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization" "AllowInputPersonalization" 0
@@ -573,9 +566,6 @@ Test-RegistryValue "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" 
 
 # Block driver co-installers
 Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" "DisableCoInstallers" 1
-
-# Kernel-level Shadow Stacks
-Test-RegistryValue "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red

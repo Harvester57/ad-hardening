@@ -95,3 +95,7 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 30. **[REQ-END-030 - Configure svchost.exe Mitigation Options](configure-svchost-mitigation.md)**
     Configures svchost.exe mitigation options on Tier 2 client workstations to restrict binary loading to Microsoft-signed code and block dynamic code execution.
+
+31. **[REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](enable-kernel-shadow-stacks.md)**
+    Configures Kernel-mode Hardware-enforced Stack Protection to enforce hardware-backed control-flow integrity and mitigate kernel Return-Oriented Programming (ROP) execution hijacks.
+

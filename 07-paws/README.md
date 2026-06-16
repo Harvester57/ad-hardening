@@ -54,3 +54,7 @@ This directory contains the physical isolation policies and operating system sec
 
 17. **[REQ-PAW-017 - Configure svchost.exe Mitigation Options for PAWs](configure-svchost-mitigation.md)**
     Configures svchost.exe mitigation options on PAWs to restrict binary loading to Microsoft-signed code and block dynamic code execution.
+
+18. **[REQ-PAW-018 - Enable Kernel-Mode Hardware-Enforced Stack Protection for PAWs](enable-kernel-shadow-stacks.md)**
+    Configures Kernel-mode Hardware-enforced Stack Protection to enforce hardware-backed control-flow integrity and mitigate kernel Return-Oriented Programming (ROP) execution hijacks.
+

@@ -111,6 +111,7 @@
     * [REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](07-paws/configure-printing-and-spooler.md)
     * [REQ-PAW-016 - Configure Untrusted Font Blocking for PAWs](07-paws/configure-untrusted-font-blocking.md)
     * [REQ-PAW-017 - Configure svchost.exe Mitigation Options for PAWs](07-paws/configure-svchost-mitigation.md)
+    * [REQ-PAW-018 - Enable Kernel-Mode Hardware-Enforced Stack Protection for PAWs](07-paws/enable-kernel-shadow-stacks.md)
 ## Module 8: Endpoint Hardening
 * [Module 8: Endpoint Hardening](08-endpoints/README.md)
     * [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](08-endpoints/harden-network-and-name-resolution.md)
@@ -143,6 +144,7 @@
     * [REQ-END-028 - Configure Early Launch Antimalware (ELAM) Policy](08-endpoints/configure-elam.md)
     * [REQ-END-029 - Configure Untrusted Font Blocking](08-endpoints/configure-untrusted-font-blocking.md)
     * [REQ-END-030 - Configure svchost.exe Mitigation Options](08-endpoints/configure-svchost-mitigation.md)
+    * [REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](08-endpoints/enable-kernel-shadow-stacks.md)
 
 ## Compliance Mapping
 * [ANSSI Compliance Matrix](compliance/anssi.md)
