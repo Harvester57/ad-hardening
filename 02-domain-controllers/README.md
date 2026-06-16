@@ -60,6 +60,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to restrict telemetry collection, online diagnostics, advertising IDs, diagnostic tools, and cloud content integration.
 * **[REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](configure-untrusted-font-blocking.md)**
   Requirement to configure the Untrusted Font Blocking mitigation on Domain Controllers to prevent kernel font parser exploits.
+* **[REQ-DC-029 - Configure svchost.exe Mitigation Options](configure-svchost-mitigation.md)**
+  Requirement to configure svchost.exe mitigation options on Domain Controllers and Member Servers to restrict binary loading to Microsoft-signed code and block dynamic code execution.
 
 
 

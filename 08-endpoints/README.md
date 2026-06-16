@@ -92,3 +92,6 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 29. **[REQ-END-029 - Configure Untrusted Font Blocking](configure-untrusted-font-blocking.md)**
     Configures the Untrusted Font Blocking mitigation to prevent loading of fonts outside the system fonts directory.
+
+30. **[REQ-END-030 - Configure svchost.exe Mitigation Options](configure-svchost-mitigation.md)**
+    Configures svchost.exe mitigation options on Tier 2 client workstations to restrict binary loading to Microsoft-signed code and block dynamic code execution.

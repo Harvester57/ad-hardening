@@ -41,6 +41,7 @@
     * [REQ-DC-026 - Configure TCP/IP and Network Parameter Hardening for Domain Controllers](02-domain-controllers/harden-network-parameters.md)
     * [REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](02-domain-controllers/configure-telemetry-privacy.md)
     * [REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](02-domain-controllers/configure-untrusted-font-blocking.md)
+    * [REQ-DC-029 - Configure svchost.exe Mitigation Options](02-domain-controllers/configure-svchost-mitigation.md)
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)
@@ -109,6 +110,7 @@
     * [REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](07-paws/configure-elam.md)
     * [REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](07-paws/configure-printing-and-spooler.md)
     * [REQ-PAW-016 - Configure Untrusted Font Blocking for PAWs](07-paws/configure-untrusted-font-blocking.md)
+    * [REQ-PAW-017 - Configure svchost.exe Mitigation Options for PAWs](07-paws/configure-svchost-mitigation.md)
 ## Module 8: Endpoint Hardening
 * [Module 8: Endpoint Hardening](08-endpoints/README.md)
     * [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](08-endpoints/harden-network-and-name-resolution.md)
@@ -140,6 +142,7 @@
     * [REQ-END-027 - Configure AppLocker Policies](08-endpoints/configure-applocker-policies.md)
     * [REQ-END-028 - Configure Early Launch Antimalware (ELAM) Policy](08-endpoints/configure-elam.md)
     * [REQ-END-029 - Configure Untrusted Font Blocking](08-endpoints/configure-untrusted-font-blocking.md)
+    * [REQ-END-030 - Configure svchost.exe Mitigation Options](08-endpoints/configure-svchost-mitigation.md)
 
 ## Compliance Mapping
 * [ANSSI Compliance Matrix](compliance/anssi.md)

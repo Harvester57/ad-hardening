@@ -52,3 +52,5 @@ This directory contains the physical isolation policies and operating system sec
 16. **[REQ-PAW-016 - Configure Untrusted Font Blocking for PAWs](configure-untrusted-font-blocking.md)**
     Configures the Untrusted Font Blocking mitigation on PAWs to prevent font parsing exploits.
 
+17. **[REQ-PAW-017 - Configure svchost.exe Mitigation Options for PAWs](configure-svchost-mitigation.md)**
+    Configures svchost.exe mitigation options on PAWs to restrict binary loading to Microsoft-signed code and block dynamic code execution.
