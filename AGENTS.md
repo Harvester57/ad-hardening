@@ -12,6 +12,7 @@ To verify this:
 1. Search for the specific GPO policy path, policy name, or registry key/value.
 2. Search for related terms, protocols, or abbreviations (e.g., "NTLM", "Kerberos", "SMBv3").
 3. Inspect all subdirectories (`01-architecture`, `02-domain-controllers`, `03-identities-services`, etc.) for existing files addressing similar subjects.
+4. When adding a requirement in the PAW (`07-paws`) or Endpoint (`08-endpoints`) baselines, check if it is applicable to the other baseline. If the control is applicable to both, check whether the configuration for the PAW baseline can be tightened (made more restrictive/secure) compared to the standard Endpoint configuration.
 
 If the control is already covered or mentioned, modify or expand the existing documentation rather than creating a duplicate entry.
 
