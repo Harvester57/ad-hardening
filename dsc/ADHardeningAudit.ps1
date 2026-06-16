@@ -109,23 +109,35 @@ Configuration ADHardeningAudit {
     elseif ($Profile -eq "PAW") {
         $profileScripts = @(
             "07-paws\audit_scripts\Audit-HardwareSecurityFeatures.ps1",
+            "07-paws\audit_scripts\Audit-PawSecureBoot.ps1",
             "07-paws\audit_scripts\Audit-UEFISecurity.ps1",
             "07-paws\audit_scripts\Get-DefenderPawStatus.ps1",
             "07-paws\audit_scripts\Get-DriverBlocklistStatus.ps1",
             "07-paws\audit_scripts\Get-ElamPolicyStatus.ps1",
+            "07-paws\audit_scripts\Get-PawExploitProtectionStatus.ps1",
+            "07-paws\audit_scripts\Get-PawSafeModeNonAdminsStatus.ps1",
+            "07-paws\audit_scripts\Get-PawSystemAdministrativeTemplatesStatus.ps1",
+            "07-paws\audit_scripts\Get-PawUnnecessaryServicesStatus.ps1",
+            "07-paws\audit_scripts\Get-PawWindowsFirewallStatus.ps1",
             "07-paws\audit_scripts\Get-PrintingAndSpoolerStatus.ps1",
             "07-paws\audit_scripts\Get-SvchostMitigationStatus.ps1",
             "07-paws\audit_scripts\Get-UntrustedFontBlockingStatus.ps1",
             "07-paws\audit_scripts\Get-WpbtStatus.ps1",
             "07-paws\audit_scripts\Test-PAWAccountPolicies.ps1",
             "07-paws\audit_scripts\Test-PawAppLockerStatus.ps1",
+            "07-paws\audit_scripts\Test-PawAutoPlay.ps1",
             "07-paws\audit_scripts\Test-PAWBitLockerStatus.ps1",
             "07-paws\audit_scripts\Test-PawDMAPhysicalSecurity.ps1",
             "07-paws\audit_scripts\Test-PawKernelShadowStacks.ps1",
             "07-paws\audit_scripts\Test-PawLocalAdministrators.ps1",
             "07-paws\audit_scripts\Test-PawLsaProtection.ps1",
+            "07-paws\audit_scripts\Test-PawNetworkHardeningStatus.ps1",
+            "07-paws\audit_scripts\Test-PawRemoteDesktopStatus.ps1",
+            "07-paws\audit_scripts\Test-PawUACPolicies.ps1",
+            "07-paws\audit_scripts\Test-PawUserProfileRestrictions.ps1",
             "07-paws\audit_scripts\Test-PawUserRightsAssignments.ps1",
-            "07-paws\audit_scripts\Test-PawVBSCredentialGuard.ps1"
+            "07-paws\audit_scripts\Test-PawVBSCredentialGuard.ps1",
+            "07-paws\audit_scripts\Test-PawWSUSClientStatus.ps1"
         )
     }
     else {
