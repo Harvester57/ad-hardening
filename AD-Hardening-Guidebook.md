@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 0e2fe80 | Generated: June 15, 2026</span>
+      <span>Commit: 0ed8662 | Generated: June 17, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -39,7 +39,7 @@ pdf_options:
     <li>Tier 2 Client Workstations: Windows 10 and above</li>
   </ul>
   <hr>
-  <p><em>Generated dynamically on: June 15, 2026</em></p>
+  <p><em>Generated dynamically on: June 17, 2026</em></p>
 </div>
 
 <div id="README-md"></div>
@@ -117,7 +117,7 @@ The guidebook is organized into eight functional modules:
      * [REQ-ID-013 - Clean Up adminCount Attribute Orphans](#03-identities-services-cleanup-admincount-orphans-md)
      * [REQ-ID-014 - Renew KDS Root Keys and gMSA Secrets](#03-identities-services-renew-kds-keys-gmsa-secrets-md)
      * [REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#03-identities-services-harden-adcs-pki-md)
-     * [REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](#03-identities-services-configure-point-and-print-md)
+     * [REQ-ID-016 - Configure Logon Screen and Credentials Delegation](#03-identities-services-configure-credential-delegation-md)
      * [REQ-ID-017 - Disable Machine Account Quota](#03-identities-services-disable-machine-account-quota-md)
      * [REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)
 4. **[Module 4: Network Configuration & Firewalling](#04-network-firewall-README-md)**
@@ -163,6 +163,10 @@ The guidebook is organized into eight functional modules:
      * [REQ-PAW-009 - Configure User Rights Assignments for PAWs](#07-paws-configure-user-rights-assignments-md)
      * [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#07-paws-enable-vbs-credential-guard-md)
      * [REQ-PAW-011 - Harden DMA and Physical Security for PAWs](#07-paws-harden-dma-and-physical-security-md)
+     * [REQ-PAW-012 - Enable WDAC Driver Blocklist](#07-paws-enable-wdac-driver-blocklist-md)
+     * [REQ-PAW-013 - Configure Account and Password Policies for PAWs](#07-paws-configure-account-policies-md)
+     * [REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](#07-paws-configure-elam-md)
+     * [REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](#07-paws-configure-printing-and-spooler-md)
 8. **[Module 8: Endpoint Hardening](#08-endpoints-README-md)**
    * Entry point index for Tier 2 workstation security.
    * Hardening controls:
@@ -192,6 +196,8 @@ The guidebook is organized into eight functional modules:
      * [REQ-END-024 - Disable Unnecessary System Services](#08-endpoints-disable-unnecessary-system-services-md)
      * [REQ-END-025 - Configure Secure Printing and Print Spooler Policies](#08-endpoints-configure-printing-and-spooler-md)
      * [REQ-END-026 - Configure System Administrative Templates](#08-endpoints-configure-system-administrative-templates-md)
+     * [REQ-END-027 - Configure AppLocker Policies](#08-endpoints-configure-applocker-policies-md)
+     * [REQ-END-028 - Configure Early Launch Antimalware (ELAM) Policy](#08-endpoints-configure-elam-md)
 
 ---
 
@@ -315,21 +321,7 @@ Enforcing administrative tiering requires structural separation in Active Direct
 ### Organizational Unit (OU) Structure
 Active Directory OUs must be organized to group assets logically by security level:
 
-```text
-Domain Root (domain.local)
-+- Administrative OUs
-|  +- Tier 0 Assets
-|  |  +- Domain Controllers
-|  |  +- Tier 0 Administrators
-|  |  +- PAWs
-|  +- Tier 1 Assets
-|  |  +- Member Servers
-|  |  +- Tier 1 Administrators
-|  +- Tier 2 Assets
-|  |  +- Workstations
-|  |  +- Standard Users
-|  |  +- Tier 2 Local Administrators
-```
+![Active Directory Organizational Unit Hierarchy](01-architecture/images/ad-ou-structure.png)
 
 <div id="01-architecture-tiering-and-architecture-md-group-policy-object-gpo-separation"></div>
 ### Group Policy Object (GPO) Separation
@@ -7464,8 +7456,8 @@ This directory contains security requirements and policies designed to protect a
 15. **[REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#03-identities-services-harden-adcs-pki-md)**
     Hardens ADCS templates to block ESC1 SAN enrollment bypasses, mandates manager approval, and secures CA Web Enrollment endpoints.
 
-16. **[REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](#03-identities-services-configure-point-and-print-md)**
-    Restricts printer driver installation to administrators, configures Early Launch Antimalware driver policy, disables logon screen user enumeration, and hardens CredSSP/credentials delegation.
+16. **[REQ-ID-016 - Configure Logon Screen and Credentials Delegation](#03-identities-services-configure-credential-delegation-md)**
+    Restricts logon screen user enumeration, and hardens CredSSP/credentials delegation.
 
 17. **[REQ-ID-017 - Disable Machine Account Quota](#03-identities-services-disable-machine-account-quota-md)**
     Restricts the ms-DS-MachineAccountQuota attribute to 0 and limits the SeMachineAccountPrivilege user right to prevent unauthorized computer object creation by standard domain users.
@@ -7631,18 +7623,6 @@ if ($psoList) {
   * **GPO Path**: `Computer Configuration\Administrative Templates\System\LAPS`
   * **Registry Location (GPO Policies)**: `HKLM\Software\Policies\Microsoft\Windows\LAPS`
   * **Registry Location (Local / CSP Settings)**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS`
-
-| Recommendation | Title | Registry Path | Value Name | Value Type | Expected Value |
-| --- | --- | --- | --- | --- | --- |
-| 18.9.25.1 | (L1) Ensure 'Configure password backup directory' is set to 'Enabled: Active Directory' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `BackupDirectory` | `REG_DWORD` | 0x00000002 (2) |
-| 18.9.25.2 | (L1) Ensure 'Do not allow password expiration time longer than required by policy' is set to 'Enabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `PasswordExpirationProtectionEnabled` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.25.3 | (L1) Ensure 'Enable password encryption' is set to 'Enabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `ADPasswordEncryptionEnabled` | `REG_DWORD` | 0x00000001 (1) |
-| 18.9.25.4 | (L1) Ensure 'Password Settings: Password Complexity' is set to 'Enabled: Large letters + small letters + numbers + special characters' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `PasswordComplexity` | `REG_DWORD` | 0x00000004 (4) |
-| 18.9.25.5 | (L1) Ensure 'Password Settings: Password Length' is set to 'Enabled: 15 or more' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `PasswordLength` | `REG_DWORD` | 0x00000014 (20) |
-| 18.9.25.6 | (L1) Ensure 'Password Settings: Password Age (Days)' is set to 'Enabled: 30 or fewer' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `PasswordAgeDays` | `REG_DWORD` | 0x0000001e (30) |
-| 18.9.25.7 | (L1) Ensure 'Post-authentication actions: Grace period (hours)' is set to 'Enabled: 8 or fewer hours, but not 0' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `PostAuthenticationResetDelay` | `REG_DWORD` | 0x00000008 (8) |
-| 18.9.25.8 | (L1) Ensure 'Post-authentication actions: Actions' is set to 'Enabled: Reset the password and logoff the managed account' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `PostAuthenticationActions` | `REG_DWORD` | 0x00000003 (3) |
-| - | (L1) Ensure 'Enable local admin password management' is set to 'Enabled' | `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS` | `EnableLAPS` | `REG_DWORD` | 0x00000001 (1) |
 
 ---
 
@@ -9881,89 +9861,64 @@ if ($VulnerableCount -eq 0) {
 
 <div style="page-break-before: always;"></div>
 
-<div id="03-identities-services-configure-point-and-print-md"></div>
+<div id="03-identities-services-configure-credential-delegation-md"></div>
 
-<div id="03-identities-services-configure-point-and-print-md-req-id-016-configure-point-and-print-elam-logon-screen-and-credentials-delegation"></div>
-# [REQ-ID-016] Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation
+<div id="03-identities-services-configure-credential-delegation-md-req-id-016-configure-logon-screen-and-credentials-delegation"></div>
+# [REQ-ID-016] Configure Logon Screen and Credentials Delegation
 
-<div id="03-identities-services-configure-point-and-print-md-target-scope"></div>
+<div id="03-identities-services-configure-credential-delegation-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise.
 
 ---
 
-<div id="03-identities-services-configure-point-and-print-md-implementation-details"></div>
+<div id="03-identities-services-configure-credential-delegation-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * **Point and Print GPO**: `Computer Configuration\Policies\Administrative Templates\Printers\Limits print driver installation to Administrators` -> Enabled
-  * **Early Launch Antimalware (ELAM) GPO**: `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware\Boot-Start Driver Initialization Policy` -> Enabled (Select **Good, unknown and bad but critical** in options)
   * **Logon screen local users enumeration GPO**: `Computer Configuration\Policies\Administrative Templates\System\Logon\Enumerate local users on domain-joined computers` -> Disabled
   * **CredSSP Encryption GPO**: `Computer Configuration\Policies\Administrative Templates\System\Credentials Delegation\Encryption Oracle Remediation` -> Enabled (Select **Force Updated Clients** in options)
   * **Protected Credentials Delegation GPO**: `Computer Configuration\Policies\Administrative Templates\System\Credentials Delegation\Remote host allows delegation of non-exportable credentials` -> Enabled
-  * **Registry Location (Printers)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint` -> `RestrictDriverInstallationToAdministrators` = `1` (REG_DWORD)
-  * **Registry Location (ELAM)**: `HKLM\SYSTEM\CurrentControlSet\Policies\EarlyLaunch` -> `DriverLoadPolicy` = `3` (REG_DWORD)
   * **Registry Location (Logon)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` -> `EnumerateLocalUsers` = `0` (REG_DWORD)
   * **Registry Location (CredSSP)**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\CredSSP\Parameters` -> `AllowEncryptionOracle` = `0` (REG_DWORD)
   * **Registry Location (Credentials Delegation)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation` -> `AllowProtectedCreds` = `1` (REG_DWORD)
 
 ---
 
-<div id="03-identities-services-configure-point-and-print-md-rationale"></div>
+<div id="03-identities-services-configure-credential-delegation-md-rationale"></div>
 ## Rationale
-Ensuring robust endpoint security and credential isolation requires configurations that address printer drivers, early boot processes, credential delegation, and the local login screen.
+Securing interactive logons and connection pathways is critical to preventing identity leaks, unauthorized physical user identification, and credential theft during remote administration:
 
-Hardening these features mitigates the following vulnerabilities:
-1. **PrintNightmare (CVE-2021-34527 / CVE-2021-1675)**: Point and Print features historically allowed non-administrative users to download and install printer drivers from arbitrary network print servers. Attackers exploited this to inject malicious DLLs, obtaining local SYSTEM execution. Restricting print driver installation to Administrators blocks this privilege escalation path.
-2. **Early Boot Rootkits**: Malicious boot-start drivers can run before security software initializes. Configuring Early Launch Antimalware (ELAM) driver policies ensures that unknown or malicious boot drivers are blocked from executing.
-3. **Logon Screen Reconnaissance**: Allowing the local login screen to enumerate local and domain users exposes valid usernames to physical shoulder-surfers or unauthorized operators. Disabling local user enumeration hides username lists at logon.
-4. **CredSSP Vulnerabilities (CVE-2018-0886)**: The Credential Security Support Provider protocol (CredSSP) had a logical remote code execution flaw. Enforcing Encryption Oracle Remediation in updated mode blocks connections from unpatched clients and servers.
-5. **Delegated Credential Extraction**: When users connect to remote hosts, delegating exportable credentials exposes their authentication materials in remote LSASS memory. Forcing the delegation of non-exportable credentials ensures authentication materials cannot be exported by administrative attackers on the remote system.
+1. **Logon Screen Reconnaissance**: Allowing the local login screen to enumerate local and domain users exposes valid usernames to physical shoulder-surfers or unauthorized operators. Disabling local user enumeration hides username lists at logon.
+2. **CredSSP Vulnerabilities (CVE-2018-0886)**: The Credential Security Support Provider protocol (CredSSP) had a logical remote code execution flaw. Enforcing Encryption Oracle Remediation in updated mode blocks connections from unpatched clients and servers.
+3. **Delegated Credential Extraction**: When users connect to remote hosts, delegating exportable credentials exposes their authentication materials in remote LSASS memory. Forcing the delegation of non-exportable credentials ensures authentication materials cannot be exported by administrative attackers on the remote system.
 
 ---
 
-<div id="03-identities-services-configure-point-and-print-md-legacy-impact-compatibility"></div>
+<div id="03-identities-services-configure-credential-delegation-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Network Printer Deployments**: Non-administrative users will be blocked from connecting to shared network printers unless the corresponding drivers have been pre-installed or pre-staged by an administrator using tools like Print Management.
-* **Boot-Start Drivers**: If legitimate, custom, unsigned kernel drivers are active on the host, the ELAM policy may block them from loading during boot, causing blue screen (BSOD) failures. Ensure all active drivers are digitally signed and verified prior to applying this policy.
 * **CredSSP Connection Failures**: Administrative RDP sessions to legacy, unpatched servers (e.g., Windows Server 2008 / Windows Server 2003) will be blocked if those targets do not support patched CredSSP. These targets must be decommissioned or patched.
 
 ---
 
-<div id="03-identities-services-configure-point-and-print-md-implementation-steps"></div>
+<div id="03-identities-services-configure-credential-delegation-md-implementation-steps"></div>
 ## Implementation Steps
 
-<div id="03-identities-services-configure-point-and-print-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+<div id="03-identities-services-configure-credential-delegation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<div id="03-identities-services-configure-point-and-print-md-1-limit-print-driver-installation"></div>
-#### 1. Limit Print Driver Installation
+<div id="03-identities-services-configure-credential-delegation-md-1-disable-logon-screen-username-enumeration"></div>
+#### 1. Disable Logon Screen Username Enumeration
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to your computer OUs (e.g., `GPO_Computer_Hardening_Baseline`).
 3. Navigate to:
-   `Computer Configuration\Policies\Administrative Templates\Printers`
-4. Double-click **Limits print driver installation to Administrators**.
-5. Set it to **Enabled** and click **OK**.
-
-<div id="03-identities-services-configure-point-and-print-md-2-configure-elam-boot-driver-policy"></div>
-#### 2. Configure ELAM Boot Driver Policy
-1. Navigate to:
-   `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware`
-2. Double-click **Boot-Start Driver Initialization Policy**.
-3. Set it to **Enabled**.
-4. In the options dropdown, select **Good, unknown and bad but critical** (corresponds to registry value `3`).
-5. Click **OK**.
-
-<div id="03-identities-services-configure-point-and-print-md-3-disable-logon-screen-username-enumeration"></div>
-#### 3. Disable Logon Screen Username Enumeration
-1. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Logon`
-2. Double-click **Enumerate local users on domain-joined computers**.
-3. Set it to **Disabled** and click **OK**.
+4. Double-click **Enumerate local users on domain-joined computers**.
+5. Set it to **Disabled** and click **OK**.
 
-<div id="03-identities-services-configure-point-and-print-md-4-configure-credssp-and-credentials-delegation"></div>
-#### 4. Configure CredSSP and Credentials Delegation
+<div id="03-identities-services-configure-credential-delegation-md-2-configure-credssp-and-credentials-delegation"></div>
+#### 2. Configure CredSSP and Credentials Delegation
 1. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Credentials Delegation`
 2. Double-click **Encryption Oracle Remediation**.
@@ -9973,36 +9928,20 @@ Hardening these features mitigates the following vulnerabilities:
 
 ---
 
-<div id="03-identities-services-configure-point-and-print-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+<div id="03-identities-services-configure-credential-delegation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to apply the printers, boot drivers, logon screen, and delegation settings to the registry.
+Run the following scripts locally to apply logon screen and delegation settings to the registry.
 
-[Download Script: Set-EndpointDelegationAndBootHardening.ps1](implementation_scripts/Set-EndpointDelegationAndBootHardening.ps1)
+[Download Script: Configure-CredentialDelegationAndLogon.ps1](implementation_scripts/Configure-CredentialDelegationAndLogon.ps1)
 
 ```powershell
-# Set-EndpointDelegationAndBootHardening.ps1
-# Description: Hardens Point and Print restrictions, ELAM policies, logon screen enumeration, and credentials delegation.
+# Configure-CredentialDelegationAndLogon.ps1
+# Description: Hardens logon screen user enumeration, CredSSP encryption oracle remediation, and remote host non-exportable credentials delegation.
 
-Write-Host "Applying printer, boot driver, logon screen, and delegation registry controls..." -ForegroundColor Cyan
+Write-Host "Applying logon screen and credentials delegation registry controls..." -ForegroundColor Cyan
 
-# 1. Limit Print Driver Installation to Administrators
-$PrinterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
-if (-not (Test-Path $PrinterPath)) {
-    New-Item -Path $PrinterPath -Force | Out-Null
-}
-Set-ItemProperty -Path $PrinterPath -Name "RestrictDriverInstallationToAdministrators" -Value 1 -Type DWord -ErrorAction Stop
-Write-Host "[+] Print driver installation restricted to Administrators." -ForegroundColor Green
-
-# 2. Configure ELAM Driver Load Policy
-$ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
-if (-not (Test-Path $ElamPath)) {
-    New-Item -Path $ElamPath -Force | Out-Null
-}
-Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
-Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green
-
-# 3. Disable Logon Screen User Enumeration
+# 1. Disable Logon Screen User Enumeration
 $SystemPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
 if (-not (Test-Path $SystemPath)) {
     New-Item -Path $SystemPath -Force | Out-Null
@@ -10010,7 +9949,7 @@ if (-not (Test-Path $SystemPath)) {
 Set-ItemProperty -Path $SystemPath -Name "EnumerateLocalUsers" -Value 0 -Type DWord -ErrorAction Stop
 Write-Host "[+] Logon screen local user enumeration disabled." -ForegroundColor Green
 
-# 4. Enforce CredSSP Encryption Oracle Remediation
+# 2. Enforce CredSSP Encryption Oracle Remediation
 $CredSspPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\CredSSP\Parameters"
 if (-not (Test-Path $CredSspPath)) {
     New-Item -Path $CredSspPath -Force | Out-Null
@@ -10018,7 +9957,7 @@ if (-not (Test-Path $CredSspPath)) {
 Set-ItemProperty -Path $CredSspPath -Name "AllowEncryptionOracle" -Value 0 -Type DWord -ErrorAction Stop
 Write-Host "[+] CredSSP Encryption Oracle Remediation configured to Force Updated Clients." -ForegroundColor Green
 
-# 5. Remote Host Allows Delegation of Non-Exportable Credentials
+# 3. Remote Host Allows Delegation of Non-Exportable Credentials
 $DelegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation"
 if (-not (Test-Path $DelegPath)) {
     New-Item -Path $DelegPath -Force | Out-Null
@@ -10027,50 +9966,60 @@ Set-ItemProperty -Path $DelegPath -Name "AllowProtectedCreds" -Value 1 -Type DWo
 Write-Host "[+] Delegation of non-exportable credentials enabled." -ForegroundColor Green
 ```
 
-*To audit these printers, boot drivers, logon screen, and delegation settings:*
-[Download Script: Get-EndpointDelegationAndBootStatus.ps1](audit_scripts/Get-EndpointDelegationAndBootStatus.ps1)
+*To audit these logon screen and delegation settings:*
+
+[Download Script: Get-CredentialDelegationAndLogonStatus.ps1](audit_scripts/Get-CredentialDelegationAndLogonStatus.ps1)
 
 ```powershell
-# Get-EndpointDelegationAndBootStatus.ps1
-# Description: Audits registry configuration of Point and Print, ELAM, user enumeration, and delegation.
+# Get-CredentialDelegationAndLogonStatus.ps1
+# Description: Audits registry configuration of user enumeration, CredSSP, and delegation settings.
 
-Write-Host "--- Auditing Endpoint Delegation and Boot Settings ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Credentials Delegation and Logon Settings ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
 
 # Helper function to check registry settings
 function Confirm-RegValue ($Path, $Name, $Expected) {
     if (Test-Path $Path) {
         $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
         $Val = $Reg.$Name
-        $Color = if ($Val -eq $Expected) { "Green" } else { "Red" }
-        Write-Host "    - Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor $Color
+        if ($Val -eq $Expected) {
+            Write-Host "  [+] Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
     } else {
-        Write-Host "    - Path $($Path): NOT FOUND" -ForegroundColor Red
+        Write-Host "  [!] NOT FOUND: Path $($Path) (Expected: $Name = $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
     }
 }
 
-# 1. Point and Print
-Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" "RestrictDriverInstallationToAdministrators" 1
-
-# 2. ELAM Policy
-Confirm-RegValue "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch" "DriverLoadPolicy" 3
-
-# 3. User Enumeration
+# 1. User Enumeration
 Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" "EnumerateLocalUsers" 0
 
-# 4. CredSSP AllowEncryptionOracle
+# 2. CredSSP AllowEncryptionOracle
 Confirm-RegValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\CredSSP\Parameters" "AllowEncryptionOracle" 0
 
-# 5. Protected Credentials Delegation
+# 3. Protected Credentials Delegation
 Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation" "AllowProtectedCreds" 1
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
 ```
 
 ---
 
-<div id="03-identities-services-configure-point-and-print-md-sources-compliance-references"></div>
+<div id="03-identities-services-configure-credential-delegation-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.2.1 (Printers), Section 18.2.2 (System Options / ELAM), Section 18.8 (Credentials Delegation)
-* **ANSSI AD Hardening Guide**: Security guidelines regarding printer service vulnerabilities (PrintNightmare) and local machine access configuration.
-* **Microsoft Security Guidance**: Mitigating PrintNightmare and CredSSP vulnerabilities (CVE-2018-0886)
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.8 (Credentials Delegation)
+* **ANSSI AD Hardening Guide**: Security guidelines regarding credential delegation and local machine access configuration.
+* **Microsoft Security Guidance**: Mitigating CredSSP vulnerabilities (CVE-2018-0886)
 
 
 <div style="page-break-before: always;"></div>
@@ -15863,9 +15812,11 @@ This directory contains the physical isolation policies and operating system sec
 13. **[REQ-PAW-013 - Configure Account and Password Policies for PAWs](#07-paws-configure-account-policies-md)**
     Configures robust local account lockout, local password complexity, and 20-character minimum length policies, and references Active Directory Fine-Grained Password Policies (FGPP) for Tier 0 Administrators.
 
+14. **[REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](#07-paws-configure-elam-md)**
+    Configures the Early Launch Antimalware (ELAM) driver initialization policy to ensure only signed, trusted boot drivers execute.
 
-
-
+15. **[REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](#07-paws-configure-printing-and-spooler-md)**
+    Enforces disabling the Print Spooler service and configuring Point and Print restrictions to prevent print-related exploits.
 
 
 <div style="page-break-before: always;"></div>
@@ -19117,6 +19068,288 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="07-paws-configure-elam-md"></div>
+
+<div id="07-paws-configure-elam-md-req-paw-014-configure-early-launch-antimalware-elam-policy-for-paws"></div>
+# [REQ-PAW-014] Configure Early Launch Antimalware (ELAM) Policy for PAWs
+
+<div id="07-paws-configure-elam-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations.
+* **Operating Systems**: Windows 10/11 Enterprise.
+
+---
+
+<div id="07-paws-configure-elam-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **ELAM GPO**: `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware\Boot-Start Driver Initialization Policy` -> Enabled (Select **Good, unknown and bad but critical** in options)
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Policies\EarlyLaunch` -> `DriverLoadPolicy` = `3` (REG_DWORD)
+
+---
+
+<div id="07-paws-configure-elam-md-rationale"></div>
+## Rationale
+Privileged Access Workstations (PAWs) require the highest level of boot integrity to prevent compromise of Tier 0 administrative tasks:
+
+1. **Early Boot Rootkits**: Malicious boot-start drivers can execute before third-party endpoint protection or security agents initialize. Enforcing the Early Launch Antimalware (ELAM) driver initialization policy ensures that unknown, unsigned, or bad drivers are prevented from loading at boot time.
+2. **Platform Integrity**: Securing the boot sequence with ELAM is a critical requirement of Virtualization-Based Security (VBS) and overall hardware-rooted protection.
+
+---
+
+<div id="07-paws-configure-elam-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Boot-Start Drivers**: If third-party, custom, or legacy hardware monitoring drivers are unsigned, the ELAM policy will block them from loading, potentially resulting in blue screen (BSOD) or hardware failures. Verify all active drivers possess valid digital signatures prior to enforcement.
+
+---
+
+<div id="07-paws-configure-elam-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-configure-elam-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO applied to your PAWs (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware`
+4. Double-click **Boot-Start Driver Initialization Policy**.
+5. Set it to **Enabled**.
+6. In the options dropdown, select **Good, unknown and bad but critical** (registry value `3`).
+7. Click **OK**.
+
+---
+
+<div id="07-paws-configure-elam-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to apply the ELAM driver load policy.
+
+[Download Script: Configure-ElamPolicy.ps1](implementation_scripts/Configure-ElamPolicy.ps1)
+
+```powershell
+# Configure-ElamPolicy.ps1
+# Description: Configures the Early Launch Antimalware (ELAM) boot-start driver load policy on the local system.
+
+Write-Host "Applying ELAM Boot-Start driver initialization policy..." -ForegroundColor Cyan
+
+$ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
+if (-not (Test-Path $ElamPath)) {
+    New-Item -Path $ElamPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green
+```
+
+*To audit the ELAM driver load policy status:*
+
+[Download Script: Get-ElamPolicyStatus.ps1](audit_scripts/Get-ElamPolicyStatus.ps1)
+
+```powershell
+# Get-ElamPolicyStatus.ps1
+# Description: Audits registry configuration of the Early Launch Antimalware (ELAM) policy.
+
+Write-Host "--- Auditing ELAM Boot-Start Policy ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
+$Name = "DriverLoadPolicy"
+$Expected = 3
+
+if (Test-Path $Path) {
+    $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
+    $Val = $Reg.$Name
+    if ($Val -eq $Expected) {
+        Write-Host "  [+] Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Green
+    } else {
+        Write-Host "  [!] MISMATCH: Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] NOT FOUND: Path $($Path) (Expected: $Name = $Expected)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-configure-elam-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.2.2 (System Options / ELAM)
+* **ANSSI AD Hardening Guide**: Section addressing system and boot configuration integrity.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-configure-printing-and-spooler-md"></div>
+
+<div id="07-paws-configure-printing-and-spooler-md-req-paw-015-configure-secure-printing-and-print-spooler-policies-for-paws"></div>
+# [REQ-PAW-015] Configure Secure Printing and Print Spooler Policies for PAWs
+
+<div id="07-paws-configure-printing-and-spooler-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations.
+* **Operating Systems**: Windows 10/11 Enterprise.
+
+---
+
+<div id="07-paws-configure-printing-and-spooler-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **System Service GPO**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Print Spooler` -> Service Startup Mode: **Disabled**
+  * **Point and Print GPO**: `Computer Configuration\Policies\Administrative Templates\Printers\Limits print driver installation to Administrators` -> Enabled
+  * **Registry Location (Service)**: `HKLM\SYSTEM\CurrentControlSet\Services\Spooler` -> `Start` = `4` (REG_DWORD)
+  * **Registry Location (Printers)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint` -> `RestrictDriverInstallationToAdministrators` = `1` (REG_DWORD)
+
+---
+
+<div id="07-paws-configure-printing-and-spooler-md-rationale"></div>
+## Rationale
+The Windows Print Spooler service (`Spooler`) has been a recurring source of critical privilege escalation and coercion exploits (e.g., the PrintNightmare family). 
+
+To secure Privileged Access Workstations (PAWs), which host highly privileged Tier 0 credentials:
+1. **Disable the Print Spooler**: PAWs should never act as print servers or need print capabilities. Disabling the `Spooler` service completely eliminates this massive attack surface.
+2. **Point and Print Restrictions**: As a defense-in-depth fallback, restricting print driver installations and updates to Administrators ensures that even if the spooler service is temporarily enabled for maintenance, standard users cannot load arbitrary, untrusted drivers.
+
+---
+
+<div id="07-paws-configure-printing-and-spooler-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **No Printing Support**: Printing from PAWs is completely disabled. This aligns with Tier 0 isolation principles where PAWs are restricted to administration and are not used for general office productivity.
+
+---
+
+<div id="07-paws-configure-printing-and-spooler-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-configure-printing-and-spooler-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+<div id="07-paws-configure-printing-and-spooler-md-1-disable-the-print-spooler-service"></div>
+#### 1. Disable the Print Spooler Service
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO applied to your PAWs (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+4. Double-click **Print Spooler**.
+5. Check **Define this policy setting** and select **Disabled**. Click **OK**.
+
+<div id="07-paws-configure-printing-and-spooler-md-2-restrict-point-and-print-driver-installations"></div>
+#### 2. Restrict Point and Print Driver Installations
+1. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\Printers`
+2. Double-click **Limits print driver installation to Administrators**.
+3. Set it to **Enabled** and click **OK**.
+
+---
+
+<div id="07-paws-configure-printing-and-spooler-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to disable the Print Spooler service and enforce driver restrictions.
+
+[Download Script: Configure-PrintingAndSpooler.ps1](implementation_scripts/Configure-PrintingAndSpooler.ps1)
+
+```powershell
+# Configure-PrintingAndSpooler.ps1
+# Description: Disables the Print Spooler service and configures Point and Print driver installation restrictions on the local PAW.
+
+Write-Host "Hardening Print Spooler and Printer configurations for PAWs..." -ForegroundColor Cyan
+
+# 1. Disable the Print Spooler Service
+if (Get-Service -Name "Spooler" -ErrorAction SilentlyContinue) {
+    Set-Service -Name "Spooler" -StartupType Disabled -Confirm:$false
+    Stop-Service -Name "Spooler" -Force -Confirm:$false
+    Write-Host "[+] Print Spooler service has been stopped and disabled." -ForegroundColor Green
+} else {
+    Write-Host "[+] Print Spooler service not found on local machine." -ForegroundColor Gray
+}
+
+# 2. Limit Print Driver Installation to Administrators (Defense-in-Depth)
+$PrinterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
+if (-not (Test-Path $PrinterPath)) {
+    New-Item -Path $PrinterPath -Force | Out-Null
+}
+Set-ItemProperty -Path $PrinterPath -Name "RestrictDriverInstallationToAdministrators" -Value 1 -Type DWord -ErrorAction Stop
+Write-Host "[+] Print driver installation restricted to Administrators." -ForegroundColor Green
+```
+
+*To audit these printer security configurations on the PAW:*
+
+[Download Script: Get-PrintingAndSpoolerStatus.ps1](audit_scripts/Get-PrintingAndSpoolerStatus.ps1)
+
+```powershell
+# Get-PrintingAndSpoolerStatus.ps1
+# Description: Audits print spooler status and Point and Print configurations on the local PAW.
+
+Write-Host "--- Auditing PAW Secure Printing and Spooler Hardening ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+# 1. Audit Spooler Service Startup Type
+$Service = Get-Service -Name "Spooler" -ErrorAction SilentlyContinue
+if ($null -ne $Service) {
+    # Check StartupType
+    $StartupType = (Get-CimInstance -ClassName Win32_Service -Filter "Name='Spooler'").StartMode
+    # StartMode can be "Disabled", "Manual", "Auto"
+    $Color = if ($StartupType -eq "Disabled") { "Green" } else { "Red" }
+    Write-Host "  [-] Print Spooler Service Startup: $StartupType (Expected: Disabled)" -ForegroundColor $Color
+    if ($StartupType -ne "Disabled") {
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [+] Print Spooler Service is not present on this machine." -ForegroundColor Green
+}
+
+# 2. Audit Point and Print Registry Restriction
+$Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
+$Name = "RestrictDriverInstallationToAdministrators"
+$Expected = 1
+
+if (Test-Path $Path) {
+    $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
+    $Val = $Reg.$Name
+    if ($Val -eq $Expected) {
+        Write-Host "  [+] Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Green
+    } else {
+        Write-Host "  [!] MISMATCH: Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] NOT FOUND: Path $($Path) (Expected: $Name = $Expected)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-configure-printing-and-spooler-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.7 (Printing settings)
+* **ANSSI AD Hardening Guide**: Section addressing system services minimization (disabling the Spooler service on sensitive systems).
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="08-endpoints-README-md"></div>
 
 <div id="08-endpoints-README-md-module-8-endpoint-hardening"></div>
@@ -19210,8 +19443,8 @@ To prevent initial access and lateral movement, the following unitary technical 
 27. **[REQ-END-027 - Configure AppLocker Policies](#08-endpoints-configure-applocker-policies-md)**
     Deploys AppLocker application control policies to restrict unauthorized software and script execution, and prevents default AppLocker bypasses.
 
-
-
+28. **[REQ-END-028 - Configure Early Launch Antimalware (ELAM) Policy](#08-endpoints-configure-elam-md)**
+    Configures the Early Launch Antimalware (ELAM) driver initialization policy to ensure only signed, trusted boot drivers execute.
 
 
 <div style="page-break-before: always;"></div>
@@ -25779,16 +26012,22 @@ if ($script:Vulnerable) {
 
 <div id="08-endpoints-configure-printing-and-spooler-md-implementation-details"></div>
 ## Implementation Details
-* **Priority**: Medium
+* **Priority**: High
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\Printers`
-  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers` and `HKLM\SYSTEM\CurrentControlSet\Control\Print`
+  * **System Service GPO**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Print Spooler` -> Service Startup Mode: **Disabled**
+  * **Limits print driver installation to Administrators GPO**: `Computer Configuration\Policies\Administrative Templates\Printers\Limits print driver installation to Administrators` -> Enabled
+  * **Registry Location (Service)**: `HKLM\SYSTEM\CurrentControlSet\Services\Spooler` -> `Start` = `4` (REG_DWORD)
+  * **Registry Location (Printers)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers`
+  * **Registry Location (Point and Print)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint` -> `RestrictDriverInstallationToAdministrators` = `1` (REG_DWORD)
+  * **Registry Location (Print Control)**: `HKLM\SYSTEM\CurrentControlSet\Control\Print`
 
 ---
 
 <div id="08-endpoints-configure-printing-and-spooler-md-rationale"></div>
 ## Rationale
-The Windows Print Spooler service (`Spooler`) has been the source of numerous high-severity vulnerabilities (such as the PrintNightmare family - CVE-2021-1675 and CVE-2021-34527). Attackers exploit the Print Spooler to coerce authentication or execute arbitrary code with SYSTEM privileges:
+The Windows Print Spooler service (`Spooler`) has been the source of numerous high-severity vulnerabilities (such as the PrintNightmare family - CVE-2021-1675 and CVE-2021-34527). Attackers exploit the Print Spooler to coerce authentication or execute arbitrary code with SYSTEM privileges.
+
+To secure standard client endpoints and member servers, the primary defense is to **completely disable the Print Spooler service**. This eliminates the service's attack surface. As a secondary defense-in-depth, additional printer registry configurations (such as restricting driver installation to administrators, Redirection Guard, and RPC connection configurations) are enforced to ensure that even if the spooler service is temporarily running, the subsystem remains hardened.
 
 1. **Remote Connections Block**: By disabling remote client connections to the print spooler, standard client endpoints are prevented from acting as print servers. Outbound printing remains unaffected, but external hosts can no longer target the workstation's print spooler over the network.
 2. **Redirection Guard**: Enabling Redirection Guard prevents print spooler processing from being redirected via symbolic links or junction points, mitigating local privilege escalation vectors that abuse file system paths during printer driver mapping.
@@ -25799,9 +26038,7 @@ The Windows Print Spooler service (`Spooler`) has been the source of numerous hi
 
 <div id="08-endpoints-configure-printing-and-spooler-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **No Local Print Server**: Endpoints cannot share local printers with other network users. Direct outbound printing to network print servers is fully supported.
-* **Legacy Spooler Compatibility**: If print servers or network printers in the environment rely on legacy RPC over Named Pipes, outbound printing from hardened endpoints will fail. Ensure all print servers support RPC over TCP before enforcement.
-* **Driver Prompts**: Non-admin users will receive elevation prompts when connecting to print servers that require installing new or updated print drivers.
+* **No Printing Support**: Printing from client workstations is completely disabled. Standard users will be unable to print documents to network or local printers. This matches the security requirements of high-security air-gapped environments where physical document flows must be restricted.
 
 ---
 
@@ -25811,10 +26048,19 @@ The Windows Print Spooler service (`Spooler`) has been the source of numerous hi
 <div id="08-endpoints-configure-printing-and-spooler-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
+<div id="08-endpoints-configure-printing-and-spooler-md-1-disable-the-print-spooler-service"></div>
+#### 1. Disable the Print Spooler Service
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit the GPO applied to client endpoints (e.g., `GPO_Hardening_Endpoints`).
-3. Navigate to: `Computer Configuration\Policies\Administrative Templates\Printers`
-4. Configure the following policies:
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+4. Double-click **Print Spooler**.
+5. Check **Define this policy setting** and select **Disabled**. Click **OK**.
+
+<div id="08-endpoints-configure-printing-and-spooler-md-2-configure-printers-gpo-hardening-secondary-defense"></div>
+#### 2. Configure Printers GPO Hardening (Secondary Defense)
+1. Navigate to: `Computer Configuration\Policies\Administrative Templates\Printers`
+2. Configure the following policies:
    * **Allow Print Spooler to accept client connections**: Set to `Disabled`
    * **Configure Redirection Guard**: Set to `Enabled`, select `Redirection Guard Enabled`
    * **Configure RPC connection settings**: Set to `Enabled`
@@ -25829,6 +26075,7 @@ The Windows Print Spooler service (`Spooler`) has been the source of numerous hi
    * **Point and Print Restrictions**: Set to `Enabled`
      * When installing drivers for a new connection: `Show warning and elevation prompt`
      * When updating drivers for an existing connection: `Show warning and elevation prompt`
+   * **Limits print driver installation to Administrators**: Set to `Enabled`
 
 ---
 
@@ -25841,9 +26088,16 @@ Run the following script locally to configure registry keys for print spooler ha
 
 ```powershell
 # Configure-PrintingAndSpooler.ps1
-# Description: Hardens Windows Print Spooler settings, RPC configurations, and Point and Print policies.
+# Description: Disables the Print Spooler service and configures secondary print registry hardening parameters on standard endpoints.
 
 Write-Host "Applying Print Spooler security hardening..." -ForegroundColor Cyan
+
+# 1. Disable the Print Spooler Service
+if (Get-Service -Name "Spooler" -ErrorAction SilentlyContinue) {
+    Set-Service -Name "Spooler" -StartupType Disabled -Confirm:$false
+    Stop-Service -Name "Spooler" -Force -Confirm:$false
+    Write-Host "[+] Print Spooler service has been stopped and disabled." -ForegroundColor Green
+}
 
 # 1. Base Printers Path Policies
 $PrintersPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
@@ -25900,6 +26154,7 @@ if (-not (Test-Path $PointPrintPath)) {
 Set-ItemProperty -Path $PointPrintPath -Name "RestrictPointAndPrint" -Value 1 -Type Dword
 Set-ItemProperty -Path $PointPrintPath -Name "NoWarningNoElevationOnInstall" -Value 0 -Type Dword
 Set-ItemProperty -Path $PointPrintPath -Name "UpdatePromptSettings" -Value 0 -Type Dword
+Set-ItemProperty -Path $PointPrintPath -Name "RestrictDriverInstallationToAdministrators" -Value 1 -Type Dword
 
 Write-Host "[+] Print Spooler and Printer configurations hardened successfully." -ForegroundColor Green
 ```
@@ -25915,6 +26170,19 @@ Write-Host "[+] Print Spooler and Printer configurations hardened successfully."
 Write-Host "--- Auditing Printing and Spooler Hardening ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
+
+# 1. Audit Spooler Service Startup Type
+$Service = Get-Service -Name "Spooler" -ErrorAction SilentlyContinue
+if ($null -ne $Service) {
+    $StartupType = (Get-CimInstance -ClassName Win32_Service -Filter "Name='Spooler'").StartMode
+    $Color = if ($StartupType -eq "Disabled") { "Green" } else { "Red" }
+    Write-Host "  [-] Print Spooler Service Startup: $StartupType (Expected: Disabled)" -ForegroundColor $Color
+    if ($StartupType -ne "Disabled") {
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [+] Print Spooler Service is not present on this machine." -ForegroundColor Green
+}
 
 # Helper function to audit registry properties
 function Test-RegistryValue {
@@ -25967,6 +26235,7 @@ $PointPrintPath = "HKLM:\Software\Policies\Microsoft\Windows NT\Printers\PointAn
 Test-RegistryValue -Path $PointPrintPath -Name "RestrictPointAndPrint" -ExpectedValue 1
 Test-RegistryValue -Path $PointPrintPath -Name "NoWarningNoElevationOnInstall" -ExpectedValue 0
 Test-RegistryValue -Path $PointPrintPath -Name "UpdatePromptSettings" -ExpectedValue 0
+Test-RegistryValue -Path $PointPrintPath -Name "RestrictDriverInstallationToAdministrators" -ExpectedValue 1
 
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
@@ -27068,6 +27337,129 @@ if (Test-Path $NtvdmPath) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="08-endpoints-configure-elam-md"></div>
+
+<div id="08-endpoints-configure-elam-md-req-end-028-configure-early-launch-antimalware-elam-policy"></div>
+# [REQ-END-028] Configure Early Launch Antimalware (ELAM) Policy
+
+<div id="08-endpoints-configure-elam-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10/11 Enterprise, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-configure-elam-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **ELAM GPO**: `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware\Boot-Start Driver Initialization Policy` -> Enabled (Select **Good, unknown and bad but critical** in options)
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Policies\EarlyLaunch` -> `DriverLoadPolicy` = `3` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-configure-elam-md-rationale"></div>
+## Rationale
+Boot-level integrity is crucial for endpoints to ensure malware cannot bypass OS-level antimalware defenses by loading malicious kernel-mode drivers early in the boot sequence:
+
+1. **Early Boot Rootkits**: Malicious boot-start drivers can execute before third-party endpoint protection or security agents initialize. Enforcing the Early Launch Antimalware (ELAM) driver initialization policy ensures that unknown, unsigned, or bad drivers are prevented from loading at boot time.
+2. **Platform Integrity**: Securing the boot sequence with ELAM is a critical requirement of Virtualization-Based Security (VBS) and overall hardware-rooted protection.
+
+---
+
+<div id="08-endpoints-configure-elam-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Boot-Start Drivers**: If third-party, custom, or legacy hardware monitoring drivers are unsigned, the ELAM policy will block them from loading, potentially resulting in blue screen (BSOD) or hardware failures. Verify all active drivers possess valid digital signatures prior to enforcement.
+
+---
+
+<div id="08-endpoints-configure-elam-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-configure-elam-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO applied to your standard endpoints (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware`
+4. Double-click **Boot-Start Driver Initialization Policy**.
+5. Set it to **Enabled**.
+6. In the options dropdown, select **Good, unknown and bad but critical** (registry value `3`).
+7. Click **OK**.
+
+---
+
+<div id="08-endpoints-configure-elam-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to apply the ELAM driver load policy.
+
+[Download Script: Configure-ElamPolicy.ps1](implementation_scripts/Configure-ElamPolicy.ps1)
+
+```powershell
+# Configure-ElamPolicy.ps1
+# Description: Configures the Early Launch Antimalware (ELAM) boot-start driver load policy on the local system.
+
+Write-Host "Applying ELAM Boot-Start driver initialization policy..." -ForegroundColor Cyan
+
+$ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
+if (-not (Test-Path $ElamPath)) {
+    New-Item -Path $ElamPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green
+```
+
+*To audit the ELAM driver load policy status:*
+
+[Download Script: Get-ElamPolicyStatus.ps1](audit_scripts/Get-ElamPolicyStatus.ps1)
+
+```powershell
+# Get-ElamPolicyStatus.ps1
+# Description: Audits registry configuration of the Early Launch Antimalware (ELAM) policy.
+
+Write-Host "--- Auditing ELAM Boot-Start Policy ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
+$Name = "DriverLoadPolicy"
+$Expected = 3
+
+if (Test-Path $Path) {
+    $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
+    $Val = $Reg.$Name
+    if ($Val -eq $Expected) {
+        Write-Host "  [+] Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Green
+    } else {
+        Write-Host "  [!] MISMATCH: Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] NOT FOUND: Path $($Path) (Expected: $Name = $Expected)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-configure-elam-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.2.2 (System Options / ELAM)
+* **ANSSI AD Hardening Guide**: Section addressing system and boot configuration integrity.
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="compliance-anssi-md"></div>
 
 <div id="compliance-anssi-md-anssi-active-directory-hardening-compliance-matrix"></div>
@@ -27205,7 +27597,7 @@ This document maps the focus areas of the **Microsoft Security Baselines** (Doma
 | **PowerShell Logging** | Configure PowerShell script block logging and transcription. | Auditing & Logging | **Covered** | [REQ-LOG-002](#05-logging-monitoring-configure-powershell-and-command-line-auditing-md) |
 | **UAC Policies** | Configure User Account Control (UAC) baseline settings. | Account Controls | **Covered** | [REQ-END-002](#08-endpoints-configure-uac-policies-md) |
 | **Removable Storage** | Deploy GPOs to block external removable storage devices (USB mass storage). | Data Protection | **Covered** | [REQ-END-004](#08-endpoints-block-removable-storage-md) |
-| **Point and Print** | Configure Point and Print restrictions to prevent PrintNightmare exploits. | Services Hardening | **Covered** | [REQ-ID-016](#03-identities-services-configure-point-and-print-md), [REQ-END-025](#08-endpoints-configure-printing-and-spooler-md) |
+| **Point and Print** | Configure Point and Print restrictions to prevent PrintNightmare exploits. | Services Hardening | **Covered** | [REQ-END-025](#08-endpoints-configure-printing-and-spooler-md), [REQ-PAW-015](#07-paws-configure-printing-and-spooler-md) |
 | **SYSVOL replication** | Migrate SYSVOL replication from FRS to DFS Replication (DFSR). | DC Hardening | **Covered** | [REQ-DC-015](#02-domain-controllers-migrate-sysvol-replication-dfsr-md) |
 | **adminSDHolder** | Harden adminSDHolder object permissions to prevent privilege persistence. | DC Hardening | **Covered** | [REQ-DC-016](#02-domain-controllers-harden-adminsdholder-permissions-md), [REQ-DC-024](#02-domain-controllers-configure-dsheuristics-md) |
 | **Services minimization** | Disable unnecessary system services on Domain Controllers and Endpoints. | Services Hardening | **Covered** | [REQ-DC-012](#02-domain-controllers-disable-unnecessary-services-md), [REQ-END-024](#08-endpoints-disable-unnecessary-system-services-md) |

@@ -7,15 +7,21 @@
 ---
 
 ## Implementation Details
-* **Priority**: Medium
+* **Priority**: High
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\Printers`
-  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers` and `HKLM\SYSTEM\CurrentControlSet\Control\Print`
+  * **System Service GPO**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Print Spooler` -> Service Startup Mode: **Disabled**
+  * **Limits print driver installation to Administrators GPO**: `Computer Configuration\Policies\Administrative Templates\Printers\Limits print driver installation to Administrators` -> Enabled
+  * **Registry Location (Service)**: `HKLM\SYSTEM\CurrentControlSet\Services\Spooler` -> `Start` = `4` (REG_DWORD)
+  * **Registry Location (Printers)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers`
+  * **Registry Location (Point and Print)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint` -> `RestrictDriverInstallationToAdministrators` = `1` (REG_DWORD)
+  * **Registry Location (Print Control)**: `HKLM\SYSTEM\CurrentControlSet\Control\Print`
 
 ---
 
 ## Rationale
-The Windows Print Spooler service (`Spooler`) has been the source of numerous high-severity vulnerabilities (such as the PrintNightmare family - CVE-2021-1675 and CVE-2021-34527). Attackers exploit the Print Spooler to coerce authentication or execute arbitrary code with SYSTEM privileges:
+The Windows Print Spooler service (`Spooler`) has been the source of numerous high-severity vulnerabilities (such as the PrintNightmare family - CVE-2021-1675 and CVE-2021-34527). Attackers exploit the Print Spooler to coerce authentication or execute arbitrary code with SYSTEM privileges.
+
+To secure standard client endpoints and member servers, the primary defense is to **completely disable the Print Spooler service**. This eliminates the service's attack surface. As a secondary defense-in-depth, additional printer registry configurations (such as restricting driver installation to administrators, Redirection Guard, and RPC connection configurations) are enforced to ensure that even if the spooler service is temporarily running, the subsystem remains hardened.
 
 1. **Remote Connections Block**: By disabling remote client connections to the print spooler, standard client endpoints are prevented from acting as print servers. Outbound printing remains unaffected, but external hosts can no longer target the workstation's print spooler over the network.
 2. **Redirection Guard**: Enabling Redirection Guard prevents print spooler processing from being redirected via symbolic links or junction points, mitigating local privilege escalation vectors that abuse file system paths during printer driver mapping.
@@ -25,9 +31,7 @@ The Windows Print Spooler service (`Spooler`) has been the source of numerous hi
 ---
 
 ## Legacy Impact & Compatibility
-* **No Local Print Server**: Endpoints cannot share local printers with other network users. Direct outbound printing to network print servers is fully supported.
-* **Legacy Spooler Compatibility**: If print servers or network printers in the environment rely on legacy RPC over Named Pipes, outbound printing from hardened endpoints will fail. Ensure all print servers support RPC over TCP before enforcement.
-* **Driver Prompts**: Non-admin users will receive elevation prompts when connecting to print servers that require installing new or updated print drivers.
+* **No Printing Support**: Printing from client workstations is completely disabled. Standard users will be unable to print documents to network or local printers. This matches the security requirements of high-security air-gapped environments where physical document flows must be restricted.
 
 ---
 
@@ -35,10 +39,17 @@ The Windows Print Spooler service (`Spooler`) has been the source of numerous hi
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
+#### 1. Disable the Print Spooler Service
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit the GPO applied to client endpoints (e.g., `GPO_Hardening_Endpoints`).
-3. Navigate to: `Computer Configuration\Policies\Administrative Templates\Printers`
-4. Configure the following policies:
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+4. Double-click **Print Spooler**.
+5. Check **Define this policy setting** and select **Disabled**. Click **OK**.
+
+#### 2. Configure Printers GPO Hardening (Secondary Defense)
+1. Navigate to: `Computer Configuration\Policies\Administrative Templates\Printers`
+2. Configure the following policies:
    * **Allow Print Spooler to accept client connections**: Set to `Disabled`
    * **Configure Redirection Guard**: Set to `Enabled`, select `Redirection Guard Enabled`
    * **Configure RPC connection settings**: Set to `Enabled`
@@ -53,6 +64,7 @@ The Windows Print Spooler service (`Spooler`) has been the source of numerous hi
    * **Point and Print Restrictions**: Set to `Enabled`
      * When installing drivers for a new connection: `Show warning and elevation prompt`
      * When updating drivers for an existing connection: `Show warning and elevation prompt`
+   * **Limits print driver installation to Administrators**: Set to `Enabled`
 
 ---
 
@@ -64,9 +76,16 @@ Run the following script locally to configure registry keys for print spooler ha
 
 ```powershell
 # Configure-PrintingAndSpooler.ps1
-# Description: Hardens Windows Print Spooler settings, RPC configurations, and Point and Print policies.
+# Description: Disables the Print Spooler service and configures secondary print registry hardening parameters on standard endpoints.
 
 Write-Host "Applying Print Spooler security hardening..." -ForegroundColor Cyan
+
+# 1. Disable the Print Spooler Service
+if (Get-Service -Name "Spooler" -ErrorAction SilentlyContinue) {
+    Set-Service -Name "Spooler" -StartupType Disabled -Confirm:$false
+    Stop-Service -Name "Spooler" -Force -Confirm:$false
+    Write-Host "[+] Print Spooler service has been stopped and disabled." -ForegroundColor Green
+}
 
 # 1. Base Printers Path Policies
 $PrintersPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
@@ -123,6 +142,7 @@ if (-not (Test-Path $PointPrintPath)) {
 Set-ItemProperty -Path $PointPrintPath -Name "RestrictPointAndPrint" -Value 1 -Type Dword
 Set-ItemProperty -Path $PointPrintPath -Name "NoWarningNoElevationOnInstall" -Value 0 -Type Dword
 Set-ItemProperty -Path $PointPrintPath -Name "UpdatePromptSettings" -Value 0 -Type Dword
+Set-ItemProperty -Path $PointPrintPath -Name "RestrictDriverInstallationToAdministrators" -Value 1 -Type Dword
 
 Write-Host "[+] Print Spooler and Printer configurations hardened successfully." -ForegroundColor Green
 ```
@@ -138,6 +158,19 @@ Write-Host "[+] Print Spooler and Printer configurations hardened successfully."
 Write-Host "--- Auditing Printing and Spooler Hardening ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
+
+# 1. Audit Spooler Service Startup Type
+$Service = Get-Service -Name "Spooler" -ErrorAction SilentlyContinue
+if ($null -ne $Service) {
+    $StartupType = (Get-CimInstance -ClassName Win32_Service -Filter "Name='Spooler'").StartMode
+    $Color = if ($StartupType -eq "Disabled") { "Green" } else { "Red" }
+    Write-Host "  [-] Print Spooler Service Startup: $StartupType (Expected: Disabled)" -ForegroundColor $Color
+    if ($StartupType -ne "Disabled") {
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [+] Print Spooler Service is not present on this machine." -ForegroundColor Green
+}
 
 # Helper function to audit registry properties
 function Test-RegistryValue {
@@ -190,6 +223,7 @@ $PointPrintPath = "HKLM:\Software\Policies\Microsoft\Windows NT\Printers\PointAn
 Test-RegistryValue -Path $PointPrintPath -Name "RestrictPointAndPrint" -ExpectedValue 1
 Test-RegistryValue -Path $PointPrintPath -Name "NoWarningNoElevationOnInstall" -ExpectedValue 0
 Test-RegistryValue -Path $PointPrintPath -Name "UpdatePromptSettings" -ExpectedValue 0
+Test-RegistryValue -Path $PointPrintPath -Name "RestrictDriverInstallationToAdministrators" -ExpectedValue 1
 
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red

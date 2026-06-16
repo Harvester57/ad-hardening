@@ -5,6 +5,19 @@ Write-Host "--- Auditing Printing and Spooler Hardening ---" -ForegroundColor Cy
 
 $script:Vulnerable = $false
 
+# 1. Audit Spooler Service Startup Type
+$Service = Get-Service -Name "Spooler" -ErrorAction SilentlyContinue
+if ($null -ne $Service) {
+    $StartupType = (Get-CimInstance -ClassName Win32_Service -Filter "Name='Spooler'").StartMode
+    $Color = if ($StartupType -eq "Disabled") { "Green" } else { "Red" }
+    Write-Host "  [-] Print Spooler Service Startup: $StartupType (Expected: Disabled)" -ForegroundColor $Color
+    if ($StartupType -ne "Disabled") {
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [+] Print Spooler Service is not present on this machine." -ForegroundColor Green
+}
+
 # Helper function to audit registry properties
 function Test-RegistryValue {
     param(
@@ -56,6 +69,7 @@ $PointPrintPath = "HKLM:\Software\Policies\Microsoft\Windows NT\Printers\PointAn
 Test-RegistryValue -Path $PointPrintPath -Name "RestrictPointAndPrint" -ExpectedValue 1
 Test-RegistryValue -Path $PointPrintPath -Name "NoWarningNoElevationOnInstall" -ExpectedValue 0
 Test-RegistryValue -Path $PointPrintPath -Name "UpdatePromptSettings" -ExpectedValue 0
+Test-RegistryValue -Path $PointPrintPath -Name "RestrictDriverInstallationToAdministrators" -ExpectedValue 1
 
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red

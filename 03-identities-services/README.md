@@ -49,8 +49,8 @@ This directory contains security requirements and policies designed to protect a
 15. **[REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](harden-adcs-pki.md)**
     Hardens ADCS templates to block ESC1 SAN enrollment bypasses, mandates manager approval, and secures CA Web Enrollment endpoints.
 
-16. **[REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](configure-point-and-print.md)**
-    Restricts printer driver installation to administrators, configures Early Launch Antimalware driver policy, disables logon screen user enumeration, and hardens CredSSP/credentials delegation.
+16. **[REQ-ID-016 - Configure Logon Screen and Credentials Delegation](configure-credential-delegation.md)**
+    Restricts logon screen user enumeration, and hardens CredSSP/credentials delegation.
 
 17. **[REQ-ID-017 - Disable Machine Account Quota](disable-machine-account-quota.md)**
     Restricts the ms-DS-MachineAccountQuota attribute to 0 and limits the SeMachineAccountPrivilege user right to prevent unauthorized computer object creation by standard domain users.

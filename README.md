@@ -69,7 +69,7 @@ The guidebook is organized into eight functional modules:
      * [REQ-ID-013 - Clean Up adminCount Attribute Orphans](03-identities-services/cleanup-admincount-orphans.md)
      * [REQ-ID-014 - Renew KDS Root Keys and gMSA Secrets](03-identities-services/renew-kds-keys-gmsa-secrets.md)
      * [REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](03-identities-services/harden-adcs-pki.md)
-     * [REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](03-identities-services/configure-point-and-print.md)
+     * [REQ-ID-016 - Configure Logon Screen and Credentials Delegation](03-identities-services/configure-credential-delegation.md)
      * [REQ-ID-017 - Disable Machine Account Quota](03-identities-services/disable-machine-account-quota.md)
      * [REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](03-identities-services/restrict-pre-windows-2000-compatible-access-group.md)
 4. **[Module 4: Network Configuration & Firewalling](04-network-firewall/README.md)**
@@ -115,6 +115,10 @@ The guidebook is organized into eight functional modules:
      * [REQ-PAW-009 - Configure User Rights Assignments for PAWs](07-paws/configure-user-rights-assignments.md)
      * [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](07-paws/enable-vbs-credential-guard.md)
      * [REQ-PAW-011 - Harden DMA and Physical Security for PAWs](07-paws/harden-dma-and-physical-security.md)
+     * [REQ-PAW-012 - Enable WDAC Driver Blocklist](07-paws/enable-wdac-driver-blocklist.md)
+     * [REQ-PAW-013 - Configure Account and Password Policies for PAWs](07-paws/configure-account-policies.md)
+     * [REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](07-paws/configure-elam.md)
+     * [REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](07-paws/configure-printing-and-spooler.md)
 8. **[Module 8: Endpoint Hardening](08-endpoints/README.md)**
    * Entry point index for Tier 2 workstation security.
    * Hardening controls:
@@ -144,6 +148,8 @@ The guidebook is organized into eight functional modules:
      * [REQ-END-024 - Disable Unnecessary System Services](08-endpoints/disable-unnecessary-system-services.md)
      * [REQ-END-025 - Configure Secure Printing and Print Spooler Policies](08-endpoints/configure-printing-and-spooler.md)
      * [REQ-END-026 - Configure System Administrative Templates](08-endpoints/configure-system-administrative-templates.md)
+     * [REQ-END-027 - Configure AppLocker Policies](08-endpoints/configure-applocker-policies.md)
+     * [REQ-END-028 - Configure Early Launch Antimalware (ELAM) Policy](08-endpoints/configure-elam.md)
 
 ---
 

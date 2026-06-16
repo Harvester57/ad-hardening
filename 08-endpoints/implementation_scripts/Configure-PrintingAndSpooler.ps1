@@ -1,7 +1,14 @@
 # Configure-PrintingAndSpooler.ps1
-# Description: Hardens Windows Print Spooler settings, RPC configurations, and Point and Print policies.
+# Description: Disables the Print Spooler service and configures secondary print registry hardening parameters on standard endpoints.
 
 Write-Host "Applying Print Spooler security hardening..." -ForegroundColor Cyan
+
+# 1. Disable the Print Spooler Service
+if (Get-Service -Name "Spooler" -ErrorAction SilentlyContinue) {
+    Set-Service -Name "Spooler" -StartupType Disabled -Confirm:$false
+    Stop-Service -Name "Spooler" -Force -Confirm:$false
+    Write-Host "[+] Print Spooler service has been stopped and disabled." -ForegroundColor Green
+}
 
 # 1. Base Printers Path Policies
 $PrintersPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
@@ -58,5 +65,6 @@ if (-not (Test-Path $PointPrintPath)) {
 Set-ItemProperty -Path $PointPrintPath -Name "RestrictPointAndPrint" -Value 1 -Type Dword
 Set-ItemProperty -Path $PointPrintPath -Name "NoWarningNoElevationOnInstall" -Value 0 -Type Dword
 Set-ItemProperty -Path $PointPrintPath -Name "UpdatePromptSettings" -Value 0 -Type Dword
+Set-ItemProperty -Path $PointPrintPath -Name "RestrictDriverInstallationToAdministrators" -Value 1 -Type Dword
 
 Write-Host "[+] Print Spooler and Printer configurations hardened successfully." -ForegroundColor Green

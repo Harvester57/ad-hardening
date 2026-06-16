@@ -43,6 +43,8 @@ This directory contains the physical isolation policies and operating system sec
 13. **[REQ-PAW-013 - Configure Account and Password Policies for PAWs](configure-account-policies.md)**
     Configures robust local account lockout, local password complexity, and 20-character minimum length policies, and references Active Directory Fine-Grained Password Policies (FGPP) for Tier 0 Administrators.
 
+14. **[REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](configure-elam.md)**
+    Configures the Early Launch Antimalware (ELAM) driver initialization policy to ensure only signed, trusted boot drivers execute.
 
-
-
+15. **[REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](configure-printing-and-spooler.md)**
+    Enforces disabling the Print Spooler service and configuring Point and Print restrictions to prevent print-related exploits.

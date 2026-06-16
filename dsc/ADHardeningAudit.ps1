@@ -19,9 +19,9 @@ Configuration ADHardeningAudit {
 
     # Common scripts apply to all systems
     $commonScripts = @(
+        "03-identities-services\audit_scripts\Get-CredentialDelegationAndLogonStatus.ps1",
         "03-identities-services\audit_scripts\Get-DefaultAccountsStatus.ps1",
         "03-identities-services\audit_scripts\Get-DenyServiceLogonsStatus.ps1",
-        "03-identities-services\audit_scripts\Get-EndpointDelegationAndBootStatus.ps1",
         "03-identities-services\audit_scripts\Get-LAPSStatus.ps1",
         "04-network-firewall\audit_scripts\Get-FirewallLoggingAndSettingsStatus.ps1",
         "04-network-firewall\audit_scripts\Get-HardenedUNCAndClientSigningStatus.ps1",
@@ -110,6 +110,8 @@ Configuration ADHardeningAudit {
             "07-paws\audit_scripts\Audit-UEFISecurity.ps1",
             "07-paws\audit_scripts\Get-DefenderPawStatus.ps1",
             "07-paws\audit_scripts\Get-DriverBlocklistStatus.ps1",
+            "07-paws\audit_scripts\Get-ElamPolicyStatus.ps1",
+            "07-paws\audit_scripts\Get-PrintingAndSpoolerStatus.ps1",
             "07-paws\audit_scripts\Get-WpbtStatus.ps1",
             "07-paws\audit_scripts\Test-PAWAccountPolicies.ps1",
             "07-paws\audit_scripts\Test-PawAppLockerStatus.ps1",
@@ -128,6 +130,7 @@ Configuration ADHardeningAudit {
             "08-endpoints\audit_scripts\Audit-SecureBoot.ps1",
             "08-endpoints\audit_scripts\Audit-UEFISecurity.ps1",
             "08-endpoints\audit_scripts\Get-DefenderAdvancedStatus.ps1",
+            "08-endpoints\audit_scripts\Get-ElamPolicyStatus.ps1",
             "08-endpoints\audit_scripts\Get-ExploitProtectionStatus.ps1",
             "08-endpoints\audit_scripts\Get-LsaProtectionStatus.ps1",
             "08-endpoints\audit_scripts\Get-PrintingAndSpoolerStatus.ps1",
