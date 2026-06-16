@@ -137,6 +137,7 @@
     * [REQ-END-026 - Configure System Administrative Templates](08-endpoints/configure-system-administrative-templates.md)
     * [REQ-END-027 - Configure AppLocker Policies](08-endpoints/configure-applocker-policies.md)
     * [REQ-END-028 - Configure Early Launch Antimalware (ELAM) Policy](08-endpoints/configure-elam.md)
+    * [REQ-END-029 - Configure Untrusted Font Blocking](08-endpoints/configure-untrusted-font-blocking.md)
 
 ## Compliance Mapping
 * [ANSSI Compliance Matrix](compliance/anssi.md)

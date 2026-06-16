@@ -137,6 +137,7 @@ Configuration ADHardeningAudit {
             "08-endpoints\audit_scripts\Get-SafeModeNonAdminsStatus.ps1",
             "08-endpoints\audit_scripts\Get-SystemAdministrativeTemplatesStatus.ps1",
             "08-endpoints\audit_scripts\Get-UnnecessaryServicesStatus.ps1",
+            "08-endpoints\audit_scripts\Get-UntrustedFontBlockingStatus.ps1",
             "08-endpoints\audit_scripts\Get-WindowsFirewallStatus.ps1",
             "08-endpoints\audit_scripts\Get-WpbtStatus.ps1",
             "08-endpoints\audit_scripts\Test-AccountPolicies.ps1",

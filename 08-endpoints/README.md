@@ -89,3 +89,6 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 28. **[REQ-END-028 - Configure Early Launch Antimalware (ELAM) Policy](configure-elam.md)**
     Configures the Early Launch Antimalware (ELAM) driver initialization policy to ensure only signed, trusted boot drivers execute.
+
+29. **[REQ-END-029 - Configure Untrusted Font Blocking](configure-untrusted-font-blocking.md)**
+    Configures the Untrusted Font Blocking mitigation to prevent loading of fonts outside the system fonts directory.
