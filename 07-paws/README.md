@@ -48,3 +48,7 @@ This directory contains the physical isolation policies and operating system sec
 
 15. **[REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](configure-printing-and-spooler.md)**
     Enforces disabling the Print Spooler service and configuring Point and Print restrictions to prevent print-related exploits.
+
+16. **[REQ-PAW-016 - Configure Untrusted Font Blocking for PAWs](configure-untrusted-font-blocking.md)**
+    Configures the Untrusted Font Blocking mitigation on PAWs to prevent font parsing exploits.
+

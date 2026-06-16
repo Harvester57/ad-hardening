@@ -40,6 +40,7 @@
     * [REQ-DC-025 - Configure Security Options for Domain Controllers](02-domain-controllers/configure-security-options.md)
     * [REQ-DC-026 - Configure TCP/IP and Network Parameter Hardening for Domain Controllers](02-domain-controllers/harden-network-parameters.md)
     * [REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](02-domain-controllers/configure-telemetry-privacy.md)
+    * [REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](02-domain-controllers/configure-untrusted-font-blocking.md)
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)
@@ -107,6 +108,7 @@
     * [REQ-PAW-013 - Configure Account and Password Policies for PAWs](07-paws/configure-account-policies.md)
     * [REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](07-paws/configure-elam.md)
     * [REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](07-paws/configure-printing-and-spooler.md)
+    * [REQ-PAW-016 - Configure Untrusted Font Blocking for PAWs](07-paws/configure-untrusted-font-blocking.md)
 ## Module 8: Endpoint Hardening
 * [Module 8: Endpoint Hardening](08-endpoints/README.md)
     * [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](08-endpoints/harden-network-and-name-resolution.md)

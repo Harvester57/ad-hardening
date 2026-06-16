@@ -58,6 +58,9 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure hardened network configurations, TCP/IP MSS parameters, disabling LLTDIO/RSPNDR drivers, Peer-to-Peer, and Windows Connect Now.
 * **[REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](configure-telemetry-privacy.md)**
   Requirement to restrict telemetry collection, online diagnostics, advertising IDs, diagnostic tools, and cloud content integration.
+* **[REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](configure-untrusted-font-blocking.md)**
+  Requirement to configure the Untrusted Font Blocking mitigation on Domain Controllers to prevent kernel font parser exploits.
+
 
 
 

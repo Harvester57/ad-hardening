@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 006d631 | Generated: June 17, 2026</span>
+      <span>Commit: 1b40a4d | Generated: June 17, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1472,6 +1472,9 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure hardened network configurations, TCP/IP MSS parameters, disabling LLTDIO/RSPNDR drivers, Peer-to-Peer, and Windows Connect Now.
 * **[REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](#02-domain-controllers-configure-telemetry-privacy-md)**
   Requirement to restrict telemetry collection, online diagnostics, advertising IDs, diagnostic tools, and cloud content integration.
+* **[REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](#02-domain-controllers-configure-untrusted-font-blocking-md)**
+  Requirement to configure the Untrusted Font Blocking mitigation on Domain Controllers to prevent kernel font parser exploits.
+
 
 
 
@@ -7397,6 +7400,127 @@ if ($script:Vulnerable) {
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.1.3 (Online Tips), Section 18.6.5 (Fonts), Section 18.8 (Push Notifications), Section 18.9.20 (Internet Communication Management), Section 18.9.47 (MSDT), Section 18.9.49 (Advertising ID), Section 18.10.4 (App Data Sharing), Section 18.10.11 (Camera), Section 18.10.16 (Telemetry Proxy), Section 18.10.37 (Location), Section 18.10.41 (Messaging Sync), Section 18.10.56 (Push to Install), Section 18.10.59 (Cloud Search), Section 18.10.63 (KMS Online AVS), Section 18.10.80 (Ink Workspace), Section 19.6.6 (Help Experience), Section 19.7.8 (Spotlight & Tailored Experiences), Section 19.7.46 (Codec Downloads)
 * **ANSSI AD Hardening Guide**: Technical security baseline recommendations to restrict diagnostic tools, telemetry collection, and background service exposure.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md"></div>
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-req-dc-028-configure-untrusted-font-blocking-for-domain-controllers"></div>
+# [REQ-DC-028] Configure Untrusted Font Blocking for Domain Controllers
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers and Member Servers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Mitigation Options\Untrusted Font Blocking`
+  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions`
+    * **Value Name**: `MitigationOptions_FontBocking`
+    * **Value Type**: `REG_SZ`
+    * **Value Data**: `1000000000000`
+
+---
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-rationale"></div>
+## Rationale
+Font files (TrueType, OpenType, and others) are highly complex formats that require advanced parsing logic. Historically, font parsing in Windows was performed by the Graphics Device Interface (GDI) within the operating system kernel. Vulnerabilities in the kernel-mode font parser (such as buffer overflows or remote code execution) have been frequently exploited by threat actors to execute arbitrary code with kernel-level privileges.
+
+Enabling Untrusted Font Blocking limits the attack surface of the graphics subsystem on Domain Controllers:
+1. **Kernel Attack Surface Reduction**: Restricting the system to only load trusted fonts installed in the `%windir%\Fonts` system directory prevents the processing of malicious, web-delivered, or embedded font files.
+2. **Mitigation of Document-Based Exploits**: Prevents malicious font files embedded in Microsoft Office documents, PDFs, or web pages from triggering parsing vulnerabilities in the context of administrative sessions on the Domain Controller.
+
+---
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Web Browsers & Web Fonts**: Web browsers and applications running on Domain Controllers/Member Servers that dynamically download custom fonts may fail to render those fonts, reverting to system default fallback fonts. However, web browsing should not be conducted on Domain Controllers as a baseline practice.
+* **Embedded Fonts in Documents**: Document viewers utilizing custom embedded fonts that are not locally installed in the system directory will render using default system fonts, potentially affecting layout alignment.
+* **Deployment Validation**: It is recommended to deploy this setting in Audit Mode (`3000000000000`) initially to monitor event log entries (Event ID 305 inside the `Microsoft-Windows-Security-Mitigations/KernelMode` log) before fully enforcing the block policy.
+
+---
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Mitigation Options`
+4. Configure the following setting:
+   * **Policy**: `Untrusted Font Blocking`
+   * **Setting**: `Enabled`
+   * **Mitigation Options**: `Block untrusted fonts and log events`
+5. Link the GPO to the Domain Controllers Organizational Unit (OU) containing the target servers.
+
+---
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-UntrustedFontBlocking.ps1](implementation_scripts/Configure-UntrustedFontBlocking.ps1)
+
+```powershell
+# Configure-UntrustedFontBlocking.ps1
+# Description: Configures Untrusted Font Blocking mitigation to block untrusted fonts and log events on Domain Controllers.
+
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions"
+$ValueName = "MitigationOptions_FontBocking"
+$ValueData = "1000000000000"
+
+Write-Host "Applying hardening requirement: Configure Untrusted Font Blocking..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type String -Force | Out-Null
+Write-Host "Hardening applied successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-UntrustedFontBlockingStatus.ps1](audit_scripts/Get-UntrustedFontBlockingStatus.ps1)
+
+```powershell
+# Get-UntrustedFontBlockingStatus.ps1
+# Description: Checks the current configuration state of Untrusted Font Blocking registry setting on Domain Controllers.
+
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions"
+$ValueName = "MitigationOptions_FontBocking"
+$ExpectedValue = "1000000000000"
+
+Write-Host "Auditing hardening requirement: Configure Untrusted Font Blocking..." -ForegroundColor Cyan
+
+if (Test-Path $RegPath) {
+    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. Untrusted fonts are blocked and logged ($($ValueName) = $($ExpectedValue))." -ForegroundColor Green
+        exit 0
+    }
+}
+
+Write-Host "Audit Result: Non-Compliant. Untrusted fonts are not configured to block and log." -ForegroundColor Red
+exit 1
+```
+
+---
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Learn**: Block untrusted fonts in an enterprise (MitigationOptions registry configurations)
+* **CIS Benchmark**: CIS Windows Server Benchmark (Section 18.9.30.1 - Mitigation Options)
 
 
 <div style="page-break-before: always;"></div>
@@ -15818,6 +15942,10 @@ This directory contains the physical isolation policies and operating system sec
 15. **[REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](#07-paws-configure-printing-and-spooler-md)**
     Enforces disabling the Print Spooler service and configuring Point and Print restrictions to prevent print-related exploits.
 
+16. **[REQ-PAW-016 - Configure Untrusted Font Blocking for PAWs](#07-paws-configure-untrusted-font-blocking-md)**
+    Configures the Untrusted Font Blocking mitigation on PAWs to prevent font parsing exploits.
+
+
 
 <div style="page-break-before: always;"></div>
 
@@ -19346,6 +19474,127 @@ if ($script:Vulnerable) {
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.7 (Printing settings)
 * **ANSSI AD Hardening Guide**: Section addressing system services minimization (disabling the Spooler service on sensitive systems).
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-configure-untrusted-font-blocking-md"></div>
+
+<div id="07-paws-configure-untrusted-font-blocking-md-req-paw-016-configure-untrusted-font-blocking-for-paws"></div>
+# [REQ-PAW-016] Configure Untrusted Font Blocking for PAWs
+
+<div id="07-paws-configure-untrusted-font-blocking-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs).
+* **Operating Systems**: Windows 10/11 Enterprise.
+
+---
+
+<div id="07-paws-configure-untrusted-font-blocking-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Mitigation Options\Untrusted Font Blocking`
+  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions`
+    * **Value Name**: `MitigationOptions_FontBocking`
+    * **Value Type**: `REG_SZ`
+    * **Value Data**: `1000000000000`
+
+---
+
+<div id="07-paws-configure-untrusted-font-blocking-md-rationale"></div>
+## Rationale
+Font files (TrueType, OpenType, and others) are highly complex formats that require advanced parsing logic. Historically, font parsing in Windows was performed by the Graphics Device Interface (GDI) within the operating system kernel. Vulnerabilities in the kernel-mode font parser (such as buffer overflows or remote code execution) have been frequently exploited by threat actors to execute arbitrary code with kernel-level privileges.
+
+Enabling Untrusted Font Blocking limits the attack surface of the graphics subsystem on Privileged Access Workstations (PAWs):
+1. **Kernel Attack Surface Reduction**: Restricting the system to only load trusted fonts installed in the `%windir%\Fonts` system directory prevents the processing of malicious, web-delivered, or embedded font files.
+2. **Mitigation of Document-Based Exploits**: Prevents malicious font files embedded in administrative documents, scripts, or web tools from triggering parsing vulnerabilities in the context of high-privileged administrative accounts.
+
+---
+
+<div id="07-paws-configure-untrusted-font-blocking-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Web Browsers & Web Fonts**: Web browsers used for administrative tasks or SaaS consoles on PAWs that dynamically download custom fonts may fail to render those fonts, reverting to system default fallback fonts. This may result in styling anomalies or missing icons.
+* **Embedded Fonts in Documents**: Administrative guides or documents utilizing custom embedded fonts that are not locally installed in the system directory will render using default system fonts, potentially affecting layout alignment.
+* **Deployment Validation**: It is recommended to deploy this setting in Audit Mode (`3000000000000`) initially to monitor event log entries (Event ID 305 inside the `Microsoft-Windows-Security-Mitigations/KernelMode` log) before fully enforcing the block policy.
+
+---
+
+<div id="07-paws-configure-untrusted-font-blocking-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-configure-untrusted-font-blocking-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Mitigation Options`
+4. Configure the following setting:
+   * **Policy**: `Untrusted Font Blocking`
+   * **Setting**: `Enabled`
+   * **Mitigation Options**: `Block untrusted fonts and log events`
+5. Link the GPO to the PAW Organizational Unit (OU) containing the target workstations.
+
+---
+
+<div id="07-paws-configure-untrusted-font-blocking-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-UntrustedFontBlocking.ps1](implementation_scripts/Configure-UntrustedFontBlocking.ps1)
+
+```powershell
+# Configure-UntrustedFontBlocking.ps1
+# Description: Configures Untrusted Font Blocking mitigation to block untrusted fonts and log events on PAWs.
+
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions"
+$ValueName = "MitigationOptions_FontBocking"
+$ValueData = "1000000000000"
+
+Write-Host "Applying hardening requirement: Configure Untrusted Font Blocking..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type String -Force | Out-Null
+Write-Host "Hardening applied successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-UntrustedFontBlockingStatus.ps1](audit_scripts/Get-UntrustedFontBlockingStatus.ps1)
+
+```powershell
+# Get-UntrustedFontBlockingStatus.ps1
+# Description: Checks the current configuration state of Untrusted Font Blocking registry setting on PAWs.
+
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions"
+$ValueName = "MitigationOptions_FontBocking"
+$ExpectedValue = "1000000000000"
+
+Write-Host "Auditing hardening requirement: Configure Untrusted Font Blocking..." -ForegroundColor Cyan
+
+if (Test-Path $RegPath) {
+    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. Untrusted fonts are blocked and logged ($($ValueName) = $($ExpectedValue))." -ForegroundColor Green
+        exit 0
+    }
+}
+
+Write-Host "Audit Result: Non-Compliant. Untrusted fonts are not configured to block and log." -ForegroundColor Red
+exit 1
+```
+
+---
+
+<div id="07-paws-configure-untrusted-font-blocking-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Learn**: Block untrusted fonts in an enterprise (MitigationOptions registry configurations)
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.9.30.1 (System Options / Mitigation Options)
 
 
 <div style="page-break-before: always;"></div>
