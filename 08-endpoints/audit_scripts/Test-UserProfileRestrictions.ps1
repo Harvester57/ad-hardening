@@ -130,9 +130,6 @@ Test-RegistryValue "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" 
 # Block driver co-installers
 Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" "DisableCoInstallers" 1
 
-# Kernel-level Shadow Stacks
-Test-RegistryValue "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
-
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
 } else {

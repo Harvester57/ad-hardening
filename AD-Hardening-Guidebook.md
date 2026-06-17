@@ -18,7 +18,11 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
+<<<<<<< HEAD
       <span>Commit: 2f4b682 | Generated: June 17, 2026</span>
+=======
+      <span>Commit: 81c9997 | Generated: June 17, 2026</span>
+>>>>>>> 157aa33d3de46a8aeb877a0c29fa881031041789
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -117,7 +121,7 @@ The guidebook is organized into eight functional modules:
      * [REQ-ID-013 - Clean Up adminCount Attribute Orphans](#03-identities-services-cleanup-admincount-orphans-md)
      * [REQ-ID-014 - Renew KDS Root Keys and gMSA Secrets](#03-identities-services-renew-kds-keys-gmsa-secrets-md)
      * [REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#03-identities-services-harden-adcs-pki-md)
-     * [REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](#03-identities-services-configure-point-and-print-md)
+     * [REQ-ID-016 - Configure Logon Screen and Credentials Delegation](#03-identities-services-configure-credential-delegation-md)
      * [REQ-ID-017 - Disable Machine Account Quota](#03-identities-services-disable-machine-account-quota-md)
      * [REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)
 4. **[Module 4: Network Configuration & Firewalling](#04-network-firewall-README-md)**
@@ -163,6 +167,10 @@ The guidebook is organized into eight functional modules:
      * [REQ-PAW-009 - Configure User Rights Assignments for PAWs](#07-paws-configure-user-rights-assignments-md)
      * [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#07-paws-enable-vbs-credential-guard-md)
      * [REQ-PAW-011 - Harden DMA and Physical Security for PAWs](#07-paws-harden-dma-and-physical-security-md)
+     * [REQ-PAW-012 - Enable WDAC Driver Blocklist](#07-paws-enable-wdac-driver-blocklist-md)
+     * [REQ-PAW-013 - Configure Account and Password Policies for PAWs](#07-paws-configure-account-policies-md)
+     * [REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](#07-paws-configure-elam-md)
+     * [REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](#07-paws-configure-printing-and-spooler-md)
 8. **[Module 8: Endpoint Hardening](#08-endpoints-README-md)**
    * Entry point index for Tier 2 workstation security.
    * Hardening controls:
@@ -192,6 +200,8 @@ The guidebook is organized into eight functional modules:
      * [REQ-END-024 - Disable Unnecessary System Services](#08-endpoints-disable-unnecessary-system-services-md)
      * [REQ-END-025 - Configure Secure Printing and Print Spooler Policies](#08-endpoints-configure-printing-and-spooler-md)
      * [REQ-END-026 - Configure System Administrative Templates](#08-endpoints-configure-system-administrative-templates-md)
+     * [REQ-END-027 - Configure AppLocker Policies](#08-endpoints-configure-applocker-policies-md)
+     * [REQ-END-028 - Configure Early Launch Antimalware (ELAM) Policy](#08-endpoints-configure-elam-md)
 
 ---
 
@@ -1466,6 +1476,11 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure hardened network configurations, TCP/IP MSS parameters, disabling LLTDIO/RSPNDR drivers, Peer-to-Peer, and Windows Connect Now.
 * **[REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](#02-domain-controllers-configure-telemetry-privacy-md)**
   Requirement to restrict telemetry collection, online diagnostics, advertising IDs, diagnostic tools, and cloud content integration.
+* **[REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](#02-domain-controllers-configure-untrusted-font-blocking-md)**
+  Requirement to configure the Untrusted Font Blocking mitigation on Domain Controllers to prevent kernel font parser exploits.
+* **[REQ-DC-029 - Configure svchost.exe Mitigation Options](#02-domain-controllers-configure-svchost-mitigation-md)**
+  Requirement to configure svchost.exe mitigation options on Domain Controllers and Member Servers to restrict binary loading to Microsoft-signed code and block dynamic code execution.
+
 
 
 
@@ -7395,6 +7410,247 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md"></div>
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-req-dc-028-configure-untrusted-font-blocking-for-domain-controllers"></div>
+# [REQ-DC-028] Configure Untrusted Font Blocking for Domain Controllers
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers and Member Servers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Mitigation Options\Untrusted Font Blocking`
+  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions`
+    * **Value Name**: `MitigationOptions_FontBocking`
+    * **Value Type**: `REG_SZ`
+    * **Value Data**: `1000000000000`
+
+---
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-rationale"></div>
+## Rationale
+Font files (TrueType, OpenType, and others) are highly complex formats that require advanced parsing logic. Historically, font parsing in Windows was performed by the Graphics Device Interface (GDI) within the operating system kernel. Vulnerabilities in the kernel-mode font parser (such as buffer overflows or remote code execution) have been frequently exploited by threat actors to execute arbitrary code with kernel-level privileges.
+
+Enabling Untrusted Font Blocking limits the attack surface of the graphics subsystem on Domain Controllers:
+1. **Kernel Attack Surface Reduction**: Restricting the system to only load trusted fonts installed in the `%windir%\Fonts` system directory prevents the processing of malicious, web-delivered, or embedded font files.
+2. **Mitigation of Document-Based Exploits**: Prevents malicious font files embedded in Microsoft Office documents, PDFs, or web pages from triggering parsing vulnerabilities in the context of administrative sessions on the Domain Controller.
+
+---
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Web Browsers & Web Fonts**: Web browsers and applications running on Domain Controllers/Member Servers that dynamically download custom fonts may fail to render those fonts, reverting to system default fallback fonts. However, web browsing should not be conducted on Domain Controllers as a baseline practice.
+* **Embedded Fonts in Documents**: Document viewers utilizing custom embedded fonts that are not locally installed in the system directory will render using default system fonts, potentially affecting layout alignment.
+* **Deployment Validation**: It is recommended to deploy this setting in Audit Mode (`3000000000000`) initially to monitor event log entries (Event ID 305 inside the `Microsoft-Windows-Security-Mitigations/KernelMode` log) before fully enforcing the block policy.
+
+---
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Mitigation Options`
+4. Configure the following setting:
+   * **Policy**: `Untrusted Font Blocking`
+   * **Setting**: `Enabled`
+   * **Mitigation Options**: `Block untrusted fonts and log events`
+5. Link the GPO to the Domain Controllers Organizational Unit (OU) containing the target servers.
+
+---
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-UntrustedFontBlocking.ps1](implementation_scripts/Configure-UntrustedFontBlocking.ps1)
+
+```powershell
+# Configure-UntrustedFontBlocking.ps1
+# Description: Configures Untrusted Font Blocking mitigation to block untrusted fonts and log events on Domain Controllers.
+
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions"
+$ValueName = "MitigationOptions_FontBocking"
+$ValueData = "1000000000000"
+
+Write-Host "Applying hardening requirement: Configure Untrusted Font Blocking..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type String -Force | Out-Null
+Write-Host "Hardening applied successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-UntrustedFontBlockingStatus.ps1](audit_scripts/Get-UntrustedFontBlockingStatus.ps1)
+
+```powershell
+# Get-UntrustedFontBlockingStatus.ps1
+# Description: Checks the current configuration state of Untrusted Font Blocking registry setting on Domain Controllers.
+
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions"
+$ValueName = "MitigationOptions_FontBocking"
+$ExpectedValue = "1000000000000"
+
+Write-Host "Auditing hardening requirement: Configure Untrusted Font Blocking..." -ForegroundColor Cyan
+
+if (Test-Path $RegPath) {
+    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. Untrusted fonts are blocked and logged ($($ValueName) = $($ExpectedValue))." -ForegroundColor Green
+        exit 0
+    }
+}
+
+Write-Host "Audit Result: Non-Compliant. Untrusted fonts are not configured to block and log." -ForegroundColor Red
+exit 1
+```
+
+---
+
+<div id="02-domain-controllers-configure-untrusted-font-blocking-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Learn**: Block untrusted fonts in an enterprise (MitigationOptions registry configurations)
+* **CIS Benchmark**: CIS Windows Server Benchmark (Section 18.9.30.1 - Mitigation Options)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md"></div>
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-req-dc-029-configure-svchostexe-mitigation-options"></div>
+# [REQ-DC-029] Configure svchost.exe Mitigation Options
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers and Member Servers.
+* **Operating Systems**: Windows Server 2022 (and above), Windows Server Semi-Annual Channel (1903 and above).
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings\Enable svchost.exe mitigation options`
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\SCMConfig`
+    * **Value Name**: `EnableSvchostMitigationPolicy`
+    * **Value Type**: `REG_DWORD`
+    * **Value Data**: `1`
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-rationale"></div>
+## Rationale
+The Service Host (`svchost.exe`) process is a critical system component responsible for hosting multiple Windows services. Because `svchost.exe` runs with elevated privileges (such as `SYSTEM`, `Network Service`, or `Local Service`) and handles sensitive system tasks, it is a prime target for security evasion techniques, process hollowing, and DLL injection.
+
+Enabling `svchost.exe` mitigation options restricts the behavior of the `svchost.exe` process to enhance security:
+1. **Microsoft-Only Binary Enforcement**: Requires all binaries and dynamic-link libraries (DLLs) loaded into `svchost.exe` to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into `svchost.exe` instances.
+2. **Dynamic Code Blocking**: Prevents the execution of dynamically generated code (such as Just-In-Time compiled code) within `svchost.exe` processes, neutralizing typical in-memory exploitation vectors.
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Third-Party Compatibility**: This policy requires all binaries loaded by `svchost.exe` to be Microsoft-signed. Any third-party software, security agents, or system drivers that attempt to run services inside the `svchost.exe` process space using non-Microsoft DLLs will fail to load. This has historically caused issues with legacy antivirus, third-party authentication plugins, or specialized management utilities.
+* **Operating System Support**: This policy has no effect on Windows Server versions prior to 1903 (such as Windows Server 2016 and Windows Server 2019).
+* **Deployment Validation**: It is recommended to perform extensive baseline testing on a representative subset of member servers running third-party software before deploying this configuration across the entire production domain.
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings`
+4. Configure the following setting:
+   * **Policy**: `Enable svchost.exe mitigation options`
+   * **Setting**: `Enabled`
+5. Link the GPO to the Domain Controllers and Member Servers Organizational Units (OUs) containing the target systems.
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-SvchostMitigation.ps1](implementation_scripts/Configure-SvchostMitigation.ps1)
+
+```powershell
+# Configure-SvchostMitigation.ps1
+# Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code.
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
+$ValueName = "EnableSvchostMitigationPolicy"
+$ValueData = 1
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
+Write-Host "Hardening applied successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-SvchostMitigationStatus.ps1](audit_scripts/Get-SvchostMitigationStatus.ps1)
+
+```powershell
+# Get-SvchostMitigationStatus.ps1
+# Description: Audits the configuration state of svchost.exe mitigation options.
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
+$ValueName = "EnableSvchostMitigationPolicy"
+$ExpectedValue = 1
+
+Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+if (Test-Path $RegPath) {
+    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. svchost.exe mitigation options are enabled." -ForegroundColor Green
+        exit 0
+    }
+}
+
+Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured." -ForegroundColor Red
+exit 1
+```
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Learn**: Group Policy settings reference - Service Control Manager Settings
+* **Microsoft Security Guidance**: Removing "Enable svchost.exe mitigation options" from baseline recommendations (for compatibility awareness)
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="03-identities-services-README-md"></div>
 
 <div id="03-identities-services-README-md-module-3-identities-services-hardening"></div>
@@ -7450,8 +7706,8 @@ This directory contains security requirements and policies designed to protect a
 15. **[REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#03-identities-services-harden-adcs-pki-md)**
     Hardens ADCS templates to block ESC1 SAN enrollment bypasses, mandates manager approval, and secures CA Web Enrollment endpoints.
 
-16. **[REQ-ID-016 - Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation](#03-identities-services-configure-point-and-print-md)**
-    Restricts printer driver installation to administrators, configures Early Launch Antimalware driver policy, disables logon screen user enumeration, and hardens CredSSP/credentials delegation.
+16. **[REQ-ID-016 - Configure Logon Screen and Credentials Delegation](#03-identities-services-configure-credential-delegation-md)**
+    Restricts logon screen user enumeration, and hardens CredSSP/credentials delegation.
 
 17. **[REQ-ID-017 - Disable Machine Account Quota](#03-identities-services-disable-machine-account-quota-md)**
     Restricts the ms-DS-MachineAccountQuota attribute to 0 and limits the SeMachineAccountPrivilege user right to prevent unauthorized computer object creation by standard domain users.
@@ -9855,89 +10111,64 @@ if ($VulnerableCount -eq 0) {
 
 <div style="page-break-before: always;"></div>
 
-<div id="03-identities-services-configure-point-and-print-md"></div>
+<div id="03-identities-services-configure-credential-delegation-md"></div>
 
-<div id="03-identities-services-configure-point-and-print-md-req-id-016-configure-point-and-print-elam-logon-screen-and-credentials-delegation"></div>
-# [REQ-ID-016] Configure Point and Print, ELAM, Logon Screen, and Credentials Delegation
+<div id="03-identities-services-configure-credential-delegation-md-req-id-016-configure-logon-screen-and-credentials-delegation"></div>
+# [REQ-ID-016] Configure Logon Screen and Credentials Delegation
 
-<div id="03-identities-services-configure-point-and-print-md-target-scope"></div>
+<div id="03-identities-services-configure-credential-delegation-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise.
 
 ---
 
-<div id="03-identities-services-configure-point-and-print-md-implementation-details"></div>
+<div id="03-identities-services-configure-credential-delegation-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * **Point and Print GPO**: `Computer Configuration\Policies\Administrative Templates\Printers\Limits print driver installation to Administrators` -> Enabled
-  * **Early Launch Antimalware (ELAM) GPO**: `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware\Boot-Start Driver Initialization Policy` -> Enabled (Select **Good, unknown and bad but critical** in options)
   * **Logon screen local users enumeration GPO**: `Computer Configuration\Policies\Administrative Templates\System\Logon\Enumerate local users on domain-joined computers` -> Disabled
   * **CredSSP Encryption GPO**: `Computer Configuration\Policies\Administrative Templates\System\Credentials Delegation\Encryption Oracle Remediation` -> Enabled (Select **Force Updated Clients** in options)
   * **Protected Credentials Delegation GPO**: `Computer Configuration\Policies\Administrative Templates\System\Credentials Delegation\Remote host allows delegation of non-exportable credentials` -> Enabled
-  * **Registry Location (Printers)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint` -> `RestrictDriverInstallationToAdministrators` = `1` (REG_DWORD)
-  * **Registry Location (ELAM)**: `HKLM\SYSTEM\CurrentControlSet\Policies\EarlyLaunch` -> `DriverLoadPolicy` = `3` (REG_DWORD)
   * **Registry Location (Logon)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System` -> `EnumerateLocalUsers` = `0` (REG_DWORD)
   * **Registry Location (CredSSP)**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\CredSSP\Parameters` -> `AllowEncryptionOracle` = `0` (REG_DWORD)
   * **Registry Location (Credentials Delegation)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation` -> `AllowProtectedCreds` = `1` (REG_DWORD)
 
 ---
 
-<div id="03-identities-services-configure-point-and-print-md-rationale"></div>
+<div id="03-identities-services-configure-credential-delegation-md-rationale"></div>
 ## Rationale
-Ensuring robust endpoint security and credential isolation requires configurations that address printer drivers, early boot processes, credential delegation, and the local login screen.
+Securing interactive logons and connection pathways is critical to preventing identity leaks, unauthorized physical user identification, and credential theft during remote administration:
 
-Hardening these features mitigates the following vulnerabilities:
-1. **PrintNightmare (CVE-2021-34527 / CVE-2021-1675)**: Point and Print features historically allowed non-administrative users to download and install printer drivers from arbitrary network print servers. Attackers exploited this to inject malicious DLLs, obtaining local SYSTEM execution. Restricting print driver installation to Administrators blocks this privilege escalation path.
-2. **Early Boot Rootkits**: Malicious boot-start drivers can run before security software initializes. Configuring Early Launch Antimalware (ELAM) driver policies ensures that unknown or malicious boot drivers are blocked from executing.
-3. **Logon Screen Reconnaissance**: Allowing the local login screen to enumerate local and domain users exposes valid usernames to physical shoulder-surfers or unauthorized operators. Disabling local user enumeration hides username lists at logon.
-4. **CredSSP Vulnerabilities (CVE-2018-0886)**: The Credential Security Support Provider protocol (CredSSP) had a logical remote code execution flaw. Enforcing Encryption Oracle Remediation in updated mode blocks connections from unpatched clients and servers.
-5. **Delegated Credential Extraction**: When users connect to remote hosts, delegating exportable credentials exposes their authentication materials in remote LSASS memory. Forcing the delegation of non-exportable credentials ensures authentication materials cannot be exported by administrative attackers on the remote system.
+1. **Logon Screen Reconnaissance**: Allowing the local login screen to enumerate local and domain users exposes valid usernames to physical shoulder-surfers or unauthorized operators. Disabling local user enumeration hides username lists at logon.
+2. **CredSSP Vulnerabilities (CVE-2018-0886)**: The Credential Security Support Provider protocol (CredSSP) had a logical remote code execution flaw. Enforcing Encryption Oracle Remediation in updated mode blocks connections from unpatched clients and servers.
+3. **Delegated Credential Extraction**: When users connect to remote hosts, delegating exportable credentials exposes their authentication materials in remote LSASS memory. Forcing the delegation of non-exportable credentials ensures authentication materials cannot be exported by administrative attackers on the remote system.
 
 ---
 
-<div id="03-identities-services-configure-point-and-print-md-legacy-impact-compatibility"></div>
+<div id="03-identities-services-configure-credential-delegation-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Network Printer Deployments**: Non-administrative users will be blocked from connecting to shared network printers unless the corresponding drivers have been pre-installed or pre-staged by an administrator using tools like Print Management.
-* **Boot-Start Drivers**: If legitimate, custom, unsigned kernel drivers are active on the host, the ELAM policy may block them from loading during boot, causing blue screen (BSOD) failures. Ensure all active drivers are digitally signed and verified prior to applying this policy.
 * **CredSSP Connection Failures**: Administrative RDP sessions to legacy, unpatched servers (e.g., Windows Server 2008 / Windows Server 2003) will be blocked if those targets do not support patched CredSSP. These targets must be decommissioned or patched.
 
 ---
 
-<div id="03-identities-services-configure-point-and-print-md-implementation-steps"></div>
+<div id="03-identities-services-configure-credential-delegation-md-implementation-steps"></div>
 ## Implementation Steps
 
-<div id="03-identities-services-configure-point-and-print-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+<div id="03-identities-services-configure-credential-delegation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<div id="03-identities-services-configure-point-and-print-md-1-limit-print-driver-installation"></div>
-#### 1. Limit Print Driver Installation
+<div id="03-identities-services-configure-credential-delegation-md-1-disable-logon-screen-username-enumeration"></div>
+#### 1. Disable Logon Screen Username Enumeration
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to your computer OUs (e.g., `GPO_Computer_Hardening_Baseline`).
 3. Navigate to:
-   `Computer Configuration\Policies\Administrative Templates\Printers`
-4. Double-click **Limits print driver installation to Administrators**.
-5. Set it to **Enabled** and click **OK**.
-
-<div id="03-identities-services-configure-point-and-print-md-2-configure-elam-boot-driver-policy"></div>
-#### 2. Configure ELAM Boot Driver Policy
-1. Navigate to:
-   `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware`
-2. Double-click **Boot-Start Driver Initialization Policy**.
-3. Set it to **Enabled**.
-4. In the options dropdown, select **Good, unknown and bad but critical** (corresponds to registry value `3`).
-5. Click **OK**.
-
-<div id="03-identities-services-configure-point-and-print-md-3-disable-logon-screen-username-enumeration"></div>
-#### 3. Disable Logon Screen Username Enumeration
-1. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Logon`
-2. Double-click **Enumerate local users on domain-joined computers**.
-3. Set it to **Disabled** and click **OK**.
+4. Double-click **Enumerate local users on domain-joined computers**.
+5. Set it to **Disabled** and click **OK**.
 
-<div id="03-identities-services-configure-point-and-print-md-4-configure-credssp-and-credentials-delegation"></div>
-#### 4. Configure CredSSP and Credentials Delegation
+<div id="03-identities-services-configure-credential-delegation-md-2-configure-credssp-and-credentials-delegation"></div>
+#### 2. Configure CredSSP and Credentials Delegation
 1. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Credentials Delegation`
 2. Double-click **Encryption Oracle Remediation**.
@@ -9947,36 +10178,20 @@ Hardening these features mitigates the following vulnerabilities:
 
 ---
 
-<div id="03-identities-services-configure-point-and-print-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+<div id="03-identities-services-configure-credential-delegation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to apply the printers, boot drivers, logon screen, and delegation settings to the registry.
+Run the following scripts locally to apply logon screen and delegation settings to the registry.
 
-[Download Script: Set-EndpointDelegationAndBootHardening.ps1](implementation_scripts/Set-EndpointDelegationAndBootHardening.ps1)
+[Download Script: Configure-CredentialDelegationAndLogon.ps1](implementation_scripts/Configure-CredentialDelegationAndLogon.ps1)
 
 ```powershell
-# Set-EndpointDelegationAndBootHardening.ps1
-# Description: Hardens Point and Print restrictions, ELAM policies, logon screen enumeration, and credentials delegation.
+# Configure-CredentialDelegationAndLogon.ps1
+# Description: Hardens logon screen user enumeration, CredSSP encryption oracle remediation, and remote host non-exportable credentials delegation.
 
-Write-Host "Applying printer, boot driver, logon screen, and delegation registry controls..." -ForegroundColor Cyan
+Write-Host "Applying logon screen and credentials delegation registry controls..." -ForegroundColor Cyan
 
-# 1. Limit Print Driver Installation to Administrators
-$PrinterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
-if (-not (Test-Path $PrinterPath)) {
-    New-Item -Path $PrinterPath -Force | Out-Null
-}
-Set-ItemProperty -Path $PrinterPath -Name "RestrictDriverInstallationToAdministrators" -Value 1 -Type DWord -ErrorAction Stop
-Write-Host "[+] Print driver installation restricted to Administrators." -ForegroundColor Green
-
-# 2. Configure ELAM Driver Load Policy
-$ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
-if (-not (Test-Path $ElamPath)) {
-    New-Item -Path $ElamPath -Force | Out-Null
-}
-Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
-Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green
-
-# 3. Disable Logon Screen User Enumeration
+# 1. Disable Logon Screen User Enumeration
 $SystemPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
 if (-not (Test-Path $SystemPath)) {
     New-Item -Path $SystemPath -Force | Out-Null
@@ -9984,7 +10199,7 @@ if (-not (Test-Path $SystemPath)) {
 Set-ItemProperty -Path $SystemPath -Name "EnumerateLocalUsers" -Value 0 -Type DWord -ErrorAction Stop
 Write-Host "[+] Logon screen local user enumeration disabled." -ForegroundColor Green
 
-# 4. Enforce CredSSP Encryption Oracle Remediation
+# 2. Enforce CredSSP Encryption Oracle Remediation
 $CredSspPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\CredSSP\Parameters"
 if (-not (Test-Path $CredSspPath)) {
     New-Item -Path $CredSspPath -Force | Out-Null
@@ -9992,7 +10207,7 @@ if (-not (Test-Path $CredSspPath)) {
 Set-ItemProperty -Path $CredSspPath -Name "AllowEncryptionOracle" -Value 0 -Type DWord -ErrorAction Stop
 Write-Host "[+] CredSSP Encryption Oracle Remediation configured to Force Updated Clients." -ForegroundColor Green
 
-# 5. Remote Host Allows Delegation of Non-Exportable Credentials
+# 3. Remote Host Allows Delegation of Non-Exportable Credentials
 $DelegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation"
 if (-not (Test-Path $DelegPath)) {
     New-Item -Path $DelegPath -Force | Out-Null
@@ -10001,50 +10216,60 @@ Set-ItemProperty -Path $DelegPath -Name "AllowProtectedCreds" -Value 1 -Type DWo
 Write-Host "[+] Delegation of non-exportable credentials enabled." -ForegroundColor Green
 ```
 
-*To audit these printers, boot drivers, logon screen, and delegation settings:*
-[Download Script: Get-EndpointDelegationAndBootStatus.ps1](audit_scripts/Get-EndpointDelegationAndBootStatus.ps1)
+*To audit these logon screen and delegation settings:*
+
+[Download Script: Get-CredentialDelegationAndLogonStatus.ps1](audit_scripts/Get-CredentialDelegationAndLogonStatus.ps1)
 
 ```powershell
-# Get-EndpointDelegationAndBootStatus.ps1
-# Description: Audits registry configuration of Point and Print, ELAM, user enumeration, and delegation.
+# Get-CredentialDelegationAndLogonStatus.ps1
+# Description: Audits registry configuration of user enumeration, CredSSP, and delegation settings.
 
-Write-Host "--- Auditing Endpoint Delegation and Boot Settings ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Credentials Delegation and Logon Settings ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
 
 # Helper function to check registry settings
 function Confirm-RegValue ($Path, $Name, $Expected) {
     if (Test-Path $Path) {
         $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
         $Val = $Reg.$Name
-        $Color = if ($Val -eq $Expected) { "Green" } else { "Red" }
-        Write-Host "    - Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor $Color
+        if ($Val -eq $Expected) {
+            Write-Host "  [+] Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
     } else {
-        Write-Host "    - Path $($Path): NOT FOUND" -ForegroundColor Red
+        Write-Host "  [!] NOT FOUND: Path $($Path) (Expected: $Name = $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
     }
 }
 
-# 1. Point and Print
-Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint" "RestrictDriverInstallationToAdministrators" 1
-
-# 2. ELAM Policy
-Confirm-RegValue "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch" "DriverLoadPolicy" 3
-
-# 3. User Enumeration
+# 1. User Enumeration
 Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" "EnumerateLocalUsers" 0
 
-# 4. CredSSP AllowEncryptionOracle
+# 2. CredSSP AllowEncryptionOracle
 Confirm-RegValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\CredSSP\Parameters" "AllowEncryptionOracle" 0
 
-# 5. Protected Credentials Delegation
+# 3. Protected Credentials Delegation
 Confirm-RegValue "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredentialsDelegation" "AllowProtectedCreds" 1
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
 ```
 
 ---
 
-<div id="03-identities-services-configure-point-and-print-md-sources-compliance-references"></div>
+<div id="03-identities-services-configure-credential-delegation-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.2.1 (Printers), Section 18.2.2 (System Options / ELAM), Section 18.8 (Credentials Delegation)
-* **ANSSI AD Hardening Guide**: Security guidelines regarding printer service vulnerabilities (PrintNightmare) and local machine access configuration.
-* **Microsoft Security Guidance**: Mitigating PrintNightmare and CredSSP vulnerabilities (CVE-2018-0886)
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.8 (Credentials Delegation)
+* **ANSSI AD Hardening Guide**: Security guidelines regarding credential delegation and local machine access configuration.
+* **Microsoft Security Guidance**: Mitigating CredSSP vulnerabilities (CVE-2018-0886)
 
 
 <div style="page-break-before: always;"></div>
@@ -16070,8 +16295,20 @@ This directory contains the physical isolation policies and operating system sec
 13. **[REQ-PAW-013 - Configure Account and Password Policies for PAWs](#07-paws-configure-account-policies-md)**
     Configures robust local account lockout, local password complexity, and 20-character minimum length policies, and references Active Directory Fine-Grained Password Policies (FGPP) for Tier 0 Administrators.
 
+14. **[REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](#07-paws-configure-elam-md)**
+    Configures the Early Launch Antimalware (ELAM) driver initialization policy to ensure only signed, trusted boot drivers execute.
 
+15. **[REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](#07-paws-configure-printing-and-spooler-md)**
+    Enforces disabling the Print Spooler service and configuring Point and Print restrictions to prevent print-related exploits.
 
+16. **[REQ-PAW-016 - Configure Untrusted Font Blocking for PAWs](#07-paws-configure-untrusted-font-blocking-md)**
+    Configures the Untrusted Font Blocking mitigation on PAWs to prevent font parsing exploits.
+
+17. **[REQ-PAW-017 - Configure svchost.exe Mitigation Options for PAWs](#07-paws-configure-svchost-mitigation-md)**
+    Configures svchost.exe mitigation options on PAWs to restrict binary loading to Microsoft-signed code and block dynamic code execution.
+
+18. **[REQ-PAW-018 - Enable Kernel-Mode Hardware-Enforced Stack Protection for PAWs](#07-paws-enable-kernel-shadow-stacks-md)**
+    Configures Kernel-mode Hardware-enforced Stack Protection to enforce hardware-backed control-flow integrity and mitigate kernel Return-Oriented Programming (ROP) execution hijacks.
 
 
 
@@ -19324,6 +19561,668 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="07-paws-configure-elam-md"></div>
+
+<div id="07-paws-configure-elam-md-req-paw-014-configure-early-launch-antimalware-elam-policy-for-paws"></div>
+# [REQ-PAW-014] Configure Early Launch Antimalware (ELAM) Policy for PAWs
+
+<div id="07-paws-configure-elam-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations.
+* **Operating Systems**: Windows 10/11 Enterprise.
+
+---
+
+<div id="07-paws-configure-elam-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **ELAM GPO**: `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware\Boot-Start Driver Initialization Policy` -> Enabled (Select **Good, unknown and bad but critical** in options)
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Policies\EarlyLaunch` -> `DriverLoadPolicy` = `3` (REG_DWORD)
+
+---
+
+<div id="07-paws-configure-elam-md-rationale"></div>
+## Rationale
+Privileged Access Workstations (PAWs) require the highest level of boot integrity to prevent compromise of Tier 0 administrative tasks:
+
+1. **Early Boot Rootkits**: Malicious boot-start drivers can execute before third-party endpoint protection or security agents initialize. Enforcing the Early Launch Antimalware (ELAM) driver initialization policy ensures that unknown, unsigned, or bad drivers are prevented from loading at boot time.
+2. **Platform Integrity**: Securing the boot sequence with ELAM is a critical requirement of Virtualization-Based Security (VBS) and overall hardware-rooted protection.
+
+---
+
+<div id="07-paws-configure-elam-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Boot-Start Drivers**: If third-party, custom, or legacy hardware monitoring drivers are unsigned, the ELAM policy will block them from loading, potentially resulting in blue screen (BSOD) or hardware failures. Verify all active drivers possess valid digital signatures prior to enforcement.
+
+---
+
+<div id="07-paws-configure-elam-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-configure-elam-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO applied to your PAWs (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware`
+4. Double-click **Boot-Start Driver Initialization Policy**.
+5. Set it to **Enabled**.
+6. In the options dropdown, select **Good, unknown and bad but critical** (registry value `3`).
+7. Click **OK**.
+
+---
+
+<div id="07-paws-configure-elam-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to apply the ELAM driver load policy.
+
+[Download Script: Configure-ElamPolicy.ps1](implementation_scripts/Configure-ElamPolicy.ps1)
+
+```powershell
+# Configure-ElamPolicy.ps1
+# Description: Configures the Early Launch Antimalware (ELAM) boot-start driver load policy on the local system.
+
+Write-Host "Applying ELAM Boot-Start driver initialization policy..." -ForegroundColor Cyan
+
+$ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
+if (-not (Test-Path $ElamPath)) {
+    New-Item -Path $ElamPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green
+```
+
+*To audit the ELAM driver load policy status:*
+
+[Download Script: Get-ElamPolicyStatus.ps1](audit_scripts/Get-ElamPolicyStatus.ps1)
+
+```powershell
+# Get-ElamPolicyStatus.ps1
+# Description: Audits registry configuration of the Early Launch Antimalware (ELAM) policy.
+
+Write-Host "--- Auditing ELAM Boot-Start Policy ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
+$Name = "DriverLoadPolicy"
+$Expected = 3
+
+if (Test-Path $Path) {
+    $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
+    $Val = $Reg.$Name
+    if ($Val -eq $Expected) {
+        Write-Host "  [+] Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Green
+    } else {
+        Write-Host "  [!] MISMATCH: Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] NOT FOUND: Path $($Path) (Expected: $Name = $Expected)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-configure-elam-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.2.2 (System Options / ELAM)
+* **ANSSI AD Hardening Guide**: Section addressing system and boot configuration integrity.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-configure-printing-and-spooler-md"></div>
+
+<div id="07-paws-configure-printing-and-spooler-md-req-paw-015-configure-secure-printing-and-print-spooler-policies-for-paws"></div>
+# [REQ-PAW-015] Configure Secure Printing and Print Spooler Policies for PAWs
+
+<div id="07-paws-configure-printing-and-spooler-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations.
+* **Operating Systems**: Windows 10/11 Enterprise.
+
+---
+
+<div id="07-paws-configure-printing-and-spooler-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **System Service GPO**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Print Spooler` -> Service Startup Mode: **Disabled**
+  * **Point and Print GPO**: `Computer Configuration\Policies\Administrative Templates\Printers\Limits print driver installation to Administrators` -> Enabled
+  * **Registry Location (Service)**: `HKLM\SYSTEM\CurrentControlSet\Services\Spooler` -> `Start` = `4` (REG_DWORD)
+  * **Registry Location (Printers)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint` -> `RestrictDriverInstallationToAdministrators` = `1` (REG_DWORD)
+
+---
+
+<div id="07-paws-configure-printing-and-spooler-md-rationale"></div>
+## Rationale
+The Windows Print Spooler service (`Spooler`) has been a recurring source of critical privilege escalation and coercion exploits (e.g., the PrintNightmare family). 
+
+To secure Privileged Access Workstations (PAWs), which host highly privileged Tier 0 credentials:
+1. **Disable the Print Spooler**: PAWs should never act as print servers or need print capabilities. Disabling the `Spooler` service completely eliminates this massive attack surface.
+2. **Point and Print Restrictions**: As a defense-in-depth fallback, restricting print driver installations and updates to Administrators ensures that even if the spooler service is temporarily enabled for maintenance, standard users cannot load arbitrary, untrusted drivers.
+
+---
+
+<div id="07-paws-configure-printing-and-spooler-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **No Printing Support**: Printing from PAWs is completely disabled. This aligns with Tier 0 isolation principles where PAWs are restricted to administration and are not used for general office productivity.
+
+---
+
+<div id="07-paws-configure-printing-and-spooler-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-configure-printing-and-spooler-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+<div id="07-paws-configure-printing-and-spooler-md-1-disable-the-print-spooler-service"></div>
+#### 1. Disable the Print Spooler Service
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO applied to your PAWs (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+4. Double-click **Print Spooler**.
+5. Check **Define this policy setting** and select **Disabled**. Click **OK**.
+
+<div id="07-paws-configure-printing-and-spooler-md-2-restrict-point-and-print-driver-installations"></div>
+#### 2. Restrict Point and Print Driver Installations
+1. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\Printers`
+2. Double-click **Limits print driver installation to Administrators**.
+3. Set it to **Enabled** and click **OK**.
+
+---
+
+<div id="07-paws-configure-printing-and-spooler-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to disable the Print Spooler service and enforce driver restrictions.
+
+[Download Script: Configure-PrintingAndSpooler.ps1](implementation_scripts/Configure-PrintingAndSpooler.ps1)
+
+```powershell
+# Configure-PrintingAndSpooler.ps1
+# Description: Disables the Print Spooler service and configures Point and Print driver installation restrictions on the local PAW.
+
+Write-Host "Hardening Print Spooler and Printer configurations for PAWs..." -ForegroundColor Cyan
+
+# 1. Disable the Print Spooler Service
+if (Get-Service -Name "Spooler" -ErrorAction SilentlyContinue) {
+    Set-Service -Name "Spooler" -StartupType Disabled -Confirm:$false
+    Stop-Service -Name "Spooler" -Force -Confirm:$false
+    Write-Host "[+] Print Spooler service has been stopped and disabled." -ForegroundColor Green
+} else {
+    Write-Host "[+] Print Spooler service not found on local machine." -ForegroundColor Gray
+}
+
+# 2. Limit Print Driver Installation to Administrators (Defense-in-Depth)
+$PrinterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
+if (-not (Test-Path $PrinterPath)) {
+    New-Item -Path $PrinterPath -Force | Out-Null
+}
+Set-ItemProperty -Path $PrinterPath -Name "RestrictDriverInstallationToAdministrators" -Value 1 -Type DWord -ErrorAction Stop
+Write-Host "[+] Print driver installation restricted to Administrators." -ForegroundColor Green
+```
+
+*To audit these printer security configurations on the PAW:*
+
+[Download Script: Get-PrintingAndSpoolerStatus.ps1](audit_scripts/Get-PrintingAndSpoolerStatus.ps1)
+
+```powershell
+# Get-PrintingAndSpoolerStatus.ps1
+# Description: Audits print spooler status and Point and Print configurations on the local PAW.
+
+Write-Host "--- Auditing PAW Secure Printing and Spooler Hardening ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+# 1. Audit Spooler Service Startup Type
+$Service = Get-Service -Name "Spooler" -ErrorAction SilentlyContinue
+if ($null -ne $Service) {
+    # Check StartupType
+    $StartupType = (Get-CimInstance -ClassName Win32_Service -Filter "Name='Spooler'").StartMode
+    # StartMode can be "Disabled", "Manual", "Auto"
+    $Color = if ($StartupType -eq "Disabled") { "Green" } else { "Red" }
+    Write-Host "  [-] Print Spooler Service Startup: $StartupType (Expected: Disabled)" -ForegroundColor $Color
+    if ($StartupType -ne "Disabled") {
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [+] Print Spooler Service is not present on this machine." -ForegroundColor Green
+}
+
+# 2. Audit Point and Print Registry Restriction
+$Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
+$Name = "RestrictDriverInstallationToAdministrators"
+$Expected = 1
+
+if (Test-Path $Path) {
+    $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
+    $Val = $Reg.$Name
+    if ($Val -eq $Expected) {
+        Write-Host "  [+] Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Green
+    } else {
+        Write-Host "  [!] MISMATCH: Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] NOT FOUND: Path $($Path) (Expected: $Name = $Expected)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-configure-printing-and-spooler-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.7 (Printing settings)
+* **ANSSI AD Hardening Guide**: Section addressing system services minimization (disabling the Spooler service on sensitive systems).
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-configure-untrusted-font-blocking-md"></div>
+
+<div id="07-paws-configure-untrusted-font-blocking-md-req-paw-016-configure-untrusted-font-blocking-for-paws"></div>
+# [REQ-PAW-016] Configure Untrusted Font Blocking for PAWs
+
+<div id="07-paws-configure-untrusted-font-blocking-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs).
+* **Operating Systems**: Windows 10/11 Enterprise.
+
+---
+
+<div id="07-paws-configure-untrusted-font-blocking-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Mitigation Options\Untrusted Font Blocking`
+  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions`
+    * **Value Name**: `MitigationOptions_FontBocking`
+    * **Value Type**: `REG_SZ`
+    * **Value Data**: `1000000000000`
+
+---
+
+<div id="07-paws-configure-untrusted-font-blocking-md-rationale"></div>
+## Rationale
+Font files (TrueType, OpenType, and others) are highly complex formats that require advanced parsing logic. Historically, font parsing in Windows was performed by the Graphics Device Interface (GDI) within the operating system kernel. Vulnerabilities in the kernel-mode font parser (such as buffer overflows or remote code execution) have been frequently exploited by threat actors to execute arbitrary code with kernel-level privileges.
+
+Enabling Untrusted Font Blocking limits the attack surface of the graphics subsystem on Privileged Access Workstations (PAWs):
+1. **Kernel Attack Surface Reduction**: Restricting the system to only load trusted fonts installed in the `%windir%\Fonts` system directory prevents the processing of malicious, web-delivered, or embedded font files.
+2. **Mitigation of Document-Based Exploits**: Prevents malicious font files embedded in administrative documents, scripts, or web tools from triggering parsing vulnerabilities in the context of high-privileged administrative accounts.
+
+---
+
+<div id="07-paws-configure-untrusted-font-blocking-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Web Browsers & Web Fonts**: Web browsers used for administrative tasks or SaaS consoles on PAWs that dynamically download custom fonts may fail to render those fonts, reverting to system default fallback fonts. This may result in styling anomalies or missing icons.
+* **Embedded Fonts in Documents**: Administrative guides or documents utilizing custom embedded fonts that are not locally installed in the system directory will render using default system fonts, potentially affecting layout alignment.
+* **Deployment Validation**: It is recommended to deploy this setting in Audit Mode (`3000000000000`) initially to monitor event log entries (Event ID 305 inside the `Microsoft-Windows-Security-Mitigations/KernelMode` log) before fully enforcing the block policy.
+
+---
+
+<div id="07-paws-configure-untrusted-font-blocking-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-configure-untrusted-font-blocking-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Mitigation Options`
+4. Configure the following setting:
+   * **Policy**: `Untrusted Font Blocking`
+   * **Setting**: `Enabled`
+   * **Mitigation Options**: `Block untrusted fonts and log events`
+5. Link the GPO to the PAW Organizational Unit (OU) containing the target workstations.
+
+---
+
+<div id="07-paws-configure-untrusted-font-blocking-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-UntrustedFontBlocking.ps1](implementation_scripts/Configure-UntrustedFontBlocking.ps1)
+
+```powershell
+# Configure-UntrustedFontBlocking.ps1
+# Description: Configures Untrusted Font Blocking mitigation to block untrusted fonts and log events on PAWs.
+
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions"
+$ValueName = "MitigationOptions_FontBocking"
+$ValueData = "1000000000000"
+
+Write-Host "Applying hardening requirement: Configure Untrusted Font Blocking..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type String -Force | Out-Null
+Write-Host "Hardening applied successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-UntrustedFontBlockingStatus.ps1](audit_scripts/Get-UntrustedFontBlockingStatus.ps1)
+
+```powershell
+# Get-UntrustedFontBlockingStatus.ps1
+# Description: Checks the current configuration state of Untrusted Font Blocking registry setting on PAWs.
+
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions"
+$ValueName = "MitigationOptions_FontBocking"
+$ExpectedValue = "1000000000000"
+
+Write-Host "Auditing hardening requirement: Configure Untrusted Font Blocking..." -ForegroundColor Cyan
+
+if (Test-Path $RegPath) {
+    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. Untrusted fonts are blocked and logged ($($ValueName) = $($ExpectedValue))." -ForegroundColor Green
+        exit 0
+    }
+}
+
+Write-Host "Audit Result: Non-Compliant. Untrusted fonts are not configured to block and log." -ForegroundColor Red
+exit 1
+```
+
+---
+
+<div id="07-paws-configure-untrusted-font-blocking-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Learn**: Block untrusted fonts in an enterprise (MitigationOptions registry configurations)
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.9.30.1 (System Options / Mitigation Options)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-configure-svchost-mitigation-md"></div>
+
+<div id="07-paws-configure-svchost-mitigation-md-req-paw-017-configure-svchostexe-mitigation-options-for-paws"></div>
+# [REQ-PAW-017] Configure svchost.exe Mitigation Options for PAWs
+
+<div id="07-paws-configure-svchost-mitigation-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs).
+* **Operating Systems**: Windows 10 (1903 and above), Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings\Enable svchost.exe mitigation options`
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\SCMConfig`
+    * **Value Name**: `EnableSvchostMitigationPolicy`
+    * **Value Type**: `REG_DWORD`
+    * **Value Data**: `1`
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-rationale"></div>
+## Rationale
+Privileged Access Workstations (PAWs) host highly sensitive administrative sessions and credentials. Securing the Service Host (`svchost.exe`) process is critical to preventing kernel-level security evasion and credential harvesting techniques.
+
+Enabling `svchost.exe` mitigation options on PAWs restricts the behavior of the `svchost.exe` process to enhance security:
+1. **Microsoft-Only Binary Enforcement**: Requires all binaries and dynamic-link libraries (DLLs) loaded into `svchost.exe` to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into `svchost.exe` instances to tamper with administrative service processes.
+2. **Dynamic Code Blocking**: Prevents the execution of dynamically generated code (such as Just-In-Time compiled code) within `svchost.exe` processes, neutralizing typical in-memory exploitation vectors.
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Third-Party Compatibility**: This policy requires all binaries loaded by `svchost.exe` to be Microsoft-signed. Since PAWs are strictly controlled, single-purpose administrative machines, they should run minimal third-party software. However, any security tools, smart card readers, or system drivers that attempt to run services inside the `svchost.exe` process space using non-Microsoft DLLs will fail to load.
+* **Operating System Support**: This policy has no effect on Windows 10 versions prior to 1903.
+* **Deployment Validation**: Ensure that any administrative agents or hardware verification drivers are fully certified and Microsoft-signed before enforcing this control.
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-configure-svchost-mitigation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings`
+4. Configure the following setting:
+   * **Policy**: `Enable svchost.exe mitigation options`
+   * **Setting**: `Enabled`
+5. Link the GPO to the PAW Organizational Unit (OU) containing the target systems.
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-SvchostMitigation.ps1](implementation_scripts/Configure-SvchostMitigation.ps1)
+
+```powershell
+# Configure-SvchostMitigation.ps1
+# Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code on PAWs.
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
+$ValueName = "EnableSvchostMitigationPolicy"
+$ValueData = 1
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
+Write-Host "Hardening applied successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-SvchostMitigationStatus.ps1](audit_scripts/Get-SvchostMitigationStatus.ps1)
+
+```powershell
+# Get-SvchostMitigationStatus.ps1
+# Description: Audits the configuration state of svchost.exe mitigation options on PAWs.
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
+$ValueName = "EnableSvchostMitigationPolicy"
+$ExpectedValue = 1
+
+Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+if (Test-Path $RegPath) {
+    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. svchost.exe mitigation options are enabled." -ForegroundColor Green
+        exit 0
+    }
+}
+
+Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured." -ForegroundColor Red
+exit 1
+```
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Learn**: Group Policy settings reference - Service Control Manager Settings
+* **Microsoft Security Guidance**: Removing "Enable svchost.exe mitigation options" from baseline recommendations (for compatibility awareness)
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark (Section 18.9.30.1 - Mitigation Options reference)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-enable-kernel-shadow-stacks-md"></div>
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-req-paw-018-enable-kernel-mode-hardware-enforced-stack-protection-for-paws"></div>
+# [REQ-PAW-018] Enable Kernel-Mode Hardware-Enforced Stack Protection for PAWs
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 11 (and above) Enterprise/Professional
+
+---
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Turn On Virtualization Based Security -> Set **Kernel-level shadow stacks** to **Enabled**
+  * **Registry Location**: HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks
+    * `Enabled` = `1` (REG_DWORD)
+
+---
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-rationale"></div>
+## Rationale
+Kernel-mode Hardware-enforced Stack Protection uses CPU hardware features to protect the operating system kernel from memory corruption exploits, specifically Return-Oriented Programming (ROP) attacks.
+
+On highly critical endpoints such as Privileged Access Workstations (PAWs), attackers aim to achieve kernel-mode execution to subvert administrative separation controls, bypass Endpoint Detection and Response (EDR) software, and extract domain credential secrets from isolated zones.
+
+Intel Control-flow Enforcement Technology (CET) and AMD Shadow Stack technologies create a separate, hardware-secured copy of the call stack (the "shadow stack"). Before returning from a function, the CPU compares the return address on the standard stack with the address stored on the hardware-secured shadow stack. If a mismatch is detected, the processor terminates the thread or crashes the system, neutralizing control-flow hijacking attempts.
+
+Deploying Kernel-mode Hardware-enforced Stack Protection on PAWs guarantees that the administrative gateway machines remain resilient against advanced kernel exploits.
+
+---
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Hardware Requirements**: Systems must support hardware shadow stacks. This requires Intel 11th Gen Core (Tiger Lake) or newer processors, or AMD Zen 3 (Ryzen 5000) or newer processors.
+* **Firmware & OS Requirements**: The system must run Windows 11 version 22H2 or newer. Additionally, the system must use UEFI BIOS with Secure Boot enabled.
+* **Dependencies**: Virtualization-Based Security (VBS) and Hypervisor-Enforced Code Integrity (HVCI / Memory Integrity) must be enabled and active.
+* **Driver Compatibility**: This feature enforces strict rules on kernel-mode code. Older, legacy, or improperly signed drivers—often associated with kernel-level anti-cheat software, legacy hardware, or debugging tools—will fail to load or may trigger system crashes (BSOD). PAW hardware should be carefully standardized on modern platforms to prevent driver compatibility issues.
+
+---
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the appropriate PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Administrative Templates\System\Device Guard`
+4. Configure the setting:
+   * **Policy**: `Turn On Virtualization Based Security` -> Set to **Enabled**
+   * Check **Kernel-level shadow stacks** -> Set to **Enabled** (or set registry `Enabled` = `1`)
+
+---
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the registry and activate Kernel-mode Hardware-enforced Stack Protection.
+
+[Download Script: Enable-PawKernelShadowStacks.ps1](implementation_scripts/Enable-PawKernelShadowStacks.ps1)
+
+```powershell
+# Enable-PawKernelShadowStacks.ps1
+# Description: Configures HKLM registry to enable Kernel-mode Hardware-enforced Stack Protection (Kernel Shadow Stacks) for PAWs.
+
+Write-Host "Enabling Kernel-mode Hardware-enforced Stack Protection for PAWs..." -ForegroundColor Cyan
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks"
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name "Enabled" -Value 1 -Type DWord
+Write-Host "[+] Registry setting for PAW Kernel Shadow Stacks enabled. (Reboot required)." -ForegroundColor Green
+```
+
+*To audit the state of Kernel-mode Hardware-enforced Stack Protection:*
+
+[Download Script: Test-PawKernelShadowStacks.ps1](audit_scripts/Test-PawKernelShadowStacks.ps1)
+
+```powershell
+# Test-PawKernelShadowStacks.ps1
+# Description: Audits the registry status of Kernel-mode Hardware-enforced Stack Protection (Kernel Shadow Stacks) for PAWs.
+
+Write-Host "--- Auditing PAW Kernel-mode Hardware-enforced Stack Protection ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks"
+
+# Check registry value
+$val = Get-ItemProperty -Path $RegPath -Name "Enabled" -ErrorAction SilentlyContinue
+$actual = if ($val) { $val.Enabled } else { "" }
+
+if ($actual -eq 1) {
+    Write-Host "    - Registry Setting: KernelShadowStacks Enabled | Actual: '1' (Expected: '1')" -ForegroundColor Green
+} else {
+    $script:Vulnerable = $true
+    Write-Host "    - Registry Setting: KernelShadowStacks Enabled | Actual: '$actual' (Expected: '1')" -ForegroundColor Red
+}
+
+# Verify VBS dependency is met
+try {
+    $DG = Get-CimInstance -Namespace "Root\Microsoft\Windows\DeviceGuard" -ClassName "Win32_DeviceGuard" -ErrorAction Stop
+    if ($DG.VirtualizationBasedSecurityStatus -eq 2) {
+        Write-Host "    - VBS Status: Running" -ForegroundColor Green
+    } else {
+        $script:Vulnerable = $true
+        Write-Host "    - VBS Status: Not Running (VBS is required for Kernel Shadow Stacks)" -ForegroundColor Red
+    }
+} catch {
+    $script:Vulnerable = $true
+    Write-Host "    - DeviceGuard WMI class query failed. VBS is likely disabled." -ForegroundColor Red
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+}
+```
+
+---
+
+<div id="07-paws-enable-kernel-shadow-stacks-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Windows Security Baselines**: Core Isolation Security Baseline
+* **ANSSI AD Hardening Guide**: Section on hardware virtualization and kernel exploitation mitigation
+* **DoD Windows 11 Computer STIG**: Device Guard / Virtualization-Based Security policies
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="08-endpoints-README-md"></div>
 
 <div id="08-endpoints-README-md-module-8-endpoint-hardening"></div>
@@ -19417,7 +20316,17 @@ To prevent initial access and lateral movement, the following unitary technical 
 27. **[REQ-END-027 - Configure AppLocker Policies](#08-endpoints-configure-applocker-policies-md)**
     Deploys AppLocker application control policies to restrict unauthorized software and script execution, and prevents default AppLocker bypasses.
 
+28. **[REQ-END-028 - Configure Early Launch Antimalware (ELAM) Policy](#08-endpoints-configure-elam-md)**
+    Configures the Early Launch Antimalware (ELAM) driver initialization policy to ensure only signed, trusted boot drivers execute.
 
+29. **[REQ-END-029 - Configure Untrusted Font Blocking](#08-endpoints-configure-untrusted-font-blocking-md)**
+    Configures the Untrusted Font Blocking mitigation to prevent loading of fonts outside the system fonts directory.
+
+30. **[REQ-END-030 - Configure svchost.exe Mitigation Options](#08-endpoints-configure-svchost-mitigation-md)**
+    Configures svchost.exe mitigation options on Tier 2 client workstations to restrict binary loading to Microsoft-signed code and block dynamic code execution.
+
+31. **[REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](#08-endpoints-enable-kernel-shadow-stacks-md)**
+    Configures Kernel-mode Hardware-enforced Stack Protection to enforce hardware-backed control-flow integrity and mitigate kernel Return-Oriented Programming (ROP) execution hijacks.
 
 
 
@@ -24263,8 +25172,6 @@ if ($script:Vulnerable) {
       * `LoadAppInit_DLLs` = `0` (REG_DWORD, disable custom DLL loading list)
     * HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer
       * `DisableCoInstallers` = `1` (REG_DWORD, block driver co-installer execution)
-    * HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks
-      * `Enabled` = `1` (REG_DWORD, enable hardware-enforced stack protection)
 ---
 
 <div id="08-endpoints-configure-user-profile-restrictions-md-rationale"></div>
@@ -24283,7 +25190,6 @@ Securing user profile characteristics and administrative explorer behaviors prev
 10. **Disable Debugging & Telemetry abuse (`RecordingPolicy`, `DisableCoInstallers`, `LoadAppInit_DLLs`)**: Disabling Time-Travel Debugging prevents adversaries from dumping memory or executing arbitrary binaries. Disabling custom DLL loading (AppInit_DLLs) blocks persistent user-mode DLL injection. Disabling driver co-installers prevents unauthorized executable downloads during peripheral plugin.
 11. **Standard User Root Certificate Restriction (`Flags` under `ProtectedRoots`)**: Restricting certificate store installation to administrators prevents standard users from importing rogue root certificate authorities into their personal store, which blocks internal MitM or code-signing forgery attacks.
 12. **Spectre & Meltdown CPU Mitigations (`FeatureSettingsOverride`)**: Hardware-level speculative execution vulnerabilities can allow a malicious process to leak kernel memory. Enforcing modern speculative execution overrides blocks these side-channel exploitation paths.
-13. **Kernel-Level Shadow Stacks (`Enabled` under `KernelShadowStacks`)**: Enforces hardware-backed control flow integrity (Intel CET/AMD Shadow Stack) to prevent Return-Oriented Programming (ROP) execution hijacks.
 
 ---
 
@@ -24295,7 +25201,7 @@ Securing user profile characteristics and administrative explorer behaviors prev
 * **Driver Installations**: Blocking co-installers means manufacturer companion software for USB devices (gaming mouses, keyboards, headsets) must be downloaded and installed manually by an administrator.
 * **Legacy Application Compatibility**:
   * Some legacy software relying on custom DLL injection via AppInit_DLLs will fail to load their helper libraries.
-  * Forcing ASLR or enabling Kernel Shadow Stacks may cause stability issues in older 32-bit executables or unsigned drivers. Proper sandbox verification is required.
+  * Forcing ASLR may cause stability issues in older 32-bit executables or unsigned drivers. Proper sandbox verification is required.
   * Batch files that are dynamically self-modifying during runtime will fail when secure batch processing is enabled due to opportunistic file locks.
 
 ---
@@ -24382,7 +25288,6 @@ Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings
 #### 3. Deploy Custom Settings via GPO Preferences and System Mitigations
 Configure GPO Preferences registry items or Administrative Templates for the remaining custom settings:
 * **ASLR Force Randomization**: Enable in Exploit Guard mitigation policies or set registry `MoveImages` = `4294967295` (0xFFFFFFFF).
-* **Kernel Shadow Stacks**: Navigate to: `Computer Configuration\Administrative Templates\System\Device Guard` -> `Turn on Virtualization-Based Security` -> Set **Kernel-level shadow stacks** to **Enabled** (or set registry `Enabled` = `1`).
 * **Spectre & Meltdown CPU Mitigations**: Configure registry `FeatureSettingsOverride` = `72` and `FeatureSettingsOverrideMask` = `3`.
 * **LockBatchFilesWhenInUse**: Configure registry `LockBatchFilesWhenInUse` = `1` under `HKLM\SOFTWARE\Microsoft\Command Processor`.
 * **EnableCertPaddingCheck**: Configure registry `EnableCertPaddingCheck` = `1` under `HKLM\Software\Microsoft\Cryptography\Wintrust\Config` (and Wow6432Node).
@@ -24535,9 +25440,6 @@ Set-RegDWord "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" 
 # Spectre/Meltdown speculative execution mitigations
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" 72
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" 3
-
-# Kernel-level Shadow Stacks
-Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
 # Speech Recognition (AllowInputPersonalization = 0)
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization" "AllowInputPersonalization" 0
@@ -24742,9 +25644,6 @@ Test-RegistryValue "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" 
 
 # Block driver co-installers
 Test-RegistryValue "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer" "DisableCoInstallers" 1
-
-# Kernel-level Shadow Stacks
-Test-RegistryValue "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks" "Enabled" 1
 
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
@@ -25986,16 +26885,22 @@ if ($script:Vulnerable) {
 
 <div id="08-endpoints-configure-printing-and-spooler-md-implementation-details"></div>
 ## Implementation Details
-* **Priority**: Medium
+* **Priority**: High
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\Printers`
-  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers` and `HKLM\SYSTEM\CurrentControlSet\Control\Print`
+  * **System Service GPO**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Print Spooler` -> Service Startup Mode: **Disabled**
+  * **Limits print driver installation to Administrators GPO**: `Computer Configuration\Policies\Administrative Templates\Printers\Limits print driver installation to Administrators` -> Enabled
+  * **Registry Location (Service)**: `HKLM\SYSTEM\CurrentControlSet\Services\Spooler` -> `Start` = `4` (REG_DWORD)
+  * **Registry Location (Printers)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers`
+  * **Registry Location (Point and Print)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint` -> `RestrictDriverInstallationToAdministrators` = `1` (REG_DWORD)
+  * **Registry Location (Print Control)**: `HKLM\SYSTEM\CurrentControlSet\Control\Print`
 
 ---
 
 <div id="08-endpoints-configure-printing-and-spooler-md-rationale"></div>
 ## Rationale
-The Windows Print Spooler service (`Spooler`) has been the source of numerous high-severity vulnerabilities (such as the PrintNightmare family - CVE-2021-1675 and CVE-2021-34527). Attackers exploit the Print Spooler to coerce authentication or execute arbitrary code with SYSTEM privileges:
+The Windows Print Spooler service (`Spooler`) has been the source of numerous high-severity vulnerabilities (such as the PrintNightmare family - CVE-2021-1675 and CVE-2021-34527). Attackers exploit the Print Spooler to coerce authentication or execute arbitrary code with SYSTEM privileges.
+
+To secure standard client endpoints and member servers, the primary defense is to **completely disable the Print Spooler service**. This eliminates the service's attack surface. As a secondary defense-in-depth, additional printer registry configurations (such as restricting driver installation to administrators, Redirection Guard, and RPC connection configurations) are enforced to ensure that even if the spooler service is temporarily running, the subsystem remains hardened.
 
 1. **Remote Connections Block**: By disabling remote client connections to the print spooler, standard client endpoints are prevented from acting as print servers. Outbound printing remains unaffected, but external hosts can no longer target the workstation's print spooler over the network.
 2. **Redirection Guard**: Enabling Redirection Guard prevents print spooler processing from being redirected via symbolic links or junction points, mitigating local privilege escalation vectors that abuse file system paths during printer driver mapping.
@@ -26006,9 +26911,7 @@ The Windows Print Spooler service (`Spooler`) has been the source of numerous hi
 
 <div id="08-endpoints-configure-printing-and-spooler-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **No Local Print Server**: Endpoints cannot share local printers with other network users. Direct outbound printing to network print servers is fully supported.
-* **Legacy Spooler Compatibility**: If print servers or network printers in the environment rely on legacy RPC over Named Pipes, outbound printing from hardened endpoints will fail. Ensure all print servers support RPC over TCP before enforcement.
-* **Driver Prompts**: Non-admin users will receive elevation prompts when connecting to print servers that require installing new or updated print drivers.
+* **No Printing Support**: Printing from client workstations is completely disabled. Standard users will be unable to print documents to network or local printers. This matches the security requirements of high-security air-gapped environments where physical document flows must be restricted.
 
 ---
 
@@ -26018,10 +26921,19 @@ The Windows Print Spooler service (`Spooler`) has been the source of numerous hi
 <div id="08-endpoints-configure-printing-and-spooler-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
+<div id="08-endpoints-configure-printing-and-spooler-md-1-disable-the-print-spooler-service"></div>
+#### 1. Disable the Print Spooler Service
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit the GPO applied to client endpoints (e.g., `GPO_Hardening_Endpoints`).
-3. Navigate to: `Computer Configuration\Policies\Administrative Templates\Printers`
-4. Configure the following policies:
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+4. Double-click **Print Spooler**.
+5. Check **Define this policy setting** and select **Disabled**. Click **OK**.
+
+<div id="08-endpoints-configure-printing-and-spooler-md-2-configure-printers-gpo-hardening-secondary-defense"></div>
+#### 2. Configure Printers GPO Hardening (Secondary Defense)
+1. Navigate to: `Computer Configuration\Policies\Administrative Templates\Printers`
+2. Configure the following policies:
    * **Allow Print Spooler to accept client connections**: Set to `Disabled`
    * **Configure Redirection Guard**: Set to `Enabled`, select `Redirection Guard Enabled`
    * **Configure RPC connection settings**: Set to `Enabled`
@@ -26036,6 +26948,7 @@ The Windows Print Spooler service (`Spooler`) has been the source of numerous hi
    * **Point and Print Restrictions**: Set to `Enabled`
      * When installing drivers for a new connection: `Show warning and elevation prompt`
      * When updating drivers for an existing connection: `Show warning and elevation prompt`
+   * **Limits print driver installation to Administrators**: Set to `Enabled`
 
 ---
 
@@ -26048,9 +26961,16 @@ Run the following script locally to configure registry keys for print spooler ha
 
 ```powershell
 # Configure-PrintingAndSpooler.ps1
-# Description: Hardens Windows Print Spooler settings, RPC configurations, and Point and Print policies.
+# Description: Disables the Print Spooler service and configures secondary print registry hardening parameters on standard endpoints.
 
 Write-Host "Applying Print Spooler security hardening..." -ForegroundColor Cyan
+
+# 1. Disable the Print Spooler Service
+if (Get-Service -Name "Spooler" -ErrorAction SilentlyContinue) {
+    Set-Service -Name "Spooler" -StartupType Disabled -Confirm:$false
+    Stop-Service -Name "Spooler" -Force -Confirm:$false
+    Write-Host "[+] Print Spooler service has been stopped and disabled." -ForegroundColor Green
+}
 
 # 1. Base Printers Path Policies
 $PrintersPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
@@ -26107,6 +27027,7 @@ if (-not (Test-Path $PointPrintPath)) {
 Set-ItemProperty -Path $PointPrintPath -Name "RestrictPointAndPrint" -Value 1 -Type Dword
 Set-ItemProperty -Path $PointPrintPath -Name "NoWarningNoElevationOnInstall" -Value 0 -Type Dword
 Set-ItemProperty -Path $PointPrintPath -Name "UpdatePromptSettings" -Value 0 -Type Dword
+Set-ItemProperty -Path $PointPrintPath -Name "RestrictDriverInstallationToAdministrators" -Value 1 -Type Dword
 
 Write-Host "[+] Print Spooler and Printer configurations hardened successfully." -ForegroundColor Green
 ```
@@ -26122,6 +27043,19 @@ Write-Host "[+] Print Spooler and Printer configurations hardened successfully."
 Write-Host "--- Auditing Printing and Spooler Hardening ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
+
+# 1. Audit Spooler Service Startup Type
+$Service = Get-Service -Name "Spooler" -ErrorAction SilentlyContinue
+if ($null -ne $Service) {
+    $StartupType = (Get-CimInstance -ClassName Win32_Service -Filter "Name='Spooler'").StartMode
+    $Color = if ($StartupType -eq "Disabled") { "Green" } else { "Red" }
+    Write-Host "  [-] Print Spooler Service Startup: $StartupType (Expected: Disabled)" -ForegroundColor $Color
+    if ($StartupType -ne "Disabled") {
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [+] Print Spooler Service is not present on this machine." -ForegroundColor Green
+}
 
 # Helper function to audit registry properties
 function Test-RegistryValue {
@@ -26174,6 +27108,7 @@ $PointPrintPath = "HKLM:\Software\Policies\Microsoft\Windows NT\Printers\PointAn
 Test-RegistryValue -Path $PointPrintPath -Name "RestrictPointAndPrint" -ExpectedValue 1
 Test-RegistryValue -Path $PointPrintPath -Name "NoWarningNoElevationOnInstall" -ExpectedValue 0
 Test-RegistryValue -Path $PointPrintPath -Name "UpdatePromptSettings" -ExpectedValue 0
+Test-RegistryValue -Path $PointPrintPath -Name "RestrictDriverInstallationToAdministrators" -ExpectedValue 1
 
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
@@ -27275,6 +28210,509 @@ if (Test-Path $NtvdmPath) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="08-endpoints-configure-elam-md"></div>
+
+<div id="08-endpoints-configure-elam-md-req-end-028-configure-early-launch-antimalware-elam-policy"></div>
+# [REQ-END-028] Configure Early Launch Antimalware (ELAM) Policy
+
+<div id="08-endpoints-configure-elam-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10/11 Enterprise, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-configure-elam-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **ELAM GPO**: `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware\Boot-Start Driver Initialization Policy` -> Enabled (Select **Good, unknown and bad but critical** in options)
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Policies\EarlyLaunch` -> `DriverLoadPolicy` = `3` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-configure-elam-md-rationale"></div>
+## Rationale
+Boot-level integrity is crucial for endpoints to ensure malware cannot bypass OS-level antimalware defenses by loading malicious kernel-mode drivers early in the boot sequence:
+
+1. **Early Boot Rootkits**: Malicious boot-start drivers can execute before third-party endpoint protection or security agents initialize. Enforcing the Early Launch Antimalware (ELAM) driver initialization policy ensures that unknown, unsigned, or bad drivers are prevented from loading at boot time.
+2. **Platform Integrity**: Securing the boot sequence with ELAM is a critical requirement of Virtualization-Based Security (VBS) and overall hardware-rooted protection.
+
+---
+
+<div id="08-endpoints-configure-elam-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Boot-Start Drivers**: If third-party, custom, or legacy hardware monitoring drivers are unsigned, the ELAM policy will block them from loading, potentially resulting in blue screen (BSOD) or hardware failures. Verify all active drivers possess valid digital signatures prior to enforcement.
+
+---
+
+<div id="08-endpoints-configure-elam-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-configure-elam-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO applied to your standard endpoints (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware`
+4. Double-click **Boot-Start Driver Initialization Policy**.
+5. Set it to **Enabled**.
+6. In the options dropdown, select **Good, unknown and bad but critical** (registry value `3`).
+7. Click **OK**.
+
+---
+
+<div id="08-endpoints-configure-elam-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to apply the ELAM driver load policy.
+
+[Download Script: Configure-ElamPolicy.ps1](implementation_scripts/Configure-ElamPolicy.ps1)
+
+```powershell
+# Configure-ElamPolicy.ps1
+# Description: Configures the Early Launch Antimalware (ELAM) boot-start driver load policy on the local system.
+
+Write-Host "Applying ELAM Boot-Start driver initialization policy..." -ForegroundColor Cyan
+
+$ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
+if (-not (Test-Path $ElamPath)) {
+    New-Item -Path $ElamPath -Force | Out-Null
+}
+Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green
+```
+
+*To audit the ELAM driver load policy status:*
+
+[Download Script: Get-ElamPolicyStatus.ps1](audit_scripts/Get-ElamPolicyStatus.ps1)
+
+```powershell
+# Get-ElamPolicyStatus.ps1
+# Description: Audits registry configuration of the Early Launch Antimalware (ELAM) policy.
+
+Write-Host "--- Auditing ELAM Boot-Start Policy ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
+$Name = "DriverLoadPolicy"
+$Expected = 3
+
+if (Test-Path $Path) {
+    $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
+    $Val = $Reg.$Name
+    if ($Val -eq $Expected) {
+        Write-Host "  [+] Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Green
+    } else {
+        Write-Host "  [!] MISMATCH: Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] NOT FOUND: Path $($Path) (Expected: $Name = $Expected)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-configure-elam-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.2.2 (System Options / ELAM)
+* **ANSSI AD Hardening Guide**: Section addressing system and boot configuration integrity.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-configure-untrusted-font-blocking-md"></div>
+
+<div id="08-endpoints-configure-untrusted-font-blocking-md-req-end-029-configure-untrusted-font-blocking"></div>
+# [REQ-END-029] Configure Untrusted Font Blocking
+
+<div id="08-endpoints-configure-untrusted-font-blocking-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-configure-untrusted-font-blocking-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Mitigation Options\Untrusted Font Blocking`
+  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions`
+    * **Value Name**: `MitigationOptions_FontBocking`
+    * **Value Type**: `REG_SZ`
+    * **Value Data**: `1000000000000`
+
+---
+
+<div id="08-endpoints-configure-untrusted-font-blocking-md-rationale"></div>
+## Rationale
+Font files (TrueType, OpenType, and others) are highly complex formats that require advanced parsing logic. Historically, font parsing in Windows was performed by the Graphics Device Interface (GDI) within the operating system kernel. Vulnerabilities in the kernel-mode font parser (such as buffer overflows or remote code execution) have been frequently exploited by threat actors to execute arbitrary code with kernel-level privileges.
+
+Enabling Untrusted Font Blocking limits the attack surface of the graphics subsystem:
+1. **Kernel Attack Surface Reduction**: Restricting the system to only load trusted fonts installed in the `%windir%\Fonts` system directory prevents the processing of malicious, web-delivered, or embedded font files.
+2. **Mitigation of Document-Based Exploits**: Prevents malicious font files embedded in Microsoft Office documents, PDFs, or web pages from triggering parsing vulnerabilities in the context of the current user.
+
+---
+
+<div id="08-endpoints-configure-untrusted-font-blocking-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Web Browsers & Web Fonts**: Web browsers (such as Microsoft Edge or Google Chrome) and web applications that dynamically download custom fonts (e.g., Google Fonts, font icon libraries like FontAwesome) may fail to render those fonts, reverting to system default fallback fonts. This may result in styling anomalies or missing icons.
+* **Embedded Fonts in Documents**: Microsoft Office files or PDFs utilizing custom embedded fonts that are not locally installed in the system directory will render using default system fonts, potentially affecting layout alignment.
+* **Deployment Validation**: It is recommended to deploy this setting in Audit Mode (`3000000000000`) initially to monitor event log entries (Event ID 305 inside the `Microsoft-Windows-Security-Mitigations/KernelMode` log) before fully enforcing the block policy.
+
+---
+
+<div id="08-endpoints-configure-untrusted-font-blocking-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-configure-untrusted-font-blocking-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Mitigation Options`
+4. Configure the following setting:
+   * **Policy**: `Untrusted Font Blocking`
+   * **Setting**: `Enabled`
+   * **Mitigation Options**: `Block untrusted fonts and log events`
+5. Link the GPO to the appropriate Organizational Unit (OU) containing the target client endpoints and member servers.
+
+---
+
+<div id="08-endpoints-configure-untrusted-font-blocking-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-UntrustedFontBlocking.ps1](implementation_scripts/Configure-UntrustedFontBlocking.ps1)
+
+```powershell
+# Configure-UntrustedFontBlocking.ps1
+# Description: Configures Untrusted Font Blocking mitigation to block untrusted fonts and log events.
+
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions"
+$ValueName = "MitigationOptions_FontBocking"
+$ValueData = "1000000000000"
+
+Write-Host "Applying hardening requirement: Configure Untrusted Font Blocking..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type String -Force | Out-Null
+Write-Host "Hardening applied successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-UntrustedFontBlockingStatus.ps1](audit_scripts/Get-UntrustedFontBlockingStatus.ps1)
+
+```powershell
+# Get-UntrustedFontBlockingStatus.ps1
+# Description: Checks the current configuration state of Untrusted Font Blocking registry setting.
+
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions"
+$ValueName = "MitigationOptions_FontBocking"
+$ExpectedValue = "1000000000000"
+
+Write-Host "Auditing hardening requirement: Configure Untrusted Font Blocking..." -ForegroundColor Cyan
+
+if (Test-Path $RegPath) {
+    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. Untrusted fonts are blocked and logged ($($ValueName) = $($ExpectedValue))." -ForegroundColor Green
+        exit 0
+    }
+}
+
+Write-Host "Audit Result: Non-Compliant. Untrusted fonts are not configured to block and log." -ForegroundColor Red
+exit 1
+```
+
+---
+
+<div id="08-endpoints-configure-untrusted-font-blocking-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Learn**: Block untrusted fonts in an enterprise (MitigationOptions registry configurations)
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.9.30.1 (System Options / Mitigation Options)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-configure-svchost-mitigation-md"></div>
+
+<div id="08-endpoints-configure-svchost-mitigation-md-req-end-030-configure-svchostexe-mitigation-options"></div>
+# [REQ-END-030] Configure svchost.exe Mitigation Options
+
+<div id="08-endpoints-configure-svchost-mitigation-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations.
+* **Operating Systems**: Windows 10 (1903 and above), Windows 11 Enterprise/Professional.
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings\Enable svchost.exe mitigation options`
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\SCMConfig`
+    * **Value Name**: `EnableSvchostMitigationPolicy`
+    * **Value Type**: `REG_DWORD`
+    * **Value Data**: `1`
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-rationale"></div>
+## Rationale
+The Service Host (`svchost.exe`) process runs multiple system services. Because these services execute with high privileges, they are frequently targeted for process injection, hollowing, or spoofing to execute arbitrary code or harvest credentials.
+
+Enabling `svchost.exe` mitigation options restricts the behavior of the `svchost.exe` process to enhance security:
+1. **Microsoft-Only Binary Enforcement**: Requires all binaries and dynamic-link libraries (DLLs) loaded into `svchost.exe` to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into `svchost.exe` instances.
+2. **Dynamic Code Blocking**: Prevents the execution of dynamically generated code (such as Just-In-Time compiled code) within `svchost.exe` processes, neutralizing typical in-memory exploitation vectors.
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Third-Party Compatibility**: This policy requires all binaries loaded by `svchost.exe` to be Microsoft-signed. Any third-party software, security agents, or system drivers that attempt to run services inside the `svchost.exe` process space using non-Microsoft DLLs will fail to load. This has historically caused issues with legacy antivirus, third-party authentication plugins, or specialized management utilities on client systems.
+* **Operating System Support**: This policy has no effect on Windows 10 versions prior to 1903.
+* **Deployment Validation**: It is recommended to perform extensive baseline testing on a representative subset of workstations running third-party software before deploying this configuration across the entire production domain.
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-configure-svchost-mitigation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
+2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings`
+4. Configure the following setting:
+   * **Policy**: `Enable svchost.exe mitigation options`
+   * **Setting**: `Enabled`
+5. Link the GPO to the appropriate Organizational Unit (OU) containing the target client endpoints.
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally on standalone systems or during reference image build phases.
+
+[Download Script: Configure-SvchostMitigation.ps1](implementation_scripts/Configure-SvchostMitigation.ps1)
+
+```powershell
+# Configure-SvchostMitigation.ps1
+# Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code.
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
+$ValueName = "EnableSvchostMitigationPolicy"
+$ValueData = 1
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
+Write-Host "Hardening applied successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-SvchostMitigationStatus.ps1](audit_scripts/Get-SvchostMitigationStatus.ps1)
+
+```powershell
+# Get-SvchostMitigationStatus.ps1
+# Description: Audits the configuration state of svchost.exe mitigation options.
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
+$ValueName = "EnableSvchostMitigationPolicy"
+$ExpectedValue = 1
+
+Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+if (Test-Path $RegPath) {
+    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. svchost.exe mitigation options are enabled." -ForegroundColor Green
+        exit 0
+    }
+}
+
+Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured." -ForegroundColor Red
+exit 1
+```
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Learn**: Group Policy settings reference - Service Control Manager Settings
+* **Microsoft Security Guidance**: Removing "Enable svchost.exe mitigation options" from baseline recommendations (for compatibility awareness)
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark (Section 18.9.30.1 - Mitigation Options reference)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md"></div>
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-req-end-031-enable-kernel-mode-hardware-enforced-stack-protection"></div>
+# [REQ-END-031] Enable Kernel-Mode Hardware-Enforced Stack Protection
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 11 (and above) Enterprise/Professional
+
+---
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Turn On Virtualization Based Security -> Set **Kernel-level shadow stacks** to **Enabled**
+  * **Registry Location**: HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks
+    * `Enabled` = `1` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-rationale"></div>
+## Rationale
+Kernel-mode Hardware-enforced Stack Protection uses CPU hardware features to protect the operating system kernel from memory corruption exploits, specifically Return-Oriented Programming (ROP) attacks. 
+
+An adversary attempting privilege escalation or remote code execution often hijacks the control flow of kernel-mode components by overwriting return addresses on the stack. Intel Control-flow Enforcement Technology (CET) and AMD Shadow Stack technologies create a separate, hardware-secured copy of the call stack (the "shadow stack"). 
+
+Before returning from a function, the CPU compares the return address on the standard stack with the address stored on the hardware-secured shadow stack. If the addresses do not match, the processor detects a control flow violation, terminates the process, or triggers a system crash to prevent execution of malicious payloads.
+
+Enforcing Kernel-mode Hardware-enforced Stack Protection provides hardware-backed control-flow integrity, neutralizing key vectors of kernel exploitation.
+
+---
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Hardware Requirements**: Systems must support hardware shadow stacks. This requires Intel 11th Gen Core (Tiger Lake) or newer processors, or AMD Zen 3 (Ryzen 5000) or newer processors.
+* **Firmware & OS Requirements**: The system must run Windows 11 version 22H2 or newer. Additionally, the system must use UEFI BIOS with Secure Boot enabled.
+* **Dependencies**: Virtualization-Based Security (VBS) and Hypervisor-Enforced Code Integrity (HVCI / Memory Integrity) must be enabled and active.
+* **Driver Compatibility**: This feature enforces strict rules on kernel-mode code. Older, legacy, or improperly signed drivers—often associated with kernel-level anti-cheat software, legacy hardware, or debugging tools—will fail to load or may trigger system crashes (BSOD). Verify driver compatibility in a representative sandbox environment prior to enterprise-wide enforcement.
+
+---
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the appropriate endpoint GPO (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to:
+   `Computer Configuration\Administrative Templates\System\Device Guard`
+4. Configure the setting:
+   * **Policy**: `Turn On Virtualization Based Security` -> Set to **Enabled**
+   * Check **Kernel-level shadow stacks** -> Set to **Enabled** (or set registry `Enabled` = `1`)
+
+---
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the registry and activate Kernel-mode Hardware-enforced Stack Protection.
+
+[Download Script: Enable-KernelShadowStacks.ps1](implementation_scripts/Enable-KernelShadowStacks.ps1)
+
+```powershell
+# Enable-KernelShadowStacks.ps1
+# Description: Configures HKLM registry to enable Kernel-mode Hardware-enforced Stack Protection (Kernel Shadow Stacks).
+
+Write-Host "Enabling Kernel-mode Hardware-enforced Stack Protection..." -ForegroundColor Cyan
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks"
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name "Enabled" -Value 1 -Type DWord
+Write-Host "[+] Registry setting for Kernel Shadow Stacks enabled. (Reboot required)." -ForegroundColor Green
+```
+
+*To audit the state of Kernel-mode Hardware-enforced Stack Protection:*
+
+[Download Script: Test-KernelShadowStacks.ps1](audit_scripts/Test-KernelShadowStacks.ps1)
+
+```powershell
+# Test-KernelShadowStacks.ps1
+# Description: Audits the registry status of Kernel-mode Hardware-enforced Stack Protection (Kernel Shadow Stacks).
+
+Write-Host "--- Auditing Kernel-mode Hardware-enforced Stack Protection ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks"
+
+# Check registry value
+$val = Get-ItemProperty -Path $RegPath -Name "Enabled" -ErrorAction SilentlyContinue
+$actual = if ($val) { $val.Enabled } else { "" }
+
+if ($actual -eq 1) {
+    Write-Host "    - Registry Setting: KernelShadowStacks Enabled | Actual: '1' (Expected: '1')" -ForegroundColor Green
+} else {
+    $script:Vulnerable = $true
+    Write-Host "    - Registry Setting: KernelShadowStacks Enabled | Actual: '$actual' (Expected: '1')" -ForegroundColor Red
+}
+
+# Verify VBS dependency is met
+try {
+    $DG = Get-CimInstance -Namespace "Root\Microsoft\Windows\DeviceGuard" -ClassName "Win32_DeviceGuard" -ErrorAction Stop
+    if ($DG.VirtualizationBasedSecurityStatus -eq 2) {
+        Write-Host "    - VBS Status: Running" -ForegroundColor Green
+    } else {
+        $script:Vulnerable = $true
+        Write-Host "    - VBS Status: Not Running (VBS is required for Kernel Shadow Stacks)" -ForegroundColor Red
+    }
+} catch {
+    $script:Vulnerable = $true
+    Write-Host "    - DeviceGuard WMI class query failed. VBS is likely disabled." -ForegroundColor Red
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+}
+```
+
+---
+
+<div id="08-endpoints-enable-kernel-shadow-stacks-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Windows Security Baselines**: Core Isolation Security Baseline
+* **ANSSI AD Hardening Guide**: Section on hardware virtualization and kernel exploitation mitigation
+* **DoD Windows 11 Computer STIG**: Device Guard / Virtualization-Based Security policies
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="compliance-anssi-md"></div>
 
 <div id="compliance-anssi-md-anssi-active-directory-hardening-compliance-matrix"></div>
@@ -27412,7 +28850,7 @@ This document maps the focus areas of the **Microsoft Security Baselines** (Doma
 | **PowerShell Logging** | Configure PowerShell script block logging and transcription. | Auditing & Logging | **Covered** | [REQ-LOG-002](#05-logging-monitoring-configure-powershell-and-command-line-auditing-md) |
 | **UAC Policies** | Configure User Account Control (UAC) baseline settings. | Account Controls | **Covered** | [REQ-END-002](#08-endpoints-configure-uac-policies-md) |
 | **Removable Storage** | Deploy GPOs to block external removable storage devices (USB mass storage). | Data Protection | **Covered** | [REQ-END-004](#08-endpoints-block-removable-storage-md) |
-| **Point and Print** | Configure Point and Print restrictions to prevent PrintNightmare exploits. | Services Hardening | **Covered** | [REQ-ID-016](#03-identities-services-configure-point-and-print-md), [REQ-END-025](#08-endpoints-configure-printing-and-spooler-md) |
+| **Point and Print** | Configure Point and Print restrictions to prevent PrintNightmare exploits. | Services Hardening | **Covered** | [REQ-END-025](#08-endpoints-configure-printing-and-spooler-md), [REQ-PAW-015](#07-paws-configure-printing-and-spooler-md) |
 | **SYSVOL replication** | Migrate SYSVOL replication from FRS to DFS Replication (DFSR). | DC Hardening | **Covered** | [REQ-DC-015](#02-domain-controllers-migrate-sysvol-replication-dfsr-md) |
 | **adminSDHolder** | Harden adminSDHolder object permissions to prevent privilege persistence. | DC Hardening | **Covered** | [REQ-DC-016](#02-domain-controllers-harden-adminsdholder-permissions-md), [REQ-DC-024](#02-domain-controllers-configure-dsheuristics-md) |
 | **Services minimization** | Disable unnecessary system services on Domain Controllers and Endpoints. | Services Hardening | **Covered** | [REQ-DC-012](#02-domain-controllers-disable-unnecessary-services-md), [REQ-END-024](#08-endpoints-disable-unnecessary-system-services-md) |

@@ -1,0 +1,13 @@
+# Enable-KernelShadowStacks.ps1
+# Description: Configures HKLM registry to enable Kernel-mode Hardware-enforced Stack Protection (Kernel Shadow Stacks).
+
+Write-Host "Enabling Kernel-mode Hardware-enforced Stack Protection..." -ForegroundColor Cyan
+
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks"
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name "Enabled" -Value 1 -Type DWord
+Write-Host "[+] Registry setting for Kernel Shadow Stacks enabled. (Reboot required)." -ForegroundColor Green

@@ -19,9 +19,9 @@ Configuration ADHardeningAudit {
 
     # Common scripts apply to all systems
     $commonScripts = @(
+        "03-identities-services\audit_scripts\Get-CredentialDelegationAndLogonStatus.ps1",
         "03-identities-services\audit_scripts\Get-DefaultAccountsStatus.ps1",
         "03-identities-services\audit_scripts\Get-DenyServiceLogonsStatus.ps1",
-        "03-identities-services\audit_scripts\Get-EndpointDelegationAndBootStatus.ps1",
         "03-identities-services\audit_scripts\Get-LAPSStatus.ps1",
         "04-network-firewall\audit_scripts\Get-FirewallLoggingAndSettingsStatus.ps1",
         "04-network-firewall\audit_scripts\Get-HardenedUNCAndClientSigningStatus.ps1",
@@ -55,11 +55,16 @@ Configuration ADHardeningAudit {
             "02-domain-controllers\audit_scripts\Get-AdminSDHolderAudit.ps1",
             "02-domain-controllers\audit_scripts\Get-AppLockerDCStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-CredentialGuardStatus.ps1",
+            "02-domain-controllers\audit_scripts\Get-DCNetworkHardeningStatus.ps1",
+            "02-domain-controllers\audit_scripts\Get-DCSecurityOptionsStatus.ps1",
+            "02-domain-controllers\audit_scripts\Get-DCTelemetryPrivacyStatus.ps1",
+            "02-domain-controllers\audit_scripts\Get-DCUserRightsAssignmentsStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-DcVirtualizationStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-DefenderDCStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-DfsrHealthStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-DnsAuditStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-DriverBlocklistStatus.ps1",
+            "02-domain-controllers\audit_scripts\Get-dSHeuristicsStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-KerberosArmoringStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-KerberosEncryptionStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-LDAPChannelBindingStatus.ps1",
@@ -73,8 +78,17 @@ Configuration ADHardeningAudit {
             "02-domain-controllers\audit_scripts\Get-RestrictRemoteSAMStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-SMBSigningStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-SMBv1Status.ps1",
+            "02-domain-controllers\audit_scripts\Get-SvchostMitigationStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-SYSVOLDfsrMigrationStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-UnnecessaryServicesStatus.ps1",
+            "02-domain-controllers\audit_scripts\Get-UntrustedFontBlockingStatus.ps1",
+            "03-identities-services\audit_scripts\Audit-KerberosPreAuth.ps1",
+            "03-identities-services\audit_scripts\Audit-MachineAccountQuota.ps1",
+            "03-identities-services\audit_scripts\Audit-OUAccidentalDeletion.ps1",
+            "03-identities-services\audit_scripts\Audit-PreWin2000Group.ps1",
+            "03-identities-services\audit_scripts\Audit-SchemaAdminsGroup.ps1",
+            "03-identities-services\audit_scripts\Get-AccountEncryptionStatus.ps1",
+            "03-identities-services\audit_scripts\Get-ADCSTemplateAudit.ps1",
             "03-identities-services\audit_scripts\Get-AdminCountOrphansAudit.ps1",
             "03-identities-services\audit_scripts\Get-AdminPasswordPolicyStatus.ps1",
             "03-identities-services\audit_scripts\Get-AuthSiloAuditStatus.ps1",
@@ -82,41 +96,66 @@ Configuration ADHardeningAudit {
             "03-identities-services\audit_scripts\Get-KdsAndGmsaAudit.ps1",
             "03-identities-services\audit_scripts\Get-KerberosDelegationStatus.ps1",
             "03-identities-services\audit_scripts\Get-ProtectedUsersStatus.ps1",
-            "03-identities-services\audit_scripts\Get-ADCSTemplateAudit.ps1",
+            "04-network-firewall\audit_scripts\Test-IntraDcManagementBlocking.ps1",
+            "04-network-firewall\audit_scripts\Test-RpcNamedPipeFilters.ps1",
+            "04-network-firewall\audit_scripts\Test-WMIStaticPort.ps1",
             "06-operations-maintenance\audit_scripts\Audit-ADBackupStatus.ps1",
             "06-operations-maintenance\audit_scripts\Audit-ADRecycleBin.ps1",
             "06-operations-maintenance\audit_scripts\Audit-CrashControl.ps1",
+            "06-operations-maintenance\audit_scripts\Audit-DefaultContainers.ps1",
             "06-operations-maintenance\audit_scripts\Get-KrbtgtRotationStatus.ps1"
         )
-    } elseif ($Profile -eq "PAW") {
+    }
+    elseif ($Profile -eq "PAW") {
         $profileScripts = @(
             "07-paws\audit_scripts\Audit-HardwareSecurityFeatures.ps1",
+            "07-paws\audit_scripts\Audit-PawSecureBoot.ps1",
             "07-paws\audit_scripts\Audit-UEFISecurity.ps1",
             "07-paws\audit_scripts\Get-DefenderPawStatus.ps1",
             "07-paws\audit_scripts\Get-DriverBlocklistStatus.ps1",
+            "07-paws\audit_scripts\Get-ElamPolicyStatus.ps1",
+            "07-paws\audit_scripts\Get-PawExploitProtectionStatus.ps1",
+            "07-paws\audit_scripts\Get-PawSafeModeNonAdminsStatus.ps1",
+            "07-paws\audit_scripts\Get-PawSystemAdministrativeTemplatesStatus.ps1",
+            "07-paws\audit_scripts\Get-PawUnnecessaryServicesStatus.ps1",
+            "07-paws\audit_scripts\Get-PawWindowsFirewallStatus.ps1",
+            "07-paws\audit_scripts\Get-PrintingAndSpoolerStatus.ps1",
+            "07-paws\audit_scripts\Get-SvchostMitigationStatus.ps1",
+            "07-paws\audit_scripts\Get-UntrustedFontBlockingStatus.ps1",
             "07-paws\audit_scripts\Get-WpbtStatus.ps1",
             "07-paws\audit_scripts\Test-PAWAccountPolicies.ps1",
             "07-paws\audit_scripts\Test-PawAppLockerStatus.ps1",
+            "07-paws\audit_scripts\Test-PawAutoPlay.ps1",
             "07-paws\audit_scripts\Test-PAWBitLockerStatus.ps1",
             "07-paws\audit_scripts\Test-PawDMAPhysicalSecurity.ps1",
+            "07-paws\audit_scripts\Test-PawKernelShadowStacks.ps1",
             "07-paws\audit_scripts\Test-PawLocalAdministrators.ps1",
             "07-paws\audit_scripts\Test-PawLsaProtection.ps1",
+            "07-paws\audit_scripts\Test-PawNetworkHardeningStatus.ps1",
+            "07-paws\audit_scripts\Test-PawRemoteDesktopStatus.ps1",
+            "07-paws\audit_scripts\Test-PawUACPolicies.ps1",
+            "07-paws\audit_scripts\Test-PawUserProfileRestrictions.ps1",
             "07-paws\audit_scripts\Test-PawUserRightsAssignments.ps1",
-            "07-paws\audit_scripts\Test-PawVBSCredentialGuard.ps1"
+            "07-paws\audit_scripts\Test-PawVBSCredentialGuard.ps1",
+            "07-paws\audit_scripts\Test-PawWSUSClientStatus.ps1"
         )
-    } else {
+    }
+    else {
         # Endpoint profile
         $profileScripts = @(
             "08-endpoints\audit_scripts\Audit-HardwareSecurityFeatures.ps1",
             "08-endpoints\audit_scripts\Audit-SecureBoot.ps1",
             "08-endpoints\audit_scripts\Audit-UEFISecurity.ps1",
             "08-endpoints\audit_scripts\Get-DefenderAdvancedStatus.ps1",
+            "08-endpoints\audit_scripts\Get-ElamPolicyStatus.ps1",
             "08-endpoints\audit_scripts\Get-ExploitProtectionStatus.ps1",
             "08-endpoints\audit_scripts\Get-LsaProtectionStatus.ps1",
             "08-endpoints\audit_scripts\Get-PrintingAndSpoolerStatus.ps1",
             "08-endpoints\audit_scripts\Get-SafeModeNonAdminsStatus.ps1",
+            "08-endpoints\audit_scripts\Get-SvchostMitigationStatus.ps1",
             "08-endpoints\audit_scripts\Get-SystemAdministrativeTemplatesStatus.ps1",
             "08-endpoints\audit_scripts\Get-UnnecessaryServicesStatus.ps1",
+            "08-endpoints\audit_scripts\Get-UntrustedFontBlockingStatus.ps1",
             "08-endpoints\audit_scripts\Get-WindowsFirewallStatus.ps1",
             "08-endpoints\audit_scripts\Get-WpbtStatus.ps1",
             "08-endpoints\audit_scripts\Test-AccountPolicies.ps1",
@@ -124,6 +163,7 @@ Configuration ADHardeningAudit {
             "08-endpoints\audit_scripts\Test-BitLockerStatus.ps1",
             "08-endpoints\audit_scripts\Test-DMAPhysicalSecurity.ps1",
             "08-endpoints\audit_scripts\Test-EndpointAppLockerStatus.ps1",
+            "08-endpoints\audit_scripts\Test-KernelShadowStacks.ps1",
             "08-endpoints\audit_scripts\Test-LocalAdministrators.ps1",
             "08-endpoints\audit_scripts\Test-NetworkHardeningStatus.ps1",
             "08-endpoints\audit_scripts\Test-RemoteDesktopStatus.ps1",
@@ -143,15 +183,15 @@ Configuration ADHardeningAudit {
         foreach ($relativeScriptPath in $allScripts) {
             # Extract script base name
             $scriptFileName = [System.IO.Path]::GetFileNameWithoutExtension($relativeScriptPath)
-            
+
             # Sanitize script name for DSC resource instance key (alphanumeric and underscores only)
             $sanitizedResourceName = $scriptFileName -replace '[^a-zA-Z0-9_]', '_'
-            
+
             # Build target path
             $targetLocalPath = Join-Path $sourcePath $relativeScriptPath
 
             Script "Audit_$sanitizedResourceName" {
-                GetScript = {
+                GetScript  = {
                     return @{
                         "Result" = $using:scriptFileName
                     }
@@ -164,7 +204,7 @@ Configuration ADHardeningAudit {
                     }
                     return & $helperPath -Path $using:targetLocalPath
                 }
-                SetScript = {
+                SetScript  = {
                     $name = $using:scriptFileName
                     $path = $using:targetLocalPath
                     Write-Warning "Audit result failed: Control '$name' is not secure. Script path: $path"

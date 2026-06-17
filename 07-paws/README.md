@@ -43,6 +43,55 @@ This directory contains the physical isolation policies and operating system sec
 13. **[REQ-PAW-013 - Configure Account and Password Policies for PAWs](configure-account-policies.md)**
     Configures robust local account lockout, local password complexity, and 20-character minimum length policies, and references Active Directory Fine-Grained Password Policies (FGPP) for Tier 0 Administrators.
 
+14. **[REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](configure-elam.md)**
+    Configures the Early Launch Antimalware (ELAM) driver initialization policy to ensure only signed, trusted boot drivers execute.
 
+15. **[REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](configure-printing-and-spooler.md)**
+    Enforces disabling the Print Spooler service and configuring Point and Print restrictions to prevent print-related exploits.
+
+16. **[REQ-PAW-016 - Configure Untrusted Font Blocking for PAWs](configure-untrusted-font-blocking.md)**
+    Configures the Untrusted Font Blocking mitigation on PAWs to prevent font parsing exploits.
+
+17. **[REQ-PAW-017 - Configure svchost.exe Mitigation Options for PAWs](configure-svchost-mitigation.md)**
+    Configures svchost.exe mitigation options on PAWs to restrict binary loading to Microsoft-signed code and block dynamic code execution.
+
+18. **[REQ-PAW-018 - Enable Kernel-Mode Hardware-Enforced Stack Protection for PAWs](enable-kernel-shadow-stacks.md)**
+    Configures Kernel-mode Hardware-enforced Stack Protection to enforce hardware-backed control-flow integrity and mitigate kernel Return-Oriented Programming (ROP) execution hijacks.
+
+19. **[REQ-PAW-019 - Harden Network Parameters and Disable Legacy Name Resolution](harden-network-and-name-resolution.md)**
+    Disables Link-Local Multicast Name Resolution (LLMNR), NetBIOS over TCP/IP, and mDNS, and secures TCP/IP parameters on PAWs to prevent credential harvesting and protocol exploits.
+
+20. **[REQ-PAW-020 - Configure User Account Control Policies for PAWs](configure-uac-policies.md)**
+    Enforces maximum UAC security behavior, requiring credential entry on the secure desktop for administrators and automatically denying elevation prompts.
+
+21. **[REQ-PAW-021 - Disable AutoPlay and AutoRun for PAWs](disable-autoplay-autorun.md)**
+    Turns off AutoPlay and AutoRun features across all drive types to prevent automatic execution of files and payloads from external media.
+
+22. **[REQ-PAW-022 - Disable Incoming Remote Desktop Access for PAWs](restrict-rdp-access.md)**
+    Strictly denies incoming RDP and Remote Assistance connections to administrative workstations to block lateral movement.
+
+23. **[REQ-PAW-023 - WSUS Client Configuration for PAWs](wsus-client-config.md)**
+    Enforces update client registry baselines to ensure workstations pull OS patches and security signatures exclusively from the local, offline WSUS server.
+
+24. **[REQ-PAW-024 - Configure User Profile and System Restrictions for PAWs](configure-user-profile-restrictions.md)**
+    Locks down user profile registry settings and key system security policies including inactivity timeouts, secondary logon, and ASLR force.
+
+25. **[REQ-PAW-025 - Configure Exploit Protection Profile for PAWs](configure-exploit-protection.md)**
+    Configures and enforces a system-wide Microsoft Defender Exploit Protection profile to apply advanced memory mitigations (DEP, ASLR, CFG, SEHOP, Heap Integrity) on all PAWs.
+
+26. **[REQ-PAW-026 - Restrict Safe Mode Access to Administrators on PAWs](disable-safe-mode-for-standard-users.md)**
+    Prevents standard (non-administrative) users from logging into the system while in Safe Mode by setting SafeModeBlockNonAdmins to 1.
+
+27. **[REQ-PAW-027 - Configure Windows Defender Firewall and Block LOLBins for PAWs](configure-windows-firewall.md)**
+    Configures host firewall profiles and outbound rules to block known Living Off the Land Binaries (LOLBins) from initiating outgoing network connections.
+
+28. **[REQ-PAW-028 - Disable Unnecessary System Services for PAWs](disable-unnecessary-system-services.md)**
+    Disables unnecessary and high-risk system services to minimize the attack surface of administrative endpoints.
+
+29. **[REQ-PAW-029 - Configure System Administrative Templates for PAWs](configure-system-administrative-templates.md)**
+    Enforces custom administrative template settings including SMBv1 driver blocks and event log size extensions.
+
+30. **[REQ-PAW-030 - Enable Secure Boot for PAWs](enable-secure-boot.md)**
+    Verifies Secure Boot, locks Device Guard VBS levels, and triggers OS-level BlackLotus DBX/SVN revocation updates.
 
 
