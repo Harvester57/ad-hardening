@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 7401cf6 | Generated: June 17, 2026</span>
+      <span>Commit: be9f491 | Generated: June 17, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -120,6 +120,7 @@ The guidebook is organized into eight functional modules:
      * [REQ-ID-016 - Configure Logon Screen and Credentials Delegation](#03-identities-services-configure-credential-delegation-md)
      * [REQ-ID-017 - Disable Machine Account Quota](#03-identities-services-disable-machine-account-quota-md)
      * [REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)
+     * [REQ-ID-019 - Enforce Smart Card Authentication for Privileged Users](#03-identities-services-enforce-smartcard-privileged-users-md)
 4. **[Module 4: Network Configuration & Firewalling](#04-network-firewall-README-md)**
    * Active Directory network boundaries, port configurations, and encryption/authentication configurations.
    * Hardening controls:
@@ -167,6 +168,7 @@ The guidebook is organized into eight functional modules:
      * [REQ-PAW-013 - Configure Account and Password Policies for PAWs](#07-paws-configure-account-policies-md)
      * [REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](#07-paws-configure-elam-md)
      * [REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](#07-paws-configure-printing-and-spooler-md)
+     * [REQ-PAW-031 - Enforce Smart Card Logon for PAWs](#07-paws-enforce-smartcard-logon-paws-md)
 8. **[Module 8: Endpoint Hardening](#08-endpoints-README-md)**
    * Entry point index for Tier 2 workstation security.
    * Hardening controls:
@@ -7711,6 +7713,9 @@ This directory contains security requirements and policies designed to protect a
 18. **[REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)**
     Limits the memberships of the legacy "Pre-Windows 2000 Compatible Access" group and restricts anonymous query options to prevent directory enumeration.
 
+19. **[REQ-ID-019 - Enforce Smart Card Authentication for Privileged Users](#03-identities-services-enforce-smartcard-privileged-users-md)**
+    Enforces the 'Smart card is required for interactive logon' setting on administrative accounts to invalidate password hashes and force Kerberos PKINIT.
+
 
 <div style="page-break-before: always;"></div>
 
@@ -10744,6 +10749,174 @@ foreach ($Key in $Settings.Keys) {
   * CIS Windows Server 2016 Benchmark v2.0.0 - Section 2.3.10.5 (Network access: Let Everyone permissions apply to anonymous users)
   * CIS Windows Server 2016 Benchmark v2.0.0 - Section 2.3.10.10 (Network access: Restrict anonymous access to Named Pipes and Shares)
 * **Microsoft Security Guidance**: Active Directory Pre-Windows 2000 Compatible Access security recommendations
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="03-identities-services-enforce-smartcard-privileged-users-md"></div>
+
+<div id="03-identities-services-enforce-smartcard-privileged-users-md-req-id-019-enforce-smart-card-authentication-for-privileged-users"></div>
+# [REQ-ID-019] Enforce Smart Card Authentication for Privileged Users
+
+<div id="03-identities-services-enforce-smartcard-privileged-users-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Active Directory Domain Services (AD DS) user accounts, Domain Controllers
+* **Operating Systems**: Windows Server 2016 (and above)
+
+---
+
+<div id="03-identities-services-enforce-smartcard-privileged-users-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **AD Configuration / PowerShell Attribute**:
+  * **AD User Attribute**: `userAccountControl` flag `UF_SMARTCARD_REQUIRED` (value `0x40000` / `262144`)
+  * **PowerShell AD Property**: `SmartcardRequired` set to `$true`
+
+---
+
+<div id="03-identities-services-enforce-smartcard-privileged-users-md-rationale"></div>
+## Rationale
+Enforcing smart card authentication on privileged accounts significantly mitigates the risk of credential theft, lateral movement, and offline password cracking:
+
+1. **Hash and Password Extraction Prevention**: By checking "Smart card is required for interactive logon" on an Active Directory user account, AD automatically rotates the account's password to a cryptographically strong, random 120-character string that is unknown to the user. This effectively invalidates the traditional NTHash and LMHash authentication methods, preventing attackers from performing password-spraying or brute-force attacks against administrative logins.
+2. **Replay and Relay Mitigation**: Password-based authentication relies on credentials that can be captured, logged, or relay-attacked. Using smart cards (or physical tokens like YubiKeys) shifts authentication to Kerberos PKINIT (Public Key Cryptography for Initial Authentication in Kerberos). This protocol relies on private keys stored in the card's secure hardware element, ensuring credentials cannot be copied or replayed.
+3. **Physical Presence Factor**: Combining a hardware token (something you have) and a PIN (something you know) establishes true multi-factor authentication (MFA) for administrative activities, preventing unauthorized access by remote network attackers who have compromised a password.
+
+---
+
+<div id="03-identities-services-enforce-smartcard-privileged-users-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Password Logons Disabled**: Privileged administrators will no longer be able to log on using standard username and password combinations. They must have physical/virtual smart cards and card readers actively connected to the workstation.
+* **PKI Dependency**: A fully operational Enterprise PKI (Active Directory Certificate Services - AD CS) must be deployed. Domain Controllers must be issued valid certificates supporting KDC authentication. If the PKI is unavailable or certificates expire, users will be unable to log on.
+* **Service Account & Script Breaks**: Administrators must not use personal administrative accounts to run automated scripts or services that rely on static password authentication. Such configurations will break and must be migrated to Group Managed Service Accounts (gMSAs) or managed via scheduled tasks utilizing certificate-based operations.
+* **Break-Glass (Emergency) Accounts**: Break-glass accounts must be excluded from this policy if they do not have active smart card tokens, or they must be assigned dedicated hardware smart cards stored in physical security safes under dual-custody.
+
+---
+
+<div id="03-identities-services-enforce-smartcard-privileged-users-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="03-identities-services-enforce-smartcard-privileged-users-md-option-a-active-directory-administrative-tools-preferred"></div>
+### Option A: Active Directory Administrative Tools (Preferred)
+
+To configure smart card requirement for individual privileged users or OUs:
+1. Open **Active Directory Users and Computers** (`dsa.msc`) on a domain controller or administrative host.
+2. Navigate to the Organizational Unit (OU) containing your administrative users.
+3. Right-click the target administrator account and select **Properties**.
+4. Click on the **Account** tab.
+5. In the **Account options** window, scroll down and check the box: **Smart card is required for interactive logon**.
+6. Click **Apply** and then **OK**.
+
+Alternatively, you can select multiple users at once, right-click, select **Properties**, click the **Account** tab, select the check box next to **Smart card is required for interactive logon** under **Account options**, and click **OK** to apply the policy in batch.
+
+---
+
+<div id="03-identities-services-enforce-smartcard-privileged-users-md-option-b-powershell-script-remediation-automation"></div>
+### Option B: PowerShell Script (Remediation / Automation)
+
+Use these scripts locally on a Domain Controller or a management machine with Active Directory administrative tools installed to enforce or audit the smart card requirement.
+
+[Download Script: Configure-PrivilegedSmartCard.ps1](implementation_scripts/Configure-PrivilegedSmartCard.ps1)
+
+```powershell
+# Configure-PrivilegedSmartCard.ps1
+# Description: Enforces the 'Smart card is required for interactive logon' flag on a specified user group.
+# Target Engine: Windows PowerShell 5.1
+
+Write-Host "Applying smart card logon requirement to administrative accounts..." -ForegroundColor Cyan
+
+if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
+    Write-Error "ActiveDirectory PowerShell module is not available. Please run this script on a system with AD DS RSAT tools."
+    exit 1
+}
+
+Import-Module ActiveDirectory
+
+$GroupName = "Tier0_Administrators"
+$Group = Get-ADGroup -Filter "Name -eq '$GroupName'"
+if (-not $Group) {
+    Write-Host "Group $GroupName not found. Defaulting to Domain Admins..." -ForegroundColor Yellow
+    $GroupName = "Domain Admins"
+}
+
+$Members = Get-ADGroupMember -Identity $GroupName -Recursive | Where-Object { $_.objectClass -eq "user" }
+
+if (-not $Members) {
+    Write-Host "No users found in group $GroupName." -ForegroundColor Yellow
+    exit 0
+}
+
+foreach ($Member in $Members) {
+    $User = Get-ADUser -Identity $Member.distinguishedName -Properties SmartcardRequired
+    if (-not $User.SmartcardRequired) {
+        Write-Host "Enforcing smart card requirement for user: $($User.SamAccountName)" -ForegroundColor Cyan
+        Set-ADUser -Identity $User.distinguishedName -SmartcardRequired $true
+    } else {
+        Write-Host "User $($User.SamAccountName) already requires smart card." -ForegroundColor Green
+    }
+}
+
+Write-Host "Smart card requirement configuration complete." -ForegroundColor Green
+```
+
+*To audit the smart card requirement on privileged users:*
+
+[Download Script: Test-PrivilegedSmartCard.ps1](audit_scripts/Test-PrivilegedSmartCard.ps1)
+
+```powershell
+# Test-PrivilegedSmartCard.ps1
+# Description: Audits if all members of the specified administrative group require smart card for logon.
+# Target Engine: Windows PowerShell 5.1
+
+Write-Host "--- Auditing Privileged User Smart Card Requirements ---" -ForegroundColor Cyan
+
+if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
+    Write-Warning "ActiveDirectory PowerShell module is not available. Please install RSAT AD DS tools."
+    exit 0
+}
+
+Import-Module ActiveDirectory
+
+$GroupName = "Tier0_Administrators"
+$Group = Get-ADGroup -Filter "Name -eq '$GroupName'"
+if (-not $Group) {
+    Write-Host "Group $GroupName not found. Defaulting audit to Domain Admins..." -ForegroundColor Yellow
+    $GroupName = "Domain Admins"
+}
+
+$Vulnerable = $false
+$Members = Get-ADGroupMember -Identity $GroupName -Recursive | Where-Object { $_.objectClass -eq "user" }
+
+if (-not $Members) {
+    Write-Host "No users found in group $GroupName to audit." -ForegroundColor Yellow
+} else {
+    foreach ($Member in $Members) {
+        $User = Get-ADUser -Identity $Member.distinguishedName -Properties SmartcardRequired
+        if (-not $User.SmartcardRequired) {
+            Write-Host "    - User: $($User.SamAccountName) | Actual: Password Allowed (Expected: Smart Card Required)" -ForegroundColor Red
+            $Vulnerable = $true
+        } else {
+            Write-Host "    - User: $($User.SamAccountName) | Actual: Smart Card Required (Expected: Smart Card Required)" -ForegroundColor Green
+        }
+    }
+}
+
+if ($Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="03-identities-services-enforce-smartcard-privileged-users-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendations on administrator identification, multi-factor authentication, and password hash isolation.
+* **CIS Microsoft Windows Server Benchmark**: Section 1.2 (Account policies) and Section 2.3.9.5 (Interactive logon: Smart card removal behavior).
+* **Microsoft Security Guidance**: Protecting high-privilege credentials in Active Directory.
 
 
 <div style="page-break-before: always;"></div>
@@ -16340,6 +16513,9 @@ This directory contains the physical isolation policies and operating system sec
 
 30. **[REQ-PAW-030 - Enable Secure Boot for PAWs](#07-paws-enable-secure-boot-md)**
     Verifies Secure Boot, locks Device Guard VBS levels, and triggers OS-level BlackLotus DBX/SVN revocation updates.
+
+31. **[REQ-PAW-031 - Enforce Smart Card Logon for PAWs](#07-paws-enforce-smartcard-logon-paws-md)**
+    Enforces the 'Interactive logon: Require smart card' GPO policy locally to suppress username/password fields and force hardware-bound authentication.
 
 
 
@@ -23774,6 +23950,139 @@ Write-Host "BlackLotus DBX revocation update configured in registry. A system re
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.8.14.1 (Configure Turn On Virtualization Based Security: Select Platform Security Level)
 * **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-enforce-smartcard-logon-paws-md"></div>
+
+<div id="07-paws-enforce-smartcard-logon-paws-md-req-paw-031-enforce-smart-card-logon-for-paws"></div>
+# [REQ-PAW-031] Enforce Smart Card Logon for PAWs
+
+<div id="07-paws-enforce-smartcard-logon-paws-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-enforce-smartcard-logon-paws-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\Interactive logon: Require smart card` -> **Enabled**
+  * **Registry Location**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System` -> `ScForceOption` = `1` (REG_DWORD)
+
+---
+
+<div id="07-paws-enforce-smartcard-logon-paws-md-rationale"></div>
+## Rationale
+Enforcing smart card requirements at the local operating system level on administrative workstations provides vital physical and logical isolation:
+
+1. **Password Logon Interface Block**: Requiring a smart card at logon tells Winlogon to suppress the default username and password fields. This forces the credential provider to only accept certificate-based smart card inserts. An attacker who has somehow acquired a user's password (e.g. via social engineering or physical shoulder surfing) will be unable to log on interactively because the endpoint will not display the password input fields.
+2. **Mitigation of Credential Replay Attacks**: Traditional password logons store NTHashes locally in the LSA database or cache, which can be extracted by dumping LSASS memory. By using smart card credentials, the logon process utilizes public-key cryptography (Kerberos PKINIT) where the private key never leaves the secure boundaries of the smart card's hardware security chip.
+3. **Session Interruption and Removal Enforcement**: Enforcing smart card logons naturally aligns with the smart card removal behavior requirement. Removing the smart card locks the session, and re-entry is impossible without physically re-inserting the token and inputting the PIN.
+
+---
+
+<div id="07-paws-enforce-smartcard-logon-paws-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Hard Block for Non-Smart Card Users**: Administrators without active smart cards or security tokens (like YubiKeys) will be completely blocked from logging on to the PAW. Pre-provisioning and certificate enrollment procedures are strict pre-requisites.
+* **Safe Mode Exemption**: The local Administrator account is exempt from the smart card requirement only when the system is booted into Safe Mode or using the Recovery Console. In normal operation, local accounts cannot log on interactively if smart cards are enforced.
+* **System Component Trust**: Workstations must trust the root and intermediate certification authorities issuing the smart card certificates, requiring active enrollment in domain CA policies.
+
+---
+
+<div id="07-paws-enforce-smartcard-logon-paws-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-enforce-smartcard-logon-paws-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+To enforce smart card logon on all PAWs via Group Policy:
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or administrative host.
+2. Edit your dedicated PAW Group Policy Object (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. In the details pane, double-click **Interactive logon: Require smart card**.
+5. Select **Enabled** and click **OK**.
+6. Ensure the GPO is linked to the PAW Organizational Unit (OU).
+
+---
+
+<div id="07-paws-enforce-smartcard-logon-paws-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use these scripts locally on a PAW endpoint to enforce or audit the local smart card requirement.
+
+[Download Script: Set-PAWSmartCardEnforcement.ps1](implementation_scripts/Set-PAWSmartCardEnforcement.ps1)
+
+```powershell
+# Set-PAWSmartCardEnforcement.ps1
+# Description: Configures the registry to require smart cards for interactive logons on PAWs.
+# Target Engine: Windows PowerShell 5.1
+
+Write-Host "Enforcing smart card interactive logon requirement..." -ForegroundColor Cyan
+
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "ScForceOption"
+$ValueData = 1
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force
+Write-Host "Smart card interactive logon requirement applied successfully." -ForegroundColor Green
+```
+
+*To audit the local smart card requirement on PAWs:*
+
+[Download Script: Test-PAWSmartCardEnforcement.ps1](audit_scripts/Test-PAWSmartCardEnforcement.ps1)
+
+```powershell
+# Test-PAWSmartCardEnforcement.ps1
+# Description: Audits if the registry is configured to require smart cards for interactive logons on PAWs.
+# Target Engine: Windows PowerShell 5.1
+
+Write-Host "--- Auditing PAW Smart Card Interactive Logon Requirement ---" -ForegroundColor Cyan
+
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "ScForceOption"
+$ExpectedValue = 1
+
+$Vulnerable = $false
+
+if (Test-Path $RegPath) {
+    $Property = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Property -and $Property.$ValueName -eq $ExpectedValue) {
+        Write-Host "    - Registry Setting: $ValueName | Actual: $($Property.$ValueName) (Expected: $ExpectedValue)" -ForegroundColor Green
+    } else {
+        $actualVal = if ($null -ne $Property) { $Property.$ValueName } else { "Not Found" }
+        Write-Host "    - Registry Setting: $ValueName | Actual: $actualVal (Expected: $ExpectedValue)" -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "    - Registry Path: $RegPath | Actual: Path Not Found (Expected: Path Exists)" -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+if ($Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-enforce-smartcard-logon-paws-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 2.3.9.5 (Interactive logon: Smart card removal behavior) and Section 2.3.9.6 (Interactive logon: Require smart card).
+* **ANSSI AD Hardening Guide**: Recommendations on workstation physical and logical isolation, and enforcing multi-factor authentication.
+* **Microsoft Security Guidance**: Enforcing multi-factor authentication for high-value hosts.
 
 
 <div style="page-break-before: always;"></div>

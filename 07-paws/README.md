@@ -94,4 +94,7 @@ This directory contains the physical isolation policies and operating system sec
 30. **[REQ-PAW-030 - Enable Secure Boot for PAWs](enable-secure-boot.md)**
     Verifies Secure Boot, locks Device Guard VBS levels, and triggers OS-level BlackLotus DBX/SVN revocation updates.
 
+31. **[REQ-PAW-031 - Enforce Smart Card Logon for PAWs](enforce-smartcard-logon-paws.md)**
+    Enforces the 'Interactive logon: Require smart card' GPO policy locally to suppress username/password fields and force hardware-bound authentication.
+
 

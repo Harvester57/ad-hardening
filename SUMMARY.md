@@ -62,6 +62,7 @@
     * [REQ-ID-016 - Configure Logon Screen and Credentials Delegation](03-identities-services/configure-credential-delegation.md)
     * [REQ-ID-017 - Disable Machine Account Quota](03-identities-services/disable-machine-account-quota.md)
     * [REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](03-identities-services/restrict-pre-windows-2000-compatible-access-group.md)
+    * [REQ-ID-019 - Enforce Smart Card Authentication for Privileged Users](03-identities-services/enforce-smartcard-privileged-users.md)
 ## Module 4: Network Configuration & Firewalling
 * [Module 4: Network Configuration & Firewalling](04-network-firewall/README.md)
     * [REQ-NET-001 - Configure Active Directory Port Matrix](04-network-firewall/configure-ad-port-matrix.md)
@@ -124,6 +125,7 @@
     * [REQ-PAW-028 - Disable Unnecessary System Services for PAWs](07-paws/disable-unnecessary-system-services.md)
     * [REQ-PAW-029 - Configure System Administrative Templates for PAWs](07-paws/configure-system-administrative-templates.md)
     * [REQ-PAW-030 - Enable Secure Boot for PAWs](07-paws/enable-secure-boot.md)
+    * [REQ-PAW-031 - Enforce Smart Card Logon for PAWs](07-paws/enforce-smartcard-logon-paws.md)
 ## Module 8: Endpoint Hardening
 * [Module 8: Endpoint Hardening](08-endpoints/README.md)
     * [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](08-endpoints/harden-network-and-name-resolution.md)

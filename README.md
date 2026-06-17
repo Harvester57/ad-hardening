@@ -72,6 +72,7 @@ The guidebook is organized into eight functional modules:
      * [REQ-ID-016 - Configure Logon Screen and Credentials Delegation](03-identities-services/configure-credential-delegation.md)
      * [REQ-ID-017 - Disable Machine Account Quota](03-identities-services/disable-machine-account-quota.md)
      * [REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](03-identities-services/restrict-pre-windows-2000-compatible-access-group.md)
+     * [REQ-ID-019 - Enforce Smart Card Authentication for Privileged Users](03-identities-services/enforce-smartcard-privileged-users.md)
 4. **[Module 4: Network Configuration & Firewalling](04-network-firewall/README.md)**
    * Active Directory network boundaries, port configurations, and encryption/authentication configurations.
    * Hardening controls:
@@ -119,6 +120,7 @@ The guidebook is organized into eight functional modules:
      * [REQ-PAW-013 - Configure Account and Password Policies for PAWs](07-paws/configure-account-policies.md)
      * [REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](07-paws/configure-elam.md)
      * [REQ-PAW-015 - Configure Secure Printing and Print Spooler Policies for PAWs](07-paws/configure-printing-and-spooler.md)
+     * [REQ-PAW-031 - Enforce Smart Card Logon for PAWs](07-paws/enforce-smartcard-logon-paws.md)
 8. **[Module 8: Endpoint Hardening](08-endpoints/README.md)**
    * Entry point index for Tier 2 workstation security.
    * Hardening controls:
