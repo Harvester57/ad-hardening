@@ -45,7 +45,6 @@ To maintain secure communications through 2030 and beyond, IPsec configurations 
      * **Encryption**: `AES-256`
      * **Integrity**: `SHA-256` or `SHA-384`
      * **Key exchange algorithm**: `Elliptic Curve Diffie-Hellman Group 19` (or `Group 20`)
-   * Note: You may keep `Diffie-Hellman Group 14` (2048-bit) as a lower-priority fallback option for older active systems if required.
 9. Click **OK**.
 10. Under **Data protection (Quick Mode)**, select **Advanced** and click **Customize...**
 11. Check **Require encryption for all connection security rules that use these settings**.
