@@ -103,6 +103,7 @@ Configuration ADHardeningAudit {
             "06-operations-maintenance\audit_scripts\Audit-ADRecycleBin.ps1",
             "06-operations-maintenance\audit_scripts\Audit-CrashControl.ps1",
             "06-operations-maintenance\audit_scripts\Audit-DefaultContainers.ps1",
+            "06-operations-maintenance\audit_scripts\Audit-NamingConventions.ps1",
             "06-operations-maintenance\audit_scripts\Get-KrbtgtRotationStatus.ps1"
         )
     }
