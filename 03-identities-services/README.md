@@ -57,3 +57,6 @@ This directory contains security requirements and policies designed to protect a
 
 18. **[REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](restrict-pre-windows-2000-compatible-access-group.md)**
     Limits the memberships of the legacy "Pre-Windows 2000 Compatible Access" group and restricts anonymous query options to prevent directory enumeration.
+
+19. **[REQ-ID-019 - Enforce Smart Card Authentication for Privileged Users](enforce-smartcard-privileged-users.md)**
+    Enforces the 'Smart card is required for interactive logon' setting on administrative accounts to invalidate password hashes and force Kerberos PKINIT.
