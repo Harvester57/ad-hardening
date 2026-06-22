@@ -93,6 +93,7 @@
     * [REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](06-operations-maintenance/use-third-party-templates.md)
     * [REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](06-operations-maintenance/configure-dedicated-tier0-wsus.md)
     * [REQ-OPS-006 - Redirect Default Users and Computers Containers](06-operations-maintenance/redirect-default-containers.md)
+    * [REQ-OPS-007 - Mandate Naming Conventions for GPOs, OUs, and User Accounts](06-operations-maintenance/mandate-naming-conventions.md)
 ## Module 7: Privileged Access Workstations (PAWs) Hardening
 * [Module 7: Privileged Access Workstations (PAWs) Hardening](07-paws/README.md)
     * [REQ-PAW-001 - Configure AppLocker Policies for PAWs](07-paws/configure-applocker-policies.md)

@@ -24,3 +24,6 @@ This directory contains operational procedures and configuration baselines for s
 
 7. **[REQ-OPS-006 - Redirect Default Users and Computers Containers](redirect-default-containers.md)**
    Redirects newly created user and computer objects to dedicated, deletion-protected Organizational Units (OUs) to enforce policy application.
+
+8. **[REQ-OPS-007 - Mandate Naming Conventions for GPOs, OUs, and User Accounts](mandate-naming-conventions.md)**
+   Enforces consistent prefixes and structures for directory objects and mandates a standard GPO description template to support programmatic auditing.

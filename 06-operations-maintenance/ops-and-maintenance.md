@@ -93,6 +93,21 @@ During critical system failures, Windows by default displays a simplified Blue S
 
 ---
 
+## 5. Administrative Naming Conventions and Metadata (ANSSI R12)
+
+Maintaining structural discipline across Group Policies, Organizational Units (OUs), and Active Directory accounts is vital to prevent security boundary bypasses, administrative errors, and credential exposure. 
+
+### Standardized Naming Prefixes
+Administrators must ensure that all directory objects conform to distinct prefixes indicating their tier level and resource class:
+* **Group Policies**: Formatted as `GPO_<Scope>_<Class>_<Name>` (e.g., `GPO_T0_Hardening_DomainControllers`)
+* **Organizational Units**: Formatted as `<Tier>-<ObjectType>-<Function>` (e.g., `T0-Computers-DCs`)
+* **User & Service Accounts**: Formatted with administrative or service prefixes (`a0-`, `a1-`, `a2-`, `s0-`, `s1-`, `s2-`, `g0-`, `g1-`, `g2-`, `bg-`).
+
+### GPO Description Metadata Template
+Every GPO must contain a structured, YAML-compliant metadata block within its description field to capture ownership, change authorization, creation details, and corresponding security requirements. This allows programmatic validation of policy alignment.
+
+---
+
 ## PowerShell Implementation Guide
 
 ### 1. Auditing System State Backup Status (Audit)
