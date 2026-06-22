@@ -109,6 +109,11 @@ add filter
 add rule layer=um actiontype=block filterkey=644291ca-9530-4066-b654-e7b838ebdc06
 add condition field=if_uuid matchtype=equal data=17FC11E9-C258-4B8D-8D07-2F4125156244
 add filter
+
+add rule layer=um actiontype=block filterkey=5270da6b-67a8-4cbf-8b2c-fa5d0abcb975
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=a8e0653c-2744-4389-a61d-7373df8b2292
+add filter
 ```
 
 #### 2. Deploy via GPO Startup Script
@@ -207,9 +212,13 @@ add rule layer=um actiontype=block filterkey=50754fe4-aa2d-42ff-8196-e90ea8fd252
 add condition field=protocol matchtype=equal data=ncacn_np
 add condition field=if_uuid matchtype=equal data=50abc2a4-574d-40b3-9d66-ee4fd5fba076
 add filter
-
 add rule layer=um actiontype=block filterkey=644291ca-9530-4066-b654-e7b838ebdc06
 add condition field=if_uuid matchtype=equal data=17FC11E9-C258-4B8D-8D07-2F4125156244
+add filter
+
+add rule layer=um actiontype=block filterkey=5270da6b-67a8-4cbf-8b2c-fa5d0abcb975
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=a8e0653c-2744-4389-a61d-7373df8b2292
 add filter
 "@
 
@@ -245,9 +254,10 @@ Write-Host "Auditing RPC filters configuration..." -ForegroundColor Cyan
 # Query RPC filters
 $filters = netsh rpc filter show filter
 
-# Check for presence of SCM block rule filterkey or Mimikatz block rule filterkey
+# Check for presence of SCM block rule filterkey, Mimikatz block rule filterkey, or MS-FSRVP block rule filterkey
 $scmFound = $false
 $mimiFound = $false
+$fsrvpFound = $false
 
 foreach ($line in $filters) {
     if ($line -like "*d0c7640c-9355-4e52-8335-c12835559c10*") {
@@ -256,10 +266,13 @@ foreach ($line in $filters) {
     if ($line -like "*644291ca-9530-4066-b654-e7b838ebdc06*") {
         $mimiFound = $true
     }
+    if ($line -like "*5270da6b-67a8-4cbf-8b2c-fa5d0abcb975*") {
+        $fsrvpFound = $true
+    }
 }
 
-if ($scmFound -and $mimiFound) {
-    Write-Host "[+] RPC Filters for named pipes are active (SCM and Mimikatz filterkeys found)." -ForegroundColor Green
+if ($scmFound -and $mimiFound -and $fsrvpFound) {
+    Write-Host "[+] RPC Filters for named pipes are active (SCM, Mimikatz, and MS-FSRVP filterkeys found)." -ForegroundColor Green
     Write-Host "Audit result: COMPLIANT" -ForegroundColor Green
 } else {
     Write-Host "[!] NON-COMPLIANT: Core RPC named pipe filters are missing or inactive." -ForegroundColor Red
@@ -268,6 +281,9 @@ if ($scmFound -and $mimiFound) {
     }
     if (-not $mimiFound) {
         Write-Host "    - Missing Mimikatz Filter (644291ca-9530-4066-b654-e7b838ebdc06)" -ForegroundColor Yellow
+    }
+    if (-not $fsrvpFound) {
+        Write-Host "    - Missing MS-FSRVP ShadowCoerce Filter (5270da6b-67a8-4cbf-8b2c-fa5d0abcb975)" -ForegroundColor Yellow
     }
     Write-Host "Audit result: NON-COMPLIANT" -ForegroundColor Red
 }

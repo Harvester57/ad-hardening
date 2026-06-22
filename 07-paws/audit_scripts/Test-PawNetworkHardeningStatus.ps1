@@ -18,10 +18,12 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
 
-# 1. Audit LLMNR and mDNS
+
+# 1. Audit LLMNR, mDNS, and default IPv6 DNS Servers
 $DnsPath = "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient"
 Test-RegistryValue $DnsPath "EnableMulticast" 0
 Test-RegistryValue $DnsPath "EnablemDNS" 0
+Test-RegistryValue $DnsPath "DisableIPv6DefaultDnsServers" 1
 
 # 2. Audit NetBIOS Parameters
 $NetbtPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netbt\Parameters"

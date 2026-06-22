@@ -74,9 +74,13 @@ add rule layer=um actiontype=block filterkey=50754fe4-aa2d-42ff-8196-e90ea8fd252
 add condition field=protocol matchtype=equal data=ncacn_np
 add condition field=if_uuid matchtype=equal data=50abc2a4-574d-40b3-9d66-ee4fd5fba076
 add filter
-
 add rule layer=um actiontype=block filterkey=644291ca-9530-4066-b654-e7b838ebdc06
 add condition field=if_uuid matchtype=equal data=17FC11E9-C258-4B8D-8D07-2F4125156244
+add filter
+
+add rule layer=um actiontype=block filterkey=5270da6b-67a8-4cbf-8b2c-fa5d0abcb975
+add condition field=protocol matchtype=equal data=ncacn_np
+add condition field=if_uuid matchtype=equal data=a8e0653c-2744-4389-a61d-7373df8b2292
 add filter
 "@
 

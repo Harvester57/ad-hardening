@@ -23,10 +23,11 @@ function Set-RegDWord {
     }
 }
 
-# 1. Disable LLMNR and mDNS
+# 1. Disable LLMNR, mDNS, and default IPv6 DNS Servers
 Set-RegDWord "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" "EnableMulticast" 0
 Set-RegDWord "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" "EnablemDNS" 0
-Write-Host "[+] LLMNR (Multicast Name Resolution) and mDNS disabled." -ForegroundColor Green
+Set-RegDWord "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" "DisableIPv6DefaultDnsServers" 1
+Write-Host "[+] LLMNR (Multicast Name Resolution), mDNS, and default IPv6 DNS Servers disabled." -ForegroundColor Green
 
 # 2. Configure NetBIOS Parameters
 $NetbtPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netbt\Parameters"

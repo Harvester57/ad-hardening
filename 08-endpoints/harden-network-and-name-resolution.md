@@ -11,6 +11,7 @@
 * **GPO Path / Registry Location**:
   * **GPO Paths**:
     * Computer Configuration\Administrative Templates\Network\DNS Client\Turn off Multicast Name Resolution
+    * Computer Configuration\Administrative Templates\Network\DNS Client\Turn off default IPv6 DNS Servers
     * Computer Configuration\Policies\Windows Settings\Security Settings\Windows Defender Firewall with Advanced Security
     * Computer Configuration\Administrative Templates\Network\Network Connections
     * Computer Configuration\Administrative Templates\Network\Windows Connection Manager
@@ -21,6 +22,7 @@
     * HKLM\Software\Policies\Microsoft\Windows NT\DNSClient
       * `EnableMulticast` = `0` (REG_DWORD, Disables LLMNR)
       * `EnablemDNS` = `0` (REG_DWORD, Disables mDNS)
+      * `DisableIPv6DefaultDnsServers` = `1` (REG_DWORD, Turn off default IPv6 DNS Servers)
     * HKLM\SYSTEM\CurrentControlSet\Services\Netbt\Parameters
       * `NoNameReleaseOnDemand` = `1` (REG_DWORD)
       * `NodeType` = `2` (REG_DWORD)
@@ -53,6 +55,7 @@ Legacy name resolution protocols and insecure default network configurations are
 2. **NetBIOS Node Type and Name Release**: Setting the Node Type to P-node (point-to-point, value 2) disables broadcast resolution fallbacks. Enabling name release protection (`NoNameReleaseOnDemand`) prevents attackers from spoofing name release requests to deregister local names.
 3. **ICMP Redirects**: ICMP redirect packets can be used by an attacker on the same subnet to dynamically redirect routing for specific hosts through the attacker's machine, enabling full MitM packet sniffing and modification. Disabling ICMP redirects prevents this vector.
 4. **IP Source Routing**: Source routing allows a sender to specify the exact network path a packet should follow. This is commonly abused to bypass firewall routing rules or establish communication paths that violate network segment isolation.
+5. **Disable Default IPv6 DNS Servers**: Disabling default IPv6 DNS servers prevents automated fallback to unauthenticated, dynamic local IPv6 DNS servers advertised by rogue routers or malicious tools (like mitm6), which would otherwise redirect query traffic and coerce NTLM or Kerberos authentication.
 
 ---
 
@@ -66,7 +69,7 @@ Legacy name resolution protocols and insecure default network configurations are
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-#### Step 1: Turn Off LLMNR and mDNS
+#### Step 1: Turn Off LLMNR, mDNS, and default IPv6 DNS Servers
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit the target endpoints GPO.
 3. Navigate to:
@@ -74,6 +77,7 @@ Legacy name resolution protocols and insecure default network configurations are
 4. Configure the settings:
    * **Policy**: `Turn off Multicast Name Resolution` -> **Enabled**
    * **Policy**: `Configure multicast DNS (mDNS) protocol` -> **Enabled** with option set to **Disabled**
+   * **Policy**: `Turn off default IPv6 DNS Servers` -> **Enabled**
 
 #### Step 2: Disable NetBIOS (via DHCP Scope Options)
 1. Open the **DHCP Management Console** (`dhcpmgmt.msc`).
@@ -84,6 +88,14 @@ Legacy name resolution protocols and insecure default network configurations are
 1. Under the target workstations GPO, navigate to:
    `Computer Configuration\Preferences\Windows Settings\Registry`
 2. Right-click **Registry** and select **New -> Registry Item** for each of the following:
+
+   * **Disable Default IPv6 DNS Servers**:
+     * **Action**: `Update`
+     * **Hive**: `HKEY_LOCAL_MACHINE`
+     * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows NT\DNSClient`
+     * **Value Name**: `DisableIPv6DefaultDnsServers`
+     * **Value Type**: `REG_DWORD`
+     * **Value Data**: `1`
 
    * **NetBIOS Name Release Protection**:
      * **Action**: `Update`
@@ -231,10 +243,11 @@ function Set-RegDWord {
     }
 }
 
-# 1. Disable LLMNR and mDNS
+# 1. Disable LLMNR, mDNS, and default IPv6 DNS Servers
 Set-RegDWord "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" "EnableMulticast" 0
 Set-RegDWord "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" "EnablemDNS" 0
-Write-Host "[+] LLMNR (Multicast Name Resolution) and mDNS disabled." -ForegroundColor Green
+Set-RegDWord "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient" "DisableIPv6DefaultDnsServers" 1
+Write-Host "[+] LLMNR (Multicast Name Resolution), mDNS, and default IPv6 DNS Servers disabled." -ForegroundColor Green
 
 # 2. Configure NetBIOS Parameters
 $NetbtPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netbt\Parameters"
@@ -308,10 +321,12 @@ function Test-RegistryValue ($path, $name, $expectedValue) {
     Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
 }
 
-# 1. Audit LLMNR and mDNS
+
+# 1. Audit LLMNR, mDNS, and default IPv6 DNS Servers
 $DnsPath = "HKLM:\Software\Policies\Microsoft\Windows NT\DNSClient"
 Test-RegistryValue $DnsPath "EnableMulticast" 0
 Test-RegistryValue $DnsPath "EnablemDNS" 0
+Test-RegistryValue $DnsPath "DisableIPv6DefaultDnsServers" 1
 
 # 2. Audit NetBIOS Parameters
 $NetbtPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Netbt\Parameters"
