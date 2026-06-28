@@ -46,10 +46,10 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 * Standardizes naming schemas to ensure structured GPO audit capabilities.
 
 ### Operations & Maintenance Requirements
-* **[Secure Operations and Maintenance Baseline (Backup & DR Sections)](../06-operations-maintenance/ops-and-maintenance.md)**: Implements daily AD System State backup, offline/immutable backup isolation, and quarterly recovery drills.
 * **[REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](../06-operations-maintenance/enable-recycle-bin.md)**: Enforces forest-wide Recycle Bin for rapid recovery of deleted objects.
 * **[REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](../06-operations-maintenance/maintain-gpo-templates.md)**: Prevents version drift across consoles.
 * **[REQ-OPS-007 - Mandate Naming Conventions for GPOs, OUs, and User Accounts](../06-operations-maintenance/mandate-naming-conventions.md)**: Enforces GPO/OU prefix metadata supporting GPO auditing.
+* **[REQ-OPS-008 - Configure Daily System State Backups](../06-operations-maintenance/configure-system-state-backups.md)**: Implements daily AD System State backup, offline/immutable backup isolation, and quarterly recovery drills.
 
 ### Domain Controller Requirements
 * **[REQ-DC-001 - Disable SMBv1](../02-domain-controllers/disable-smbv1.md)**: Disables legacy, vulnerable file sharing protocol drivers.
@@ -83,9 +83,9 @@ This phase focuses on isolating credentials inside memory and network packets to
 * Redirects default directory containers to ensure new objects receive security policies automatically.
 
 ### Operations & Maintenance Requirements
-* **[Secure Operations and Maintenance Baseline (Offline Patching Sections)](../06-operations-maintenance/ops-and-maintenance.md)**: Implements offline WSUS metadata imports/exports (sneakernet transport).
 * **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](../06-operations-maintenance/configure-dedicated-tier0-wsus.md)**: Secures dedicated patch servers to prevent cross-tier update spoofing.
 * **[REQ-OPS-006 - Redirect Default Users and Computers Containers](../06-operations-maintenance/redirect-default-containers.md)**: Prevents newly joined machines from staying in unmanaged default OUs.
+* **[REQ-OPS-009 - Implement Offline Patch Management via WSUS](../06-operations-maintenance/implement-offline-patch-management.md)**: Implements offline WSUS metadata imports/exports (sneakernet transport).
 
 ### Domain Controller Requirements
 * **[REQ-DC-004 - Enforce LDAP Server Signing](../02-domain-controllers/enforce-ldap-signing.md)**: Restricts cleartext un-signed LDAP operations.
@@ -160,8 +160,9 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * Audits Active Directory configurations monthly via offline scanners.
 
 ### Operations & Maintenance Requirements
-* **[Secure Operations and Maintenance Baseline (Continuous Assessment)](../06-operations-maintenance/ops-and-maintenance.md)**: Integrates monthly PingCastle scans, quarterly BloodHound analyses, and semi-annual offline database checks.
 * **[REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](../06-operations-maintenance/use-third-party-templates.md)**: Standardizes security settings for custom application baselines.
+* **[REQ-OPS-010 - Establish Continuous Security Assessments](../06-operations-maintenance/establish-continuous-security-assessments.md)**: Integrates monthly PingCastle scans, quarterly BloodHound analyses, and semi-annual offline database checks.
+* **[REQ-OPS-011 - Enable Detailed BSOD Stop Parameters for Crash Control](../06-operations-maintenance/enable-detailed-bsod-parameters.md)**: Enables detailed crash diagnostics for air-gapped system recovery.
 
 ### Domain Controller Requirements
 * **[REQ-DC-012 - Disable Unnecessary Services on Domain Controllers](../02-domain-controllers/disable-unnecessary-services.md)**: Stops non-essential system functions.

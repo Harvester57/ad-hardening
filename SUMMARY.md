@@ -86,7 +86,6 @@
     * [REQ-LOG-004 - Configure Secure SIEM Log Shipping](05-logging-monitoring/configure-siem-log-shipping.md)
 ## Module 6: Secure Operations & Maintenance
 * [Module 6: Secure Operations & Maintenance](06-operations-maintenance/README.md)
-    * [Secure Operations and Maintenance Baseline](06-operations-maintenance/ops-and-maintenance.md)
     * [REQ-OPS-001 - Enforce KRBTGT Password Rotation](06-operations-maintenance/enforce-krbtgt-password-rotation.md)
     * [REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](06-operations-maintenance/enable-recycle-bin.md)
     * [REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](06-operations-maintenance/maintain-gpo-templates.md)
@@ -94,6 +93,10 @@
     * [REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](06-operations-maintenance/configure-dedicated-tier0-wsus.md)
     * [REQ-OPS-006 - Redirect Default Users and Computers Containers](06-operations-maintenance/redirect-default-containers.md)
     * [REQ-OPS-007 - Mandate Naming Conventions for GPOs, OUs, and User Accounts](06-operations-maintenance/mandate-naming-conventions.md)
+    * [REQ-OPS-008 - Configure Daily System State Backups](06-operations-maintenance/configure-system-state-backups.md)
+    * [REQ-OPS-009 - Implement Offline Patch Management via WSUS](06-operations-maintenance/implement-offline-patch-management.md)
+    * [REQ-OPS-010 - Establish Continuous Security Assessments](06-operations-maintenance/establish-continuous-security-assessments.md)
+    * [REQ-OPS-011 - Enable Detailed BSOD Stop Parameters for Crash Control](06-operations-maintenance/enable-detailed-bsod-parameters.md)
 ## Module 7: Privileged Access Workstations (PAWs) Hardening
 * [Module 7: Privileged Access Workstations (PAWs) Hardening](07-paws/README.md)
     * [REQ-PAW-001 - Configure AppLocker Policies for PAWs](07-paws/configure-applocker-policies.md)
@@ -160,12 +163,6 @@
     * [REQ-END-029 - Configure Untrusted Font Blocking](08-endpoints/configure-untrusted-font-blocking.md)
     * [REQ-END-030 - Configure svchost.exe Mitigation Options](08-endpoints/configure-svchost-mitigation.md)
     * [REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](08-endpoints/enable-kernel-shadow-stacks.md)
-
-## Implementation Roadmap
-* [Implementation Plan and Prioritized Roadmap](roadmap/implementation-plan.md)
-
-## Audit Framework
-* [PowerShell DSC Audit Framework](dsc/README.md)
 
 ## Compliance Mapping
 * [ANSSI Compliance Matrix](compliance/anssi.md)

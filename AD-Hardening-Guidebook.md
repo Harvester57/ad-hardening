@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 69fc6bb | Generated: June 28, 2026</span>
+      <span>Commit: f9ce258 | Generated: June 28, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -15109,340 +15109,39 @@ This directory contains operational procedures and configuration baselines for s
 <div id="06-operations-maintenance-README-md-technical-hardening-controls"></div>
 ## Technical Hardening Controls
 
-1. **[Secure Operations and Maintenance Baseline](#06-operations-maintenance-ops-and-maintenance-md)**
-   Detailed requirement documenting Active Directory System State Backup and bare-metal restoration workflows, offline WSUS patch synchronization ("sneakernet" imports/exports), and continuous security analysis using offline tools (such as PingCastle and ADRecon).
-
-2. **[REQ-OPS-001 - Enforce KRBTGT Password Rotation](#06-operations-maintenance-enforce-krbtgt-password-rotation-md)**
+1. **[REQ-OPS-001 - Enforce KRBTGT Password Rotation](#06-operations-maintenance-enforce-krbtgt-password-rotation-md)**
    Enforces and audits periodic rotation of the domain KRBTGT account password to prevent Golden Ticket attacks.
 
-3. **[REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](#06-operations-maintenance-enable-recycle-bin-md)**
+2. **[REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](#06-operations-maintenance-enable-recycle-bin-md)**
    Enables the forest-wide Recycle Bin optional feature to preserve all link-valued attributes and permit rapid recovery of deleted objects.
 
-4. **[REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#06-operations-maintenance-maintain-gpo-templates-md)**
+3. **[REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#06-operations-maintenance-maintain-gpo-templates-md)**
    Centralizes ADMX administrative templates within the SYSVOL share to prevent console drift and version mismatches.
 
-5. **[REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](#06-operations-maintenance-use-third-party-templates-md)**
+4. **[REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](#06-operations-maintenance-use-third-party-templates-md)**
    Enforces standardized configuration templates to lock down third-party application configurations (browsers, reader software, security guides).
 
-6. **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#06-operations-maintenance-configure-dedicated-tier0-wsus-md)**
+5. **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#06-operations-maintenance-configure-dedicated-tier0-wsus-md)**
    Establishes and secures dedicated WSUS update server endpoints for Tier 0 assets to prevent cross-tier update spoofing.
 
-7. **[REQ-OPS-006 - Redirect Default Users and Computers Containers](#06-operations-maintenance-redirect-default-containers-md)**
+6. **[REQ-OPS-006 - Redirect Default Users and Computers Containers](#06-operations-maintenance-redirect-default-containers-md)**
    Redirects newly created user and computer objects to dedicated, deletion-protected Organizational Units (OUs) to enforce policy application.
 
-8. **[REQ-OPS-007 - Mandate Naming Conventions for GPOs, OUs, and User Accounts](#06-operations-maintenance-mandate-naming-conventions-md)**
+7. **[REQ-OPS-007 - Mandate Naming Conventions for GPOs, OUs, and User Accounts](#06-operations-maintenance-mandate-naming-conventions-md)**
    Enforces consistent prefixes and structures for directory objects and mandates a standard GPO description template to support programmatic auditing.
 
+8. **[REQ-OPS-008 - Configure Daily System State Backups](#06-operations-maintenance-configure-system-state-backups-md)**
+   Enforces daily DC System State backups to secure, offline storage to enable clean bare-metal recovery.
 
-<div style="page-break-before: always;"></div>
+9. **[REQ-OPS-009 - Implement Offline Patch Management via WSUS](#06-operations-maintenance-implement-offline-patch-management-md)**
+   Establishes secure, offline wsusutil metadata import/export processes for air-gapped systems.
 
-<div id="06-operations-maintenance-ops-and-maintenance-md"></div>
+10. **[REQ-OPS-010 - Establish Continuous Security Assessments](#06-operations-maintenance-establish-continuous-security-assessments-md)**
+    Implements a scheduled operational program of offline directory reviews using PingCastle, BloodHound/SharpHound, and ORADAD.
 
-<div id="06-operations-maintenance-ops-and-maintenance-md-module-6-secure-operations-maintenance"></div>
-# Module 6: Secure Operations & Maintenance
+11. **[REQ-OPS-011 - Enable Detailed BSOD Stop Parameters for Crash Control](#06-operations-maintenance-enable-detailed-bsod-parameters-md)**
+    Enables detailed crash display screens to facilitate local hardware/system troubleshooting in isolated infrastructures.
 
-This module defines the processes and tools required to securely operate, maintain, and assess an isolated Active Directory environment over time. In air-gapped networks, tasks like patching and security assessments must be performed entirely offline.
-
----
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-1-backup-disaster-recovery-anssi-r54"></div>
-## 1. Backup & Disaster Recovery (ANSSI R54)
-
-Disaster Recovery is a core pillar of Active Directory security. If Domain Controllers are corrupted or compromised, administrators must recover from trusted, clean states.
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-system-state-backups"></div>
-### System State Backups
-* **Frequency**: Create **System State Backups** daily on at least two Domain Controllers.
-* **Content**: The System State contains the Active Directory database (`ntds.dit`), the SYSVOL share, registry settings, certificates, and DNS records.
-* **Storage Isolation (Offline/Immutable)**: Backups must be stored on separate physical/virtual storage. In high-security systems, enforce write-once-read-many (WORM) storage or store backups in an offline, physically secured media rotation to prevent modifications by compromised accounts.
-* **Validation**: Run recovery exercises quarterly in an isolated network sandbox to verify that restored DCs are functional and free of replication loops.
-
----
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-2-offline-patch-management-wsus-offline"></div>
-## 2. Offline Patch Management (WSUS Offline)
-
-Keeping Domain Controllers and clients patched is critical to resolve OS and RPC vulnerabilities. In air-gapped systems, this requires a sneakernet approach utilizing **Windows Server Update Services (WSUS) import/export**.
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-wsus-importexport-protocol"></div>
-### WSUS Import/Export Protocol
-
-<div class="wsus-flow-container">
-  <div class="wsus-step-card online-wsus">
-    <div class="wsus-step-badge">1. Online WSUS</div>
-    <div class="wsus-step-content">
-      <h4>Online WSUS Server</h4>
-      <p class="wsus-step-desc">Synchronizes with Microsoft Update to retrieve metadata and patch binaries.</p>
-      <div class="wsus-action-list">
-        <span class="wsus-action-tag">wsusutil export</span>
-        <span class="wsus-action-tag">WSUSContent Copy</span>
-      </div>
-    </div>
-  </div>
-  <div class="wsus-flow-arrow">
-    <div class="arrow-line"></div>
-    <div class="arrow-label">Physical Transfer</div>
-  </div>
-  <div class="wsus-step-card media-transfer">
-    <div class="wsus-step-badge">2. Media</div>
-    <div class="wsus-step-content">
-      <h4>Encrypted Media</h4>
-      <p class="wsus-step-desc">Transport encrypted external storage (USB/DVD) physically to air-gapped system.</p>
-      <div class="wsus-action-list">
-        <span class="wsus-action-tag">Sneakernet</span>
-      </div>
-    </div>
-  </div>
-  <div class="wsus-flow-arrow">
-    <div class="arrow-line"></div>
-    <div class="arrow-label">Import / Sync</div>
-  </div>
-  <div class="wsus-step-card offline-wsus">
-    <div class="wsus-step-badge">3. Offline WSUS</div>
-    <div class="wsus-step-content">
-      <h4>Offline WSUS Server</h4>
-      <p class="wsus-step-desc">Imports update metadata and patch binaries, then deploys them locally to DCs and Member Servers.</p>
-      <div class="wsus-action-list">
-        <span class="wsus-action-tag">wsusutil import</span>
-        <span class="wsus-action-tag">Local Push</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-wsusutil-commands"></div>
-### wsusutil Commands
-1. **On the Internet-connected WSUS Server**:
-   * Export the metadata file:
-     ```cmd
-     wsusutil.exe export C:\export\metadata.xml.gz C:\export\export.log
-     ```
-   * Copy `metadata.xml.gz` and the entire `WSUSContent` directory containing patch binaries onto an encrypted storage medium.
-2. **On the Air-Gapped WSUS Server**:
-   * Place the files locally and import metadata:
-     ```cmd
-     wsusutil.exe import C:\import\metadata.xml.gz C:\import\import.log
-     ```
-   * Copy the update binaries into the offline WSUS server's content folder.
-
----
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-3-continuous-security-assessments-anssi-r57"></div>
-## 3. Continuous Security Assessments (ANSSI R57)
-
-Administrators must actively search for misconfigurations, weak permissions, and signs of compromise in Active Directory. In an isolated, air-gapped network, online scanning is impossible, requiring all diagnostic tools to run natively and extract results offline.
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-recommended-offline-assessment-tools-execution-guides"></div>
-### Recommended Offline Assessment Tools & Execution Guides
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-1-pingcastle-active-directory-health-security-auditing"></div>
-#### 1. PingCastle (Active Directory Health & Security Auditing)
-PingCastle evaluates the security posture of an Active Directory domain by querying the directory database via LDAP and generating a comprehensive HTML report with a security score and recommendations mapped to ANSSI guidelines.
-* **Execution Interval**: Run monthly, or after any major schema or GPO changes.
-* **Operational Command**: Run the following command from an administrative workstation to generate the report without user interaction:
-  ```cmd
-  PingCastle.exe --server target.domain.local --level level_Default --xml --no_update
-  ```
-* **Post-Execution**: Transfer the generated HTML report and XML output to a secure auditing platform. Analyze the security score, paying close attention to anomalous Trust relationships and Delegation paths.
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-2-bloodhound-sharphound-lateral-movement-graph-analysis"></div>
-#### 2. BloodHound & SharpHound (Lateral Movement Graph Analysis)
-BloodHound uses graph theory to reveal hidden relationships and complex attack paths within an Active Directory environment. SharpHound is the offline data collector.
-* **Execution Interval**: Run quarterly, or during dedicated red/blue team security reviews.
-* **SharpHound Execution Command**: Run the collector locally from a domain-joined system using:
-  ```cmd
-  SharpHound.exe --CollectionMethods All --Domain target.domain.local --ZipFileName AD_BloodHound_Export.zip
-  ```
-* **Data Processing**: Securely copy the output `.zip` file from the isolated environment. Import the JSON files into the offline BloodHound GUI dashboard to query for attack paths (e.g. finding paths from Domain Users to Domain Admins).
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-3-oradad-offline-active-directory-database-analysis"></div>
-#### 3. ORADAD (Offline Active Directory Database Analysis)
-ORADAD allows administrators to perform offline analysis of Active Directory configurations and database objects, helping audit and flag anomalous permissions or structural variations.
-* **Execution Interval**: Run semi-annually, or during forensic investigation scenarios.
-* **Extraction Command**: Perform offline analysis by leveraging PowerShell to audit AD configuration states or dump schema values without query overhead.
-
----
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-4-crash-control-troubleshooting-bsod-detailed-display"></div>
-## 4. Crash Control & Troubleshooting (BSOD Detailed Display)
-
-During critical system failures, Windows by default displays a simplified Blue Screen of Death (BSOD) screen. Enabling detailed stop error parameters ensures that critical diagnostic information (such as the stop code and parameters) is immediately visible on the physical or virtual console screen. This is crucial for administrators in isolated, air-gapped environments who must troubleshoot system failures without access to online analysis tools or automatic crash dumps.
-
-* **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\CrashControl`
-* **Registry Value**: `DisplayParameters` (REG_DWORD = `1`)
-
----
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-5-administrative-naming-conventions-and-metadata-anssi-r12"></div>
-## 5. Administrative Naming Conventions and Metadata (ANSSI R12)
-
-Maintaining structural discipline across Group Policies, Organizational Units (OUs), and Active Directory accounts is vital to prevent security boundary bypasses, administrative errors, and credential exposure. 
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-standardized-naming-prefixes"></div>
-### Standardized Naming Prefixes
-Administrators must ensure that all directory objects conform to distinct prefixes indicating their tier level and resource class:
-* **Group Policies**: Formatted as `GPO_<Scope>_<Class>_<Name>` (e.g., `GPO_T0_Hardening_DomainControllers`)
-* **Organizational Units**: Formatted as `<Tier>-<ObjectType>-<Function>` (e.g., `T0-Computers-DCs`)
-* **User & Service Accounts**: Formatted with administrative or service prefixes (`a0-`, `a1-`, `a2-`, `s0-`, `s1-`, `s2-`, `g0-`, `g1-`, `g2-`, `bg-`).
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-gpo-description-metadata-template"></div>
-### GPO Description Metadata Template
-Every GPO must contain a structured, YAML-compliant metadata block within its description field to capture ownership, change authorization, creation details, and corresponding security requirements. This allows programmatic validation of policy alignment.
-
----
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-powershell-implementation-guide"></div>
-## PowerShell Implementation Guide
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-1-auditing-system-state-backup-status-audit"></div>
-### 1. Auditing System State Backup Status (Audit)
-
-Run this script locally on a Domain Controller to query the status and location of recent System State backups using the Windows Server Backup module.
-
-[Download Script: Audit-ADBackupStatus.ps1](audit_scripts/Audit-ADBackupStatus.ps1)
-
-```powershell
-# Audit-ADBackupStatus.ps1
-# Audits the status of local system state backups.
-
-Import-Module WindowsServerBackup -ErrorAction SilentlyContinue
-
-Write-Host "--- Auditing System State Backup Status ---" -ForegroundColor Cyan
-
-# Check if Windows Server Backup feature is installed
-$feature = Get-WindowsFeature -Name Windows-Server-Backup -ErrorAction SilentlyContinue
-if ($feature -and $feature.Installed -eq $false) {
-    Write-Warning "Windows Server Backup feature is NOT installed on this machine."
-    exit 1
-}
-
-# Retrieve history of local backups
-try {
-    $backups = Get-WBBackupSet -ErrorAction Stop
-    Write-Host "`n[+] Found $($backups.Count) recorded backup sets." -ForegroundColor Yellow
-    
-    # Sort and output the most recent backups
-    $sortedBackups = $backups | Sort-Object -Property BackupTime -Descending
-    foreach ($bk in $sortedBackups | Select-Object -First 5) {
-        $containsSystemState = $bk.CatalogFlags -match "SystemState"
-        $statusColor = if ($containsSystemState) { "Green" } else { "Yellow" }
-        Write-Host "    - Backup Time: $($bk.BackupTime) | Location: $($bk.VolumePath) | Contains SystemState: $containsSystemState" -ForegroundColor $statusColor
-    }
-} catch {
-    Write-Host "[-] No backup records found on the system. System state backups may not be configured." -ForegroundColor Red
-}
-```
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-2-creating-an-automated-system-state-backup-remediation"></div>
-### 2. Creating an Automated System State Backup (Remediation)
-
-Execute the following PowerShell script to install the Windows Server Backup feature, configure a System State backup policy, and execute an immediate System State backup to a designated disk volume (e.g. `E:`).
-
-[Download Script: Set-ADSystemStateBackup.ps1](implementation_scripts/Set-ADSystemStateBackup.ps1)
-
-```powershell
-# Set-ADSystemStateBackup.ps1
-# Installs Windows Server Backup and executes a System State backup.
-
-Write-Host "--- Initializing System State Backup ---" -ForegroundColor Cyan
-
-# 1. Install Windows Server Backup feature if missing
-$feature = Get-WindowsFeature -Name Windows-Server-Backup
-if ($feature.Installed -eq $false) {
-    Write-Host "[+] Installing Windows Server Backup feature..." -ForegroundColor Gray
-    Install-WindowsFeature -Name Windows-Server-Backup -IncludeAllSubFeature | Out-Null
-    Write-Host "    Feature installed successfully." -ForegroundColor Green
-} else {
-    Write-Host "[+] Windows Server Backup feature is already installed." -ForegroundColor Green
-}
-
-# Import WSB module
-Import-Module WindowsServerBackup
-
-# 2. Define Backup Volume Target
-$BackupVolumePath = "E:\" # Replace with your designated offline backup storage disk
-if (-not (Test-Path $BackupVolumePath)) {
-    Write-Error "Backup target volume '$BackupVolumePath' does not exist. Please specify a valid volume."
-    exit 1
-}
-
-# 3. Create Backup Policy
-Write-Host "[+] Configuring System State Backup Policy..." -ForegroundColor Gray
-$policy = New-WBPolicy
-Add-WBSystemState -Policy $policy | Out-Null
-
-$backupTarget = New-WBBackupTarget -VolumePath $BackupVolumePath
-Add-WBBackupTarget -Policy $policy -Target $backupTarget | Out-Null
-
-Write-Host "    Backup Policy created (Target: $BackupVolumePath, Subject: SystemState)." -ForegroundColor Green
-
-# 4. Execute Backup Job
-Write-Host "[+] Starting System State Backup. This process can take several minutes..." -ForegroundColor Yellow
-$backupJob = Start-WBBackup -Policy $policy -Async
-
-# Monitor backup job status
-while ($backupJob.State -eq "Running" -or $backupJob.State -eq "Verifying") {
-    Write-Host "    - Backup Progress: $($backupJob.PercentComplete)% complete..." -ForegroundColor Gray
-    Start-Sleep -Seconds 10
-    # Refresh backup job status
-    $backupJob = Get-WBJob
-}
-
-# Final output
-$finalJob = Get-WBJob -Previous 1
-if ($finalJob.JobState -eq "Completed") {
-    Write-Host "`nSystem State Backup Completed successfully!" -ForegroundColor Green
-} else {
-    Write-Error "`nBackup failed with status: $($finalJob.JobState). Error: $($finalJob.ErrorDescription)"
-}
-```
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-3-auditing-crash-control-settings-audit"></div>
-### 3. Auditing Crash Control Settings (Audit)
-
-[Download Script: Audit-CrashControl.ps1](audit_scripts/Audit-CrashControl.ps1)
-
-```powershell
-# Audit-CrashControl.ps1
-# Description: Audits whether detailed BSOD parameters are enabled in the registry.
-
-Write-Host "--- Auditing Detailed BSOD Parameters ---" -ForegroundColor Cyan
-
-$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl"
-if (Test-Path $Path) {
-    $Val = Get-ItemProperty -Path $Path -Name "DisplayParameters" -ErrorAction SilentlyContinue
-    if ($Val -and $Val.DisplayParameters -eq 1) {
-        Write-Host "[+] Detailed BSOD stop parameters are ENABLED (Compliant)." -ForegroundColor Green
-    } else {
-        Write-Host "[-] Detailed BSOD stop parameters are DISABLED (Non-Compliant)." -ForegroundColor Red
-        exit 1
-    }
-} else {
-    Write-Host "[-] Registry path HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl not found." -ForegroundColor Red
-    exit 1
-}
-```
-
-<div id="06-operations-maintenance-ops-and-maintenance-md-4-configuring-crash-control-settings-remediation"></div>
-### 4. Configuring Crash Control Settings (Remediation)
-
-[Download Script: Set-CrashControl.ps1](implementation_scripts/Set-CrashControl.ps1)
-
-```powershell
-# Set-CrashControl.ps1
-# Description: Enables detailed BSOD parameters in the registry.
-
-Write-Host "--- Configuring Detailed BSOD Parameters ---" -ForegroundColor Cyan
-
-$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl"
-if (-not (Test-Path $Path)) {
-    New-Item -Path $Path -Force | Out-Null
-}
-
-Set-ItemProperty -Path $Path -Name "DisplayParameters" -Value 1 -Type DWord -Force | Out-Null
-Write-Host "[+] Detailed BSOD stop parameters configured successfully." -ForegroundColor Green
-```
-```
 
 
 <div style="page-break-before: always;"></div>
@@ -16729,6 +16428,744 @@ if ($Compliant) {
 * **ANSSI AD Hardening Guide**: Recommendation R12 (Naming and description convention of GPOs)
 * **CIS Microsoft Windows Server 2016 Benchmark v2.0.0**: Section 1.1.1 (Security policy and resource management)
 * **Microsoft Security Best Practices**: Administrative Account Lifecycle and Group Policy Management Strategy
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="06-operations-maintenance-configure-system-state-backups-md"></div>
+
+<div id="06-operations-maintenance-configure-system-state-backups-md-req-ops-008-configure-daily-system-state-backups"></div>
+# [REQ-OPS-008] Configure Daily System State Backups
+
+<div id="06-operations-maintenance-configure-system-state-backups-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
+
+---
+
+<div id="06-operations-maintenance-configure-system-state-backups-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**: Windows Server Backup feature and local backup policies
+
+---
+
+<div id="06-operations-maintenance-configure-system-state-backups-md-rationale"></div>
+## Rationale
+Disaster Recovery is a core pillar of Active Directory security. If Domain Controllers are corrupted or compromised, administrators must recover from trusted, clean states.
+
+The System State contains the Active Directory database (ntds.dit), the SYSVOL share, registry settings, certificates, and DNS records. 
+
+To ensure resilience:
+1. **Daily Frequency**: Create System State Backups daily on at least two Domain Controllers to minimize data loss.
+2. **Storage Isolation (Offline/Immutable)**: Backups must be stored on separate physical or virtual storage. In high-security systems, enforce write-once-read-many (WORM) storage or store backups in an offline, physically secured media rotation to prevent modifications by compromised accounts.
+3. **Regular Validation**: Run recovery exercises quarterly in an isolated network sandbox to verify that restored DCs are functional and free of replication loops.
+
+---
+
+<div id="06-operations-maintenance-configure-system-state-backups-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Performance Impact**: Creating a system state backup utilizes significant disk I/O and CPU resources. It should be scheduled during off-peak hours to avoid affecting authentication response times.
+* **Storage Requirements**: System State backups consume considerable storage space (typically 10-20 GB or more depending on database size). Ensure target volumes have adequate capacity and are configured to automatically prune older backups.
+* **Access Control**: Backups contain the Active Directory database (including credentials hashes). The backup destination volume must be restricted via NTFS permissions to only Domain Admins and the SYSTEM account.
+
+---
+
+<div id="06-operations-maintenance-configure-system-state-backups-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="06-operations-maintenance-configure-system-state-backups-md-option-a-graphical-user-interface-gui-configuration"></div>
+### Option A: Graphical User Interface (GUI) Configuration
+
+1. Log in to the Domain Controller and open **Server Manager**.
+2. Click **Manage** -> **Add Roles and Features**.
+3. Advance to the **Features** step, check **Windows Server Backup**, and complete the installation.
+4. Open the administrative tool **Windows Server Backup** (wbadmin.msc).
+5. In the Actions pane, click **Backup Schedule...**.
+6. In the Backup Schedule Wizard, click **Next** on the Getting Started page.
+7. Select **Custom** configuration and click **Next**.
+8. Click **Add Items**, check **System State**, and click **OK**.
+9. Specify the time and frequency (once a day, during off-peak hours) and click **Next**.
+10. Choose the destination type (dedicated backup disk, volume, or shared network folder) and complete the wizard.
+
+---
+
+<div id="06-operations-maintenance-configure-system-state-backups-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script block to install the Windows Server Backup feature, configure a System State backup policy, and execute an immediate System State backup to a designated disk volume.
+
+[Download Script: Set-ADSystemStateBackup.ps1](implementation_scripts/Set-ADSystemStateBackup.ps1)
+
+```powershell
+# Set-ADSystemStateBackup.ps1
+# Installs Windows Server Backup and executes a System State backup.
+
+Write-Host "--- Initializing System State Backup ---" -ForegroundColor Cyan
+
+# 1. Install Windows Server Backup feature if missing
+$feature = Get-WindowsFeature -Name Windows-Server-Backup
+if ($feature.Installed -eq $false) {
+    Write-Host "[+] Installing Windows Server Backup feature..." -ForegroundColor Gray
+    Install-WindowsFeature -Name Windows-Server-Backup -IncludeAllSubFeature | Out-Null
+    Write-Host "    Feature installed successfully." -ForegroundColor Green
+} else {
+    Write-Host "[+] Windows Server Backup feature is already installed." -ForegroundColor Green
+}
+
+# Import WSB module
+Import-Module WindowsServerBackup
+
+# 2. Define Backup Volume Target
+$BackupVolumePath = "E:\" # Replace with your designated offline backup storage disk
+if (-not (Test-Path $BackupVolumePath)) {
+    Write-Error "Backup target volume '$BackupVolumePath' does not exist. Please specify a valid volume."
+    exit 1
+}
+
+# 3. Create Backup Policy
+Write-Host "[+] Configuring System State Backup Policy..." -ForegroundColor Gray
+$policy = New-WBPolicy
+Add-WBSystemState -Policy $policy | Out-Null
+
+$backupTarget = New-WBBackupTarget -VolumePath $BackupVolumePath
+Add-WBBackupTarget -Policy $policy -Target $backupTarget | Out-Null
+
+Write-Host "    Backup Policy created (Target: $BackupVolumePath, Subject: SystemState)." -ForegroundColor Green
+
+# 4. Execute Backup Job
+Write-Host "[+] Starting System State Backup. This process can take several minutes..." -ForegroundColor Yellow
+$backupJob = Start-WBBackup -Policy $policy -Async
+
+# Monitor backup job status
+while ($backupJob.State -eq "Running" -or $backupJob.State -eq "Verifying") {
+    Write-Host "    - Backup Progress: $($backupJob.PercentComplete)% complete..." -ForegroundColor Gray
+    Start-Sleep -Seconds 10
+    # Refresh backup job status
+    $backupJob = Get-WBJob
+}
+
+# Final output
+$finalJob = Get-WBJob -Previous 1
+if ($finalJob.JobState -eq "Completed") {
+    Write-Host "`nSystem State Backup Completed successfully!" -ForegroundColor Green
+} else {
+    Write-Error "`nBackup failed with status: $($finalJob.JobState). Error: $($finalJob.ErrorDescription)"
+}
+```
+
+*To verify active backup configurations:*
+
+[Download Script: Audit-ADBackupStatus.ps1](audit_scripts/Audit-ADBackupStatus.ps1)
+
+```powershell
+# Audit-ADBackupStatus.ps1
+# Audits the status of local system state backups.
+
+Import-Module WindowsServerBackup -ErrorAction SilentlyContinue
+
+Write-Host "--- Auditing System State Backup Status ---" -ForegroundColor Cyan
+
+# Check if Windows Server Backup feature is installed
+$feature = Get-WindowsFeature -Name Windows-Server-Backup -ErrorAction SilentlyContinue
+if ($feature -and $feature.Installed -eq $false) {
+    Write-Warning "Windows Server Backup feature is NOT installed on this machine."
+    exit 1
+}
+
+# Retrieve history of local backups
+try {
+    $backups = Get-WBBackupSet -ErrorAction Stop
+    Write-Host "`n[+] Found $($backups.Count) recorded backup sets." -ForegroundColor Yellow
+    
+    # Sort and output the most recent backups
+    $sortedBackups = $backups | Sort-Object -Property BackupTime -Descending
+    foreach ($bk in $sortedBackups | Select-Object -First 5) {
+        $containsSystemState = $bk.CatalogFlags -match "SystemState"
+        $statusColor = if ($containsSystemState) { "Green" } else { "Yellow" }
+        Write-Host "    - Backup Time: $($bk.BackupTime) | Location: $($bk.VolumePath) | Contains SystemState: $containsSystemState" -ForegroundColor $statusColor
+    }
+} catch {
+    Write-Host "[-] No backup records found on the system. System state backups may not be configured." -ForegroundColor Red
+}
+```
+
+---
+
+<div id="06-operations-maintenance-configure-system-state-backups-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R54 (Domain Controller backup and disaster recovery)
+* **Microsoft Security Guidance**: Active Directory Backup and Restore Best Practices
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md"></div>
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-req-ops-009-implement-offline-patch-management-via-wsus"></div>
+# [REQ-OPS-009] Implement Offline Patch Management via WSUS
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Dedicated WSUS Update Servers (Tier 0 & Tier 1/2)
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
+
+---
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**: Offline update synchronization and media transfer procedure
+
+---
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-rationale"></div>
+## Rationale
+Keeping Domain Controllers, member servers, and clients patched is critical to resolve OS and RPC vulnerabilities. In isolated, air-gapped networks, direct connection to Microsoft Update servers is impossible, requiring all patches to be imported offline.
+
+Establishing an offline WSUS sync protocol:
+1. **Prevents Network exposure**: Domain Controllers and administrative hosts do not require access to external network zones.
+2. **Maintains Integrity**: Allows checking update metadata and approvals in a controlled sandbox environment before propagating them to production.
+3. **Automates Distribution**: Uses standard WSUS client policies to distribute approved updates locally with minimal network overhead.
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-wsus-importexport-protocol"></div>
+### WSUS Import/Export Protocol
+
+<div class="wsus-flow-container">
+  <div class="wsus-step-card online-wsus">
+    <div class="wsus-step-badge">1. Online WSUS</div>
+    <div class="wsus-step-content">
+      <h4>Online WSUS Server</h4>
+      <p class="wsus-step-desc">Synchronizes with Microsoft Update to retrieve metadata and patch binaries.</p>
+      <div class="wsus-action-list">
+        <span class="wsus-action-tag">wsusutil export</span>
+        <span class="wsus-action-tag">WSUSContent Copy</span>
+      </div>
+    </div>
+  </div>
+  <div class="wsus-flow-arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">Physical Transfer</div>
+  </div>
+  <div class="wsus-step-card media-transfer">
+    <div class="wsus-step-badge">2. Media</div>
+    <div class="wsus-step-content">
+      <h4>Encrypted Media</h4>
+      <p class="wsus-step-desc">Transport encrypted external storage (USB/DVD) physically to air-gapped system.</p>
+      <div class="wsus-action-list">
+        <span class="wsus-action-tag">Sneakernet</span>
+      </div>
+    </div>
+  </div>
+  <div class="wsus-flow-arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">Import / Sync</div>
+  </div>
+  <div class="wsus-step-card offline-wsus">
+    <div class="wsus-step-badge">3. Offline WSUS</div>
+    <div class="wsus-step-content">
+      <h4>Offline WSUS Server</h4>
+      <p class="wsus-step-desc">Imports update metadata and patch binaries, then deploys them locally to DCs and Member Servers.</p>
+      <div class="wsus-action-list">
+        <span class="wsus-action-tag">wsusutil import</span>
+        <span class="wsus-action-tag">Local Push</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+---
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Overhead**: Performing sneakernet synchronization requires regular manual intervention by administrators to export updates on internet-connected networks, perform virus scans, write to encrypted media, and import onto the air-gapped WSUS server.
+* **Storage Requirements**: Storing full update files on a WSUS server requires substantial storage space (typically several hundred gigabytes for multiple operating systems and products).
+* **Time Drift**: There will be a latency between when patches are released and when they are imported and deployed to air-gapped systems. High-severity patches must be prioritized during scheduled transfer windows.
+
+---
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-wsus-categories-classifications-configuration"></div>
+### WSUS Categories & Classifications Configuration
+Before performing the import/export process, both the online (source) and offline (destination) WSUS servers must be configured with identical Products and Classifications. If the destination server does not have the corresponding categories enabled, the imported update metadata for those categories will be ignored.
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-1-graphical-user-interface-gui-configuration"></div>
+#### 1. Graphical User Interface (GUI) Configuration
+On both the online and offline WSUS administration consoles:
+1. Open the **Windows Server Update Services** console (`wsus.msc`).
+2. Expand the server name and click on **Options** -> **Products and Classifications**.
+3. In the **Products** tab, ensure the exact operating systems present in the environment are selected:
+   * **Windows Server 2016**
+   * **Windows Server 2019**
+   * **Windows Server 2022**
+   * **Windows 10**
+   * **Windows 11**
+4. In the **Classifications** tab, ensure the following classifications are selected:
+   * **Critical Updates**
+   * **Security Updates**
+   * **Definition Updates** (mandatory if distributing Windows Defender signatures)
+   * **Update Rollups** (standard cumulative updates)
+5. Click **Apply** and then click **OK**.
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-2-powershell-configuration"></div>
+#### 2. PowerShell Configuration
+Run the following PowerShell commands as Administrator on both WSUS servers to align Categories and Classifications programmatically:
+
+```powershell
+# Import WSUS module
+Import-Module UpdateServices
+
+Write-Host "--- Aligning WSUS Categories & Classifications ---" -ForegroundColor Cyan
+
+# Define targets
+$TargetClassifications = @("Critical Updates", "Security Updates", "Definition Updates", "Update Rollups")
+$TargetProducts = @("Windows Server 2016", "Windows Server 2019", "Windows Server 2022", "Windows 10", "Windows 11")
+
+# Enable Classifications
+Write-Host "[+] Configuring WSUS Classifications..." -ForegroundColor Gray
+Get-WsusClassification | Where-Object { $TargetClassifications -contains $_.Classification.Title } | Set-WsusClassification
+
+# Enable Products
+Write-Host "[+] Configuring WSUS Products..." -ForegroundColor Gray
+Get-WsusProduct | Where-Object { $TargetProducts -contains $_.Product.Title } | Set-WsusProduct
+
+Write-Host "[+] WSUS categories and classifications updated successfully." -ForegroundColor Green
+```
+
+---
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-option-a-command-line-execution-wsusutil"></div>
+### Option A: Command-line Execution (wsusutil)
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-1-on-the-internet-connected-wsus-server"></div>
+#### 1. On the Internet-Connected WSUS Server
+1. Wait for standard synchronization to complete, or force a sync.
+2. Open a Command Prompt as Administrator.
+3. Export the WSUS metadata file:
+   ```cmd
+   wsusutil.exe export C:\export\metadata.xml.gz C:\export\export.log
+   ```
+4. Copy the metadata file (`metadata.xml.gz`) and the entire `WSUSContent` directory (containing the update binaries) onto an encrypted and scanned storage medium.
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-2-on-the-air-gapped-wsus-server"></div>
+#### 2. On the Air-Gapped WSUS Server
+1. Connect the transfer storage medium and copy the files to a local staging directory (e.g., `C:\import`).
+2. Open a Command Prompt as Administrator.
+3. Import the update metadata:
+   ```cmd
+   wsusutil.exe import C:\import\metadata.xml.gz C:\import\import.log
+   ```
+4. Copy the update binary files from the storage medium into the WSUS content directory of the air-gapped server.
+
+---
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use the following PowerShell script to programmatically import WSUS metadata from a specified location using the native WSUS utility.
+
+[Download Script: Invoke-OfflineWsusImport.ps1](implementation_scripts/Invoke-OfflineWsusImport.ps1)
+
+```powershell
+# Invoke-OfflineWsusImport.ps1
+# Description: Imports WSUS update metadata from an offline backup file.
+
+param (
+    [Parameter(Mandatory = $true)]
+    [string]$MetadataPath,
+    
+    [Parameter(Mandatory = $true)]
+    [string]$LogPath
+)
+
+Write-Host "--- Performing Offline WSUS Import ---" -ForegroundColor Cyan
+
+if (-not (Test-Path $MetadataPath)) {
+    Write-Error "Metadata file not found at: $MetadataPath"
+    exit 1
+}
+
+# Run wsusutil import
+$WsusUtil = "C:\Program Files\Update Services\Tools\wsusutil.exe"
+if (-not (Test-Path $WsusUtil)) {
+    Write-Error "wsusutil.exe not found at default location."
+    exit 1
+}
+
+Write-Host "[+] Running wsusutil import..." -ForegroundColor Yellow
+$Process = Start-Process -FilePath $WsusUtil -ArgumentList "import `"$MetadataPath`" `"$LogPath`"" -Wait -NoNewWindow -PassThru
+
+if ($Process.ExitCode -eq 0) {
+    Write-Host "[+] Offline WSUS Import completed successfully." -ForegroundColor Green
+} else {
+    Write-Error "wsusutil import failed with exit code $($Process.ExitCode)."
+    exit 1
+}
+```
+
+*To verify synchronization state of the local WSUS server:*
+
+[Download Script: Get-OfflineWsusSyncStatus.ps1](audit_scripts/Get-OfflineWsusSyncStatus.ps1)
+
+```powershell
+# Get-OfflineWsusSyncStatus.ps1
+# Description: Checks the synchronization history of the local WSUS server.
+
+Import-Module UpdateServices -ErrorAction SilentlyContinue
+
+Write-Host "--- Auditing WSUS Offline Synchronization Status ---" -ForegroundColor Cyan
+
+try {
+    # Connect to the local WSUS server
+    $wsus = [Microsoft.UpdateServices.Administration.AdminProxy]::GetUpdateServer()
+    $history = $wsus.GetSubscription().GetSynchronizationHistory()
+    
+    if ($history.Count -gt 0) {
+        $lastSync = $history[0]
+        Write-Host "[+] Last WSUS Sync Time: $($lastSync.EndTime)" -ForegroundColor Green
+        Write-Host "[+] Last WSUS Sync Result: $($lastSync.Result)" -ForegroundColor Green
+        if ($lastSync.Result -eq "Succeeded") {
+            exit 0
+        } else {
+            Write-Warning "Last WSUS Sync did not succeed."
+            exit 1
+        }
+    } else {
+        Write-Host "[-] No WSUS synchronization history found." -ForegroundColor Red
+        exit 1
+    }
+} catch {
+    Write-Host "[-] Failed to retrieve WSUS synchronization history. Ensure the WSUS role is installed and services are running." -ForegroundColor Red
+    exit 1
+}
+```
+
+---
+
+<div id="06-operations-maintenance-implement-offline-patch-management-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Section 3.6.2 (Windows Server Update Services)
+* **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 7 (Page 46)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="06-operations-maintenance-establish-continuous-security-assessments-md"></div>
+
+<div id="06-operations-maintenance-establish-continuous-security-assessments-md-req-ops-010-establish-continuous-security-assessments"></div>
+# [REQ-OPS-010] Establish Continuous Security Assessments
+
+<div id="06-operations-maintenance-establish-continuous-security-assessments-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Active Directory Domain Services, Management Workstations
+* **Operating Systems**: Windows Server 2016+, Windows 10/11 Enterprise
+
+---
+
+<div id="06-operations-maintenance-establish-continuous-security-assessments-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**: Administrative diagnostic tools configuration and execution plan
+
+---
+
+<div id="06-operations-maintenance-establish-continuous-security-assessments-md-rationale"></div>
+## Rationale
+Active Directory configurations naturally drift over time as a result of administrative changes, new trust relationships, and changing group policies. Administrators must actively search for misconfigurations, weak permissions, and signs of compromise.
+
+In isolated, air-gapped networks, online security analysis services cannot be reached. Therefore:
+1. **Periodic Scans**: Execute security audits locally using offline-compatible tools (such as PingCastle, BloodHound/SharpHound, or ORADAD).
+2. **Directory Health Monitoring**: Run PingCastle monthly to generate local XML/HTML reports indicating domain vulnerabilities and tracking AD configuration health.
+3. **Lateral Movement Auditing**: Execute SharpHound quarterly to construct lateral movement path graphs, enabling defenders to identify complex trust relationships or delegation chains leading to Tier 0 compromise.
+4. **Data Isolation**: Transfer the diagnostic reports and export ZIPs out of production to secure, offline assessment platforms to limit exposure of sensitive configuration data.
+
+---
+
+<div id="06-operations-maintenance-establish-continuous-security-assessments-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **LDAP & Domain Controller Load**: SharpHound queries Active Directory via LDAP and SAMR protocols, which can generate thousands of queries depending on the directory's size. Schedule directory-wide collectors during low-activity windows to avoid latency.
+* **Security Alarm Generation**: SharpHound and PingCastle execution looks like reconnaissance activity and can trigger alerts in local Antivirus or Endpoint Detection and Response (EDR) agents. Administrators must coordinate scans with security operations teams and authorize the diagnostic binaries.
+* **Data Sensitivity**: BloodHound export ZIPs and PingCastle reports contain highly sensitive structural details of the directory. These files must be stored with strict access controls (Domain Admins only) and purged from administrative workstations after completion.
+
+---
+
+<div id="06-operations-maintenance-establish-continuous-security-assessments-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="06-operations-maintenance-establish-continuous-security-assessments-md-option-a-manual-diagnostic-tool-execution"></div>
+### Option A: Manual Diagnostic Tool Execution
+
+<div id="06-operations-maintenance-establish-continuous-security-assessments-md-1-running-pingcastle-audits"></div>
+#### 1. Running PingCastle Audits
+1. Place `PingCastle.exe` in a secure local diagnostic directory (e.g., `C:\Diagnostics`).
+2. Open a Command Prompt as Administrator on a domain-joined workstation.
+3. Run the following command to generate the HTML report and XML output:
+   ```cmd
+   PingCastle.exe --server target.domain.local --level level_Default --xml --no_update
+   ```
+4. Collect the generated files from the directory and transfer them to a secure analysis terminal.
+
+<div id="06-operations-maintenance-establish-continuous-security-assessments-md-2-running-bloodhoundsharphound-collectors"></div>
+#### 2. Running BloodHound/SharpHound Collectors
+1. Place the `SharpHound.exe` collector binary in the diagnostic directory.
+2. Open a Command Prompt as Administrator on a domain-joined workstation.
+3. Run the collector using standard active directory enumeration methods:
+   ```cmd
+   SharpHound.exe --CollectionMethods All --Domain target.domain.local --ZipFileName AD_BloodHound_Export.zip
+   ```
+4. Copy the resulting zip file to the offline BloodHound graph database dashboard to query and audit lateral movement paths.
+
+---
+
+<div id="06-operations-maintenance-establish-continuous-security-assessments-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use the following PowerShell script to automate the execution of both PingCastle and SharpHound collectors inside a specified diagnostic workspace.
+
+[Download Script: Start-OfflineAssessments.ps1](implementation_scripts/Start-OfflineAssessments.ps1)
+
+```powershell
+# Start-OfflineAssessments.ps1
+# Description: Triggers a PingCastle security audit scan and SharpHound data collection.
+
+param (
+    [string]$DiagnosticsPath = "C:\Diagnostics",
+    [string]$DomainName = "target.domain.local"
+)
+
+Write-Host "--- Starting AD Hardening Offline Assessment Scans ---" -ForegroundColor Cyan
+
+if (-not (Test-Path $DiagnosticsPath)) {
+    New-Item -Path $DiagnosticsPath -ItemType Directory -Force | Out-Null
+}
+
+$PingCastlePath = Join-Path $DiagnosticsPath "PingCastle.exe"
+$SharpHoundPath = Join-Path $DiagnosticsPath "SharpHound.exe"
+
+# 1. Execute PingCastle
+if (Test-Path $PingCastlePath) {
+    Write-Host "[+] Executing PingCastle..." -ForegroundColor Yellow
+    $params = @(
+        "--server", $DomainName,
+        "--level", "level_Default",
+        "--xml",
+        "--no_update",
+        "--output", $DiagnosticsPath
+    )
+    Start-Process -FilePath $PingCastlePath -ArgumentList $params -Wait -NoNewWindow
+    Write-Host "[+] PingCastle scan complete." -ForegroundColor Green
+} else {
+    Write-Error "PingCastle.exe not found at $PingCastlePath. Please place the binary to execute."
+}
+
+# 2. Execute SharpHound
+if (Test-Path $SharpHoundPath) {
+    Write-Host "[+] Executing SharpHound..." -ForegroundColor Yellow
+    $zipName = "AD_BloodHound_Export_" + (Get-Date -Format "yyyyMMdd") + ".zip"
+    $zipPath = Join-Path $DiagnosticsPath $zipName
+    
+    $params = @(
+        "--CollectionMethods", "All",
+        "--Domain", $DomainName,
+        "--ZipFileName", $zipPath
+    )
+    Start-Process -FilePath $SharpHoundPath -ArgumentList $params -Wait -NoNewWindow
+    Write-Host "[+] SharpHound collection complete. Saved to: $zipPath" -ForegroundColor Green
+} else {
+    Write-Error "SharpHound.exe not found at $SharpHoundPath. Please place the binary to execute."
+}
+```
+
+*To verify that diagnostic tools and recent reports exist on the auditing system:*
+
+[Download Script: Get-OfflineAssessmentStatus.ps1](audit_scripts/Get-OfflineAssessmentStatus.ps1)
+
+```powershell
+# Get-OfflineAssessmentStatus.ps1
+# Description: Audits the presence of PingCastle and SharpHound tools and the age of recent reports.
+
+Write-Host "--- Auditing Active Directory Security Assessment Tools ---" -ForegroundColor Cyan
+
+$DiagnosticsPath = "C:\Diagnostics" # Common diagnostics path
+$PingCastlePath = Join-Path $DiagnosticsPath "PingCastle.exe"
+$SharpHoundPath = Join-Path $DiagnosticsPath "SharpHound.exe"
+$ReportAgeDays = 30
+
+$Compliant = $true
+
+# 1. Check PingCastle
+if (Test-Path $PingCastlePath) {
+    Write-Host "[+] PingCastle executable found: $PingCastlePath" -ForegroundColor Green
+    
+    # Check if reports have been generated in the last 30 days
+    $reports = Get-ChildItem -Path $DiagnosticsPath -Filter "*pingcastle*.xml" -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge (Get-Date).AddDays(-$ReportAgeDays) }
+    if ($reports) {
+        Write-Host "    [+] Found $($reports.Count) recent PingCastle report(s) (within last $ReportAgeDays days)." -ForegroundColor Green
+    } else {
+        Write-Warning "    [-] No recent PingCastle report found (older than $ReportAgeDays days)."
+        $Compliant = $false
+    }
+} else {
+    Write-Warning "[-] PingCastle executable NOT found at: $PingCastlePath"
+    $Compliant = $false
+}
+
+# 2. Check SharpHound
+if (Test-Path $SharpHoundPath) {
+    Write-Host "[+] SharpHound executable found: $SharpHoundPath" -ForegroundColor Green
+    
+    # Check if data exports exist
+    $exports = Get-ChildItem -Path $DiagnosticsPath -Filter "*BloodHound*.zip" -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge (Get-Date).AddDays(-$ReportAgeDays) }
+    if ($exports) {
+        Write-Host "    [+] Found $($exports.Count) recent SharpHound export(s) (within last $ReportAgeDays days)." -ForegroundColor Green
+    } else {
+        Write-Warning "    [-] No recent SharpHound export found (older than $ReportAgeDays days)."
+        $Compliant = $false
+    }
+} else {
+    Write-Warning "[-] SharpHound executable NOT found at: $SharpHoundPath"
+    $Compliant = $false
+}
+
+if ($Compliant) {
+    Write-Host "`nStatus: Compliant. Diagnostics tools and recent reports are present." -ForegroundColor Green
+    exit 0
+} else {
+    Write-Host "`nStatus: Non-Compliant. Action required." -ForegroundColor Red
+    exit 1
+}
+```
+
+---
+
+<div id="06-operations-maintenance-establish-continuous-security-assessments-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R57 (Perform continuous security assessments and audits)
+* **CIS Microsoft Windows Server 2016 Benchmark v2.0.0**: Section 18.9 (Administrative tools and logging controls)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="06-operations-maintenance-enable-detailed-bsod-parameters-md"></div>
+
+<div id="06-operations-maintenance-enable-detailed-bsod-parameters-md-req-ops-011-enable-detailed-bsod-stop-parameters-for-crash-control"></div>
+# [REQ-OPS-011] Enable Detailed BSOD Stop Parameters for Crash Control
+
+<div id="06-operations-maintenance-enable-detailed-bsod-parameters-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11 Enterprise
+
+---
+
+<div id="06-operations-maintenance-enable-detailed-bsod-parameters-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Control\CrashControl`
+  * **Registry Value**: `DisplayParameters` (REG_DWORD = `1`)
+
+---
+
+<div id="06-operations-maintenance-enable-detailed-bsod-parameters-md-rationale"></div>
+## Rationale
+During critical system failures (such as a kernel panic or Blue Screen of Death - BSOD), Windows by default displays a simplified error screen intended for general consumers, hiding the actual bugcheck code and parameters.
+
+Enabling detailed stop error parameters is crucial because:
+1. **Offline Diagnostics**: In air-gapped, isolated environments, administrators cannot easily query online resources, transmit automated memory dumps, or contact cloud support.
+2. **Immediate Visibility**: Having the exact stop code (e.g., `0x0000000A`) and the four parameters visible on the screen or virtual console allows operators to diagnose driver, memory, or hardware issues immediately.
+3. **Improves Mean Time to Recovery (MTTR)**: Speeds up troubleshooting during disaster recovery or critical server restore processes.
+
+---
+
+<div id="06-operations-maintenance-enable-detailed-bsod-parameters-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **User Experience**: The screen display layout changes slightly when a crash occurs to show standard troubleshooting parameters. There is no impact on active system performance, running services, or application operations.
+* **Troubleshooting dependencies**: Enabling this value does not affect the creation of memory dump files (minidumps or full dumps), which remain governed by other CrashControl parameters.
+
+---
+
+<div id="06-operations-maintenance-enable-detailed-bsod-parameters-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="06-operations-maintenance-enable-detailed-bsod-parameters-md-option-a-group-policy-object-gpo-configuration"></div>
+### Option A: Group Policy Object (GPO) Configuration
+
+Because this parameter resides in the system registry and is not exposed as a default administrative template, it must be deployed via Group Policy Preferences (GPP):
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management station.
+2. Create a new GPO targeting all domain computers (e.g., `GPO_Global_Config_SystemHardening`) or edit an existing policy.
+3. Navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Right-click the **Registry** node and select **New** -> **Registry Item**.
+5. Configure the following properties:
+   * **Action**: Update
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Control\CrashControl`
+   * **Value Name**: `DisplayParameters`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `1`
+6. Click **OK**.
+7. Link the GPO to the top-level OU structure containing computers, servers, and Domain Controllers.
+
+---
+
+<div id="06-operations-maintenance-enable-detailed-bsod-parameters-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script block to enable detailed stop error parameters locally in the registry.
+
+[Download Script: Set-CrashControl.ps1](implementation_scripts/Set-CrashControl.ps1)
+
+```powershell
+# Set-CrashControl.ps1
+# Description: Enables detailed BSOD parameters in the registry.
+
+Write-Host "--- Configuring Detailed BSOD Parameters ---" -ForegroundColor Cyan
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl"
+if (-not (Test-Path $Path)) {
+    New-Item -Path $Path -Force | Out-Null
+}
+
+Set-ItemProperty -Path $Path -Name "DisplayParameters" -Value 1 -Type DWord -Force | Out-Null
+Write-Host "[+] Detailed BSOD stop parameters configured successfully." -ForegroundColor Green
+```
+
+*To verify that detailed stop parameters are enabled:*
+
+[Download Script: Audit-CrashControl.ps1](audit_scripts/Audit-CrashControl.ps1)
+
+```powershell
+# Audit-CrashControl.ps1
+# Description: Audits whether detailed BSOD parameters are enabled in the registry.
+
+Write-Host "--- Auditing Detailed BSOD Parameters ---" -ForegroundColor Cyan
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl"
+if (Test-Path $Path) {
+    $Val = Get-ItemProperty -Path $Path -Name "DisplayParameters" -ErrorAction SilentlyContinue
+    if ($Val -and $Val.DisplayParameters -eq 1) {
+        Write-Host "[+] Detailed BSOD stop parameters are ENABLED (Compliant)." -ForegroundColor Green
+    } else {
+        Write-Host "[-] Detailed BSOD stop parameters are DISABLED (Non-Compliant)." -ForegroundColor Red
+        exit 1
+    }
+} else {
+    Write-Host "[-] Registry path HKLM:\SYSTEM\CurrentControlSet\Control\CrashControl not found." -ForegroundColor Red
+    exit 1
+}
+```
+
+---
+
+<div id="06-operations-maintenance-enable-detailed-bsod-parameters-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Security Guidance**: Windows CrashControl Registry Reference
+* **ANSSI AD Hardening Guide**: Section 9 (Operations & Troubleshooting guidance)
 
 
 <div style="page-break-before: always;"></div>
@@ -32985,10 +33422,10 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 
 <div id="roadmap-implementation-plan-md-operations-maintenance-requirements"></div>
 ### Operations & Maintenance Requirements
-* **[Secure Operations and Maintenance Baseline (Backup & DR Sections)](#06-operations-maintenance-ops-and-maintenance-md)**: Implements daily AD System State backup, offline/immutable backup isolation, and quarterly recovery drills.
 * **[REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](#06-operations-maintenance-enable-recycle-bin-md)**: Enforces forest-wide Recycle Bin for rapid recovery of deleted objects.
 * **[REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#06-operations-maintenance-maintain-gpo-templates-md)**: Prevents version drift across consoles.
 * **[REQ-OPS-007 - Mandate Naming Conventions for GPOs, OUs, and User Accounts](#06-operations-maintenance-mandate-naming-conventions-md)**: Enforces GPO/OU prefix metadata supporting GPO auditing.
+* **[REQ-OPS-008 - Configure Daily System State Backups](#06-operations-maintenance-configure-system-state-backups-md)**: Implements daily AD System State backup, offline/immutable backup isolation, and quarterly recovery drills.
 
 <div id="roadmap-implementation-plan-md-domain-controller-requirements"></div>
 ### Domain Controller Requirements
@@ -33028,9 +33465,9 @@ This phase focuses on isolating credentials inside memory and network packets to
 
 <div id="roadmap-implementation-plan-md-operations-maintenance-requirements"></div>
 ### Operations & Maintenance Requirements
-* **[Secure Operations and Maintenance Baseline (Offline Patching Sections)](#06-operations-maintenance-ops-and-maintenance-md)**: Implements offline WSUS metadata imports/exports (sneakernet transport).
 * **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#06-operations-maintenance-configure-dedicated-tier0-wsus-md)**: Secures dedicated patch servers to prevent cross-tier update spoofing.
 * **[REQ-OPS-006 - Redirect Default Users and Computers Containers](#06-operations-maintenance-redirect-default-containers-md)**: Prevents newly joined machines from staying in unmanaged default OUs.
+* **[REQ-OPS-009 - Implement Offline Patch Management via WSUS](#06-operations-maintenance-implement-offline-patch-management-md)**: Implements offline WSUS metadata imports/exports (sneakernet transport).
 
 <div id="roadmap-implementation-plan-md-domain-controller-requirements"></div>
 ### Domain Controller Requirements
@@ -33117,8 +33554,9 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 
 <div id="roadmap-implementation-plan-md-operations-maintenance-requirements"></div>
 ### Operations & Maintenance Requirements
-* **[Secure Operations and Maintenance Baseline (Continuous Assessment)](#06-operations-maintenance-ops-and-maintenance-md)**: Integrates monthly PingCastle scans, quarterly BloodHound analyses, and semi-annual offline database checks.
 * **[REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](#06-operations-maintenance-use-third-party-templates-md)**: Standardizes security settings for custom application baselines.
+* **[REQ-OPS-010 - Establish Continuous Security Assessments](#06-operations-maintenance-establish-continuous-security-assessments-md)**: Integrates monthly PingCastle scans, quarterly BloodHound analyses, and semi-annual offline database checks.
+* **[REQ-OPS-011 - Enable Detailed BSOD Stop Parameters for Crash Control](#06-operations-maintenance-enable-detailed-bsod-parameters-md)**: Enables detailed crash diagnostics for air-gapped system recovery.
 
 <div id="roadmap-implementation-plan-md-domain-controller-requirements"></div>
 ### Domain Controller Requirements
@@ -33261,8 +33699,8 @@ This document maps the recommendations of the **ANSSI (French National Agency fo
 | **R48** | Configure advanced security audit policies | Audit Policies | **Covered** | [REQ-LOG-001](#05-logging-monitoring-configure-advanced-audit-policies-md) |
 | **R50** | Configure PowerShell and command-line auditing | PowerShell Auditing | **Covered** | [REQ-LOG-002](#05-logging-monitoring-configure-powershell-and-command-line-auditing-md) |
 | **R52** | Deploy and harden Sysmon and configure SIEM log shipping | Monitoring & Shipping | **Covered** | [REQ-LOG-003](#05-logging-monitoring-deploy-and-harden-sysmon-md), [REQ-LOG-004](#05-logging-monitoring-configure-siem-log-shipping-md) |
-| **R54** | Establish secure Domain Controller backup and disaster recovery | Disaster Recovery | **Covered** | [REQ-OPS-002](#06-operations-maintenance-enable-recycle-bin-md), [ops-and-maintenance.md](#06-operations-maintenance-ops-and-maintenance-md) |
-| **R57** | Perform continuous security assessments and privileged group audits | Security Assessments | **Covered** | [REQ-ARCH-003](#01-architecture-audit-privileged-groups-md), [ops-and-maintenance.md](#06-operations-maintenance-ops-and-maintenance-md) |
+| **R54** | Establish secure Domain Controller backup and disaster recovery | Disaster Recovery | **Covered** | [REQ-OPS-002](#06-operations-maintenance-enable-recycle-bin-md), [REQ-OPS-008](#06-operations-maintenance-configure-system-state-backups-md) |
+| **R57** | Perform continuous security assessments and privileged group audits | Security Assessments | **Covered** | [REQ-ARCH-003](#01-architecture-audit-privileged-groups-md), [REQ-OPS-010](#06-operations-maintenance-establish-continuous-security-assessments-md) |
 | **R58** | Deploy and harden Privileged Access Workstations (PAWs) | PAW Deployment | **Covered** | [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-PAW-004](#07-paws-enable-bitlocker-md), [REQ-PAW-005](#07-paws-configure-uefi-security-md), [REQ-PAW-006](#07-paws-enable-hardware-virtualization-and-dma-protection-md) |
 | **R64** | Configure Active Directory Authentication Silos and Policies | Authentication Silos | **Covered** | [REQ-ID-012](#03-identities-services-configure-authentication-silos-md) |
 | **R80** | Configure Authentication Policies for administrative groups | Authentication Silos | **Covered** | [REQ-ID-012](#03-identities-services-configure-authentication-silos-md) |
