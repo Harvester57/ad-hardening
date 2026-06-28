@@ -164,6 +164,9 @@
 ## Implementation Roadmap
 * [Implementation Plan and Prioritized Roadmap](roadmap/implementation-plan.md)
 
+## Audit Framework
+* [PowerShell DSC Audit Framework](dsc/README.md)
+
 ## Compliance Mapping
 * [ANSSI Compliance Matrix](compliance/anssi.md)
 * [CIS Benchmarks Compliance Matrix](compliance/cis.md)
