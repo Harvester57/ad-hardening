@@ -164,6 +164,12 @@
     * [REQ-END-030 - Configure svchost.exe Mitigation Options](08-endpoints/configure-svchost-mitigation.md)
     * [REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](08-endpoints/enable-kernel-shadow-stacks.md)
 
+## Implementation Roadmap
+* [Implementation Plan and Prioritized Roadmap](roadmap/implementation-plan.md)
+
+## Audit Framework
+* [PowerShell DSC Audit Framework](dsc/README.md)
+
 ## Compliance Mapping
 * [ANSSI Compliance Matrix](compliance/anssi.md)
 * [CIS Benchmarks Compliance Matrix](compliance/cis.md)

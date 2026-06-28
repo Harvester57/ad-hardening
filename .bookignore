@@ -1,0 +1,3 @@
+# Ignore the compiled unified guidebook in HonKit build to prevent duplicate parsing and heap out of memory
+AD-Hardening-Guidebook.md
+AD-Hardening-Guidebook.pdf

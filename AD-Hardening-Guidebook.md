@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: f7b9826 | Generated: June 28, 2026</span>
+      <span>Commit: 8786a0c | Generated: June 29, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -39,7 +39,7 @@ pdf_options:
     <li>Tier 2 Client Workstations: Windows 10 and above</li>
   </ul>
   <hr>
-  <p><em>Generated dynamically on: June 28, 2026</em></p>
+  <p><em>Generated dynamically on: June 29, 2026</em></p>
 </div>
 
 <div id="README-md"></div>

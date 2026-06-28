@@ -58,6 +58,20 @@ def main():
         else:
             print(f"Warning: Module README {module_readme} not found.")
 
+    # Add Implementation Roadmap
+    roadmap_path = "roadmap/implementation-plan.md"
+    if os.path.exists(os.path.join(repo_root, roadmap_path)):
+        summary_lines.append("")
+        summary_lines.append("## Implementation Roadmap")
+        summary_lines.append(f"* [Implementation Plan and Prioritized Roadmap]({roadmap_path})")
+
+    # Add Audit Framework
+    dsc_readme_path = "dsc/README.md"
+    if os.path.exists(os.path.join(repo_root, dsc_readme_path)):
+        summary_lines.append("")
+        summary_lines.append("## Audit Framework")
+        summary_lines.append(f"* [PowerShell DSC Audit Framework]({dsc_readme_path})")
+
     # Add Compliance Matrices
     compliance_files = [
         ("ANSSI Compliance Matrix", "compliance/anssi.md"),
