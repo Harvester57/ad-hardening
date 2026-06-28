@@ -238,3 +238,259 @@ a:hover {
     print-color-adjust: exact;
   }
 }
+
+/* Tiering Model Visualizer */
+.tiering-model-container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
+  margin: 6mm 0;
+}
+
+.tier-card {
+  display: flex;
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.01) !important;
+  page-break-inside: avoid !important;
+}
+
+.tier-badge {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 14pt !important;
+  width: 100px !important;
+  min-width: 100px !important;
+  color: #ffffff !important;
+  text-transform: uppercase !important;
+}
+
+.tier-0 .tier-badge {
+  background-color: #3b82f6 !important;
+}
+.tier-1 .tier-badge {
+  background-color: #f59e0b !important;
+}
+.tier-2 .tier-badge {
+  background-color: #10b981 !important;
+}
+
+.tier-card.tier-0 {
+  border-left: 4px solid #3b82f6 !important;
+}
+.tier-card.tier-1 {
+  border-left: 4px solid #f59e0b !important;
+}
+.tier-card.tier-2 {
+  border-left: 4px solid #10b981 !important;
+}
+
+.tier-content {
+  padding: 15px !important;
+  flex-grow: 1 !important;
+}
+
+.tier-content h3 {
+  margin-top: 0 !important;
+  margin-bottom: 5px !important;
+  font-family: 'Outfit', sans-serif !important;
+  color: #1e3a8a !important;
+  font-weight: 600 !important;
+}
+
+.tier-desc {
+  font-size: 9.5pt !important;
+  color: #4b5563 !important;
+  margin-bottom: 10px !important;
+  line-height: 1.4 !important;
+  text-align: left !important;
+}
+
+.tier-elements {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+}
+
+.element-tag {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #1f2937 !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  font-size: 8.5pt !important;
+  font-weight: 500 !important;
+}
+
+.tier-connector {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin: 3px 0 !important;
+  page-break-inside: avoid !important;
+}
+
+.connector-line {
+  width: 2px !important;
+  height: 15px !important;
+  background-color: #e2e8f0 !important;
+}
+
+.connector-rule {
+  font-size: 8.5pt !important;
+  font-weight: 600 !important;
+  padding: 2px 10px !important;
+  border-radius: 20px !important;
+  border: 1px solid transparent !important;
+}
+
+.connector-rule.block-logon {
+  background-color: #fef2f2 !important;
+  border-color: #fca5a5 !important;
+  color: #b91c1c !important;
+}
+
+.connector-rule.secure-mgmt {
+  background-color: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1d4ed8 !important;
+}
+
+/* WSUS Flow Visualizer */
+.wsus-flow-container {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 15px;
+  margin: 6mm 0;
+  font-family: 'Inter', sans-serif;
+  page-break-inside: avoid !important;
+}
+
+.wsus-step-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.01) !important;
+  page-break-inside: avoid !important;
+}
+
+.wsus-step-badge {
+  padding: 6px 10px !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 8.5pt !important;
+  color: #ffffff !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+}
+
+.online-wsus .wsus-step-badge {
+  background-color: #3b82f6 !important;
+}
+.media-transfer .wsus-step-badge {
+  background-color: #f59e0b !important;
+}
+.offline-wsus .wsus-step-badge {
+  background-color: #10b981 !important;
+}
+
+.wsus-step-card.online-wsus {
+  border-top: 4px solid #3b82f6 !important;
+}
+.wsus-step-card.media-transfer {
+  border-top: 4px solid #f59e0b !important;
+}
+.wsus-step-card.offline-wsus {
+  border-top: 4px solid #10b981 !important;
+}
+
+.wsus-step-content {
+  padding: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex-grow: 1 !important;
+}
+
+.wsus-step-content h4 {
+  margin-top: 0 !important;
+  margin-bottom: 4px !important;
+  font-family: 'Outfit', sans-serif !important;
+  color: #1e3a8a !important;
+  font-weight: 600 !important;
+  font-size: 10pt !important;
+}
+
+.wsus-step-desc {
+  font-size: 8.5pt !important;
+  color: #4b5563 !important;
+  margin-bottom: 10px !important;
+  line-height: 1.3 !important;
+  text-align: left !important;
+  flex-grow: 1 !important;
+}
+
+.wsus-action-list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+}
+
+.wsus-action-tag {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #1f2937 !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+  font-size: 7.5pt !important;
+  font-weight: 500 !important;
+}
+
+/* Connectors */
+.wsus-flow-arrow {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  min-width: 60px !important;
+}
+
+.arrow-line {
+  height: 2px !important;
+  width: 30px !important;
+  background-color: #e2e8f0 !important;
+  position: relative !important;
+}
+
+.arrow-line::after {
+  content: '' !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: -3px !important;
+  width: 0 !important;
+  height: 0 !important;
+  border-top: 4px solid transparent !important;
+  border-bottom: 4px solid transparent !important;
+  border-left: 6px solid #e2e8f0 !important;
+}
+
+.arrow-label {
+  font-size: 7.5pt !important;
+  font-weight: 600 !important;
+  color: #4b5563 !important;
+  text-align: center !important;
+}
+
+
