@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 8786a0c | Generated: June 29, 2026</span>
+      <span>Commit: 04138c5 | Generated: June 29, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -33371,7 +33371,7 @@ if ($script:Vulnerable) {
 
 This document outlines the prioritized implementation plan for Domain Controllers, Endpoints, and Privileged Access Workstations (PAWs). Hardening a production Active Directory environment requires balancing security posture improvements against operational disruption and engineering effort.
 
-To achieve this, the security controls in this guidebook are organized into five sequential phases based on their real-world impact on preventing compromise, ease of implementation, and potential compatibility impact. 
+To achieve this, the security controls in this guidebook are organized into five sequential phases based on their real-world impact on preventing compromise, ease of implementation, and potential compatibility impact.
 
 ---
 
@@ -33406,22 +33406,33 @@ Architectural choices must be made and established **before** implementing indiv
 * **[REQ-ARCH-005 - Default Domain and Domain Controllers Policies Management](#01-architecture-default-policies-recommendations-md)**: Standardizes GPO hierarchy and separates default policy links.
 * **[REQ-ARCH-006 - Harden Active Directory Domain Trusts](#01-architecture-harden-domain-trusts-md)**: Configures secure trust filters and disables SID history routing where appropriate.
 
+<div id="roadmap-implementation-plan-md-identities-services-requirements"></div>
+### Identities & Services Requirements
+* **[REQ-ID-010 - Restrict Schema Administrators Group Membership](#03-identities-services-restrict-schema-admins-md)**: Restricts membership of the Schema Administrators group to minimize administrative privilege footprint.
+* **[REQ-ID-011 - Enforce Accidental Deletion Protection on Organizational Units](#03-identities-services-prevent-accidental-deletion-ous-md)**: Enables accidental deletion protection on all active Organizational Units to prevent directory data loss.
+
+<div id="roadmap-implementation-plan-md-network-firewall-requirements"></div>
+### Network & Firewall Requirements
+* **[REQ-NET-001 - Configure Active Directory Port Matrix](#04-network-firewall-configure-ad-port-matrix-md)**: Standardizes the AD port matrix firewall rules for domain controllers and member servers.
+
 ---
 
 <div id="roadmap-implementation-plan-md-phase-1-critical-risk-reduction-operational-baselines"></div>
 ## Phase 1: Critical Risk Reduction & Operational Baselines
 
-This phase targets the elimination of immediately exploitable vulnerability classes, including coercive authentication, protocol relaying, name resolution poisoning, and default password reuse. Crucially, it also implements the core backup baselines to ensure a recovery path exists before deeper hardening parameters are deployed.
+This phase targets the elimination of immediately exploitable vulnerability classes, including coercive authentication, protocol relaying, name resolution poisoning, default password reuse, and PKI template vulnerabilities. Crucially, it also implements the core backup, auditing, and LAPS baselines to establish recovery and visibility before deeper hardening parameters are deployed.
 
 <div id="roadmap-implementation-plan-md-security-posture-impact"></div>
 ### Security Posture Impact
 * Enforces backup and restore procedures to protect against fatal misconfigurations or ransomware.
 * Blocks coercion techniques (such as PetitPotam or DFSCoerce) that allow attackers to instantly compromise Domain Controllers from standard domain accounts.
 * Neutralizes LLMNR/mDNS spoofing (such as Responder attacks) that capture hashes on local network segments.
-* Standardizes naming schemas to ensure structured GPO audit capabilities.
+* Standardizes naming schemas and establishes foundational ADCS and local administrator password management (LAPS).
+* Implements essential security auditing for PowerShell and process creation to ensure visibility.
 
 <div id="roadmap-implementation-plan-md-operations-maintenance-requirements"></div>
 ### Operations & Maintenance Requirements
+* **[REQ-OPS-001 - Enforce KRBTGT Password Rotation](#06-operations-maintenance-enforce-krbtgt-password-rotation-md)**: Implements standard 2-step rotation of the domain key ticket account.
 * **[REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](#06-operations-maintenance-enable-recycle-bin-md)**: Enforces forest-wide Recycle Bin for rapid recovery of deleted objects.
 * **[REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#06-operations-maintenance-maintain-gpo-templates-md)**: Prevents version drift across consoles.
 * **[REQ-OPS-007 - Mandate Naming Conventions for GPOs, OUs, and User Accounts](#06-operations-maintenance-mandate-naming-conventions-md)**: Enforces GPO/OU prefix metadata supporting GPO auditing.
@@ -33434,7 +33445,19 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 * **[REQ-DC-003 - Disable NTLMv1](#02-domain-controllers-disable-ntlmv1-md)**: Mitigates weak cryptographic authentication.
 * **[REQ-DC-008 - Disable Print Spooler Service](#02-domain-controllers-disable-print-spooler-md)**: Disables spooler to block PrintNightmare and coercion.
 * **[REQ-DC-015 - Migrate SYSVOL Replication to DFSR](#02-domain-controllers-migrate-sysvol-replication-dfsr-md)**: Retires legacy FRS replication.
+* **[REQ-DC-016 - Harden adminSDHolder Permissions](#02-domain-controllers-harden-adminsdholder-permissions-md)**: Blocks permission changes to high-privilege templates.
 * **[REQ-DC-024 - Configure dSHeuristics](#02-domain-controllers-configure-dsheuristics-md)**: Restricts anonymous directory access.
+
+<div id="roadmap-implementation-plan-md-identities-services-requirements"></div>
+### Identities & Services Requirements
+* **[REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](#03-identities-services-enable-laps-md)**: Implements Windows LAPS or Classic LAPS to rotate local administrator passwords periodically.
+* **[REQ-ID-006 - Rename and Disable Default Administrator and Guest Accounts](#03-identities-services-harden-default-accounts-md)**: Disables the default Guest account and renames the default Administrator account.
+* **[REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#03-identities-services-harden-adcs-pki-md)**: Hardens Active Directory Certificate Services (ADCS) and PKI templates against privilege escalation.
+
+<div id="roadmap-implementation-plan-md-logging-monitoring-requirements"></div>
+### Logging & Monitoring Requirements
+* **[REQ-LOG-001 - Configure Advanced Security Audit Policies](#05-logging-monitoring-configure-advanced-audit-policies-md)**: Configures advanced security audit policies to enable comprehensive event logging.
+* **[REQ-LOG-002 - Configure PowerShell and Command-Line Auditing](#05-logging-monitoring-configure-powershell-and-command-line-auditing-md)**: Enforces PowerShell script block and command-line process auditing.
 
 <div id="roadmap-implementation-plan-md-paw-requirements"></div>
 ### PAW Requirements
@@ -33455,13 +33478,14 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 <div id="roadmap-implementation-plan-md-phase-2-credential-session-isolation-high-impact"></div>
 ## Phase 2: Credential & Session Isolation (High Impact)
 
-This phase focuses on isolating credentials inside memory and network packets to block credential dumping tools (like Mimikatz) and session hijacking. It also integrates isolated update deployment mechanisms.
+This phase focuses on isolating credentials inside memory and network packets to block credential dumping tools (like Mimikatz) and session hijacking. It also integrates isolated update deployment mechanisms, restricts Kerberos delegations, secures network authentication protocols, and implements robust service account policies.
 
 <div id="roadmap-implementation-plan-md-security-posture-impact"></div>
 ### Security Posture Impact
 * Enforces network cryptographic integrity via SMB signing and LDAP channel binding, stopping man-in-the-middle relays.
 * Protects the Local Security Authority Subsystem Service (LSASS) process from debugging and memory reading.
 * Redirects default directory containers to ensure new objects receive security policies automatically.
+* Restricts Kerberos delegation and deploys fine-grained password and service account policies.
 
 <div id="roadmap-implementation-plan-md-operations-maintenance-requirements"></div>
 ### Operations & Maintenance Requirements
@@ -33479,6 +33503,28 @@ This phase focuses on isolating credentials inside memory and network packets to
 * **[REQ-DC-011 - Restrict Remote SAM API Access](#02-domain-controllers-restrict-ntds-sam-api-md)**: Restricts remote account listing.
 * **[REQ-DC-019 - Enforce RDP Restricted Admin Mode](#02-domain-controllers-enforce-rdp-restricted-admin-md)**: Stops administrative credential caching during RDP.
 * **[REQ-DC-025 - Configure Security Options for Domain Controllers](#02-domain-controllers-configure-security-options-md)**: Locks anonymous pipe access and credential parameters.
+
+<div id="roadmap-implementation-plan-md-identities-services-requirements"></div>
+### Identities & Services Requirements
+* **[REQ-ID-001 - Enforce Fine-Grained Password Policies](#03-identities-services-enforce-fgpp-md)**: Enforces password complexity, length, and lockout policies using Fine-Grained Password Policies.
+* **[REQ-ID-003 - Implement Group Managed Service Accounts (gMSA)](#03-identities-services-harden-service-accounts-md)**: Deploys group Managed Service Accounts (gMSAs) to automate password management for services.
+* **[REQ-ID-004 - Restrict Kerberos Delegation](#03-identities-services-restrict-kerberos-delegation-md)**: Restricts Kerberos delegation configurations to prevent delegation and relay-to-delegation attacks.
+* **[REQ-ID-005 - Configure and Populate Protected Users Group](#03-identities-services-configure-protected-users-group-md)**: Configures the Protected Users security group to restrict credential caching and weak delegation.
+* **[REQ-ID-007 - Restrict Interactive Logons for Service Accounts](#03-identities-services-restrict-service-account-logons-md)**: Blocks interactive and remote logons for service accounts using GPO user rights assignments.
+* **[REQ-ID-009 - Enforce Kerberos Pre-Authentication](#03-identities-services-enforce-kerberos-preauthentication-md)**: Configures accounts to mandate Kerberos pre-authentication, mitigating offline AS-REP roasting.
+* **[REQ-ID-013 - Clean Up adminCount Attribute Orphans](#03-identities-services-cleanup-admincount-orphans-md)**: Cleans up the adminCount attribute on non-privileged accounts to prevent administrative ACL persistence.
+* **[REQ-ID-014 - Renew KDS Root Keys and gMSA Secrets](#03-identities-services-renew-kds-keys-gmsa-secrets-md)**: Automatically renews KDS root keys and gMSA secrets to maintain cryptographic validity.
+* **[REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](#03-identities-services-restrict-pre-windows-2000-compatible-access-group-md)**: Restricts the Pre-Windows 2000 Compatible Access group to block anonymous directory listings.
+
+<div id="roadmap-implementation-plan-md-network-firewall-requirements"></div>
+### Network & Firewall Requirements
+* **[REQ-NET-007 - Enforce SMBv3 Security and Digitally Sign/Encrypt Communications](#04-network-firewall-enforce-smbv3-security-md)**: Enforces SMBv3 security parameters, including message signing and encryption.
+* **[REQ-NET-009 - Configure Hardened UNC Paths and LDAP Client Signing](#04-network-firewall-configure-hardened-unc-paths-md)**: Hardens UNC paths (UNC Hardening) and mandates LDAP client signing parameters.
+
+<div id="roadmap-implementation-plan-md-logging-monitoring-requirements"></div>
+### Logging & Monitoring Requirements
+* **[REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](#05-logging-monitoring-deploy-and-harden-sysmon-md)**: Deploys and hardens Microsoft Sysmon to detect advanced host-based anomalies.
+* **[REQ-LOG-004 - Configure Secure SIEM Log Shipping](#05-logging-monitoring-configure-siem-log-shipping-md)**: Enforces secure, encrypted SIEM log shipping for central log correlation.
 
 <div id="roadmap-implementation-plan-md-paw-requirements"></div>
 ### PAW Requirements
@@ -33499,25 +33545,34 @@ This phase focuses on isolating credentials inside memory and network packets to
 <div id="roadmap-implementation-plan-md-phase-3-tiering-hardware-rooted-protections-strategic"></div>
 ## Phase 3: Tiering & Hardware-Rooted Protections (Strategic)
 
-This phase establishes the physical boundaries and hardware-based trust mechanisms that form the foundations of Tier 0 administrative workstations (PAWs).
+This phase establishes the physical boundaries, hardware-based trust mechanisms, and deep tiering segmentations that form the foundations of Tier 0 administrative workstations (PAWs) and secure network isolation.
 
 <div id="roadmap-implementation-plan-md-security-posture-impact"></div>
 ### Security Posture Impact
 * Assures that administrative systems cannot be modified by offline attacks (via BitLocker and firmware locks).
 * Ensures the boot sequence is verified from a hardware trust anchor (TPM 2.0).
-* Enforces KRBTGT password rotation to invalidate existing Kerberos tickets.
-
-<div id="roadmap-implementation-plan-md-operations-maintenance-requirements"></div>
-### Operations & Maintenance Requirements
-* **[REQ-OPS-001 - Enforce KRBTGT Password Rotation](#06-operations-maintenance-enforce-krbtgt-password-rotation-md)**: Implements standard 2-step rotation of the domain key ticket account.
+* Cryptographically isolates tiers on the network using IPsec domain isolation.
+* Enforces smart card requirements for administrative accounts.
 
 <div id="roadmap-implementation-plan-md-domain-controller-requirements"></div>
 ### Domain Controller Requirements
 * **[REQ-DC-010 - Restrict Kerberos Encryption Types](#02-domain-controllers-restrict-kerberos-encryption-md)**: Enforces AES-only encryption for Kerberos.
-* **[REQ-DC-016 - Harden adminSDHolder Permissions](#02-domain-controllers-harden-adminsdholder-permissions-md)**: Blocks permission changes to high-privilege templates.
 * **[REQ-DC-017 - Harden Microsoft DNS AD Container Permissions](#02-domain-controllers-harden-dns-container-permissions-md)**: Prevents server-level DNS hijack DLLs.
 * **[REQ-DC-018 - Harden Virtualization Hosts for Domain Controllers](#02-domain-controllers-harden-dc-virtualization-hosts-md)**: Places virtualized domain controllers inside a secure Tier 0 host boundary.
 * **[REQ-DC-023 - Configure User Rights Assignments for Domain Controllers](#02-domain-controllers-configure-user-rights-assignments-md)**: Limits operator rights on DCs.
+
+<div id="roadmap-implementation-plan-md-identities-services-requirements"></div>
+### Identities & Services Requirements
+* **[REQ-ID-008 - Enforce User and Service Account Kerberos Encryption (AES-Only)](#03-identities-services-enforce-user-aes-encryption-md)**: Restricts user and service account Kerberos encryption to AES-only, disabling weak DES/RC4.
+* **[REQ-ID-012 - Configure Active Directory Authentication Silos and Policies](#03-identities-services-configure-authentication-silos-md)**: Establishes Authentication Silos and Policies to isolate Tier 0 administrative account sessions.
+* **[REQ-ID-016 - Configure Logon Screen and Credentials Delegation](#03-identities-services-configure-credential-delegation-md)**: Disables credential delegation and configures logon screen security parameters.
+* **[REQ-ID-019 - Enforce Smart Card Authentication for Privileged Users](#03-identities-services-enforce-smartcard-privileged-users-md)**: Mandates smart card logon requirements for administrative accounts to enforce hardware-based MFA.
+
+<div id="roadmap-implementation-plan-md-network-firewall-requirements"></div>
+### Network & Firewall Requirements
+* **[REQ-NET-003 - Configure Workstation and Server Isolation](#04-network-firewall-configure-workstation-isolation-md)**: Segregates workstations and member servers to prevent peer-to-peer lateral movement.
+* **[REQ-NET-004 - Configure IPsec Domain Isolation](#04-network-firewall-configure-ipsec-domain-isolation-md)**: Enforces IPsec-based domain isolation to cryptographically segment administrative tiers.
+* **[REQ-NET-005 - Harden IPsec Cryptographic Configurations](#04-network-firewall-harden-ipsec-cryptography-md)**: Hardens IPsec cryptographic algorithms and parameters to ensure network integrity.
 
 <div id="roadmap-implementation-plan-md-paw-requirements"></div>
 ### PAW Requirements
@@ -33551,6 +33606,7 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * Prevents the execution of unauthorized binaries, scripts, or malicious installers via application blocklists/allowlists.
 * Restricts system executables (`svchost.exe`) from loading arbitrary non-Microsoft binaries.
 * Audits Active Directory configurations monthly via offline scanners.
+* Tightens firewall configurations and disables unnecessary system services.
 
 <div id="roadmap-implementation-plan-md-operations-maintenance-requirements"></div>
 ### Operations & Maintenance Requirements
@@ -33570,6 +33626,20 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](#02-domain-controllers-configure-telemetry-privacy-md)**: Limits diagnostics collection.
 * **[REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](#02-domain-controllers-configure-untrusted-font-blocking-md)**: Protects kernel font parser.
 * **[REQ-DC-029 - Configure svchost.exe Mitigation Options](#02-domain-controllers-configure-svchost-mitigation-md)**: Limits svchost sub-process execution.
+
+<div id="roadmap-implementation-plan-md-identities-services-requirements"></div>
+### Identities & Services Requirements
+* **[REQ-ID-017 - Disable Machine Account Quota](#03-identities-services-disable-machine-account-quota-md)**: Reduces the Machine Account Quota (ms-DS-MachineAccountQuota) to 0 to prevent unauthorized machine domain joins.
+
+<div id="roadmap-implementation-plan-md-network-firewall-requirements"></div>
+### Network & Firewall Requirements
+* **[REQ-NET-002 - Restrict RPC Dynamic Ports](#04-network-firewall-restrict-rpc-dynamic-ports-md)**: Limits RPC dynamic ports to restrict the active network service attack surface.
+* **[REQ-NET-006 - Harden TLS Protocols, Cipher Suites, and Elliptic Curves](#04-network-firewall-harden-tls-configuration-md)**: Disables weak TLS protocols and configures secure cipher suites for system-wide channels.
+* **[REQ-NET-008 - Configure Firewall Logging and Operational Settings](#04-network-firewall-configure-firewall-logging-md)**: Configures Windows Defender Firewall logging parameters to maintain full network audit records.
+* **[REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](#04-network-firewall-harden-winrm-service-md)**: Restricts WinRM remote management and limits remote RPC client connections.
+* **[REQ-NET-011 - Configure WMI Static Port](#04-network-firewall-configure-wmi-static-port-md)**: Restricts WMI service connections to a dedicated static network port.
+* **[REQ-NET-012 - Configure RPC Filters for Named Pipes](#04-network-firewall-configure-rpc-named-pipe-filters-md)**: Restricts remote RPC named pipe connections to standard system pipes.
+* **[REQ-NET-013 - Block Management Traffic Between Domain Controllers](#04-network-firewall-block-intra-dc-management-md)**: Restricts network management traffic between Domain Controllers to prevent intra-tier attacks.
 
 <div id="roadmap-implementation-plan-md-paw-requirements"></div>
 ### PAW Requirements
