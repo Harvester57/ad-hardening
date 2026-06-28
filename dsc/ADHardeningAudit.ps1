@@ -39,6 +39,7 @@ Configuration ADHardeningAudit {
         "05-logging-monitoring\audit_scripts\Test-SysmonHardening.ps1",
         "06-operations-maintenance\audit_scripts\Audit-GPOCentralStore.ps1",
         "06-operations-maintenance\audit_scripts\Audit-ThirdPartyTemplates.ps1",
+        "06-operations-maintenance\audit_scripts\Get-InactiveAccountsStatus.ps1",
         "06-operations-maintenance\audit_scripts\Get-WsusConfigStatus.ps1"
     )
 
@@ -49,6 +50,7 @@ Configuration ADHardeningAudit {
             "01-architecture\audit_scripts\Audit-ADFunctionalLevels.ps1",
             "01-architecture\audit_scripts\Audit-GPOPrecedence.ps1",
             "01-architecture\audit_scripts\Get-ADTrustStatus.ps1",
+            "01-architecture\audit_scripts\Get-ExchangePermissionsStatus.ps1",
             "01-architecture\audit_scripts\Test-ADChangesAuditing.ps1",
             "01-architecture\audit_scripts\Test-AdminProtocolRestrictions.ps1",
             "01-architecture\audit_scripts\Test-LocalLogonRestrictions.ps1",
@@ -64,6 +66,7 @@ Configuration ADHardeningAudit {
             "02-domain-controllers\audit_scripts\Get-DfsrHealthStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-DnsAuditStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-DriverBlocklistStatus.ps1",
+            "02-domain-controllers\audit_scripts\Get-DsrmHardeningStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-dSHeuristicsStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-KerberosArmoringStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-KerberosEncryptionStatus.ps1",

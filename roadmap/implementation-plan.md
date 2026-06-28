@@ -32,6 +32,7 @@ Architectural choices must be made and established **before** implementing indiv
 * **[REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](../01-architecture/keep-functional-levels-up-to-date.md)**: Ensures modern AD security features are active.
 * **[REQ-ARCH-005 - Default Domain and Domain Controllers Policies Management](../01-architecture/default-policies-recommendations.md)**: Standardizes GPO hierarchy and separates default policy links.
 * **[REQ-ARCH-006 - Harden Active Directory Domain Trusts](../01-architecture/harden-domain-trusts.md)**: Configures secure trust filters and disables SID history routing where appropriate.
+* **[REQ-ARCH-007 - Harden Microsoft Exchange Active Directory Permissions](../01-architecture/harden-exchange-permissions.md)**: Removes WriteDacl and WriteOwner permissions for Exchange groups on the domain root.
 
 ### Identities & Services Requirements
 * **[REQ-ID-010 - Restrict Schema Administrators Group Membership](../03-identities-services/restrict-schema-admins.md)**: Restricts membership of the Schema Administrators group to minimize administrative privilege footprint.
@@ -68,6 +69,7 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 * **[REQ-DC-015 - Migrate SYSVOL Replication to DFSR](../02-domain-controllers/migrate-sysvol-replication-dfsr.md)**: Retires legacy FRS replication.
 * **[REQ-DC-016 - Harden adminSDHolder Permissions](../02-domain-controllers/harden-adminsdholder-permissions.md)**: Blocks permission changes to high-privilege templates.
 * **[REQ-DC-024 - Configure dSHeuristics](../02-domain-controllers/configure-dsheuristics.md)**: Restricts anonymous directory access.
+* **[REQ-DC-030 - Secure Directory Services Restore Mode (DSRM) and Recovery Parameters](../02-domain-controllers/harden-dsrm-recovery-mode.md)**: Configures DsrmAdminLogonBehavior to restrict network logons.
 
 ### Identities & Services Requirements
 * **[REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](../03-identities-services/enable-laps.md)**: Implements Windows LAPS or Classic LAPS to rotate local administrator passwords periodically.
@@ -106,6 +108,7 @@ This phase focuses on isolating credentials inside memory and network packets to
 * **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](../06-operations-maintenance/configure-dedicated-tier0-wsus.md)**: Secures dedicated patch servers to prevent cross-tier update spoofing.
 * **[REQ-OPS-006 - Redirect Default Users and Computers Containers](../06-operations-maintenance/redirect-default-containers.md)**: Prevents newly joined machines from staying in unmanaged default OUs.
 * **[REQ-OPS-009 - Implement Offline Patch Management via WSUS](../06-operations-maintenance/implement-offline-patch-management.md)**: Implements offline WSUS metadata imports/exports (sneakernet transport).
+* **[REQ-OPS-012 - Implement Automated Inactive Computer and User Account Cleanup](../06-operations-maintenance/decommission-inactive-accounts.md)**: Disables and moves inactive user (180 days) and computer (90 days) accounts to a stale OU.
 
 ### Domain Controller Requirements
 * **[REQ-DC-004 - Enforce LDAP Server Signing](../02-domain-controllers/enforce-ldap-signing.md)**: Restricts cleartext un-signed LDAP operations.

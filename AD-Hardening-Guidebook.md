@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 04138c5 | Generated: June 29, 2026</span>
+      <span>Commit: e6b6c10 | Generated: June 29, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -20092,7 +20092,7 @@ Securing authentication parameters and account controls reduces the risk of pass
 3. **No Password Expiration (`MaxPasswordAge = 0`)**: Periodic password expiration is disabled. Setting the password expiration interval to 0 prevents users from cycling to weaker password variants or writing credentials down, as a 20-character complex password is mathematically robust against current brute-forcing capabilities.
 4. **Smart Card Removal Behavior (`ScRemoveOption`)**: In secure environments using Smart Card or token-based authentication, removing the card must automatically lock the desktop session (`1`). If disabled, a user leaving their workstation with the card removed leaves the session exposed.
 5. **Blank Passwords Limit (`LimitBlankPasswordUse`)**: Restricting the use of blank passwords to physical console logons prevents attackers from using empty-password accounts to authenticate remotely over network shares or RDP.
-6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, dramatically increasing resistance to offline brute-force and GPU-accelerated cracking attacks (like RTX 4090 models).
+6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, increasing resistance to offline brute-force and GPU-accelerated cracking attacks.
 7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
 8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
 9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, and requiring NTLMv2 and 128-bit encryption block legacy protocol exploitation.
@@ -33405,6 +33405,7 @@ Architectural choices must be made and established **before** implementing indiv
 * **[REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](#01-architecture-keep-functional-levels-up-to-date-md)**: Ensures modern AD security features are active.
 * **[REQ-ARCH-005 - Default Domain and Domain Controllers Policies Management](#01-architecture-default-policies-recommendations-md)**: Standardizes GPO hierarchy and separates default policy links.
 * **[REQ-ARCH-006 - Harden Active Directory Domain Trusts](#01-architecture-harden-domain-trusts-md)**: Configures secure trust filters and disables SID history routing where appropriate.
+* **[REQ-ARCH-007 - Harden Microsoft Exchange Active Directory Permissions](#01-architecture-harden-exchange-permissions-md)**: Removes WriteDacl and WriteOwner permissions for Exchange groups on the domain root.
 
 <div id="roadmap-implementation-plan-md-identities-services-requirements"></div>
 ### Identities & Services Requirements
@@ -33447,6 +33448,7 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 * **[REQ-DC-015 - Migrate SYSVOL Replication to DFSR](#02-domain-controllers-migrate-sysvol-replication-dfsr-md)**: Retires legacy FRS replication.
 * **[REQ-DC-016 - Harden adminSDHolder Permissions](#02-domain-controllers-harden-adminsdholder-permissions-md)**: Blocks permission changes to high-privilege templates.
 * **[REQ-DC-024 - Configure dSHeuristics](#02-domain-controllers-configure-dsheuristics-md)**: Restricts anonymous directory access.
+* **[REQ-DC-030 - Secure Directory Services Restore Mode (DSRM) and Recovery Parameters](#02-domain-controllers-harden-dsrm-recovery-mode-md)**: Configures DsrmAdminLogonBehavior to restrict network logons.
 
 <div id="roadmap-implementation-plan-md-identities-services-requirements"></div>
 ### Identities & Services Requirements
@@ -33492,6 +33494,7 @@ This phase focuses on isolating credentials inside memory and network packets to
 * **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](#06-operations-maintenance-configure-dedicated-tier0-wsus-md)**: Secures dedicated patch servers to prevent cross-tier update spoofing.
 * **[REQ-OPS-006 - Redirect Default Users and Computers Containers](#06-operations-maintenance-redirect-default-containers-md)**: Prevents newly joined machines from staying in unmanaged default OUs.
 * **[REQ-OPS-009 - Implement Offline Patch Management via WSUS](#06-operations-maintenance-implement-offline-patch-management-md)**: Implements offline WSUS metadata imports/exports (sneakernet transport).
+* **[REQ-OPS-012 - Implement Automated Inactive Computer and User Account Cleanup](#06-operations-maintenance-decommission-inactive-accounts-md)**: Disables and moves inactive user (180 days) and computer (90 days) accounts to a stale OU.
 
 <div id="roadmap-implementation-plan-md-domain-controller-requirements"></div>
 ### Domain Controller Requirements
