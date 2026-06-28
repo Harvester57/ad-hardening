@@ -22,20 +22,48 @@ Keeping Domain Controllers and clients patched is critical to resolve OS and RPC
 
 ### WSUS Import/Export Protocol
 
-```mermaid
-sequenceDiagram
-    participant OnlineWSUS as Online WSUS Server (DMZ/Internet)
-    participant Media as Encrypted External Storage (USB/DVD)
-    participant OfflineWSUS as Offline WSUS Server (Air-Gapped)
-
-    Note over OnlineWSUS: Synchronizes with Microsoft Update
-    OnlineWSUS->>Media: Export Update Metadata (wsusutil export)
-    OnlineWSUS->>Media: Copy Downloaded Update Files (WsusContent folder)
-    Note over Media: Transported physically to air-gap
-    Media->>OfflineWSUS: Import Update Metadata (wsusutil import)
-    Media->>OfflineWSUS: Copy Update Files to local WsusContent
-    Note over OfflineWSUS: Approves and deploys patches to DCs/Clients
-```
+<div class="wsus-flow-container">
+  <div class="wsus-step-card online-wsus">
+    <div class="wsus-step-badge">1. Online WSUS</div>
+    <div class="wsus-step-content">
+      <h4>Online WSUS Server</h4>
+      <p class="wsus-step-desc">Synchronizes with Microsoft Update to retrieve metadata and patch binaries.</p>
+      <div class="wsus-action-list">
+        <span class="wsus-action-tag">wsusutil export</span>
+        <span class="wsus-action-tag">WSUSContent Copy</span>
+      </div>
+    </div>
+  </div>
+  <div class="wsus-flow-arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">Physical Transfer</div>
+  </div>
+  <div class="wsus-step-card media-transfer">
+    <div class="wsus-step-badge">2. Media</div>
+    <div class="wsus-step-content">
+      <h4>Encrypted Media</h4>
+      <p class="wsus-step-desc">Transport encrypted external storage (USB/DVD) physically to air-gapped system.</p>
+      <div class="wsus-action-list">
+        <span class="wsus-action-tag">Sneakernet</span>
+      </div>
+    </div>
+  </div>
+  <div class="wsus-flow-arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">Import / Sync</div>
+  </div>
+  <div class="wsus-step-card offline-wsus">
+    <div class="wsus-step-badge">3. Offline WSUS</div>
+    <div class="wsus-step-content">
+      <h4>Offline WSUS Server</h4>
+      <p class="wsus-step-desc">Imports update metadata and patch binaries, then deploys them locally to DCs and Member Servers.</p>
+      <div class="wsus-action-list">
+        <span class="wsus-action-tag">wsusutil import</span>
+        <span class="wsus-action-tag">Local Push</span>
+      </div>
+    </div>
+  </div>
+</div>
 
 ### wsusutil Commands
 1. **On the Internet-connected WSUS Server**:
