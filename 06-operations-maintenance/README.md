@@ -2,11 +2,6 @@
 
 This directory contains operational procedures and configuration baselines for system backups, offline patch distribution, and regular security auditing.
 
-## Implementation and Roadmap
-
-* **[Implementation Plan and Prioritized Roadmap](implementation-plan.md)**
-  Roadmap detailing the prioritization of domain controllers, endpoints, and PAWs hardening controls into four sequential phases, with instructions on how to maintain the roadmap.
-
 ## Technical Hardening Controls
 
 1. **[Secure Operations and Maintenance Baseline](ops-and-maintenance.md)**

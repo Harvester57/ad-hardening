@@ -46,10 +46,10 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 * Standardizes naming schemas to ensure structured GPO audit capabilities.
 
 ### Operations & Maintenance Requirements
-* **[Secure Operations and Maintenance Baseline (Backup & DR Sections)](ops-and-maintenance.md)**: Implements daily AD System State backup, offline/immutable backup isolation, and quarterly recovery drills.
-* **[REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](enable-recycle-bin.md)**: Enforces forest-wide Recycle Bin for rapid recovery of deleted objects.
-* **[REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](maintain-gpo-templates.md)**: Prevents version drift across consoles.
-* **[REQ-OPS-007 - Mandate Naming Conventions for GPOs, OUs, and User Accounts](mandate-naming-conventions.md)**: Enforces GPO/OU prefix metadata supporting GPO auditing.
+* **[Secure Operations and Maintenance Baseline (Backup & DR Sections)](../06-operations-maintenance/ops-and-maintenance.md)**: Implements daily AD System State backup, offline/immutable backup isolation, and quarterly recovery drills.
+* **[REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](../06-operations-maintenance/enable-recycle-bin.md)**: Enforces forest-wide Recycle Bin for rapid recovery of deleted objects.
+* **[REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](../06-operations-maintenance/maintain-gpo-templates.md)**: Prevents version drift across consoles.
+* **[REQ-OPS-007 - Mandate Naming Conventions for GPOs, OUs, and User Accounts](../06-operations-maintenance/mandate-naming-conventions.md)**: Enforces GPO/OU prefix metadata supporting GPO auditing.
 
 ### Domain Controller Requirements
 * **[REQ-DC-001 - Disable SMBv1](../02-domain-controllers/disable-smbv1.md)**: Disables legacy, vulnerable file sharing protocol drivers.
@@ -83,9 +83,9 @@ This phase focuses on isolating credentials inside memory and network packets to
 * Redirects default directory containers to ensure new objects receive security policies automatically.
 
 ### Operations & Maintenance Requirements
-* **[Secure Operations and Maintenance Baseline (Offline Patching Sections)](ops-and-maintenance.md)**: Implements offline WSUS metadata imports/exports (sneakernet transport).
-* **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](configure-dedicated-tier0-wsus.md)**: Secures dedicated patch servers to prevent cross-tier update spoofing.
-* **[REQ-OPS-006 - Redirect Default Users and Computers Containers](redirect-default-containers.md)**: Prevents newly joined machines from staying in unmanaged default OUs.
+* **[Secure Operations and Maintenance Baseline (Offline Patching Sections)](../06-operations-maintenance/ops-and-maintenance.md)**: Implements offline WSUS metadata imports/exports (sneakernet transport).
+* **[REQ-OPS-005 - Configure Dedicated WSUS for Tier 0](../06-operations-maintenance/configure-dedicated-tier0-wsus.md)**: Secures dedicated patch servers to prevent cross-tier update spoofing.
+* **[REQ-OPS-006 - Redirect Default Users and Computers Containers](../06-operations-maintenance/redirect-default-containers.md)**: Prevents newly joined machines from staying in unmanaged default OUs.
 
 ### Domain Controller Requirements
 * **[REQ-DC-004 - Enforce LDAP Server Signing](../02-domain-controllers/enforce-ldap-signing.md)**: Restricts cleartext un-signed LDAP operations.
@@ -121,7 +121,7 @@ This phase establishes the physical boundaries and hardware-based trust mechanis
 * Enforces KRBTGT password rotation to invalidate existing Kerberos tickets.
 
 ### Operations & Maintenance Requirements
-* **[REQ-OPS-001 - Enforce KRBTGT Password Rotation](enforce-krbtgt-password-rotation.md)**: Implements standard 2-step rotation of the domain key ticket account.
+* **[REQ-OPS-001 - Enforce KRBTGT Password Rotation](../06-operations-maintenance/enforce-krbtgt-password-rotation.md)**: Implements standard 2-step rotation of the domain key ticket account.
 
 ### Domain Controller Requirements
 * **[REQ-DC-010 - Restrict Kerberos Encryption Types](../02-domain-controllers/restrict-kerberos-encryption.md)**: Enforces AES-only encryption for Kerberos.
@@ -160,8 +160,8 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * Audits Active Directory configurations monthly via offline scanners.
 
 ### Operations & Maintenance Requirements
-* **[Secure Operations and Maintenance Baseline (Continuous Assessment)](ops-and-maintenance.md)**: Integrates monthly PingCastle scans, quarterly BloodHound analyses, and semi-annual offline database checks.
-* **[REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](use-third-party-templates.md)**: Standardizes security settings for custom application baselines.
+* **[Secure Operations and Maintenance Baseline (Continuous Assessment)](../06-operations-maintenance/ops-and-maintenance.md)**: Integrates monthly PingCastle scans, quarterly BloodHound analyses, and semi-annual offline database checks.
+* **[REQ-OPS-004 - Implement Third-Party and Custom GPO Templates for COTS Hardening](../06-operations-maintenance/use-third-party-templates.md)**: Standardizes security settings for custom application baselines.
 
 ### Domain Controller Requirements
 * **[REQ-DC-012 - Disable Unnecessary Services on Domain Controllers](../02-domain-controllers/disable-unnecessary-services.md)**: Stops non-essential system functions.
@@ -233,13 +233,12 @@ Evaluate the new control against the following criteria to determine its priorit
   * Does the control involve strict application blocklisting/allowlisting (AppLocker/WDAC), network segmentation, blocking LOLBins, disabling services, or fine-tuning diagnostic parameters that require extensive verification?
 
 ### 2. Document Integration
-* Open `06-operations-maintenance/implementation-plan.md`.
+* Open `roadmap/implementation-plan.md`.
 * Locate the chosen phase section.
 * Identify the correct target scope subsection (Architectural, Operations, Domain Controller, PAW, or Endpoint).
 * Insert the new requirement. Ensure it is sorted in alphanumeric order by its Requirement ID.
 * Use the relative markdown link syntax:
-  `* **[REQ-XXX-### - Requirement Title](../<module-dir>/<file-name>.md)**: Brief explanation.`
-  *(Note: For files in the same directory, omit the `../<module-dir>/` prefix).*
+  `* **[REQ-XXX-### - Requirement Title] (../module-dir/file-name.md)**: Brief explanation.` (Note: remove the space between the bracket and parenthesis in your actual implementation).
 
 ### 3. Verify Links and Guidebook Build
 After editing, run the automated verification script from a PowerShell console to ensure links resolve properly:

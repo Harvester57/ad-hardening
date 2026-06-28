@@ -86,7 +86,6 @@
     * [REQ-LOG-004 - Configure Secure SIEM Log Shipping](05-logging-monitoring/configure-siem-log-shipping.md)
 ## Module 6: Secure Operations & Maintenance
 * [Module 6: Secure Operations & Maintenance](06-operations-maintenance/README.md)
-    * [Implementation Plan and Prioritized Roadmap](06-operations-maintenance/implementation-plan.md)
     * [Secure Operations and Maintenance Baseline](06-operations-maintenance/ops-and-maintenance.md)
     * [REQ-OPS-001 - Enforce KRBTGT Password Rotation](06-operations-maintenance/enforce-krbtgt-password-rotation.md)
     * [REQ-OPS-002 - Enable and Configure the Active Directory Recycle Bin](06-operations-maintenance/enable-recycle-bin.md)
@@ -161,6 +160,9 @@
     * [REQ-END-029 - Configure Untrusted Font Blocking](08-endpoints/configure-untrusted-font-blocking.md)
     * [REQ-END-030 - Configure svchost.exe Mitigation Options](08-endpoints/configure-svchost-mitigation.md)
     * [REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](08-endpoints/enable-kernel-shadow-stacks.md)
+
+## Implementation Roadmap
+* [Implementation Plan and Prioritized Roadmap](roadmap/implementation-plan.md)
 
 ## Compliance Mapping
 * [ANSSI Compliance Matrix](compliance/anssi.md)

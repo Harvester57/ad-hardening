@@ -265,6 +265,18 @@ pdf_options:
         else:
             print(f"Warning: Module README {module_readme} not found.")
             
+    # 3.5. Add Implementation Roadmap
+    roadmap_file = "roadmap/implementation-plan.md"
+    roadmap_file_abs = os.path.join(repo_root, roadmap_file)
+    if os.path.exists(roadmap_file_abs):
+        print(f"Processing roadmap file: {roadmap_file}...")
+        # Page break before implementation roadmap
+        compiled_lines.append('\n<div style="page-break-before: always;"></div>\n')
+        processed_roadmap = process_file(roadmap_file, repo_root)
+        compiled_lines.append(processed_roadmap)
+    else:
+        print(f"Warning: Roadmap file {roadmap_file} not found.")
+
     # 4. Add Compliance Matrices
     compliance_files = [
         "compliance/anssi.md",
