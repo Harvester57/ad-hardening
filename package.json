@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "gitbook-plugin-flexible-alerts": "^1.0.4",
+    "gitbook-plugin-collapse-menu": "file:plugins/gitbook-plugin-collapse-menu",
     "honkit": "^6.2.2",
     "honkit-plugin-prism": "^2.5.4",
     "honkit-plugin-search-plus": "^1.0.0",

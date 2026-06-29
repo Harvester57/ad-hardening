@@ -9,7 +9,8 @@
     "prism",
     "-highlight",
     "flexible-alerts",
-    "search-plus"
+    "search-plus",
+    "collapse-menu"
   ],
   "pluginsConfig": {
     "prism": {

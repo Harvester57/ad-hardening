@@ -1,0 +1,10 @@
+{
+  "name": "gitbook-plugin-collapse-menu",
+  "version": "1.0.0",
+  "description": "Collapsible sidebar menu for HonKit and GitBook",
+  "main": "index.js",
+  "engines": {
+    "gitbook": ">=3.0.0",
+    "honkit": ">=3.0.0"
+  }
+}

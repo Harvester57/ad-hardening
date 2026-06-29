@@ -1,0 +1,67 @@
+/* Custom CSS for Collapsible Sidebar Menu */
+
+.book-summary ul.summary li.chapter.has-toggle {
+    position: relative;
+}
+
+/* Ensure link text does not overlap the toggle arrow */
+.book-summary ul.summary li.chapter.has-toggle > a {
+    padding-right: 42px !important;
+}
+
+/* Toggle arrow styling and layout */
+.book-summary ul.summary li.chapter > .menu-toggle-arrow {
+    position: absolute;
+    top: 5px;
+    right: 15px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 8px;
+    color: var(--text-secondary);
+    background-color: transparent;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                background-color 0.2s ease, 
+                color 0.2s ease;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hover effects */
+.book-summary ul.summary li.chapter > .menu-toggle-arrow:hover {
+    background-color: var(--sidebar-hover-bg);
+    color: var(--link-color);
+}
+
+/* Arrow character shape */
+.book-summary ul.summary li.chapter > .menu-toggle-arrow::before {
+    content: '▼';
+    display: inline-block;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.book-summary ul.summary li.chapter > .menu-toggle-arrow:hover::before {
+    opacity: 1;
+}
+
+/* Collapsed state (default): hide child articles list, rotate arrow left (-90 deg) */
+.book-summary ul.summary li.chapter:not(.expanded) > .articles {
+    display: none !important;
+}
+
+.book-summary ul.summary li.chapter:not(.expanded) > .menu-toggle-arrow {
+    transform: rotate(-90deg);
+}
+
+/* Expanded state: display articles list, rotate arrow back to default (0 deg / down) */
+.book-summary ul.summary li.chapter.expanded > .articles {
+    display: block !important;
+}
+
+.book-summary ul.summary li.chapter.expanded > .menu-toggle-arrow {
+    transform: rotate(0deg);
+}
