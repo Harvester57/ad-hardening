@@ -26,3 +26,6 @@ This directory contains the Active Directory Administrative Tiering Model defini
 
 6. **[REQ-ARCH-006 - Harden Active Directory Domain Trusts](harden-domain-trusts.md)**
    Hardens trust relationships across forest and external boundaries by disabling SID History, enabling Quarantine (SID filtering), enforcing Selective Authentication, and blocking Kerberos TGT Delegation.
+
+7. **[REQ-ARCH-007 - Harden Microsoft Exchange Active Directory Permissions](harden-exchange-permissions.md)**
+   Removes WriteDacl and WriteOwner permissions for Exchange groups on the domain root.

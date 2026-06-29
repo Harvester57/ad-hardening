@@ -68,7 +68,7 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 * **[REQ-DC-008 - Disable Print Spooler Service](../02-domain-controllers/disable-print-spooler.md)**: Disables spooler to block PrintNightmare and coercion.
 * **[REQ-DC-015 - Migrate SYSVOL Replication to DFSR](../02-domain-controllers/migrate-sysvol-replication-dfsr.md)**: Retires legacy FRS replication.
 * **[REQ-DC-016 - Harden adminSDHolder Permissions](../02-domain-controllers/harden-adminsdholder-permissions.md)**: Blocks permission changes to high-privilege templates.
-* **[REQ-DC-024 - Configure dSHeuristics](../02-domain-controllers/configure-dsheuristics.md)**: Restricts anonymous directory access.
+* **[REQ-DC-024 - Configure dSHeuristics Attribute](../02-domain-controllers/configure-dsheuristics.md)**: Restricts anonymous directory access.
 * **[REQ-DC-030 - Secure Directory Services Restore Mode (DSRM) and Recovery Parameters](../02-domain-controllers/harden-dsrm-recovery-mode.md)**: Configures DsrmAdminLogonBehavior to restrict network logons.
 
 ### Identities & Services Requirements
@@ -187,7 +187,7 @@ This phase establishes the physical boundaries, hardware-based trust mechanisms,
 * **[REQ-PAW-009 - Configure User Rights Assignments for PAWs](../07-paws/configure-user-rights-assignments.md)**: Restricts debugging, impersonation, and interactive logins on PAWs.
 * **[REQ-PAW-011 - Harden DMA and Physical Security for PAWs](../07-paws/harden-dma-and-physical-security.md)**: Blocks sleep states and limits external bus operations.
 * **[REQ-PAW-022 - Disable Incoming Remote Desktop Access for PAWs](../07-paws/restrict-rdp-access.md)**: Blocks remote lateral logins to administrative devices.
-* **[REQ-PAW-030 - Enable Secure Boot for PAWs](../07-paws/enable-secure-boot.md)**: Locks the bootloader signatures.
+* **[REQ-PAW-030 - Enable Secure Boot](../07-paws/enable-secure-boot.md)**: Locks the bootloader signatures.
 
 ### Endpoint Requirements
 * **[REQ-END-005 - Restrict Remote Desktop Access](../08-endpoints/restrict-rdp-access.md)**: Prevents incoming RDP connections.
@@ -250,7 +250,7 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-PAW-017 - Configure svchost.exe Mitigation Options for PAWs](../07-paws/configure-svchost-mitigation.md)**: Enforces Microsoft signature check on svchost.
 * **[REQ-PAW-018 - Enable Kernel-Mode Hardware-Enforced Stack Protection for PAWs](../07-paws/enable-kernel-shadow-stacks.md)**: Enforces hardware-backed ROP mitigation.
 * **[REQ-PAW-023 - WSUS Client Configuration for PAWs](../07-paws/wsus-client-config.md)**: Directs updates to local WSUS servers.
-* **[REQ-PAW-024 - Configure User Profile and System Restrictions for PAWs](../07-paws/configure-user-profile-restrictions.md)**: Locks administrative host profiles.
+* **[REQ-PAW-024 - Configure User Profile Restrictions](../07-paws/configure-user-profile-restrictions.md)**: Locks administrative host profiles.
 * **[REQ-PAW-025 - Configure Exploit Protection Profile for PAWs](../07-paws/configure-exploit-protection.md)**: System-wide DEP and ASLR configurations.
 * **[REQ-PAW-026 - Restrict Safe Mode Access to Administrators on PAWs](../07-paws/disable-safe-mode-for-standard-users.md)**: Disables standard user access in Safe Mode.
 * **[REQ-PAW-027 - Configure Windows Defender Firewall and Block LOLBins for PAWs](../07-paws/configure-windows-firewall.md)**: Firewalls and LOLBin traffic limits.

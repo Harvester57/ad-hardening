@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 701c8f1 | Generated: June 29, 2026</span>
+      <span>Commit: 5457d6c | Generated: June 29, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -207,6 +207,9 @@ This directory contains the Active Directory Administrative Tiering Model defini
 
 6. **[REQ-ARCH-006 - Harden Active Directory Domain Trusts](#01-architecture-harden-domain-trusts-md)**
    Hardens trust relationships across forest and external boundaries by disabling SID History, enabling Quarantine (SID filtering), enforcing Selective Authentication, and blocking Kerberos TGT Delegation.
+
+7. **[REQ-ARCH-007 - Harden Microsoft Exchange Active Directory Permissions](#01-architecture-harden-exchange-permissions-md)**
+   Removes WriteDacl and WriteOwner permissions for Exchange groups on the domain root.
 
 
 <div style="page-break-before: always;"></div>
@@ -1348,6 +1351,208 @@ if ($Trusts) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="01-architecture-harden-exchange-permissions-md"></div>
+
+<div id="01-architecture-harden-exchange-permissions-md-req-arch-007-harden-microsoft-exchange-active-directory-permissions"></div>
+# [REQ-ARCH-007] Harden Microsoft Exchange Active Directory Permissions
+
+<div id="01-architecture-harden-exchange-permissions-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Active Directory Domain Controllers and Domain Root Object (Tier 0).
+* **Operating Systems**: Active Directory Domain Services (All supported functional levels).
+
+---
+
+<div id="01-architecture-harden-exchange-permissions-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High (Prevents domain-wide privilege escalation from compromised Exchange servers).
+* **GPO Path / Registry Location**: N/A (Direct Active Directory ACL modification on the domain root object).
+
+---
+
+<div id="01-architecture-harden-exchange-permissions-md-rationale"></div>
+## Rationale
+By default, installing Microsoft Exchange Server in an Active Directory forest modifies the permissions of the domain root object. It grants the **Exchange Windows Permissions** group (and sometimes **Exchange Servers**) write permissions (`WriteDacl` and `WriteOwner`) over the domain root container.
+
+This configuration presents a critical security risk:
+1. **Privilege Escalation**: Any user or service account with administrative control over Exchange, or any compromised Exchange server itself, can write new permissions to the domain root.
+2. **DCSync Exploitation**: The attacker can grant their own account the `ds-Replication-Get-Changes` and `ds-Replication-Get-Changes-All` (DCSync) extended rights. This allows the attacker to dump password hashes directly from the domain controller database (NTDS.dit), leading to a complete forest compromise.
+
+Restricting these write permissions ensures that Exchange servers cannot modify domain-level security descriptors.
+
+---
+
+<div id="01-architecture-harden-exchange-permissions-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Exchange Operations**: Restricting `WriteDacl` on the domain root may prevent Exchange from performing certain automatic administrative operations, such as modifying schema attributes, auto-provisioning objects in default containers, or updating domain-wide permissions during subsequent Exchange cumulative updates (CUs).
+* **Workaround**: If Exchange database or organization adjustments are required, a member of the Domain Admins or Enterprise Admins group must run Exchange setup with the `/PrepareAD` flag to temporarily apply permissions, or perform the modifications manually.
+
+---
+
+<div id="01-architecture-harden-exchange-permissions-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="01-architecture-harden-exchange-permissions-md-option-a-active-directory-users-computers-gui-configuration"></div>
+### Option A: Active Directory Users & Computers (GUI Configuration)
+
+1. Open **Active Directory Users and Computers** (`dsa.msc`) on a management console with Domain Admin privileges.
+2. Enable **Advanced Features** under the **View** menu.
+3. Right-click the root domain object (e.g., `domain.local`) and select **Properties**.
+4. Select the **Security** tab, then click **Advanced**.
+5. Locate the permission entries for **Exchange Windows Permissions** and **Exchange Servers**.
+6. Review the permissions:
+   * Remove any entries granting **Modify permissions** (`WriteDacl`) or **Modify owner** (`WriteOwner`) on the domain root.
+   * Ensure standard read and object creation permissions (such as writing specific user properties for mailbox management) remain unchanged.
+7. Click **Apply**, then **OK**.
+
+---
+
+<div id="01-architecture-harden-exchange-permissions-md-option-b-powershell-active-directory-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Active Directory Configuration (Remediation / Non-GPO)
+
+To automate verification and remediation of the domain root ACL:
+
+[Download Script: Harden-ExchangePermissions.ps1](implementation_scripts/Harden-ExchangePermissions.ps1)
+
+```powershell
+# Harden-ExchangePermissions.ps1
+# Description: Removes WriteDacl and WriteOwner permissions for Exchange groups on the domain root.
+
+Import-Module ActiveDirectory
+
+$DomainDN = (Get-ADDomain).DistinguishedName
+$DomainPath = "AD:\$DomainDN"
+
+# Retrieve existing ACL
+$Acl = Get-Acl -Path $DomainPath
+$DangerousAcesToRemove = @()
+
+# Define Exchange groups to target
+$TargetGroups = @("Exchange Windows Permissions", "Exchange Servers")
+$TargetSids = @()
+
+foreach ($groupName in $TargetGroups) {
+    try {
+        $sid = (Get-ADGroup -Identity $groupName).SID.Value
+        $TargetSids += $sid
+    }
+    catch {
+        Write-Host "Group '$groupName' not found in this domain. Skipping." -ForegroundColor Yellow
+    }
+}
+
+if ($TargetSids.Count -eq- 0) {
+    Write-Host "No Exchange groups detected. No permissions to harden." -ForegroundColor Green
+    exit 0
+}
+
+# Scan ACL for dangerous ACEs
+foreach ($ace in $Acl.Access) {
+    $identity = $ace.IdentityReference
+    try {
+        $sid = $identity.Translate([System.Security.Principal.SecurityIdentifier]).Value
+    }
+    catch {
+        continue
+    }
+
+    if ($TargetSids -contains $sid) {
+        # Check for WriteDacl or WriteOwner rights
+        $hasWriteDacl = ($ace.ActiveDirectoryRights -band [System.DirectoryServices.ActiveDirectoryRights]::WriteDacl) -eq [System.DirectoryServices.ActiveDirectoryRights]::WriteDacl
+        $hasWriteOwner = ($ace.ActiveDirectoryRights -band [System.DirectoryServices.ActiveDirectoryRights]::WriteOwner) -eq [System.DirectoryServices.ActiveDirectoryRights]::WriteOwner
+
+        if ($hasWriteDacl -or $hasWriteOwner) {
+            $DangerousAcesToRemove += $ace
+        }
+    }
+}
+
+if ($DangerousAcesToRemove.Count -eq 0) {
+    Write-Host "[+] Domain root ACL is compliant. No dangerous Exchange write permissions found." -ForegroundColor Green
+} else {
+    Write-Host "[-] Found $($DangerousAcesToRemove.Count) dangerous Exchange permissions. Removing..." -ForegroundColor Yellow
+    foreach ($ace in $DangerousAcesToRemove) {
+        $Acl.RemoveAccessRule($ace) | Out-Null
+    }
+    Set-Acl -Path $DomainPath -AclObject $Acl
+    Write-Host "[+] Successfully removed dangerous Exchange WriteDacl/WriteOwner permissions from domain root." -ForegroundColor Green
+}
+```
+
+*To verify the domain root permissions:*
+
+[Download Script: Get-ExchangePermissionsStatus.ps1](audit_scripts/Get-ExchangePermissionsStatus.ps1)
+
+```powershell
+# Get-ExchangePermissionsStatus.ps1
+# Check if Exchange groups hold WriteDacl/WriteOwner permissions on the domain root.
+
+Import-Module ActiveDirectory
+
+$DomainDN = (Get-ADDomain).DistinguishedName
+$DomainPath = "AD:\$DomainDN"
+
+$Acl = Get-Acl -Path $DomainPath
+$TargetGroups = @("Exchange Windows Permissions", "Exchange Servers")
+$TargetSids = @()
+
+foreach ($groupName in $TargetGroups) {
+    try {
+        $sid = (Get-ADGroup -Identity $groupName).SID.Value
+        $TargetSids += $sid
+    }
+    catch {
+        # Group not present in domain
+    }
+}
+
+if ($TargetSids.Count -eq 0) {
+    Write-Host "[+] COMPLIANT: Exchange groups are not present in this domain."
+    exit 0
+}
+
+$nonCompliantAces = 0
+
+foreach ($ace in $Acl.Access) {
+    $identity = $ace.IdentityReference
+    try {
+        $sid = $identity.Translate([System.Security.Principal.SecurityIdentifier]).Value
+    }
+    catch {
+        continue
+    }
+
+    if ($TargetSids -contains $sid) {
+        $hasWriteDacl = ($ace.ActiveDirectoryRights -band [System.DirectoryServices.ActiveDirectoryRights]::WriteDacl) -eq [System.DirectoryServices.ActiveDirectoryRights]::WriteDacl
+        $hasWriteOwner = ($ace.ActiveDirectoryRights -band [System.DirectoryServices.ActiveDirectoryRights]::WriteOwner) -eq [System.DirectoryServices.ActiveDirectoryRights]::WriteOwner
+
+        if ($hasWriteDacl -or $hasWriteOwner) {
+            Write-Host "[!] NON-COMPLIANT: Group '$($identity.Value)' has permissions: $($ace.ActiveDirectoryRights)" -ForegroundColor Red
+            $nonCompliantAces++
+        }
+    }
+}
+
+if ($nonCompliantAces -eq 0) {
+    Write-Host "[+] COMPLIANT: No Exchange groups have WriteDacl or WriteOwner permissions on the domain root." -ForegroundColor Green
+    exit 0
+} else {
+    Write-Host "[!] NON-COMPLIANT: Dangerous Exchange write permissions detected on the domain root." -ForegroundColor Red
+    exit 1
+}
+```
+
+---
+
+<div id="01-architecture-harden-exchange-permissions-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R13 (Restricting permissions on domain objects)
+* **CIS Benchmark**: Section 1.2 (Active Directory Permissions Audit)
+* **PingCastle Rule**: `P-ExchangePrivEsc` (Ensure that Exchange did not introduce security vulnerabilities)
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="02-domain-controllers-README-md"></div>
 
 <div id="02-domain-controllers-README-md-module-2-domain-controller-hardening"></div>
@@ -1416,6 +1621,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure the Untrusted Font Blocking mitigation on Domain Controllers to prevent kernel font parser exploits.
 * **[REQ-DC-029 - Configure svchost.exe Mitigation Options](#02-domain-controllers-configure-svchost-mitigation-md)**
   Requirement to configure svchost.exe mitigation options on Domain Controllers and Member Servers to restrict binary loading to Microsoft-signed code and block dynamic code execution.
+* **[REQ-DC-030 - Secure Directory Services Restore Mode (DSRM) and Recovery Parameters](#02-domain-controllers-harden-dsrm-recovery-mode-md)**
+  Requirement to secure DSRM restore mode logon behavior and recovery credentials parameters.
 
 
 
@@ -7583,6 +7790,137 @@ exit 1
 ## Sources & Compliance References
 * **Microsoft Learn**: Group Policy settings reference - Service Control Manager Settings
 * **Microsoft Security Guidance**: Removing "Enable svchost.exe mitigation options" from baseline recommendations (for compatibility awareness)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-harden-dsrm-recovery-mode-md"></div>
+
+<div id="02-domain-controllers-harden-dsrm-recovery-mode-md-req-dc-030-secure-directory-services-restore-mode-dsrm-and-recovery-parameters"></div>
+# [REQ-DC-030] Secure Directory Services Restore Mode (DSRM) and Recovery Parameters
+
+<div id="02-domain-controllers-harden-dsrm-recovery-mode-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers (Tier 0).
+* **Operating Systems**: Windows Server 2016, 2019, 2022, 2025.
+
+---
+
+<div id="02-domain-controllers-harden-dsrm-recovery-mode-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High (Reduces offline DC attack surface).
+* **GPO Path / Registry Location**:
+  * Registry Path: `HKLM\System\CurrentControlSet\Control\Lsa`
+  * Value Name: `DsrmAdminLogonBehavior`
+  * Value Type: `REG_DWORD`
+  * Value Data: `1` (Allows DSRM Admin logon only when booted in DSRM).
+
+---
+
+<div id="02-domain-controllers-harden-dsrm-recovery-mode-md-rationale"></div>
+## Rationale
+Directory Services Restore Mode (DSRM) is a special boot mode for Domain Controllers that allows administrators to repair or restore the Active Directory database (NTDS.dit). DSRM uses a local Administrator account separate from the AD directory.
+
+If DSRM is not secured:
+1. **Network Authentication Abuse**: By default, or if misconfigured (e.g. `DsrmAdminLogonBehavior` set to `0` or `2`), the local DSRM administrator account can authenticate over the network to the Domain Controller. Since this account has a static password (often never changed since DC promotion), it can be targeted for brute-forcing, pass-the-hash, or DCSync credential retrieval.
+2. **Offline Recovery Attacks**: If the DC is booted in Safe Mode/DSRM, local controls are reduced.
+
+Setting `DsrmAdminLogonBehavior` to `1` ensures the DSRM Administrator account can only log on locally, and only when the DC is booted into DSRM mode. Setting it to `2` allows logon when the AD service is stopped, which is also a risk.
+
+---
+
+<div id="02-domain-controllers-harden-dsrm-recovery-mode-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Offline Recovery Access**: To use DSRM for database maintenance, administrators must have physical console access (or out-of-band console access like iDRAC/iLO/Hyper-V console) since remote RDP or network logons will be rejected.
+* **Credential Synchronization**: The DSRM password must be rotated periodically and synchronized with a highly secure Domain Admin credential.
+
+---
+
+<div id="02-domain-controllers-harden-dsrm-recovery-mode-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-harden-dsrm-recovery-mode-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
+2. Create or edit a GPO linked to the **Domain Controllers** OU (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Create a new **Registry Item** with the following properties:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `System\CurrentControlSet\Control\Lsa`
+   * **Value Name**: `DsrmAdminLogonBehavior`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `00000001` (Hexadecimal)
+5. Deploy and link the GPO to enforce the registry setting domain-wide.
+
+---
+
+<div id="02-domain-controllers-harden-dsrm-recovery-mode-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+To automate verification and local remediation of the DSRM configuration:
+
+[Download Script: Set-DsrmHardening.ps1](implementation_scripts/Set-DsrmHardening.ps1)
+
+```powershell
+# Set-DsrmHardening.ps1
+# Description: Configures DsrmAdminLogonBehavior to restrict network logons.
+
+$RegPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+$ValueName = "DsrmAdminLogonBehavior"
+$ValueData = 1 # Restrict network logons
+
+Write-Host "Applying hardening: Restricting DSRM Admin Logon Behavior..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord
+Write-Host "[+] Registry parameter set successfully: $ValueName = $ValueData" -ForegroundColor Green
+
+# Instructions for DSRM password sync
+Write-Host "`n[NOTE] Ensure that you synchronize the DSRM Administrator password with the Domain Administrator account." -ForegroundColor Yellow
+Write-Host "Run the following command to sync passwords:" -ForegroundColor Yellow
+Write-Host "  ntdsutil `"set dsrm password`" `"sync from domain account administrator`" q q" -ForegroundColor Yellow
+```
+
+*To verify the DSRM configuration status:*
+
+[Download Script: Get-DsrmHardeningStatus.ps1](audit_scripts/Get-DsrmHardeningStatus.ps1)
+
+```powershell
+# Get-DsrmHardeningStatus.ps1
+# Check if DsrmAdminLogonBehavior registry parameter is set to 1.
+
+$RegPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+$ValueName = "DsrmAdminLogonBehavior"
+
+if (-not (Test-Path $RegPath)) {
+    Write-Host "[!] NON-COMPLIANT: Registry key '$RegPath' does not exist." -ForegroundColor Red
+    exit 1
+}
+
+$Value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+
+if ($null -eq $Value -or $Value.$ValueName -ne 1) {
+    Write-Host "[!] NON-COMPLIANT: DSRM network logon is not restricted (DsrmAdminLogonBehavior is not 1)." -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "[+] COMPLIANT: DSRM network logon is restricted (DsrmAdminLogonBehavior = 1)." -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-harden-dsrm-recovery-mode-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R14 (Harden directory services restore mode (DSRM))
+* **CIS Benchmark**: Section 2.3.1.2 (LSA Security Settings)
+* **PingCastle Rule**: `P-RecoveryModeUnprotected` (Ensure the \"automatic administrative logon\" feature of the recovery mode is not enabled)
 
 
 <div style="page-break-before: always;"></div>
@@ -15142,6 +15480,9 @@ This directory contains operational procedures and configuration baselines for s
 11. **[REQ-OPS-011 - Enable Detailed BSOD Stop Parameters for Crash Control](#06-operations-maintenance-enable-detailed-bsod-parameters-md)**
     Enables detailed crash display screens to facilitate local hardware/system troubleshooting in isolated infrastructures.
 
+12. **[REQ-OPS-012 - Implement Automated Inactive Computer and User Account Cleanup](#06-operations-maintenance-decommission-inactive-accounts-md)**
+    Disables and moves inactive user (180 days) and computer (90 days) accounts to a stale OU.
+
 
 
 <div style="page-break-before: always;"></div>
@@ -17217,6 +17558,195 @@ if (Test-Path $Path) {
 ## Sources & Compliance References
 * **Microsoft Security Guidance**: Windows CrashControl Registry Reference
 * **ANSSI AD Hardening Guide**: Section 9 (Operations & Troubleshooting guidance)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="06-operations-maintenance-decommission-inactive-accounts-md"></div>
+
+<div id="06-operations-maintenance-decommission-inactive-accounts-md-req-ops-012-implement-automated-inactive-computer-and-user-account-cleanup"></div>
+# [REQ-OPS-012] Implement Automated Inactive Computer and User Account Cleanup
+
+<div id="06-operations-maintenance-decommission-inactive-accounts-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Active Directory User and Computer Accounts (Tiers 0, 1, and 2).
+* **Operating Systems**: Active Directory Domain Services (All supported functional levels).
+
+---
+
+<div id="06-operations-maintenance-decommission-inactive-accounts-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium (Operational mitigation against lateral movement and backdoor persistence).
+* **GPO Path / Registry Location**: N/A (Implemented via an automated PowerShell maintenance script scheduled to run periodically on a management host).
+
+---
+
+<div id="06-operations-maintenance-decommission-inactive-accounts-md-rationale"></div>
+## Rationale
+Inactive computer and user accounts remain in the directory due to gaps in the employee offboarding or machine decommissioning processes. 
+
+These stale accounts represent a significant security risk:
+1. **Backdoor Persistence**: Attackers targeting a domain can take control of inactive accounts (especially stale administrative accounts or service accounts with never-expiring passwords) to establish persistent, quiet access that is rarely monitored.
+2. **Resource-Based Delegation Exploits**: Stale computer accounts can be targeted by attackers to construct resource-based constrained delegation (RBCD) attacks, allowing them to impersonate high-privilege services and eventually compromise the domain.
+3. **Password Aging bypass**: Standard computers automatically change their passwords every 30 days. If a machine is powered off or disconnected, its password age increases. If computer passwords are not rotated, or if a stale computer account remains enabled, it increases the risk of offline password dumping and hash-relay.
+
+Automatically disabling and isolating user accounts after 180 days of inactivity, and computer accounts after 90 days of inactivity, minimizes the active attack surface of the directory.
+
+---
+
+<div id="06-operations-maintenance-decommission-inactive-accounts-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Temporary Absence**: Employees on long-term leave (e.g., parental or medical leave) may have their accounts disabled automatically. Standard procedures must exist for the service desk to quickly re-enable accounts upon validation.
+* **Lab and Staging Systems**: Test or staging servers that are powered down for long periods might have their computer accounts disabled. These accounts should be placed in excluded Organizational Units (OUs) or excluded via the script parameters.
+
+---
+
+<div id="06-operations-maintenance-decommission-inactive-accounts-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="06-operations-maintenance-decommission-inactive-accounts-md-option-a-scheduled-maintenance-task-setup"></div>
+### Option A: Scheduled Maintenance Task Setup
+
+1. Place the decommissioning script (`Decommission-InactiveAccounts.ps1`) in a secure administrative directory on a domain management host (e.g., `C:\ADMaintenance\Scripts\`).
+2. Open **Task Scheduler** (`taskschd.msc`) on the management host.
+3. Create a new task with the following properties:
+   * **Account**: Run as a dedicated service account or `NT AUTHORITY\SYSTEM` (with delegated rights to modify user and computer accounts in target OUs).
+   * **Trigger**: Weekly (e.g., every Sunday at 02:00 AM).
+   * **Action**: Start a program:
+     * **Program/script**: `powershell.exe`
+     * **Arguments**: `-NoProfile -ExecutionPolicy Bypass -File "C:\ADMaintenance\Scripts\Decommission-InactiveAccounts.ps1" -LogPath "C:\ADMaintenance\Logs\"`
+4. Enable logging and monitor execution logs to verify that accounts are correctly identified, disabled, and moved to the Stale OU.
+
+---
+
+<div id="06-operations-maintenance-decommission-inactive-accounts-md-option-b-powershell-active-directory-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Active Directory Configuration (Remediation / Non-GPO)
+
+To automate the identification, disabling, and isolation of inactive accounts:
+
+[Download Script: Decommission-InactiveAccounts.ps1](implementation_scripts/Decommission-InactiveAccounts.ps1)
+
+```powershell
+# Decommission-InactiveAccounts.ps1
+# Description: Disables and moves inactive user (180 days) and computer (90 days) accounts to a stale OU.
+
+Import-Module ActiveDirectory
+
+# Define thresholds
+$UserInactivityDays = 180
+$ComputerInactivityDays = 90
+
+$UserCutoffDate = (Get-Date).AddDays(-$UserInactivityDays)
+$ComputerCutoffDate = (Get-Date).AddDays(-$ComputerInactivityDays)
+
+# Target OU for stale objects (adjust to your environment)
+$StaleOU = "OU=StaleObjects,DC=domain,DC=local"
+$Exclusions = @("Domain Controllers") # Exclude OUs containing DCs
+
+if (-not (Get-ADOrganizationalUnit -Identity $StaleOU -ErrorAction SilentlyContinue)) {
+    Write-Host "[-] Stale OU '$StaleOU' does not exist. Creating it." -ForegroundColor Yellow
+    New-ADOrganizationalUnit -Name "StaleObjects" -Path (Get-ADDomain).DistinguishedName -Verbose
+}
+
+Write-Host "Scanning for inactive user accounts (no logon in last $UserInactivityDays days)..." -ForegroundColor Cyan
+$StaleUsers = Get-ADUser -Filter {Enabled -eq $true -and LastLogonDate -lt $UserCutoffDate -and Name -ne "Administrator" -and Name -ne "Guest"} -Properties LastLogonDate
+
+foreach ($user in $StaleUsers) {
+    # Verify the user is not in excluded paths
+    $isExcluded = $false
+    foreach ($ex in $Exclusions) {
+        if ($user.DistinguishedName -like "*$ex*") { $isExcluded = $true }
+    }
+    if ($isExcluded) { continue }
+
+    Write-Host "Disabling and moving inactive user: $($user.SamAccountName) (Last Logon: $($user.LastLogonDate))" -ForegroundColor Yellow
+    Set-ADUser -Identity $user -Enabled $false -Description "Disabled by AD Decommissioning Script - Inactive for $UserInactivityDays days"
+    Move-ADObject -Identity $user -TargetPath $StaleOU
+}
+
+Write-Host "`nScanning for inactive computer accounts (no logon in last $ComputerInactivityDays days)..." -ForegroundColor Cyan
+$StaleComputers = Get-ADComputer -Filter {Enabled -eq $true -and LastLogonDate -lt $ComputerCutoffDate} -Properties LastLogonDate
+
+foreach ($comp in $StaleComputers) {
+    $isExcluded = $false
+    foreach ($ex in $Exclusions) {
+        if ($comp.DistinguishedName -like "*$ex*") { $isExcluded = $true }
+    }
+    if ($isExcluded) { continue }
+
+    Write-Host "Disabling and moving inactive computer: $($comp.Name) (Last Logon: $($comp.LastLogonDate))" -ForegroundColor Yellow
+    Set-ADComputer -Identity $comp -Enabled $false -Description "Disabled by AD Decommissioning Script - Inactive for $ComputerInactivityDays days"
+    Move-ADObject -Identity $comp -TargetPath $StaleOU
+}
+
+Write-Host "`nDecommissioning process completed." -ForegroundColor Green
+```
+
+*To audit the domain for stale user/computer accounts:*
+
+[Download Script: Get-InactiveAccountsStatus.ps1](audit_scripts/Get-InactiveAccountsStatus.ps1)
+
+```powershell
+# Get-InactiveAccountsStatus.ps1
+# Audits the directory for enabled but inactive user (180 days) and computer (90 days) accounts.
+
+Import-Module ActiveDirectory
+
+$UserInactivityDays = 180
+$ComputerInactivityDays = 90
+
+$UserCutoffDate = (Get-Date).AddDays(-$UserInactivityDays)
+$ComputerCutoffDate = (Get-Date).AddDays(-$ComputerInactivityDays)
+
+$StaleUsers = Get-ADUser -Filter {Enabled -eq $true -and LastLogonDate -lt $UserCutoffDate -and Name -ne "Administrator" -and Name -ne "Guest"} -Properties LastLogonDate
+$StaleComputers = Get-ADComputer -Filter {Enabled -eq $true -and LastLogonDate -lt $ComputerCutoffDate} -Properties LastLogonDate
+
+$Exclusions = @("Domain Controllers")
+
+$nonCompliantCount = 0
+
+foreach ($user in $StaleUsers) {
+    $isExcluded = $false
+    foreach ($ex in $Exclusions) {
+        if ($user.DistinguishedName -like "*$ex*") { $isExcluded = $true }
+    }
+    if ($isExcluded) { continue }
+
+    Write-Host "[!] NON-COMPLIANT: User account '$($user.SamAccountName)' is enabled but inactive since $($user.LastLogonDate)" -ForegroundColor Red
+    $nonCompliantCount++
+}
+
+foreach ($comp in $StaleComputers) {
+    $isExcluded = $false
+    foreach ($ex in $Exclusions) {
+        if ($comp.DistinguishedName -like "*$ex*") { $isExcluded = $true }
+    }
+    if ($isExcluded) { continue }
+
+    Write-Host "[!] NON-COMPLIANT: Computer account '$($comp.Name)' is enabled but inactive since $($comp.LastLogonDate)" -ForegroundColor Red
+    $nonCompliantCount++
+}
+
+if ($nonCompliantCount -eq 0) {
+    Write-Host "[+] COMPLIANT: No stale enabled user or computer accounts detected." -ForegroundColor Green
+    exit 0
+} else {
+    Write-Host "[!] NON-COMPLIANT: Detected $nonCompliantCount stale enabled accounts that need to be decommissioned." -ForegroundColor Red
+    exit 1
+}
+```
+
+---
+
+<div id="06-operations-maintenance-decommission-inactive-accounts-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R45 (Auditing and disabling stale user/computer accounts)
+* **CIS Benchmark**: Section 5.1 (User Account Control and password expirations)
+* **PingCastle Rules**:
+  * `S-C-Inactive` (Inactive computer check)
+  * `P-Inactive` (Check for inactive administrator accounts)
+  * `S-Inactive` (Inactive account check)
+  * `S-PwdLastSet-90` (Check if all computers have changed their passwords in the last 3 months)
 
 
 <div style="page-break-before: always;"></div>
@@ -33498,7 +34028,7 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 * **[REQ-DC-008 - Disable Print Spooler Service](#02-domain-controllers-disable-print-spooler-md)**: Disables spooler to block PrintNightmare and coercion.
 * **[REQ-DC-015 - Migrate SYSVOL Replication to DFSR](#02-domain-controllers-migrate-sysvol-replication-dfsr-md)**: Retires legacy FRS replication.
 * **[REQ-DC-016 - Harden adminSDHolder Permissions](#02-domain-controllers-harden-adminsdholder-permissions-md)**: Blocks permission changes to high-privilege templates.
-* **[REQ-DC-024 - Configure dSHeuristics](#02-domain-controllers-configure-dsheuristics-md)**: Restricts anonymous directory access.
+* **[REQ-DC-024 - Configure dSHeuristics Attribute](#02-domain-controllers-configure-dsheuristics-md)**: Restricts anonymous directory access.
 * **[REQ-DC-030 - Secure Directory Services Restore Mode (DSRM) and Recovery Parameters](#02-domain-controllers-harden-dsrm-recovery-mode-md)**: Configures DsrmAdminLogonBehavior to restrict network logons.
 
 <div id="roadmap-implementation-plan-md-identities-services-requirements"></div>
@@ -33636,7 +34166,7 @@ This phase establishes the physical boundaries, hardware-based trust mechanisms,
 * **[REQ-PAW-009 - Configure User Rights Assignments for PAWs](#07-paws-configure-user-rights-assignments-md)**: Restricts debugging, impersonation, and interactive logins on PAWs.
 * **[REQ-PAW-011 - Harden DMA and Physical Security for PAWs](#07-paws-harden-dma-and-physical-security-md)**: Blocks sleep states and limits external bus operations.
 * **[REQ-PAW-022 - Disable Incoming Remote Desktop Access for PAWs](#07-paws-restrict-rdp-access-md)**: Blocks remote lateral logins to administrative devices.
-* **[REQ-PAW-030 - Enable Secure Boot for PAWs](#07-paws-enable-secure-boot-md)**: Locks the bootloader signatures.
+* **[REQ-PAW-030 - Enable Secure Boot](#07-paws-enable-secure-boot-md)**: Locks the bootloader signatures.
 
 <div id="roadmap-implementation-plan-md-endpoint-requirements"></div>
 ### Endpoint Requirements
@@ -33707,7 +34237,7 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-PAW-017 - Configure svchost.exe Mitigation Options for PAWs](#07-paws-configure-svchost-mitigation-md)**: Enforces Microsoft signature check on svchost.
 * **[REQ-PAW-018 - Enable Kernel-Mode Hardware-Enforced Stack Protection for PAWs](#07-paws-enable-kernel-shadow-stacks-md)**: Enforces hardware-backed ROP mitigation.
 * **[REQ-PAW-023 - WSUS Client Configuration for PAWs](#07-paws-wsus-client-config-md)**: Directs updates to local WSUS servers.
-* **[REQ-PAW-024 - Configure User Profile and System Restrictions for PAWs](#07-paws-configure-user-profile-restrictions-md)**: Locks administrative host profiles.
+* **[REQ-PAW-024 - Configure User Profile Restrictions](#07-paws-configure-user-profile-restrictions-md)**: Locks administrative host profiles.
 * **[REQ-PAW-025 - Configure Exploit Protection Profile for PAWs](#07-paws-configure-exploit-protection-md)**: System-wide DEP and ASLR configurations.
 * **[REQ-PAW-026 - Restrict Safe Mode Access to Administrators on PAWs](#07-paws-disable-safe-mode-for-standard-users-md)**: Disables standard user access in Safe Mode.
 * **[REQ-PAW-027 - Configure Windows Defender Firewall and Block LOLBins for PAWs](#07-paws-configure-windows-firewall-md)**: Firewalls and LOLBin traffic limits.

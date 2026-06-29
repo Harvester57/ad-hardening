@@ -37,3 +37,6 @@ This directory contains operational procedures and configuration baselines for s
 11. **[REQ-OPS-011 - Enable Detailed BSOD Stop Parameters for Crash Control](enable-detailed-bsod-parameters.md)**
     Enables detailed crash display screens to facilitate local hardware/system troubleshooting in isolated infrastructures.
 
+12. **[REQ-OPS-012 - Implement Automated Inactive Computer and User Account Cleanup](decommission-inactive-accounts.md)**
+    Disables and moves inactive user (180 days) and computer (90 days) accounts to a stale OU.
+

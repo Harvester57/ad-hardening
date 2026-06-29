@@ -62,6 +62,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure the Untrusted Font Blocking mitigation on Domain Controllers to prevent kernel font parser exploits.
 * **[REQ-DC-029 - Configure svchost.exe Mitigation Options](configure-svchost-mitigation.md)**
   Requirement to configure svchost.exe mitigation options on Domain Controllers and Member Servers to restrict binary loading to Microsoft-signed code and block dynamic code execution.
+* **[REQ-DC-030 - Secure Directory Services Restore Mode (DSRM) and Recovery Parameters](harden-dsrm-recovery-mode.md)**
+  Requirement to secure DSRM restore mode logon behavior and recovery credentials parameters.
 
 
 

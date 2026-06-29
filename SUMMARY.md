@@ -11,6 +11,7 @@
     * [REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](01-architecture/keep-functional-levels-up-to-date.md)
     * [REQ-ARCH-005 - Default Domain and Domain Controllers Policies Management](01-architecture/default-policies-recommendations.md)
     * [REQ-ARCH-006 - Harden Active Directory Domain Trusts](01-architecture/harden-domain-trusts.md)
+    * [REQ-ARCH-007 - Harden Microsoft Exchange Active Directory Permissions](01-architecture/harden-exchange-permissions.md)
 ## Module 2: Domain Controller Hardening
 * [Module 2: Domain Controller Hardening](02-domain-controllers/README.md)
     * [REQ-DC-001 - Disable SMBv1](02-domain-controllers/disable-smbv1.md)
@@ -42,6 +43,7 @@
     * [REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](02-domain-controllers/configure-telemetry-privacy.md)
     * [REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](02-domain-controllers/configure-untrusted-font-blocking.md)
     * [REQ-DC-029 - Configure svchost.exe Mitigation Options](02-domain-controllers/configure-svchost-mitigation.md)
+    * [REQ-DC-030 - Secure Directory Services Restore Mode (DSRM) and Recovery Parameters](02-domain-controllers/harden-dsrm-recovery-mode.md)
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)
@@ -97,6 +99,7 @@
     * [REQ-OPS-009 - Implement Offline Patch Management via WSUS](06-operations-maintenance/implement-offline-patch-management.md)
     * [REQ-OPS-010 - Establish Continuous Security Assessments](06-operations-maintenance/establish-continuous-security-assessments.md)
     * [REQ-OPS-011 - Enable Detailed BSOD Stop Parameters for Crash Control](06-operations-maintenance/enable-detailed-bsod-parameters.md)
+    * [REQ-OPS-012 - Implement Automated Inactive Computer and User Account Cleanup](06-operations-maintenance/decommission-inactive-accounts.md)
 ## Module 7: Privileged Access Workstations (PAWs) Hardening
 * [Module 7: Privileged Access Workstations (PAWs) Hardening](07-paws/README.md)
     * [REQ-PAW-001 - Configure AppLocker Policies for PAWs](07-paws/configure-applocker-policies.md)
