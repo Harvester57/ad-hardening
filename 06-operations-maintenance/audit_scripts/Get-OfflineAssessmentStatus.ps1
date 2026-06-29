@@ -1,11 +1,12 @@
 # Get-OfflineAssessmentStatus.ps1
-# Description: Audits the presence of PingCastle and SharpHound tools and the age of recent reports.
+# Description: Audits the presence of PingCastle, SharpHound, and Locksmith tools and the age of recent reports.
 
 Write-Host "--- Auditing Active Directory Security Assessment Tools ---" -ForegroundColor Cyan
 
 $DiagnosticsPath = "C:\Diagnostics" # Common diagnostics path
 $PingCastlePath = Join-Path $DiagnosticsPath "PingCastle.exe"
 $SharpHoundPath = Join-Path $DiagnosticsPath "SharpHound.exe"
+$LocksmithPath = Join-Path $DiagnosticsPath "Invoke-Locksmith.ps1"
 $ReportAgeDays = 30
 
 $Compliant = $true
@@ -41,6 +42,23 @@ if (Test-Path $SharpHoundPath) {
     }
 } else {
     Write-Warning "[-] SharpHound executable NOT found at: $SharpHoundPath"
+    $Compliant = $false
+}
+
+# 3. Check Locksmith
+if (Test-Path $LocksmithPath) {
+    Write-Host "[+] Locksmith script found: $LocksmithPath" -ForegroundColor Green
+    
+    # Check if Locksmith CSV output exists and was generated in the last 30 days
+    $locksmithReport = Get-ChildItem -Path $DiagnosticsPath -Filter "ADCSIssues.CSV" -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge (Get-Date).AddDays(-$ReportAgeDays) }
+    if ($locksmithReport) {
+        Write-Host "    [+] Found recent Locksmith report (within last $ReportAgeDays days)." -ForegroundColor Green
+    } else {
+        Write-Warning "    [-] No recent Locksmith report (ADCSIssues.CSV) found (older than $ReportAgeDays days)."
+        $Compliant = $false
+    }
+} else {
+    Write-Warning "[-] Locksmith script (Invoke-Locksmith.ps1) NOT found at: $LocksmithPath"
     $Compliant = $false
 }
 

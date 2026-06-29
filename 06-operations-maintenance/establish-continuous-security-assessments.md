@@ -16,17 +16,18 @@
 Active Directory configurations naturally drift over time as a result of administrative changes, new trust relationships, and changing group policies. Administrators must actively search for misconfigurations, weak permissions, and signs of compromise.
 
 In isolated, air-gapped networks, online security analysis services cannot be reached. Therefore:
-1. **Periodic Scans**: Execute security audits locally using offline-compatible tools (such as PingCastle, BloodHound/SharpHound, or ORADAD).
+1. **Periodic Scans**: Execute security audits locally using offline-compatible tools (such as PingCastle, BloodHound/SharpHound, Locksmith, or ORADAD).
 2. **Directory Health Monitoring**: Run PingCastle monthly to generate local XML/HTML reports indicating domain vulnerabilities and tracking AD configuration health.
 3. **Lateral Movement Auditing**: Execute SharpHound quarterly to construct lateral movement path graphs, enabling defenders to identify complex trust relationships or delegation chains leading to Tier 0 compromise.
-4. **Data Isolation**: Transfer the diagnostic reports and export ZIPs out of production to secure, offline assessment platforms to limit exposure of sensitive configuration data.
+4. **Active Directory Certificate Services Auditing**: Run Locksmith monthly to identify misconfigured certificate templates, insecure enrollment settings, and potential AD CS privilege escalation paths.
+5. **Data Isolation**: Transfer the diagnostic reports, CSV exports, and export ZIPs out of production to secure, offline assessment platforms to limit exposure of sensitive configuration data.
 
 ---
 
 ## Legacy Impact & Compatibility
 * **LDAP & Domain Controller Load**: SharpHound queries Active Directory via LDAP and SAMR protocols, which can generate thousands of queries depending on the directory's size. Schedule directory-wide collectors during low-activity windows to avoid latency.
-* **Security Alarm Generation**: SharpHound and PingCastle execution looks like reconnaissance activity and can trigger alerts in local Antivirus or Endpoint Detection and Response (EDR) agents. Administrators must coordinate scans with security operations teams and authorize the diagnostic binaries.
-* **Data Sensitivity**: BloodHound export ZIPs and PingCastle reports contain highly sensitive structural details of the directory. These files must be stored with strict access controls (Domain Admins only) and purged from administrative workstations after completion.
+* **Security Alarm Generation**: SharpHound, Locksmith, and PingCastle execution looks like reconnaissance activity and can trigger alerts in local Antivirus or Endpoint Detection and Response (EDR) agents. Administrators must coordinate scans with security operations teams and authorize the diagnostic tools.
+* **Data Sensitivity**: BloodHound export ZIPs, PingCastle reports, and Locksmith CSV exports contain highly sensitive structural details of the directory. These files must be stored with strict access controls (Domain Admins only) and purged from administrative workstations after completion.
 
 ---
 
@@ -52,17 +53,27 @@ In isolated, air-gapped networks, online security analysis services cannot be re
    ```
 4. Copy the resulting zip file to the offline BloodHound graph database dashboard to query and audit lateral movement paths.
 
+#### 3. Running Locksmith Audits (AD CS)
+1. Download the `Invoke-Locksmith.ps1` script from the official repository and place it in the diagnostic directory (e.g., `C:\Diagnostics`).
+2. Open PowerShell as Administrator on a domain-joined workstation.
+3. Run the script using the CSV export mode (Mode 2) to audit AD CS and save findings:
+```powershell
+Set-Location -Path C:\Diagnostics
+.\Invoke-Locksmith.ps1 -Mode 2
+```
+4. Copy the generated `ADCSIssues.CSV` report to a secure analysis terminal for offline review.
+
 ---
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Use the following PowerShell script to automate the execution of both PingCastle and SharpHound collectors inside a specified diagnostic workspace.
+Use the following PowerShell script to automate the execution of PingCastle, SharpHound, and Locksmith collectors inside a specified diagnostic workspace.
 
 [Download Script: Start-OfflineAssessments.ps1](implementation_scripts/Start-OfflineAssessments.ps1)
 
 ```powershell
 # Start-OfflineAssessments.ps1
-# Description: Triggers a PingCastle security audit scan and SharpHound data collection.
+# Description: Triggers PingCastle, SharpHound, and Locksmith security audit scans.
 
 param (
     [string]$DiagnosticsPath = "C:\Diagnostics",
@@ -77,6 +88,7 @@ if (-not (Test-Path $DiagnosticsPath)) {
 
 $PingCastlePath = Join-Path $DiagnosticsPath "PingCastle.exe"
 $SharpHoundPath = Join-Path $DiagnosticsPath "SharpHound.exe"
+$LocksmithPath = Join-Path $DiagnosticsPath "Invoke-Locksmith.ps1"
 
 # 1. Execute PingCastle
 if (Test-Path $PingCastlePath) {
@@ -110,6 +122,25 @@ if (Test-Path $SharpHoundPath) {
 } else {
     Write-Error "SharpHound.exe not found at $SharpHoundPath. Please place the binary to execute."
 }
+
+# 3. Execute Locksmith
+if (Test-Path $LocksmithPath) {
+    Write-Host "[+] Executing Locksmith..." -ForegroundColor Yellow
+    $originalLocation = Get-Location
+    Set-Location -Path $DiagnosticsPath
+    try {
+        & $LocksmithPath -Mode 2
+        Write-Host ("[+] Locksmith scan complete. Saved to: " + (Join-Path $DiagnosticsPath "ADCSIssues.CSV")) -ForegroundColor Green
+    }
+    catch {
+        Write-Error "Failed to execute Locksmith: $($_.Exception.Message)"
+    }
+    finally {
+        Set-Location -Path $originalLocation
+    }
+} else {
+    Write-Error "Invoke-Locksmith.ps1 not found at $LocksmithPath. Please place the script to execute."
+}
 ```
 
 *To verify that diagnostic tools and recent reports exist on the auditing system:*
@@ -118,13 +149,14 @@ if (Test-Path $SharpHoundPath) {
 
 ```powershell
 # Get-OfflineAssessmentStatus.ps1
-# Description: Audits the presence of PingCastle and SharpHound tools and the age of recent reports.
+# Description: Audits the presence of PingCastle, SharpHound, and Locksmith tools and the age of recent reports.
 
 Write-Host "--- Auditing Active Directory Security Assessment Tools ---" -ForegroundColor Cyan
 
 $DiagnosticsPath = "C:\Diagnostics" # Common diagnostics path
 $PingCastlePath = Join-Path $DiagnosticsPath "PingCastle.exe"
 $SharpHoundPath = Join-Path $DiagnosticsPath "SharpHound.exe"
+$LocksmithPath = Join-Path $DiagnosticsPath "Invoke-Locksmith.ps1"
 $ReportAgeDays = 30
 
 $Compliant = $true
@@ -163,6 +195,23 @@ if (Test-Path $SharpHoundPath) {
     $Compliant = $false
 }
 
+# 3. Check Locksmith
+if (Test-Path $LocksmithPath) {
+    Write-Host "[+] Locksmith script found: $LocksmithPath" -ForegroundColor Green
+    
+    # Check if Locksmith CSV output exists and was generated in the last 30 days
+    $locksmithReport = Get-ChildItem -Path $DiagnosticsPath -Filter "ADCSIssues.CSV" -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge (Get-Date).AddDays(-$ReportAgeDays) }
+    if ($locksmithReport) {
+        Write-Host "    [+] Found recent Locksmith report (within last $ReportAgeDays days)." -ForegroundColor Green
+    } else {
+        Write-Warning "    [-] No recent Locksmith report (ADCSIssues.CSV) found (older than $ReportAgeDays days)."
+        $Compliant = $false
+    }
+} else {
+    Write-Warning "[-] Locksmith script (Invoke-Locksmith.ps1) NOT found at: $LocksmithPath"
+    $Compliant = $false
+}
+
 if ($Compliant) {
     Write-Host "`nStatus: Compliant. Diagnostics tools and recent reports are present." -ForegroundColor Green
     exit 0
@@ -177,3 +226,4 @@ if ($Compliant) {
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R57 (Perform continuous security assessments and audits)
 * **CIS Microsoft Windows Server 2016 Benchmark v2.0.0**: Section 18.9 (Administrative tools and logging controls)
+* **Locksmith Repository**: [Trimarc Locksmith AD CS Auditing Tool](https://github.com/jakehildreth/Locksmith)

@@ -1,5 +1,5 @@
 # Start-OfflineAssessments.ps1
-# Description: Triggers a PingCastle security audit scan and SharpHound data collection.
+# Description: Triggers PingCastle, SharpHound, and Locksmith security audit scans.
 
 param (
     [string]$DiagnosticsPath = "C:\Diagnostics",
@@ -14,6 +14,7 @@ if (-not (Test-Path $DiagnosticsPath)) {
 
 $PingCastlePath = Join-Path $DiagnosticsPath "PingCastle.exe"
 $SharpHoundPath = Join-Path $DiagnosticsPath "SharpHound.exe"
+$LocksmithPath = Join-Path $DiagnosticsPath "Invoke-Locksmith.ps1"
 
 # 1. Execute PingCastle
 if (Test-Path $PingCastlePath) {
@@ -46,4 +47,23 @@ if (Test-Path $SharpHoundPath) {
     Write-Host "[+] SharpHound collection complete. Saved to: $zipPath" -ForegroundColor Green
 } else {
     Write-Error "SharpHound.exe not found at $SharpHoundPath. Please place the binary to execute."
+}
+
+# 3. Execute Locksmith
+if (Test-Path $LocksmithPath) {
+    Write-Host "[+] Executing Locksmith..." -ForegroundColor Yellow
+    $originalLocation = Get-Location
+    Set-Location -Path $DiagnosticsPath
+    try {
+        & $LocksmithPath -Mode 2
+        Write-Host ("[+] Locksmith scan complete. Saved to: " + (Join-Path $DiagnosticsPath "ADCSIssues.CSV")) -ForegroundColor Green
+    }
+    catch {
+        Write-Error "Failed to execute Locksmith: $($_.Exception.Message)"
+    }
+    finally {
+        Set-Location -Path $originalLocation
+    }
+} else {
+    Write-Error "Invoke-Locksmith.ps1 not found at $LocksmithPath. Please place the script to execute."
 }
