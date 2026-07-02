@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 59ef14f | Generated: July 02, 2026</span>
+      <span>Commit: 728454e | Generated: July 02, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -8247,6 +8247,9 @@ This directory contains security requirements and policies designed to protect a
 19. **[REQ-ID-019 - Enforce Smart Card Authentication for Privileged Users](#03-identities-services-enforce-smartcard-privileged-users-md)**
     Enforces the 'Smart card is required for interactive logon' setting on administrative accounts to invalidate password hashes and force Kerberos PKINIT.
 
+20. **[REQ-ID-020 - Clean Up Legacy Group Policy Preferences and SYSVOL Passwords](#03-identities-services-cleanup-gpp-sysvol-passwords-md)**
+    Identifies and remediates Group Policy Preferences (GPP) XML files with `cpassword` properties and legacy scripts containing cleartext credentials inside SYSVOL.
+
 
 <div style="page-break-before: always;"></div>
 
@@ -11476,6 +11479,226 @@ if ($Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="03-identities-services-cleanup-gpp-sysvol-passwords-md"></div>
+
+<div id="03-identities-services-cleanup-gpp-sysvol-passwords-md-req-id-020-clean-up-legacy-group-policy-preferences-and-sysvol-passwords"></div>
+# [REQ-ID-020] Clean Up Legacy Group Policy Preferences and SYSVOL Passwords
+
+<div id="03-identities-services-cleanup-gpp-sysvol-passwords-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025
+
+---
+
+<div id="03-identities-services-cleanup-gpp-sysvol-passwords-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**: None (Domain-wide SYSVOL cleanup of legacy policy preference files and logon/startup scripts)
+
+---
+
+<div id="03-identities-services-cleanup-gpp-sysvol-passwords-md-rationale"></div>
+## Rationale
+Historically, administrators utilized Group Policy Preferences (GPP) to automate account creation, service configurations, drive mappings, and local administrator password rotations. When credentials were saved within a GPP, the password was stored as an encrypted string under the `cpassword` attribute in XML configuration files (e.g., `Groups.xml`, `Services.xml`, `ScheduledTasks.xml`) inside the domain-wide `SYSVOL` share.
+
+Although Microsoft encrypted the password with AES-256, the static AES decryption key was published on MSDN. Because any authenticated user (or trust) has read access to the `SYSVOL` share, any domain user can read the preference XML files, extract the `cpassword` value, and decrypt it to obtain cleartext credentials.
+
+Microsoft patched this vulnerability in May 2014 via **MS14-025 (KB2962486)**, which blocks the Group Policy Management Console (GPMC) from creating or updating policies that contain password fields. However, **the patch does not delete existing GPP XML files with passwords from SYSVOL**. Consequently, legacy preferences with encrypted credentials remain in the `SYSVOL` directory and continue to be a primary target for adversary credential harvesting.
+
+Additionally, administrators historically deployed custom login or management scripts (e.g., `.vbs`, `.bat`, `.cmd`, `.ps1`) in `SYSVOL` with cleartext passwords hardcoded. These must also be identified and purged.
+
+---
+
+<div id="03-identities-services-cleanup-gpp-sysvol-passwords-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Configuration Breakage**: Removing credentials or stripping `cpassword` properties from active Group Policy Preferences will prevent those specific objects (drives, tasks, services) from authenticating and executing. 
+* **Transition Prerequisite**: Ensure that all systems requiring local administrator password rotation are migrated to Windows LAPS or Classic LAPS ([REQ-ID-002](#03-identities-services-enable-laps-md)) and all service/task authentication is migrated to Group Managed Service Accounts (gMSAs) ([REQ-ID-003](#03-identities-services-harden-service-accounts-md)) prior to cleaning up GPP passwords.
+
+---
+
+<div id="03-identities-services-cleanup-gpp-sysvol-passwords-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="03-identities-services-cleanup-gpp-sysvol-passwords-md-option-a-active-directory-group-policy-management-gui"></div>
+### Option A: Active Directory Group Policy Management (GUI)
+
+To manually locate and clean up credential fields:
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management server.
+2. Review all active GPOs that configure Preferences (specifically under **Computer Configuration** or **User Configuration** -> **Preferences** -> **Control Panel Settings** -> **Local Users and Groups**, **Scheduled Tasks**, or **Services**).
+3. If an active policy contains an account configuration with a password, recreate the policy option without specifying credentials (use LAPS or gMSA as alternatives).
+4. For any GPOs no longer in use, delete them using GPMC to clean up their folders from the `SYSVOL` directory.
+
+---
+
+<div id="03-identities-services-cleanup-gpp-sysvol-passwords-md-option-b-powershell-remediation-non-gpo-script-based"></div>
+### Option B: PowerShell & Remediation (Non-GPO / Script-based)
+
+Use these scripts to scan and automatically remediate GPP configuration files in the `SYSVOL` share.
+
+[Download Script: Remove-GPPSYSVOLPasswords.ps1](implementation_scripts/Remove-GPPSYSVOLPasswords.ps1)
+
+```powershell
+# Remove-GPPSYSVOLPasswords.ps1
+# Description: Removes cpassword attributes from Group Policy Preference XML files in SYSVOL and backs up original files.
+# Target Engine: Windows PowerShell 5.1
+
+Write-Host "--- Remediation: Cleaning Up GPP cpassword Credentials in SYSVOL ---" -ForegroundColor Cyan
+
+# Retrieve local SYSVOL path from registry
+$SysvolReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters" -Name "Sysvol" -ErrorAction SilentlyContinue
+if (-not $SysvolReg) {
+    Write-Host "[*] SYSVOL registry path not found. Checking standard share path..." -ForegroundColor Yellow
+    $SysvolPath = "C:\Windows\SYSVOL\sysvol"
+} else {
+    $SysvolPath = $SysvolReg.Sysvol
+}
+
+if (-not (Test-Path -Path $SysvolPath)) {
+    Write-Host "[-] SYSVOL folder not found at path: $SysvolPath. Nothing to remediate." -ForegroundColor Red
+    exit 0
+}
+
+# 1. Scan and remediate GPP XML files
+$GppXmls = Get-ChildItem -Path $SysvolPath -Filter *.xml -Recurse -File -ErrorAction SilentlyContinue
+
+foreach ($file in $GppXmls) {
+    $content = Get-Content -Path $file.FullName -Raw -ErrorAction SilentlyContinue
+    if ($content -and $content.Contains("cpassword")) {
+        Write-Host "[*] Found GPP file with cpassword: $($file.FullName)" -ForegroundColor Yellow
+        
+        # Create Backup
+        $Timestamp = Get-Date -Format "yyyyMMddHHmmss"
+        $BackupPath = "$($file.FullName).bak_$Timestamp"
+        Copy-Item -Path $file.FullName -Destination $BackupPath -Force -ErrorAction SilentlyContinue
+        Write-Host "    [+] Created backup at: $BackupPath" -ForegroundColor Gray
+
+        # Load XML
+        [xml]$xml = New-Object System.Xml.XmlDocument
+        try {
+            $xml.Load($file.FullName)
+            
+            # Find all elements with cpassword attribute using XPath
+            $Nodes = $xml.SelectNodes("//*[@cpassword]")
+            if ($Nodes.Count -gt 0) {
+                foreach ($Node in $Nodes) {
+                    Write-Host "    [+] Stripping cpassword attribute from XML node: $($Node.Name)" -ForegroundColor White
+                    $Node.RemoveAttribute("cpassword")
+                    # If username exists, log it to help administrator identify what was affected
+                    if ($Node.Attributes["username"]) {
+                        Write-Host "    [!] Note: Node was configured for username '$($Node.Attributes["username"].Value)'" -ForegroundColor Yellow
+                    }
+                }
+                $xml.Save($file.FullName)
+                Write-Host "    [+] Successfully stripped cpassword from: $($file.FullName)" -ForegroundColor Green
+            }
+        }
+        catch {
+            Write-Host "    [-] Failed to parse or save XML: $($_.Exception.Message)" -ForegroundColor Red
+        }
+    }
+}
+
+# 2. Alert for scripts (Do not auto-remediate script files to prevent code syntax breakage)
+$ScriptFiles = Get-ChildItem -Path $SysvolPath -Include *.vbs, *.ps1, *.bat, *.cmd -Recurse -File -ErrorAction SilentlyContinue
+$CredentialPattern = '(?i)\b(password|pwd|adminpwd|syspwd|adminpassword|localadminpwd)\s*=\s*["''][^"'']+\b'
+
+foreach ($file in $ScriptFiles) {
+    # Skip our own audit and implementation scripts
+    if ($file.Name -like "*Get-GPPSYSVOLPasswords*" -or $file.Name -like "*Remove-GPPSYSVOLPasswords*" -or $file.Name -like "*SYSVOLHoneypot*") {
+        continue
+    }
+
+    $content = Get-Content -Path $file.FullName -Raw -ErrorAction SilentlyContinue
+    if ($content -and $content -match $CredentialPattern) {
+        Write-Host "[WARNING] Script contains hardcoded credential pattern: $($file.FullName)" -ForegroundColor Red
+        Write-Host "          Manual intervention is required. Review and delete/rotate credentials in this script." -ForegroundColor Yellow
+    }
+}
+
+Write-Host "[+] SYSVOL password remediation processing completed." -ForegroundColor Green
+```
+
+*To verify that no cpassword files or cleartext script credentials exist in SYSVOL:*
+
+[Download Script: Get-GPPSYSVOLPasswords.ps1](audit_scripts/Get-GPPSYSVOLPasswords.ps1)
+
+```powershell
+# Get-GPPSYSVOLPasswords.ps1
+# Description: Audits the SYSVOL directory for legacy Group Policy Preference files containing cpassword values and scripts containing cleartext credentials.
+# Target Engine: Windows PowerShell 5.1
+
+Write-Host "--- Auditing SYSVOL for Group Policy Preference and Script Passwords ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+# Retrieve local SYSVOL path from registry
+$SysvolReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters" -Name "Sysvol" -ErrorAction SilentlyContinue
+if (-not $SysvolReg) {
+    Write-Host "[*] SYSVOL registry path not found. Checking standard share path..." -ForegroundColor Yellow
+    $SysvolPath = "C:\Windows\SYSVOL\sysvol"
+} else {
+    $SysvolPath = $SysvolReg.Sysvol
+}
+
+if (-not (Test-Path -Path $SysvolPath)) {
+    Write-Host "[-] SYSVOL folder not found at path: $SysvolPath" -ForegroundColor Red
+    exit 0 # Not a Domain Controller or SYSVOL not configured, nothing to audit
+}
+
+Write-Host "[*] Scanning SYSVOL directory: $SysvolPath" -ForegroundColor White
+
+# 1. Scan for XML files containing 'cpassword'
+$GppXmls = Get-ChildItem -Path $SysvolPath -Filter *.xml -Recurse -File -ErrorAction SilentlyContinue
+foreach ($file in $GppXmls) {
+    # Read the file content safely
+    $content = Get-Content -Path $file.FullName -Raw -ErrorAction SilentlyContinue
+    if ($content -and $content.Contains("cpassword")) {
+        Write-Host "[!] VULNERABLE: Group Policy Preference file contains cpassword attribute: $($file.FullName)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+# 2. Scan for script files containing cleartext credentials
+# Scripts: .vbs, .ps1, .bat, .cmd
+$ScriptFiles = Get-ChildItem -Path $SysvolPath -Include *.vbs, *.ps1, *.bat, *.cmd -Recurse -File -ErrorAction SilentlyContinue
+
+# Regex pattern for credentials (e.g. password=, pwd=, adminpwd=)
+$CredentialPattern = '(?i)\b(password|pwd|adminpwd|syspwd|adminpassword|localadminpwd)\s*=\s*["''][^"'']+\b'
+
+foreach ($file in $ScriptFiles) {
+    # Check if the file is our own audit or implementation scripts (skip those)
+    if ($file.Name -like "*Get-GPPSYSVOLPasswords*" -or $file.Name -like "*Remove-GPPSYSVOLPasswords*" -or $file.Name -like "*SYSVOLHoneypot*") {
+        continue
+    }
+    
+    $content = Get-Content -Path $file.FullName -Raw -ErrorAction SilentlyContinue
+    if ($content -and $content -match $CredentialPattern) {
+        Write-Host "[!] VULNERABLE: Script file contains potential cleartext password: $($file.FullName)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "[+] No Group Policy Preference passwords or cleartext scripts found in SYSVOL." -ForegroundColor Green
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="03-identities-services-cleanup-gpp-sysvol-passwords-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Security Bulletin**: [MS14-025 - Vulnerability in Group Policy Preferences Could Allow Elevation of Privilege (2962486)](https://learn.microsoft.com/en-us/security-updates/securitybulletins/2014/ms14-025)
+* **ANSSI Active Directory Hardening Guide**: Recommendations on local account password delegation and account cleanup.
+* **CIS Control**: CIS Control 5.2 - Unique passwords for administrative accounts; CIS Control 6.4 - Delete orphan/defunct policies.
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="04-network-firewall-README-md"></div>
 
 <div id="04-network-firewall-README-md-module-4-network-configuration-firewalling"></div>
@@ -14628,6 +14851,9 @@ This directory contains configuration policies for security log auditing, PowerS
 5. **[REQ-LOG-005 - Configure Kerberoasting Honeypots and SIEM Detection Rules](#05-logging-monitoring-implement-kerberoasting-honeypot-md)**
    Deploys decoy service accounts in Active Directory to attract Kerberoasting scans and provides high-fidelity SIEM alerting queries.
 
+6. **[REQ-LOG-006 - Configure SYSVOL Decoy XML Honeypot](#05-logging-monitoring-implement-sysvol-honeypot-md)**
+   Deploys a mock Group Policy folder structure and dummy preferences XML file with a Deny Read rule for Everyone and file access failure auditing.
+
 
 <div style="page-break-before: always;"></div>
 
@@ -15988,6 +16214,318 @@ index=security EventCode=4769 TicketEncryptionType="0x17" NOT (ServiceName="*$")
 * **ANSSI AD Hardening Guide**: Recommendation R48 (Audit policy configuration and anomaly detection)
 * **Active Directory Security Guide**: Detecting Kerberoasting Activity and Creating Service Account Honeypots (Sean Metcalf)
 * **MITRE ATT&CK**: Technique T1558.003 (Steal or Forge Kerberos Tickets: Kerberoasting)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="05-logging-monitoring-implement-sysvol-honeypot-md"></div>
+
+<div id="05-logging-monitoring-implement-sysvol-honeypot-md-req-log-006-configure-sysvol-decoy-xml-honeypot"></div>
+# [REQ-LOG-006] Configure SYSVOL Decoy XML Honeypot
+
+<div id="05-logging-monitoring-implement-sysvol-honeypot-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025
+
+---
+
+<div id="05-logging-monitoring-implement-sysvol-honeypot-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**: File System Auditing (Decoy file path) and Advanced Security Audit Policies (Object Access -> Audit File System)
+
+---
+
+<div id="05-logging-monitoring-implement-sysvol-honeypot-md-rationale"></div>
+## Rationale
+Adversaries seeking to elevate privileges within an Active Directory domain frequently scan the `SYSVOL` share for files containing legacy Group Policy Preference (GPP) credentials (specifically searching for the `cpassword` attribute in XML files) or startup/login scripts. This discovery scanning is often automated using script search commands (e.g., `findstr /S cpassword`) or administrative diagnostic frameworks (such as PowerSploit or BloodHound).
+
+To detect these unauthorized discovery scans, security teams can deploy a **SYSVOL Decoy XML Honeypot**. This decoy consists of a mock Group Policy folder structure containing a dummy GPP `Groups.xml` file with fake credential properties. 
+
+Because this mock policy is not linked to any active Active Directory object, no legitimate system or user account has any reason to query or read this file. 
+
+By applying an explicit **NTFS Deny Read** rule to the `Everyone` group on the decoy file, any attempt by an attacker to scan or read it will immediately fail and generate a high-fidelity **Access Denied** event. By configuring file failure auditing on the decoy path, Windows generates **Event ID 4656** or **4663** in the Domain Controller's Security Log. These events capture the attacker's account details and client IP address, providing a low-noise, high-fidelity alert.
+
+---
+
+<div id="05-logging-monitoring-implement-sysvol-honeypot-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Auditing Dependency**: This honeypot requires Advanced File System Auditing to be enabled on the Domain Controllers. Ensure that `Audit File System` is configured for **Failure** events under the Domain Controllers' auditing policies ([REQ-LOG-001](#05-logging-monitoring-configure-advanced-audit-policies-md)).
+* **Replication Compatibility**: The decoy folder is located within the `SYSVOL` share. Since it is explicitly denied read access to `Everyone`, legacy replication components (like FRS) or standard file synchronization tools might skip it. This behavior is expected and does not impact domain services since the decoy folder is not an active GPO.
+
+---
+
+<div id="05-logging-monitoring-implement-sysvol-honeypot-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="05-logging-monitoring-implement-sysvol-honeypot-md-option-a-active-directory-domain-controllers-file-explorer-gui"></div>
+### Option A: Active Directory Domain Controllers File Explorer (GUI)
+
+To manually configure the decoy file:
+1. Log on to a Domain Controller with Domain Admin privileges.
+2. Navigate to the local SYSVOL policies directory (typically `C:\Windows\SYSVOL\sysvol\<domain.local>\Policies`).
+3. Create a new folder with a randomly generated GUID format (e.g., `{5B7853A8-1E74-4C56-AC89-E911A34D2E5B}`).
+4. Inside this folder, create the directory structure: `Machine\Preferences\Groups`.
+5. Create a new file named `Groups.xml` inside `Groups` with standard XML structure and a dummy `cpassword` attribute:
+   ```xml
+   <?xml version="1.0" encoding="utf-8"?>
+   <Groups clsid="{312F64FA-EB90-4b2e-A6AE-E8C1FCDD4A2C}">
+     <User clsid="{15C200C5-AE9F-4a18-A372-FD51206104C1}" name="BuiltinAdminDecoy" image="0" changed="2026-07-02 20:56:00" uid="{B6396E70-2EA1-46B4-9F6D-E5D3AD3CD2BE}">
+       <Properties action="U" newName="LocalAdministrator" changeLogon="0" noChange="1" neverExpires="1" disabled="0" cpassword="j1Uyj/k7S8248c8j838jjSjjSj2jJ29" description="Decoy local admin account for automation services"/>
+     </User>
+   </Groups>
+   ```
+6. Configure the permissions to deny read access:
+   - Right-click `Groups.xml` and select **Properties**.
+   - Navigate to the **Security** tab and click **Advanced**.
+   - Click **Add**. Set the Principal to `Everyone`. Set the Type to `Deny`. Check the permissions for `Read & execute` and `Read`. Click **OK**.
+7. Configure File System Auditing on the decoy:
+   - In the **Advanced Security Settings** window for `Groups.xml`, navigate to the **Auditing** tab.
+   - Click **Add**. Set the Principal to `Everyone`. Set the Type to `Fail`. Check the permissions for `Read & execute` and `Read`. Click **OK**.
+   - Click **Apply** and then **OK**.
+
+---
+
+<div id="05-logging-monitoring-implement-sysvol-honeypot-md-option-b-powershell-remediation-non-gpo-script-based"></div>
+### Option B: PowerShell & Remediation (Non-GPO / Script-based)
+
+Use these scripts to deploy and audit the SYSVOL honeypot.
+
+[Download Script: New-SYSVOLHoneypot.ps1](implementation_scripts/New-SYSVOLHoneypot.ps1)
+
+```powershell
+# New-SYSVOLHoneypot.ps1
+# Description: Configures a decoy Group Policy Preferences XML file in SYSVOL with Everyone:Deny read permissions and file access failure auditing.
+# Target Engine: Windows PowerShell 5.1
+
+Write-Host "Applying hardening requirement: Configure SYSVOL Decoy XML Honeypot..." -ForegroundColor Cyan
+
+# 1. Retrieve local SYSVOL path
+$SysvolReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters" -Name "Sysvol" -ErrorAction SilentlyContinue
+if (-not $SysvolReg) {
+    Write-Host "[*] SYSVOL registry path not found. Checking standard share path..." -ForegroundColor Yellow
+    $SysvolPath = "C:\Windows\SYSVOL\sysvol"
+} else {
+    $SysvolPath = $SysvolReg.Sysvol
+}
+
+if (-not (Test-Path -Path $SysvolPath)) {
+    Write-Host "[-] SYSVOL folder not found at path: $SysvolPath. Honeypot cannot be deployed." -ForegroundColor Red
+    exit 1
+}
+
+# Resolve the active Policies folder path
+$PoliciesPath = Get-ChildItem -Path $SysvolPath -Directory | ForEach-Object {
+    Join-Path $_.FullName "Policies"
+} | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+if (-not $PoliciesPath) {
+    Write-Host "[-] GPO Policies folder not found under SYSVOL: $SysvolPath" -ForegroundColor Red
+    exit 1
+}
+
+# 2. Check if a decoy is already registered
+$RegPath = "HKLM:\SOFTWARE\ADHardening\SYSVOLHoneypot"
+$ExistingGuid = $null
+$ExistingPath = $null
+
+if (Test-Path $RegPath) {
+    $ExistingGuid = (Get-ItemProperty -Path $RegPath -Name "DecoyGuid" -ErrorAction SilentlyContinue).DecoyGuid
+    $ExistingPath = (Get-ItemProperty -Path $RegPath -Name "DecoyPath" -ErrorAction SilentlyContinue).DecoyPath
+}
+
+# If it exists, verify it
+$DeployNew = $true
+if ($ExistingGuid -and $ExistingPath -and (Test-Path $ExistingPath)) {
+    Write-Host "[*] Decoy GPO already registered in registry with GUID: $ExistingGuid" -ForegroundColor Yellow
+    $DeployNew = $false
+}
+
+if ($DeployNew) {
+    # Generate a new random GUID
+    $Guid = [guid]::NewGuid().ToString("B").ToUpper()
+    $DecoyGpoPath = Join-Path $PoliciesPath $Guid
+    $DecoyGroupsPath = Join-Path $DecoyGpoPath "Machine\Preferences\Groups"
+    $DecoyXmlPath = Join-Path $DecoyGroupsPath "Groups.xml"
+
+    Write-Host "[*] Deploying new decoy GPO folder at: $DecoyGpoPath" -ForegroundColor White
+    New-Item -ItemType Directory -Path $DecoyGroupsPath -Force | Out-Null
+
+    # Create dummy XML file with decoy cpassword content
+    $DecoyXmlContent = @'
+<?xml version="1.0" encoding="utf-8"?>
+<Groups clsid="{312F64FA-EB90-4b2e-A6AE-E8C1FCDD4A2C}">
+  <User clsid="{15C200C5-AE9F-4a18-A372-FD51206104C1}" name="BuiltinAdminDecoy" image="0" changed="2026-07-02 20:56:00" uid="{B6396E70-2EA1-46B4-9F6D-E5D3AD3CD2BE}">
+    <Properties action="U" newName="LocalAdministrator" changeLogon="0" noChange="1" neverExpires="1" disabled="0" cpassword="j1Uyj/k7S8248c8j838jjSjjSj2jJ29" description="Decoy local admin account for automation services"/>
+  </User>
+</Groups>
+'@
+    Set-Content -Path $DecoyXmlPath -Value $DecoyXmlContent -Force | Out-Null
+    Write-Host "[+] Decoy GPP Groups.xml created." -ForegroundColor Green
+
+    # Save to Registry
+    if (-not (Test-Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegPath -Name "DecoyGuid" -Value $Guid -Type String
+    Set-ItemProperty -Path $RegPath -Name "DecoyPath" -Value $DecoyXmlPath -Type String
+    Write-Host "[+] Registered Decoy Guid: $Guid in HKLM:\SOFTWARE\ADHardening\SYSVOLHoneypot" -ForegroundColor Gray
+} else {
+    $DecoyXmlPath = $ExistingPath
+}
+
+# 3. Configure permissions: Deny Everyone Read access
+Write-Host "[*] Enforcing Deny Read/Execute permissions for Everyone on decoy file..." -ForegroundColor White
+$Acl = Get-Acl -Path $DecoyXmlPath
+
+# Check if Deny rule for Everyone already exists to avoid duplication
+$HasDenyRule = $false
+foreach ($rule in $Acl.GetAccessRules($true, $false, [System.Security.Principal.NTAccount])) {
+    if ($rule.IdentityReference.Value -eq "Everyone" -and $rule.AccessControlType -eq [System.Security.AccessControl.AccessControlType]::Deny) {
+        $HasDenyRule = $true
+        break
+    }
+}
+
+if (-not $HasDenyRule) {
+    $Identity = "Everyone"
+    $Rights = [System.Security.AccessControl.FileSystemRights]::ReadAndExecute -bor [System.Security.AccessControl.FileSystemRights]::Read
+    $Inheritance = [System.Security.AccessControl.InheritanceFlags]::None
+    $Propagation = [System.Security.AccessControl.PropagationFlags]::None
+    $Type = [System.Security.AccessControl.AccessControlType]::Deny
+
+    $DenyRule = New-Object System.Security.AccessControl.FileSystemAccessRule($Identity, $Rights, $Inheritance, $Propagation, $Type)
+    $Acl.AddAccessRule($DenyRule)
+    Set-Acl -Path $DecoyXmlPath -AclObject $Acl
+    Write-Host "[+] Applied Deny Everyone rule successfully." -ForegroundColor Green
+} else {
+    Write-Host "[*] Deny Everyone rule is already present." -ForegroundColor Yellow
+}
+
+# 4. Configure Object Auditing for Failure (SACL)
+Write-Host "[*] Configuring Failure Audit rule for Everyone on decoy file..." -ForegroundColor White
+
+# To set SACL, we must load the ACL with audit rules
+$AclAudit = Get-Acl -Path $DecoyXmlPath -Audit
+
+$HasAuditRule = $false
+foreach ($rule in $AclAudit.GetAuditRules($true, $false, [System.Security.Principal.NTAccount])) {
+    if ($rule.IdentityReference.Value -eq "Everyone" -and $rule.AuditFlags -eq [System.Security.AccessControl.AuditFlags]::Failure) {
+        $HasAuditRule = $true
+        break
+    }
+}
+
+if (-not $HasAuditRule) {
+    $AuditIdentity = "Everyone"
+    $AuditRights = [System.Security.AccessControl.FileSystemRights]::ReadAndExecute -bor [System.Security.AccessControl.FileSystemRights]::Read
+    $AuditInheritance = [System.Security.AccessControl.InheritanceFlags]::None
+    $AuditPropagation = [System.Security.AccessControl.PropagationFlags]::None
+    $AuditFlags = [System.Security.AccessControl.AuditFlags]::Failure
+
+    $AuditRule = New-Object System.Security.AccessControl.FileSystemAuditRule($AuditIdentity, $AuditRights, $AuditInheritance, $AuditPropagation, $AuditFlags)
+    $AclAudit.AddAuditRule($AuditRule)
+    
+    # Set the ACL with audit rules back to the file
+    Set-Acl -Path $DecoyXmlPath -AclObject $AclAudit
+    Write-Host "[+] Applied Failure Audit rule successfully." -ForegroundColor Green
+} else {
+    Write-Host "[*] Failure Audit rule is already present." -ForegroundColor Yellow
+}
+
+Write-Host "SYSVOL Decoy XML Honeypot configuration completed successfully." -ForegroundColor Green
+```
+
+*To verify the honeypot configuration status:*
+
+[Download Script: Get-SYSVOLHoneypotStatus.ps1](audit_scripts/Get-SYSVOLHoneypotStatus.ps1)
+
+```powershell
+# Get-SYSVOLHoneypotStatus.ps1
+# Description: Checks the configuration status of the SYSVOL Decoy XML Honeypot.
+# Target Engine: Windows PowerShell 5.1
+
+Write-Host "--- Auditing SYSVOL Decoy XML Honeypot Configuration ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$RegPath = "HKLM:\SOFTWARE\ADHardening\SYSVOLHoneypot"
+
+if (Test-Path $RegPath) {
+    $DecoyGuid = (Get-ItemProperty -Path $RegPath -Name "DecoyGuid" -ErrorAction SilentlyContinue).DecoyGuid
+    $DecoyPath = (Get-ItemProperty -Path $RegPath -Name "DecoyPath" -ErrorAction SilentlyContinue).DecoyPath
+    
+    if (-not $DecoyGuid) {
+        Write-Host "[-] Decoy GPO GUID is missing in the registry." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+    
+    if (-not $DecoyPath) {
+        Write-Host "[-] Decoy file path is missing in the registry." -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        if (-not (Test-Path $DecoyPath)) {
+            Write-Host "[-] Decoy XML file does not exist at registered path: $DecoyPath" -ForegroundColor Red
+            $script:Vulnerable = $true
+        } else {
+            Write-Host "[+] Decoy XML file found: $DecoyPath" -ForegroundColor Green
+            
+            # Check Deny ACL rule
+            $Acl = Get-Acl -Path $DecoyPath
+            $HasDenyRule = $false
+            foreach ($rule in $Acl.GetAccessRules($true, $false, [System.Security.Principal.NTAccount])) {
+                if ($rule.IdentityReference.Value -eq "Everyone" -and $rule.AccessControlType -eq [System.Security.AccessControl.AccessControlType]::Deny) {
+                    $HasDenyRule = $true
+                    break
+                }
+            }
+            
+            if ($HasDenyRule) {
+                Write-Host "    - Everyone Deny Read rule: CONFIGURED" -ForegroundColor White
+            } else {
+                Write-Host "    - Everyone Deny Read rule: NOT CONFIGURED" -ForegroundColor Red
+                $script:Vulnerable = $true
+            }
+            
+            # Check Audit failure rule (SACL)
+            $AclAudit = Get-Acl -Path $DecoyPath -Audit
+            $HasAuditRule = $false
+            foreach ($rule in $AclAudit.GetAuditRules($true, $false, [System.Security.Principal.NTAccount])) {
+                if ($rule.IdentityReference.Value -eq "Everyone" -and $rule.AuditFlags -eq [System.Security.AccessControl.AuditFlags]::Failure) {
+                    $HasAuditRule = $true
+                    break
+                }
+            }
+            
+            if ($HasAuditRule) {
+                Write-Host "    - Everyone Failure Audit rule: CONFIGURED" -ForegroundColor White
+            } else {
+                Write-Host "    - Everyone Failure Audit rule: NOT CONFIGURED" -ForegroundColor Red
+                $script:Vulnerable = $true
+            }
+        }
+    }
+} else {
+    Write-Host "[-] Decoy registry key not found under HKLM:\SOFTWARE\ADHardening\SYSVOLHoneypot" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="05-logging-monitoring-implement-sysvol-honeypot-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Sean Metcalf (ADSecurity)**: [Finding Passwords in SYSVOL & Exploiting Group Policy Preferences](https://adsecurity.org/?p=2288) (Honeypot detection strategy)
+* **ANSSI Active Directory Hardening Guide**: Recommendations on logging and security auditing policies.
+* **CIS Controls**: CIS Control 8 - Audit Logs Management; CIS Control 10.5 - Configure host-based firewalls and detection sensors.
 
 
 <div style="page-break-before: always;"></div>
@@ -35072,6 +35610,7 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 * **[REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](#03-identities-services-enable-laps-md)**: Implements Windows LAPS or Classic LAPS to rotate local administrator passwords periodically.
 * **[REQ-ID-006 - Rename and Disable Default Administrator and Guest Accounts](#03-identities-services-harden-default-accounts-md)**: Disables the default Guest account and renames the default Administrator account.
 * **[REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](#03-identities-services-harden-adcs-pki-md)**: Hardens Active Directory Certificate Services (ADCS) and PKI templates against privilege escalation.
+* **[REQ-ID-020 - Clean Up Legacy Group Policy Preferences and SYSVOL Passwords](#03-identities-services-cleanup-gpp-sysvol-passwords-md)**: Cleans up GPP credentials and insecure scripts from SYSVOL.
 
 <div id="roadmap-implementation-plan-md-logging-monitoring-requirements"></div>
 ### Logging & Monitoring Requirements
@@ -35146,6 +35685,7 @@ This phase focuses on isolating credentials inside memory and network packets to
 * **[REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](#05-logging-monitoring-deploy-and-harden-sysmon-md)**: Deploys and hardens Microsoft Sysmon to detect advanced host-based anomalies.
 * **[REQ-LOG-004 - Configure Secure SIEM Log Shipping](#05-logging-monitoring-configure-siem-log-shipping-md)**: Enforces secure, encrypted SIEM log shipping for central log correlation.
 * **[REQ-LOG-005 - Configure Kerberoasting Honeypots and SIEM Detection Rules](#05-logging-monitoring-implement-kerberoasting-honeypot-md)**: Configures decoy accounts and SIEM alerts to capture Kerberoasting attacks.
+* **[REQ-LOG-006 - Configure SYSVOL Decoy XML Honeypot](#05-logging-monitoring-implement-sysvol-honeypot-md)**: Deploys a decoy GPO XML file with Deny access rules to detect active credential harvesting scans.
 
 <div id="roadmap-implementation-plan-md-paw-requirements"></div>
 ### PAW Requirements

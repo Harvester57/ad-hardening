@@ -77,6 +77,7 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 * **[REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](../03-identities-services/enable-laps.md)**: Implements Windows LAPS or Classic LAPS to rotate local administrator passwords periodically.
 * **[REQ-ID-006 - Rename and Disable Default Administrator and Guest Accounts](../03-identities-services/harden-default-accounts.md)**: Disables the default Guest account and renames the default Administrator account.
 * **[REQ-ID-015 - Harden Active Directory Certificate Services (ADCS) and PKI](../03-identities-services/harden-adcs-pki.md)**: Hardens Active Directory Certificate Services (ADCS) and PKI templates against privilege escalation.
+* **[REQ-ID-020 - Clean Up Legacy Group Policy Preferences and SYSVOL Passwords](../03-identities-services/cleanup-gpp-sysvol-passwords.md)**: Cleans up GPP credentials and insecure scripts from SYSVOL.
 
 ### Logging & Monitoring Requirements
 * **[REQ-LOG-001 - Configure Advanced Security Audit Policies](../05-logging-monitoring/configure-advanced-audit-policies.md)**: Configures advanced security audit policies to enable comprehensive event logging.
@@ -141,6 +142,7 @@ This phase focuses on isolating credentials inside memory and network packets to
 * **[REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](../05-logging-monitoring/deploy-and-harden-sysmon.md)**: Deploys and hardens Microsoft Sysmon to detect advanced host-based anomalies.
 * **[REQ-LOG-004 - Configure Secure SIEM Log Shipping](../05-logging-monitoring/configure-siem-log-shipping.md)**: Enforces secure, encrypted SIEM log shipping for central log correlation.
 * **[REQ-LOG-005 - Configure Kerberoasting Honeypots and SIEM Detection Rules](../05-logging-monitoring/implement-kerberoasting-honeypot.md)**: Configures decoy accounts and SIEM alerts to capture Kerberoasting attacks.
+* **[REQ-LOG-006 - Configure SYSVOL Decoy XML Honeypot](../05-logging-monitoring/implement-sysvol-honeypot.md)**: Deploys a decoy GPO XML file with Deny access rules to detect active credential harvesting scans.
 
 ### PAW Requirements
 * **[REQ-PAW-002 - Enable LSA Protection for PAWs](../07-paws/enable-lsa-protection.md)**: Blocks LSASS memory reading on PAWs.

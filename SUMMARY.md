@@ -45,7 +45,6 @@
     * [REQ-DC-029 - Configure svchost.exe Mitigation Options](02-domain-controllers/configure-svchost-mitigation.md)
     * [REQ-DC-030 - Secure Directory Services Restore Mode (DSRM) and Recovery Parameters](02-domain-controllers/harden-dsrm-recovery-mode.md)
     * [REQ-DC-031 - Configure NTP Time Synchronization on the PDC Emulator](02-domain-controllers/configure-pdc-time-sync.md)
-
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)
@@ -67,6 +66,7 @@
     * [REQ-ID-017 - Disable Machine Account Quota](03-identities-services/disable-machine-account-quota.md)
     * [REQ-ID-018 - Restrict Pre-Windows 2000 Compatible Access Group](03-identities-services/restrict-pre-windows-2000-compatible-access-group.md)
     * [REQ-ID-019 - Enforce Smart Card Authentication for Privileged Users](03-identities-services/enforce-smartcard-privileged-users.md)
+    * [REQ-ID-020 - Clean Up Legacy Group Policy Preferences and SYSVOL Passwords](03-identities-services/cleanup-gpp-sysvol-passwords.md)
 ## Module 4: Network Configuration & Firewalling
 * [Module 4: Network Configuration & Firewalling](04-network-firewall/README.md)
     * [REQ-NET-001 - Configure Active Directory Port Matrix](04-network-firewall/configure-ad-port-matrix.md)
@@ -89,6 +89,7 @@
     * [REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](05-logging-monitoring/deploy-and-harden-sysmon.md)
     * [REQ-LOG-004 - Configure Secure SIEM Log Shipping](05-logging-monitoring/configure-siem-log-shipping.md)
     * [REQ-LOG-005 - Configure Kerberoasting Honeypots and SIEM Detection Rules](05-logging-monitoring/implement-kerberoasting-honeypot.md)
+    * [REQ-LOG-006 - Configure SYSVOL Decoy XML Honeypot](05-logging-monitoring/implement-sysvol-honeypot.md)
 ## Module 6: Secure Operations & Maintenance
 * [Module 6: Secure Operations & Maintenance](06-operations-maintenance/README.md)
     * [REQ-OPS-001 - Enforce KRBTGT Password Rotation](06-operations-maintenance/enforce-krbtgt-password-rotation.md)

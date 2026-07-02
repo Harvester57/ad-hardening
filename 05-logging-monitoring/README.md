@@ -16,3 +16,6 @@ This directory contains configuration policies for security log auditing, PowerS
 
 5. **[REQ-LOG-005 - Configure Kerberoasting Honeypots and SIEM Detection Rules](implement-kerberoasting-honeypot.md)**
    Deploys decoy service accounts in Active Directory to attract Kerberoasting scans and provides high-fidelity SIEM alerting queries.
+
+6. **[REQ-LOG-006 - Configure SYSVOL Decoy XML Honeypot](implement-sysvol-honeypot.md)**
+   Deploys a mock Group Policy folder structure and dummy preferences XML file with a Deny Read rule for Everyone and file access failure auditing.

@@ -60,3 +60,6 @@ This directory contains security requirements and policies designed to protect a
 
 19. **[REQ-ID-019 - Enforce Smart Card Authentication for Privileged Users](enforce-smartcard-privileged-users.md)**
     Enforces the 'Smart card is required for interactive logon' setting on administrative accounts to invalidate password hashes and force Kerberos PKINIT.
+
+20. **[REQ-ID-020 - Clean Up Legacy Group Policy Preferences and SYSVOL Passwords](cleanup-gpp-sysvol-passwords.md)**
+    Identifies and remediates Group Policy Preferences (GPP) XML files with `cpassword` properties and legacy scripts containing cleartext credentials inside SYSVOL.
