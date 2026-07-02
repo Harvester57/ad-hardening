@@ -263,6 +263,8 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-PAW-028 - Disable Unnecessary System Services for PAWs](../07-paws/disable-unnecessary-system-services.md)**: Reduces active service footprints.
 * **[REQ-PAW-029 - Configure System Administrative Templates for PAWs](../07-paws/configure-system-administrative-templates.md)**: Custom registry rules.
 * **[REQ-PAW-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](../07-paws/disable-unused-features.md)**: Disables legacy .NET 3.5, PowerShell 2.0, SMBv1, and unused platform features.
+* **[REQ-PAW-033 - Configure Microsoft Office Security and Block OLE Packages](../07-paws/configure-office-security.md)**: Blocks VBA macros in external files and Outlook OLE packages.
+* **[REQ-PAW-034 - Disable Windows Script Host and Remap Scripting Extensions](../07-paws/disable-windows-script-host.md)**: Disables WSH execution and maps extension defaults to Notepad.
 
 ### Endpoint Requirements
 * **[REQ-END-004 - Block Removable Storage](../08-endpoints/block-removable-storage.md)**: Prevents data exfiltration and USB storage execution.
@@ -282,6 +284,8 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-END-030 - Configure svchost.exe Mitigation Options](../08-endpoints/configure-svchost-mitigation.md)**: Restricts binary loading to Microsoft-signed code.
 * **[REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](../08-endpoints/enable-kernel-shadow-stacks.md)**: Mitigates Return-Oriented Programming (ROP) exploits.
 * **[REQ-END-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](../08-endpoints/disable-unused-features.md)**: Disables legacy .NET 3.5, PowerShell 2.0, SMBv1, and unused optional features.
+* **[REQ-END-033 - Configure Microsoft Office Security and Block OLE Packages](../08-endpoints/configure-office-security.md)**: Blocks VBA macros in external files and Outlook OLE packages.
+* **[REQ-END-034 - Disable Windows Script Host and Remap Scripting Extensions](../08-endpoints/disable-windows-script-host.md)**: Disables WSH execution and maps extension defaults to Notepad.
 
 ---
 

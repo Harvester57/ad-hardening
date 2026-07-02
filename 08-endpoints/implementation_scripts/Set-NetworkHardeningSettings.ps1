@@ -74,4 +74,32 @@ Write-Host "[+] Printing spooler HTTP and Web service options disabled." -Foregr
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" "RestrictNullSessAccess" 1
 Write-Host "[+] Anonymous null session share access restricted." -ForegroundColor Green
 
+# 8. Disable WPAD
+Write-Host "[+] Disabling WinHTTP Auto-Proxy service..." -ForegroundColor Gray
+Set-Service -Name "WinHttpAutoProxySvc" -StartupType Disabled -ErrorAction SilentlyContinue
+Stop-Service -Name "WinHttpAutoProxySvc" -Force -ErrorAction SilentlyContinue
+
+$WpadPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad"
+if (-not (Test-Path $WpadPath)) {
+    New-Item -Path $WpadPath -Force | Out-Null
+}
+Set-ItemProperty -Path $WpadPath -Name "WpadOverride" -Value 1 -Type DWord -Force
+Write-Host "[+] WPAD auto-detection disabled in user preferences registry." -ForegroundColor Green
+
+# 9. Restrict Net Session Enumeration (NetCease SDDL)
+Write-Host "[+] Restricting Net Session Enumeration..." -ForegroundColor Gray
+try {
+    $SD = New-Object System.Security.AccessControl.CommonSecurityDescriptor($false, $false, "D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)")
+    $BinaryForm = New-Object byte[] $SD.BinaryLength
+    $SD.GetBinaryForm($BinaryForm, 0)
+    $LanmanSecPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity"
+    if (-not (Test-Path $LanmanSecPath)) {
+        New-Item -Path $LanmanSecPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $LanmanSecPath -Name "SrvsvcSessionInfo" -Value $BinaryForm -Type Binary -Force
+    Write-Host "[+] Net Session Enumeration restricted to Admins/Operators/Power Users." -ForegroundColor Green
+} catch {
+    Write-Error "    Failed to apply Net Session Enumeration restrictions: $($_.Exception.Message)"
+}
+
 Write-Host "Network and name resolution hardening applied successfully." -ForegroundColor Green

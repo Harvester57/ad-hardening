@@ -60,6 +60,46 @@ Test-RegistryValue $PrinterPath "DisableHTTPPrinting" 1
 $ServerPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
 Test-RegistryValue $ServerPath "RestrictNullSessAccess" 1
 
+# 7. Audit WPAD Service and Registry Override
+$WpadSvc = Get-Service -Name "WinHttpAutoProxySvc" -ErrorAction SilentlyContinue
+if ($null -ne $WpadSvc) {
+    if ($WpadSvc.StartType -eq "Disabled") {
+        Write-Host "    - WPAD Service State: Disabled (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: WPAD Service StartType is $($WpadSvc.StartType) (Expected: Disabled)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+$WpadPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad"
+Test-RegistryValue $WpadPath "WpadOverride" 1
+
+# 8. Audit Net Session Enumeration (NetCease)
+$LanmanSecPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity"
+if (Test-Path $LanmanSecPath) {
+    $SrvsvcSessionInfo = (Get-ItemProperty -Path $LanmanSecPath -Name "SrvsvcSessionInfo" -ErrorAction SilentlyContinue).SrvsvcSessionInfo
+    if ($null -ne $SrvsvcSessionInfo) {
+        try {
+            $SD = New-Object System.Security.AccessControl.CommonSecurityDescriptor($false, $false, $SrvsvcSessionInfo, 0)
+            $Sddl = $SD.GetSddlForm("Dacl")
+            if ($Sddl -eq "D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)") {
+                Write-Host "    - Net Session Enumeration Security Descriptor: Hardened (Secure)" -ForegroundColor Green
+            } else {
+                Write-Host "    - VULNERABLE: Net Session Enumeration Security Descriptor is '$Sddl' (Expected: 'D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)')" -ForegroundColor Red
+                $script:Vulnerable = $true
+            }
+        } catch {
+            Write-Host "    - VULNERABLE: Failed to parse Net Session Enumeration security descriptor." -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: SrvsvcSessionInfo registry value not found." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "    - VULNERABLE: LanmanServer\DefaultSecurity path not found." -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
 } else {

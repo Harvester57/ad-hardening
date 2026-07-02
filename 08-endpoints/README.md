@@ -102,4 +102,10 @@ To prevent initial access and lateral movement, the following unitary technical 
 32. **[REQ-END-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](disable-unused-features.md)**
     Disables legacy, unused Windows optional features, including PowerShell 2.0, .NET Framework 3.5, and SMBv1 to minimize the client attack surface.
 
+33. **[REQ-END-033 - Configure Microsoft Office Security and Block OLE Packages](configure-office-security.md)**
+    Blocks VBA macros from running in Office files downloaded from the Internet, enforces macro digital signing warnings, and disables OLE Package execution in Outlook to prevent initial access exploits.
+
+34. **[REQ-END-034 - Disable Windows Script Host and Remap Scripting Extensions](disable-windows-script-host.md)**
+    Disables Windows Script Host execution globally and remaps standard scripting extensions (.vbs, .js, etc.) to open in Notepad by default to prevent execution by double-click.
+
 

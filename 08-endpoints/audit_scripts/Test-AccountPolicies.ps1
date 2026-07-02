@@ -81,6 +81,7 @@ Test-RegistryValue $LsaPath "RestrictAnonymousSAM" 1
 Test-RegistryValue $LsaPath "RestrictAnonymous" 1
 Test-RegistryValue $LsaPath "ForceNetworkLogon" 0
 Test-RegistryValue $LsaPath "ObaseCaseInsensitive" 1
+Test-RegistryValue $LsaPath "LmCompatibilityLevel" 5
 
 $KerbParamsPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
 Test-RegistryValue $KerbParamsPath "AllowPKU2U" 0

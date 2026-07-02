@@ -39,6 +39,7 @@
       * `RestrictAnonymous` = `1` (REG_DWORD, restrict anonymous enumeration of shares)
       * `ForceNetworkLogon` = `0` (REG_DWORD, sharing and security model Classic)
       * `ObaseCaseInsensitive` = `1` (REG_DWORD, require case insensitivity for non-Windows subsystems)
+      * `LmCompatibilityLevel` = `5` (REG_DWORD, Network security: LAN Manager authentication level - NTLMv2 only)
     * `HKLM\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters`
       * `AllowPKU2U` = `0` (REG_DWORD, Allow PKU2U requests disabled)
     * `HKLM\System\CurrentControlSet\Control\SecurityProviders\WDigest`
@@ -93,7 +94,7 @@ Securing authentication parameters and account controls reduces the risk of pass
 6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, dramatically increasing resistance to offline brute-force and GPU-accelerated cracking attacks (like RTX 4090 models).
 7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
 8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
-9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, and requiring NTLMv2 and 128-bit encryption block legacy protocol exploitation.
+9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, requiring NTLMv2 and 128-bit encryption, and enforcing client-side NTLMv2-only authentication via `LmCompatibilityLevel = 5` block legacy protocol exploitation and relay vectors.
 10. **Kerberos Security Policy**: Restricting Kerberos ticket lifetimes (e.g. 10 hours max ticket lifetime, 7 days max renewal, 600 minutes max service ticket lifetime) and clock skew tolerance (5 minutes) limits the window of opportunity for stolen ticket abuse (Pass-the-Ticket) and ensures synchronization integrity.
 11. **GPO Background Refresh Security**: Forcing regular Group Policy background reapplication prevents persistent local configuration changes or drift.
 12. **WMI Class Minimization**: Avoiding WMI queries to `Win32_Product` avoids unintended re-installation checks of all MSI packages during GPO processing, protecting host CPU and disk health.
@@ -242,7 +243,8 @@ if (-not (Test-Path $LsaPath)) {
 }
 Set-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $LsaPath -Name "NoLMHash" -Value 1 -Type DWord -Force
-Write-Host "[+] Blank password restriction and NoLMHash options enforced." -ForegroundColor Green
+Set-ItemProperty -Path $LsaPath -Name "LmCompatibilityLevel" -Value 5 -Type DWord -Force
+Write-Host "[+] Blank password, NoLMHash, and client NTLMv2-only options enforced." -ForegroundColor Green
 
 # LSASS WDigest caching block
 $WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
@@ -549,6 +551,7 @@ Test-RegistryValue $LsaPath "RestrictAnonymousSAM" 1
 Test-RegistryValue $LsaPath "RestrictAnonymous" 1
 Test-RegistryValue $LsaPath "ForceNetworkLogon" 0
 Test-RegistryValue $LsaPath "ObaseCaseInsensitive" 1
+Test-RegistryValue $LsaPath "LmCompatibilityLevel" 5
 
 $KerbParamsPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
 Test-RegistryValue $KerbParamsPath "AllowPKU2U" 0

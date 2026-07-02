@@ -26,6 +26,7 @@ Test-RegistryValue $WinlogonPath "CachedLogonsCount" 0
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
 Test-RegistryValue $LsaPath "LimitBlankPasswordUse" 1
 Test-RegistryValue $LsaPath "NoLMHash" 1
+Test-RegistryValue $LsaPath "LmCompatibilityLevel" 5
 
 $WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
 Test-RegistryValue $WDigestPath "UseLogonCredential" 0

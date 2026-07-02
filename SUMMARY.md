@@ -139,6 +139,8 @@
     * [REQ-PAW-030 - Enable Secure Boot for PAWs](07-paws/enable-secure-boot.md)
     * [REQ-PAW-031 - Enforce Smart Card Logon for PAWs](07-paws/enforce-smartcard-logon-paws.md)
     * [REQ-PAW-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](07-paws/disable-unused-features.md)
+    * [REQ-PAW-033 - Configure Microsoft Office Security and Block OLE Packages](07-paws/configure-office-security.md)
+    * [REQ-PAW-034 - Disable Windows Script Host and Remap Scripting Extensions](07-paws/disable-windows-script-host.md)
 ## Module 8: Endpoint Hardening
 * [Module 8: Endpoint Hardening](08-endpoints/README.md)
     * [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](08-endpoints/harden-network-and-name-resolution.md)
@@ -173,6 +175,8 @@
     * [REQ-END-030 - Configure svchost.exe Mitigation Options](08-endpoints/configure-svchost-mitigation.md)
     * [REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](08-endpoints/enable-kernel-shadow-stacks.md)
     * [REQ-END-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](08-endpoints/disable-unused-features.md)
+    * [REQ-END-033 - Configure Microsoft Office Security and Block OLE Packages](08-endpoints/configure-office-security.md)
+    * [REQ-END-034 - Disable Windows Script Host and Remap Scripting Extensions](08-endpoints/disable-windows-script-host.md)
 
 ## Implementation Roadmap
 * [Implementation Plan and Prioritized Roadmap](roadmap/implementation-plan.md)

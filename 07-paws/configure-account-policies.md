@@ -35,6 +35,7 @@
     * `HKLM\System\CurrentControlSet\Control\Lsa`
       * `LimitBlankPasswordUse` = `1` (REG_DWORD)
       * `NoLMHash` = `1` (REG_DWORD)
+      * `LmCompatibilityLevel` = `5` (REG_DWORD, Network security: LAN Manager authentication level - NTLMv2 only)
     * `HKLM\System\CurrentControlSet\Control\SecurityProviders\WDigest`
       * `UseLogonCredential` = `0` (REG_DWORD)
     * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
@@ -76,7 +77,7 @@ Securing authentication parameters and account controls reduces the risk of pass
 6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, increasing resistance to offline brute-force and GPU-accelerated cracking attacks.
 7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
 8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
-9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, and requiring NTLMv2 and 128-bit encryption block legacy protocol exploitation.
+9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, requiring NTLMv2 and 128-bit encryption, and enforcing client-side NTLMv2-only authentication via `LmCompatibilityLevel = 5` block legacy protocol exploitation and relay vectors.
 10. **Fine-Grained Password Policies (FGPP)**: While local accounts are secured on the machine, the Active Directory user accounts of the Tier 0 Administrators who logon to these PAWs must also be protected by a domain-level Fine-Grained Password Policy (FGPP / PSO) of at least 20 characters, as configured in [REQ-ID-001 - Enforce Fine-Grained Password Policies](../03-identities-services/enforce-fgpp.md).
 
 ---
@@ -182,7 +183,8 @@ if (-not (Test-Path $LsaPath)) {
 }
 Set-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $LsaPath -Name "NoLMHash" -Value 1 -Type DWord -Force
-Write-Host "[+] Blank password restriction and NoLMHash options enforced." -ForegroundColor Green
+Set-ItemProperty -Path $LsaPath -Name "LmCompatibilityLevel" -Value 5 -Type DWord -Force
+Write-Host "[+] Blank password, NoLMHash, and client NTLMv2-only options enforced." -ForegroundColor Green
 
 # LSASS WDigest caching block
 $WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
@@ -394,6 +396,7 @@ Test-RegistryValue $WinlogonPath "CachedLogonsCount" 0
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
 Test-RegistryValue $LsaPath "LimitBlankPasswordUse" 1
 Test-RegistryValue $LsaPath "NoLMHash" 1
+Test-RegistryValue $LsaPath "LmCompatibilityLevel" 5
 
 $WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
 Test-RegistryValue $WDigestPath "UseLogonCredential" 0

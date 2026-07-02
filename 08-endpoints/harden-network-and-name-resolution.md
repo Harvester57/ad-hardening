@@ -18,6 +18,7 @@
     * Computer Configuration\Administrative Templates\Network\WLAN Service\WLAN Settings
     * Computer Configuration\Administrative Templates\Printers
     * Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options
+    * Computer Configuration\Policies\Windows Settings\Security Settings\System Services\WinHTTP Web Proxy Auto-Discovery Service
   * **Registry Locations**:
     * HKLM\Software\Policies\Microsoft\Windows NT\DNSClient
       * `EnableMulticast` = `0` (REG_DWORD, Disables LLMNR)
@@ -45,6 +46,10 @@
       * `DisableHTTPPrinting` = `1` (REG_DWORD)
     * HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
       * `RestrictNullSessAccess` = `1` (REG_DWORD)
+    * HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad
+      * `WpadOverride` = `1` (REG_DWORD, Disables WPAD)
+    * HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity
+      * `SrvsvcSessionInfo` = (REG_BINARY, Restricts Net Session Enumeration)
 
 ---
 
@@ -56,6 +61,8 @@ Legacy name resolution protocols and insecure default network configurations are
 3. **ICMP Redirects**: ICMP redirect packets can be used by an attacker on the same subnet to dynamically redirect routing for specific hosts through the attacker's machine, enabling full MitM packet sniffing and modification. Disabling ICMP redirects prevents this vector.
 4. **IP Source Routing**: Source routing allows a sender to specify the exact network path a packet should follow. This is commonly abused to bypass firewall routing rules or establish communication paths that violate network segment isolation.
 5. **Disable Default IPv6 DNS Servers**: Disabling default IPv6 DNS servers prevents automated fallback to unauthenticated, dynamic local IPv6 DNS servers advertised by rogue routers or malicious tools (like mitm6), which would otherwise redirect query traffic and coerce NTLM or Kerberos authentication.
+6. **Disable Web Proxy Auto-Discovery (WPAD)**: Disabling WPAD removes another name resolution mechanism that Responder exploits to harvest credentials. By disabling the `WinHttpAutoProxySvc` service and configuring `WpadOverride = 1`, the workstation is protected from rogue web proxy configurations.
+7. **Restrict Net Session Enumeration (NetCease)**: By default, any authenticated domain user can query session information from remote hosts. Attackers utilize session enumeration to locate high-privileged user sessions (e.g., Domain Admins) across the network. Hardening the `SrvsvcSessionInfo` default security descriptor blocks this remote reconnaissance.
 
 ---
 
@@ -209,6 +216,26 @@ Legacy name resolution protocols and insecure default network configurations are
       * **Value Type**: `REG_DWORD`
       * **Value Data**: `1`
 
+    * **Disable WPAD Override (User Preference)**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_CURRENT_USER`
+      * **Key Path**: `Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad`
+      * **Value Name**: `WpadOverride`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `1`
+
+    * **Restrict Net Session Enumeration (NetCease SDDL)**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity`
+      * **Value Name**: `SrvsvcSessionInfo`
+      * **Value Type**: `REG_BINARY`
+      * **Value Data**: Generate via SDDL `D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)`
+
+#### Step 4: Disable WinHTTP WPAD Service
+1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+2. Scroll to **WinHTTP Web Proxy Auto-Discovery Service** and set to **Disabled**.
+
 ---
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
@@ -294,6 +321,34 @@ Write-Host "[+] Printing spooler HTTP and Web service options disabled." -Foregr
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" "RestrictNullSessAccess" 1
 Write-Host "[+] Anonymous null session share access restricted." -ForegroundColor Green
 
+# 8. Disable WPAD
+Write-Host "[+] Disabling WinHTTP Auto-Proxy service..." -ForegroundColor Gray
+Set-Service -Name "WinHttpAutoProxySvc" -StartupType Disabled -ErrorAction SilentlyContinue
+Stop-Service -Name "WinHttpAutoProxySvc" -Force -ErrorAction SilentlyContinue
+
+$WpadPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad"
+if (-not (Test-Path $WpadPath)) {
+    New-Item -Path $WpadPath -Force | Out-Null
+}
+Set-ItemProperty -Path $WpadPath -Name "WpadOverride" -Value 1 -Type DWord -Force
+Write-Host "[+] WPAD auto-detection disabled in user preferences registry." -ForegroundColor Green
+
+# 9. Restrict Net Session Enumeration (NetCease SDDL)
+Write-Host "[+] Restricting Net Session Enumeration..." -ForegroundColor Gray
+try {
+    $SD = New-Object System.Security.AccessControl.CommonSecurityDescriptor($false, $false, "D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)")
+    $BinaryForm = New-Object byte[] $SD.BinaryLength
+    $SD.GetBinaryForm($BinaryForm, 0)
+    $LanmanSecPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity"
+    if (-not (Test-Path $LanmanSecPath)) {
+        New-Item -Path $LanmanSecPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $LanmanSecPath -Name "SrvsvcSessionInfo" -Value $BinaryForm -Type Binary -Force
+    Write-Host "[+] Net Session Enumeration restricted to Admins/Operators/Power Users." -ForegroundColor Green
+} catch {
+    Write-Error "    Failed to apply Net Session Enumeration restrictions: $($_.Exception.Message)"
+}
+
 Write-Host "Network and name resolution hardening applied successfully." -ForegroundColor Green
 ```
 
@@ -362,6 +417,46 @@ Test-RegistryValue $PrinterPath "DisableHTTPPrinting" 1
 # 6. Audit Null Session Share Restrict
 $ServerPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
 Test-RegistryValue $ServerPath "RestrictNullSessAccess" 1
+
+# 7. Audit WPAD Service and Registry Override
+$WpadSvc = Get-Service -Name "WinHttpAutoProxySvc" -ErrorAction SilentlyContinue
+if ($null -ne $WpadSvc) {
+    if ($WpadSvc.StartType -eq "Disabled") {
+        Write-Host "    - WPAD Service State: Disabled (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: WPAD Service StartType is $($WpadSvc.StartType) (Expected: Disabled)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+$WpadPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad"
+Test-RegistryValue $WpadPath "WpadOverride" 1
+
+# 8. Audit Net Session Enumeration (NetCease)
+$LanmanSecPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity"
+if (Test-Path $LanmanSecPath) {
+    $SrvsvcSessionInfo = (Get-ItemProperty -Path $LanmanSecPath -Name "SrvsvcSessionInfo" -ErrorAction SilentlyContinue).SrvsvcSessionInfo
+    if ($null -ne $SrvsvcSessionInfo) {
+        try {
+            $SD = New-Object System.Security.AccessControl.CommonSecurityDescriptor($false, $false, $SrvsvcSessionInfo, 0)
+            $Sddl = $SD.GetSddlForm("Dacl")
+            if ($Sddl -eq "D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)") {
+                Write-Host "    - Net Session Enumeration Security Descriptor: Hardened (Secure)" -ForegroundColor Green
+            } else {
+                Write-Host "    - VULNERABLE: Net Session Enumeration Security Descriptor is '$Sddl' (Expected: 'D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)')" -ForegroundColor Red
+                $script:Vulnerable = $true
+            }
+        } catch {
+            Write-Host "    - VULNERABLE: Failed to parse Net Session Enumeration security descriptor." -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: SrvsvcSessionInfo registry value not found." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "    - VULNERABLE: LanmanServer\DefaultSecurity path not found." -ForegroundColor Red
+    $script:Vulnerable = $true
+}
 
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
