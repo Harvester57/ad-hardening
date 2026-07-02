@@ -52,6 +52,8 @@ $BaselineRights = @{
     "SeProfileSingleProcessPrivilege" = "*S-1-5-32-544"
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
+    "SeDenyNetworkLogonRight"             = "*S-1-5-113,*S-1-5-114"
+    "SeDenyRemoteInteractiveLogonRight"   = "*S-1-5-113,*S-1-5-114"
 }
 
 # Re-build [Privilege Rights] section line-by-line

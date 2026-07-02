@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 728454e | Generated: July 02, 2026</span>
+      <span>Commit: 9a9dbc8 | Generated: July 02, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -16576,6 +16576,9 @@ This directory contains operational procedures and configuration baselines for s
 12. **[REQ-OPS-012 - Implement Automated Inactive Computer and User Account Cleanup](#06-operations-maintenance-decommission-inactive-accounts-md)**
     Disables and moves inactive user (180 days) and computer (90 days) accounts to a stale OU.
 
+13. **[REQ-OPS-013 - Clean Up Staged Install From Media (IFM) Data](#06-operations-maintenance-cleanup-staged-ifm-files-md)**
+    Deletes temporary ntds.dit datasets immediately after Domain Controller promotions.
+
 
 
 <div style="page-break-before: always;"></div>
@@ -17902,7 +17905,9 @@ To ensure resilience:
 ## Legacy Impact & Compatibility
 * **Performance Impact**: Creating a system state backup utilizes significant disk I/O and CPU resources. It should be scheduled during off-peak hours to avoid affecting authentication response times.
 * **Storage Requirements**: System State backups consume considerable storage space (typically 10-20 GB or more depending on database size). Ensure target volumes have adequate capacity and are configured to automatically prune older backups.
-* **Access Control**: Backups contain the Active Directory database (including credentials hashes). The backup destination volume must be restricted via NTFS permissions to only Domain Admins and the SYSTEM account.
+* **Access Control**: Backups contain the Active Directory database (including credential hashes). The backup destination volume and network shares must be strictly restricted:
+  * For local folders, configure NTFS ACLs to grant access only to `BUILTIN\Administrators` and `NT AUTHORITY\SYSTEM`.
+  * For remote network shares (UNC paths), configure share permissions and NTFS ACLs on the target storage server to restrict read/write access exclusively to Tier 0 Administrators (e.g., Domain Admins, Enterprise Admins) and dedicated backup service accounts, blocking all other domain accounts.
 
 ---
 
@@ -18022,6 +18027,51 @@ try {
     }
 } catch {
     Write-Host "[-] No backup records found on the system. System state backups may not be configured." -ForegroundColor Red
+}
+
+# Audit Backup Target Access Control List
+$policy = Get-WBPolicy -ErrorAction SilentlyContinue
+if ($policy) {
+    $targets = Get-WBBackupTarget -Policy $policy -ErrorAction SilentlyContinue
+    foreach ($target in $targets) {
+        $path = $null
+        if ($target.VolumePath) {
+            $path = $target.VolumePath
+        } elseif ($target.NetworkPath) {
+            $path = $target.NetworkPath
+        }
+        
+        if ($path) {
+            Write-Host "`n[*] Auditing backup target permissions: $path" -ForegroundColor Gray
+            if (Test-Path $path) {
+                $acl = Get-Acl -Path $path -ErrorAction SilentlyContinue
+                if ($acl) {
+                    $unauthorized = $false
+                    foreach ($access in $acl.Access) {
+                        $identity = $access.IdentityReference.Value
+                        $rights = $access.FileSystemRights
+                        $type = $access.AccessControlType
+                        
+                        if ($type -eq "Allow") {
+                            if ($identity -notmatch "SYSTEM|Administrators|Domain Admins|Enterprise Admins|Creator Owner|NT AUTHORITY\\SYSTEM|BUILTIN\\Administrators") {
+                                if ($rights -match "Read|Write|Modify|FullControl") {
+                                    Write-Host "    [!] WARNING: Unauthorized identity '$identity' has '$rights' access to backup target." -ForegroundColor Red
+                                    $unauthorized = $true
+                                }
+                            }
+                        }
+                    }
+                    if (-not $unauthorized) {
+                        Write-Host "    [+] Target directory ACL is securely restricted." -ForegroundColor Green
+                    }
+                } else {
+                    Write-Warning "    Could not retrieve ACL for backup target."
+                }
+            } else {
+                Write-Host "    [-] Backup target path is currently offline or unreachable." -ForegroundColor Yellow
+            }
+        }
+    }
 }
 ```
 
@@ -18840,6 +18890,208 @@ if ($nonCompliantCount -eq 0) {
   * `P-Inactive` (Check for inactive administrator accounts)
   * `S-Inactive` (Inactive account check)
   * `S-PwdLastSet-90` (Check if all computers have changed their passwords in the last 3 months)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="06-operations-maintenance-cleanup-staged-ifm-files-md"></div>
+
+<div id="06-operations-maintenance-cleanup-staged-ifm-files-md-req-ops-013-clean-up-staged-install-from-media-ifm-data"></div>
+# [REQ-OPS-013] Clean Up Staged Install From Media (IFM) Data
+
+<div id="06-operations-maintenance-cleanup-staged-ifm-files-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers, Member Servers
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
+
+---
+
+<div id="06-operations-maintenance-cleanup-staged-ifm-files-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**: Administrative Standards / Scheduled Tasks
+
+---
+
+<div id="06-operations-maintenance-cleanup-staged-ifm-files-md-rationale"></div>
+## Rationale
+The Install From Media (IFM) feature allows administrators to promote a new Domain Controller using an offline backup dataset rather than copying the entire Active Directory database over the network. 
+
+To generate this dataset, administrators run the `ntdsutil` tool (e.g., `ntdsutil "ac i ntds" "ifm" "create full c:\Staging" q q`). This process generates a staging folder containing:
+1. The Active Directory database file (`ntds.dit`).
+2. Copies of the `SYSTEM` and `SECURITY` registry hives (which contain the boot key needed to decrypt the database file).
+
+If these staged IFM folders are left behind on member servers, administrative shares, or staging volumes, any user or attacker who compromises that machine can copy the files and extract all Active Directory password hashes offline. Securing active directory requires ensuring that temporary IFM datasets are deleted immediately after the new Domain Controller is promoted.
+
+---
+
+<div id="06-operations-maintenance-cleanup-staged-ifm-files-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Readiness**: The only operational impact is that the IFM data is no longer available on the staging host. If another Domain Controller needs to be promoted using IFM, a new dataset must be generated.
+* **Service Interruption**: This cleanup process has zero impact on active Active Directory services.
+
+---
+
+<div id="06-operations-maintenance-cleanup-staged-ifm-files-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="06-operations-maintenance-cleanup-staged-ifm-files-md-option-a-manual-search-and-deletion-gui"></div>
+### Option A: Manual Search and Deletion (GUI)
+
+To manually locate and clean up staged IFM folders:
+1. Log on to the staging Member Server or Domain Controller with administrative privileges.
+2. Open **File Explorer** and search all local disk volumes (e.g., `C:\`, `D:\`) for files named `ntds.dit`.
+3. Verify the location of each found file:
+   * **Domain Controllers**: The authorized directory is the Active Directory database path (typically `C:\Windows\NTDS\ntds.dit` as specified in the registry value `DSA Database file` under `HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters`).
+   * **Member Servers**: There are no authorized directories. Any instance of `ntds.dit` is unauthorized.
+4. If an unauthorized `ntds.dit` file is located:
+   * Select the folder containing the `ntds.dit` file (which usually also contains a `registry` sub-folder).
+   * Delete the folder and clear it from the Recycle Bin.
+
+---
+
+<div id="06-operations-maintenance-cleanup-staged-ifm-files-md-option-b-powershell-remediation-non-gpo-script-based"></div>
+### Option B: PowerShell & Remediation (Non-GPO / Script-based)
+
+Use these scripts to audit and automatically delete staged IFM datasets.
+
+[Download Script: Remove-StagedIFM.ps1](implementation_scripts/Remove-StagedIFM.ps1)
+
+```powershell
+# Remove-StagedIFM.ps1
+# Description: Searches for unauthorized copies of ntds.dit and deletes them.
+# Target Engine: Windows PowerShell 5.1
+
+Write-Host "Applying hardening requirement: Clean Up Staged IFM Data..." -ForegroundColor Cyan
+
+# 1. Resolve standard active directory database path (only applicable to DCs)
+$StandardDir = $null
+$StandardAdPath = (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters" -Name "DSA Database file" -ErrorAction SilentlyContinue)."DSA Database file"
+if ($StandardAdPath) {
+    $StandardDir = [System.IO.Path]::GetDirectoryName($StandardAdPath)
+}
+
+# 2. Recursive search function excluding standard heavy system directories
+function Search-UnauthorizedDIT ($SearchPath) {
+    if (-not (Test-Path $SearchPath)) { return @() }
+    
+    $Found = @()
+    $Items = Get-ChildItem -Path $SearchPath -ErrorAction SilentlyContinue
+    foreach ($Item in $Items) {
+        if ($Item.Attributes -match "Directory") {
+            # Skip system/program directories to optimize speed
+            if ($Item.Name -match "^(Windows|Program Files|Program Files \(x86\)|\$Recycle\.Bin|System Volume Information|AppData)$") {
+                continue
+            }
+            $Found += Search-UnauthorizedDIT $Item.FullName
+        } elseif ($Item.Name -ieq "ntds.dit") {
+            # Skip authorized DC database folder
+            if ($null -ne $StandardDir -and $Item.DirectoryName -eq $StandardDir) {
+                continue
+            }
+            $Found += $Item.FullName
+        }
+    }
+    return $Found
+}
+
+# 3. Scan all local drives
+$Drives = Get-PSDrive -PSProvider FileSystem
+$VulnerableFiles = @()
+
+foreach ($Drive in $Drives) {
+    $Root = $Drive.Root
+    Write-Host "[*] Scanning drive $Root for unauthorized ntds.dit files..." -ForegroundColor Gray
+    $VulnerableFiles += Search-UnauthorizedDIT $Root
+}
+
+# 4. Delete unauthorized directories
+if ($VulnerableFiles.Count -gt 0) {
+    Write-Host "[-] Found $($VulnerableFiles.Count) unauthorized ntds.dit file(s)." -ForegroundColor Yellow
+    foreach ($File in $VulnerableFiles) {
+        $FolderToDelete = [System.IO.Path]::GetDirectoryName($File)
+        Write-Host "[-] Deleting staging directory: $FolderToDelete" -ForegroundColor Yellow
+        try {
+            Remove-Item -Path $FolderToDelete -Recurse -Force -ErrorAction Stop
+            Write-Host "[+] Directory $FolderToDelete successfully deleted." -ForegroundColor Green
+        } catch {
+            Write-Error "Failed to delete directory: $FolderToDelete. Error: $($_.Exception.Message)"
+        }
+    }
+} else {
+    Write-Host "[+] No unauthorized staged ntds.dit files found on local drives." -ForegroundColor Green
+}
+```
+
+*To audit the system for staged IFM directories:*
+
+[Download Script: Get-StagedIFMStatus.ps1](audit_scripts/Get-StagedIFMStatus.ps1)
+
+```powershell
+# Get-StagedIFMStatus.ps1
+# Description: Audits local drives for unauthorized staged ntds.dit databases.
+# Target Engine: Windows PowerShell 5.1
+
+Write-Host "--- Auditing Staged IFM Data ---" -ForegroundColor Cyan
+
+# 1. Resolve standard active directory database path (only applicable to DCs)
+$StandardDir = $null
+$StandardAdPath = (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters" -Name "DSA Database file" -ErrorAction SilentlyContinue)."DSA Database file"
+if ($StandardAdPath) {
+    $StandardDir = [System.IO.Path]::GetDirectoryName($StandardAdPath)
+}
+
+# 2. Recursive search function
+function Search-UnauthorizedDIT ($SearchPath) {
+    if (-not (Test-Path $SearchPath)) { return @() }
+    
+    $Found = @()
+    $Items = Get-ChildItem -Path $SearchPath -ErrorAction SilentlyContinue
+    foreach ($Item in $Items) {
+        if ($Item.Attributes -match "Directory") {
+            # Skip system/program directories to optimize speed
+            if ($Item.Name -match "^(Windows|Program Files|Program Files \(x86\)|\$Recycle\.Bin|System Volume Information|AppData)$") {
+                continue
+            }
+            $Found += Search-UnauthorizedDIT $Item.FullName
+        } elseif ($Item.Name -ieq "ntds.dit") {
+            # Skip authorized DC database folder
+            if ($null -ne $StandardDir -and $Item.DirectoryName -eq $StandardDir) {
+                continue
+            }
+            $Found += $Item.FullName
+        }
+    }
+    return $Found
+}
+
+# 3. Scan local drives
+$Drives = Get-PSDrive -PSProvider FileSystem
+$VulnerableFiles = @()
+
+foreach ($Drive in $Drives) {
+    $Root = $Drive.Root
+    $VulnerableFiles += Search-UnauthorizedDIT $Root
+}
+
+# 4. Evaluate status
+if ($VulnerableFiles.Count -gt 0) {
+    foreach ($File in $VulnerableFiles) {
+        Write-Host "[!] VULNERABLE: Unauthorized ntds.dit database found at: $File" -ForegroundColor Red
+    }
+    exit 1
+} else {
+    Write-Host "[+] Secure: No unauthorized staged ntds.dit database files found." -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="06-operations-maintenance-cleanup-staged-ifm-files-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendations on protecting domain backups and credentials storage
+* **Microsoft Security Guidance**: Active Directory Install From Media (IFM) Security best practices
 
 
 <div style="page-break-before: always;"></div>
@@ -20869,6 +21121,7 @@ Privileged Access Workstations (PAWs) host the most sensitive credentials in the
 1. **Deny Standard Users Local Logon (`SeInteractiveLogonRight`)**: Unlike standard endpoints, standard domain users must never log on to a PAW. Only dedicated Tier 0 administrators are allowed console access. Removing `BUILTIN\Users` from local logon rights ensures standard users cannot execute local code on a PAW.
 2. **Restrict Network Access (`SeNetworkLogonRight`)**: Restricting network access strictly to local Administrators prevents domain users from initiating network-based connections to the PAW, cutting off remote exploitation paths.
 3. **Restricting Debugging and Impersonation (`SeDebugPrivilege` / `SeImpersonatePrivilege`)**: Restricting these rights to the built-in local Administrators group prevents any running application from dumping LSA memory or hijacking service tokens.
+4. **Deny Local Account Remote Logon (`SeDenyNetworkLogonRight` / `SeDenyRemoteInteractiveLogonRight`)**: Blocking network and Remote Desktop logons for local accounts (SIDs `S-1-5-113` and `S-1-5-114`) on the PAW provides defense-in-depth, preventing lateral network logons via local accounts.
 
 ---
 
@@ -20912,6 +21165,8 @@ Privileged Access Workstations (PAWs) host the most sensitive credentials in the
 | **Modify firmware environment values** | `BUILTIN\Administrators` |
 | **Perform volume maintenance tasks** | `BUILTIN\Administrators` |
 | **Profile single process** | `BUILTIN\Administrators` |
+| **Deny access to this computer from the network** | Local account (SID `S-1-5-113`), Local account and member of Administrators group (SID `S-1-5-114`) |
+| **Deny log on through Remote Desktop Services** | Local account (SID `S-1-5-113`), Local account and member of Administrators group (SID `S-1-5-114`) |
 | **Restore files and directories** | `BUILTIN\Administrators` |
 | **Take ownership of files or other objects** | `BUILTIN\Administrators` |
 
@@ -20981,6 +21236,8 @@ $BaselineRights = @{
     "SeProfileSingleProcessPrivilege" = "*S-1-5-32-544"
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
+    "SeDenyNetworkLogonRight"             = "*S-1-5-113,*S-1-5-114"
+    "SeDenyRemoteInteractiveLogonRight"   = "*S-1-5-113,*S-1-5-114"
 }
 
 # Re-build [Privilege Rights] section line-by-line
@@ -21087,6 +21344,8 @@ $BaselineRights = @{
     "SeProfileSingleProcessPrivilege" = "*S-1-5-32-544"
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
+    "SeDenyNetworkLogonRight"             = "*S-1-5-113,*S-1-5-114"
+    "SeDenyRemoteInteractiveLogonRight"   = "*S-1-5-113,*S-1-5-114"
 }
 
 foreach ($Key in $BaselineRights.Keys) {
@@ -30373,6 +30632,7 @@ User Rights Assignments (URAs) govern the specific actions that security princip
 2. **Token Impersonation (`SeImpersonatePrivilege` / `SeCreateGlobalPrivilege`)**: The Impersonate Client privilege allows a service or user to run code in the security context of another user. Attackers exploit this privilege (using "Potato" exploits) to coerce local services (like Print Spooler or IIS) into authenticating to them, allowing the attacker to steal the service's SYSTEM token. It must be restricted to Administrators and local service identities.
 3. **Backup and Restore Access (`SeBackupPrivilege` / `SeRestorePrivilege`)**: The Backup/Restore privileges bypass all file-system Access Control Lists (ACLs) to read or write any file. Attackers use these rights to dump the local SAM database, registry hives, or confidential directories.
 4. **Network and Local Logon Access (`SeNetworkLogonRight` / `SeInteractiveLogonRight`)**: Restricting network logon permissions limits lateral movement options for standard domain accounts, containing potential compromises.
+5. **Deny Local Account Remote Logon (`SeDenyNetworkLogonRight` / `SeDenyRemoteInteractiveLogonRight`)**: Blocking network and Remote Desktop logons for local accounts (SIDs `S-1-5-113` and `S-1-5-114`) prevents lateral movement. If a local account is compromised, the attacker cannot leverage Pass-the-Hash or cleartext authentication to connect remotely to other systems using that local account context.
 
 ---
 
@@ -30423,6 +30683,8 @@ User Rights Assignments (URAs) govern the specific actions that security princip
 | **Profile single process** | `BUILTIN\Administrators` |
 | **Profile system performance** | `BUILTIN\Administrators`, `NT SERVICE\WdiServiceHost` |
 | **Replace a process level token** | `LOCAL SERVICE`, `NETWORK SERVICE` |
+| **Deny access to this computer from the network** | Local account (SID `S-1-5-113`), Local account and member of Administrators group (SID `S-1-5-114`) |
+| **Deny log on through Remote Desktop Services** | Local account (SID `S-1-5-113`), Local account and member of Administrators group (SID `S-1-5-114`) |
 | **Restore files and directories** | `BUILTIN\Administrators` |
 | **Take ownership of files or other objects** | `BUILTIN\Administrators` |
 
@@ -30499,6 +30761,8 @@ $BaselineRights = @{
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
     "SeRelabelPrivilege"              = ""
+    "SeDenyNetworkLogonRight"             = "*S-1-5-113,*S-1-5-114"
+    "SeDenyRemoteInteractiveLogonRight"   = "*S-1-5-113,*S-1-5-114"
 }
 
 # Re-build [Privilege Rights] section line-by-line
@@ -30613,6 +30877,8 @@ $BaselineRights = @{
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
     "SeRelabelPrivilege"              = ""
+    "SeDenyNetworkLogonRight"             = "*S-1-5-113,*S-1-5-114"
+    "SeDenyRemoteInteractiveLogonRight"   = "*S-1-5-113,*S-1-5-114"
 }
 
 foreach ($Key in $BaselineRights.Keys) {
@@ -35591,6 +35857,7 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 * **[REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](#06-operations-maintenance-maintain-gpo-templates-md)**: Prevents version drift across consoles.
 * **[REQ-OPS-007 - Mandate Naming Conventions for GPOs, OUs, and User Accounts](#06-operations-maintenance-mandate-naming-conventions-md)**: Enforces GPO/OU prefix metadata supporting GPO auditing.
 * **[REQ-OPS-008 - Configure Daily System State Backups](#06-operations-maintenance-configure-system-state-backups-md)**: Implements daily AD System State backup, offline/immutable backup isolation, and quarterly recovery drills.
+* **[REQ-OPS-013 - Clean Up Staged Install From Media (IFM) Data](#06-operations-maintenance-cleanup-staged-ifm-files-md)**: Deletes temporary ntds.dit datasets immediately after Domain Controller promotions.
 
 <div id="roadmap-implementation-plan-md-domain-controller-requirements"></div>
 ### Domain Controller Requirements

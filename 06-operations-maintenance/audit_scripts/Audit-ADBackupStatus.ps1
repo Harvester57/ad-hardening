@@ -27,3 +27,48 @@ try {
 } catch {
     Write-Host "[-] No backup records found on the system. System state backups may not be configured." -ForegroundColor Red
 }
+
+# Audit Backup Target Access Control List
+$policy = Get-WBPolicy -ErrorAction SilentlyContinue
+if ($policy) {
+    $targets = Get-WBBackupTarget -Policy $policy -ErrorAction SilentlyContinue
+    foreach ($target in $targets) {
+        $path = $null
+        if ($target.VolumePath) {
+            $path = $target.VolumePath
+        } elseif ($target.NetworkPath) {
+            $path = $target.NetworkPath
+        }
+        
+        if ($path) {
+            Write-Host "`n[*] Auditing backup target permissions: $path" -ForegroundColor Gray
+            if (Test-Path $path) {
+                $acl = Get-Acl -Path $path -ErrorAction SilentlyContinue
+                if ($acl) {
+                    $unauthorized = $false
+                    foreach ($access in $acl.Access) {
+                        $identity = $access.IdentityReference.Value
+                        $rights = $access.FileSystemRights
+                        $type = $access.AccessControlType
+                        
+                        if ($type -eq "Allow") {
+                            if ($identity -notmatch "SYSTEM|Administrators|Domain Admins|Enterprise Admins|Creator Owner|NT AUTHORITY\\SYSTEM|BUILTIN\\Administrators") {
+                                if ($rights -match "Read|Write|Modify|FullControl") {
+                                    Write-Host "    [!] WARNING: Unauthorized identity '$identity' has '$rights' access to backup target." -ForegroundColor Red
+                                    $unauthorized = $true
+                                }
+                            }
+                        }
+                    }
+                    if (-not $unauthorized) {
+                        Write-Host "    [+] Target directory ACL is securely restricted." -ForegroundColor Green
+                    }
+                } else {
+                    Write-Warning "    Could not retrieve ACL for backup target."
+                }
+            } else {
+                Write-Host "    [-] Backup target path is currently offline or unreachable." -ForegroundColor Yellow
+            }
+        }
+    }
+}

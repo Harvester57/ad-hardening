@@ -104,6 +104,7 @@
     * [REQ-OPS-010 - Establish Continuous Security Assessments](06-operations-maintenance/establish-continuous-security-assessments.md)
     * [REQ-OPS-011 - Enable Detailed BSOD Stop Parameters for Crash Control](06-operations-maintenance/enable-detailed-bsod-parameters.md)
     * [REQ-OPS-012 - Implement Automated Inactive Computer and User Account Cleanup](06-operations-maintenance/decommission-inactive-accounts.md)
+    * [REQ-OPS-013 - Clean Up Staged Install From Media (IFM) Data](06-operations-maintenance/cleanup-staged-ifm-files.md)
 ## Module 7: Privileged Access Workstations (PAWs) Hardening
 * [Module 7: Privileged Access Workstations (PAWs) Hardening](07-paws/README.md)
     * [REQ-PAW-001 - Configure AppLocker Policies for PAWs](07-paws/configure-applocker-policies.md)

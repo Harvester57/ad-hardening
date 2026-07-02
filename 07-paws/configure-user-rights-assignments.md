@@ -20,6 +20,7 @@ Privileged Access Workstations (PAWs) host the most sensitive credentials in the
 1. **Deny Standard Users Local Logon (`SeInteractiveLogonRight`)**: Unlike standard endpoints, standard domain users must never log on to a PAW. Only dedicated Tier 0 administrators are allowed console access. Removing `BUILTIN\Users` from local logon rights ensures standard users cannot execute local code on a PAW.
 2. **Restrict Network Access (`SeNetworkLogonRight`)**: Restricting network access strictly to local Administrators prevents domain users from initiating network-based connections to the PAW, cutting off remote exploitation paths.
 3. **Restricting Debugging and Impersonation (`SeDebugPrivilege` / `SeImpersonatePrivilege`)**: Restricting these rights to the built-in local Administrators group prevents any running application from dumping LSA memory or hijacking service tokens.
+4. **Deny Local Account Remote Logon (`SeDenyNetworkLogonRight` / `SeDenyRemoteInteractiveLogonRight`)**: Blocking network and Remote Desktop logons for local accounts (SIDs `S-1-5-113` and `S-1-5-114`) on the PAW provides defense-in-depth, preventing lateral network logons via local accounts.
 
 ---
 
@@ -60,6 +61,8 @@ Privileged Access Workstations (PAWs) host the most sensitive credentials in the
 | **Modify firmware environment values** | `BUILTIN\Administrators` |
 | **Perform volume maintenance tasks** | `BUILTIN\Administrators` |
 | **Profile single process** | `BUILTIN\Administrators` |
+| **Deny access to this computer from the network** | Local account (SID `S-1-5-113`), Local account and member of Administrators group (SID `S-1-5-114`) |
+| **Deny log on through Remote Desktop Services** | Local account (SID `S-1-5-113`), Local account and member of Administrators group (SID `S-1-5-114`) |
 | **Restore files and directories** | `BUILTIN\Administrators` |
 | **Take ownership of files or other objects** | `BUILTIN\Administrators` |
 
@@ -128,6 +131,8 @@ $BaselineRights = @{
     "SeProfileSingleProcessPrivilege" = "*S-1-5-32-544"
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
+    "SeDenyNetworkLogonRight"             = "*S-1-5-113,*S-1-5-114"
+    "SeDenyRemoteInteractiveLogonRight"   = "*S-1-5-113,*S-1-5-114"
 }
 
 # Re-build [Privilege Rights] section line-by-line
@@ -234,6 +239,8 @@ $BaselineRights = @{
     "SeProfileSingleProcessPrivilege" = "*S-1-5-32-544"
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
+    "SeDenyNetworkLogonRight"             = "*S-1-5-113,*S-1-5-114"
+    "SeDenyRemoteInteractiveLogonRight"   = "*S-1-5-113,*S-1-5-114"
 }
 
 foreach ($Key in $BaselineRights.Keys) {

@@ -60,6 +60,7 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 * **[REQ-OPS-003 - Establish and Maintain Group Policy ADMX Central Store](../06-operations-maintenance/maintain-gpo-templates.md)**: Prevents version drift across consoles.
 * **[REQ-OPS-007 - Mandate Naming Conventions for GPOs, OUs, and User Accounts](../06-operations-maintenance/mandate-naming-conventions.md)**: Enforces GPO/OU prefix metadata supporting GPO auditing.
 * **[REQ-OPS-008 - Configure Daily System State Backups](../06-operations-maintenance/configure-system-state-backups.md)**: Implements daily AD System State backup, offline/immutable backup isolation, and quarterly recovery drills.
+* **[REQ-OPS-013 - Clean Up Staged Install From Media (IFM) Data](../06-operations-maintenance/cleanup-staged-ifm-files.md)**: Deletes temporary ntds.dit datasets immediately after Domain Controller promotions.
 
 ### Domain Controller Requirements
 * **[REQ-DC-001 - Disable SMBv1](../02-domain-controllers/disable-smbv1.md)**: Disables legacy, vulnerable file sharing protocol drivers.

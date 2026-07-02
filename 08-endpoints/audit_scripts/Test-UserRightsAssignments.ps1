@@ -45,6 +45,8 @@ $BaselineRights = @{
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
     "SeRelabelPrivilege"              = ""
+    "SeDenyNetworkLogonRight"             = "*S-1-5-113,*S-1-5-114"
+    "SeDenyRemoteInteractiveLogonRight"   = "*S-1-5-113,*S-1-5-114"
 }
 
 foreach ($Key in $BaselineRights.Keys) {

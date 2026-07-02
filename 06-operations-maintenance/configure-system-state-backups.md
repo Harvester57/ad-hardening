@@ -27,7 +27,9 @@ To ensure resilience:
 ## Legacy Impact & Compatibility
 * **Performance Impact**: Creating a system state backup utilizes significant disk I/O and CPU resources. It should be scheduled during off-peak hours to avoid affecting authentication response times.
 * **Storage Requirements**: System State backups consume considerable storage space (typically 10-20 GB or more depending on database size). Ensure target volumes have adequate capacity and are configured to automatically prune older backups.
-* **Access Control**: Backups contain the Active Directory database (including credentials hashes). The backup destination volume must be restricted via NTFS permissions to only Domain Admins and the SYSTEM account.
+* **Access Control**: Backups contain the Active Directory database (including credential hashes). The backup destination volume and network shares must be strictly restricted:
+  * For local folders, configure NTFS ACLs to grant access only to `BUILTIN\Administrators` and `NT AUTHORITY\SYSTEM`.
+  * For remote network shares (UNC paths), configure share permissions and NTFS ACLs on the target storage server to restrict read/write access exclusively to Tier 0 Administrators (e.g., Domain Admins, Enterprise Admins) and dedicated backup service accounts, blocking all other domain accounts.
 
 ---
 
@@ -144,6 +146,51 @@ try {
     }
 } catch {
     Write-Host "[-] No backup records found on the system. System state backups may not be configured." -ForegroundColor Red
+}
+
+# Audit Backup Target Access Control List
+$policy = Get-WBPolicy -ErrorAction SilentlyContinue
+if ($policy) {
+    $targets = Get-WBBackupTarget -Policy $policy -ErrorAction SilentlyContinue
+    foreach ($target in $targets) {
+        $path = $null
+        if ($target.VolumePath) {
+            $path = $target.VolumePath
+        } elseif ($target.NetworkPath) {
+            $path = $target.NetworkPath
+        }
+        
+        if ($path) {
+            Write-Host "`n[*] Auditing backup target permissions: $path" -ForegroundColor Gray
+            if (Test-Path $path) {
+                $acl = Get-Acl -Path $path -ErrorAction SilentlyContinue
+                if ($acl) {
+                    $unauthorized = $false
+                    foreach ($access in $acl.Access) {
+                        $identity = $access.IdentityReference.Value
+                        $rights = $access.FileSystemRights
+                        $type = $access.AccessControlType
+                        
+                        if ($type -eq "Allow") {
+                            if ($identity -notmatch "SYSTEM|Administrators|Domain Admins|Enterprise Admins|Creator Owner|NT AUTHORITY\\SYSTEM|BUILTIN\\Administrators") {
+                                if ($rights -match "Read|Write|Modify|FullControl") {
+                                    Write-Host "    [!] WARNING: Unauthorized identity '$identity' has '$rights' access to backup target." -ForegroundColor Red
+                                    $unauthorized = $true
+                                }
+                            }
+                        }
+                    }
+                    if (-not $unauthorized) {
+                        Write-Host "    [+] Target directory ACL is securely restricted." -ForegroundColor Green
+                    }
+                } else {
+                    Write-Warning "    Could not retrieve ACL for backup target."
+                }
+            } else {
+                Write-Host "    [-] Backup target path is currently offline or unreachable." -ForegroundColor Yellow
+            }
+        }
+    }
 }
 ```
 

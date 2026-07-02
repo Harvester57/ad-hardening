@@ -40,3 +40,6 @@ This directory contains operational procedures and configuration baselines for s
 12. **[REQ-OPS-012 - Implement Automated Inactive Computer and User Account Cleanup](decommission-inactive-accounts.md)**
     Disables and moves inactive user (180 days) and computer (90 days) accounts to a stale OU.
 
+13. **[REQ-OPS-013 - Clean Up Staged Install From Media (IFM) Data](cleanup-staged-ifm-files.md)**
+    Deletes temporary ntds.dit datasets immediately after Domain Controller promotions.
+

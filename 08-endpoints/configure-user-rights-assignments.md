@@ -21,6 +21,7 @@ User Rights Assignments (URAs) govern the specific actions that security princip
 2. **Token Impersonation (`SeImpersonatePrivilege` / `SeCreateGlobalPrivilege`)**: The Impersonate Client privilege allows a service or user to run code in the security context of another user. Attackers exploit this privilege (using "Potato" exploits) to coerce local services (like Print Spooler or IIS) into authenticating to them, allowing the attacker to steal the service's SYSTEM token. It must be restricted to Administrators and local service identities.
 3. **Backup and Restore Access (`SeBackupPrivilege` / `SeRestorePrivilege`)**: The Backup/Restore privileges bypass all file-system Access Control Lists (ACLs) to read or write any file. Attackers use these rights to dump the local SAM database, registry hives, or confidential directories.
 4. **Network and Local Logon Access (`SeNetworkLogonRight` / `SeInteractiveLogonRight`)**: Restricting network logon permissions limits lateral movement options for standard domain accounts, containing potential compromises.
+5. **Deny Local Account Remote Logon (`SeDenyNetworkLogonRight` / `SeDenyRemoteInteractiveLogonRight`)**: Blocking network and Remote Desktop logons for local accounts (SIDs `S-1-5-113` and `S-1-5-114`) prevents lateral movement. If a local account is compromised, the attacker cannot leverage Pass-the-Hash or cleartext authentication to connect remotely to other systems using that local account context.
 
 ---
 
@@ -68,6 +69,8 @@ User Rights Assignments (URAs) govern the specific actions that security princip
 | **Profile single process** | `BUILTIN\Administrators` |
 | **Profile system performance** | `BUILTIN\Administrators`, `NT SERVICE\WdiServiceHost` |
 | **Replace a process level token** | `LOCAL SERVICE`, `NETWORK SERVICE` |
+| **Deny access to this computer from the network** | Local account (SID `S-1-5-113`), Local account and member of Administrators group (SID `S-1-5-114`) |
+| **Deny log on through Remote Desktop Services** | Local account (SID `S-1-5-113`), Local account and member of Administrators group (SID `S-1-5-114`) |
 | **Restore files and directories** | `BUILTIN\Administrators` |
 | **Take ownership of files or other objects** | `BUILTIN\Administrators` |
 
@@ -143,6 +146,8 @@ $BaselineRights = @{
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
     "SeRelabelPrivilege"              = ""
+    "SeDenyNetworkLogonRight"             = "*S-1-5-113,*S-1-5-114"
+    "SeDenyRemoteInteractiveLogonRight"   = "*S-1-5-113,*S-1-5-114"
 }
 
 # Re-build [Privilege Rights] section line-by-line
@@ -257,6 +262,8 @@ $BaselineRights = @{
     "SeRestorePrivilege"              = "*S-1-5-32-544"
     "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
     "SeRelabelPrivilege"              = ""
+    "SeDenyNetworkLogonRight"             = "*S-1-5-113,*S-1-5-114"
+    "SeDenyRemoteInteractiveLogonRight"   = "*S-1-5-113,*S-1-5-114"
 }
 
 foreach ($Key in $BaselineRights.Keys) {

@@ -114,7 +114,8 @@ Configuration ADHardeningAudit {
             "06-operations-maintenance\audit_scripts\Audit-NamingConventions.ps1",
             "06-operations-maintenance\audit_scripts\Get-KrbtgtRotationStatus.ps1",
             "06-operations-maintenance\audit_scripts\Get-OfflineAssessmentStatus.ps1",
-            "06-operations-maintenance\audit_scripts\Get-OfflineWsusSyncStatus.ps1"
+            "06-operations-maintenance\audit_scripts\Get-OfflineWsusSyncStatus.ps1",
+            "06-operations-maintenance\audit_scripts\Get-StagedIFMStatus.ps1"
         )
     }
     elseif ($Profile -eq "PAW") {
