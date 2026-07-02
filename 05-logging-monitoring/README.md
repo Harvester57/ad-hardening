@@ -13,3 +13,6 @@ This directory contains configuration policies for security log auditing, PowerS
 
 4. **[REQ-LOG-004 - Configure Secure SIEM Log Shipping](configure-siem-log-shipping.md)**
    Configures secured log shipping agents (Winlogbeat and Wazuh) utilizing TLS encryption, authenticated CA checks, local configuration file ACL protections, and buffer queue size limits to prevent local disk space exhaustion.
+
+5. **[REQ-LOG-005 - Configure Kerberoasting Honeypots and SIEM Detection Rules](implement-kerberoasting-honeypot.md)**
+   Deploys decoy service accounts in Active Directory to attract Kerberoasting scans and provides high-fidelity SIEM alerting queries.

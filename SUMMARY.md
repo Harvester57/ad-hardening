@@ -88,6 +88,7 @@
     * [REQ-LOG-002 - Configure PowerShell and Command-Line Auditing](05-logging-monitoring/configure-powershell-and-command-line-auditing.md)
     * [REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](05-logging-monitoring/deploy-and-harden-sysmon.md)
     * [REQ-LOG-004 - Configure Secure SIEM Log Shipping](05-logging-monitoring/configure-siem-log-shipping.md)
+    * [REQ-LOG-005 - Configure Kerberoasting Honeypots and SIEM Detection Rules](05-logging-monitoring/implement-kerberoasting-honeypot.md)
 ## Module 6: Secure Operations & Maintenance
 * [Module 6: Secure Operations & Maintenance](06-operations-maintenance/README.md)
     * [REQ-OPS-001 - Enforce KRBTGT Password Rotation](06-operations-maintenance/enforce-krbtgt-password-rotation.md)

@@ -104,6 +104,7 @@ Configuration ADHardeningAudit {
             "04-network-firewall\audit_scripts\Test-IntraDcManagementBlocking.ps1",
             "04-network-firewall\audit_scripts\Test-RpcNamedPipeFilters.ps1",
             "04-network-firewall\audit_scripts\Test-WMIStaticPort.ps1",
+            "05-logging-monitoring\audit_scripts\Get-KerberoastHoneypotStatus.ps1",
             "06-operations-maintenance\audit_scripts\Audit-ADBackupStatus.ps1",
             "06-operations-maintenance\audit_scripts\Audit-ADRecycleBin.ps1",
             "06-operations-maintenance\audit_scripts\Audit-CrashControl.ps1",

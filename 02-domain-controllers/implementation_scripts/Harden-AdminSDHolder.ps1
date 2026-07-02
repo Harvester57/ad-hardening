@@ -1,5 +1,5 @@
 # Harden-AdminSDHolder.ps1
-# Description: Hardens the adminSDHolder ACL by auditing permissions and removing delegated helpdesk groups.
+# Description: Hardens the adminSDHolder ACL by auditing permissions, blocking inheritance, and removing delegated helpdesk groups.
 
 Import-Module ActiveDirectory
 
@@ -21,6 +21,17 @@ $AllowedTrustees = @(
 $Acl = Get-Acl -Path $AdminSDPath
 $AclModified = $false
 
+# 1. Enforce inheritance blocking (DACL_Protected flag)
+if ($Acl.AreAccessRulesProtected) {
+    Write-Host "[+] Inheritance is already blocked (protected) on the adminSDHolder container." -ForegroundColor Green
+} else {
+    Write-Host "[-] adminSDHolder container has inheritance enabled. Blocking inheritance..." -ForegroundColor Yellow
+    # Block inheritance ($true) and copy existing rules as explicit ($true)
+    $Acl.SetAccessRuleProtection($true, $true)
+    $AclModified = $true
+}
+
+# 2. Prune non-compliant permissions
 foreach ($Rule in $Acl.Access) {
     $Identity = $Rule.IdentityReference.Value
     

@@ -140,6 +140,7 @@ This phase focuses on isolating credentials inside memory and network packets to
 ### Logging & Monitoring Requirements
 * **[REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](../05-logging-monitoring/deploy-and-harden-sysmon.md)**: Deploys and hardens Microsoft Sysmon to detect advanced host-based anomalies.
 * **[REQ-LOG-004 - Configure Secure SIEM Log Shipping](../05-logging-monitoring/configure-siem-log-shipping.md)**: Enforces secure, encrypted SIEM log shipping for central log correlation.
+* **[REQ-LOG-005 - Configure Kerberoasting Honeypots and SIEM Detection Rules](../05-logging-monitoring/implement-kerberoasting-honeypot.md)**: Configures decoy accounts and SIEM alerts to capture Kerberoasting attacks.
 
 ### PAW Requirements
 * **[REQ-PAW-002 - Enable LSA Protection for PAWs](../07-paws/enable-lsa-protection.md)**: Blocks LSASS memory reading on PAWs.

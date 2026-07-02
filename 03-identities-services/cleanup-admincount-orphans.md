@@ -13,10 +13,12 @@
 ---
 
 ## Rationale
-In Active Directory, when an account is added to a protected group (such as `Domain Admins`, `Schema Admins`, or `Account Operators`), a background system process called SDPROP automatically sets the account's `adminCount` attribute to `1` and disables security descriptor inheritance. This is done to ensure the account only inherits permissions defined by the secure `adminSDHolder` template rather than any insecure permissions on the parent Organizational Unit (OU).
+In Active Directory, when an account is added to a protected group (such as `Domain Admins`, `Schema Admins`, or `Account Operators`), a forest-wide background thread (the `AdminSDHolder` task, running on the Domain Controller holding the PDC Emulator role) automatically sets the account's `adminCount` attribute to `1` and disables security descriptor inheritance. This is done to ensure the account only inherits permissions defined by the secure `adminSDHolder` template rather than any insecure permissions on the parent Organizational Unit (OU).
+
+A common myth is that Active Directory uses the `adminCount` attribute to determine which accounts are protected. In reality, the `AdminSDHolder` background task evaluates group membership (direct or nested association with a protected group) to trigger protection, not `adminCount`. The `adminCount=1` attribute is merely a metadata flag stamped by the task.
 
 However, if that user is later removed from the protected group:
-1. **adminCount Remains Active**: Active Directory does not automatically reset the `adminCount` attribute to `0` or empty, nor does it re-enable security descriptor inheritance on the user object.
+1. **adminCount Remains Active**: Active Directory does not automatically reset the `adminCount` attribute to `0` or empty, nor does it re-enable security descriptor inheritance on the user object. Although the `AdminSDHolder` task stops protecting the object (it no longer overwrites its DACL), inheritance remains permanently disabled.
 2. **Leaves Account Insecurely Unmanaged**: The user object remains orphaned, with inheritance permanently disabled. This blocks future legitimate GPO-based permission updates and can allow persistent, hidden permissions (backdoors) on the object to remain unmitigated.
 3. **Breaks Management Consistency**: Security administrators auditing protected accounts will see false positives, as accounts appear to have administrative attributes when they do not have administrative group memberships.
 
@@ -25,7 +27,7 @@ Auditing and resetting these orphan accounts restores proper security inheritanc
 ---
 
 ## Legacy Impact & Compatibility
-* **Parent OU Access Control**: Re-enabling security inheritance on a user object will immediately apply the Access Control Lists (ACLs) of its parent Organizational Unit. Before re-enabling inheritance, ensure that the target user's parent OU is properly secured and does not grant excessive delegation permissions to non-Tier 0 accounts.
+* **Parent OU Access Control**: Re-enabling security inheritance on a user object will immediately apply the Access Control Lists (RLs) of its parent Organizational Unit. Before re-enabling inheritance, ensure that the target user's parent OU is properly secured and does not grant excessive delegation permissions to non-Tier 0 accounts.
 * **Service Interruption**: No service interruption is expected, as this is an attribute cleanup task.
 
 ---
@@ -166,3 +168,5 @@ Write-Host "[*] Total adminCount orphans detected: $($OrphanCount)." -Foreground
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 6.b (Page 32)
 * **ANSSI AD Hardening Guide**: Section 3.2.2 (adminSDHolder Context)
 * **Microsoft Security Guidance**: Active Directory Orphaned adminCount Cleanup Procedures
+* **SpecterOps Research**: AdminSDHolder: Misconceptions, Misconfigurations, and Myths (October 2025)
+

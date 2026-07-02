@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: c13fa1a | Generated: July 02, 2026</span>
+      <span>Commit: 59ef14f | Generated: July 02, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -4085,13 +4085,24 @@ if ($DfsrEvents) {
 
 <div id="02-domain-controllers-harden-adminsdholder-permissions-md-rationale"></div>
 ## Rationale
-In Active Directory, the `adminSDHolder` object acts as a security template for administrative accounts and groups (known as protected objects). Every hour, a background system thread called SDPROP (Security Descriptor Propagator) compares the ACLs of all protected objects against the ACL of the `adminSDHolder` object. If they differ, the ACL on the protected object is overwritten by the ACL on `adminSDHolder`, and security inheritance is disabled.
+In Active Directory, the `adminSDHolder` object acts as a security template for administrative accounts and groups (known as protected objects). Every hour, a background system thread (the `AdminSDHolder` task, also referred to as the `ProtectAdminGroups` task) running on the Domain Controller holding the PDC Emulator role compares the Access Control Lists (ACLs) of all protected objects against the ACL of the `adminSDHolder` object. If they differ, the ACL on the protected object is overwritten by the ACL on `adminSDHolder`, and security inheritance is disabled.
 
-If an attacker gains temporary write permissions on the `adminSDHolder` object, they can inject a backdoor Access Control Entry (ACE) granting their account write permissions. Within an hour, SDPROP will apply this backdoor ACE to all protected groups (e.g., Domain Admins, Schema Admins, Enterprise Admins). Even if the administrator cleans up permissions on a Domain Admin account directly, SDPROP will restore the backdoor ACE on its next run.
+A common misconception is that the Security Descriptor Propagator (`SDProp`) thread enforces this protection. In reality, `SDProp` is a separate background thread on all Domain Controllers whose sole job is to propagate inheritable Access Control Entries (ACEs) when an object is moved or a parent ACL is modified. The actual enforcement of the `adminSDHolder` template is performed exclusively by the `AdminSDHolder` background task.
+
+If an attacker gains temporary write permissions on the `adminSDHolder` object, they can inject a backdoor Access Control Entry (ACE) granting their account write permissions. Within an hour, the `AdminSDHolder` background task will apply this backdoor ACE to all protected groups (e.g., Domain Admins, Schema Admins, Enterprise Admins). Even if the administrator cleans up permissions on a Domain Admin account directly, the `AdminSDHolder` task will restore the backdoor ACE on its next run.
+
+<div id="02-domain-controllers-harden-adminsdholder-permissions-md-the-importance-of-container-inheritance-protection-dacl-protected"></div>
+### The Importance of Container Inheritance Protection (DACL_Protected)
+By default, the `adminSDHolder` container itself (`CN=adminSDHolder,CN=System,DC=[Domain]`) has its DACL protected (inheritance blocked). This prevents permissions delegated on the parent `CN=System` container or the Domain Root from inheriting down to the `adminSDHolder` object. If inheritance is accidentally enabled on `CN=adminSDHolder`, any account with write permissions delegated on parent containers would implicitly gain control over `adminSDHolder`, resulting in full domain compromise when those permissions are propagated to all administrative accounts.
+
+<div id="02-domain-controllers-harden-adminsdholder-permissions-md-protection-of-non-user-objects"></div>
+### Protection of Non-User Objects
+The `AdminSDHolder` task is not restricted to user objects and groups. It will also protect computer objects, Managed Service Accounts (MSAs), and Group Managed Service Accounts (gMSAs) if they are added to a protected group (such as `Administrators` or `Domain Admins`), provided they are not members of an excluded group like `Domain Controllers` or `Read-Only Domain Controllers` (which are excluded to prevent replication and authentication breakages).
 
 Therefore:
 1. **Prevents Privilege Escalation Backdoors**: Auditing and hardening the `adminSDHolder` ACL ensures that unauthorized accounts cannot establish persistent, self-healing backdoors.
 2. **Maintains Tier 0 Isolation**: Restricting write access on `adminSDHolder` strictly to Tier 0 accounts keeps the tiered boundary intact.
+3. **Protects Against Inherited Backdoors**: Enforcing inheritance blocking on the `adminSDHolder` container prevents lateral permission leakage from parent containers.
 
 ---
 
@@ -4099,6 +4110,7 @@ Therefore:
 ## Legacy Impact & Compatibility
 * **Administrative Operations**: If custom scripts or third-party provisioning systems rely on writing directly to protected accounts without belonging to the built-in protected groups, modifying the `adminSDHolder` ACL may disrupt their operations. Ensure all automated directory tools are audited before removing custom ACL entries.
 * **Pre-Remediation Check**: Ensure that only trusted, built-in system groups (such as Domain Admins, Enterprise Admins, and SYSTEM) have Write and Modify permissions on the `adminSDHolder` object.
+* **Service Accounts and gMSAs**: If service accounts or gMSAs are placed in administrative groups, their object DACLs will also be protected and set to block inheritance. Ensure this does not break service delegation or management permissions.
 
 ---
 
@@ -4115,10 +4127,13 @@ Therefore:
 4. Right-click **adminSDHolder** and select **Properties**.
 5. Select the **Security** tab.
 6. Click **Advanced**.
-7. Review the permission entries:
+7. Enforce inheritance blocking:
+   * Verify that the button at the bottom reads **Enable Inheritance**. If it reads **Disable Inheritance**, click it to block inheritance.
+   * When prompted, choose to convert inherited permissions into explicit permissions to avoid losing default settings, then prune any non-compliant explicit permissions.
+8. Review the permission entries:
    * Ensure only highly privileged built-in groups (e.g., `Domain Admins`, `Enterprise Admins`, `SYSTEM`) have Write, Modify, or Full Control permissions.
    * Remove any entries granting permissions to non-Tier 0 accounts, such as delegated helpdesk groups, `Account Operators`, `Print Operators`, or custom service accounts.
-8. Click **OK** to save changes.
+9. Click **OK** to save changes.
 
 ---
 
@@ -4131,7 +4146,7 @@ Run the following script to audit and remediate unauthorized permissions on the 
 
 ```powershell
 # Harden-AdminSDHolder.ps1
-# Description: Hardens the adminSDHolder ACL by auditing permissions and removing delegated helpdesk groups.
+# Description: Hardens the adminSDHolder ACL by auditing permissions, blocking inheritance, and removing delegated helpdesk groups.
 
 Import-Module ActiveDirectory
 
@@ -4153,6 +4168,17 @@ $AllowedTrustees = @(
 $Acl = Get-Acl -Path $AdminSDPath
 $AclModified = $false
 
+# 1. Enforce inheritance blocking (DACL_Protected flag)
+if ($Acl.AreAccessRulesProtected) {
+    Write-Host "[+] Inheritance is already blocked (protected) on the adminSDHolder container." -ForegroundColor Green
+} else {
+    Write-Host "[-] adminSDHolder container has inheritance enabled. Blocking inheritance..." -ForegroundColor Yellow
+    # Block inheritance ($true) and copy existing rules as explicit ($true)
+    $Acl.SetAccessRuleProtection($true, $true)
+    $AclModified = $true
+}
+
+# 2. Prune non-compliant permissions
 foreach ($Rule in $Acl.Access) {
     $Identity = $Rule.IdentityReference.Value
     
@@ -4189,7 +4215,7 @@ if ($AclModified) {
 
 ```powershell
 # Get-AdminSDHolderAudit.ps1
-# Description: Audits and prints all active permission entries on adminSDHolder.
+# Description: Audits and prints all active permission entries and the inheritance block status on adminSDHolder.
 
 Import-Module ActiveDirectory
 
@@ -4198,6 +4224,13 @@ Write-Host "--- Auditing adminSDHolder Permissions ---" -ForegroundColor Cyan
 $DomainDN = (Get-ADRootDSE).defaultNamingContext
 $AdminSDPath = "AD:\CN=adminSDHolder,CN=System,$($DomainDN)"
 $Acl = Get-Acl -Path $AdminSDPath
+
+# Check inheritance block status
+if ($Acl.AreAccessRulesProtected) {
+    Write-Host "[+] Inheritance is BLOCKED (Protected) on the adminSDHolder container (Secure)." -ForegroundColor Green
+} else {
+    Write-Host "[!] VULNERABLE: Inheritance is ENABLED (Unprotected) on the adminSDHolder container. Permissions may inherit from parent objects." -ForegroundColor Red
+}
 
 foreach ($Rule in $Acl.Access) {
     $Identity = $Rule.IdentityReference.Value
@@ -4220,6 +4253,8 @@ foreach ($Rule in $Acl.Access) {
 * **ANSSI AD Hardening Guide**: Recommendation R23
 * **Microsoft Security Guidance**: Protected Accounts and Groups in Active Directory
 * **CIS Benchmark**: Section 2.2 (Active Directory Object Access Permissions)
+* **SpecterOps Research**: AdminSDHolder: Misconceptions, Misconfigurations, and Myths (October 2025)
+
 
 
 <div style="page-break-before: always;"></div>
@@ -6281,7 +6316,7 @@ The `dSHeuristics` attribute is a Unicode string that defines forest-wide heuris
 
 1. **fLDAPBlockAnonOps** (7th character): Controls anonymous LDAP operations. If set to `2`, anonymous binds and searches are permitted, allowing unauthorized users to map out directory structures. Setting it to `0` blocks anonymous operations.
 2. **fAllowAnonNSPI** (8th character): Controls anonymous access to the Name Service Provider Interface (NSPI). If set to `1` or any value other than `0`, anonymous clients can query address books, which allows user enumeration. Setting it to `0` restricts NSPI queries to authenticated users.
-3. **dwAdminSDExMask** (16th character): Excludes administrative groups from the automatic security descriptor protection mechanism (`SDProp`). By default (`0`), groups like Account Operators, Server Operators, Print Operators, and Backup Operators are protected. If set to non-zero, this protection is bypassed, risking privilege escalation.
+3. **dwAdminSDExMask** (16th character): Excludes administrative groups from the automatic security descriptor protection mechanism (the `AdminSDHolder` background task). By default (`0`), groups like Account Operators, Server Operators, Print Operators, and Backup Operators are protected. If set to non-zero, this protection is bypassed, risking privilege escalation.
 4. **DoNotVerifyUPNAndOrSPNUniqueness** (21st character): Controls uniqueness enforcement for User Principal Names (UPN) and Service Principal Names (SPN). Disabling this check (`1` or non-zero) can lead to identity spoofing or credential hijacking by registering duplicate names (KB5008382).
 5. **AttributeAuthorizationOnLDAPAdd** (28th character) and **BlockOwnerImplicitRights** (29th character): Introduced in KB5008383. Setting these to `1` enforces strict authorization validations and auditing during LDAP Add operations, preventing malicious creators from abusing implicit owner privileges.
 6. **DisableConfidentialAttributeEncryptionRequirements** (31st character): Controls connection security requirements for retrieving or writing confidential attributes. Allowing unencrypted connections (non-zero) risks exposing sensitive information such as password hashes or BitLocker recovery keys on the network.
@@ -10143,10 +10178,12 @@ if ($Silos) {
 
 <div id="03-identities-services-cleanup-admincount-orphans-md-rationale"></div>
 ## Rationale
-In Active Directory, when an account is added to a protected group (such as `Domain Admins`, `Schema Admins`, or `Account Operators`), a background system process called SDPROP automatically sets the account's `adminCount` attribute to `1` and disables security descriptor inheritance. This is done to ensure the account only inherits permissions defined by the secure `adminSDHolder` template rather than any insecure permissions on the parent Organizational Unit (OU).
+In Active Directory, when an account is added to a protected group (such as `Domain Admins`, `Schema Admins`, or `Account Operators`), a forest-wide background thread (the `AdminSDHolder` task, running on the Domain Controller holding the PDC Emulator role) automatically sets the account's `adminCount` attribute to `1` and disables security descriptor inheritance. This is done to ensure the account only inherits permissions defined by the secure `adminSDHolder` template rather than any insecure permissions on the parent Organizational Unit (OU).
+
+A common myth is that Active Directory uses the `adminCount` attribute to determine which accounts are protected. In reality, the `AdminSDHolder` background task evaluates group membership (direct or nested association with a protected group) to trigger protection, not `adminCount`. The `adminCount=1` attribute is merely a metadata flag stamped by the task.
 
 However, if that user is later removed from the protected group:
-1. **adminCount Remains Active**: Active Directory does not automatically reset the `adminCount` attribute to `0` or empty, nor does it re-enable security descriptor inheritance on the user object.
+1. **adminCount Remains Active**: Active Directory does not automatically reset the `adminCount` attribute to `0` or empty, nor does it re-enable security descriptor inheritance on the user object. Although the `AdminSDHolder` task stops protecting the object (it no longer overwrites its DACL), inheritance remains permanently disabled.
 2. **Leaves Account Insecurely Unmanaged**: The user object remains orphaned, with inheritance permanently disabled. This blocks future legitimate GPO-based permission updates and can allow persistent, hidden permissions (backdoors) on the object to remain unmitigated.
 3. **Breaks Management Consistency**: Security administrators auditing protected accounts will see false positives, as accounts appear to have administrative attributes when they do not have administrative group memberships.
 
@@ -10156,7 +10193,7 @@ Auditing and resetting these orphan accounts restores proper security inheritanc
 
 <div id="03-identities-services-cleanup-admincount-orphans-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Parent OU Access Control**: Re-enabling security inheritance on a user object will immediately apply the Access Control Lists (ACLs) of its parent Organizational Unit. Before re-enabling inheritance, ensure that the target user's parent OU is properly secured and does not grant excessive delegation permissions to non-Tier 0 accounts.
+* **Parent OU Access Control**: Re-enabling security inheritance on a user object will immediately apply the Access Control Lists (RLs) of its parent Organizational Unit. Before re-enabling inheritance, ensure that the target user's parent OU is properly secured and does not grant excessive delegation permissions to non-Tier 0 accounts.
 * **Service Interruption**: No service interruption is expected, as this is an attribute cleanup task.
 
 ---
@@ -10301,6 +10338,8 @@ Write-Host "[*] Total adminCount orphans detected: $($OrphanCount)." -Foreground
 * **ANSSI Remediation of Active Directory Tier 0 Guide**: Section 6.b (Page 32)
 * **ANSSI AD Hardening Guide**: Section 3.2.2 (adminSDHolder Context)
 * **Microsoft Security Guidance**: Active Directory Orphaned adminCount Cleanup Procedures
+* **SpecterOps Research**: AdminSDHolder: Misconceptions, Misconfigurations, and Myths (October 2025)
+
 
 
 <div style="page-break-before: always;"></div>
@@ -14586,6 +14625,9 @@ This directory contains configuration policies for security log auditing, PowerS
 4. **[REQ-LOG-004 - Configure Secure SIEM Log Shipping](#05-logging-monitoring-configure-siem-log-shipping-md)**
    Configures secured log shipping agents (Winlogbeat and Wazuh) utilizing TLS encryption, authenticated CA checks, local configuration file ACL protections, and buffer queue size limits to prevent local disk space exhaustion.
 
+5. **[REQ-LOG-005 - Configure Kerberoasting Honeypots and SIEM Detection Rules](#05-logging-monitoring-implement-kerberoasting-honeypot-md)**
+   Deploys decoy service accounts in Active Directory to attract Kerberoasting scans and provides high-fidelity SIEM alerting queries.
+
 
 <div style="page-break-before: always;"></div>
 
@@ -15676,6 +15718,276 @@ foreach ($File in $ConfigFiles) {
 * **ANSSI AD Hardening Guide**: Recommendation R52 (Sysmon and log shipping recommendations)
 * **CIS Benchmark**: Recommended settings for centralized log shipping configurations
 * **Wazuh Security Hardening Guidelines**: Transport encryption and configuration protection
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md"></div>
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-req-log-005-configure-kerberoasting-honeypots-and-siem-detection-rules"></div>
+# [REQ-LOG-005] Configure Kerberoasting Honeypots and SIEM Detection Rules
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022
+
+---
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**: Active Directory Object Management (Account attributes: `servicePrincipalName`, `adminCount`, `LogonWorkstations`)
+
+---
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-rationale"></div>
+## Rationale
+Kerberoasting allows an authenticated user to request a Kerberos service ticket (TGS) for any service account mapped to a Service Principal Name (SPN). Because the ticket is encrypted using the service account's password hash, the attacker can extract the encrypted ticket from memory and attempt to crack the password offline using brute-force dictionaries or GPU arrays.
+
+To mitigate and detect this vector, two strategies must be implemented:
+
+1. **Service Account Honeypots (Decoy Accounts)**:
+   By creating a fake Active Directory user account and registering a decoy SPN on it, security teams establish a high-fidelity trap. Since this decoy account is not tied to any legitimate application or service, no standard user or system has any reason to request a Kerberos ticket for it. 
+   - Set the `adminCount` attribute to `1` so the account appears in attacker search queries searching for high-privilege targets (e.g., Domain Admins).
+   - Any ticket request (Event ID 4769) for the decoy SPN is a definitive indicator of a Kerberoasting attempt, providing a zero-false-positive alert with the attacker's client IP.
+
+2. **SIEM Filtering and Correlation**:
+   Standard Event ID 4769 logging generates millions of events daily. Filtering this telemetry down to anomalous behavior is necessary to catch broad Kerberoasting scans:
+   - **Ticket Encryption Type**: Focus on encryption type `0x17` (RC4-HMAC-MD5) or legacy DES (`0x1`, `0x2`, `0x3`) as modern Windows environments negotiate AES (`0x11` or `0x12`) by default.
+   - **Account Exclusions**: Filter out usernames ending with `$` (which represent computer accounts, trusts, or managed service accounts that feature automatically rotated, high-entropy passwords).
+   - **Anomalous Patterns**: Trigger alerts when a single user account requests RC4 or DES tickets for multiple distinct SPNs within a short timeframe (e.g., less than 5 seconds).
+
+---
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Disabled Interactive Logon**: The honeypot account is a decoy and must never be allowed to log on to any system. Enforcing a logon workstation restriction to a non-existent host (e.g., `HONEYPOT-VOID-HOST`) ensures the account cannot be actively abused for lateral movement or authentication even if the password is leaked or cracked.
+* **TGS Ticket Issuance**: Active Directory KDC will still issue service tickets for a user account even when logon workstation restrictions are active, ensuring the security audit event (Event ID 4769) is generated for the SIEM to alert on.
+
+---
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-option-a-active-directory-users-and-computers-gui"></div>
+### Option A: Active Directory Users and Computers (GUI)
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-1-create-the-decoy-account"></div>
+#### 1. Create the Decoy Account
+1. Log on to a Domain Controller or administrative workstation with Domain Admin privileges.
+2. Open **Active Directory Users and Computers** (`dsa.msc`).
+3. Create a new User Object (e.g., named `krbtgt_honey`).
+4. Set a strong, complex 120-character password.
+5. In the account options:
+   - Ensure **Account is enabled** is checked.
+   - Check **Password never expires**.
+6. Open the user properties and navigate to the **Account** tab:
+   - Click **Log On To...** under Logon Workstations.
+   - Select **The following computers** and enter a non-existent hostname (e.g., `HONEYPOT-VOID-HOST`).
+   - Click **Add** and then **OK**.
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-2-configure-administrative-attributes"></div>
+#### 2. Configure administrative attributes
+1. In Active Directory Users and Computers, select **View** -> **Advanced Features** to enable the Attribute Editor.
+2. Open the properties of the decoy account and navigate to the **Attribute Editor** tab.
+3. Locate the `adminCount` attribute and double-click it.
+4. Set the value to `1` and click **OK**.
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-3-register-the-decoy-spn"></div>
+#### 3. Register the Decoy SPN
+1. Open an elevated command prompt on the Domain Controller.
+2. Register a unique fake SPN using the `setspn` tool:
+   ```cmd
+   setspn -s MSSQLSvc/sql-backup-prod.domain.local:1433 krbtgt_honey
+   ```
+
+---
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-option-b-powershell-active-directory-cmdlets"></div>
+### Option B: PowerShell & Active Directory cmdlets
+
+Use this method to automatically deploy the honeypot configuration and audit its compliance status.
+
+[Download Script: New-KerberoastHoneypot.ps1](implementation_scripts/New-KerberoastHoneypot.ps1)
+
+```powershell
+# New-KerberoastHoneypot.ps1
+# Description: Configures a decoy Kerberoasting Honeypot account with a fake SPN, AdminCount=1, and restricted logon capabilities.
+# Target Engine: Windows PowerShell 5.1
+
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "")]
+param()
+
+Import-Module ActiveDirectory
+
+Write-Host "Applying hardening requirement: Configure Kerberoasting Honeypot..." -ForegroundColor Cyan
+
+$HoneypotName = "krbtgt_honey"
+$HoneypotSPN = "MSSQLSvc/sql-backup-prod.domain.local:1433"
+$HoneypotDescription = "Decoy service account for backup database monitoring."
+
+# 1. Check if the honeypot user account already exists
+$ExistingUser = Get-ADUser -Filter "SamAccountName -eq '$HoneypotName'"
+
+if (-not $ExistingUser) {
+    # Generate a complex 120-character password to prevent cracking
+    $Characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+"
+    $RandomPassword = ""
+    for ($i = 0; $i -lt 120; $i++) {
+        $Index = Get-Random -Minimum 0 -Maximum $Characters.Length
+        $RandomPassword += $Characters[$Index]
+    }
+    
+    $SecurePassword = ConvertTo-SecureString $RandomPassword -AsPlainText -Force
+
+    # Create the AD User.
+    # Set LogonWorkstations to a non-existent host to prevent logon attempts.
+    # UPN domain suffix should match the root domain.
+    $Domain = Get-ADDomain
+    New-ADUser -Name $HoneypotName `
+               -SamAccountName $HoneypotName `
+               -UserPrincipalName "$HoneypotName@$($Domain.DNSRoot)" `
+               -AccountPassword $SecurePassword `
+               -Enabled $true `
+               -Description $HoneypotDescription `
+               -LogonWorkstations "HONEYPOT-VOID-HOST" `
+               -PasswordNeverExpires $true
+
+    Write-Host "[+] Decoy user account '$HoneypotName' created with logon restrictions." -ForegroundColor Green
+} else {
+    Write-Host "[*] Decoy user account '$HoneypotName' already exists." -ForegroundColor Yellow
+}
+
+# 2. Configure target attributes: AdminCount, ServicePrincipalName
+$UserObj = Get-ADUser -Identity $HoneypotName -Properties servicePrincipalName, adminCount
+
+# Set AdminCount to 1 (highly attractive to scanners)
+if ($UserObj.adminCount -ne 1) {
+    Set-ADUser -Identity $HoneypotName -Replace @{adminCount = 1}
+    Write-Host "[+] Set AdminCount to 1 on '$HoneypotName'." -ForegroundColor Green
+} else {
+    Write-Host "[*] AdminCount is already set to 1." -ForegroundColor Yellow
+}
+
+# Set Service Principal Name
+$SPNExists = $UserObj.servicePrincipalName | Where-Object { $_ -eq $HoneypotSPN }
+if (-not $SPNExists) {
+    Set-ADUser -Identity $HoneypotName -Add @{servicePrincipalName = $HoneypotSPN}
+    Write-Host "[+] Service Principal Name '$HoneypotSPN' registered on '$HoneypotName'." -ForegroundColor Green
+} else {
+    Write-Host "[*] Service Principal Name '$HoneypotSPN' already registered." -ForegroundColor Yellow
+}
+
+Write-Host "Honeypot configuration applied successfully." -ForegroundColor Green
+```
+
+*To verify the honeypot configuration state:*
+
+[Download Script: Get-KerberoastHoneypotStatus.ps1](audit_scripts/Get-KerberoastHoneypotStatus.ps1)
+
+```powershell
+# Get-KerberoastHoneypotStatus.ps1
+# Description: Audits the existence, SPN, AdminCount, and logon restrictions of the Kerberoasting honeypot account.
+# Target Engine: Windows PowerShell 5.1
+
+Import-Module ActiveDirectory
+
+Write-Host "--- Auditing Kerberoasting Honeypot Configuration ---" -ForegroundColor Cyan
+
+$HoneypotName = "krbtgt_honey"
+$HoneypotSPN = "MSSQLSvc/sql-backup-prod.domain.local:1433"
+
+# 1. Retrieve the honeypot account
+$User = Get-ADUser -Filter "SamAccountName -eq '$HoneypotName'" -Properties servicePrincipalName, adminCount, LogonWorkstations
+
+if (-not $User) {
+    Write-Host "[-] Decoy user account '$HoneypotName' does not exist." -ForegroundColor Red
+    exit 1
+}
+
+$IsCompliant = $true
+
+# 2. Verify SPN is registered
+$SPNExists = $User.servicePrincipalName | Where-Object { $_ -eq $HoneypotSPN }
+if ($SPNExists) {
+    Write-Host "[+] Decoy SPN '$HoneypotSPN' is registered on '$HoneypotName'." -ForegroundColor Green
+} else {
+    Write-Host "[!] Decoy SPN '$HoneypotSPN' is NOT registered on '$HoneypotName'." -ForegroundColor Red
+    $IsCompliant = $false
+}
+
+# 3. Verify AdminCount is set to 1
+if ($User.adminCount -eq 1) {
+    Write-Host "[+] AdminCount is set to 1 (deceptive marker active)." -ForegroundColor Green
+} else {
+    Write-Host "[!] AdminCount is NOT set to 1 on '$HoneypotName'." -ForegroundColor Red
+    $IsCompliant = $false
+}
+
+# 4. Verify LogonWorkstations restriction
+if ($User.LogonWorkstations -like "*HONEYPOT-VOID-HOST*") {
+    Write-Host "[+] Logon restrictions enforced (LogonWorkstations contains 'HONEYPOT-VOID-HOST')." -ForegroundColor Green
+} else {
+    Write-Host "[!] Logon restrictions NOT enforced on '$HoneypotName' (LogonWorkstations: '$($User.LogonWorkstations)')." -ForegroundColor Red
+    $IsCompliant = $false
+}
+
+if ($IsCompliant) {
+    Write-Host "[+] Secure: Kerberoasting Honeypot is fully configured and active." -ForegroundColor Green
+    exit 0
+} else {
+    Write-Host "[-] Non-Compliant: Kerberoasting Honeypot configurations are incomplete." -ForegroundColor Red
+    exit 1
+}
+```
+
+---
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-siem-alerting-and-query-configurations"></div>
+## SIEM Alerting and Query Configurations
+
+Use these reference detection logic configurations to alert on the honeypot and correlate standard ticket request events.
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-1-honeypot-access-alerts-high-severity---zero-false-positives"></div>
+### 1. Honeypot Access Alerts (High Severity - Zero False Positives)
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-splunk-query"></div>
+#### Splunk Query
+```splunk
+index=security EventCode=4769 ServiceName="sql-backup-prod"
+| table _time, TargetUserName, IpAddress, ServiceName, TicketEncryptionType
+```
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-microsoft-sentinel-kql-query"></div>
+#### Microsoft Sentinel / KQL Query
+```kql
+SecurityEvent
+| where EventID == 4769
+| where ServiceName has "sql-backup-prod"
+| project TimeGenerated, TargetUserName, IpAddress, ServiceName, TicketEncryptionType
+```
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-2-anomalous-kerberoasting-request-activity-medium-severity"></div>
+### 2. Anomalous Kerberoasting Request Activity (Medium Severity)
+
+Detects users requesting a high volume of RC4 service tickets in a short period (potential Kerberoasting scans).
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-splunk-query"></div>
+#### Splunk Query
+```splunk
+index=security EventCode=4769 TicketEncryptionType="0x17" NOT (ServiceName="*$")
+| stats dc(ServiceName) as UniqueServicesRequested, values(ServiceName) as ServicesRequested by _time, TargetUserName, IpAddress
+| where UniqueServicesRequested > 5
+```
+
+---
+
+<div id="05-logging-monitoring-implement-kerberoasting-honeypot-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R48 (Audit policy configuration and anomaly detection)
+* **Active Directory Security Guide**: Detecting Kerberoasting Activity and Creating Service Account Honeypots (Sean Metcalf)
+* **MITRE ATT&CK**: Technique T1558.003 (Steal or Forge Kerberos Tickets: Kerberoasting)
 
 
 <div style="page-break-before: always;"></div>
@@ -34833,6 +35145,7 @@ This phase focuses on isolating credentials inside memory and network packets to
 ### Logging & Monitoring Requirements
 * **[REQ-LOG-003 - Deploy and Harden Microsoft Sysmon](#05-logging-monitoring-deploy-and-harden-sysmon-md)**: Deploys and hardens Microsoft Sysmon to detect advanced host-based anomalies.
 * **[REQ-LOG-004 - Configure Secure SIEM Log Shipping](#05-logging-monitoring-configure-siem-log-shipping-md)**: Enforces secure, encrypted SIEM log shipping for central log correlation.
+* **[REQ-LOG-005 - Configure Kerberoasting Honeypots and SIEM Detection Rules](#05-logging-monitoring-implement-kerberoasting-honeypot-md)**: Configures decoy accounts and SIEM alerts to capture Kerberoasting attacks.
 
 <div id="roadmap-implementation-plan-md-paw-requirements"></div>
 ### PAW Requirements
