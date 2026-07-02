@@ -133,6 +133,7 @@
     * [REQ-PAW-029 - Configure System Administrative Templates for PAWs](07-paws/configure-system-administrative-templates.md)
     * [REQ-PAW-030 - Enable Secure Boot for PAWs](07-paws/enable-secure-boot.md)
     * [REQ-PAW-031 - Enforce Smart Card Logon for PAWs](07-paws/enforce-smartcard-logon-paws.md)
+    * [REQ-PAW-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](07-paws/disable-unused-features.md)
 ## Module 8: Endpoint Hardening
 * [Module 8: Endpoint Hardening](08-endpoints/README.md)
     * [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](08-endpoints/harden-network-and-name-resolution.md)
@@ -166,6 +167,7 @@
     * [REQ-END-029 - Configure Untrusted Font Blocking](08-endpoints/configure-untrusted-font-blocking.md)
     * [REQ-END-030 - Configure svchost.exe Mitigation Options](08-endpoints/configure-svchost-mitigation.md)
     * [REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](08-endpoints/enable-kernel-shadow-stacks.md)
+    * [REQ-END-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](08-endpoints/disable-unused-features.md)
 
 ## Implementation Roadmap
 * [Implementation Plan and Prioritized Roadmap](roadmap/implementation-plan.md)

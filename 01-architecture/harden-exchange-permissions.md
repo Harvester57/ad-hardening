@@ -139,7 +139,7 @@ foreach ($groupName in $TargetGroups) {
         $TargetSids += $sid
     }
     catch {
-        # Group not present in domain
+        Write-Verbose "Group '$groupName' not found in Active Directory."
     }
 }
 

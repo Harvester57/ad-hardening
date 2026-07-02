@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 5457d6c | Generated: June 29, 2026</span>
+      <span>Commit: 23e0551 | Generated: July 02, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -39,7 +39,7 @@ pdf_options:
     <li>Tier 2 Client Workstations: Windows 10 and above</li>
   </ul>
   <hr>
-  <p><em>Generated dynamically on: June 29, 2026</em></p>
+  <p><em>Generated dynamically on: July 02, 2026</em></p>
 </div>
 
 <div id="README-md"></div>
@@ -1502,7 +1502,7 @@ foreach ($groupName in $TargetGroups) {
         $TargetSids += $sid
     }
     catch {
-        # Group not present in domain
+        Write-Verbose "Group '$groupName' not found in Active Directory."
     }
 }
 
@@ -17854,6 +17854,10 @@ This directory contains the physical isolation policies and operating system sec
 31. **[REQ-PAW-031 - Enforce Smart Card Logon for PAWs](#07-paws-enforce-smartcard-logon-paws-md)**
     Enforces the 'Interactive logon: Require smart card' GPO policy locally to suppress username/password fields and force hardware-bound authentication.
 
+32. **[REQ-PAW-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](#07-paws-disable-unused-features-md)**
+    Disables legacy, unused Windows optional features, including PowerShell 2.0, .NET Framework 3.5, and SMBv1 to minimize the workstation attack surface.
+
+
 
 
 
@@ -25440,6 +25444,202 @@ if ($Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="07-paws-disable-unused-features-md"></div>
+
+<div id="07-paws-disable-unused-features-md-req-paw-032-disable-unused-windows-features-and-powershell-20-engine"></div>
+# [REQ-PAW-032] Disable Unused Windows Features and PowerShell 2.0 Engine
+
+<div id="07-paws-disable-unused-features-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 hosts).
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional.
+
+---
+
+<div id="07-paws-disable-unused-features-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path (PowerShell 2.0 Compatibility)**: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows PowerShell`
+  * **Registry Location (PowerShell 2.0 Compatibility)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\PowerShell\PowerShellV2`
+  * **Feature Disablement**: Deployed via Group Policy Startup Script or PowerShell Desired State Configuration (DSC) using DISM.
+
+---
+
+<div id="07-paws-disable-unused-features-md-rationale"></div>
+## Rationale
+To enforce strict isolation and minimize the attack surface of Tier 0 Privileged Access Workstations, all unnecessary legacy protocols, optional features, and runtime engines must be disabled. 
+
+1. **PowerShell 2.0 Engine**: Legacy PowerShell 2.0 does not support modern logging, transcription, or security monitoring mechanisms such as the Antimalware Scan Interface (AMSI). Attackers leverage "downgrade attacks" by executing PowerShell scripts using the `-version 2.0` parameter to bypass script block logging and security tooling. Disabling the engine and its parent runtimes eliminates this bypass vector.
+2. **.NET Framework 3.5**: The .NET 3.5 Framework includes the runtime files for .NET 2.0 and 3.0. PowerShell 2.0 requires .NET 2.0/3.5 to run. Disabling `.NET Framework 3.5` removes legacy runtime binaries that are susceptible to downgrade attacks and removes support for older, unpatched software.
+3. **SMBv1 Protocol**: The legacy SMBv1 protocol is cryptographically weak, lacks authentication integrity protection, and has been the target of catastrophic remote code execution attacks (such as EternalBlue). Leaving the SMBv1 driver active allows relaying and man-in-the-middle attacks.
+4. **Internet Explorer 11**: Internet Explorer contains obsolete MSHTML render engine components. Disabling this legacy browser reduces vulnerability to web-based code execution.
+5. **Work Folders, XPS, DirectPlay, and Client Protocols**: Services and tools such as Work Folders, XPS Viewer, DirectPlay, Telnet Client, TFTP Client, and Simple TCP/IP Services contain legacy network parsers and protocols that are completely unnecessary for a secure administrative system.
+6. **WSL and Windows Sandbox**: Virtualization layers such as the Windows Subsystem for Linux (WSL) and Windows Sandbox allow the execution of unmonitored binaries, containers, and Linux utilities. On a PAW, these components present an unacceptable audit-bypass risk and must be disabled.
+
+---
+
+<div id="07-paws-disable-unused-features-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Script Dependencies**: Any administrative scripts that depend on .NET Framework 2.0/3.0/3.5 will fail. All internal scripts must be updated to run on .NET 4.8 or modern .NET (Core) runtimes.
+* **Legacy Management Software**: Old configuration managers or printers that require SMBv1 client capabilities to mount file shares will fail to connect.
+* **Developer Tools**: Disabling WSL and Windows Sandbox on PAWs prevents the use of localized Docker configurations or container tests on the administrative device. PAWs must remain dedicated to administration, and developer workloads must be redirected to standard development endpoints.
+
+---
+
+<div id="07-paws-disable-unused-features-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-disable-unused-features-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+<div id="07-paws-disable-unused-features-md-step-1-disable-powershell-20-compatibility-policy"></div>
+#### Step 1: Disable PowerShell 2.0 Compatibility Policy
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
+2. Edit the target PAWs GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows PowerShell`
+4. Configure the following setting:
+   * **Policy**: `Turn on PowerShell 2.0 Compatibility Mode`
+   * **Setting**: `Disabled`
+5. Link the GPO to the PAWs Organizational Unit (OU).
+
+<div id="07-paws-disable-unused-features-md-step-2-deploy-feature-disablement-startup-script"></div>
+#### Step 2: Deploy Feature Disablement Startup Script
+Because Windows Optional Features are managed via DISM/Packages and lack direct GPO settings for feature removal, deploy the disablement script as a Computer Startup script:
+1. In the same GPO, navigate to:
+   `Computer Configuration\Policies\Windows Settings\Scripts (Startup/Shutdown)`
+2. Double-click **Startup**, click the **PowerShell Scripts** tab.
+3. Add the `Disable-PawUnusedFeatures.ps1` script to execute on system startup.
+
+---
+
+<div id="07-paws-disable-unused-features-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally or run it as a startup script.
+
+[Download Script: Disable-PawUnusedFeatures.ps1](implementation_scripts/Disable-PawUnusedFeatures.ps1)
+
+```powershell
+# Disable-PawUnusedFeatures.ps1
+# Description: Disables unused legacy features, .NET 3.5, and PowerShell 2.0 on the local PAW system.
+
+Write-Host "Disabling unused legacy features and PowerShell 2.0..." -ForegroundColor Cyan
+
+# Check if running as administrator
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Error "This script must be run as an Administrator."
+    exit 1
+}
+
+# Features to disable (Client OS DISM feature names)
+$Features = @(
+    "MicrosoftWindowsPowerShellV2",
+    "MicrosoftWindowsPowerShellV2Root",
+    "NetFx3",                                # .NET Framework 3.5
+    "SMB1Protocol",                          # SMBv1 Client
+    "Internet-Explorer-Optional-amd64",      # Internet Explorer 11
+    "WorkFolders-Client",                    # Work Folders Client
+    "Xps-Viewer-Dependency",                 # XPS Viewer
+    "DirectPlay",                            # DirectPlay
+    "TelnetClient",                          # Telnet Client
+    "TFTP",                                  # TFTP Client
+    "SimpleTCP",                             # Simple TCP/IP Services
+    "Microsoft-Windows-Subsystem-Linux",     # WSL (specifically disabled on PAWs)
+    "Containers-DisposableClientVM"          # Windows Sandbox (specifically disabled on PAWs)
+)
+
+foreach ($Feature in $Features) {
+    $State = Get-WindowsOptionalFeature -Online -FeatureName $Feature -ErrorAction SilentlyContinue
+    if ($null -ne $State) {
+        if ($State.State -eq "Enabled" -or $State.State -eq "EnabledPendingRestart") {
+            Write-Host "[*] Disabling feature: $Feature..." -ForegroundColor Yellow
+            Disable-WindowsOptionalFeature -Online -FeatureName $Feature -NoRestart -ErrorAction SilentlyContinue | Out-Null
+            Write-Host "[+] Feature '$Feature' has been disabled." -ForegroundColor Green
+        } else {
+            Write-Host "[~] Feature '$Feature' is already disabled." -ForegroundColor Gray
+        }
+    } else {
+        Write-Host "[~] Feature '$Feature' is not present in this Windows image." -ForegroundColor Gray
+    }
+}
+
+Write-Host "Optional features configuration completed." -ForegroundColor Green
+```
+
+*To verify the state of unused features:*
+
+[Download Script: Get-PawUnusedFeaturesStatus.ps1](audit_scripts/Get-PawUnusedFeaturesStatus.ps1)
+
+```powershell
+# Get-PawUnusedFeaturesStatus.ps1
+# Description: Audits the installation state of unused legacy features on the local PAW system.
+
+Write-Host "--- Auditing Unused Windows Features ---" -ForegroundColor Cyan
+
+# Check if running as administrator
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Error "This script must be run as an Administrator."
+    exit 1
+}
+
+$script:Vulnerable = $false
+
+# Features to check (Client OS DISM feature names)
+$Features = @(
+    "MicrosoftWindowsPowerShellV2",
+    "MicrosoftWindowsPowerShellV2Root",
+    "NetFx3",                                # .NET Framework 3.5
+    "SMB1Protocol",                          # SMBv1 Client
+    "Internet-Explorer-Optional-amd64",      # Internet Explorer 11
+    "WorkFolders-Client",                    # Work Folders Client
+    "Xps-Viewer-Dependency",                 # XPS Viewer
+    "DirectPlay",                            # DirectPlay
+    "TelnetClient",                          # Telnet Client
+    "TFTP",                                  # TFTP Client
+    "SimpleTCP",                             # Simple TCP/IP Services
+    "Microsoft-Windows-Subsystem-Linux",     # WSL (specifically disabled on PAWs)
+    "Containers-DisposableClientVM"          # Windows Sandbox (specifically disabled on PAWs)
+)
+
+foreach ($Feature in $Features) {
+    $State = Get-WindowsOptionalFeature -Online -FeatureName $Feature -ErrorAction SilentlyContinue
+    if ($null -ne $State) {
+        $IsEnabled = ($State.State -eq "Enabled" -or $State.State -eq "EnabledPendingRestart")
+        $Color = if (-not $IsEnabled) { "Green" } else { "Red" }
+        Write-Host "    - Feature: $Feature | State: $($State.State) (Expected: Disabled)" -ForegroundColor $Color
+        
+        if ($IsEnabled) {
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - Feature: $Feature | Not Present (Compliant)" -ForegroundColor Green
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-disable-unused-features-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **DoD Windows 11 Computer STIG v2r6**: V-220728 (PowerShell 2.0), V-253286 (SMBv1), V-219524 (.NET Framework 3.5)
+* **ANSSI AD Hardening Guide**: Section on Endpoint Minimization and disabling legacy protocols
+* **CIS Microsoft Windows Client Benchmark**: Section 18.9 (PowerShell restrictions)
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="08-endpoints-README-md"></div>
 
 <div id="08-endpoints-README-md-module-8-endpoint-hardening"></div>
@@ -25544,6 +25744,10 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 31. **[REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](#08-endpoints-enable-kernel-shadow-stacks-md)**
     Configures Kernel-mode Hardware-enforced Stack Protection to enforce hardware-backed control-flow integrity and mitigate kernel Return-Oriented Programming (ROP) execution hijacks.
+
+32. **[REQ-END-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](#08-endpoints-disable-unused-features-md)**
+    Disables legacy, unused Windows optional features, including PowerShell 2.0, .NET Framework 3.5, and SMBv1 to minimize the client attack surface.
+
 
 
 
@@ -33945,6 +34149,281 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="08-endpoints-disable-unused-features-md"></div>
+
+<div id="08-endpoints-disable-unused-features-md-req-end-032-disable-unused-windows-features-and-powershell-20-engine"></div>
+# [REQ-END-032] Disable Unused Windows Features and PowerShell 2.0 Engine
+
+<div id="08-endpoints-disable-unused-features-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-disable-unused-features-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path (PowerShell 2.0 Compatibility)**: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows PowerShell`
+  * **Registry Location (PowerShell 2.0 Compatibility)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\PowerShell\PowerShellV2`
+  * **Feature Disablement**: Deployed via Group Policy Startup Script or PowerShell Desired State Configuration (DSC) using DISM/ServerManager.
+
+---
+
+<div id="08-endpoints-disable-unused-features-md-rationale"></div>
+## Rationale
+To minimize the attack surface of standard client endpoints and member servers, all unnecessary legacy protocols, optional features, and runtime engines must be disabled:
+
+1. **PowerShell 2.0 Engine**: Legacy PowerShell 2.0 does not support modern logging, transcription, or security monitoring mechanisms such as the Antimalware Scan Interface (AMSI). Attackers leverage "downgrade attacks" by executing PowerShell scripts using the `-version 2.0` parameter to bypass script block logging and security tooling. Disabling the engine and its parent runtimes eliminates this bypass vector.
+2. **.NET Framework 3.5**: The .NET 3.5 Framework includes the runtime files for .NET 2.0 and 3.0. PowerShell 2.0 requires .NET 2.0/3.5 to run. Disabling `.NET Framework 3.5` removes legacy runtime binaries that are susceptible to downgrade attacks and removes support for older, unpatched software.
+3. **SMBv1 Protocol**: The legacy SMBv1 protocol is cryptographically weak, lacks authentication integrity protection, and has been the target of catastrophic remote code execution attacks (such as EternalBlue). Leaving the SMBv1 driver active allows relaying and man-in-the-middle attacks.
+4. **Internet Explorer 11**: Internet Explorer contains obsolete MSHTML render engine components. Disabling this legacy browser reduces vulnerability to web-based code execution.
+5. **Work Folders, XPS, DirectPlay, and Client Protocols**: Services and tools such as Work Folders, XPS Viewer, DirectPlay, Telnet Client, TFTP Client, and Simple TCP/IP Services contain legacy network parsers and protocols that are completely unnecessary for a secure administrative system.
+
+---
+
+<div id="08-endpoints-disable-unused-features-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Script Dependencies**: Any administrative scripts that depend on .NET Framework 2.0/3.0/3.5 will fail. All internal scripts must be updated to run on .NET 4.8 or modern .NET (Core) runtimes.
+* **Legacy Management Software**: Old configuration managers or printers that require SMBv1 client capabilities to mount file shares will fail to connect.
+* **Compatibility Exclusions**: Windows Subsystem for Linux (WSL) and Windows Sandbox are excluded from this baseline on standard client endpoints, as they may be required for development and testing activities by standard users.
+
+---
+
+<div id="08-endpoints-disable-unused-features-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-disable-unused-features-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+<div id="08-endpoints-disable-unused-features-md-step-1-disable-powershell-20-compatibility-policy"></div>
+#### Step 1: Disable PowerShell 2.0 Compatibility Policy
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
+2. Edit the target endpoints GPO (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows PowerShell`
+4. Configure the following setting:
+   * **Policy**: `Turn on PowerShell 2.0 Compatibility Mode`
+   * **Setting**: `Disabled`
+5. Link the GPO to the Endpoints and Member Servers OUs.
+
+<div id="08-endpoints-disable-unused-features-md-step-2-deploy-feature-disablement-startup-script"></div>
+#### Step 2: Deploy Feature Disablement Startup Script
+Because Windows Optional Features are managed via DISM/Packages and lack direct GPO settings for feature removal, deploy the disablement script as a Computer Startup script:
+1. In the same GPO, navigate to:
+   `Computer Configuration\Policies\Windows Settings\Scripts (Startup/Shutdown)`
+2. Double-click **Startup**, click the **PowerShell Scripts** tab.
+3. Add the `Disable-UnusedFeatures.ps1` script to execute on system startup.
+
+---
+
+<div id="08-endpoints-disable-unused-features-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Use this method to apply the setting locally or run it as a startup script.
+
+[Download Script: Disable-UnusedFeatures.ps1](implementation_scripts/Disable-UnusedFeatures.ps1)
+
+```powershell
+# Disable-UnusedFeatures.ps1
+# Description: Disables unused legacy features, .NET 3.5, and PowerShell 2.0 on the local system.
+
+Write-Host "Disabling unused legacy features and PowerShell 2.0..." -ForegroundColor Cyan
+
+# Check if running as administrator
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Error "This script must be run as an Administrator."
+    exit 1
+}
+
+# Feature lists
+$DismFeatures = @(
+    "MicrosoftWindowsPowerShellV2",
+    "MicrosoftWindowsPowerShellV2Root",
+    "NetFx3",                                # .NET Framework 3.5
+    "SMB1Protocol",                          # SMBv1 Client
+    "Internet-Explorer-Optional-amd64",      # Internet Explorer 11
+    "WorkFolders-Client",                    # Work Folders Client
+    "Xps-Viewer-Dependency",                 # XPS Viewer
+    "DirectPlay",                            # DirectPlay
+    "TelnetClient",                          # Telnet Client
+    "TFTP",                                  # TFTP Client
+    "SimpleTCP"                              # Simple TCP/IP Services
+)
+
+$ServerFeatures = @(
+    "PowerShell-V2",
+    "NET-Framework-Core",
+    "FS-SMB1",
+    "Internet-Explorer-Optional-amd64",
+    "WorkFolders-Client",
+    "Xps-Viewer-Dependency",
+    "DirectPlay",
+    "Telnet-Client",
+    "TFTP-Client",
+    "Simple-TCPIP"
+)
+
+if (Get-Command Get-WindowsFeature -ErrorAction SilentlyContinue) {
+    # Windows Server path
+    foreach ($FeatName in $ServerFeatures) {
+        $Feat = Get-WindowsFeature -Name $FeatName -ErrorAction SilentlyContinue
+        if ($null -ne $Feat) {
+            if ($Feat.Installed) {
+                Write-Host "[*] Removing Server feature: $FeatName..." -ForegroundColor Yellow
+                Uninstall-WindowsFeature -Name $FeatName -ErrorAction SilentlyContinue | Out-Null
+                Write-Host "[+] Feature '$FeatName' uninstalled." -ForegroundColor Green
+            } else {
+                Write-Host "[~] Feature '$FeatName' is already uninstalled." -ForegroundColor Gray
+            }
+        } else {
+            # Try DISM fallback
+            $DismFeat = Get-WindowsOptionalFeature -Online -FeatureName $FeatName -ErrorAction SilentlyContinue
+            if ($null -ne $DismFeat) {
+                if ($DismFeat.State -eq "Enabled" -or $DismFeat.State -eq "EnabledPendingRestart") {
+                    Write-Host "[*] Disabling optional feature: $FeatName..." -ForegroundColor Yellow
+                    Disable-WindowsOptionalFeature -Online -FeatureName $FeatName -NoRestart -ErrorAction SilentlyContinue | Out-Null
+                    Write-Host "[+] Feature '$FeatName' disabled." -ForegroundColor Green
+                } else {
+                    Write-Host "[~] Feature '$FeatName' is already disabled." -ForegroundColor Gray
+                }
+            } else {
+                Write-Host "[~] Feature '$FeatName' is not present in the system." -ForegroundColor Gray
+            }
+        }
+    }
+} else {
+    # Windows Client path
+    foreach ($Feature in $DismFeatures) {
+        $State = Get-WindowsOptionalFeature -Online -FeatureName $Feature -ErrorAction SilentlyContinue
+        if ($null -ne $State) {
+            if ($State.State -eq "Enabled" -or $State.State -eq "EnabledPendingRestart") {
+                Write-Host "[*] Disabling feature: $Feature..." -ForegroundColor Yellow
+                Disable-WindowsOptionalFeature -Online -FeatureName $Feature -NoRestart -ErrorAction SilentlyContinue | Out-Null
+                Write-Host "[+] Feature '$Feature' has been disabled." -ForegroundColor Green
+            } else {
+                Write-Host "[~] Feature '$Feature' is already disabled." -ForegroundColor Gray
+            }
+        } else {
+            Write-Host "[~] Feature '$Feature' is not present in this Windows image." -ForegroundColor Gray
+        }
+    }
+}
+
+Write-Host "Optional features configuration completed." -ForegroundColor Green
+```
+
+*To verify the state of unused features:*
+
+[Download Script: Get-UnusedFeaturesStatus.ps1](audit_scripts/Get-UnusedFeaturesStatus.ps1)
+
+```powershell
+# Get-UnusedFeaturesStatus.ps1
+# Description: Audits the installation state of unused legacy features on the local system.
+
+Write-Host "--- Auditing Unused Windows Features ---" -ForegroundColor Cyan
+
+# Check if running as administrator
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Error "This script must be run as an Administrator."
+    exit 1
+}
+
+$script:Vulnerable = $false
+
+$DismFeatures = @(
+    "MicrosoftWindowsPowerShellV2",
+    "MicrosoftWindowsPowerShellV2Root",
+    "NetFx3",                                # .NET Framework 3.5
+    "SMB1Protocol",                          # SMBv1 Client
+    "Internet-Explorer-Optional-amd64",      # Internet Explorer 11
+    "WorkFolders-Client",                    # Work Folders Client
+    "Xps-Viewer-Dependency",                 # XPS Viewer
+    "DirectPlay",                            # DirectPlay
+    "TelnetClient",                          # Telnet Client
+    "TFTP",                                  # TFTP Client
+    "SimpleTCP"                              # Simple TCP/IP Services
+)
+
+$ServerFeatures = @(
+    "PowerShell-V2",
+    "NET-Framework-Core",
+    "FS-SMB1",
+    "Internet-Explorer-Optional-amd64",
+    "WorkFolders-Client",
+    "Xps-Viewer-Dependency",
+    "DirectPlay",
+    "Telnet-Client",
+    "TFTP-Client",
+    "Simple-TCPIP"
+)
+
+if (Get-Command Get-WindowsFeature -ErrorAction SilentlyContinue) {
+    # Windows Server path
+    foreach ($FeatName in $ServerFeatures) {
+        $Feat = Get-WindowsFeature -Name $FeatName -ErrorAction SilentlyContinue
+        if ($null -ne $Feat) {
+            $Color = if ($Feat.Installed -eq $false) { "Green" } else { "Red" }
+            Write-Host "    - Feature: $FeatName | Installed: $($Feat.Installed) (Expected: False)" -ForegroundColor $Color
+            if ($Feat.Installed) {
+                $script:Vulnerable = $true
+            }
+        } else {
+            # Try DISM fallback
+            $DismFeat = Get-WindowsOptionalFeature -Online -FeatureName $FeatName -ErrorAction SilentlyContinue
+            if ($null -ne $DismFeat) {
+                $IsEnabled = ($DismFeat.State -eq "Enabled" -or $DismFeat.State -eq "EnabledPendingRestart")
+                $Color = if (-not $IsEnabled) { "Green" } else { "Red" }
+                Write-Host "    - Feature: $FeatName (DISM) | State: $($DismFeat.State) (Expected: Disabled)" -ForegroundColor $Color
+                if ($IsEnabled) {
+                    $script:Vulnerable = $true
+                }
+            } else {
+                Write-Host "    - Feature: $FeatName | Not Present (Compliant)" -ForegroundColor Green
+            }
+        }
+    }
+} else {
+    # Windows Client path
+    foreach ($Feature in $DismFeatures) {
+        $State = Get-WindowsOptionalFeature -Online -FeatureName $Feature -ErrorAction SilentlyContinue
+        if ($null -ne $State) {
+            $IsEnabled = ($State.State -eq "Enabled" -or $State.State -eq "EnabledPendingRestart")
+            $Color = if (-not $IsEnabled) { "Green" } else { "Red" }
+            Write-Host "    - Feature: $Feature | State: $($State.State) (Expected: Disabled)" -ForegroundColor $Color
+            
+            if ($IsEnabled) {
+                $script:Vulnerable = $true
+            }
+        } else {
+            Write-Host "    - Feature: $Feature | Not Present (Compliant)" -ForegroundColor Green
+        }
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-disable-unused-features-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **DoD Windows 11 Computer STIG v2r6**: V-220728 (PowerShell 2.0), V-253286 (SMBv1), V-219524 (.NET Framework 3.5)
+* **ANSSI AD Hardening Guide**: Section on Endpoint Minimization and disabling legacy protocols
+* **CIS Microsoft Windows Client Benchmark**: Section 18.9 (PowerShell restrictions)
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="roadmap-implementation-plan-md"></div>
 
 <div id="roadmap-implementation-plan-md-implementation-plan-and-prioritized-roadmap"></div>
@@ -34243,6 +34722,7 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-PAW-027 - Configure Windows Defender Firewall and Block LOLBins for PAWs](#07-paws-configure-windows-firewall-md)**: Firewalls and LOLBin traffic limits.
 * **[REQ-PAW-028 - Disable Unnecessary System Services for PAWs](#07-paws-disable-unnecessary-system-services-md)**: Reduces active service footprints.
 * **[REQ-PAW-029 - Configure System Administrative Templates for PAWs](#07-paws-configure-system-administrative-templates-md)**: Custom registry rules.
+* **[REQ-PAW-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](#07-paws-disable-unused-features-md)**: Disables legacy .NET 3.5, PowerShell 2.0, SMBv1, and unused platform features.
 
 <div id="roadmap-implementation-plan-md-endpoint-requirements"></div>
 ### Endpoint Requirements
@@ -34262,6 +34742,7 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-END-029 - Configure Untrusted Font Blocking](#08-endpoints-configure-untrusted-font-blocking-md)**: Disables third-party font libraries.
 * **[REQ-END-030 - Configure svchost.exe Mitigation Options](#08-endpoints-configure-svchost-mitigation-md)**: Restricts binary loading to Microsoft-signed code.
 * **[REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](#08-endpoints-enable-kernel-shadow-stacks-md)**: Mitigates Return-Oriented Programming (ROP) exploits.
+* **[REQ-END-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](#08-endpoints-disable-unused-features-md)**: Disables legacy .NET 3.5, PowerShell 2.0, SMBv1, and unused optional features.
 
 ---
 

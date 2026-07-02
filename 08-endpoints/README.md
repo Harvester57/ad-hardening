@@ -99,3 +99,7 @@ To prevent initial access and lateral movement, the following unitary technical 
 31. **[REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](enable-kernel-shadow-stacks.md)**
     Configures Kernel-mode Hardware-enforced Stack Protection to enforce hardware-backed control-flow integrity and mitigate kernel Return-Oriented Programming (ROP) execution hijacks.
 
+32. **[REQ-END-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](disable-unused-features.md)**
+    Disables legacy, unused Windows optional features, including PowerShell 2.0, .NET Framework 3.5, and SMBv1 to minimize the client attack surface.
+
+

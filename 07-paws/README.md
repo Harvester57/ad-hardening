@@ -97,4 +97,8 @@ This directory contains the physical isolation policies and operating system sec
 31. **[REQ-PAW-031 - Enforce Smart Card Logon for PAWs](enforce-smartcard-logon-paws.md)**
     Enforces the 'Interactive logon: Require smart card' GPO policy locally to suppress username/password fields and force hardware-bound authentication.
 
+32. **[REQ-PAW-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](disable-unused-features.md)**
+    Disables legacy, unused Windows optional features, including PowerShell 2.0, .NET Framework 3.5, and SMBv1 to minimize the workstation attack surface.
+
+
 
