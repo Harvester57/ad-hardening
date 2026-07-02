@@ -8,29 +8,17 @@ $FWProfiles = @("Domain", "Private", "Public")
 foreach ($FWProfile in $FWProfiles) {
     $LogFile = "$env:windir\System32\logfiles\firewall\$($FWProfile.ToLower())fw.log"
     
-    if ($FWProfile -eq "Public") {
-        Set-NetFirewallProfile -Profile $FWProfile `
-            -Enabled True `
-            -DefaultInboundAction Block `
-            -DefaultOutboundAction Allow `
-            -NotifyOnListen False `
-            -AllowLocalPolicyMerge False `
-            -AllowLocalIPsecPolicyMerge False `
-            -LogFileName $LogFile `
-            -LogMaxSizeKilobytes 16384 `
-            -LogBlocked True `
-            -LogAllowed True | Out-Null
-    } else {
-        Set-NetFirewallProfile -Profile $FWProfile `
-            -Enabled True `
-            -DefaultInboundAction Block `
-            -DefaultOutboundAction Allow `
-            -NotifyOnListen False `
-            -LogFileName $LogFile `
-            -LogMaxSizeKilobytes 16384 `
-            -LogBlocked True `
-            -LogAllowed True | Out-Null
-    }
+    Set-NetFirewallProfile -Profile $FWProfile `
+        -Enabled True `
+        -DefaultInboundAction Block `
+        -DefaultOutboundAction Allow `
+        -NotifyOnListen False `
+        -AllowLocalPolicyMerge False `
+        -AllowLocalIPsecPolicyMerge False `
+        -LogFileName $LogFile `
+        -LogMaxSizeKilobytes 16384 `
+        -LogBlocked True `
+        -LogAllowed False | Out-Null
     Write-Host "[+] Profile '$FWProfile' configured with logging and defaults." -ForegroundColor Green
 }
 
@@ -51,7 +39,15 @@ $Lolbins = @(
     @{ Name = "wscript.exe (x64)"; Path = "%SystemRoot%\System32\wscript.exe" },
     @{ Name = "wscript.exe (x86)"; Path = "%SystemRoot%\SysWOW64\wscript.exe" },
     @{ Name = "hh.exe (x64)"; Path = "%SystemRoot%\hh.exe" },
-    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" }
+    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" },
+    @{ Name = "calc.exe (x64)"; Path = "%SystemRoot%\System32\calc.exe" },
+    @{ Name = "calc.exe (x86)"; Path = "%SystemRoot%\SysWOW64\calc.exe" },
+    @{ Name = "notepad.exe (x64)"; Path = "%SystemRoot%\System32\notepad.exe" },
+    @{ Name = "notepad.exe (x86)"; Path = "%SystemRoot%\SysWOW64\notepad.exe" },
+    @{ Name = "conhost.exe (x64)"; Path = "%SystemRoot%\System32\conhost.exe" },
+    @{ Name = "conhost.exe (x86)"; Path = "%SystemRoot%\SysWOW64\conhost.exe" },
+    @{ Name = "RunScriptHelper.exe (x64)"; Path = "%SystemRoot%\System32\RunScriptHelper.exe" },
+    @{ Name = "RunScriptHelper.exe (x86)"; Path = "%SystemRoot%\SysWOW64\RunScriptHelper.exe" }
 )
 
 Write-Host "Configuring outbound firewall block rules for known LOLBins..." -ForegroundColor Cyan

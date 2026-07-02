@@ -48,22 +48,26 @@ Additionally:
    * **Outbound connections**: `Allow (default)`
    * Click **Customize...** under **Settings**:
      * **Display a notification**: `No`
+     * **Apply local firewall rules**: `No`
+     * **Apply local connection security rules**: `No`
    * Click **Customize...** under **Logging**:
      * **Name**: `%SystemRoot%\System32\logfiles\firewall\domainfw.log`
      * **Size limit (KB)**: `16384`
      * **Log dropped packets**: `Yes`
-     * **Log successful connections**: `Yes`
+     * **Log successful connections**: `No`
 6. Configure the **Private Profile** tab:
    * **Firewall state**: `On (recommended)`
    * **Inbound connections**: `Block (default)`
    * **Outbound connections**: `Allow (default)`
    * Click **Customize...** under **Settings**:
      * **Display a notification**: `No`
+     * **Apply local firewall rules**: `No`
+     * **Apply local connection security rules**: `No`
    * Click **Customize...** under **Logging**:
      * **Name**: `%SystemRoot%\System32\logfiles\firewall\privatefw.log`
      * **Size limit (KB)**: `16384`
      * **Log dropped packets**: `Yes`
-     * **Log successful connections**: `Yes`
+     * **Log successful connections**: `No`
 7. Configure the **Public Profile** tab:
    * **Firewall state**: `On (recommended)`
    * **Inbound connections**: `Block (default)`
@@ -76,12 +80,12 @@ Additionally:
      * **Name**: `%SystemRoot%\System32\logfiles\firewall\publicfw.log`
      * **Size limit (KB)**: `16384`
      * **Log dropped packets**: `Yes`
-     * **Log successful connections**: `Yes`
+     * **Log successful connections**: `No`
 
 #### 2. Create Outbound Rules for Known LOLBins
 1. Navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\Windows Defender Firewall with Advanced Security\Windows Defender Firewall with Advanced Security\Outbound Rules`
-2. Create a new rule for each target LOLBin binary (e.g., mshta.exe, certutil.exe, bitsadmin.exe, regsvr32.exe, rundll32.exe, cscript.exe, wscript.exe, hh.exe):
+2. Create a new rule for each target LOLBin binary (e.g., mshta.exe, certutil.exe, bitsadmin.exe, regsvr32.exe, rundll32.exe, cscript.exe, wscript.exe, hh.exe, calc.exe, notepad.exe, conhost.exe, RunScriptHelper.exe):
    * Right-click **Outbound Rules** and select **New Rule...**
    * **Rule Type**: `Program`
    * **Program**: Choose `This program path` and enter the path matching the binary (both x64 and x86 paths if applicable, e.g., `%SystemRoot%\System32\mshta.exe` and `%SystemRoot%\SysWOW64\mshta.exe`).
@@ -108,29 +112,17 @@ $FWProfiles = @("Domain", "Private", "Public")
 foreach ($FWProfile in $FWProfiles) {
     $LogFile = "$env:windir\System32\logfiles\firewall\$($FWProfile.ToLower())fw.log"
     
-    if ($FWProfile -eq "Public") {
-        Set-NetFirewallProfile -Profile $FWProfile `
-            -Enabled True `
-            -DefaultInboundAction Block `
-            -DefaultOutboundAction Allow `
-            -NotifyOnListen False `
-            -AllowLocalPolicyMerge False `
-            -AllowLocalIPsecPolicyMerge False `
-            -LogFileName $LogFile `
-            -LogMaxSizeKilobytes 16384 `
-            -LogBlocked True `
-            -LogAllowed True | Out-Null
-    } else {
-        Set-NetFirewallProfile -Profile $FWProfile `
-            -Enabled True `
-            -DefaultInboundAction Block `
-            -DefaultOutboundAction Allow `
-            -NotifyOnListen False `
-            -LogFileName $LogFile `
-            -LogMaxSizeKilobytes 16384 `
-            -LogBlocked True `
-            -LogAllowed True | Out-Null
-    }
+    Set-NetFirewallProfile -Profile $FWProfile `
+        -Enabled True `
+        -DefaultInboundAction Block `
+        -DefaultOutboundAction Allow `
+        -NotifyOnListen False `
+        -AllowLocalPolicyMerge False `
+        -AllowLocalIPsecPolicyMerge False `
+        -LogFileName $LogFile `
+        -LogMaxSizeKilobytes 16384 `
+        -LogBlocked True `
+        -LogAllowed False | Out-Null
     Write-Host "[+] Profile '$FWProfile' configured with logging and defaults." -ForegroundColor Green
 }
 
@@ -151,7 +143,15 @@ $Lolbins = @(
     @{ Name = "wscript.exe (x64)"; Path = "%SystemRoot%\System32\wscript.exe" },
     @{ Name = "wscript.exe (x86)"; Path = "%SystemRoot%\SysWOW64\wscript.exe" },
     @{ Name = "hh.exe (x64)"; Path = "%SystemRoot%\hh.exe" },
-    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" }
+    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" },
+    @{ Name = "calc.exe (x64)"; Path = "%SystemRoot%\System32\calc.exe" },
+    @{ Name = "calc.exe (x86)"; Path = "%SystemRoot%\SysWOW64\calc.exe" },
+    @{ Name = "notepad.exe (x64)"; Path = "%SystemRoot%\System32\notepad.exe" },
+    @{ Name = "notepad.exe (x86)"; Path = "%SystemRoot%\SysWOW64\notepad.exe" },
+    @{ Name = "conhost.exe (x64)"; Path = "%SystemRoot%\System32\conhost.exe" },
+    @{ Name = "conhost.exe (x86)"; Path = "%SystemRoot%\SysWOW64\conhost.exe" },
+    @{ Name = "RunScriptHelper.exe (x64)"; Path = "%SystemRoot%\System32\RunScriptHelper.exe" },
+    @{ Name = "RunScriptHelper.exe (x86)"; Path = "%SystemRoot%\SysWOW64\RunScriptHelper.exe" }
 )
 
 Write-Host "Configuring outbound firewall block rules for known LOLBins..." -ForegroundColor Cyan
@@ -214,14 +214,14 @@ function Test-FirewallProfile ($ProfileName, $ExpectMergeLocal, $ExpectMergeIPse
     $LogPathColor = if ($FWProfile.LogFileName -eq $LogPath) { "Green" } else { "Red" }
     $LogSizeColor = if ($FWProfile.LogMaxSizeKilobytes -ge 16384) { "Green" } else { "Red" }
     $LogBlockedColor = if ($FWProfile.LogBlocked -eq $true) { "Green" } else { "Red" }
-    $LogAllowedColor = if ($FWProfile.LogAllowed -eq $true) { "Green" } else { "Red" }
+    $LogAllowedColor = if ($FWProfile.LogAllowed -eq $false) { "Green" } else { "Red" }
     
     Write-Host "    - LogFileName: $($FWProfile.LogFileName) (Expected: $LogPath)" -ForegroundColor $LogPathColor
     Write-Host "    - LogMaxSizeKilobytes: $($FWProfile.LogMaxSizeKilobytes) (Expected: >= 16384)" -ForegroundColor $LogSizeColor
     Write-Host "    - LogBlocked: $($FWProfile.LogBlocked) (Expected: True)" -ForegroundColor $LogBlockedColor
-    Write-Host "    - LogAllowed: $($FWProfile.LogAllowed) (Expected: True)" -ForegroundColor $LogAllowedColor
+    Write-Host "    - LogAllowed: $($FWProfile.LogAllowed) (Expected: False)" -ForegroundColor $LogAllowedColor
     
-    if ($FWProfile.Enabled -ne $true -or $FWProfile.DefaultInboundAction -ne "Block" -or $FWProfile.NotifyOnListen -ne $false -or $FWProfile.LogFileName -ne $LogPath -or $FWProfile.LogMaxSizeKilobytes -lt 16384 -or $FWProfile.LogBlocked -ne $true -or $FWProfile.LogAllowed -ne $true) {
+    if ($FWProfile.Enabled -ne $true -or $FWProfile.DefaultInboundAction -ne "Block" -or $FWProfile.NotifyOnListen -ne $false -or $FWProfile.LogFileName -ne $LogPath -or $FWProfile.LogMaxSizeKilobytes -lt 16384 -or $FWProfile.LogBlocked -ne $true -or $FWProfile.LogAllowed -ne $false) {
         $script:Vulnerable = $true
     }
     
@@ -238,8 +238,8 @@ function Test-FirewallProfile ($ProfileName, $ExpectMergeLocal, $ExpectMergeIPse
 }
 
 Write-Host "Auditing profiles..." -ForegroundColor Gray
-Test-FirewallProfile -ProfileName "Domain" -ExpectMergeLocal $null -ExpectMergeIPsec $null
-Test-FirewallProfile -ProfileName "Private" -ExpectMergeLocal $null -ExpectMergeIPsec $null
+Test-FirewallProfile -ProfileName "Domain" -ExpectMergeLocal $false -ExpectMergeIPsec $false
+Test-FirewallProfile -ProfileName "Private" -ExpectMergeLocal $false -ExpectMergeIPsec $false
 Test-FirewallProfile -ProfileName "Public" -ExpectMergeLocal $false -ExpectMergeIPsec $false
 
 # Audit outbound rules for known LOLBins
@@ -259,7 +259,15 @@ $Lolbins = @(
     @{ Name = "wscript.exe (x64)"; Path = "%SystemRoot%\System32\wscript.exe" },
     @{ Name = "wscript.exe (x86)"; Path = "%SystemRoot%\SysWOW64\wscript.exe" },
     @{ Name = "hh.exe (x64)"; Path = "%SystemRoot%\hh.exe" },
-    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" }
+    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" },
+    @{ Name = "calc.exe (x64)"; Path = "%SystemRoot%\System32\calc.exe" },
+    @{ Name = "calc.exe (x86)"; Path = "%SystemRoot%\SysWOW64\calc.exe" },
+    @{ Name = "notepad.exe (x64)"; Path = "%SystemRoot%\System32\notepad.exe" },
+    @{ Name = "notepad.exe (x86)"; Path = "%SystemRoot%\SysWOW64\notepad.exe" },
+    @{ Name = "conhost.exe (x64)"; Path = "%SystemRoot%\System32\conhost.exe" },
+    @{ Name = "conhost.exe (x86)"; Path = "%SystemRoot%\SysWOW64\conhost.exe" },
+    @{ Name = "RunScriptHelper.exe (x64)"; Path = "%SystemRoot%\System32\RunScriptHelper.exe" },
+    @{ Name = "RunScriptHelper.exe (x86)"; Path = "%SystemRoot%\SysWOW64\RunScriptHelper.exe" }
 )
 
 Write-Host "Auditing outbound firewall rules for known LOLBins..." -ForegroundColor Gray

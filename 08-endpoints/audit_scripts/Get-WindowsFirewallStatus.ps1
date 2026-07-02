@@ -30,14 +30,14 @@ function Test-FirewallProfile ($ProfileName, $ExpectMergeLocal, $ExpectMergeIPse
     $LogPathColor = if ($FWProfile.LogFileName -eq $LogPath) { "Green" } else { "Red" }
     $LogSizeColor = if ($FWProfile.LogMaxSizeKilobytes -ge 16384) { "Green" } else { "Red" }
     $LogBlockedColor = if ($FWProfile.LogBlocked -eq $true) { "Green" } else { "Red" }
-    $LogAllowedColor = if ($FWProfile.LogAllowed -eq $true) { "Green" } else { "Red" }
+    $LogAllowedColor = if ($FWProfile.LogAllowed -eq $false) { "Green" } else { "Red" }
     
     Write-Host "    - LogFileName: $($FWProfile.LogFileName) (Expected: $LogPath)" -ForegroundColor $LogPathColor
     Write-Host "    - LogMaxSizeKilobytes: $($FWProfile.LogMaxSizeKilobytes) (Expected: >= 16384)" -ForegroundColor $LogSizeColor
     Write-Host "    - LogBlocked: $($FWProfile.LogBlocked) (Expected: True)" -ForegroundColor $LogBlockedColor
-    Write-Host "    - LogAllowed: $($FWProfile.LogAllowed) (Expected: True)" -ForegroundColor $LogAllowedColor
+    Write-Host "    - LogAllowed: $($FWProfile.LogAllowed) (Expected: False)" -ForegroundColor $LogAllowedColor
     
-    if ($FWProfile.Enabled -ne $true -or $FWProfile.DefaultInboundAction -ne "Block" -or $FWProfile.NotifyOnListen -ne $false -or $FWProfile.LogFileName -ne $LogPath -or $FWProfile.LogMaxSizeKilobytes -lt 16384 -or $FWProfile.LogBlocked -ne $true -or $FWProfile.LogAllowed -ne $true) {
+    if ($FWProfile.Enabled -ne $true -or $FWProfile.DefaultInboundAction -ne "Block" -or $FWProfile.NotifyOnListen -ne $false -or $FWProfile.LogFileName -ne $LogPath -or $FWProfile.LogMaxSizeKilobytes -lt 16384 -or $FWProfile.LogBlocked -ne $true -or $FWProfile.LogAllowed -ne $false) {
         $script:Vulnerable = $true
     }
     
@@ -54,8 +54,8 @@ function Test-FirewallProfile ($ProfileName, $ExpectMergeLocal, $ExpectMergeIPse
 }
 
 Write-Host "Auditing profiles..." -ForegroundColor Gray
-Test-FirewallProfile -ProfileName "Domain" -ExpectMergeLocal $null -ExpectMergeIPsec $null
-Test-FirewallProfile -ProfileName "Private" -ExpectMergeLocal $null -ExpectMergeIPsec $null
+Test-FirewallProfile -ProfileName "Domain" -ExpectMergeLocal $false -ExpectMergeIPsec $false
+Test-FirewallProfile -ProfileName "Private" -ExpectMergeLocal $false -ExpectMergeIPsec $false
 Test-FirewallProfile -ProfileName "Public" -ExpectMergeLocal $false -ExpectMergeIPsec $false
 
 # Audit outbound rules for known LOLBins
@@ -75,7 +75,15 @@ $Lolbins = @(
     @{ Name = "wscript.exe (x64)"; Path = "%SystemRoot%\System32\wscript.exe" },
     @{ Name = "wscript.exe (x86)"; Path = "%SystemRoot%\SysWOW64\wscript.exe" },
     @{ Name = "hh.exe (x64)"; Path = "%SystemRoot%\hh.exe" },
-    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" }
+    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" },
+    @{ Name = "calc.exe (x64)"; Path = "%SystemRoot%\System32\calc.exe" },
+    @{ Name = "calc.exe (x86)"; Path = "%SystemRoot%\SysWOW64\calc.exe" },
+    @{ Name = "notepad.exe (x64)"; Path = "%SystemRoot%\System32\notepad.exe" },
+    @{ Name = "notepad.exe (x86)"; Path = "%SystemRoot%\SysWOW64\notepad.exe" },
+    @{ Name = "conhost.exe (x64)"; Path = "%SystemRoot%\System32\conhost.exe" },
+    @{ Name = "conhost.exe (x86)"; Path = "%SystemRoot%\SysWOW64\conhost.exe" },
+    @{ Name = "RunScriptHelper.exe (x64)"; Path = "%SystemRoot%\System32\RunScriptHelper.exe" },
+    @{ Name = "RunScriptHelper.exe (x86)"; Path = "%SystemRoot%\SysWOW64\RunScriptHelper.exe" }
 )
 
 Write-Host "Auditing outbound firewall rules for known LOLBins..." -ForegroundColor Gray
