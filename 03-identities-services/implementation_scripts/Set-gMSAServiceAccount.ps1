@@ -20,11 +20,15 @@ $gMSAName = "gmsa-sqlservice"
 $existingMSA = Get-ADServiceAccount -Filter "Name -eq '$gMSAName'"
 
 if (-not $existingMSA) {
-    # Specify the name, DNS, and which principals (servers/DCs) can retrieve the password
+    # Specify the name, DNS, and which principals (member servers running the service) can retrieve the password.
+    # CRITICAL: Do NOT allow user accounts or groups containing users (like Domain Admins or Schema Admins) 
+    # to retrieve the password. Only allow the specific computer account(s) hosting the service.
+    $targetHostComputer = "SQLServerHost$"
+    
     New-ADServiceAccount -Name $gMSAName `
         -DNSHostName "$gMSAName.domain.local" `
         -ManagedPasswordIntervalInDays 30 `
-        -PrincipalsAllowedToRetrieveManagedPassword "Domain Controllers", "Schema Admins"
+        -PrincipalsAllowedToRetrieveManagedPassword $targetHostComputer
         
     Write-Host "[+] gMSA '$gMSAName' created successfully." -ForegroundColor Green
 } else {
