@@ -3,10 +3,18 @@
 
 Import-Module ActiveDirectory
 
+# Configuration Switch: Set to $true if you want to remove 'Authenticated Users' (S-1-5-11).
+# WARNING: Removing Authenticated Users can break legacy Samba/SSSD clients, Cisco ISE, and other querying integrations.
+$RemoveAuthenticatedUsers = $false
+
 Write-Host "Applying hardening requirement: Restrict Pre-Windows 2000 Compatible Access..." -ForegroundColor Cyan
 
 $GroupSid = "S-1-5-32-554"
-$NonCompliantSids = @("S-1-1-0", "S-1-5-7", "S-1-5-11")
+$NonCompliantSids = @("S-1-1-0", "S-1-5-7") # Critical SIDs to remove (Everyone, Anonymous Logon)
+
+if ($RemoveAuthenticatedUsers) {
+    $NonCompliantSids += "S-1-5-11" # Add Authenticated Users to the removal list
+}
 
 # 1. Remediate Group Membership
 try {

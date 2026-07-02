@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 23e0551 | Generated: July 02, 2026</span>
+      <span>Commit: 3e5505d | Generated: July 02, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -10801,7 +10801,7 @@ try {
   * **Restricted Groups GPO**: `Computer Configuration\Policies\Windows Settings\Security Settings\Restricted Groups` -> Group: `Pre-Windows 2000 Compatible Access` (SID: `S-1-5-32-554`)
   * **GPO Security Options**:
     * `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options` -> `Network access: Let Everyone permissions apply to anonymous users` (Registry: `HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\EveryoneIncludesAnonymous` = `0`)
-    * `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options` -> `Network access: Restrict anonymous access to Named Pipes and Shares` (Registry: `HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\RestrictAnonymous` = `1`)
+    * `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options` -> `Network access: Do not allow anonymous enumeration of SAM accounts and shares` (Registry: `HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\RestrictAnonymous` = `1`)
     * `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options` -> `Network access: Do not allow anonymous enumeration of SAM accounts` (Registry: `HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\RestrictAnonymousSAM` = `1`)
 
 ---
@@ -10823,7 +10823,7 @@ Removing insecure principals from this group and enforcing anonymous access rest
 <div id="03-identities-services-restrict-pre-windows-2000-compatible-access-group-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Legacy Integrations**: Non-Windows devices or legacy operating systems (such as older Linux integrations utilizing SSSD or Samba, Cisco ISE, or third-party reporting tools) may rely on the broad permissions of this group to query domain objects. Removing "Authenticated Users" can cause these services to fail to authenticate users or map group memberships.
-* **Active Directory Certificate Services (AD CS)**: Integrated Enterprise CAs are added to this group by default to enable certificate management policies. If certificate manager restrictions are in use, removing the CA servers can impact enrollment processes.
+* **Active Directory Certificate Services (AD CS)**: Integrated Enterprise CAs are added to this group by default to enable certificate management policies. If the restricted certificate manager feature is not in use, these CA servers can be safely removed; otherwise, removing them can impact enrollment processes.
 * **Mitigations**:
   * Prior to removing "Authenticated Users", verify whether any applications fail to query AD attributes.
   * If a specific service or application fails, do not re-add broad groups to the Pre-Windows 2000 group. Instead, grant the specific application service account or computer account the necessary explicit "Read" permissions on target Organizational Units (OUs).
@@ -10854,7 +10854,7 @@ Removing insecure principals from this group and enforcing anonymous access rest
 2. Configure the following policies:
    * **Policy**: `Network access: Let Everyone permissions apply to anonymous users`
      * **Setting**: `Disabled`
-   * **Policy**: `Network access: Restrict anonymous access to Named Pipes and Shares`
+   * **Policy**: `Network access: Do not allow anonymous enumeration of SAM accounts and shares`
      * **Setting**: `Enabled`
    * **Policy**: `Network access: Do not allow anonymous enumeration of SAM accounts`
      * **Setting**: `Enabled`
@@ -10881,8 +10881,10 @@ Import-Module ActiveDirectory
 Write-Host "--- Auditing Pre-Windows 2000 Compatible Access Settings ---" -ForegroundColor Cyan
 
 $GroupSid = "S-1-5-32-554"
-$NonCompliantSids = @("S-1-1-0", "S-1-5-7", "S-1-5-11")
+$CriticalNonCompliantSids = @("S-1-1-0", "S-1-5-7") # Everyone, Anonymous Logon
+$RestrictedNonCompliantSids = @("S-1-5-11")          # Authenticated Users (default in modern systems, high legacy impact if removed)
 $Vulnerable = $false
+$HasWarning = $false
 
 # 1. Audit Group Membership
 try {
@@ -10896,20 +10898,30 @@ try {
         }
     }
 
-    foreach ($Sid in $NonCompliantSids) {
+    # Check for Critical SIDs (Everyone, Anonymous Logon)
+    foreach ($Sid in $CriticalNonCompliantSids) {
         if ($MembersSids.Contains($Sid)) {
             $Vulnerable = $true
             $Name = ""
             if ($Sid -eq "S-1-1-0") { $Name = "Everyone" }
             elseif ($Sid -eq "S-1-5-7") { $Name = "Anonymous Logon" }
-            elseif ($Sid -eq "S-1-5-11") { $Name = "Authenticated Users" }
 
             Write-Host "VULNERABLE: '$($Name)' ($($Sid)) is a member of the Pre-Windows 2000 Compatible Access group." -ForegroundColor Red
         }
     }
 
-    if (-not $Vulnerable) {
+    # Check for Authenticated Users (High legacy impact warning)
+    foreach ($Sid in $RestrictedNonCompliantSids) {
+        if ($MembersSids.Contains($Sid)) {
+            $HasWarning = $true
+            Write-Host "WARNING: 'Authenticated Users' ($($Sid)) is a member of the Pre-Windows 2000 Compatible Access group. (This is default in modern systems; remove with caution)." -ForegroundColor Yellow
+        }
+    }
+
+    if (-not $Vulnerable -and -not $HasWarning) {
         Write-Host "Status: Compliant. Pre-Windows 2000 Compatible Access group membership is restricted." -ForegroundColor Green
+    } elseif (-not $Vulnerable) {
+        Write-Host "Status: Compliant (with warnings). Critical groups are removed, but legacy/default Authenticated Users remains." -ForegroundColor Green
     }
 } catch {
     Write-Host "VULNERABLE: Could not query Pre-Windows 2000 Compatible Access group membership. Error: $($_.Exception.Message)" -ForegroundColor Red
@@ -10955,10 +10967,18 @@ foreach ($Key in $Settings.Keys) {
 
 Import-Module ActiveDirectory
 
+# Configuration Switch: Set to $true if you want to remove 'Authenticated Users' (S-1-5-11).
+# WARNING: Removing Authenticated Users can break legacy Samba/SSSD clients, Cisco ISE, and other querying integrations.
+$RemoveAuthenticatedUsers = $false
+
 Write-Host "Applying hardening requirement: Restrict Pre-Windows 2000 Compatible Access..." -ForegroundColor Cyan
 
 $GroupSid = "S-1-5-32-554"
-$NonCompliantSids = @("S-1-1-0", "S-1-5-7", "S-1-5-11")
+$NonCompliantSids = @("S-1-1-0", "S-1-5-7") # Critical SIDs to remove (Everyone, Anonymous Logon)
+
+if ($RemoveAuthenticatedUsers) {
+    $NonCompliantSids += "S-1-5-11" # Add Authenticated Users to the removal list
+}
 
 # 1. Remediate Group Membership
 try {
