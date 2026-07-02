@@ -62,16 +62,17 @@ Enforcing advanced auditing policies provides the following security coverages:
 | **Account Management** | `Audit User Account Management` | Success and Failure |
 | **Account Management** | `Audit Security Group Management` | Success and Failure |
 | **Account Management** | `Audit Application Group Management` | Success and Failure |
-| **Account Management** | `Audit Computer Account Management` | Success |
+| **Account Management** | `Audit Computer Account Management` | Success and Failure |
 | **Account Management** | `Audit Distribution Group Management` | Success |
-| **Account Management** | `Audit Other Account Management Events` | Success |
+| **Account Management** | `Audit Other Account Management Events` | Success and Failure |
 | **Detailed Tracking** | `Audit Process Creation` | Success and Failure |
+| **Detailed Tracking** | `Audit DPAPI Activity` | Success and Failure |
 | **Detailed Tracking** | `Audit PNP Activity` | Success |
 | **DS Access** | `Audit Directory Service Changes` | Success and Failure |
 | **DS Access** | `Audit Directory Service Access` | Success and Failure |
 | **Logon/Logoff** | `Audit Logon` | Success and Failure |
 | **Logon/Logoff** | `Audit Logoff` | Success |
-| **Logon/Logoff** | `Audit Special Logon` | Success |
+| **Logon/Logoff** | `Audit Special Logon` | Success and Failure |
 | **Logon/Logoff** | `Audit Account Lockout` | Success and Failure |
 | **Logon/Logoff** | `Audit Other Logon/Logoff Events` | Success and Failure |
 | **Object Access** | `Audit Handle Manipulation` | Success and Failure |
@@ -85,10 +86,10 @@ Enforcing advanced auditing policies provides the following security coverages:
 | **Policy Change** | `Audit MPSSVC Rule-Level Policy Change` | Success and Failure |
 | **Policy Change** | `Audit Other Policy Change Events` | Failure |
 | **Privilege Use** | `Audit Sensitive Privilege Use` | Success and Failure |
-| **System** | `Audit IPsec Driver` | Failure |
+| **System** | `Audit IPsec Driver` | Success and Failure |
 | **System** | `Audit Other System Events` | Success and Failure |
-| **System** | `Audit Security State Change` | Success |
-| **System** | `Audit Security System Extension` | Success |
+| **System** | `Audit Security State Change` | Success and Failure |
+| **System** | `Audit Security System Extension` | Success and Failure |
 | **System** | `Audit System Integrity` | Success and Failure |
 
 #### 3. Deploy Kerberos LogLevel Registry Settings via GPO Preferences
@@ -143,16 +144,17 @@ $Policies = @(
     @{ Subcategory = "User Account Management"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Security Group Management"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Application Group Management"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Computer Account Management"; Success = "enable"; Failure = "disable" },
+    @{ Subcategory = "Computer Account Management"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Distribution Group Management"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "Other Account Management Events"; Success = "enable"; Failure = "disable" },
+    @{ Subcategory = "Other Account Management Events"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Process Creation"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "DPAPI Activity"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "PNP Activity"; Success = "enable"; Failure = "disable" },
     @{ Subcategory = "Directory Service Changes"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Directory Service Access"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Logon"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Logoff"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "Special Logon"; Success = "enable"; Failure = "disable" },
+    @{ Subcategory = "Special Logon"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Policy Change"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Account Lockout"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Other Logon/Logoff Events"; Success = "enable"; Failure = "enable" },
@@ -166,10 +168,10 @@ $Policies = @(
     @{ Subcategory = "MPSSVC Rule-Level Policy Change"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Other Policy Change Events"; Success = "disable"; Failure = "enable" },
     @{ Subcategory = "Sensitive Privilege Use"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "IPsec Driver"; Success = "disable"; Failure = "enable" },
+    @{ Subcategory = "IPsec Driver"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "Other System Events"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Security State Change"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "Security System Extension"; Success = "enable"; Failure = "disable" },
+    @{ Subcategory = "Security State Change"; Success = "enable"; Failure = "enable" },
+    @{ Subcategory = "Security System Extension"; Success = "enable"; Failure = "enable" },
     @{ Subcategory = "System Integrity"; Success = "enable"; Failure = "enable" }
 )
 
@@ -233,16 +235,17 @@ $RequiredPolicies = @(
     @{ Subcategory = "User Account Management"; Expected = "Success and Failure" },
     @{ Subcategory = "Security Group Management"; Expected = "Success and Failure" },
     @{ Subcategory = "Application Group Management"; Expected = "Success and Failure" },
-    @{ Subcategory = "Computer Account Management"; Expected = "Success" },
+    @{ Subcategory = "Computer Account Management"; Expected = "Success and Failure" },
     @{ Subcategory = "Distribution Group Management"; Expected = "Success" },
-    @{ Subcategory = "Other Account Management Events"; Expected = "Success" },
+    @{ Subcategory = "Other Account Management Events"; Expected = "Success and Failure" },
     @{ Subcategory = "Process Creation"; Expected = "Success and Failure" },
+    @{ Subcategory = "DPAPI Activity"; Expected = "Success and Failure" },
     @{ Subcategory = "PNP Activity"; Expected = "Success" },
     @{ Subcategory = "Directory Service Changes"; Expected = "Success and Failure" },
     @{ Subcategory = "Directory Service Access"; Expected = "Success and Failure" },
     @{ Subcategory = "Logon"; Expected = "Success and Failure" },
     @{ Subcategory = "Logoff"; Expected = "Success" },
-    @{ Subcategory = "Special Logon"; Expected = "Success" },
+    @{ Subcategory = "Special Logon"; Expected = "Success and Failure" },
     @{ Subcategory = "Policy Change"; Expected = "Success and Failure" },
     @{ Subcategory = "Account Lockout"; Expected = "Success and Failure" },
     @{ Subcategory = "Other Logon/Logoff Events"; Expected = "Success and Failure" },
@@ -256,10 +259,10 @@ $RequiredPolicies = @(
     @{ Subcategory = "MPSSVC Rule-Level Policy Change"; Expected = "Success and Failure" },
     @{ Subcategory = "Other Policy Change Events"; Expected = "Failure" },
     @{ Subcategory = "Sensitive Privilege Use"; Expected = "Success and Failure" },
-    @{ Subcategory = "IPsec Driver"; Expected = "Failure" },
+    @{ Subcategory = "IPsec Driver"; Expected = "Success and Failure" },
     @{ Subcategory = "Other System Events"; Expected = "Success and Failure" },
-    @{ Subcategory = "Security State Change"; Expected = "Success" },
-    @{ Subcategory = "Security System Extension"; Expected = "Success" },
+    @{ Subcategory = "Security State Change"; Expected = "Success and Failure" },
+    @{ Subcategory = "Security System Extension"; Expected = "Success and Failure" },
     @{ Subcategory = "System Integrity"; Expected = "Success and Failure" }
 )
 

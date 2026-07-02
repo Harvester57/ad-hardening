@@ -64,6 +64,9 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure svchost.exe mitigation options on Domain Controllers and Member Servers to restrict binary loading to Microsoft-signed code and block dynamic code execution.
 * **[REQ-DC-030 - Secure Directory Services Restore Mode (DSRM) and Recovery Parameters](harden-dsrm-recovery-mode.md)**
   Requirement to secure DSRM restore mode logon behavior and recovery credentials parameters.
+* **[REQ-DC-031 - Configure NTP Time Synchronization on the PDC Emulator](configure-pdc-time-sync.md)**
+  Requirement to configure NTP time synchronization on the PDC Emulator to serve as a reliable time source and secure Kerberos exchanges.
+
 
 
 

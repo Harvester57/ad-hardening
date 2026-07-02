@@ -44,6 +44,8 @@
     * [REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](02-domain-controllers/configure-untrusted-font-blocking.md)
     * [REQ-DC-029 - Configure svchost.exe Mitigation Options](02-domain-controllers/configure-svchost-mitigation.md)
     * [REQ-DC-030 - Secure Directory Services Restore Mode (DSRM) and Recovery Parameters](02-domain-controllers/harden-dsrm-recovery-mode.md)
+    * [REQ-DC-031 - Configure NTP Time Synchronization on the PDC Emulator](02-domain-controllers/configure-pdc-time-sync.md)
+
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)

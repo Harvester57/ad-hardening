@@ -70,6 +70,8 @@ This phase targets the elimination of immediately exploitable vulnerability clas
 * **[REQ-DC-016 - Harden adminSDHolder Permissions](../02-domain-controllers/harden-adminsdholder-permissions.md)**: Blocks permission changes to high-privilege templates.
 * **[REQ-DC-024 - Configure dSHeuristics Attribute](../02-domain-controllers/configure-dsheuristics.md)**: Restricts anonymous directory access.
 * **[REQ-DC-030 - Secure Directory Services Restore Mode (DSRM) and Recovery Parameters](../02-domain-controllers/harden-dsrm-recovery-mode.md)**: Configures DsrmAdminLogonBehavior to restrict network logons.
+* **[REQ-DC-031 - Configure NTP Time Synchronization on the PDC Emulator](../02-domain-controllers/configure-pdc-time-sync.md)**: Configures w32time parameters and external time sync on the PDC Emulator.
+
 
 ### Identities & Services Requirements
 * **[REQ-ID-002 - Enable Local Administrator Password Solution (LAPS)](../03-identities-services/enable-laps.md)**: Implements Windows LAPS or Classic LAPS to rotate local administrator passwords periodically.

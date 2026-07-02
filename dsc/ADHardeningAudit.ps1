@@ -75,6 +75,7 @@ Configuration ADHardeningAudit {
             "02-domain-controllers\audit_scripts\Get-LSAProtectionStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-MulticastNameResolutionStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-NTLMv1Status.ps1",
+            "02-domain-controllers\audit_scripts\Get-PdcTimeSyncStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-PrintSpoolerStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-RdpRestrictedAdminStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-RestrictNTLMStatus.ps1",
