@@ -95,16 +95,27 @@ cd ../..
 
 ---
 
-## Compliance Benchmarks (XCCDF & OVAL) Integration
+## Automation and Documentation Generation Scripts
 
-When adding, removing, or changing technical hardening requirements in this repository, you must rebuild the compliance benchmark XML definitions to keep the automated audit profiles synchronized.
+When adding, removing, or changing technical hardening requirements in this repository, you must execute the automated generation scripts to keep the scripts, compliance benchmarks, GitBook summary, and consolidated guidebook synchronized:
 
-To update the compliance benchmarks:
-1. Run the Python generation script to re-scan all guidebook files and compile the benchmarks:
+1. **Extract PowerShell Scripts**: Extract standalone `.ps1` audit and remediation scripts from markdown blocks and automatically inject download links:
+```text
+python scripts/extract_scripts.py
+```
+2. **Rebuild Compliance Benchmarks**: Recompile XCCDF and OVAL XML documents directly from the markdown requirements:
 ```text
 python scripts/generate_compliance.py
 ```
-2. Verify that the generated XML manifests compile cleanly and satisfy schema integrity constraints by running the project-wide documentation and compliance validator:
+3. **Rebuild GitBook Table of Contents**: Re-generate the `SUMMARY.md` navigation file:
+```text
+python scripts/generate_summary.py
+```
+4. **Compile Consolidated Guidebook**: Re-compile the single consolidated guidebook file `AD-Hardening-Guidebook.md`:
+```text
+python scripts/compile_docs.py
+```
+5. **Verify and Validate**: Run the unified pipeline check to verify markdown links, code blocks syntax, and compliance schema validity:
 ```powershell
 .\Verify-ADHardeningDocs.ps1
 ```
