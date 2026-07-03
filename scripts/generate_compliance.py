@@ -785,7 +785,7 @@ def generate_oval(requirements, output_path):
                     'check': 'all'
                 }
                 if chk.get('existence') == 'none_exist':
-                    test_attrs['existence'] = 'none_exist'
+                    test_attrs['check_existence'] = 'none_exist'
                     
                 test_el = ET.SubElement(tests_el, w_tag('registry_test'), test_attrs)
                 ET.SubElement(test_el, w_tag('object'), {
