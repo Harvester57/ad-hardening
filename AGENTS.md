@@ -107,6 +107,11 @@ python scripts/extract_scripts.py
 ```text
 python scripts/generate_compliance.py
 ```
+After recompiling, validate the generated XML documents using OpenSCAP:
+```powershell
+oscap xccdf validate audit/scap/ad-hardening-xccdf.xml
+oscap oval validate audit/scap/ad-hardening-oval.xml
+```
 3. **Rebuild GitBook Table of Contents**: Re-generate the `SUMMARY.md` navigation file:
 ```text
 python scripts/generate_summary.py
@@ -135,6 +140,16 @@ Before marking your work as complete, you **must** run this verification script 
 The script will:
 * Check for broken internal markdown links between modules and templates.
 * Extract all `powershell` or `ps1` code blocks from the markdown documents and run them through a syntax analyzer (`[System.Management.Automation.Language.Parser]`) to ensure compile-time validity without executing the instructions.
+
+### SCAP Validation
+
+After making changes to compliance XML files, validate them using the following OpenSCAP commands:
+
+```powershell
+oscap xccdf validate audit/scap/ad-hardening-xccdf.xml
+oscap oval validate audit/scap/ad-hardening-oval.xml
+```
+
 
 ### Script Linting
 

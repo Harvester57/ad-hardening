@@ -271,6 +271,14 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                     module_dir = os.path.dirname(rel_path).replace('\\', '/')
                     audit_script = f"{module_dir}/audit_scripts/{script_name}"
                 
+                # Extract implementation script URL relative target
+                impl_script = None
+                impl_match = re.search(r'implementation_scripts/([a-zA-Z0-9_-]+\.ps1)', content, re.IGNORECASE)
+                if impl_match:
+                    impl_name = impl_match.group(1)
+                    module_dir = os.path.dirname(rel_path).replace('\\', '/')
+                    impl_script = f"{module_dir}/implementation_scripts/{impl_name}"
+                
                 # Extract target scope
                 scope = ""
                 scope_match = re.search(r'## Target Scope\s*\n(.*?)(?=\n##|\n---)', content, re.DOTALL | re.IGNORECASE)
@@ -531,6 +539,7 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                     'priority': priority,
                     'rationale': rationale,
                     'audit_script': audit_script,
+                    'impl_script': impl_script,
                     'registry_checks': registry_checks,
                     'service_checks': service_checks,
                     'user_rights': user_rights,
@@ -618,7 +627,7 @@ def parse_markdown_to_xml(parent_el, md_text, xhtml_ns):
             p_text_inline = " ".join(line.strip() for line in lines)
             parse_inline_formatting(p_el, p_text_inline, xhtml_ns)
 
-def generate_xccdf(requirements, output_path):
+def generate_xccdf(requirements, output_path, repo_root):
     """
     Generates a valid XCCDF 1.2 Benchmark XML.
     """
@@ -732,6 +741,21 @@ def generate_xccdf(requirements, output_path):
             if req['rationale']:
                 r_rat = ET.SubElement(rule_el, x_tag('rationale'))
                 parse_markdown_to_xml(r_rat, req['rationale'], XHTML_NS)
+                
+            # If the requirement has an implementation script, embed it as a fix element
+            if req['impl_script']:
+                impl_path = os.path.join(repo_root, req['impl_script'])
+                if os.path.exists(impl_path):
+                    try:
+                        with open(impl_path, 'r', encoding='utf-8') as sf:
+                            script_content = sf.read().strip()
+                        if script_content:
+                            fix_el = ET.SubElement(rule_el, x_tag('fix'), {
+                                'system': 'urn:xccdf:fix:script:powershell'
+                            })
+                            fix_el.text = script_content
+                    except Exception as e:
+                        print(f"Warning: Failed to read implementation script {impl_path}: {e}")
                 
             # If the requirement has an automated audit script, link OVAL check
             if req['audit_script']:
@@ -1219,7 +1243,7 @@ def main():
     print(f"Found {len(requirements)} requirement records.")
     
     print("\nGenerating compliance files...")
-    generate_xccdf(requirements, xccdf_output)
+    generate_xccdf(requirements, xccdf_output, repo_root)
     generate_oval(requirements, oval_output)
     print("\nCompliance metadata generation complete!")
 
