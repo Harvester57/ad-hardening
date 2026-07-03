@@ -16,9 +16,10 @@
   * **Registry Locations**:
     * `HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server`
       * `fDenyTSConnections` = `1` (REG_DWORD, Disabled)
+      * `fAllowToGetHelp` = `0` (REG_DWORD, Solicited Remote Assistance Disabled)
     * `HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp`
       * `UserAuthentication` = `1` (REG_DWORD, NLA Enabled)
-    * `HKLM\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services`
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services`
       * `fAllowToGetHelp` = `0` (REG_DWORD, Solicited Remote Assistance Disabled)
       * `MaxTicketExpiryUnits` = (Delete / Not Configured)
       * `MaxTicketExpiry` = (Delete / Not Configured)

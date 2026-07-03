@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 5f9c5c1 | Generated: July 03, 2026</span>
+      <span>Commit: 38890f9 | Generated: July 03, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -4282,7 +4282,10 @@ foreach ($Rule in $Acl.Access) {
 <div id="02-domain-controllers-harden-dns-container-permissions-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**: Active Directory path: `CN=MicrosoftDNS,CN=System,DC=[Domain]` and Registry Path: `HKLM:\System\CurrentControlSet\Services\DNS\Parameters`
+* **GPO Path / Registry Location**:
+  * **Active Directory Path**: `CN=MicrosoftDNS,CN=System,DC=[Domain]`
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\DNS\Parameters`
+    * `ServerLevelPluginDll` = `""` (REG_SZ)
 
 ---
 
@@ -24063,7 +24066,7 @@ Write-Host "    - NoAutoplayfornonVolume: $NoNonVolVal (Required = 1)" -Foregrou
     * `HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server`
       * `fDenyTSConnections` = `1` (REG_DWORD, Disabled)
       * `fAllowToGetHelp` = `0` (REG_DWORD, Solicited Remote Assistance Disabled)
-    * `HKLM\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services`
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services`
       * `fAllowToGetHelp` = `0` (REG_DWORD, Solicited Remote Assistance Policy Disabled)
 
 ---
@@ -28621,9 +28624,10 @@ Write-Host "    - Removable Storage Deny_All: $DenyAllVal (Required = 1)" -Foreg
   * **Registry Locations**:
     * `HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server`
       * `fDenyTSConnections` = `1` (REG_DWORD, Disabled)
+      * `fAllowToGetHelp` = `0` (REG_DWORD, Solicited Remote Assistance Disabled)
     * `HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp`
       * `UserAuthentication` = `1` (REG_DWORD, NLA Enabled)
-    * `HKLM\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services`
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services`
       * `fAllowToGetHelp` = `0` (REG_DWORD, Solicited Remote Assistance Disabled)
       * `MaxTicketExpiryUnits` = (Delete / Not Configured)
       * `MaxTicketExpiry` = (Delete / Not Configured)
@@ -34029,7 +34033,7 @@ if ($script:Vulnerable) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: Computer Configuration\Policies\Administrative Templates\System\Local Security Authority\Configures LSASS to run as a protected process
-  * **Registry Location**: HKLM\SOFTWARE\Policies\Microsoft\Windows\System
+  * **Registry Location**: HKLM\SYSTEM\CurrentControlSet\Control\Lsa
     * `RunAsPPL` = `1` (REG_DWORD, Enabled with UEFI Lock)
 
 ---
@@ -34084,14 +34088,14 @@ Configure the local registry key on the workstation to run LSASS as a protected 
 
 Write-Host "Applying LSA Protection registry hardening..." -ForegroundColor Cyan
 
-$LsaPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$LsaPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
 
-if (-not (Test-Path $LsaPoliciesPath)) {
-    New-Item -Path $LsaPoliciesPath -Force | Out-Null
+if (-not (Test-Path $LsaPath)) {
+    New-Item -Path $LsaPath -Force | Out-Null
 }
 
-Set-ItemProperty -Path $LsaPoliciesPath -Name "RunAsPPL" -Value 1 -Type DWord
-Write-Host "[+] LSA Protection (RunAsPPL) enabled in registry policies. (Reboot required)." -ForegroundColor Green
+Set-ItemProperty -Path $LsaPath -Name "RunAsPPL" -Value 1 -Type DWord
+Write-Host "[+] LSA Protection (RunAsPPL) enabled in registry. (Reboot required)." -ForegroundColor Green
 ```
 
 *To verify the local LSA Protection state:*
@@ -34104,8 +34108,8 @@ Write-Host "[+] LSA Protection (RunAsPPL) enabled in registry policies. (Reboot 
 
 Write-Host "--- Auditing LSA Protection Status ---" -ForegroundColor Cyan
 
-$LsaPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-$RunAsPPL = (Get-ItemProperty -Path $LsaPoliciesPath -Name "RunAsPPL" -ErrorAction SilentlyContinue).RunAsPPL
+$LsaPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
+$RunAsPPL = (Get-ItemProperty -Path $LsaPath -Name "RunAsPPL" -ErrorAction SilentlyContinue).RunAsPPL
 
 if ($RunAsPPL -eq 1) {
     Write-Host "    - LSA Protection (RunAsPPL): Enabled (Secure)" -ForegroundColor Green

@@ -253,7 +253,7 @@
   </Profile>
   <Group id="xccdf_org.adhardening.benchmarks_group_Module_1__Architecture___Administrative_Tiering">
     <title>Module 1: Architecture &amp; Administrative Tiering</title>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-001" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-001" severity="high" weight="10.0" selected="false">
       <title>[REQ-ARCH-001] Restrict Tier Logons</title>
       <description>Target Scope:  Applicable Systems: Tier 1 member servers and Tier 2 client workstations.
  Operating Systems: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
@@ -268,7 +268,7 @@ By configuring Group Policy objects to explicitly deny logon rights (interactive
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:1001" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-002" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-002" severity="high" weight="10.0" selected="false">
       <title>[REQ-ARCH-002] Restrict Administrative Management Protocols</title>
       <description>Target Scope:  Applicable Systems: Tier 0 assets (Domain Controllers, Jump Hosts) and Tier 1 member servers.
  Operating Systems: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
@@ -283,7 +283,7 @@ Restricting administrative protocols at the network and local firewall levels to
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:1002" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-003" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-003" severity="high" weight="10.0" selected="false">
       <title>[REQ-ARCH-003] Audit Privileged Groups</title>
       <description>Target Scope:  Applicable Systems: Active Directory Domain.
  Operating Systems: Windows Server 2016 (and above) Domain Controllers.
@@ -301,7 +301,7 @@ Enforcing advanced auditing on directory object changes, combined with a daily s
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:1003" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-004" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-004" severity="medium" weight="10.0" selected="false">
       <title>[REQ-ARCH-004] Keep Domain and Forest Functional Levels Up-To-Date</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers (Forest-wide configuration)
  Operating Systems: Windows Server 2016 and above
@@ -318,7 +318,7 @@ Raising the functional level is critical for hardening because it unlocks archit
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:1004" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-005" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-005" severity="high" weight="10.0" selected="false">
       <title>[REQ-ARCH-005] Default Domain and Domain Controllers Policies Management</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers and Domain Members (Forest-wide)
  Operating Systems: Windows Server 2016 and above
@@ -339,7 +339,7 @@ Integrating the following controls inside the DDP/DDCP and custom GPOs completes
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:1005" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-006" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-006" severity="high" weight="10.0" selected="false">
       <title>[REQ-ARCH-006] Harden Active Directory Domain Trusts</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -356,7 +356,7 @@ Specifically:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:1006" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-007" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-007" severity="high" weight="10.0" selected="false">
       <title>[REQ-ARCH-007] Harden Microsoft Exchange Active Directory Permissions</title>
       <description>Target Scope:  Applicable Systems: Active Directory Domain Controllers and Domain Root Object (Tier 0).
  Operating Systems: Active Directory Domain Services (All supported functional levels).
@@ -376,7 +376,7 @@ Restricting these write permissions ensures that Exchange servers cannot modify 
   </Group>
   <Group id="xccdf_org.adhardening.benchmarks_group_Module_2__Domain_Controller_Hardening">
     <title>Module 2: Domain Controller Hardening</title>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-001" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-001" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-001] Disable SMBv1</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
@@ -389,7 +389,7 @@ SMBv1 contains severe remote code execution (RCE) vulnerabilities (e.g., the Ete
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2001" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-002" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-002" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-002] Disable Multicast Name Resolution</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
@@ -402,7 +402,7 @@ Adversaries on the same subnet can easily sniff these broadcast/multicast querie
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2002" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-003" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-003" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-003] Disable NTLMv1</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
@@ -415,7 +415,7 @@ By configuring the system to send only NTLMv2 responses and refuse both LM and N
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2003" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-004" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-004" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-004] Enforce LDAP Server Signing</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -428,7 +428,7 @@ Enforcing LDAP signing ensures that the LDAP server (Domain Controller) rejects 
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2004" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-005" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-005" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-005] Enforce LDAP Channel Binding</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -441,7 +441,7 @@ LDAP Channel Binding Tokens (CBT) mitigate these relay attacks. CBT establishes 
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2005" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-006" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-006" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-006] Enable LSA Protection</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
@@ -454,7 +454,7 @@ Enabling LSA Protection configures LSASS to run as a Protected Process Light (PP
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2006" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-007" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-007" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-007] Disable Credential Guard</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025
@@ -472,7 +472,7 @@ Microsoft Security Guidance: Windows Defender Credential Guard Warnings</rationa
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2007" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-008" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-008" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-008] Disable Print Spooler Service</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -485,7 +485,7 @@ The Print Spooler service has a history of high-severity vulnerabilities, includ
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2008" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-009" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-009" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-009] Enforce SMB Message Signing</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
@@ -498,7 +498,7 @@ Enforcing SMB signing ensures that all SMB packets are digitally signed using se
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2009" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-010" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-010" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-010] Restrict Kerberos Encryption Types</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
@@ -513,7 +513,7 @@ Restricting allowed Kerberos encryption types to Advanced Encryption Standard (A
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2010" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-011" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-011" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-011] Restrict Remote SAM API Access</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10 (1607+), Windows 11
@@ -526,7 +526,7 @@ Tools like BloodHound/SharpHound, or simple commands like net user /domain, rely
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2011" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-012" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-012" severity="medium" weight="10.0" selected="false">
       <title>[REQ-DC-012] Disable Unnecessary Services on Domain Controllers</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers (DCs) running Windows Server.
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022.
@@ -539,7 +539,7 @@ Disabling non-essential services aligns with the principle of least functionalit
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2012" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-013" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-013" severity="medium" weight="10.0" selected="false">
       <title>[REQ-DC-013] Enable Kerberos Armoring</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
@@ -554,7 +554,7 @@ Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Cont
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2013" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-014" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-014" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-014] Restrict NTLM</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
@@ -567,7 +567,7 @@ By auditing and subsequently restricting NTLM authentication incoming to, outgoi
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2014" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-015" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-015" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-015] Migrate SYSVOL Replication to DFSR</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -585,7 +585,7 @@ Migrating to Distributed File System Replication (DFSR):
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2015" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-016" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-016" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-016] Harden adminSDHolder Permissions</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -600,7 +600,7 @@ If an attacker gains temporary write permissions on the adminSDHolder object, th
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2016" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-017" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-017" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-017] Harden Microsoft DNS AD Container Permissions</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -615,7 +615,7 @@ This default configuration presents a critical privilege escalation vector:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2017" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-018" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-018" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-018] Harden Virtualization Hosts for Domain Controllers</title>
       <description>Target Scope:  Applicable Systems: Virtualization Hosts (Hyper-V / VMware ESXi hosting Domain Controllers)
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, VMware vSphere ESXi 6.7+
@@ -636,7 +636,7 @@ To mitigate these risks:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2018" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-019" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-019" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-019] Enforce RDP Restricted Admin Mode</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients, PAWs
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10/11 Enterprise
@@ -653,7 +653,7 @@ Enforcing RDP Restricted Admin Mode (RDP RA) prevents credential harvesting:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2019" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-020" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-020" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-020] Windows Defender Antivirus Domain Controller Baseline and Exploit Guard</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers.
  Operating Systems: Windows Server 2016 (and above).
@@ -670,7 +670,7 @@ This control establishes a server-optimized defense posture:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2020" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-021" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-021" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-021] Configure AppLocker Policies on Domain Controllers</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers.
  Operating Systems: Windows Server 2016 (and above).
@@ -687,7 +687,7 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2021" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-022" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-022" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-022] Enable WDAC Driver Blocklist</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025
@@ -700,7 +700,7 @@ Enforcing the Microsoft Vulnerable Driver Blocklist via Windows Defender Applica
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2022" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-023" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-023" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-023] Configure User Rights Assignments for Domain Controllers</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers (DCs)
  Operating Systems: Windows Server 2016 and above
@@ -717,7 +717,7 @@ To preserve the Tier 0 administrative boundary, these rights must be restricted 
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2023" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-024" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-024" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-024] Configure dSHeuristics Attribute</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -737,7 +737,7 @@ To reach the maximum Level 5 security state, all dangerous features must be disa
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2024" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-025" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-025" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-025] Configure Security Options for Domain Controllers</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers.
  Operating Systems: Windows Server 2016 and above.
@@ -756,7 +756,7 @@ Specifically, the following settings are configured to protect the Tier 0 admini
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2025" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-026" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-026" severity="medium" weight="10.0" selected="false">
       <title>[REQ-DC-026] Configure TCP/IP and Network Parameter Hardening for Domain Controllers</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers.
  Operating Systems: Windows Server 2016 (and above).
@@ -771,7 +771,7 @@ File Path: 02-domain-controllers/harden-network-parameters.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2026" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-027" severity="low" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-027" severity="low" weight="10.0" selected="false">
       <title>[REQ-DC-027] Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers.
  Operating Systems: Windows Server 2016 (and above).
@@ -786,7 +786,7 @@ File Path: 02-domain-controllers/configure-telemetry-privacy.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2027" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-028" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-028" severity="medium" weight="10.0" selected="false">
       <title>[REQ-DC-028] Configure Untrusted Font Blocking for Domain Controllers</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers and Member Servers.
  Operating Systems: Windows Server 2016 (and above).
@@ -801,7 +801,7 @@ Enabling Untrusted Font Blocking limits the attack surface of the graphics subsy
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2028" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-029" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-029" severity="medium" weight="10.0" selected="false">
       <title>[REQ-DC-029] Configure svchost.exe Mitigation Options</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers and Member Servers.
  Operating Systems: Windows Server 2022 (and above), Windows Server Semi-Annual Channel (1903 and above).
@@ -816,7 +816,7 @@ Enabling svchost.exe mitigation options restricts the behavior of the svchost.ex
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2029" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-030" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-030" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-030] Secure Directory Services Restore Mode (DSRM) and Recovery Parameters</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers (Tier 0).
  Operating Systems: Windows Server 2016, 2019, 2022, 2025.
@@ -833,7 +833,7 @@ Setting DsrmAdminLogonBehavior to 1 ensures the DSRM Administrator account can o
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2030" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-031" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-031" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-031] Configure NTP Time Synchronization on the PDC Emulator</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers (specifically the PDC Emulator FSMO role owner)
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025
@@ -855,7 +855,7 @@ Configuring the PDC Emulator as a reliable NTP server synchronizing with a secur
   </Group>
   <Group id="xccdf_org.adhardening.benchmarks_group_Module_3__Identities___Services_Hardening">
     <title>Module 3: Identities &amp; Services Hardening</title>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-001" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-001" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-001] Enforce Fine-Grained Password Policies</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -868,7 +868,7 @@ Enforcing Fine-Grained Password Policies (FGPP) via Password Settings Objects (P
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3001" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-002] Enable Local Administrator Password Solution (LAPS)</title>
       <description>Target Scope:  Applicable Systems: Member Servers, Tier 2 Clients, Domain Controllers
  Operating Systems: 
@@ -883,7 +883,7 @@ Implementing the Local Administrator Password Solution (LAPS) completely mitigat
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3002" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-003" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-003" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-003] Implement Group Managed Service Accounts (gMSA)</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -901,7 +901,7 @@ However, gMSAs introduce specific security boundaries that must be strictly enfo
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3003" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-004" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-004" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-004] Restrict Kerberos Delegation</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -914,7 +914,7 @@ To prevent this critical privilege escalation path, Unconstrained Delegation mus
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3004" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-005" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-005" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-005] Configure and Populate Protected Users Group</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
@@ -934,7 +934,7 @@ Placing Tier 0 and Tier 1 administrative accounts into the Protected Users group
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3005" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-006" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-006" severity="medium" weight="10.0" selected="false">
       <title>[REQ-ID-006] Rename and Disable Default Administrator and Guest Accounts</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
@@ -947,7 +947,7 @@ Because these accounts are well-known, they are frequent targets for automated b
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3006" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-007" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-007" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-007] Restrict Interactive Logons for Service Accounts</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
@@ -960,7 +960,7 @@ By enforcing User Rights Assignment policies that explicitly deny service accoun
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3007" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-008" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-008" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-008] Enforce User and Service Account Kerberos Encryption (AES-Only)</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -973,7 +973,7 @@ Because RC4 utilizes weaker, legacy cryptography, tickets encrypted using RC4 ca
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3008" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-009" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-009" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-009] Enforce Kerberos Pre-Authentication</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers (Active Directory User Accounts)
  Operating Systems: Windows Server 2016 and above
@@ -990,7 +990,7 @@ By enforcing pre-authentication, the KDC requires the client to encrypt a timest
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3009" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-010" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-010" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-010] Restrict Schema Administrators Group Membership</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016 and above
@@ -1007,7 +1007,7 @@ To minimize the attack surface, standard administrative accounts must not have p
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3010" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-011" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-011" severity="medium" weight="10.0" selected="false">
       <title>[REQ-ID-011] Enforce Accidental Deletion Protection on Organizational Units</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016 and above
@@ -1022,7 +1022,7 @@ Enforcing the accidental deletion protection property provides the following sec
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3011" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-012" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-012" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-012] Configure Active Directory Authentication Silos and Policies</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Tier 0 Administration Workstations (PAWs), Tier 0 Administrator Accounts
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -1038,7 +1038,7 @@ Authentication Silos and Policies provide cryptographic containment:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3012" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-013" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-013" severity="medium" weight="10.0" selected="false">
       <title>[REQ-ID-013] Clean Up adminCount Attribute Orphans</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Identity Management
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -1058,7 +1058,7 @@ Auditing and resetting these orphan accounts restores proper security inheritanc
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3013" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-014" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-014" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-014] Renew KDS Root Keys and gMSA Secrets</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Group Managed Service Accounts (gMSAs)
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -1077,7 +1077,7 @@ Therefore:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3014" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-015" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-015" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-015] Harden Active Directory Certificate Services (ADCS) and PKI</title>
       <description>Target Scope:  Applicable Systems: Member Servers (Certification Authorities), Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -1094,7 +1094,7 @@ Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3015" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-016" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-016" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-016] Configure Logon Screen and Credentials Delegation</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients.
  Operating Systems: Windows Server 2016 (and above), Windows 10/11 Enterprise.
@@ -1109,7 +1109,7 @@ File Path: 03-identities-services/configure-credential-delegation.md</descriptio
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3016" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-017" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-017" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-017] Disable Machine Account Quota</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Domain Environment
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -1127,7 +1127,7 @@ Restricting this behavior by setting ms-DS-MachineAccountQuota to 0 and removing
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3017" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-018" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-018" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-018] Restrict Pre-Windows 2000 Compatible Access Group</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Domain Environment
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -1146,7 +1146,7 @@ Removing insecure principals from this group and enforcing anonymous access rest
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3018" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-019" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-019" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-019] Enforce Smart Card Authentication for Privileged Users</title>
       <description>Target Scope:  Applicable Systems: Active Directory Domain Services (AD DS) user accounts, Domain Controllers
  Operating Systems: Windows Server 2016 (and above)
@@ -1161,7 +1161,7 @@ File Path: 03-identities-services/enforce-smartcard-privileged-users.md</descrip
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3019" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-020" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-020" severity="high" weight="10.0" selected="false">
       <title>[REQ-ID-020] Clean Up Legacy Group Policy Preferences and SYSVOL Passwords</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025
@@ -1181,7 +1181,7 @@ Additionally, administrators historically deployed custom login or management sc
   </Group>
   <Group id="xccdf_org.adhardening.benchmarks_group_Module_4__Network_Configuration___Firewalling">
     <title>Module 4: Network Configuration &amp; Firewalling</title>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-001" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-001" severity="high" weight="10.0" selected="false">
       <title>[REQ-NET-001] Configure Active Directory Port Matrix</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Client Workstations.
  Operating Systems: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
@@ -1197,7 +1197,7 @@ Restricting network communications to the minimum required AD Port Matrix ensure
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4001" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-002" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-002" severity="high" weight="10.0" selected="false">
       <title>[REQ-NET-002] Restrict RPC Dynamic Ports</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers.
  Operating Systems: Windows Server 2016 (and above).
@@ -1217,7 +1217,7 @@ Therefore, the system-wide dynamic RPC port range must remain at its default sta
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4002" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-003" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-003" severity="high" weight="10.0" selected="false">
       <title>[REQ-NET-003] Configure Workstation and Server Isolation</title>
       <description>Target Scope:  Applicable Systems: Tier 2 Client Workstations, Member Servers.
  Operating Systems: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
@@ -1232,7 +1232,7 @@ Configuring local firewalls via Group Policy to explicitly block inbound SMB, RP
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4003" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-004" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-004" severity="medium" weight="10.0" selected="false">
       <title>[REQ-NET-004] Configure IPsec Domain Isolation</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.
  Operating Systems: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
@@ -1250,7 +1250,7 @@ Benefits of IPsec isolation include:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4004" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-005" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-005" severity="high" weight="10.0" selected="false">
       <title>[REQ-NET-005] Harden IPsec Cryptographic Configurations</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.
  Operating Systems: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
@@ -1263,7 +1263,7 @@ To maintain secure communications through 2030 and beyond, IPsec configurations 
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4005" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-006" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-006" severity="high" weight="10.0" selected="false">
       <title>[REQ-NET-006] Harden TLS Protocols, Cipher Suites, and Elliptic Curves</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.
  Operating Systems: Windows Server 2016 (and above), Windows 10 (and above).
@@ -1278,7 +1278,7 @@ By default, legacy .NET Framework applications (targeting .NET 3.5 or earlier) a
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4006" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-007" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-007" severity="high" weight="10.0" selected="false">
       <title>[REQ-NET-007] Enforce SMBv3 Security and Digitally Sign/Encrypt Communications</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.
  Operating Systems: Windows Server 2016 (and above), Windows 10 (and above).
@@ -1294,7 +1294,7 @@ Enforcing SMBv3 (minimum version 3.0.0 or 3.1.1) provides significant security a
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4007" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-008" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-008" severity="high" weight="10.0" selected="false">
       <title>[REQ-NET-008] Configure Firewall Logging and Operational Settings</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Client Workstations.
  Operating Systems: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
@@ -1310,7 +1310,7 @@ File Path: 04-network-firewall/configure-firewall-logging.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4008" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-009" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-009" severity="high" weight="10.0" selected="false">
       <title>[REQ-NET-009] Configure Hardened UNC Paths and LDAP Client Signing</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients.
  Operating Systems: Windows Server 2016 (and above), Windows 10/11 Enterprise.
@@ -1326,7 +1326,7 @@ Enforcing these channel-level controls mitigates the following threat vectors:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4009" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-010" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-010" severity="high" weight="10.0" selected="false">
       <title>[REQ-NET-010] Harden WinRM Service and Restrict Remote RPC Clients</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Clients.
  Operating Systems: Windows Server 2016 (and above), Windows 10/11 Enterprise.
@@ -1343,7 +1343,7 @@ Hardening these service channels blocks the following exploit vectors:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4010" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-011" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-011" severity="medium" weight="10.0" selected="false">
       <title>[REQ-NET-011] Configure WMI Static Port</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers.
  Operating Systems: Windows Server 2016 (and above).
@@ -1359,7 +1359,7 @@ Restricting WMI to a static port and process solves these security challenges:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4011" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-012" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-012" severity="high" weight="10.0" selected="false">
       <title>[REQ-NET-012] Configure RPC Filters for Named Pipes</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers.
  Operating Systems: Windows Server 2016 (and above).
@@ -1377,7 +1377,7 @@ Implementing Windows Firewall RPC Filters solves this vulnerability:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4012" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-013" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-NET-013" severity="high" weight="10.0" selected="false">
       <title>[REQ-NET-013] Block Management Traffic Between Domain Controllers</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers.
  Operating Systems: Windows Server 2016 (and above).
@@ -1398,7 +1398,7 @@ Enforcing intra-DC remote management blocking resolves this vector:
   </Group>
   <Group id="xccdf_org.adhardening.benchmarks_group_Module_5__Logging__Monitoring___SIEM">
     <title>Module 5: Logging, Monitoring &amp; SIEM</title>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-001" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-001" severity="high" weight="10.0" selected="false">
       <title>[REQ-LOG-001] Configure Advanced Security Audit Policies</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Client Workstations.
  Operating Systems: Windows Server 2016 (and above), Windows 10/11 Enterprise.
@@ -1416,7 +1416,7 @@ Enforcing advanced auditing policies provides the following security coverages:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:5001" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-002" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-002" severity="high" weight="10.0" selected="false">
       <title>[REQ-LOG-002] Configure PowerShell and Command-Line Auditing</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Client Workstations.
  Operating Systems: Windows Server 2016 (and above), Windows 10/11 Enterprise.
@@ -1433,7 +1433,7 @@ Enforcing advanced execution logging mitigates these threat vectors:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:5002" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-003" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-003" severity="medium" weight="10.0" selected="false">
       <title>[REQ-LOG-003] Deploy and Harden Microsoft Sysmon</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Client Workstations.
  Operating Systems: Windows Server 2016 (and above), Windows 10/11 Enterprise.
@@ -1450,7 +1450,7 @@ Hardening Sysmon involves:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:5003" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-004" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-004" severity="medium" weight="10.0" selected="false">
       <title>[REQ-LOG-004] Configure Secure SIEM Log Shipping</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Client Workstations.
  Operating Systems: Windows Server 2016 (and above), Windows 10/11 Enterprise.
@@ -1466,7 +1466,7 @@ To prevent adversaries from intercepting, redirecting, or tampering with log tel
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:5004" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-005" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-005" severity="medium" weight="10.0" selected="false">
       <title>[REQ-LOG-005] Configure Kerberoasting Honeypots and SIEM Detection Rules</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -1490,7 +1490,7 @@ To mitigate and detect this vector, two strategies must be implemented:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:5005" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-006" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-006" severity="medium" weight="10.0" selected="false">
       <title>[REQ-LOG-006] Configure SYSVOL Decoy XML Honeypot</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025
@@ -1510,7 +1510,7 @@ By applying an explicit NTFS Deny Read rule to the Everyone group on the decoy f
   </Group>
   <Group id="xccdf_org.adhardening.benchmarks_group_Module_6__Secure_Operations___Maintenance">
     <title>Module 6: Secure Operations &amp; Maintenance</title>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-001" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-001" severity="high" weight="10.0" selected="false">
       <title>[REQ-OPS-001] Enforce KRBTGT Password Rotation</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -1527,7 +1527,7 @@ Therefore, a complete rotation requires resetting the password twice. The resets
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6001" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-002" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-002" severity="high" weight="10.0" selected="false">
       <title>[REQ-OPS-002] Enable and Configure the Active Directory Recycle Bin</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers (Forest-wide configuration)
  Operating Systems: Windows Server 2016 and above
@@ -1543,7 +1543,7 @@ Enabling this feature provides several key benefits:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6002" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-003" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-003" severity="medium" weight="10.0" selected="false">
       <title>[REQ-OPS-003] Establish and Maintain Group Policy ADMX Central Store</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers (SYSVOL Share)
  Operating Systems: Windows Server 2016 and above
@@ -1560,7 +1560,7 @@ Establishing the Central Store in the SYSVOL share ensures that all administrato
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6003" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-004" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-004" severity="medium" weight="10.0" selected="false">
       <title>[REQ-OPS-004] Implement Third-Party and Custom GPO Templates for COTS Hardening</title>
       <description>Target Scope:  Applicable Systems: Domain Members (Clients and Servers)
  Operating Systems: Windows 10/11, Windows Server 2016 and above
@@ -1576,7 +1576,7 @@ Implementing third-party and custom GPO templates provides the following benefit
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6004" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-005" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-005" severity="medium" weight="10.0" selected="false">
       <title>[REQ-OPS-005] Configure Dedicated WSUS for Tier 0</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Tier 0 Administration Workstations (PAWs)
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10/11 Enterprise
@@ -1594,7 +1594,7 @@ To mitigate these threats, Tier 0 Domain Controllers and PAWs must pull updates 
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6005" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-006" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-006" severity="medium" weight="10.0" selected="false">
       <title>[REQ-OPS-006] Redirect Default Users and Computers Containers</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016 and above
@@ -1614,7 +1614,7 @@ Redirecting the default creation paths of users and computers to dedicated, hard
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6006" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-007" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-007" severity="medium" weight="10.0" selected="false">
       <title>[REQ-OPS-007] Mandate Naming Conventions for GPOs, OUs, and User Accounts</title>
       <description>Target Scope:  Applicable Systems: Active Directory Domain Services (Logical Structure), Management Stations, Domain Controllers
  Operating Systems: Windows Server 2016+, Windows 10 Enterprise, Windows 11 Enterprise
@@ -1631,7 +1631,7 @@ Enforcing structured GPO, OU, and Account naming conventions, combined with a ma
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6007" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-008" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-008" severity="high" weight="10.0" selected="false">
       <title>[REQ-OPS-008] Configure Daily System State Backups</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -1649,7 +1649,7 @@ To ensure resilience:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6008" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-009" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-009" severity="high" weight="10.0" selected="false">
       <title>[REQ-OPS-009] Implement Offline Patch Management via WSUS</title>
       <description>Target Scope:  Applicable Systems: Dedicated WSUS Update Servers (Tier 0 &amp; Tier 1/2)
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -1665,7 +1665,7 @@ Establishing an offline WSUS sync protocol:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6009" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-010" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-010" severity="medium" weight="10.0" selected="false">
       <title>[REQ-OPS-010] Establish Continuous Security Assessments</title>
       <description>Target Scope:  Applicable Systems: Active Directory Domain Services, Management Workstations
  Operating Systems: Windows Server 2016+, Windows 10/11 Enterprise
@@ -1683,7 +1683,7 @@ In isolated, air-gapped networks, online security analysis services cannot be re
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6010" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-011" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-011" severity="medium" weight="10.0" selected="false">
       <title>[REQ-OPS-011] Enable Detailed BSOD Stop Parameters for Crash Control</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers, Tier 2 Client Workstations
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11 Enterprise
@@ -1699,7 +1699,7 @@ Enabling detailed stop error parameters is crucial because:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6011" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-012" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-012" severity="medium" weight="10.0" selected="false">
       <title>[REQ-OPS-012] Implement Automated Inactive Computer and User Account Cleanup</title>
       <description>Target Scope:  Applicable Systems: Active Directory User and Computer Accounts (Tiers 0, 1, and 2).
  Operating Systems: Active Directory Domain Services (All supported functional levels).
@@ -1717,7 +1717,7 @@ Automatically disabling and isolating user accounts after 180 days of inactivity
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6012" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-013" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-013" severity="medium" weight="10.0" selected="false">
       <title>[REQ-OPS-013] Clean Up Staged Install From Media (IFM) Data</title>
       <description>Target Scope:  Applicable Systems: Domain Controllers, Member Servers
  Operating Systems: Windows Server 2016, Windows Server 2019, Windows Server 2022
@@ -1737,7 +1737,7 @@ If these staged IFM folders are left behind on member servers, administrative sh
   </Group>
   <Group id="xccdf_org.adhardening.benchmarks_group_Module_7__Privileged_Access_Workstations__PAWs__Hardening">
     <title>Module 7: Privileged Access Workstations (PAWs) Hardening</title>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-001" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-001" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-001] Configure AppLocker Policies for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -1754,7 +1754,7 @@ Enforcing strict execution controls via AppLocker ensures that:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7001" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-002" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-002" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-002] Enable LSA Protection for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -1770,7 +1770,7 @@ Enabling LSA Protection ensures that:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7002" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-003" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-003" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-003] Restrict Local Administrators Group for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -1786,7 +1786,7 @@ Restricting local Administrators group membership ensures that:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7003" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-004" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-004" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-004] Enforce BitLocker with TPM and Startup PIN for PAWs</title>
       <description>Target Scope:  Applicable Systems: Tier 0 Privileged Access Workstations (PAWs).
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -1804,7 +1804,7 @@ To achieve maximum protection, the PAW BitLocker configuration enforces a signif
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7004" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-005" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-005" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-005] UEFI Firmware Security Hardening</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -1823,7 +1823,7 @@ Securing the firmware level ensures:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7005" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-006" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-006" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-006] Enable Hardware Virtualization and DMA Protection</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -1839,7 +1839,7 @@ Enabling hardware virtualization and DMA protection guarantees:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7006" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-007" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-007" severity="medium" weight="10.0" selected="false">
       <title>[REQ-PAW-007] Disable Windows Platform Binary Table (WPBT)</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -1857,7 +1857,7 @@ Disabling WPBT execution prevents Windows from parsing the ACPI table and runnin
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7007" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-008" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-008" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-008] Windows Defender Antivirus PAW Baseline and Exploit Guard</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -1874,7 +1874,7 @@ This control introduces a highly restrictive protective barrier on PAWs:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7008" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-009" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-009" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-009] Configure User Rights Assignments for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -1890,7 +1890,7 @@ File Path: 07-paws/configure-user-rights-assignments.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7009" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-010" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-010" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-010] Enable VBS and Credential Guard for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -1906,7 +1906,7 @@ File Path: 07-paws/enable-vbs-credential-guard.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7010" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-011" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-011" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-011] Harden DMA and Physical Security for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -1924,7 +1924,7 @@ File Path: 07-paws/harden-dma-and-physical-security.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7011" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-012" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-012" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-012] Enable WDAC Driver Blocklist</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs)
  Operating Systems: Windows 10, Windows 11 (Enterprise and Professional editions)
@@ -1937,7 +1937,7 @@ Enforcing the Microsoft Vulnerable Driver Blocklist via Windows Defender Applica
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7012" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-013" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-013" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-013] Configure Account and Password Policies for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
  Operating Systems: Windows 10/11 Enterprise
@@ -1959,7 +1959,7 @@ File Path: 07-paws/configure-account-policies.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7013" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-014" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-014" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-014] Configure Early Launch Antimalware (ELAM) Policy for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations.
  Operating Systems: Windows 10/11 Enterprise.
@@ -1973,7 +1973,7 @@ File Path: 07-paws/configure-elam.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7014" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-015" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-015" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-015] Configure Secure Printing and Print Spooler Policies for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations.
  Operating Systems: Windows 10/11 Enterprise.
@@ -1988,7 +1988,7 @@ To secure Privileged Access Workstations (PAWs), which host highly privileged Ti
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7015" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-016" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-016" severity="medium" weight="10.0" selected="false">
       <title>[REQ-PAW-016] Configure Untrusted Font Blocking for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs).
  Operating Systems: Windows 10/11 Enterprise.
@@ -2003,7 +2003,7 @@ Enabling Untrusted Font Blocking limits the attack surface of the graphics subsy
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7016" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-017" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-017" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-017] Configure svchost.exe Mitigation Options for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs).
  Operating Systems: Windows 10 (1903 and above), Windows 11 Enterprise.
@@ -2018,7 +2018,7 @@ Enabling svchost.exe mitigation options on PAWs restricts the behavior of the sv
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7017" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-018" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-018" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-018] Enable Kernel-Mode Hardware-Enforced Stack Protection for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs)
  Operating Systems: Windows 11 (and above) Enterprise/Professional
@@ -2035,7 +2035,7 @@ Deploying Kernel-mode Hardware-enforced Stack Protection on PAWs guarantees that
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7018" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-019" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-019" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-019] Harden Network Parameters and Disable Legacy Name Resolution</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -2054,7 +2054,7 @@ File Path: 07-paws/harden-network-and-name-resolution.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7019" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-020" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-020" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-020] Configure User Account Control Policies for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -2074,7 +2074,7 @@ Hardening UAC settings ensures:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7020" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-021" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-021" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-021] Disable AutoPlay and AutoRun for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -2089,7 +2089,7 @@ Additionally, non-volume devices (such as mobile phones, cameras, or media playe
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7021" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-022" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-022" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-022] Disable Incoming Remote Desktop Access for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -2105,7 +2105,7 @@ For Privileged Access Workstations (PAWs), which manage Tier 0 administrative as
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7022" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-023" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-023" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-023] WSUS Client Configuration for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -2121,7 +2121,7 @@ Enforcing the intranet update service location redirects all system update queri
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7023" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-024" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-024" severity="medium" weight="10.0" selected="false">
       <title>[REQ-PAW-024] Configure User Profile Restrictions</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -2145,7 +2145,7 @@ File Path: 07-paws/configure-user-profile-restrictions.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7024" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-025" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-025" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-025] Configure Exploit Protection Profile for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -2163,7 +2163,7 @@ By enforcing system-wide mitigations:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7025" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-026" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-026" severity="medium" weight="10.0" selected="false">
       <title>[REQ-PAW-026] Restrict Safe Mode Access to Administrators on PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -2178,7 +2178,7 @@ By configuring SafeModeBlockNonAdmins = 1:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7026" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-027" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-027" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-027] Configure Windows Defender Firewall and Block LOLBins for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -2192,7 +2192,7 @@ Additionally:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7027" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-028" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-028" severity="medium" weight="10.0" selected="false">
       <title>[REQ-PAW-028] Disable Unnecessary System Services for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -2208,7 +2208,7 @@ File Path: 07-paws/disable-unnecessary-system-services.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7028" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-029" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-029" severity="medium" weight="10.0" selected="false">
       <title>[REQ-PAW-029] Configure System Administrative Templates for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
@@ -2225,7 +2225,7 @@ File Path: 07-paws/configure-system-administrative-templates.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7029" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-030" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-030" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-030] Enable Secure Boot</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs).
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2243,7 +2243,7 @@ If Secure Boot is disabled:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7030" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-031" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-031" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-031] Enforce Smart Card Logon for PAWs</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
  Operating Systems: Windows 10/11 Enterprise
@@ -2258,7 +2258,7 @@ File Path: 07-paws/enforce-smartcard-logon-paws.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7031" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-032" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-032" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-032] Disable Unused Windows Features and PowerShell 2.0 Engine</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) (Tier 0 hosts).
  Operating Systems: Windows 10 (and above) Enterprise/Professional.
@@ -2276,7 +2276,7 @@ File Path: 07-paws/disable-unused-features.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7032" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-033" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-033" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-033] Configure Microsoft Office Security and Block OLE Packages</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
  Operating Systems: Windows 10/11 Enterprise
@@ -2292,7 +2292,7 @@ Hardening these settings ensures:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7033" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-034" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-034" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-034] Disable Windows Script Host and Remap Scripting Extensions</title>
       <description>Target Scope:  Applicable Systems: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
  Operating Systems: Windows 10/11 Enterprise
@@ -2310,7 +2310,7 @@ Enforcing these deactivation controls ensures:
   </Group>
   <Group id="xccdf_org.adhardening.benchmarks_group_Module_8__Endpoint_Hardening">
     <title>Module 8: Endpoint Hardening</title>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-001" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-001" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-001] Harden Network Parameters and Disable Legacy Name Resolution</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2329,7 +2329,7 @@ File Path: 08-endpoints/harden-network-and-name-resolution.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8001" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-002" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-002" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-002] Configure User Account Control Policies</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2349,7 +2349,7 @@ Hardening UAC settings ensures:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8002" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-003" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-003" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-003] Disable AutoPlay and AutoRun</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2364,7 +2364,7 @@ Additionally, non-volume devices (such as mobile phones, cameras, or media playe
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8003" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-004" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-004" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-004] Block Removable Storage</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations.
  Operating Systems: Windows 10 (and above) Enterprise/Professional.
@@ -2377,7 +2377,7 @@ Attackers use USB drives to bypass network-based security boundaries (such as fi
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8004" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-005" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-005" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-005] Restrict Remote Desktop Access</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2395,7 +2395,7 @@ The safest configuration is to disable Remote Desktop Services and Remote Assist
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8005" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-006" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-006" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-006] Restrict Local Administrators Group</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations.
  Operating Systems: Windows 10 (and above) Enterprise/Professional.
@@ -2411,7 +2411,7 @@ Securing the local Administrators group ensures only local security accounts (li
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8006" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-007" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-007" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-007] Windows Defender Antivirus Baseline and Exploit Guard</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2429,7 +2429,7 @@ This control introduces four primary hardening mechanisms:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8007" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-008" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-008" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-008] WSUS Client Configuration</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2445,7 +2445,7 @@ Enforcing the intranet update service location redirects all system update queri
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8008" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-009" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-009" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-009] Enable Secure Boot</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2463,7 +2463,7 @@ If Secure Boot is disabled:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8009" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-010" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-010" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-010] Enable VBS and Credential Guard</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2482,7 +2482,7 @@ Enforcing VBS and Credential Guard prevents in-memory credential harvesting, bre
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8010" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-011" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-011" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-011] Configure Windows Defender Application Control</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations.
  Operating Systems: Windows 10 (and above) Enterprise/Professional.
@@ -2502,7 +2502,7 @@ Deploying a strict WDAC baseline ensures that only binaries and scripts signed b
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8011" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-012" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-012" severity="medium" weight="10.0" selected="false">
       <title>[REQ-END-012] Enable BitLocker and Network Unlock</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations.
  Operating Systems: Windows 10 (and above) Enterprise/Professional.
@@ -2517,7 +2517,7 @@ To maximize security, standard endpoints (Tier 2) should use BitLocker Network U
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8012" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-013" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-013" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-013] UEFI Firmware Security Hardening</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2536,7 +2536,7 @@ Securing the firmware level ensures:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8013" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-014" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-014" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-014] Enable Hardware Virtualization and DMA Protection</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2552,7 +2552,7 @@ Enabling hardware virtualization and DMA protection ensures:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8014" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-015" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-015" severity="medium" weight="10.0" selected="false">
       <title>[REQ-END-015] Disable Windows Platform Binary Table (WPBT)</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2570,7 +2570,7 @@ Disabling WPBT execution prevents Windows from parsing the ACPI table and runnin
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8015" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-016" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-016" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-016] Configure User Rights Assignments</title>
       <description>Target Scope:  Applicable Systems: Member Servers, Tier 2 Clients (Windows 10/11)
  Operating Systems: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
@@ -2587,7 +2587,7 @@ File Path: 08-endpoints/configure-user-rights-assignments.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8016" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-017" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-017" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-017] Harden DMA and Physical Security</title>
       <description>Target Scope:  Applicable Systems: Member Servers, Tier 2 Clients (Workstations / Laptops)
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above)
@@ -2605,7 +2605,7 @@ File Path: 08-endpoints/harden-dma-and-physical-security.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8017" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-018" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-018" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-018] Configure Account and Password Policies</title>
       <description>Target Scope:  Applicable Systems: Tier 2 Client Workstations, Member Servers, Domain Controllers
  Operating Systems: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
@@ -2632,7 +2632,7 @@ File Path: 08-endpoints/configure-account-policies.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8018" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-019" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-019" severity="medium" weight="10.0" selected="false">
       <title>[REQ-END-019] Configure User Profile Restrictions</title>
       <description>Target Scope:  Applicable Systems: Tier 2 Client Workstations
  Operating Systems: Windows 10 (and above) Enterprise/Professional
@@ -2656,7 +2656,7 @@ File Path: 08-endpoints/configure-user-profile-restrictions.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8019" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-020" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-020" severity="medium" weight="10.0" selected="false">
       <title>[REQ-END-020] Configure Exploit Protection Profile</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2674,7 +2674,7 @@ By enforcing system-wide mitigations:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8020" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-021" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-021" severity="medium" weight="10.0" selected="false">
       <title>[REQ-END-021] Restrict Safe Mode Access to Administrators</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2689,7 +2689,7 @@ By configuring SafeModeBlockNonAdmins = 1:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8021" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-022" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-022" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-022] Configure Windows Defender Firewall and Block LOLBins</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2703,7 +2703,7 @@ Additionally:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8022" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-023" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-023" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-023] Enable LSA Protection with UEFI Lock</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 Enterprise (1607+) and Windows 11 Enterprise/Professional.
@@ -2719,7 +2719,7 @@ Enabling LSA Protection ensures that:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8023" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-024" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-024" severity="medium" weight="10.0" selected="false">
       <title>[REQ-END-024] Disable Unnecessary System Services</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2735,7 +2735,7 @@ File Path: 08-endpoints/disable-unnecessary-system-services.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8024" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-025" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-025" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-025] Configure Secure Printing and Print Spooler Policies</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2753,7 +2753,7 @@ To secure standard client endpoints and member servers, the primary defense is t
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8025" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-026" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-026" severity="medium" weight="10.0" selected="false">
       <title>[REQ-END-026] Configure System Administrative Templates</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2770,7 +2770,7 @@ File Path: 08-endpoints/configure-system-administrative-templates.md</descriptio
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8026" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-027" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-027" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-027] Configure AppLocker Policies</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 Enterprise/Professional (and above), Windows 11 Enterprise/Professional, Windows Server 2016 (and above).
@@ -2787,7 +2787,7 @@ Enforcing strict application control via AppLocker on endpoints ensures that:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8027" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-028" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-028" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-028] Configure Early Launch Antimalware (ELAM) Policy</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10/11 Enterprise, Windows Server 2016 (and above).
@@ -2801,7 +2801,7 @@ File Path: 08-endpoints/configure-elam.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8028" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-029" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-029" severity="medium" weight="10.0" selected="false">
       <title>[REQ-END-029] Configure Untrusted Font Blocking</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2816,7 +2816,7 @@ Enabling Untrusted Font Blocking limits the attack surface of the graphics subsy
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8029" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-030" severity="medium" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-030" severity="medium" weight="10.0" selected="false">
       <title>[REQ-END-030] Configure svchost.exe Mitigation Options</title>
       <description>Target Scope:  Applicable Systems: Tier 2 Client Workstations.
  Operating Systems: Windows 10 (1903 and above), Windows 11 Enterprise/Professional.
@@ -2831,7 +2831,7 @@ Enabling svchost.exe mitigation options restricts the behavior of the svchost.ex
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8030" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-031" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-031" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-031] Enable Kernel-Mode Hardware-Enforced Stack Protection</title>
       <description>Target Scope:  Applicable Systems: Tier 2 Client Workstations
  Operating Systems: Windows 11 (and above) Enterprise/Professional
@@ -2848,7 +2848,7 @@ Enforcing Kernel-mode Hardware-enforced Stack Protection provides hardware-backe
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8031" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-032" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-032" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-032] Disable Unused Windows Features and PowerShell 2.0 Engine</title>
       <description>Target Scope:  Applicable Systems: Tier 2 client workstations and member servers.
  Operating Systems: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
@@ -2865,7 +2865,7 @@ File Path: 08-endpoints/disable-unused-features.md</description>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8032" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-033" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-033" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-033] Configure Microsoft Office Security and Block OLE Packages</title>
       <description>Target Scope:  Applicable Systems: Member Workstations (Endpoints)
  Operating Systems: Windows 10/11 Enterprise/Professional
@@ -2881,7 +2881,7 @@ Hardening these settings ensures:
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8033" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-034" severity="high" weight="10.0">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-034" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-034] Disable Windows Script Host and Remap Scripting Extensions</title>
       <description>Target Scope:  Applicable Systems: Member Workstations (Endpoints)
  Operating Systems: Windows 10/11 Enterprise

@@ -3,8 +3,8 @@
 
 Write-Host "--- Auditing LSA Protection Status ---" -ForegroundColor Cyan
 
-$LsaPoliciesPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-$RunAsPPL = (Get-ItemProperty -Path $LsaPoliciesPath -Name "RunAsPPL" -ErrorAction SilentlyContinue).RunAsPPL
+$LsaPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
+$RunAsPPL = (Get-ItemProperty -Path $LsaPath -Name "RunAsPPL" -ErrorAction SilentlyContinue).RunAsPPL
 
 if ($RunAsPPL -eq 1) {
     Write-Host "    - LSA Protection (RunAsPPL): Enabled (Secure)" -ForegroundColor Green

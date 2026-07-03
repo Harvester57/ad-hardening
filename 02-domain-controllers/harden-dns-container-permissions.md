@@ -8,7 +8,10 @@
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**: Active Directory path: `CN=MicrosoftDNS,CN=System,DC=[Domain]` and Registry Path: `HKLM:\System\CurrentControlSet\Services\DNS\Parameters`
+* **GPO Path / Registry Location**:
+  * **Active Directory Path**: `CN=MicrosoftDNS,CN=System,DC=[Domain]`
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\DNS\Parameters`
+    * `ServerLevelPluginDll` = `""` (REG_SZ)
 
 ---
 

@@ -18,7 +18,7 @@ To achieve high-fidelity auditing with minimal overhead and no arbitrary script 
    * **User Rights Assignments**: Native `userright_test` checks mapping security permissions to trustee SIDs.
    * **Local Account Policies**: Native `passwordpolicy_test` and `lockoutpolicy_test` checks validating SAM limits.
    * **Audit Policies**: Native `auditeventpolicysubcategories_test` checks validating audit subcategory settings.
-   * **External Scripts (Fallback)**: Native `command_test` checks that execute local PowerShell audit scripts for advanced AD directory object checks.
+    * **External Scripts (Fallback)**: Native placeholder checks for rules requiring complex custom scripts (actual checks are performed by the PowerShell DSC audit framework).
 
 ---
 
@@ -31,22 +31,21 @@ Automated audits using these compliance manifests can be performed using standar
 OpenSCAP is an open-source security compliance tool. It can evaluate XCCDF benchmarks and OVAL definitions on Windows systems:
 
 1. **Install OpenSCAP**: Download and install the OpenSCAP command-line utility for Windows (available in packages or compiled from source).
-2. **Run the Audit**: Open an elevated command prompt or PowerShell console (run as Administrator) and execute `oscap` specifying the benchmark profile:
+2. **Run the Audit**: Open an elevated command prompt or PowerShell console (run as Administrator) and execute `oscap` specifying the benchmark profile. Include the `--oval-results` flag to ensure that the system characteristics (expected vs actual value) are included in the results for detailed reporting:
 
 ```text
 # Evaluate Domain Controller baseline
-oscap xccdf eval --profile xccdf_org.adhardening.benchmarks_profile_DomainController --results dc-results.xml ad-hardening-xccdf.xml
+oscap xccdf eval --oval-results --profile xccdf_org.adhardening.benchmarks_profile_DomainController --results dc-results.xml --report dc-report.html ad-hardening-xccdf.xml
 
 # Evaluate Privileged Access Workstation baseline
-oscap xccdf eval --profile xccdf_org.adhardening.benchmarks_profile_PAW --results paw-results.xml ad-hardening-xccdf.xml
+oscap xccdf eval --oval-results --profile xccdf_org.adhardening.benchmarks_profile_PAW --results paw-results.xml --report paw-report.html ad-hardening-xccdf.xml
 
 # Evaluate Endpoint baseline
-oscap xccdf eval --profile xccdf_org.adhardening.benchmarks_profile_Endpoint --results endpoint-results.xml ad-hardening-xccdf.xml
+oscap xccdf eval --oval-results --profile xccdf_org.adhardening.benchmarks_profile_Endpoint --results endpoint-results.xml --report endpoint-report.html ad-hardening-xccdf.xml
 ```
 
-3. **Generate a Human-Readable Report**:
-```text
-oscap xccdf generate report dc-results.xml > dc-report.html
+3. **View the Detailed Report**:
+Open the generated HTML report (e.g., `dc-report.html`) in a browser. Under each evaluated rule, you can expand the rule details to see the OVAL system characteristics, including the expected value versus the actual value found on the machine.
 ```
 
 ### Option B: Using jOVAL or Enterprise Vulnerability Scanners

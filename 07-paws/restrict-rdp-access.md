@@ -16,7 +16,7 @@
     * `HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server`
       * `fDenyTSConnections` = `1` (REG_DWORD, Disabled)
       * `fAllowToGetHelp` = `0` (REG_DWORD, Solicited Remote Assistance Disabled)
-    * `HKLM\SOFTWARE\Policies\Microsoft\WindowsNT\Terminal Services`
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services`
       * `fAllowToGetHelp` = `0` (REG_DWORD, Solicited Remote Assistance Policy Disabled)
 
 ---

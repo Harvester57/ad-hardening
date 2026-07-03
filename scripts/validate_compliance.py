@@ -135,14 +135,14 @@ def validate_oval(oval_path, xsd_elements):
             
         obj_refs = test.findall(f'{{{ns}}}object')
         for obj_ref in obj_refs:
-            ref = obj_ref.attrib.get('ref')
+            ref = obj_ref.attrib.get('object_ref')
             if not ref or ref not in object_ids:
                 print(f"Error: Test {test_id} references missing Object: {ref}")
                 errors += 1
                 
         ste_refs = test.findall(f'{{{ns}}}state')
         for ste_ref in ste_refs:
-            ref = ste_ref.attrib.get('ref')
+            ref = ste_ref.attrib.get('state_ref')
             if not ref or ref not in state_ids:
                 print(f"Error: Test {test_id} references missing State: {ref}")
                 errors += 1
