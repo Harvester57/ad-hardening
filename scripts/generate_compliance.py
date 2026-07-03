@@ -279,6 +279,12 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                     module_dir = os.path.dirname(rel_path).replace('\\', '/')
                     impl_script = f"{module_dir}/implementation_scripts/{impl_name}"
                 
+                # Extract implementation steps text block
+                impl_steps = ""
+                impl_steps_match = re.search(r'## Implementation Steps\s*\n(.*?)(?=\n##\s|\Z)', content, re.DOTALL | re.IGNORECASE)
+                if impl_steps_match:
+                    impl_steps = impl_steps_match.group(1).strip()
+                
                 # Extract target scope
                 scope = ""
                 scope_match = re.search(r'## Target Scope\s*\n(.*?)(?=\n##|\n---)', content, re.DOTALL | re.IGNORECASE)
@@ -540,6 +546,7 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                     'rationale': rationale,
                     'audit_script': audit_script,
                     'impl_script': impl_script,
+                    'impl_steps': impl_steps,
                     'registry_checks': registry_checks,
                     'service_checks': service_checks,
                     'user_rights': user_rights,
@@ -594,14 +601,79 @@ def parse_inline_formatting(parent_el, text, xhtml_ns):
         else:
             append_text(parent_el, part)
 
+def split_paragraphs_respecting_code(md_text):
+    paragraphs = []
+    current_p_lines = []
+    in_code_block = False
+    
+    for line in md_text.splitlines():
+        line_strip = line.strip()
+        if line_strip.startswith('```'):
+            in_code_block = not in_code_block
+            current_p_lines.append(line)
+            continue
+            
+        if in_code_block:
+            current_p_lines.append(line)
+        else:
+            if line_strip.startswith('#') or line_strip == '---':
+                if current_p_lines:
+                    paragraphs.append("\n".join(current_p_lines))
+                    current_p_lines = []
+                paragraphs.append(line)
+                continue
+                
+            if not line_strip:
+                if current_p_lines:
+                    paragraphs.append("\n".join(current_p_lines))
+                    current_p_lines = []
+            else:
+                current_p_lines.append(line)
+                
+    if current_p_lines:
+        paragraphs.append("\n".join(current_p_lines))
+        
+    return paragraphs
+
 def parse_markdown_to_xml(parent_el, md_text, xhtml_ns):
-    paragraphs = re.split(r'\n\n+', md_text.strip())
+    paragraphs = split_paragraphs_respecting_code(md_text)
     for p_text in paragraphs:
         p_text = p_text.strip()
         if not p_text:
             continue
             
         lines = p_text.split('\n')
+        
+        # Check for code blocks
+        if lines[0].strip().startswith('```'):
+            code_lines = []
+            for line in lines:
+                line_strip = line.strip()
+                if line_strip.startswith('```'):
+                    continue
+                code_lines.append(line)
+            code_text = "\n".join(code_lines)
+            pre_el = ET.SubElement(parent_el, f"{{{xhtml_ns}}}pre")
+            code_el = ET.SubElement(pre_el, f"{{{xhtml_ns}}}code")
+            code_el.text = code_text
+            continue
+            
+        # Check for headings
+        heading_match = re.match(r'^(#{1,6})\s+(.*)$', lines[0])
+        if heading_match:
+            level = len(heading_match.group(1))
+            h_tag = f"{{{xhtml_ns}}}h{level}"
+            h_el = ET.SubElement(parent_el, h_tag)
+            h_text = " ".join(line.strip() for line in lines)
+            h_text_clean = re.sub(r'^#{1,6}\s+', '', h_text)
+            parse_inline_formatting(h_el, h_text_clean, xhtml_ns)
+            continue
+            
+        # Check for horizontal rules
+        if lines[0].strip() == '---':
+            ET.SubElement(parent_el, f"{{{xhtml_ns}}}hr")
+            continue
+            
         is_list = False
         is_ordered = False
         
@@ -741,6 +813,10 @@ def generate_xccdf(requirements, output_path, repo_root):
             if req['rationale']:
                 r_rat = ET.SubElement(rule_el, x_tag('rationale'))
                 parse_markdown_to_xml(r_rat, req['rationale'], XHTML_NS)
+                
+            if req['impl_steps']:
+                r_fixtext = ET.SubElement(rule_el, x_tag('fixtext'))
+                parse_markdown_to_xml(r_fixtext, req['impl_steps'], XHTML_NS)
                 
             # If the requirement has an implementation script, embed it as a fix element
             if req['impl_script']:
