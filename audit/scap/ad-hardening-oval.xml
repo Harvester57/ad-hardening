@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-03T21:29:40Z</oval:timestamp>
+    <oval:timestamp>2026-07-03T21:32:55Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -4129,10 +4129,10 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:2001001" />
       <windows:state state_ref="oval:org.adhardening:ste:2001001" />
     </windows:registry_test>
-    <windows:service_test id="oval:org.adhardening:tst:2001150" version="1" comment="Check Startup Configuration for Service mrxsmb10" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:2001150" version="1" comment="Check Startup Configuration for Service mrxsmb10" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2001150" />
       <windows:state state_ref="oval:org.adhardening:ste:2001150" />
-    </windows:service_test>
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:2002001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Dnscache\Parameters Value EnableMDNS" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2002001" />
       <windows:state state_ref="oval:org.adhardening:ste:2002001" />
@@ -4189,10 +4189,10 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:2007006" />
       <windows:state state_ref="oval:org.adhardening:ste:2007006" />
     </windows:registry_test>
-    <windows:service_test id="oval:org.adhardening:tst:2008150" version="1" comment="Check Startup Configuration for Service Spooler" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:2008150" version="1" comment="Check Startup Configuration for Service Spooler" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2008150" />
       <windows:state state_ref="oval:org.adhardening:ste:2008150" />
-    </windows:service_test>
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:2009001" version="1" comment="Check Registry Key System\CurrentControlSet\Services\LanmanServer\Parameters Value RequireSecuritySignature" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2009001" />
       <windows:state state_ref="oval:org.adhardening:ste:2009001" />
@@ -4209,10 +4209,10 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:2011001" />
       <windows:state state_ref="oval:org.adhardening:ste:2011001" />
     </windows:registry_test>
-    <windows:service_test id="oval:org.adhardening:tst:2012150" version="1" comment="Check Startup Configuration for Service &lt;ServiceName&gt;" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:2012150" version="1" comment="Check Startup Configuration for Service &lt;ServiceName&gt;" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2012150" />
       <windows:state state_ref="oval:org.adhardening:ste:2012150" />
-    </windows:service_test>
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:2013001" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters Value EnableCbacAndArmor" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2013001" />
       <windows:state state_ref="oval:org.adhardening:ste:2013001" />
@@ -4329,10 +4329,10 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:2020005" />
       <windows:state state_ref="oval:org.adhardening:ste:2020005" />
     </windows:registry_test>
-    <windows:service_test id="oval:org.adhardening:tst:2021150" version="1" comment="Check Startup Configuration for Service AppIDSvc" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:2021150" version="1" comment="Check Startup Configuration for Service AppIDSvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2021150" />
       <windows:state state_ref="oval:org.adhardening:ste:2021150" />
-    </windows:service_test>
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:2022001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\CI\Config Value VulnerableDriverBlocklistEnable" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2022001" />
       <windows:state state_ref="oval:org.adhardening:ste:2022001" />
@@ -5657,10 +5657,10 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:8019044" />
       <windows:state state_ref="oval:org.adhardening:ste:8019044" />
     </windows:registry_test>
-    <windows:service_test id="oval:org.adhardening:tst:8019150" version="1" comment="Check Startup Configuration for Service seclogon" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8019150" version="1" comment="Check Startup Configuration for Service seclogon" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8019150" />
       <windows:state state_ref="oval:org.adhardening:ste:8019150" />
-    </windows:service_test>
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8020001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection Value ExploitProtectionSettings" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8020001" />
       <windows:state state_ref="oval:org.adhardening:ste:8020001" />
@@ -5689,94 +5689,94 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:8023001" />
       <windows:state state_ref="oval:org.adhardening:ste:8023001" />
     </windows:registry_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024150" version="1" comment="Check Startup Configuration for Service Browser" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8024150" version="1" comment="Check Startup Configuration for Service Browser" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024150" />
       <windows:state state_ref="oval:org.adhardening:ste:8024150" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024151" version="1" comment="Check Startup Configuration for Service irmon" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024151" version="1" comment="Check Startup Configuration for Service irmon" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024151" />
       <windows:state state_ref="oval:org.adhardening:ste:8024151" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024152" version="1" comment="Check Startup Configuration for Service SharedAccess" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024152" version="1" comment="Check Startup Configuration for Service SharedAccess" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024152" />
       <windows:state state_ref="oval:org.adhardening:ste:8024152" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024153" version="1" comment="Check Startup Configuration for Service LxssManager" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024153" version="1" comment="Check Startup Configuration for Service LxssManager" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024153" />
       <windows:state state_ref="oval:org.adhardening:ste:8024153" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024154" version="1" comment="Check Startup Configuration for Service FTPSVC" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024154" version="1" comment="Check Startup Configuration for Service FTPSVC" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024154" />
       <windows:state state_ref="oval:org.adhardening:ste:8024154" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024155" version="1" comment="Check Startup Configuration for Service sshd" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024155" version="1" comment="Check Startup Configuration for Service sshd" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024155" />
       <windows:state state_ref="oval:org.adhardening:ste:8024155" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024156" version="1" comment="Check Startup Configuration for Service RpcLocator" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024156" version="1" comment="Check Startup Configuration for Service RpcLocator" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024156" />
       <windows:state state_ref="oval:org.adhardening:ste:8024156" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024157" version="1" comment="Check Startup Configuration for Service RemoteAccess" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024157" version="1" comment="Check Startup Configuration for Service RemoteAccess" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024157" />
       <windows:state state_ref="oval:org.adhardening:ste:8024157" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024158" version="1" comment="Check Startup Configuration for Service simptcp" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024158" version="1" comment="Check Startup Configuration for Service simptcp" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024158" />
       <windows:state state_ref="oval:org.adhardening:ste:8024158" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024159" version="1" comment="Check Startup Configuration for Service sacsvr" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024159" version="1" comment="Check Startup Configuration for Service sacsvr" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024159" />
       <windows:state state_ref="oval:org.adhardening:ste:8024159" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024160" version="1" comment="Check Startup Configuration for Service SSDPSRV" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024160" version="1" comment="Check Startup Configuration for Service SSDPSRV" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024160" />
       <windows:state state_ref="oval:org.adhardening:ste:8024160" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024161" version="1" comment="Check Startup Configuration for Service upnphost" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024161" version="1" comment="Check Startup Configuration for Service upnphost" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024161" />
       <windows:state state_ref="oval:org.adhardening:ste:8024161" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024162" version="1" comment="Check Startup Configuration for Service WMSvc" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024162" version="1" comment="Check Startup Configuration for Service WMSvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024162" />
       <windows:state state_ref="oval:org.adhardening:ste:8024162" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024163" version="1" comment="Check Startup Configuration for Service WMPNetworkSvc" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024163" version="1" comment="Check Startup Configuration for Service WMPNetworkSvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024163" />
       <windows:state state_ref="oval:org.adhardening:ste:8024163" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024164" version="1" comment="Check Startup Configuration for Service icssvc" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024164" version="1" comment="Check Startup Configuration for Service icssvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024164" />
       <windows:state state_ref="oval:org.adhardening:ste:8024164" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024165" version="1" comment="Check Startup Configuration for Service W3SVC" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024165" version="1" comment="Check Startup Configuration for Service W3SVC" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024165" />
       <windows:state state_ref="oval:org.adhardening:ste:8024165" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024166" version="1" comment="Check Startup Configuration for Service XboxGipSvc" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024166" version="1" comment="Check Startup Configuration for Service XboxGipSvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024166" />
       <windows:state state_ref="oval:org.adhardening:ste:8024166" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024167" version="1" comment="Check Startup Configuration for Service XblAuthManager" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024167" version="1" comment="Check Startup Configuration for Service XblAuthManager" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024167" />
       <windows:state state_ref="oval:org.adhardening:ste:8024167" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024168" version="1" comment="Check Startup Configuration for Service XblGameSave" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024168" version="1" comment="Check Startup Configuration for Service XblGameSave" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024168" />
       <windows:state state_ref="oval:org.adhardening:ste:8024168" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:8024169" version="1" comment="Check Startup Configuration for Service XboxNetApiSvc" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8024169" version="1" comment="Check Startup Configuration for Service XboxNetApiSvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8024169" />
       <windows:state state_ref="oval:org.adhardening:ste:8024169" />
-    </windows:service_test>
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8025001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint Value RestrictDriverInstallationToAdministrators" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8025001" />
       <windows:state state_ref="oval:org.adhardening:ste:8025001" />
     </windows:registry_test>
-    <windows:service_test id="oval:org.adhardening:tst:8025150" version="1" comment="Check Startup Configuration for Service Spooler" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8025150" version="1" comment="Check Startup Configuration for Service Spooler" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8025150" />
       <windows:state state_ref="oval:org.adhardening:ste:8025150" />
-    </windows:service_test>
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8026001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon Value AutoAdminLogon" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8026001" />
       <windows:state state_ref="oval:org.adhardening:ste:8026001" />
@@ -6125,10 +6125,10 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:8027001" />
       <windows:state state_ref="oval:org.adhardening:ste:8027001" />
     </windows:registry_test>
-    <windows:service_test id="oval:org.adhardening:tst:8027150" version="1" comment="Check Startup Configuration for Service AppIDSvc" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8027150" version="1" comment="Check Startup Configuration for Service AppIDSvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8027150" />
       <windows:state state_ref="oval:org.adhardening:ste:8027150" />
-    </windows:service_test>
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8028001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Policies\EarlyLaunch Value DriverLoadPolicy" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8028001" />
       <windows:state state_ref="oval:org.adhardening:ste:8028001" />
@@ -6549,10 +6549,10 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:7001001" />
       <windows:state state_ref="oval:org.adhardening:ste:7001001" />
     </windows:registry_test>
-    <windows:service_test id="oval:org.adhardening:tst:7001150" version="1" comment="Check Startup Configuration for Service AppIDSvc" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7001150" version="1" comment="Check Startup Configuration for Service AppIDSvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7001150" />
       <windows:state state_ref="oval:org.adhardening:ste:7001150" />
-    </windows:service_test>
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7002001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Lsa Value RunAsPPL" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7002001" />
       <windows:state state_ref="oval:org.adhardening:ste:7002001" />
@@ -6897,10 +6897,10 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:7015001" />
       <windows:state state_ref="oval:org.adhardening:ste:7015001" />
     </windows:registry_test>
-    <windows:service_test id="oval:org.adhardening:tst:7015150" version="1" comment="Check Startup Configuration for Service Spooler" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7015150" version="1" comment="Check Startup Configuration for Service Spooler" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7015150" />
       <windows:state state_ref="oval:org.adhardening:ste:7015150" />
-    </windows:service_test>
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7016001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions Value MitigationOptions_FontBocking" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7016001" />
       <windows:state state_ref="oval:org.adhardening:ste:7016001" />
@@ -7245,10 +7245,10 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:7024044" />
       <windows:state state_ref="oval:org.adhardening:ste:7024044" />
     </windows:registry_test>
-    <windows:service_test id="oval:org.adhardening:tst:7024150" version="1" comment="Check Startup Configuration for Service seclogon" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7024150" version="1" comment="Check Startup Configuration for Service seclogon" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7024150" />
       <windows:state state_ref="oval:org.adhardening:ste:7024150" />
-    </windows:service_test>
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7025001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection Value ExploitProtectionSettings" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7025001" />
       <windows:state state_ref="oval:org.adhardening:ste:7025001" />
@@ -7273,86 +7273,86 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:7027" />
       <windows:state state_ref="oval:org.adhardening:ste:7027" />
     </windows:registry_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028150" version="1" comment="Check Startup Configuration for Service Browser" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7028150" version="1" comment="Check Startup Configuration for Service Browser" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028150" />
       <windows:state state_ref="oval:org.adhardening:ste:7028150" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028151" version="1" comment="Check Startup Configuration for Service irmon" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028151" version="1" comment="Check Startup Configuration for Service irmon" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028151" />
       <windows:state state_ref="oval:org.adhardening:ste:7028151" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028152" version="1" comment="Check Startup Configuration for Service SharedAccess" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028152" version="1" comment="Check Startup Configuration for Service SharedAccess" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028152" />
       <windows:state state_ref="oval:org.adhardening:ste:7028152" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028153" version="1" comment="Check Startup Configuration for Service LxssManager" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028153" version="1" comment="Check Startup Configuration for Service LxssManager" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028153" />
       <windows:state state_ref="oval:org.adhardening:ste:7028153" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028154" version="1" comment="Check Startup Configuration for Service FTPSVC" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028154" version="1" comment="Check Startup Configuration for Service FTPSVC" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028154" />
       <windows:state state_ref="oval:org.adhardening:ste:7028154" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028155" version="1" comment="Check Startup Configuration for Service sshd" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028155" version="1" comment="Check Startup Configuration for Service sshd" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028155" />
       <windows:state state_ref="oval:org.adhardening:ste:7028155" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028156" version="1" comment="Check Startup Configuration for Service RpcLocator" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028156" version="1" comment="Check Startup Configuration for Service RpcLocator" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028156" />
       <windows:state state_ref="oval:org.adhardening:ste:7028156" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028157" version="1" comment="Check Startup Configuration for Service RemoteAccess" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028157" version="1" comment="Check Startup Configuration for Service RemoteAccess" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028157" />
       <windows:state state_ref="oval:org.adhardening:ste:7028157" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028158" version="1" comment="Check Startup Configuration for Service simptcp" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028158" version="1" comment="Check Startup Configuration for Service simptcp" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028158" />
       <windows:state state_ref="oval:org.adhardening:ste:7028158" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028159" version="1" comment="Check Startup Configuration for Service sacsvr" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028159" version="1" comment="Check Startup Configuration for Service sacsvr" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028159" />
       <windows:state state_ref="oval:org.adhardening:ste:7028159" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028160" version="1" comment="Check Startup Configuration for Service SSDPSRV" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028160" version="1" comment="Check Startup Configuration for Service SSDPSRV" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028160" />
       <windows:state state_ref="oval:org.adhardening:ste:7028160" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028161" version="1" comment="Check Startup Configuration for Service upnphost" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028161" version="1" comment="Check Startup Configuration for Service upnphost" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028161" />
       <windows:state state_ref="oval:org.adhardening:ste:7028161" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028162" version="1" comment="Check Startup Configuration for Service WMSvc" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028162" version="1" comment="Check Startup Configuration for Service WMSvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028162" />
       <windows:state state_ref="oval:org.adhardening:ste:7028162" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028163" version="1" comment="Check Startup Configuration for Service WMPNetworkSvc" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028163" version="1" comment="Check Startup Configuration for Service WMPNetworkSvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028163" />
       <windows:state state_ref="oval:org.adhardening:ste:7028163" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028164" version="1" comment="Check Startup Configuration for Service icssvc" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028164" version="1" comment="Check Startup Configuration for Service icssvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028164" />
       <windows:state state_ref="oval:org.adhardening:ste:7028164" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028165" version="1" comment="Check Startup Configuration for Service W3SVC" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028165" version="1" comment="Check Startup Configuration for Service W3SVC" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028165" />
       <windows:state state_ref="oval:org.adhardening:ste:7028165" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028166" version="1" comment="Check Startup Configuration for Service XboxGipSvc" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028166" version="1" comment="Check Startup Configuration for Service XboxGipSvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028166" />
       <windows:state state_ref="oval:org.adhardening:ste:7028166" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028167" version="1" comment="Check Startup Configuration for Service XblAuthManager" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028167" version="1" comment="Check Startup Configuration for Service XblAuthManager" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028167" />
       <windows:state state_ref="oval:org.adhardening:ste:7028167" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028168" version="1" comment="Check Startup Configuration for Service XblGameSave" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028168" version="1" comment="Check Startup Configuration for Service XblGameSave" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028168" />
       <windows:state state_ref="oval:org.adhardening:ste:7028168" />
-    </windows:service_test>
-    <windows:service_test id="oval:org.adhardening:tst:7028169" version="1" comment="Check Startup Configuration for Service XboxNetApiSvc" check="all">
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7028169" version="1" comment="Check Startup Configuration for Service XboxNetApiSvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7028169" />
       <windows:state state_ref="oval:org.adhardening:ste:7028169" />
-    </windows:service_test>
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7029001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon Value AutoAdminLogon" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7029001" />
       <windows:state state_ref="oval:org.adhardening:ste:7029001" />
@@ -7780,9 +7780,11 @@ Enforcing these deactivation controls ensures:
       <windows:key>SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters</windows:key>
       <windows:name>SMB1</windows:name>
     </windows:registry_object>
-    <windows:service_object id="oval:org.adhardening:obj:2001150" version="1">
-      <windows:service_name>mrxsmb10</windows:service_name>
-    </windows:service_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2001150" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\mrxsmb10</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:2002001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\Dnscache\Parameters</windows:key>
@@ -7853,9 +7855,11 @@ Enforcing these deactivation controls ensures:
       <windows:key>SYSTEM\CurrentControlSet\Control\Lsa</windows:key>
       <windows:name>LsaCfgFlags</windows:name>
     </windows:registry_object>
-    <windows:service_object id="oval:org.adhardening:obj:2008150" version="1">
-      <windows:service_name>Spooler</windows:service_name>
-    </windows:service_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2008150" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\Spooler</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:2009001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>System\CurrentControlSet\Services\LanmanServer\Parameters</windows:key>
@@ -7876,9 +7880,11 @@ Enforcing these deactivation controls ensures:
       <windows:key>System\CurrentControlSet\Control\Lsa</windows:key>
       <windows:name>RestrictRemoteSAM</windows:name>
     </windows:registry_object>
-    <windows:service_object id="oval:org.adhardening:obj:2012150" version="1">
-      <windows:service_name>&lt;ServiceName&gt;</windows:service_name>
-    </windows:service_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2012150" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\&lt;ServiceName&gt;</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:2013001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters</windows:key>
@@ -8024,9 +8030,11 @@ Enforcing these deactivation controls ensures:
       <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Remote Encryption Protection</windows:key>
       <windows:name>RemoteEncryptionProtectionAggressiveness</windows:name>
     </windows:registry_object>
-    <windows:service_object id="oval:org.adhardening:obj:2021150" version="1">
-      <windows:service_name>AppIDSvc</windows:service_name>
-    </windows:service_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2021150" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\AppIDSvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:2022001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Control\CI\Config</windows:key>
@@ -9555,9 +9563,11 @@ Enforcing these deactivation controls ensures:
       <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer</windows:key>
       <windows:name>DisableCoInstallers</windows:name>
     </windows:registry_object>
-    <windows:service_object id="oval:org.adhardening:obj:8019150" version="1">
-      <windows:service_name>seclogon</windows:service_name>
-    </windows:service_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8019150" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\seclogon</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8020001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection</windows:key>
@@ -9593,74 +9603,116 @@ Enforcing these deactivation controls ensures:
       <windows:key>SYSTEM\CurrentControlSet\Control\Lsa</windows:key>
       <windows:name>RunAsPPL</windows:name>
     </windows:registry_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024150" version="1">
-      <windows:service_name>Browser</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024151" version="1">
-      <windows:service_name>irmon</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024152" version="1">
-      <windows:service_name>SharedAccess</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024153" version="1">
-      <windows:service_name>LxssManager</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024154" version="1">
-      <windows:service_name>FTPSVC</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024155" version="1">
-      <windows:service_name>sshd</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024156" version="1">
-      <windows:service_name>RpcLocator</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024157" version="1">
-      <windows:service_name>RemoteAccess</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024158" version="1">
-      <windows:service_name>simptcp</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024159" version="1">
-      <windows:service_name>sacsvr</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024160" version="1">
-      <windows:service_name>SSDPSRV</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024161" version="1">
-      <windows:service_name>upnphost</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024162" version="1">
-      <windows:service_name>WMSvc</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024163" version="1">
-      <windows:service_name>WMPNetworkSvc</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024164" version="1">
-      <windows:service_name>icssvc</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024165" version="1">
-      <windows:service_name>W3SVC</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024166" version="1">
-      <windows:service_name>XboxGipSvc</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024167" version="1">
-      <windows:service_name>XblAuthManager</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024168" version="1">
-      <windows:service_name>XblGameSave</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:8024169" version="1">
-      <windows:service_name>XboxNetApiSvc</windows:service_name>
-    </windows:service_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024150" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\Browser</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024151" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\irmon</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024152" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\SharedAccess</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024153" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\LxssManager</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024154" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\FTPSVC</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024155" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\sshd</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024156" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\RpcLocator</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024157" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\RemoteAccess</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024158" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\simptcp</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024159" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\sacsvr</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024160" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\SSDPSRV</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024161" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\upnphost</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024162" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\WMSvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024163" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\WMPNetworkSvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024164" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\icssvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024165" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\W3SVC</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024166" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\XboxGipSvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024167" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\XblAuthManager</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024168" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\XblGameSave</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8024169" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\XboxNetApiSvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8025001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint</windows:key>
       <windows:name>RestrictDriverInstallationToAdministrators</windows:name>
     </windows:registry_object>
-    <windows:service_object id="oval:org.adhardening:obj:8025150" version="1">
-      <windows:service_name>Spooler</windows:service_name>
-    </windows:service_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8025150" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\Spooler</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8026001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon</windows:key>
@@ -10096,9 +10148,11 @@ Enforcing these deactivation controls ensures:
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\AppCompat</windows:key>
       <windows:name>Prevent16BitApp</windows:name>
     </windows:registry_object>
-    <windows:service_object id="oval:org.adhardening:obj:8027150" version="1">
-      <windows:service_name>AppIDSvc</windows:service_name>
-    </windows:service_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8027150" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\AppIDSvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8028001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Policies\EarlyLaunch</windows:key>
@@ -10616,9 +10670,11 @@ Enforcing these deactivation controls ensures:
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\AppCompat</windows:key>
       <windows:name>Prevent16BitApp</windows:name>
     </windows:registry_object>
-    <windows:service_object id="oval:org.adhardening:obj:7001150" version="1">
-      <windows:service_name>AppIDSvc</windows:service_name>
-    </windows:service_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7001150" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\AppIDSvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7002001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Control\Lsa</windows:key>
@@ -10995,9 +11051,11 @@ Enforcing these deactivation controls ensures:
       <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint</windows:key>
       <windows:name>RestrictDriverInstallationToAdministrators</windows:name>
     </windows:registry_object>
-    <windows:service_object id="oval:org.adhardening:obj:7015150" version="1">
-      <windows:service_name>Spooler</windows:service_name>
-    </windows:service_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7015150" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\Spooler</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7016001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\MitigationOptions</windows:key>
@@ -11428,9 +11486,11 @@ Enforcing these deactivation controls ensures:
       <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer</windows:key>
       <windows:name>DisableCoInstallers</windows:name>
     </windows:registry_object>
-    <windows:service_object id="oval:org.adhardening:obj:7024150" version="1">
-      <windows:service_name>seclogon</windows:service_name>
-    </windows:service_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7024150" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\seclogon</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7025001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection</windows:key>
@@ -11461,66 +11521,106 @@ Enforcing these deactivation controls ensures:
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028150" version="1">
-      <windows:service_name>Browser</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028151" version="1">
-      <windows:service_name>irmon</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028152" version="1">
-      <windows:service_name>SharedAccess</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028153" version="1">
-      <windows:service_name>LxssManager</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028154" version="1">
-      <windows:service_name>FTPSVC</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028155" version="1">
-      <windows:service_name>sshd</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028156" version="1">
-      <windows:service_name>RpcLocator</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028157" version="1">
-      <windows:service_name>RemoteAccess</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028158" version="1">
-      <windows:service_name>simptcp</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028159" version="1">
-      <windows:service_name>sacsvr</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028160" version="1">
-      <windows:service_name>SSDPSRV</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028161" version="1">
-      <windows:service_name>upnphost</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028162" version="1">
-      <windows:service_name>WMSvc</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028163" version="1">
-      <windows:service_name>WMPNetworkSvc</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028164" version="1">
-      <windows:service_name>icssvc</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028165" version="1">
-      <windows:service_name>W3SVC</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028166" version="1">
-      <windows:service_name>XboxGipSvc</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028167" version="1">
-      <windows:service_name>XblAuthManager</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028168" version="1">
-      <windows:service_name>XblGameSave</windows:service_name>
-    </windows:service_object>
-    <windows:service_object id="oval:org.adhardening:obj:7028169" version="1">
-      <windows:service_name>XboxNetApiSvc</windows:service_name>
-    </windows:service_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028150" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\Browser</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028151" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\irmon</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028152" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\SharedAccess</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028153" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\LxssManager</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028154" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\FTPSVC</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028155" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\sshd</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028156" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\RpcLocator</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028157" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\RemoteAccess</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028158" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\simptcp</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028159" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\sacsvr</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028160" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\SSDPSRV</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028161" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\upnphost</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028162" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\WMSvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028163" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\WMPNetworkSvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028164" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\icssvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028165" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\W3SVC</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028166" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\XboxGipSvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028167" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\XblAuthManager</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028168" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\XblGameSave</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7028169" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\XboxNetApiSvc</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7029001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon</windows:key>
@@ -12037,9 +12137,10 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
-    <windows:service_state id="oval:org.adhardening:ste:2001150" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2001150" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:2002001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
@@ -12096,9 +12197,10 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
-    <windows:service_state id="oval:org.adhardening:ste:2008150" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2008150" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:2009001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -12115,9 +12217,10 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string">O:BAG:BAD:(A;;RC;;;BA)</windows:value>
     </windows:registry_state>
-    <windows:service_state id="oval:org.adhardening:ste:2012150" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2012150" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:2013001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -12234,9 +12337,10 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
-    <windows:service_state id="oval:org.adhardening:ste:2021150" version="1">
-      <windows:start_type>SERVICE_AUTO_START</windows:start_type>
-    </windows:service_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2021150" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:2022001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -13453,9 +13557,10 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
-    <windows:service_state id="oval:org.adhardening:ste:8019150" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8019150" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8020001" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string">C:\ProgramData\ExploitProtection\ExploitProtectionSettings.xml</windows:value>
@@ -13484,73 +13589,94 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024150" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024151" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024152" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024153" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024154" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024155" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024156" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024157" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024158" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024159" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024160" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024161" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024162" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024163" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024164" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024165" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024166" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024167" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024168" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:8024169" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024150" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024151" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024152" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024153" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024154" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024155" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024156" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024157" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024158" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024159" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024160" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024161" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024162" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024163" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024164" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024165" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024166" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024167" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024168" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8024169" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8025001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
-    <windows:service_state id="oval:org.adhardening:ste:8025150" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8025150" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8026001" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string">0</windows:value>
@@ -13899,9 +14025,10 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
-    <windows:service_state id="oval:org.adhardening:ste:8027150" version="1">
-      <windows:start_type>SERVICE_AUTO_START</windows:start_type>
-    </windows:service_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8027150" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8028001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">3</windows:value>
@@ -14324,9 +14451,10 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
-    <windows:service_state id="oval:org.adhardening:ste:7001150" version="1">
-      <windows:start_type>SERVICE_AUTO_START</windows:start_type>
-    </windows:service_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7001150" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7002001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -14635,9 +14763,10 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
-    <windows:service_state id="oval:org.adhardening:ste:7015150" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7015150" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7016001" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string">1000000000000</windows:value>
@@ -14982,9 +15111,10 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
-    <windows:service_state id="oval:org.adhardening:ste:7024150" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7024150" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7025001" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string">C:\ProgramData\ExploitProtection\ExploitProtectionSettings.xml</windows:value>
@@ -15009,66 +15139,86 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028150" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028151" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028152" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028153" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028154" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028155" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028156" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028157" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028158" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028159" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028160" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028161" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028162" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028163" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028164" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028165" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028166" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028167" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028168" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
-    <windows:service_state id="oval:org.adhardening:ste:7028169" version="1">
-      <windows:start_type>SERVICE_DISABLED</windows:start_type>
-    </windows:service_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028150" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028151" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028152" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028153" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028154" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028155" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028156" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028157" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028158" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028159" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028160" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028161" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028162" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028163" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028164" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028165" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028166" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028167" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028168" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7028169" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7029001" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string">0</windows:value>

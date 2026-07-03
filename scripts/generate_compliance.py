@@ -964,10 +964,8 @@ def generate_xccdf(requirements, output_path, repo_root):
                     chk_el = ET.SubElement(rule_el, x_tag('check'), {
                         'system': 'http://checklists.nist.gov/xccdf/check/manual'
                     })
-                    ET.SubElement(chk_el, x_tag('check-content-ref'), {
-                        'href': 'manual-verification',
-                        'name': 'manual-verification'
-                    })
+                    content_el = ET.SubElement(chk_el, x_tag('check-content'))
+                    content_el.text = "Perform manual verification steps as documented in the guidebook."
                 else:
                     chk_el = ET.SubElement(rule_el, x_tag('check'), {
                         'system': 'http://oval.mitre.org/XMLSchema/oval-definitions-5'
@@ -1147,13 +1145,28 @@ def generate_oval(requirements, output_path):
                 sub_id = req['numeric_id'] * 1000 + 100 + idx
                 comment = f"Check Startup Configuration for Service {chk['service_name']}"
                 
+                # Map service start type to registry Start value
+                start_map = {
+                    'SERVICE_BOOT_START': '0',
+                    'SERVICE_BOOT': '0',
+                    'SERVICE_SYSTEM_START': '1',
+                    'SERVICE_SYSTEM': '1',
+                    'SERVICE_AUTO_START': '2',
+                    'SERVICE_AUTO': '2',
+                    'SERVICE_DEMAND_START': '3',
+                    'SERVICE_DEMAND': '3',
+                    'SERVICE_DISABLED': '4',
+                    'DISABLED': '4'
+                }
+                data_val = start_map.get(chk['start_type'].upper(), '4')
+                
                 ET.SubElement(criteria, o_tag('criterion'), {
                     'comment': comment,
                     'test_ref': f"oval:org.adhardening:tst:{sub_id}"
                 })
                 
-                # service_test
-                test_el = ET.SubElement(tests_el, w_tag('service_test'), {
+                # registry_test
+                test_el = ET.SubElement(tests_el, w_tag('registry_test'), {
                     'id': f"oval:org.adhardening:tst:{sub_id}",
                     'version': '1',
                     'comment': comment,
@@ -1166,21 +1179,32 @@ def generate_oval(requirements, output_path):
                     'state_ref': f"oval:org.adhardening:ste:{sub_id}"
                 })
                 
-                # service_object
-                obj_el = ET.SubElement(objs_el, w_tag('service_object'), {
+                # registry_object
+                obj_el = ET.SubElement(objs_el, w_tag('registry_object'), {
                     'id': f"oval:org.adhardening:obj:{sub_id}",
                     'version': '1'
                 })
-                name_el = ET.SubElement(obj_el, w_tag('service_name'))
-                name_el.text = chk['service_name']
+                hive_el = ET.SubElement(obj_el, w_tag('hive'))
+                hive_el.text = 'HKEY_LOCAL_MACHINE'
                 
-                # service_state
-                state_el = ET.SubElement(states_el, w_tag('service_state'), {
+                key_el = ET.SubElement(obj_el, w_tag('key'))
+                key_el.text = f"SYSTEM\\CurrentControlSet\\Services\\{chk['service_name']}"
+                
+                name_el = ET.SubElement(obj_el, w_tag('name'))
+                name_el.text = 'Start'
+                
+                # registry_state
+                state_el = ET.SubElement(states_el, w_tag('registry_state'), {
                     'id': f"oval:org.adhardening:ste:{sub_id}",
                     'version': '1'
                 })
-                start_el = ET.SubElement(state_el, w_tag('start_type'))
-                start_el.text = chk['start_type']
+                type_el = ET.SubElement(state_el, w_tag('type'))
+                type_el.text = 'reg_dword'
+                
+                val_el = ET.SubElement(state_el, w_tag('value'), {
+                    'datatype': 'int'
+                })
+                val_el.text = data_val
                 
         # Native User Rights Checks
         if req['user_rights']:

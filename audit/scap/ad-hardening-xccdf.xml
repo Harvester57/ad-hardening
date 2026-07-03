@@ -22846,7 +22846,7 @@ if ($BiosDetails) {
         <xhtml:hr />
       </fixtext>
       <check system="http://checklists.nist.gov/xccdf/check/manual">
-        <check-content-ref href="manual-verification" name="manual-verification" />
+        <check-content>Perform manual verification steps as documented in the guidebook.</check-content>
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-006" severity="high" weight="10.0" selected="false">
@@ -22992,7 +22992,7 @@ if (-not (Test-Path $RegPath)) {
 Set-ItemProperty -Path $RegPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
 Write-Host "Status: Kernel DMA Protection registry configuration applied." -ForegroundColor Green</fix>
       <check system="http://checklists.nist.gov/xccdf/check/manual">
-        <check-content-ref href="manual-verification" name="manual-verification" />
+        <check-content>Perform manual verification steps as documented in the guidebook.</check-content>
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-007" severity="medium" weight="10.0" selected="false">
@@ -36351,7 +36351,7 @@ if ($BiosDetails) {
         <xhtml:hr />
       </fixtext>
       <check system="http://checklists.nist.gov/xccdf/check/manual">
-        <check-content-ref href="manual-verification" name="manual-verification" />
+        <check-content>Perform manual verification steps as documented in the guidebook.</check-content>
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-014" severity="high" weight="10.0" selected="false">
@@ -36501,7 +36501,7 @@ if (-not (Test-Path $RegPath)) {
 Set-ItemProperty -Path $RegPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
 Write-Host "Status: Kernel DMA Protection registry configuration applied." -ForegroundColor Green</fix>
       <check system="http://checklists.nist.gov/xccdf/check/manual">
-        <check-content-ref href="manual-verification" name="manual-verification" />
+        <check-content>Perform manual verification steps as documented in the guidebook.</check-content>
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-015" severity="medium" weight="10.0" selected="false">
