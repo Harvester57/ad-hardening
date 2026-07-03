@@ -29,7 +29,6 @@ Configuration ADHardeningAudit {
         "04-network-firewall\audit_scripts\Test-ADPortMatrixRules.ps1",
         "04-network-firewall\audit_scripts\Test-IPsecCryptography.ps1",
         "04-network-firewall\audit_scripts\Test-IPsecDomainIsolation.ps1",
-        "04-network-firewall\audit_scripts\Test-RPCDynamicPorts.ps1",
         "04-network-firewall\audit_scripts\Test-SMBSecurity.ps1",
         "04-network-firewall\audit_scripts\Test-TLSConfiguration.ps1",
         "04-network-firewall\audit_scripts\Test-WorkstationIsolation.ps1",
@@ -39,8 +38,7 @@ Configuration ADHardeningAudit {
         "05-logging-monitoring\audit_scripts\Test-SysmonHardening.ps1",
         "06-operations-maintenance\audit_scripts\Audit-GPOCentralStore.ps1",
         "06-operations-maintenance\audit_scripts\Audit-ThirdPartyTemplates.ps1",
-        "06-operations-maintenance\audit_scripts\Get-InactiveAccountsStatus.ps1",
-        "06-operations-maintenance\audit_scripts\Get-WsusConfigStatus.ps1"
+        "06-operations-maintenance\audit_scripts\Get-InactiveAccountsStatus.ps1"
     )
 
     # Profile-specific scripts
@@ -103,6 +101,7 @@ Configuration ADHardeningAudit {
             "03-identities-services\audit_scripts\Get-ProtectedUsersStatus.ps1",
             "03-identities-services\audit_scripts\Test-PrivilegedSmartCard.ps1",
             "04-network-firewall\audit_scripts\Test-IntraDcManagementBlocking.ps1",
+            "04-network-firewall\audit_scripts\Test-RPCDynamicPorts.ps1",
             "04-network-firewall\audit_scripts\Test-RpcNamedPipeFilters.ps1",
             "04-network-firewall\audit_scripts\Test-WMIStaticPort.ps1",
             "05-logging-monitoring\audit_scripts\Get-KerberoastHoneypotStatus.ps1",
@@ -115,11 +114,13 @@ Configuration ADHardeningAudit {
             "06-operations-maintenance\audit_scripts\Get-KrbtgtRotationStatus.ps1",
             "06-operations-maintenance\audit_scripts\Get-OfflineAssessmentStatus.ps1",
             "06-operations-maintenance\audit_scripts\Get-OfflineWsusSyncStatus.ps1",
-            "06-operations-maintenance\audit_scripts\Get-StagedIFMStatus.ps1"
+            "06-operations-maintenance\audit_scripts\Get-StagedIFMStatus.ps1",
+            "06-operations-maintenance\audit_scripts\Get-WsusConfigStatus.ps1"
         )
     }
     elseif ($Profile -eq "PAW") {
         $profileScripts = @(
+            "06-operations-maintenance\audit_scripts\Get-WsusConfigStatus.ps1",
             "07-paws\audit_scripts\Audit-HardwareSecurityFeatures.ps1",
             "07-paws\audit_scripts\Audit-PawSecureBoot.ps1",
             "07-paws\audit_scripts\Audit-UEFISecurity.ps1",

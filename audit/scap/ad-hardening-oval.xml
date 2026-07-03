@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-03T21:32:55Z</oval:timestamp>
+    <oval:timestamp>2026-07-03T21:43:33Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -1150,8 +1150,7 @@ If Secure Boot is disabled:
 3. **BlackLotus Bootkit Bypass Mitigations (CVE-2023-24932)**: A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit). To fully mitigate this threat, Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value (REG_DWORD" test_ref="oval:org.adhardening:tst:8009001" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:8009002" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:8009001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8010" version="1" class="compliance">
@@ -3076,7 +3075,6 @@ Enabling detailed stop error parameters is crucial because:
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\CrashControl Value DisplayParameters" test_ref="oval:org.adhardening:tst:6011001" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\CrashControl Value (REG_DWORD" test_ref="oval:org.adhardening:tst:6011002" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:6012" version="1" class="compliance">
@@ -3993,8 +3991,7 @@ If Secure Boot is disabled:
 3. **BlackLotus Bootkit Bypass Mitigations (CVE-2023-24932)**: A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit). To fully mitigate this threat, Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value (REG_DWORD" test_ref="oval:org.adhardening:tst:7030001" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:7030002" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:7030001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7031" version="1" class="compliance">
@@ -4921,13 +4918,9 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:8008005" />
       <windows:state state_ref="oval:org.adhardening:ste:8008005" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8009001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value (REG_DWORD" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8009001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8009001" />
       <windows:state state_ref="oval:org.adhardening:ste:8009001" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8009002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8009002" />
-      <windows:state state_ref="oval:org.adhardening:ste:8009002" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8010001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceGuard Value EnableVirtualizationBasedSecurity" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8010001" />
@@ -6533,10 +6526,6 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:6011001" />
       <windows:state state_ref="oval:org.adhardening:ste:6011001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:6011002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\CrashControl Value (REG_DWORD" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:6011002" />
-      <windows:state state_ref="oval:org.adhardening:ste:6011002" />
-    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:6012" version="1" comment="Placeholder check for REQ-OPS-012 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:6012" />
       <windows:state state_ref="oval:org.adhardening:ste:6012" />
@@ -7697,13 +7686,9 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:7029086" />
       <windows:state state_ref="oval:org.adhardening:ste:7029086" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7030001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value (REG_DWORD" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7030001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7030001" />
       <windows:state state_ref="oval:org.adhardening:ste:7030001" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7030002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7030002" />
-      <windows:state state_ref="oval:org.adhardening:ste:7030002" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7031001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value ScForceOption" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7031001" />
@@ -8712,11 +8697,6 @@ Enforcing these deactivation controls ensures:
       <windows:name>DODownloadMode</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8009001" version="1">
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Secureboot</windows:key>
-      <windows:name>(REG_DWORD</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8009002" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Control\Secureboot</windows:key>
       <windows:name>AvailableUpdates</windows:name>
@@ -10650,11 +10630,6 @@ Enforcing these deactivation controls ensures:
       <windows:key>SYSTEM\CurrentControlSet\Control\CrashControl</windows:key>
       <windows:name>DisplayParameters</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:6011002" version="1">
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\CrashControl</windows:key>
-      <windows:name>(REG_DWORD</windows:name>
-    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:6012" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
@@ -12054,11 +12029,6 @@ Enforcing these deactivation controls ensures:
     <windows:registry_object id="oval:org.adhardening:obj:7030001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Control\Secureboot</windows:key>
-      <windows:name>(REG_DWORD</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7030002" version="1">
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Secureboot</windows:key>
       <windows:name>AvailableUpdates</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7031001" version="1">
@@ -12868,10 +12838,6 @@ Enforcing these deactivation controls ensures:
       <windows:value datatype="int">2</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8009001" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">64</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8009002" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">64</windows:value>
     </windows:registry_state>
@@ -14435,10 +14401,6 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:6011002" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:6012" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
@@ -15564,10 +15526,6 @@ Enforcing these deactivation controls ensures:
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7030001" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">64</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7030002" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">64</windows:value>
     </windows:registry_state>

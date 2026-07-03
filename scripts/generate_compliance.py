@@ -501,8 +501,10 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                             vtype = val_match.group(3) if val_match.group(3) else "UNKNOWN"
                             
                             if '\\' not in name and '/' not in name and len(name) < 100 and name.lower() not in ['path', 'key path', 'value name', 'value type', 'value data', 'registry location']:
-                                normalized = normalize_reg_check(current_key, name, vtype, val)
-                                add_reg_or_service_check(normalized)
+                                name_upper = name.upper()
+                                if not name.startswith('(') and not name.endswith(')') and name_upper not in ['REG_DWORD', 'REG_SZ', 'REG_EXPAND_SZ', 'REG_MULTI_SZ', 'REG_BINARY', 'DWORD']:
+                                    normalized = normalize_reg_check(current_key, name, vtype, val)
+                                    add_reg_or_service_check(normalized)
                                 
                     # User Rights Assignments (PowerShell/INF style dictionary)
                     ura_match = re.search(r'"(Se[a-zA-Z0-9_]+)"\s*=\s*"([^"]*)"', line_strip)
@@ -627,16 +629,16 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                 # Assign to profiles based on DSC lists
                 profiles = []
                 if audit_script:
-                    script_base = get_basename(audit_script)
+                    audit_script_lower = audit_script.lower()
                     
-                    if any(get_basename(p) == script_base for p in common_scripts):
+                    if any(p.lower() == audit_script_lower for p in common_scripts):
                         profiles.extend(['DomainController', 'PAW', 'Endpoint'])
                     else:
-                        if any(get_basename(p) == script_base for p in dc_scripts):
+                        if any(p.lower() == audit_script_lower for p in dc_scripts):
                             profiles.append('DomainController')
-                        if any(get_basename(p) == script_base for p in paw_scripts):
+                        if any(p.lower() == audit_script_lower for p in paw_scripts):
                             profiles.append('PAW')
-                        if any(get_basename(p) == script_base for p in endpoint_scripts):
+                        if any(p.lower() == audit_script_lower for p in endpoint_scripts):
                             profiles.append('Endpoint')
                 
                 # Fallback assignment based on requirement prefix if DSC mapping is absent

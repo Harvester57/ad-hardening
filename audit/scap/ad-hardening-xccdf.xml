@@ -50,10 +50,6 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-029" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-030" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-031" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-023" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-024" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-029" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-030" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-001" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-003" selected="true" />
@@ -106,23 +102,10 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-011" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-012" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-013" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-012" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-016" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-017" selected="true" />
   </Profile>
   <Profile id="xccdf_org.adhardening.benchmarks_profile_PAW">
     <title>Privileged Access Workstations (PAW) Hardening Profile</title>
     <description>Applies security restrictions specifically targeting PAWs.</description>
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-022" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-028" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-029" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-013" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-014" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-015" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-025" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-028" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-029" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-030" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-006" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-007" selected="true" />
@@ -132,7 +115,6 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-003" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-004" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-001" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-003" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-004" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-005" selected="true" />
@@ -183,10 +165,6 @@
   <Profile id="xccdf_org.adhardening.benchmarks_profile_Endpoint">
     <title>Endpoint Hardening Profile</title>
     <description>Applies security baselines for general client workstations and endpoints.</description>
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-006" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-012" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-028" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-029" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-001" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-003" selected="true" />
@@ -230,7 +208,6 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-003" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-004" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-001" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-003" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-004" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-005" selected="true" />
@@ -241,15 +218,7 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-010" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-003" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-004" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-005" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-012" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-005" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-006" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-007" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-014" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-015" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-016" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-017" selected="true" />
   </Profile>
   <Group id="xccdf_org.adhardening.benchmarks_group_Module_1__Architecture___Administrative_Tiering">
     <title>Module 1: Architecture &amp; Administrative Tiering</title>
