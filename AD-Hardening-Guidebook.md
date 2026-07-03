@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 3f3d3b5 | Generated: July 03, 2026</span>
+      <span>Commit: 8fb5043 | Generated: July 03, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -20230,6 +20230,7 @@ if ($DmaVal -and $DmaVal.DeviceEnumerationPolicy -eq 0) {
 <div id="07-paws-configure-uefi-security-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
+* **Assessment**: Manual
 * **GPO Path / Registry Location**: Hardware/UEFI Firmware Configuration Menu
 
 ---
@@ -20373,6 +20374,7 @@ if ($BiosDetails) {
 <div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
+* **Assessment**: Manual
 * **GPO Path / Registry Location**:
   * Computer Configuration\Administrative Templates\System\Kernel DMA Protection
   * HKLM\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection
@@ -30813,6 +30815,7 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-configure-uefi-security-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
+* **Assessment**: Manual
 * **GPO Path / Registry Location**: Hardware/UEFI Firmware Configuration Menu
 
 ---
@@ -30981,6 +30984,7 @@ if ($BiosDetails) {
 <div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
+* **Assessment**: Manual
 * **GPO Path / Registry Location**:
   * Computer Configuration\Administrative Templates\System\Kernel DMA Protection
   * HKLM\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection

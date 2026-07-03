@@ -8,6 +8,7 @@
 
 ## Implementation Details
 * **Priority**: High
+* **Assessment**: Manual
 * **GPO Path / Registry Location**: Hardware/UEFI Firmware Configuration Menu
 
 ---

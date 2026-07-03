@@ -198,6 +198,108 @@ subcat_mapping = {
     'audit system integrity': 'system_integrity'
 }
 
+def parse_ps1_for_registry_and_services(script_content):
+    registry_checks = []
+    service_checks = []
+    
+    # 1. Extract variables representing registry paths
+    var_defs = {}
+    var_matches = re.finditer(r'\$([a-zA-Z0-9_]+)\s*=\s*["\']((?:HKLM|HKCU|HKEY_LOCAL_MACHINE|HKEY_CURRENT_USER)[^"\']+)["\']', script_content, re.IGNORECASE)
+    for m in var_matches:
+        var_name = m.group(1)
+        val_path = m.group(2).replace(':', '')
+        var_defs[var_name] = val_path
+        
+    # 2. Extract Set-ItemProperty / New-ItemProperty calls
+    set_prop_pattern = r'(?:Set-ItemProperty|New-ItemProperty)\s+-Path\s+(\$[a-zA-Z0-9_]+|"[^"]+"|\'[^\']+\')\s+-Name\s+("[^"]+"|\'[^\']+\'|[a-zA-Z0-9_]+)\s+-Value\s+("[^"]+"|\'[^\']+\'|[a-zA-Z0-9_]+|[0-9]+|\$[a-zA-Z0-9_]+)'
+    for m in re.finditer(set_prop_pattern, script_content, re.IGNORECASE):
+        path_raw = m.group(1).strip()
+        name_raw = m.group(2).strip().strip('"\'')
+        value_raw = m.group(3).strip().strip('"\'')
+        
+        path = ""
+        if path_raw.startswith('$'):
+            var_name = path_raw[1:]
+            path = var_defs.get(var_name, "")
+        else:
+            path = path_raw.strip('"\'').replace(':', '')
+            
+        if path and name_raw:
+            line_start = script_content.rfind('\n', 0, m.start()) + 1
+            line_end = script_content.find('\n', m.end())
+            if line_end == -1:
+                line_end = len(script_content)
+            line = script_content[line_start:line_end]
+            
+            vtype = "UNKNOWN"
+            if "-Type DWord" in line or "-Type dword" in line:
+                vtype = "REG_DWORD"
+            elif "-Type MultiString" in line or "-Type multistring" in line:
+                vtype = "REG_MULTI_SZ"
+            elif "-Type String" in line or "-Type string" in line:
+                vtype = "REG_SZ"
+                
+            if vtype == "UNKNOWN":
+                if value_raw.isdigit():
+                    vtype = "REG_DWORD"
+                else:
+                    vtype = "REG_SZ"
+                    
+            chk = normalize_reg_check(path, name_raw, vtype, value_raw)
+            if not any(c['key'] == chk['key'] and c['name'] == chk['name'] for c in registry_checks):
+                registry_checks.append(chk)
+            
+    # 3. Extract custom helper functions
+    custom_helpers = [('Set-RegDWord', 'REG_DWORD'), ('Set-RegString', 'REG_SZ'), ('Set-RegMultiString', 'REG_MULTI_SZ')]
+    for helper_name, vtype in custom_helpers:
+        helper_pattern = rf'{helper_name}\s+("[^"]+"|\'[^\']+\'|\$[a-zA-Z0-9_]+)\s+("[^"]+"|\'[^\']+\')\s+("[^"]+"|\'[^\']+\'|[a-zA-Z0-9_]+|[0-9]+)'
+        for m in re.finditer(helper_pattern, script_content, re.IGNORECASE):
+            path_raw = m.group(1).strip()
+            name_raw = m.group(2).strip().strip('"\'')
+            value_raw = m.group(3).strip().strip('"\'')
+            
+            path = ""
+            if path_raw.startswith('$'):
+                var_name = path_raw[1:]
+                path = var_defs.get(var_name, "")
+            else:
+                path = path_raw.strip('"\'').replace(':', '')
+                
+            if path and name_raw:
+                chk = normalize_reg_check(path, name_raw, vtype, value_raw)
+                if not any(c['key'] == chk['key'] and c['name'] == chk['name'] for c in registry_checks):
+                    registry_checks.append(chk)
+                
+    # 4. Extract Set-Service calls
+    service_pattern = r'Set-Service\s+(?:-Name\s+)?("[^"]+"|\'[^\']+\'|[a-zA-Z0-9_]+)\s+-StartupType\s+(\w+)'
+    for m in re.finditer(service_pattern, script_content, re.IGNORECASE):
+        svc_name = m.group(1).strip().strip('"\'')
+        startup_type = m.group(2).strip().upper()
+        
+        start_type_map = {
+            'DISABLED': 'SERVICE_DISABLED',
+            'AUTOMATIC': 'SERVICE_AUTO_START',
+            'MANUAL': 'SERVICE_DEMAND_START'
+        }
+        if not any(s['service_name'].lower() == svc_name.lower() for s in service_checks):
+            service_checks.append({
+                'service_name': svc_name,
+                'start_type': start_type_map.get(startup_type, 'SERVICE_DISABLED')
+            })
+        
+    # 5. Extract array of services from loop-based service scripts
+    array_match = re.search(r'\$Services\s*=\s*@\((.*?)\r?\n\s*\)', script_content, re.DOTALL | re.IGNORECASE)
+    if array_match:
+        array_content = array_match.group(1)
+        for name in re.findall(r'["\']([a-zA-Z0-9_-]+)["\']', array_content):
+            if not any(s['service_name'].lower() == name.lower() for s in service_checks):
+                service_checks.append({
+                    'service_name': name,
+                    'start_type': 'SERVICE_DISABLED'
+                })
+            
+    return registry_checks, service_checks
+
 def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_scripts, endpoint_scripts):
     """
     Scans the repository for requirement markdown files and builds metadata list.
@@ -256,6 +358,10 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                 # Extract priority
                 priority_match = re.search(r'\*\s*\*\*Priority\*\*:\s*(\w+)', content, re.IGNORECASE)
                 priority = priority_match.group(1).strip() if priority_match else "Medium"
+                
+                # Extract assessment type (automated vs manual)
+                assessment_match = re.search(r'\*\s*\*\*(?:Assessment|Assessment Type|Verification Method)\*\*:\s*(\w+)', content, re.IGNORECASE)
+                assessment_type = assessment_match.group(1).strip().lower() if assessment_match else "automated"
                 
                 # Extract rationale
                 rationale = ""
@@ -327,7 +433,7 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                 
                 # 1. First format (Key Path, Value Name, Value Type, Value Data list)
                 bt = '`'
-                pattern_key = r'(?:\*\*|\*|)?Key Path(?:\*\*|\*|)?:\s*' + bt + r'([^' + bt + r']+)' + bt
+                pattern_key = r'(?:\*\*|\*|)?(?:Key Path|Registry Location)(?:\*\*|\*|)?:\s*' + bt + r'([^' + bt + r']+)' + bt
                 pattern_name = r'(?:\*\*|\*|)?Value Name(?:\*\*|\*|)?:\s*' + bt + r'([^' + bt + r']+)' + bt
                 pattern_type = r'(?:\*\*|\*|)?Value Type(?:\*\*|\*|)?:\s*' + bt + r'([^' + bt + r']+)' + bt
                 pattern_data = r'(?:\*\*|\*|)?Value Data(?:\*\*|\*|)?:\s*' + bt + r'([^' + bt + r']+)' + bt
@@ -362,6 +468,13 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                         in_code_block = not in_code_block
                         continue
                     if in_code_block:
+                        # User Rights Assignments (PowerShell/INF style dictionary) can be inside code blocks
+                        ura_match = re.search(r'"(Se[a-zA-Z0-9_]+)"\s*=\s*"([^"]*)"', line_strip)
+                        if ura_match:
+                            right_name = ura_match.group(1)
+                            sids_str = ura_match.group(2)
+                            sids = [s.strip().replace('*', '') for s in sids_str.split(',') if s.strip()]
+                            user_rights[right_name] = sids
                         continue
                     if not line_strip:
                         continue
@@ -536,7 +649,18 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                         profiles.append('Endpoint')
                     else:
                         profiles.extend(['DomainController', 'PAW', 'Endpoint'])
-                        
+                if not (registry_checks or service_checks or user_rights or password_policy or lockout_policy or audit_policy) and impl_script:
+                    impl_path = os.path.join(repo_root, impl_script)
+                    if os.path.exists(impl_path):
+                        try:
+                            with open(impl_path, 'r', encoding='utf-8') as f:
+                                impl_content = f.read()
+                            r_chks, s_chks = parse_ps1_for_registry_and_services(impl_content)
+                            registry_checks.extend(r_chks)
+                            service_checks.extend(s_chks)
+                        except Exception as e:
+                            print(f"Warning: Failed to parse implementation script {impl_path}: {e}")
+                            
                 requirements.append({
                     'id': req_id,
                     'prefix': prefix,
@@ -556,7 +680,8 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                     'scope': scope,
                     'markdown_file': rel_path.replace('\\', '/'),
                     'module_name': module_name,
-                    'profiles': profiles
+                    'profiles': profiles,
+                    'assessment_type': assessment_type
                 })
                 
     # Sort requirements by ID to ensure output stability
@@ -833,15 +958,24 @@ def generate_xccdf(requirements, output_path, repo_root):
                     except Exception as e:
                         print(f"Warning: Failed to read implementation script {impl_path}: {e}")
                 
-            # If the requirement has an automated audit script, link OVAL check
+            # If the requirement has an automated audit script, link appropriate check
             if req['audit_script']:
-                chk_el = ET.SubElement(rule_el, x_tag('check'), {
-                    'system': 'http://oval.mitre.org/XMLSchema/oval-definitions-5'
-                })
-                ET.SubElement(chk_el, x_tag('check-content-ref'), {
-                    'href': 'ad-hardening-oval.xml',
-                    'name': f"oval:org.adhardening:def:{req['numeric_id']}"
-                })
+                if req.get('assessment_type') == 'manual':
+                    chk_el = ET.SubElement(rule_el, x_tag('check'), {
+                        'system': 'http://checklists.nist.gov/xccdf/check/manual'
+                    })
+                    ET.SubElement(chk_el, x_tag('check-content-ref'), {
+                        'href': 'manual-verification',
+                        'name': 'manual-verification'
+                    })
+                else:
+                    chk_el = ET.SubElement(rule_el, x_tag('check'), {
+                        'system': 'http://oval.mitre.org/XMLSchema/oval-definitions-5'
+                    })
+                    ET.SubElement(chk_el, x_tag('check-content-ref'), {
+                        'href': 'ad-hardening-oval.xml',
+                        'name': f"oval:org.adhardening:def:{req['numeric_id']}"
+                    })
                 
     ET.indent(root, space="  ")
     tree = ET.ElementTree(root)
@@ -908,10 +1042,11 @@ def generate_oval(requirements, output_path):
         })
         val_el.text = '.*'
         
-    # Filter requirements that can be evaluated (either has registry checks, services, user rights, etc. or has audit script)
+    # Filter requirements that can be evaluated (either has registry checks, services, user rights, etc. or has audit script) and are not manual
     oval_reqs = [
         r for r in requirements
-        if r['registry_checks'] or r['service_checks'] or r['user_rights'] or r['password_policy'] or r['lockout_policy'] or r['audit_policy'] or r['audit_script']
+        if (r['registry_checks'] or r['service_checks'] or r['user_rights'] or r['password_policy'] or r['lockout_policy'] or r['audit_policy'] or r['audit_script'])
+        and r.get('assessment_type') != 'manual'
     ]
     
     for req in oval_reqs:

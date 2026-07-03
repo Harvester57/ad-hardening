@@ -8,6 +8,7 @@
 
 ## Implementation Details
 * **Priority**: High
+* **Assessment**: Manual
 * **GPO Path / Registry Location**:
   * Computer Configuration\Administrative Templates\System\Kernel DMA Protection
   * HKLM\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection
