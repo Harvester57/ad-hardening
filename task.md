@@ -1,0 +1,24 @@
+# Hardening Compliance Checklist (Direct Windows OVAL Integration)
+
+- [x] Implement service startup parsing and native service checks in OVAL
+- [x] Implement password & lockout policy parsing and native policy checks in OVAL
+- [x] Implement user rights assignments parsing and native userright checks in OVAL
+- [x] Implement advanced audit policy parsing and native audit checks in OVAL
+- [x] Compile compliance manifests and run validation tests
+- [x] Audit all technical controls to migrate remaining fallback tests to native OVAL definitions
+  - [x] Support bold formatting and optional backticks in registry paths
+  - [x] Parse advanced audit policies defined as lists (e.g., Audit Directory Service Changes)
+  - [x] Inject user rights for Restrict Tier Logons requirements
+  - [x] Migrate 60 requirements and compile 2,300+ native registry tests
+- [x] Compliance Audit Framework Improvements
+  - [x] Update AGENTS.md rule to mandate compliance manifest rebuilding & validation
+  - [x] Implement a schema-aware linter/validator for XCCDF and OVAL definitions (scripts/validate_compliance.py)
+  - [x] Integrate compliance validation step directly into Verify-ADHardeningDocs.ps1
+  - [x] Update compliance README.md documentation for SCAP audit execution instructions on Windows
+  - [x] Document compliance benchmark check integration in main README.md
+- [x] Folder Structure Harmonization
+  - [x] Relocate PowerShell DSC Audit Framework to audit/dsc/
+  - [x] Relocate SCAP XML Audit manifests to audit/scap/
+  - [x] Keep ANSSI, CIS, and Microsoft compliance mapping tables under compliance/ to preserve internal relative links
+  - [x] Update generate_compliance.py, validate_compliance.py, generate_summary.py, and compile_docs.py paths
+  - [x] Verify link integrity and pass validation checks

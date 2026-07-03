@@ -75,7 +75,7 @@ When adding or modifying a technical control:
 When adding, removing, or changing technical controls in this repository, you must update the PowerShell DSC configuration to keep the audit framework synchronized.
 
 To align the DSC policy:
-1. Open the primary DSC configuration file: `dsc/ADHardeningAudit.ps1`.
+1. Open the primary DSC configuration file: `audit/dsc/ADHardeningAudit.ps1`.
 2. Update the appropriate script array:
    * If a control is common (applies to Domain Controllers, PAWs, and Endpoints), add the script's module-relative path to the `$commonScripts` array.
    * If a control is profile-specific, add the script's module-relative path to the `$profileScripts` array under the corresponding profile condition:
@@ -86,11 +86,27 @@ To align the DSC policy:
 4. Verify compilation by running the deployment script with the `-CompileOnly` flag for each profile to confirm that the configuration MOF files compile without errors:
 
 ```powershell
-cd dsc
+cd audit/dsc
 .\Deploy-ADHardeningAudit.ps1 -Profile DomainController -CompileOnly
 .\Deploy-ADHardeningAudit.ps1 -Profile PAW -CompileOnly
 .\Deploy-ADHardeningAudit.ps1 -Profile Endpoint -CompileOnly
-cd ..
+cd ../..
+```
+
+---
+
+## Compliance Benchmarks (XCCDF & OVAL) Integration
+
+When adding, removing, or changing technical hardening requirements in this repository, you must rebuild the compliance benchmark XML definitions to keep the automated audit profiles synchronized.
+
+To update the compliance benchmarks:
+1. Run the Python generation script to re-scan all guidebook files and compile the benchmarks:
+```text
+python scripts/generate_compliance.py
+```
+2. Verify that the generated XML manifests compile cleanly and satisfy schema integrity constraints by running the project-wide documentation and compliance validator:
+```powershell
+.\Verify-ADHardeningDocs.ps1
 ```
 
 ---

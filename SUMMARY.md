@@ -182,7 +182,8 @@
 * [Implementation Plan and Prioritized Roadmap](roadmap/implementation-plan.md)
 
 ## Audit Framework
-* [PowerShell DSC Audit Framework](dsc/README.md)
+* [PowerShell DSC Audit Framework](audit/dsc/README.md)
+* [SCAP Compliance Auditing](audit/scap/README.md)
 
 ## Compliance Mapping
 * [ANSSI Compliance Matrix](compliance/anssi.md)

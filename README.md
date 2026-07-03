@@ -95,17 +95,23 @@ The hardening guidelines are organized into eight functional modules:
 | **[Module 7: Privileged Access Workstations Hardening](07-paws/README.md)** | Management Devices (Tier 0/1) | BitLocker with TPM/PIN, UEFI security, DMA protection, AppLocker, WDAC, kernel shadow stacks. |
 | **[Module 8: Endpoint Hardening](08-endpoints/README.md)** | Client Workstations (Tier 2) | UAC policies, LOLBins blocklists, Application Control (WDAC), system service disabling, Windows Defender. |
 
-## Continuous Auditing & Compliance (PowerShell DSC)
+## Continuous Auditing & Compliance Framework
 
-To ensure that the security controls documented in this guidebook remain enforced and do not experience configuration drift, this repository includes a native **[PowerShell DSC Audit Framework](dsc/README.md)**. 
+To ensure that the security controls documented in this guidebook remain enforced and do not experience configuration drift, this repository includes a two-pronged automated auditing framework:
 
-The framework operates in `ApplyAndMonitor` mode, continuously checking target systems against the security baseline and logging details of any failing controls or drift. It is organized around the following targeting profiles:
-*   **Common Controls**: Standard security baselines applied across all domain hosts.
-*   **Domain Controllers**: Strict directory services hardening rules (Tier 0).
-*   **Privileged Access Workstations (PAWs)**: High-security administrative host restrictions.
-*   **Endpoints**: User client workstation controls (Tier 2).
+### 1. PowerShell DSC Audit Baseline
 
-For details on configuration, compiling MOF templates, and retrieving compliance results from local event channels, refer to the full **[DSC Audit Framework Documentation](dsc/README.md)**.
+A native **[PowerShell DSC Audit Framework](audit/dsc/README.md)** that operates in `ApplyAndMonitor` mode, continuously checking target systems against the security baseline and logging details of any failing controls or drift. It is organized around targeting profiles for Common Controls, Domain Controllers, PAWs, and Endpoints. 
+
+For details on configuration and compilation, refer to the **[DSC Audit Framework Documentation](audit/dsc/README.md)**.
+
+### 2. Automated SCAP Benchmarks (XCCDF & OVAL)
+
+A standardized, declarative security checking mechanism using **[SCAP XML Benchmarks](audit/scap/README.md)**:
+*   **XCCDF Benchmark (`audit/scap/ad-hardening-xccdf.xml`)**: Defines the checklist groups, severities, and target profiles.
+*   **OVAL Definitions (`audit/scap/ad-hardening-oval.xml`)**: Implements automated native checks (registry, services, privileges, account limits, and audit policies) to evaluate compliance without manual tasks.
+
+For execution instructions using tools like `oscap` or enterprise compliance agents, refer to the **[SCAP Compliance Documentation](audit/scap/README.md)**.
 
 ---
 

@@ -66,11 +66,15 @@ def main():
         summary_lines.append(f"* [Implementation Plan and Prioritized Roadmap]({roadmap_path})")
 
     # Add Audit Framework
-    dsc_readme_path = "dsc/README.md"
-    if os.path.exists(os.path.join(repo_root, dsc_readme_path)):
+    dsc_readme_path = "audit/dsc/README.md"
+    compliance_readme_path = "audit/scap/README.md"
+    if os.path.exists(os.path.join(repo_root, dsc_readme_path)) or os.path.exists(os.path.join(repo_root, compliance_readme_path)):
         summary_lines.append("")
         summary_lines.append("## Audit Framework")
-        summary_lines.append(f"* [PowerShell DSC Audit Framework]({dsc_readme_path})")
+        if os.path.exists(os.path.join(repo_root, dsc_readme_path)):
+            summary_lines.append(f"* [PowerShell DSC Audit Framework]({dsc_readme_path})")
+        if os.path.exists(os.path.join(repo_root, compliance_readme_path)):
+            summary_lines.append(f"* [SCAP Compliance Auditing]({compliance_readme_path})")
 
     # Add Compliance Matrices
     compliance_files = [

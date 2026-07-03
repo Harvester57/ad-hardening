@@ -73,9 +73,20 @@ foreach ($file in $mdFiles) {
     }
 }
 
+# 3. Verify XML Compliance Manifests
+Write-Host "`nRunning compliance manifests validation..." -ForegroundColor Yellow
+$valProcess = Start-Process python -ArgumentList "scripts/validate_compliance.py" -Wait -NoNewWindow -PassThru
+if ($valProcess.ExitCode -ne 0) {
+    Write-Error "Compliance XML files validation failed!"
+    $errorsCount++
+}
+else {
+    Write-Host "Compliance XML files validation: PASSED" -ForegroundColor Green
+}
+
 Write-Host "`n-------------------------------------------" -ForegroundColor Cyan
 if ($errorsCount -eq 0) {
-    Write-Host "Verification PASSED. No broken links or syntax errors found!" -ForegroundColor Green
+    Write-Host "Verification PASSED. No broken links, syntax errors, or schema validation errors found!" -ForegroundColor Green
     exit 0
 }
 else {
