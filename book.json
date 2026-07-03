@@ -21,7 +21,9 @@
         "mermaid",
         "text",
         "none",
-        "plain"
+        "plain",
+        "splunk",
+        "kql"
       ]
     }
   },
