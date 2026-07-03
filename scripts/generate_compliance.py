@@ -262,9 +262,6 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                 rationale_match = re.search(r'## Rationale\s*\n(.*?)(?=\n##|\n---|\n#)', content, re.DOTALL | re.IGNORECASE)
                 if rationale_match:
                     rationale = rationale_match.group(1).strip()
-                    # Clean markdown links and styling
-                    rationale = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', rationale)
-                    rationale = rationale.replace('**', '').replace('*', '').replace('`', '')
                 
                 # Extract audit script URL relative target
                 audit_script = None
@@ -279,8 +276,6 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                 scope_match = re.search(r'## Target Scope\s*\n(.*?)(?=\n##|\n---)', content, re.DOTALL | re.IGNORECASE)
                 if scope_match:
                     scope = scope_match.group(1).strip()
-                    scope = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', scope)
-                    scope = scope.replace('**', '').replace('*', '').replace('`', '')
                 
                 # Initialize direct OVAL checks
                 registry_checks = []
@@ -552,15 +547,88 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
     requirements.sort(key=lambda x: x['id'])
     return requirements
 
+def append_text(parent_el, text):
+    if len(parent_el) == 0:
+        if parent_el.text is None:
+            parent_el.text = text
+        else:
+            parent_el.text += text
+    else:
+        last_child = parent_el[-1]
+        if last_child.tail is None:
+            last_child.tail = text
+        else:
+            last_child.tail += text
+
+def parse_inline_formatting(parent_el, text, xhtml_ns):
+    token_pattern = re.compile(r'(\*\*.*?\*\*|\*.*?\*|`.*?`|\[.*?\]\(.*?\))')
+    parts = token_pattern.split(text)
+    for part in parts:
+        if not part:
+            continue
+        if part.startswith('**') and part.endswith('**'):
+            strong_el = ET.SubElement(parent_el, f"{{{xhtml_ns}}}strong")
+            strong_el.text = part[2:-2]
+        elif part.startswith('*') and part.endswith('*'):
+            em_el = ET.SubElement(parent_el, f"{{{xhtml_ns}}}em")
+            em_el.text = part[1:-1]
+        elif part.startswith('`') and part.endswith('`'):
+            code_el = ET.SubElement(parent_el, f"{{{xhtml_ns}}}code")
+            code_el.text = part[1:-1]
+        elif part.startswith('[') and '](' in part and part.endswith(')'):
+            link_match = re.match(r'^\[([^\]]+)\]\(([^)]+)\)$', part)
+            if link_match:
+                a_el = ET.SubElement(parent_el, f"{{{xhtml_ns}}}a", {'href': link_match.group(2)})
+                a_el.text = link_match.group(1)
+            else:
+                append_text(parent_el, part)
+        else:
+            append_text(parent_el, part)
+
+def parse_markdown_to_xml(parent_el, md_text, xhtml_ns):
+    paragraphs = re.split(r'\n\n+', md_text.strip())
+    for p_text in paragraphs:
+        p_text = p_text.strip()
+        if not p_text:
+            continue
+            
+        lines = p_text.split('\n')
+        is_list = False
+        is_ordered = False
+        
+        if re.match(r'^\s*[\*\-]\s+', lines[0]):
+            is_list = True
+        elif re.match(r'^\s*\d+\.\s+', lines[0]):
+            is_list = True
+            is_ordered = True
+            
+        if is_list:
+            list_tag = f"{{{xhtml_ns}}}ol" if is_ordered else f"{{{xhtml_ns}}}ul"
+            list_el = ET.SubElement(parent_el, list_tag)
+            for line in lines:
+                line_strip = line.strip()
+                if is_ordered:
+                    item_text = re.sub(r'^\d+\.\s+', '', line_strip)
+                else:
+                    item_text = re.sub(r'^[\*\-]\s+', '', line_strip)
+                li_el = ET.SubElement(list_el, f"{{{xhtml_ns}}}li")
+                parse_inline_formatting(li_el, item_text, xhtml_ns)
+        else:
+            p_el = ET.SubElement(parent_el, f"{{{xhtml_ns}}}p")
+            p_text_inline = " ".join(line.strip() for line in lines)
+            parse_inline_formatting(p_el, p_text_inline, xhtml_ns)
+
 def generate_xccdf(requirements, output_path):
     """
     Generates a valid XCCDF 1.2 Benchmark XML.
     """
     XCCDF_NS = 'http://checklists.nist.gov/xccdf/1.2'
     DC_NS = 'http://purl.org/dc/elements/1.1/'
+    XHTML_NS = 'http://www.w3.org/1999/xhtml'
     
     ET.register_namespace('', XCCDF_NS)
     ET.register_namespace('dc', DC_NS)
+    ET.register_namespace('xhtml', XHTML_NS)
     
     def x_tag(name):
         return f"{{{XCCDF_NS}}}{name}"
@@ -645,11 +713,25 @@ def generate_xccdf(requirements, output_path):
             r_title.text = f"[{req['id']}] {req['title']}"
             
             r_desc = ET.SubElement(rule_el, x_tag('description'))
-            r_desc.text = f"Target Scope: {req['scope'] or 'Not Specified'}\n\nFile Path: {req['markdown_file']}"
+            if req['scope']:
+                scope_header_p = ET.SubElement(r_desc, f"{{{XHTML_NS}}}p")
+                scope_strong = ET.SubElement(scope_header_p, f"{{{XHTML_NS}}}strong")
+                scope_strong.text = "Target Scope:"
+                parse_markdown_to_xml(r_desc, req['scope'], XHTML_NS)
+            else:
+                scope_p = ET.SubElement(r_desc, f"{{{XHTML_NS}}}p")
+                scope_strong = ET.SubElement(scope_p, f"{{{XHTML_NS}}}strong")
+                scope_strong.text = "Target Scope: Not Specified"
+                
+            path_p = ET.SubElement(r_desc, f"{{{XHTML_NS}}}p")
+            path_strong = ET.SubElement(path_p, f"{{{XHTML_NS}}}strong")
+            path_strong.text = "File Path: "
+            path_code = ET.SubElement(path_p, f"{{{XHTML_NS}}}code")
+            path_code.text = req['markdown_file']
             
             if req['rationale']:
                 r_rat = ET.SubElement(rule_el, x_tag('rationale'))
-                r_rat.text = req['rationale']
+                parse_markdown_to_xml(r_rat, req['rationale'], XHTML_NS)
                 
             # If the requirement has an automated audit script, link OVAL check
             if req['audit_script']:
