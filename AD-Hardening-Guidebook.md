@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 9a9dbc8 | Generated: July 02, 2026</span>
+      <span>Commit: 5f9c5c1 | Generated: July 03, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -39,7 +39,7 @@ pdf_options:
     <li>Tier 2 Client Workstations: Windows 10 and above</li>
   </ul>
   <hr>
-  <p><em>Generated dynamically on: July 02, 2026</em></p>
+  <p><em>Generated dynamically on: July 03, 2026</em></p>
 </div>
 
 <div id="README-md"></div>
@@ -146,18 +146,26 @@ The hardening guidelines are organized into eight functional modules:
 | **[Module 7: Privileged Access Workstations Hardening](#07-paws-README-md)** | Management Devices (Tier 0/1) | BitLocker with TPM/PIN, UEFI security, DMA protection, AppLocker, WDAC, kernel shadow stacks. |
 | **[Module 8: Endpoint Hardening](#08-endpoints-README-md)** | Client Workstations (Tier 2) | UAC policies, LOLBins blocklists, Application Control (WDAC), system service disabling, Windows Defender. |
 
-<div id="README-md-continuous-auditing-compliance-powershell-dsc"></div>
-## Continuous Auditing & Compliance (PowerShell DSC)
+<div id="README-md-continuous-auditing-compliance-framework"></div>
+## Continuous Auditing & Compliance Framework
 
-To ensure that the security controls documented in this guidebook remain enforced and do not experience configuration drift, this repository includes a native **[PowerShell DSC Audit Framework](#dsc-README-md)**. 
+To ensure that the security controls documented in this guidebook remain enforced and do not experience configuration drift, this repository includes a two-pronged automated auditing framework:
 
-The framework operates in `ApplyAndMonitor` mode, continuously checking target systems against the security baseline and logging details of any failing controls or drift. It is organized around the following targeting profiles:
-*   **Common Controls**: Standard security baselines applied across all domain hosts.
-*   **Domain Controllers**: Strict directory services hardening rules (Tier 0).
-*   **Privileged Access Workstations (PAWs)**: High-security administrative host restrictions.
-*   **Endpoints**: User client workstation controls (Tier 2).
+<div id="README-md-1-powershell-dsc-audit-baseline"></div>
+### 1. PowerShell DSC Audit Baseline
 
-For details on configuration, compiling MOF templates, and retrieving compliance results from local event channels, refer to the full **[DSC Audit Framework Documentation](#dsc-README-md)**.
+A native **[PowerShell DSC Audit Framework](#audit-dsc-README-md)** that operates in `ApplyAndMonitor` mode, continuously checking target systems against the security baseline and logging details of any failing controls or drift. It is organized around targeting profiles for Common Controls, Domain Controllers, PAWs, and Endpoints. 
+
+For details on configuration and compilation, refer to the **[DSC Audit Framework Documentation](#audit-dsc-README-md)**.
+
+<div id="README-md-2-automated-scap-benchmarks-xccdf-oval"></div>
+### 2. Automated SCAP Benchmarks (XCCDF & OVAL)
+
+A standardized, declarative security checking mechanism using **[SCAP XML Benchmarks](#audit-scap-README-md)**:
+*   **XCCDF Benchmark (`audit/scap/ad-hardening-xccdf.xml`)**: Defines the checklist groups, severities, and target profiles.
+*   **OVAL Definitions (`audit/scap/ad-hardening-oval.xml`)**: Implements automated native checks (registry, services, privileges, account limits, and audit policies) to evaluate compliance without manual tasks.
+
+For execution instructions using tools like `oscap` or enterprise compliance agents, refer to the **[SCAP Compliance Documentation](#audit-scap-README-md)**.
 
 ---
 
@@ -8761,6 +8769,11 @@ Traditional service accounts in Active Directory are standard user accounts with
 
 Group Managed Service Accounts (gMSAs) address this risk by delegating password management to the operating system and Domain Controllers. Windows automatically generates a complex 120-character password for each gMSA and rotates it every 30 days. Additionally, gMSAs cannot be used for interactive logons, preventing administrative session hijacking or remote administrative access via service accounts.
 
+However, gMSAs introduce specific security boundaries that must be strictly enforced:
+1. **Password Retrieval Delegation (GMSA Password Access)**: The attribute `msDS-GroupMSAMembership` (`PrincipalsAllowedToRetrieveManagedPassword`) defines which security principals can query Active Directory to retrieve the clear-text gMSA password. If human user accounts or groups containing human users are added to this attribute, any compromise of those user credentials allows an attacker to fetch the clear-text password blob and convert it to an NT hash.
+2. **Credential Dumping from memory (LSASS ekeys)**: While LSASS does not cache the clear-text password of a gMSA under standard `sekurlsa::logonpasswords` dumps, the active Kerberos keys (NT hash, AES-128/256 keys) are stored in memory on the host computer running the service. An attacker with administrative/SYSTEM access to the host server can extract these keys using Mimikatz `sekurlsa::ekeys` and use them for pass-the-hash (PTH) or pass-the-ticket (PTT) attacks.
+3. **Tier Alignment (Tier-Matching)**: Because compromising the host server hosting a gMSA compromises the gMSA itself, and retrieving the gMSA password grants full control over its permissions, hosts running gMSAs must be secured to the same level (Tier) as the privileges granted to the gMSA. A Tier 0 gMSA must only run on Tier 0 systems (Domain Controllers or Tier 0 Admin Hosts), and only Tier 0 computer accounts/groups must be allowed to retrieve its password.
+
 ---
 
 <div id="03-identities-services-harden-service-accounts-md-legacy-impact-compatibility"></div>
@@ -8820,11 +8833,15 @@ $gMSAName = "gmsa-sqlservice"
 $existingMSA = Get-ADServiceAccount -Filter "Name -eq '$gMSAName'"
 
 if (-not $existingMSA) {
-    # Specify the name, DNS, and which principals (servers/DCs) can retrieve the password
+    # Specify the name, DNS, and which principals (member servers running the service) can retrieve the password.
+    # CRITICAL: Do NOT allow user accounts or groups containing users (like Domain Admins or Schema Admins) 
+    # to retrieve the password. Only allow the specific computer account(s) hosting the service.
+    $targetHostComputer = "SQLServerHost$"
+    
     New-ADServiceAccount -Name $gMSAName `
         -DNSHostName "$gMSAName.domain.local" `
         -ManagedPasswordIntervalInDays 30 `
-        -PrincipalsAllowedToRetrieveManagedPassword "Domain Controllers", "Schema Admins"
+        -PrincipalsAllowedToRetrieveManagedPassword $targetHostComputer
         
     Write-Host "[+] gMSA '$gMSAName' created successfully." -ForegroundColor Green
 } else {
@@ -8835,9 +8852,10 @@ if (-not $existingMSA) {
 *To audit registered Managed Service Accounts:*
 [Download Script: Get-gMSAStatus.ps1](audit_scripts/Get-gMSAStatus.ps1)
 
+
 ```powershell
 # Get-gMSAStatus.ps1
-# Description: Lists all registered gMSAs and their configuration details.
+# Description: Lists all registered gMSAs and audits password retrieval delegation permissions.
 
 Import-Module ActiveDirectory
 
@@ -8847,9 +8865,58 @@ $gMSAs = Get-ADServiceAccount -Filter * -Properties Name, DNSHostName, Enabled, 
 
 if ($gMSAs) {
     foreach ($sa in $gMSAs) {
-        Write-Host "[+] gMSA Account: $($sa.Name)" -ForegroundColor Green
+        $nonCompliant = $false
+        Write-Host "[*] gMSA Account: $($sa.Name)" -ForegroundColor White
         Write-Host "    - DNS Name: $($sa.DNSHostName)" -ForegroundColor White
         Write-Host "    - Enabled: $($sa.Enabled)" -ForegroundColor White
+        
+        $principals = $sa.PrincipalsAllowedToRetrieveManagedPassword
+        if ($null -ne $principals) {
+            Write-Host "    - Principals Allowed to Retrieve Password:" -ForegroundColor White
+            foreach ($p in $principals) {
+                # Get the AD Object to verify class and name
+                $adObj = Get-ADObject -Identity $p.DistinguishedName -Properties ObjectClass, Name
+                if ($null -ne $adObj) {
+                    $objType = $adObj.ObjectClass
+                    $name = $adObj.Name
+                    
+                    if ($objType -eq "user") {
+                        Write-Host "      [-] WARNING: User account '$($name)' is explicitly allowed to retrieve password (HIGH RISK)" -ForegroundColor Red
+                        $nonCompliant = $true
+                    } elseif ($objType -eq "group") {
+                        Write-Host "      [!] Group: '$($name)'" -ForegroundColor Yellow
+                        
+                        # Recursively resolve members to check for users
+                        $members = Get-ADGroupMember -Identity $p.DistinguishedName -Recursive
+                        $userMembers = $members | Where-Object { $_.objectClass -eq "user" }
+                        
+                        if ($userMembers) {
+                            $userNames = @()
+                            foreach ($user in $userMembers) {
+                                $userNames += $user.Name
+                            }
+                            $usersList = $userNames -join ", "
+                            Write-Host "        [-] WARNING: Group '$($name)' contains human user accounts: $($usersList) (HIGH RISK)" -ForegroundColor Red
+                            $nonCompliant = $true
+                        } else {
+                            Write-Host "        [+] Group contains only computer/service accounts." -ForegroundColor Green
+                        }
+                    } else {
+                        Write-Host "      [+] Computer/Host: '$($name)'" -ForegroundColor Green
+                    }
+                }
+            }
+        } else {
+            Write-Host "    [-] WARNING: No principals allowed to retrieve password (gMSA will not function)." -ForegroundColor Yellow
+            $nonCompliant = $true
+        }
+        
+        if ($nonCompliant) {
+            Write-Host "    [-] STATUS: NON-COMPLIANT (Insecure password retrieval delegation)" -ForegroundColor Red
+        } else {
+            Write-Host "    [+] STATUS: COMPLIANT" -ForegroundColor Green
+        }
+        Write-Host ""
     }
 } else {
     Write-Host "[-] No Group Managed Service Accounts found in the Active Directory domain." -ForegroundColor Yellow
@@ -8863,6 +8930,8 @@ if ($gMSAs) {
 * **ANSSI AD Hardening Guide**: Section on Service account authentication management
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section on Managed Service Accounts
 * **Microsoft Security Guidance**: Group Managed Service Accounts Overview
+* **Trimarc ADSecurity**: [Attacking Active Directory Group Managed Service Accounts (GMSAs)](https://adsecurity.org/?p=4367)
+
 
 
 <div style="page-break-before: always;"></div>
@@ -12480,6 +12549,8 @@ Therefore, Domain Controllers must allow unauthenticated initial requests (Reque
 * **Network Performance**: IPsec encryption and authentication overhead may slightly increase CPU usage on older hardware, though modern CPUs with AES-NI support experience negligible latency.
 * **Deployment Sequence**: Connection Security Rules should always be set to **Request** authentication first. Once audit logs confirm all legitimate systems are successfully authenticating, the rules can be safely transitioned to **Require** authentication (inbound) to prevent self-lockout.
 * **BitLocker Network Unlock Compatibility**: BitLocker Network Unlock sends a key-unlock payload in a cleartext DHCP request from the UEFI network stack in the pre-boot environment. Because this exchange happens before the Windows operating system and its IPsec driver are loaded, the client cannot negotiate IPsec SAs. If the Windows Deployment Services (WDS) server hosting the Network Unlock provider requires IPsec authentication for all incoming traffic, it will drop the unauthenticated UEFI client packets. To prevent this, DHCP traffic (UDP ports 67 and 68) must be exempted from IPsec enforcement on the WDS server, or the WDS server's IP address must be added to the IPsec exemption list for DHCP communications.
+* **Network Firewall Routing**: Internal hardware network firewalls and router access control lists (ACLs) separating subnets must permit the transmission of IPsec negotiation and transport traffic between domain member hosts. Specifically, UDP port 500 (Internet Key Exchange / IKE), UDP port 4500 (IPsec NAT-Traversal / NAT-T, if applicable), and IP Protocol 50 (Encapsulating Security Payload / ESP) must be permitted across subnet boundaries.
+* **Hyper-V Virtualization Hosts**: If Hyper-V virtual machines are running on a host, the host requires DNS query traffic (TCP/UDP port 53) to be allowed inbound on all virtual network switch interfaces to ensure VMs can reach local DNS services for name resolution.
 
 ---
 
@@ -19202,6 +19273,12 @@ This directory contains the physical isolation policies and operating system sec
 32. **[REQ-PAW-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](#07-paws-disable-unused-features-md)**
     Disables legacy, unused Windows optional features, including PowerShell 2.0, .NET Framework 3.5, and SMBv1 to minimize the workstation attack surface.
 
+33. **[REQ-PAW-033 - Configure Microsoft Office Security and Block OLE Packages](#07-paws-configure-office-security-md)**
+    Blocks VBA macros from running in Office files downloaded from the Internet, enforces macro digital signing warnings, and disables OLE Package execution in Outlook to prevent initial access exploits.
+
+34. **[REQ-PAW-034 - Disable Windows Script Host and Remap Scripting Extensions](#07-paws-disable-windows-script-host-md)**
+    Disables Windows Script Host execution globally and remaps standard scripting extensions (.vbs, .js, etc.) to open in Notepad by default to prevent execution by double-click.
+
 
 
 
@@ -21990,6 +22067,7 @@ if ($Vulnerable) {
     * `HKLM\System\CurrentControlSet\Control\Lsa`
       * `LimitBlankPasswordUse` = `1` (REG_DWORD)
       * `NoLMHash` = `1` (REG_DWORD)
+      * `LmCompatibilityLevel` = `5` (REG_DWORD, Network security: LAN Manager authentication level - NTLMv2 only)
     * `HKLM\System\CurrentControlSet\Control\SecurityProviders\WDigest`
       * `UseLogonCredential` = `0` (REG_DWORD)
     * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
@@ -22032,7 +22110,7 @@ Securing authentication parameters and account controls reduces the risk of pass
 6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, increasing resistance to offline brute-force and GPU-accelerated cracking attacks.
 7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
 8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
-9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, and requiring NTLMv2 and 128-bit encryption block legacy protocol exploitation.
+9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, requiring NTLMv2 and 128-bit encryption, and enforcing client-side NTLMv2-only authentication via `LmCompatibilityLevel = 5` block legacy protocol exploitation and relay vectors.
 10. **Fine-Grained Password Policies (FGPP)**: While local accounts are secured on the machine, the Active Directory user accounts of the Tier 0 Administrators who logon to these PAWs must also be protected by a domain-level Fine-Grained Password Policy (FGPP / PSO) of at least 20 characters, as configured in [REQ-ID-001 - Enforce Fine-Grained Password Policies](#03-identities-services-enforce-fgpp-md).
 
 ---
@@ -22146,7 +22224,8 @@ if (-not (Test-Path $LsaPath)) {
 }
 Set-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $LsaPath -Name "NoLMHash" -Value 1 -Type DWord -Force
-Write-Host "[+] Blank password restriction and NoLMHash options enforced." -ForegroundColor Green
+Set-ItemProperty -Path $LsaPath -Name "LmCompatibilityLevel" -Value 5 -Type DWord -Force
+Write-Host "[+] Blank password, NoLMHash, and client NTLMv2-only options enforced." -ForegroundColor Green
 
 # LSASS WDigest caching block
 $WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
@@ -22358,6 +22437,7 @@ Test-RegistryValue $WinlogonPath "CachedLogonsCount" 0
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
 Test-RegistryValue $LsaPath "LimitBlankPasswordUse" 1
 Test-RegistryValue $LsaPath "NoLMHash" 1
+Test-RegistryValue $LsaPath "LmCompatibilityLevel" 5
 
 $WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
 Test-RegistryValue $WDigestPath "UseLogonCredential" 0
@@ -23149,6 +23229,7 @@ if ($script:Vulnerable) {
     * Computer Configuration\Administrative Templates\Network\WLAN Service\WLAN Settings
     * Computer Configuration\Administrative Templates\Printers
     * Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options
+    * Computer Configuration\Policies\Windows Settings\Security Settings\System Services\WinHTTP Web Proxy Auto-Discovery Service
   * **Registry Locations**:
     * HKLM\Software\Policies\Microsoft\Windows NT\DNSClient
       * `EnableMulticast` = `0` (REG_DWORD, Disables LLMNR)
@@ -23176,6 +23257,10 @@ if ($script:Vulnerable) {
       * `DisableHTTPPrinting` = `1` (REG_DWORD)
     * HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
       * `RestrictNullSessAccess` = `1` (REG_DWORD)
+    * HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad
+      * `WpadOverride` = `1` (REG_DWORD, Disables WPAD)
+    * HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity
+      * `SrvsvcSessionInfo` = (REG_BINARY, Restricts Net Session Enumeration)
 
 ---
 
@@ -23188,6 +23273,8 @@ Legacy name resolution protocols and insecure default network configurations are
 3. **ICMP Redirects**: ICMP redirect packets can be used by an attacker on the same subnet to dynamically redirect routing for specific hosts through the attacker's machine, enabling full MitM packet sniffing and modification. Disabling ICMP redirects prevents this vector.
 4. **IP Source Routing**: Source routing allows a sender to specify the exact network path a packet should follow. This is commonly abused to bypass firewall routing rules or establish communication paths that violate network segment isolation.
 5. **Disable Default IPv6 DNS Servers**: Disabling default IPv6 DNS servers prevents automated fallback to unauthenticated, dynamic local IPv6 DNS servers advertised by rogue routers or malicious tools (like mitm6), which would otherwise redirect query traffic and coerce NTLM or Kerberos authentication.
+6. **Disable Web Proxy Auto-Discovery (WPAD)**: Disabling WPAD removes another name resolution mechanism that Responder exploits to harvest credentials. By disabling the `WinHttpAutoProxySvc` service and configuring `WpadOverride = 1`, the workstation is protected from rogue web proxy configurations.
+7. **Restrict Net Session Enumeration (NetCease)**: By default, any authenticated domain user can query session information from remote hosts. Attackers utilize session enumeration to locate high-privileged user sessions (e.g., Domain Admins) across the network. Hardening the `SrvsvcSessionInfo` default security descriptor blocks this remote reconnaissance.
 
 ---
 
@@ -23347,6 +23434,27 @@ Legacy name resolution protocols and insecure default network configurations are
       * **Value Type**: `REG_DWORD`
       * **Value Data**: `1`
 
+    * **Disable WPAD Override (User Preference)**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_CURRENT_USER`
+      * **Key Path**: `Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad`
+      * **Value Name**: `WpadOverride`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `1`
+
+    * **Restrict Net Session Enumeration (NetCease SDDL)**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity`
+      * **Value Name**: `SrvsvcSessionInfo`
+      * **Value Type**: `REG_BINARY`
+      * **Value Data**: Generate via SDDL `D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)`
+
+<div id="07-paws-harden-network-and-name-resolution-md-step-4-disable-winhttp-wpad-service"></div>
+#### Step 4: Disable WinHTTP WPAD Service
+1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+2. Scroll to **WinHTTP Web Proxy Auto-Discovery Service** and set to **Disabled**.
+
 ---
 
 <div id="07-paws-harden-network-and-name-resolution-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
@@ -23434,6 +23542,34 @@ Write-Host "[+] Printing spooler HTTP and Web service options disabled." -Foregr
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" "RestrictNullSessAccess" 1
 Write-Host "[+] Anonymous null session share access restricted." -ForegroundColor Green
 
+# 8. Disable WPAD
+Write-Host "[+] Disabling WinHTTP Auto-Proxy service..." -ForegroundColor Gray
+Set-Service -Name "WinHttpAutoProxySvc" -StartupType Disabled -ErrorAction SilentlyContinue
+Stop-Service -Name "WinHttpAutoProxySvc" -Force -ErrorAction SilentlyContinue
+
+$WpadPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad"
+if (-not (Test-Path $WpadPath)) {
+    New-Item -Path $WpadPath -Force | Out-Null
+}
+Set-ItemProperty -Path $WpadPath -Name "WpadOverride" -Value 1 -Type DWord -Force
+Write-Host "[+] WPAD auto-detection disabled in user preferences registry." -ForegroundColor Green
+
+# 9. Restrict Net Session Enumeration (NetCease SDDL)
+Write-Host "[+] Restricting Net Session Enumeration..." -ForegroundColor Gray
+try {
+    $SD = New-Object System.Security.AccessControl.CommonSecurityDescriptor($false, $false, "D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)")
+    $BinaryForm = New-Object byte[] $SD.BinaryLength
+    $SD.GetBinaryForm($BinaryForm, 0)
+    $LanmanSecPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity"
+    if (-not (Test-Path $LanmanSecPath)) {
+        New-Item -Path $LanmanSecPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $LanmanSecPath -Name "SrvsvcSessionInfo" -Value $BinaryForm -Type Binary -Force
+    Write-Host "[+] Net Session Enumeration restricted to Admins/Operators/Power Users." -ForegroundColor Green
+} catch {
+    Write-Error "    Failed to apply Net Session Enumeration restrictions: $($_.Exception.Message)"
+}
+
 Write-Host "Network and name resolution hardening applied successfully." -ForegroundColor Green
 ```
 
@@ -23503,6 +23639,46 @@ Test-RegistryValue $PrinterPath "DisableHTTPPrinting" 1
 # 6. Audit Null Session Share Restrict
 $ServerPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
 Test-RegistryValue $ServerPath "RestrictNullSessAccess" 1
+
+# 7. Audit WPAD Service and Registry Override
+$WpadSvc = Get-Service -Name "WinHttpAutoProxySvc" -ErrorAction SilentlyContinue
+if ($null -ne $WpadSvc) {
+    if ($WpadSvc.StartType -eq "Disabled") {
+        Write-Host "    - WPAD Service State: Disabled (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: WPAD Service StartType is $($WpadSvc.StartType) (Expected: Disabled)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+$WpadPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad"
+Test-RegistryValue $WpadPath "WpadOverride" 1
+
+# 8. Audit Net Session Enumeration (NetCease)
+$LanmanSecPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity"
+if (Test-Path $LanmanSecPath) {
+    $SrvsvcSessionInfo = (Get-ItemProperty -Path $LanmanSecPath -Name "SrvsvcSessionInfo" -ErrorAction SilentlyContinue).SrvsvcSessionInfo
+    if ($null -ne $SrvsvcSessionInfo) {
+        try {
+            $SD = New-Object System.Security.AccessControl.CommonSecurityDescriptor($false, $false, $SrvsvcSessionInfo, 0)
+            $Sddl = $SD.GetSddlForm("Dacl")
+            if ($Sddl -eq "D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)") {
+                Write-Host "    - Net Session Enumeration Security Descriptor: Hardened (Secure)" -ForegroundColor Green
+            } else {
+                Write-Host "    - VULNERABLE: Net Session Enumeration Security Descriptor is '$Sddl' (Expected: 'D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)')" -ForegroundColor Red
+                $script:Vulnerable = $true
+            }
+        } catch {
+            Write-Host "    - VULNERABLE: Failed to parse Net Session Enumeration security descriptor." -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: SrvsvcSessionInfo registry value not found." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "    - VULNERABLE: LanmanServer\DefaultSecurity path not found." -ForegroundColor Red
+    $script:Vulnerable = $true
+}
 
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
@@ -25364,22 +25540,26 @@ Additionally:
    * **Outbound connections**: `Allow (default)`
    * Click **Customize...** under **Settings**:
      * **Display a notification**: `No`
+     * **Apply local firewall rules**: `No`
+     * **Apply local connection security rules**: `No`
    * Click **Customize...** under **Logging**:
      * **Name**: `%SystemRoot%\System32\logfiles\firewall\domainfw.log`
      * **Size limit (KB)**: `16384`
      * **Log dropped packets**: `Yes`
-     * **Log successful connections**: `Yes`
+     * **Log successful connections**: `No`
 6. Configure the **Private Profile** tab:
    * **Firewall state**: `On (recommended)`
    * **Inbound connections**: `Block (default)`
    * **Outbound connections**: `Allow (default)`
    * Click **Customize...** under **Settings**:
      * **Display a notification**: `No`
+     * **Apply local firewall rules**: `No`
+     * **Apply local connection security rules**: `No`
    * Click **Customize...** under **Logging**:
      * **Name**: `%SystemRoot%\System32\logfiles\firewall\privatefw.log`
      * **Size limit (KB)**: `16384`
      * **Log dropped packets**: `Yes`
-     * **Log successful connections**: `Yes`
+     * **Log successful connections**: `No`
 7. Configure the **Public Profile** tab:
    * **Firewall state**: `On (recommended)`
    * **Inbound connections**: `Block (default)`
@@ -25392,13 +25572,13 @@ Additionally:
      * **Name**: `%SystemRoot%\System32\logfiles\firewall\publicfw.log`
      * **Size limit (KB)**: `16384`
      * **Log dropped packets**: `Yes`
-     * **Log successful connections**: `Yes`
+     * **Log successful connections**: `No`
 
 <div id="07-paws-configure-windows-firewall-md-2-create-outbound-rules-for-known-lolbins"></div>
 #### 2. Create Outbound Rules for Known LOLBins
 1. Navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\Windows Defender Firewall with Advanced Security\Windows Defender Firewall with Advanced Security\Outbound Rules`
-2. Create a new rule for each target LOLBin binary (e.g., mshta.exe, certutil.exe, bitsadmin.exe, regsvr32.exe, rundll32.exe, cscript.exe, wscript.exe, hh.exe):
+2. Create a new rule for each target LOLBin binary (e.g., mshta.exe, certutil.exe, bitsadmin.exe, regsvr32.exe, rundll32.exe, cscript.exe, wscript.exe, hh.exe, calc.exe, notepad.exe, conhost.exe, RunScriptHelper.exe):
    * Right-click **Outbound Rules** and select **New Rule...**
    * **Rule Type**: `Program`
    * **Program**: Choose `This program path` and enter the path matching the binary (both x64 and x86 paths if applicable, e.g., `%SystemRoot%\System32\mshta.exe` and `%SystemRoot%\SysWOW64\mshta.exe`).
@@ -25426,29 +25606,17 @@ $FWProfiles = @("Domain", "Private", "Public")
 foreach ($FWProfile in $FWProfiles) {
     $LogFile = "$env:windir\System32\logfiles\firewall\$($FWProfile.ToLower())fw.log"
     
-    if ($FWProfile -eq "Public") {
-        Set-NetFirewallProfile -Profile $FWProfile `
-            -Enabled True `
-            -DefaultInboundAction Block `
-            -DefaultOutboundAction Allow `
-            -NotifyOnListen False `
-            -AllowLocalPolicyMerge False `
-            -AllowLocalIPsecPolicyMerge False `
-            -LogFileName $LogFile `
-            -LogMaxSizeKilobytes 16384 `
-            -LogBlocked True `
-            -LogAllowed True | Out-Null
-    } else {
-        Set-NetFirewallProfile -Profile $FWProfile `
-            -Enabled True `
-            -DefaultInboundAction Block `
-            -DefaultOutboundAction Allow `
-            -NotifyOnListen False `
-            -LogFileName $LogFile `
-            -LogMaxSizeKilobytes 16384 `
-            -LogBlocked True `
-            -LogAllowed True | Out-Null
-    }
+    Set-NetFirewallProfile -Profile $FWProfile `
+        -Enabled True `
+        -DefaultInboundAction Block `
+        -DefaultOutboundAction Allow `
+        -NotifyOnListen False `
+        -AllowLocalPolicyMerge False `
+        -AllowLocalIPsecPolicyMerge False `
+        -LogFileName $LogFile `
+        -LogMaxSizeKilobytes 16384 `
+        -LogBlocked True `
+        -LogAllowed False | Out-Null
     Write-Host "[+] Profile '$FWProfile' configured with logging and defaults." -ForegroundColor Green
 }
 
@@ -25469,7 +25637,15 @@ $Lolbins = @(
     @{ Name = "wscript.exe (x64)"; Path = "%SystemRoot%\System32\wscript.exe" },
     @{ Name = "wscript.exe (x86)"; Path = "%SystemRoot%\SysWOW64\wscript.exe" },
     @{ Name = "hh.exe (x64)"; Path = "%SystemRoot%\hh.exe" },
-    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" }
+    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" },
+    @{ Name = "calc.exe (x64)"; Path = "%SystemRoot%\System32\calc.exe" },
+    @{ Name = "calc.exe (x86)"; Path = "%SystemRoot%\SysWOW64\calc.exe" },
+    @{ Name = "notepad.exe (x64)"; Path = "%SystemRoot%\System32\notepad.exe" },
+    @{ Name = "notepad.exe (x86)"; Path = "%SystemRoot%\SysWOW64\notepad.exe" },
+    @{ Name = "conhost.exe (x64)"; Path = "%SystemRoot%\System32\conhost.exe" },
+    @{ Name = "conhost.exe (x86)"; Path = "%SystemRoot%\SysWOW64\conhost.exe" },
+    @{ Name = "RunScriptHelper.exe (x64)"; Path = "%SystemRoot%\System32\RunScriptHelper.exe" },
+    @{ Name = "RunScriptHelper.exe (x86)"; Path = "%SystemRoot%\SysWOW64\RunScriptHelper.exe" }
 )
 
 Write-Host "Configuring outbound firewall block rules for known LOLBins..." -ForegroundColor Cyan
@@ -25532,14 +25708,14 @@ function Test-FirewallProfile ($ProfileName, $ExpectMergeLocal, $ExpectMergeIPse
     $LogPathColor = if ($FWProfile.LogFileName -eq $LogPath) { "Green" } else { "Red" }
     $LogSizeColor = if ($FWProfile.LogMaxSizeKilobytes -ge 16384) { "Green" } else { "Red" }
     $LogBlockedColor = if ($FWProfile.LogBlocked -eq $true) { "Green" } else { "Red" }
-    $LogAllowedColor = if ($FWProfile.LogAllowed -eq $true) { "Green" } else { "Red" }
+    $LogAllowedColor = if ($FWProfile.LogAllowed -eq $false) { "Green" } else { "Red" }
     
     Write-Host "    - LogFileName: $($FWProfile.LogFileName) (Expected: $LogPath)" -ForegroundColor $LogPathColor
     Write-Host "    - LogMaxSizeKilobytes: $($FWProfile.LogMaxSizeKilobytes) (Expected: >= 16384)" -ForegroundColor $LogSizeColor
     Write-Host "    - LogBlocked: $($FWProfile.LogBlocked) (Expected: True)" -ForegroundColor $LogBlockedColor
-    Write-Host "    - LogAllowed: $($FWProfile.LogAllowed) (Expected: True)" -ForegroundColor $LogAllowedColor
+    Write-Host "    - LogAllowed: $($FWProfile.LogAllowed) (Expected: False)" -ForegroundColor $LogAllowedColor
     
-    if ($FWProfile.Enabled -ne $true -or $FWProfile.DefaultInboundAction -ne "Block" -or $FWProfile.NotifyOnListen -ne $false -or $FWProfile.LogFileName -ne $LogPath -or $FWProfile.LogMaxSizeKilobytes -lt 16384 -or $FWProfile.LogBlocked -ne $true -or $FWProfile.LogAllowed -ne $true) {
+    if ($FWProfile.Enabled -ne $true -or $FWProfile.DefaultInboundAction -ne "Block" -or $FWProfile.NotifyOnListen -ne $false -or $FWProfile.LogFileName -ne $LogPath -or $FWProfile.LogMaxSizeKilobytes -lt 16384 -or $FWProfile.LogBlocked -ne $true -or $FWProfile.LogAllowed -ne $false) {
         $script:Vulnerable = $true
     }
     
@@ -25556,8 +25732,8 @@ function Test-FirewallProfile ($ProfileName, $ExpectMergeLocal, $ExpectMergeIPse
 }
 
 Write-Host "Auditing profiles..." -ForegroundColor Gray
-Test-FirewallProfile -ProfileName "Domain" -ExpectMergeLocal $null -ExpectMergeIPsec $null
-Test-FirewallProfile -ProfileName "Private" -ExpectMergeLocal $null -ExpectMergeIPsec $null
+Test-FirewallProfile -ProfileName "Domain" -ExpectMergeLocal $false -ExpectMergeIPsec $false
+Test-FirewallProfile -ProfileName "Private" -ExpectMergeLocal $false -ExpectMergeIPsec $false
 Test-FirewallProfile -ProfileName "Public" -ExpectMergeLocal $false -ExpectMergeIPsec $false
 
 # Audit outbound rules for known LOLBins
@@ -25577,7 +25753,15 @@ $Lolbins = @(
     @{ Name = "wscript.exe (x64)"; Path = "%SystemRoot%\System32\wscript.exe" },
     @{ Name = "wscript.exe (x86)"; Path = "%SystemRoot%\SysWOW64\wscript.exe" },
     @{ Name = "hh.exe (x64)"; Path = "%SystemRoot%\hh.exe" },
-    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" }
+    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" },
+    @{ Name = "calc.exe (x64)"; Path = "%SystemRoot%\System32\calc.exe" },
+    @{ Name = "calc.exe (x86)"; Path = "%SystemRoot%\SysWOW64\calc.exe" },
+    @{ Name = "notepad.exe (x64)"; Path = "%SystemRoot%\System32\notepad.exe" },
+    @{ Name = "notepad.exe (x86)"; Path = "%SystemRoot%\SysWOW64\notepad.exe" },
+    @{ Name = "conhost.exe (x64)"; Path = "%SystemRoot%\System32\conhost.exe" },
+    @{ Name = "conhost.exe (x86)"; Path = "%SystemRoot%\SysWOW64\conhost.exe" },
+    @{ Name = "RunScriptHelper.exe (x64)"; Path = "%SystemRoot%\System32\RunScriptHelper.exe" },
+    @{ Name = "RunScriptHelper.exe (x86)"; Path = "%SystemRoot%\SysWOW64\RunScriptHelper.exe" }
 )
 
 Write-Host "Auditing outbound firewall rules for known LOLBins..." -ForegroundColor Gray
@@ -26992,6 +27176,368 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="07-paws-configure-office-security-md"></div>
+
+<div id="07-paws-configure-office-security-md-req-paw-033-configure-microsoft-office-security-and-block-ole-packages"></div>
+# [REQ-PAW-033] Configure Microsoft Office Security and Block OLE Packages
+
+<div id="07-paws-configure-office-security-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-configure-office-security-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: User Configuration\Policies\Administrative Templates\Microsoft Office 2016\Security Settings
+  * **Registry Locations**:
+    * `HKCU\software\policies\microsoft\office\16.0\common\security`
+      * `vbawarnings` = `3` (REG_DWORD, Enforce macro signing / Block unsigned macros)
+    * `HKCU\software\policies\microsoft\office\16.0\excel\security`
+      * `blockcontentexecutionfrominternet` = `1` (REG_DWORD, Block macros in files from the Internet)
+    * `HKCU\software\policies\microsoft\office\16.0\word\security`
+      * `blockcontentexecutionfrominternet` = `1` (REG_DWORD)
+    * `HKCU\software\policies\microsoft\office\16.0\powerpoint\security`
+      * `blockcontentexecutionfrominternet` = `1` (REG_DWORD)
+    * `HKCU\software\policies\microsoft\office\16.0\outlook\security`
+      * `ShowOLEPackageObj` = `0` (REG_DWORD, Disable OLE package activation)
+
+---
+
+<div id="07-paws-configure-office-security-md-rationale"></div>
+## Rationale
+Malicious documents (e.g., weaponized Word, Excel, or PowerPoint files) containing embedded VBA macros are a prevalent initial access and execution vector. Similarly, embedding malicious OLE packages inside Outlook items (such as RTF-formatted emails) allows attackers to trigger script execution or execute arbitrary packages via `packager.dll` when an administrator opens or previews the email.
+
+Hardening these settings ensures:
+1. **Internet Macro Blocking**: VBA macros in files downloaded from the Internet or untrusted external attachments are blocked from executing, regardless of user consent.
+2. **Macro Code Signing**: Any locally run macros are restricted to trusted, digitally signed code, preventing the execution of ad-hoc unverified user scripts.
+3. **OLE Package Disablement**: Restricting Outlook OLE package activation (`ShowOLEPackageObj = 0`) blocks the execution of dangerous embedded objects in email messages.
+
+---
+
+<div id="07-paws-configure-office-security-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Office Macros**: Business workflows relying on macro-enabled spreadsheets or documents downloaded from external sources (e.g., vendor portals) will be blocked. Unsigned local macros will also fail to run. Users must acquire certificates to digitally sign internal macro projects.
+* **Outlook Packages**: Embedded document shortcuts or packages in emails will be displayed as static icons and cannot be double-clicked for direct execution.
+
+---
+
+<div id="07-paws-configure-office-security-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-configure-office-security-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+<div id="07-paws-configure-office-security-md-step-1-enforce-macro-security-in-admx-templates"></div>
+#### Step 1: Enforce Macro Security in ADMX Templates
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO.
+3. Navigate to: `User Configuration\Policies\Administrative Templates\Microsoft Office 2016\Security Settings\Trust Center`
+4. Set the following policies:
+   * **Policy**: `VBA Macro Notification Settings` -> **Enabled** with option set to **Disable all except digitally signed macros**
+5. For each application (Word, Excel, PowerPoint, Access), navigate to:
+   `User Configuration\Policies\Administrative Templates\[Application] 2016\[Application] Options\Security\Trust Center`
+6. Set the policy:
+   * **Policy**: `Block macros from running in Office files from the Internet` -> **Enabled**
+
+<div id="07-paws-configure-office-security-md-step-2-disable-outlook-ole-packages"></div>
+#### Step 2: Disable Outlook OLE Packages
+1. Navigate to: `User Configuration\Policies\Administrative Templates\Microsoft Outlook 2016\Security`
+2. Configure the setting:
+   * **Policy**: `Do not allow OLE package execution` -> **Enabled**
+
+---
+
+<div id="07-paws-configure-office-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Configure the current user registry hives to enforce macro blocking and OLE package restrictions.
+
+[Download Script: Configure-PawOfficeSecurity.ps1](implementation_scripts/Configure-PawOfficeSecurity.ps1)
+
+```powershell
+# Configure-PawOfficeSecurity.ps1
+# Description: Configures registry settings under the HKCU hive to restrict VBA macros and block Outlook OLE package execution on PAWs.
+
+Write-Host "Applying Microsoft Office security and OLE restrictions..." -ForegroundColor Cyan
+
+# Helper to configure User Registry DWORD values
+function Set-UserRegDWord {
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        [string]$Path,
+        [string]$Name,
+        [int]$Value
+    )
+    if ($PSCmdlet.ShouldProcess($Path, "Set registry DWORD value $Name to $Value")) {
+        $FullRegistryPath = "HKCU:\$Path"
+        if (-not (Test-Path $FullRegistryPath)) {
+            New-Item -Path $FullRegistryPath -Force | Out-Null
+        }
+        Set-ItemProperty -Path $FullRegistryPath -Name $Name -Value $Value -Type DWord -Force
+    }
+}
+
+# 1. Enforce macro signing policy (common)
+Set-UserRegDWord "software\policies\microsoft\office\16.0\common\security" "vbawarnings" 3
+Write-Host "[+] Digital signing for Office macros enforced." -ForegroundColor Green
+
+# 2. Block macros from the Internet for key Office applications
+$Apps = @("excel", "word", "powerpoint", "access", "visio")
+foreach ($App in $Apps) {
+    Set-UserRegDWord "software\policies\microsoft\office\16.0\$App\security" "blockcontentexecutionfrominternet" 1
+}
+Write-Host "[+] VBA macro blocks from Internet applied to Office applications." -ForegroundColor Green
+
+# 3. Disable OLE Package execution in Outlook (Policies and Preferences branches)
+Set-UserRegDWord "software\policies\microsoft\office\16.0\outlook\security" "ShowOLEPackageObj" 0
+Set-UserRegDWord "software\microsoft\office\16.0\outlook\security" "ShowOLEPackageObj" 0
+Write-Host "[+] Outlook OLE Package execution blocked." -ForegroundColor Green
+```
+
+*To verify the current Office security settings:*
+
+[Download Script: Get-PawOfficeSecurityStatus.ps1](audit_scripts/Get-PawOfficeSecurityStatus.ps1)
+
+```powershell
+# Get-PawOfficeSecurityStatus.ps1
+# Description: Audits Microsoft Office macro settings and Outlook OLE package restrictions on PAWs.
+
+Write-Host "--- Auditing Microsoft Office Security Baseline ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+# Helper to audit registry values under HKCU
+function Test-UserRegistryValue ($Path, $Name, $ExpectedValue) {
+    $FullRegistryPath = "HKCU:\$Path"
+    $Val = Get-ItemProperty -Path $FullRegistryPath -Name $Name -ErrorAction SilentlyContinue
+    $Actual = if ($val) { $val.$Name } else { "" }
+    $Color = "Red"
+    if ($Actual -eq $ExpectedValue) {
+        $Color = "Green"
+    } else {
+        $script:Vulnerable = $true
+    }
+    Write-Host "    - User Registry: $Name | Actual: '$Actual' (Expected: '$ExpectedValue')" -ForegroundColor $Color
+}
+
+# 1. Audit macro signing warning
+Test-UserRegistryValue "software\policies\microsoft\office\16.0\common\security" "vbawarnings" 3
+
+# 2. Audit macro Internet blocks
+$Apps = @("excel", "word", "powerpoint", "access", "visio")
+foreach ($App in $Apps) {
+    Test-UserRegistryValue "software\policies\microsoft\office\16.0\$App\security" "blockcontentexecutionfrominternet" 1
+}
+
+# 3. Audit Outlook OLE package block
+Test-UserRegistryValue "software\policies\microsoft\office\16.0\outlook\security" "ShowOLEPackageObj" 0
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-configure-office-security-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendations on restricting application execution, blocking external scripts, and application sandboxing.
+* **CIS Microsoft Office Benchmark**: Section on Office Common Security settings, VBA warnings, and blocking macros in internet files.
+* **Microsoft Security Baseline**: Recommended settings for Microsoft Office and Office 365 ProPlus Security.
+* **DoD Microsoft Outlook STIG**: Restrictions on active content, remote attachments, and OLE execution behavior.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-disable-windows-script-host-md"></div>
+
+<div id="07-paws-disable-windows-script-host-md-req-paw-034-disable-windows-script-host-and-remap-scripting-extensions"></div>
+# [REQ-PAW-034] Disable Windows Script Host and Remap Scripting Extensions
+
+<div id="07-paws-disable-windows-script-host-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-disable-windows-script-host-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path (WSH Disable)**: Computer Configuration\Preferences\Windows Settings\Registry
+  * **GPO Path (Associations)**: User Configuration\Preferences\Control Panel Settings\Folder Options
+  * **Registry Location**:
+    * `HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings`
+      * `Enabled` = `0` (REG_DWORD)
+    * `HKCU\SOFTWARE\Microsoft\Windows Script Host\Settings`
+      * `Enabled` = `0` (REG_DWORD)
+
+---
+
+<div id="07-paws-disable-windows-script-host-md-rationale"></div>
+## Rationale
+Windows Script Host (WSH), which executes VBScript and JScript files (`wscript.exe` and `cscript.exe`), is frequently targeted by threat actors in phishing campaigns and initial access vectors. By placing a script file (e.g., `.vbs`, `.js`, `.wsf`, `.hta`) in an email attachment or download path, attackers can execute arbitrary code on the system if a user opens the file.
+
+Enforcing these deactivation controls ensures:
+1. **Attack Surface Reduction**: Disabling WSH globally blocks the execution of JScript and VBScript files via the standard scripting engines on the workstation.
+2. **Defense-in-Depth File Associations**: Remapping the default file handler for typical scripting extensions to `notepad.exe` ensures that if a scripting file is double-clicked by an administrator, the file opens as plaintext in Notepad for inspection rather than executing its contents.
+
+---
+
+<div id="07-paws-disable-windows-script-host-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Script Dependencies**: Any legacy administrative scripts (such as logon scripts or backup routines) written in VBScript or JScript will fail to run. All internal workstation management scripts must be written in PowerShell 5.1+ and executed under secure execution policies.
+* **Explorer Associations**: Double-clicking on a `.js` or `.vbs` configuration file will open Notepad instead of running the script.
+
+---
+
+<div id="07-paws-disable-windows-script-host-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-disable-windows-script-host-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+<div id="07-paws-disable-windows-script-host-md-step-1-disable-wsh-via-gpo-registry-preferences"></div>
+#### Step 1: Disable WSH via GPO Registry Preferences
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAW`).
+3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Create a new **Registry Item**:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `Enabled`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `0`
+
+<div id="07-paws-disable-windows-script-host-md-step-2-configure-script-file-extensions-to-open-in-notepad"></div>
+#### Step 2: Configure Script File Extensions to Open in Notepad
+1. Navigate to: `User Configuration\Preferences\Control Panel Settings\Folder Options`
+2. Right-click and select **New -> Open With**:
+   * **File Extension**: `vbs`
+   * **Associated Program**: `%SystemRoot%\System32\notepad.exe`
+   * **Set as default**: Check
+3. Repeat the process for the following extensions: `vbe`, `js`, `jse`, `wsf`, `wsh`, `hta`.
+
+---
+
+<div id="07-paws-disable-windows-script-host-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Configure the local registry settings to disable WSH and remap associations.
+
+[Download Script: Disable-PawWsh.ps1](implementation_scripts/Disable-PawWsh.ps1)
+
+```powershell
+# Disable-PawWsh.ps1
+# Description: Disables Windows Script Host globally in HKLM and HKCU registry hives, and remaps script file associations to Notepad.
+
+Write-Host "Applying Windows Script Host and file association hardening..." -ForegroundColor Cyan
+
+# 1. Disable WSH globally
+$RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (-not (Test-Path $RegistryHklm)) {
+    New-Item -Path $RegistryHklm -Force | Out-Null
+}
+Set-ItemProperty -Path $RegistryHklm -Name "Enabled" -Value 0 -Type DWord -Force
+Write-Host "[+] WSH globally disabled in HKLM." -ForegroundColor Green
+
+$RegistryHkcu = "HKCU:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (-not (Test-Path $RegistryHkcu)) {
+    New-Item -Path $RegistryHkcu -Force | Out-Null
+}
+Set-ItemProperty -Path $RegistryHkcu -Name "Enabled" -Value 0 -Type DWord -Force
+Write-Host "[+] WSH disabled in current user HKCU hive." -ForegroundColor Green
+
+# 2. Remap script file extensions to notepad
+$Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
+foreach ($Ext in $Extensions) {
+    $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
+    
+    # Update Class Association to Notepad
+    if (-not (Test-Path $ProgIdPath)) {
+        New-Item -Path $ProgIdPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $ProgIdPath -Name "" -Value "txtfile" -Type String -Force
+    Write-Host "    Mapped .$Ext extension to txtfile handler." -ForegroundColor Gray
+}
+Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundColor Green
+```
+
+*To verify the WSH configuration state:*
+
+[Download Script: Get-PawWshStatus.ps1](audit_scripts/Get-PawWshStatus.ps1)
+
+```powershell
+# Get-PawWshStatus.ps1
+# Description: Audits Windows Script Host registry state and script file extension association handlers on PAWs.
+
+Write-Host "--- Auditing Windows Script Host Hardening ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+# 1. Audit WSH Registry settings
+$RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (Test-Path $RegistryHklm) {
+    $ValHklm = (Get-ItemProperty -Path $RegistryHklm -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
+    if ($ValHklm -eq 0) {
+        Write-Host "    - HKLM WSH Enabled: 0 (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: HKLM WSH is enabled or not configured (Value: '$ValHklm')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "    - VULNERABLE: HKLM WSH settings key is missing (Expected: Enabled = 0)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 2. Audit file associations
+$Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
+foreach ($Ext in $Extensions) {
+    $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
+    if (Test-Path $ProgIdPath) {
+        $Handler = (Get-ItemProperty -Path $ProgIdPath -Name "" -ErrorAction SilentlyContinue).""
+        if ($Handler -eq "txtfile" -or $Handler -match "notepad") {
+            Write-Host "    - Extension .$Ext Handler: $Handler (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: Extension .$Ext Handler is '$Handler' (Expected: txtfile/notepad)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: Extension .$Ext Class Registry key not found." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-disable-windows-script-host-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendations on workstation OS minimization and script execution control.
+* **DoD Windows 11 Computer STIG v2r6**: V-219661 (Windows Script Host disablement and script restriction).
+* **CIS Microsoft Windows Client Benchmark**: Section 18.9 (Administrative templates for script execution safety).
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="08-endpoints-README-md"></div>
 
 <div id="08-endpoints-README-md-module-8-endpoint-hardening"></div>
@@ -27100,6 +27646,12 @@ To prevent initial access and lateral movement, the following unitary technical 
 32. **[REQ-END-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](#08-endpoints-disable-unused-features-md)**
     Disables legacy, unused Windows optional features, including PowerShell 2.0, .NET Framework 3.5, and SMBv1 to minimize the client attack surface.
 
+33. **[REQ-END-033 - Configure Microsoft Office Security and Block OLE Packages](#08-endpoints-configure-office-security-md)**
+    Blocks VBA macros from running in Office files downloaded from the Internet, enforces macro digital signing warnings, and disables OLE Package execution in Outlook to prevent initial access exploits.
+
+34. **[REQ-END-034 - Disable Windows Script Host and Remap Scripting Extensions](#08-endpoints-disable-windows-script-host-md)**
+    Disables Windows Script Host execution globally and remaps standard scripting extensions (.vbs, .js, etc.) to open in Notepad by default to prevent execution by double-click.
+
 
 
 
@@ -27130,6 +27682,7 @@ To prevent initial access and lateral movement, the following unitary technical 
     * Computer Configuration\Administrative Templates\Network\WLAN Service\WLAN Settings
     * Computer Configuration\Administrative Templates\Printers
     * Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options
+    * Computer Configuration\Policies\Windows Settings\Security Settings\System Services\WinHTTP Web Proxy Auto-Discovery Service
   * **Registry Locations**:
     * HKLM\Software\Policies\Microsoft\Windows NT\DNSClient
       * `EnableMulticast` = `0` (REG_DWORD, Disables LLMNR)
@@ -27157,6 +27710,10 @@ To prevent initial access and lateral movement, the following unitary technical 
       * `DisableHTTPPrinting` = `1` (REG_DWORD)
     * HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
       * `RestrictNullSessAccess` = `1` (REG_DWORD)
+    * HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad
+      * `WpadOverride` = `1` (REG_DWORD, Disables WPAD)
+    * HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity
+      * `SrvsvcSessionInfo` = (REG_BINARY, Restricts Net Session Enumeration)
 
 ---
 
@@ -27169,6 +27726,8 @@ Legacy name resolution protocols and insecure default network configurations are
 3. **ICMP Redirects**: ICMP redirect packets can be used by an attacker on the same subnet to dynamically redirect routing for specific hosts through the attacker's machine, enabling full MitM packet sniffing and modification. Disabling ICMP redirects prevents this vector.
 4. **IP Source Routing**: Source routing allows a sender to specify the exact network path a packet should follow. This is commonly abused to bypass firewall routing rules or establish communication paths that violate network segment isolation.
 5. **Disable Default IPv6 DNS Servers**: Disabling default IPv6 DNS servers prevents automated fallback to unauthenticated, dynamic local IPv6 DNS servers advertised by rogue routers or malicious tools (like mitm6), which would otherwise redirect query traffic and coerce NTLM or Kerberos authentication.
+6. **Disable Web Proxy Auto-Discovery (WPAD)**: Disabling WPAD removes another name resolution mechanism that Responder exploits to harvest credentials. By disabling the `WinHttpAutoProxySvc` service and configuring `WpadOverride = 1`, the workstation is protected from rogue web proxy configurations.
+7. **Restrict Net Session Enumeration (NetCease)**: By default, any authenticated domain user can query session information from remote hosts. Attackers utilize session enumeration to locate high-privileged user sessions (e.g., Domain Admins) across the network. Hardening the `SrvsvcSessionInfo` default security descriptor blocks this remote reconnaissance.
 
 ---
 
@@ -27328,6 +27887,27 @@ Legacy name resolution protocols and insecure default network configurations are
       * **Value Type**: `REG_DWORD`
       * **Value Data**: `1`
 
+    * **Disable WPAD Override (User Preference)**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_CURRENT_USER`
+      * **Key Path**: `Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad`
+      * **Value Name**: `WpadOverride`
+      * **Value Type**: `REG_DWORD`
+      * **Value Data**: `1`
+
+    * **Restrict Net Session Enumeration (NetCease SDDL)**:
+      * **Action**: `Update`
+      * **Hive**: `HKEY_LOCAL_MACHINE`
+      * **Key Path**: `SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity`
+      * **Value Name**: `SrvsvcSessionInfo`
+      * **Value Type**: `REG_BINARY`
+      * **Value Data**: Generate via SDDL `D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)`
+
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-4-disable-winhttp-wpad-service"></div>
+#### Step 4: Disable WinHTTP WPAD Service
+1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+2. Scroll to **WinHTTP Web Proxy Auto-Discovery Service** and set to **Disabled**.
+
 ---
 
 <div id="08-endpoints-harden-network-and-name-resolution-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
@@ -27414,6 +27994,34 @@ Write-Host "[+] Printing spooler HTTP and Web service options disabled." -Foregr
 Set-RegDWord "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" "RestrictNullSessAccess" 1
 Write-Host "[+] Anonymous null session share access restricted." -ForegroundColor Green
 
+# 8. Disable WPAD
+Write-Host "[+] Disabling WinHTTP Auto-Proxy service..." -ForegroundColor Gray
+Set-Service -Name "WinHttpAutoProxySvc" -StartupType Disabled -ErrorAction SilentlyContinue
+Stop-Service -Name "WinHttpAutoProxySvc" -Force -ErrorAction SilentlyContinue
+
+$WpadPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad"
+if (-not (Test-Path $WpadPath)) {
+    New-Item -Path $WpadPath -Force | Out-Null
+}
+Set-ItemProperty -Path $WpadPath -Name "WpadOverride" -Value 1 -Type DWord -Force
+Write-Host "[+] WPAD auto-detection disabled in user preferences registry." -ForegroundColor Green
+
+# 9. Restrict Net Session Enumeration (NetCease SDDL)
+Write-Host "[+] Restricting Net Session Enumeration..." -ForegroundColor Gray
+try {
+    $SD = New-Object System.Security.AccessControl.CommonSecurityDescriptor($false, $false, "D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)")
+    $BinaryForm = New-Object byte[] $SD.BinaryLength
+    $SD.GetBinaryForm($BinaryForm, 0)
+    $LanmanSecPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity"
+    if (-not (Test-Path $LanmanSecPath)) {
+        New-Item -Path $LanmanSecPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $LanmanSecPath -Name "SrvsvcSessionInfo" -Value $BinaryForm -Type Binary -Force
+    Write-Host "[+] Net Session Enumeration restricted to Admins/Operators/Power Users." -ForegroundColor Green
+} catch {
+    Write-Error "    Failed to apply Net Session Enumeration restrictions: $($_.Exception.Message)"
+}
+
 Write-Host "Network and name resolution hardening applied successfully." -ForegroundColor Green
 ```
 
@@ -27482,6 +28090,46 @@ Test-RegistryValue $PrinterPath "DisableHTTPPrinting" 1
 # 6. Audit Null Session Share Restrict
 $ServerPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
 Test-RegistryValue $ServerPath "RestrictNullSessAccess" 1
+
+# 7. Audit WPAD Service and Registry Override
+$WpadSvc = Get-Service -Name "WinHttpAutoProxySvc" -ErrorAction SilentlyContinue
+if ($null -ne $WpadSvc) {
+    if ($WpadSvc.StartType -eq "Disabled") {
+        Write-Host "    - WPAD Service State: Disabled (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: WPAD Service StartType is $($WpadSvc.StartType) (Expected: Disabled)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+$WpadPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad"
+Test-RegistryValue $WpadPath "WpadOverride" 1
+
+# 8. Audit Net Session Enumeration (NetCease)
+$LanmanSecPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity"
+if (Test-Path $LanmanSecPath) {
+    $SrvsvcSessionInfo = (Get-ItemProperty -Path $LanmanSecPath -Name "SrvsvcSessionInfo" -ErrorAction SilentlyContinue).SrvsvcSessionInfo
+    if ($null -ne $SrvsvcSessionInfo) {
+        try {
+            $SD = New-Object System.Security.AccessControl.CommonSecurityDescriptor($false, $false, $SrvsvcSessionInfo, 0)
+            $Sddl = $SD.GetSddlForm("Dacl")
+            if ($Sddl -eq "D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)") {
+                Write-Host "    - Net Session Enumeration Security Descriptor: Hardened (Secure)" -ForegroundColor Green
+            } else {
+                Write-Host "    - VULNERABLE: Net Session Enumeration Security Descriptor is '$Sddl' (Expected: 'D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)')" -ForegroundColor Red
+                $script:Vulnerable = $true
+            }
+        } catch {
+            Write-Host "    - VULNERABLE: Failed to parse Net Session Enumeration security descriptor." -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: SrvsvcSessionInfo registry value not found." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "    - VULNERABLE: LanmanServer\DefaultSecurity path not found." -ForegroundColor Red
+    $script:Vulnerable = $true
+}
 
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
@@ -31244,6 +31892,7 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block
       * `RestrictAnonymous` = `1` (REG_DWORD, restrict anonymous enumeration of shares)
       * `ForceNetworkLogon` = `0` (REG_DWORD, sharing and security model Classic)
       * `ObaseCaseInsensitive` = `1` (REG_DWORD, require case insensitivity for non-Windows subsystems)
+      * `LmCompatibilityLevel` = `5` (REG_DWORD, Network security: LAN Manager authentication level - NTLMv2 only)
     * `HKLM\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters`
       * `AllowPKU2U` = `0` (REG_DWORD, Allow PKU2U requests disabled)
     * `HKLM\System\CurrentControlSet\Control\SecurityProviders\WDigest`
@@ -31299,7 +31948,7 @@ Securing authentication parameters and account controls reduces the risk of pass
 6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, dramatically increasing resistance to offline brute-force and GPU-accelerated cracking attacks (like RTX 4090 models).
 7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
 8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
-9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, and requiring NTLMv2 and 128-bit encryption block legacy protocol exploitation.
+9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, requiring NTLMv2 and 128-bit encryption, and enforcing client-side NTLMv2-only authentication via `LmCompatibilityLevel = 5` block legacy protocol exploitation and relay vectors.
 10. **Kerberos Security Policy**: Restricting Kerberos ticket lifetimes (e.g. 10 hours max ticket lifetime, 7 days max renewal, 600 minutes max service ticket lifetime) and clock skew tolerance (5 minutes) limits the window of opportunity for stolen ticket abuse (Pass-the-Ticket) and ensures synchronization integrity.
 11. **GPO Background Refresh Security**: Forcing regular Group Policy background reapplication prevents persistent local configuration changes or drift.
 12. **WMI Class Minimization**: Avoiding WMI queries to `Win32_Product` avoids unintended re-installation checks of all MSI packages during GPO processing, protecting host CPU and disk health.
@@ -31459,7 +32108,8 @@ if (-not (Test-Path $LsaPath)) {
 }
 Set-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $LsaPath -Name "NoLMHash" -Value 1 -Type DWord -Force
-Write-Host "[+] Blank password restriction and NoLMHash options enforced." -ForegroundColor Green
+Set-ItemProperty -Path $LsaPath -Name "LmCompatibilityLevel" -Value 5 -Type DWord -Force
+Write-Host "[+] Blank password, NoLMHash, and client NTLMv2-only options enforced." -ForegroundColor Green
 
 # LSASS WDigest caching block
 $WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
@@ -31766,6 +32416,7 @@ Test-RegistryValue $LsaPath "RestrictAnonymousSAM" 1
 Test-RegistryValue $LsaPath "RestrictAnonymous" 1
 Test-RegistryValue $LsaPath "ForceNetworkLogon" 0
 Test-RegistryValue $LsaPath "ObaseCaseInsensitive" 1
+Test-RegistryValue $LsaPath "LmCompatibilityLevel" 5
 
 $KerbParamsPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
 Test-RegistryValue $KerbParamsPath "AllowPKU2U" 0
@@ -33090,22 +33741,26 @@ Additionally:
    * **Outbound connections**: `Allow (default)`
    * Click **Customize...** under **Settings**:
      * **Display a notification**: `No`
+     * **Apply local firewall rules**: `No`
+     * **Apply local connection security rules**: `No`
    * Click **Customize...** under **Logging**:
      * **Name**: `%SystemRoot%\System32\logfiles\firewall\domainfw.log`
      * **Size limit (KB)**: `16384`
      * **Log dropped packets**: `Yes`
-     * **Log successful connections**: `Yes`
+     * **Log successful connections**: `No`
 6. Configure the **Private Profile** tab:
    * **Firewall state**: `On (recommended)`
    * **Inbound connections**: `Block (default)`
    * **Outbound connections**: `Allow (default)`
    * Click **Customize...** under **Settings**:
      * **Display a notification**: `No`
+     * **Apply local firewall rules**: `No`
+     * **Apply local connection security rules**: `No`
    * Click **Customize...** under **Logging**:
      * **Name**: `%SystemRoot%\System32\logfiles\firewall\privatefw.log`
      * **Size limit (KB)**: `16384`
      * **Log dropped packets**: `Yes`
-     * **Log successful connections**: `Yes`
+     * **Log successful connections**: `No`
 7. Configure the **Public Profile** tab:
    * **Firewall state**: `On (recommended)`
    * **Inbound connections**: `Block (default)`
@@ -33118,13 +33773,13 @@ Additionally:
      * **Name**: `%SystemRoot%\System32\logfiles\firewall\publicfw.log`
      * **Size limit (KB)**: `16384`
      * **Log dropped packets**: `Yes`
-     * **Log successful connections**: `Yes`
+     * **Log successful connections**: `No`
 
 <div id="08-endpoints-configure-windows-firewall-md-2-create-outbound-rules-for-known-lolbins"></div>
 #### 2. Create Outbound Rules for Known LOLBins
 1. Navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\Windows Defender Firewall with Advanced Security\Windows Defender Firewall with Advanced Security\Outbound Rules`
-2. Create a new rule for each target LOLBin binary (e.g., mshta.exe, certutil.exe, bitsadmin.exe, regsvr32.exe, rundll32.exe, cscript.exe, wscript.exe, hh.exe):
+2. Create a new rule for each target LOLBin binary (e.g., mshta.exe, certutil.exe, bitsadmin.exe, regsvr32.exe, rundll32.exe, cscript.exe, wscript.exe, hh.exe, calc.exe, notepad.exe, conhost.exe, RunScriptHelper.exe):
    * Right-click **Outbound Rules** and select **New Rule...**
    * **Rule Type**: `Program`
    * **Program**: Choose `This program path` and enter the path matching the binary (both x64 and x86 paths if applicable, e.g., `%SystemRoot%\System32\mshta.exe` and `%SystemRoot%\SysWOW64\mshta.exe`).
@@ -33152,29 +33807,17 @@ $FWProfiles = @("Domain", "Private", "Public")
 foreach ($FWProfile in $FWProfiles) {
     $LogFile = "$env:windir\System32\logfiles\firewall\$($FWProfile.ToLower())fw.log"
     
-    if ($Profile -eq "Public") {
-        Set-NetFirewallProfile -Profile $FWProfile `
-            -Enabled True `
-            -DefaultInboundAction Block `
-            -DefaultOutboundAction Allow `
-            -NotifyOnListen False `
-            -AllowLocalPolicyMerge False `
-            -AllowLocalIPsecPolicyMerge False `
-            -LogFileName $LogFile `
-            -LogMaxSizeKilobytes 16384 `
-            -LogBlocked True `
-            -LogAllowed True | Out-Null
-    } else {
-        Set-NetFirewallProfile -Profile $FWProfile `
-            -Enabled True `
-            -DefaultInboundAction Block `
-            -DefaultOutboundAction Allow `
-            -NotifyOnListen False `
-            -LogFileName $LogFile `
-            -LogMaxSizeKilobytes 16384 `
-            -LogBlocked True `
-            -LogAllowed True | Out-Null
-    }
+    Set-NetFirewallProfile -Profile $FWProfile `
+        -Enabled True `
+        -DefaultInboundAction Block `
+        -DefaultOutboundAction Allow `
+        -NotifyOnListen False `
+        -AllowLocalPolicyMerge False `
+        -AllowLocalIPsecPolicyMerge False `
+        -LogFileName $LogFile `
+        -LogMaxSizeKilobytes 16384 `
+        -LogBlocked True `
+        -LogAllowed False | Out-Null
     Write-Host "[+] Profile '$FWProfile' configured with logging and defaults." -ForegroundColor Green
 }
 
@@ -33195,7 +33838,15 @@ $Lolbins = @(
     @{ Name = "wscript.exe (x64)"; Path = "%SystemRoot%\System32\wscript.exe" },
     @{ Name = "wscript.exe (x86)"; Path = "%SystemRoot%\SysWOW64\wscript.exe" },
     @{ Name = "hh.exe (x64)"; Path = "%SystemRoot%\hh.exe" },
-    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" }
+    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" },
+    @{ Name = "calc.exe (x64)"; Path = "%SystemRoot%\System32\calc.exe" },
+    @{ Name = "calc.exe (x86)"; Path = "%SystemRoot%\SysWOW64\calc.exe" },
+    @{ Name = "notepad.exe (x64)"; Path = "%SystemRoot%\System32\notepad.exe" },
+    @{ Name = "notepad.exe (x86)"; Path = "%SystemRoot%\SysWOW64\notepad.exe" },
+    @{ Name = "conhost.exe (x64)"; Path = "%SystemRoot%\System32\conhost.exe" },
+    @{ Name = "conhost.exe (x86)"; Path = "%SystemRoot%\SysWOW64\conhost.exe" },
+    @{ Name = "RunScriptHelper.exe (x64)"; Path = "%SystemRoot%\System32\RunScriptHelper.exe" },
+    @{ Name = "RunScriptHelper.exe (x86)"; Path = "%SystemRoot%\SysWOW64\RunScriptHelper.exe" }
 )
 
 Write-Host "Configuring outbound firewall block rules for known LOLBins..." -ForegroundColor Cyan
@@ -33258,14 +33909,14 @@ function Test-FirewallProfile ($ProfileName, $ExpectMergeLocal, $ExpectMergeIPse
     $LogPathColor = if ($FWProfile.LogFileName -eq $LogPath) { "Green" } else { "Red" }
     $LogSizeColor = if ($FWProfile.LogMaxSizeKilobytes -ge 16384) { "Green" } else { "Red" }
     $LogBlockedColor = if ($FWProfile.LogBlocked -eq $true) { "Green" } else { "Red" }
-    $LogAllowedColor = if ($FWProfile.LogAllowed -eq $true) { "Green" } else { "Red" }
+    $LogAllowedColor = if ($FWProfile.LogAllowed -eq $false) { "Green" } else { "Red" }
     
     Write-Host "    - LogFileName: $($FWProfile.LogFileName) (Expected: $LogPath)" -ForegroundColor $LogPathColor
     Write-Host "    - LogMaxSizeKilobytes: $($FWProfile.LogMaxSizeKilobytes) (Expected: >= 16384)" -ForegroundColor $LogSizeColor
     Write-Host "    - LogBlocked: $($FWProfile.LogBlocked) (Expected: True)" -ForegroundColor $LogBlockedColor
-    Write-Host "    - LogAllowed: $($FWProfile.LogAllowed) (Expected: True)" -ForegroundColor $LogAllowedColor
+    Write-Host "    - LogAllowed: $($FWProfile.LogAllowed) (Expected: False)" -ForegroundColor $LogAllowedColor
     
-    if ($FWProfile.Enabled -ne $true -or $FWProfile.DefaultInboundAction -ne "Block" -or $FWProfile.NotifyOnListen -ne $false -or $FWProfile.LogFileName -ne $LogPath -or $FWProfile.LogMaxSizeKilobytes -lt 16384 -or $FWProfile.LogBlocked -ne $true -or $FWProfile.LogAllowed -ne $true) {
+    if ($FWProfile.Enabled -ne $true -or $FWProfile.DefaultInboundAction -ne "Block" -or $FWProfile.NotifyOnListen -ne $false -or $FWProfile.LogFileName -ne $LogPath -or $FWProfile.LogMaxSizeKilobytes -lt 16384 -or $FWProfile.LogBlocked -ne $true -or $FWProfile.LogAllowed -ne $false) {
         $script:Vulnerable = $true
     }
     
@@ -33282,8 +33933,8 @@ function Test-FirewallProfile ($ProfileName, $ExpectMergeLocal, $ExpectMergeIPse
 }
 
 Write-Host "Auditing profiles..." -ForegroundColor Gray
-Test-FirewallProfile -ProfileName "Domain" -ExpectMergeLocal $null -ExpectMergeIPsec $null
-Test-FirewallProfile -ProfileName "Private" -ExpectMergeLocal $null -ExpectMergeIPsec $null
+Test-FirewallProfile -ProfileName "Domain" -ExpectMergeLocal $false -ExpectMergeIPsec $false
+Test-FirewallProfile -ProfileName "Private" -ExpectMergeLocal $false -ExpectMergeIPsec $false
 Test-FirewallProfile -ProfileName "Public" -ExpectMergeLocal $false -ExpectMergeIPsec $false
 
 # Audit outbound rules for known LOLBins
@@ -33303,7 +33954,15 @@ $Lolbins = @(
     @{ Name = "wscript.exe (x64)"; Path = "%SystemRoot%\System32\wscript.exe" },
     @{ Name = "wscript.exe (x86)"; Path = "%SystemRoot%\SysWOW64\wscript.exe" },
     @{ Name = "hh.exe (x64)"; Path = "%SystemRoot%\hh.exe" },
-    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" }
+    @{ Name = "hh.exe (x86)"; Path = "%SystemRoot%\SysWOW64\hh.exe" },
+    @{ Name = "calc.exe (x64)"; Path = "%SystemRoot%\System32\calc.exe" },
+    @{ Name = "calc.exe (x86)"; Path = "%SystemRoot%\SysWOW64\calc.exe" },
+    @{ Name = "notepad.exe (x64)"; Path = "%SystemRoot%\System32\notepad.exe" },
+    @{ Name = "notepad.exe (x86)"; Path = "%SystemRoot%\SysWOW64\notepad.exe" },
+    @{ Name = "conhost.exe (x64)"; Path = "%SystemRoot%\System32\conhost.exe" },
+    @{ Name = "conhost.exe (x86)"; Path = "%SystemRoot%\SysWOW64\conhost.exe" },
+    @{ Name = "RunScriptHelper.exe (x64)"; Path = "%SystemRoot%\System32\RunScriptHelper.exe" },
+    @{ Name = "RunScriptHelper.exe (x86)"; Path = "%SystemRoot%\SysWOW64\RunScriptHelper.exe" }
 )
 
 Write-Host "Auditing outbound firewall rules for known LOLBins..." -ForegroundColor Gray
@@ -35783,6 +36442,364 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="08-endpoints-configure-office-security-md"></div>
+
+<div id="08-endpoints-configure-office-security-md-req-end-033-configure-microsoft-office-security-and-block-ole-packages"></div>
+# [REQ-END-033] Configure Microsoft Office Security and Block OLE Packages
+
+<div id="08-endpoints-configure-office-security-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Member Workstations (Endpoints)
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-configure-office-security-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: User Configuration\Policies\Administrative Templates\Microsoft Office 2016\Security Settings
+  * **Registry Locations**:
+    * `HKCU\software\policies\microsoft\office\16.0\common\security`
+      * `vbawarnings` = `3` (REG_DWORD, Enforce macro signing / Block unsigned macros)
+    * `HKCU\software\policies\microsoft\office\16.0\excel\security`
+      * `blockcontentexecutionfrominternet` = `1` (REG_DWORD, Block macros in files from the Internet)
+    * `HKCU\software\policies\microsoft\office\16.0\word\security`
+      * `blockcontentexecutionfrominternet` = `1` (REG_DWORD)
+    * `HKCU\software\policies\microsoft\office\16.0\powerpoint\security`
+      * `blockcontentexecutionfrominternet` = `1` (REG_DWORD)
+    * `HKCU\software\policies\microsoft\office\16.0\outlook\security`
+      * `ShowOLEPackageObj` = `0` (REG_DWORD, Disable OLE package activation)
+
+---
+
+<div id="08-endpoints-configure-office-security-md-rationale"></div>
+## Rationale
+Malicious documents (e.g., weaponized Word, Excel, or PowerPoint files) containing embedded VBA macros are a prevalent initial access and execution vector. Similarly, embedding malicious OLE packages inside Outlook items (such as RTF-formatted emails) allows attackers to trigger script execution or execute arbitrary packages via `packager.dll` when an administrator or standard user opens or previews the email.
+
+Hardening these settings ensures:
+1. **Internet Macro Blocking**: VBA macros in files downloaded from the Internet or untrusted external attachments are blocked from executing, regardless of user consent.
+2. **Macro Code Signing**: Any locally run macros are restricted to trusted, digitally signed code, preventing the execution of ad-hoc unverified user scripts.
+3. **OLE Package Disablement**: Restricting Outlook OLE package activation (`ShowOLEPackageObj = 0`) blocks the execution of dangerous embedded objects in email messages.
+
+---
+
+<div id="08-endpoints-configure-office-security-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Office Macros**: Business workflows relying on macro-enabled spreadsheets or documents downloaded from external sources (e.g., vendor portals) will be blocked. Unsigned local macros will also fail to run. Users must acquire certificates to digitally sign internal macro projects.
+* **Outlook Packages**: Embedded document shortcuts or packages in emails will be displayed as static icons and cannot be double-clicked for direct execution.
+
+---
+
+<div id="08-endpoints-configure-office-security-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-configure-office-security-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+<div id="08-endpoints-configure-office-security-md-step-1-enforce-macro-security-in-admx-templates"></div>
+#### Step 1: Enforce Macro Security in ADMX Templates
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the target endpoints GPO.
+3. Navigate to: `User Configuration\Policies\Administrative Templates\Microsoft Office 2016\Security Settings\Trust Center`
+4. Set the following policies:
+   * **Policy**: `VBA Macro Notification Settings` -> **Enabled** with option set to **Disable all except digitally signed macros**
+5. For each application (Word, Excel, PowerPoint, Access), navigate to:
+   `User Configuration\Policies\Administrative Templates\[Application] 2016\[Application] Options\Security\Trust Center`
+6. Set the policy:
+   * **Policy**: `Block macros from running in Office files from the Internet` -> **Enabled**
+
+<div id="08-endpoints-configure-office-security-md-step-2-disable-outlook-ole-packages"></div>
+#### Step 2: Disable Outlook OLE Packages
+1. Navigate to: `User Configuration\Policies\Administrative Templates\Microsoft Outlook 2016\Security`
+2. Configure the setting:
+   * **Policy**: `Do not allow OLE package execution` -> **Enabled**
+
+---
+
+<div id="08-endpoints-configure-office-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Configure the current user registry hives to enforce macro blocking and OLE package restrictions.
+
+[Download Script: Configure-OfficeSecurity.ps1](implementation_scripts/Configure-OfficeSecurity.ps1)
+
+```powershell
+# Configure-OfficeSecurity.ps1
+# Description: Configures registry settings under the HKCU hive to restrict VBA macros and block Outlook OLE package execution.
+
+Write-Host "Applying Microsoft Office security and OLE restrictions..." -ForegroundColor Cyan
+
+# Helper to configure User Registry DWORD values
+function Set-UserRegDWord {
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        [string]$Path,
+        [string]$Name,
+        [int]$Value
+    )
+    if ($PSCmdlet.ShouldProcess($Path, "Set registry DWORD value $Name to $Value")) {
+        $FullRegistryPath = "HKCU:\$Path"
+        if (-not (Test-Path $FullRegistryPath)) {
+            New-Item -Path $FullRegistryPath -Force | Out-Null
+        }
+        Set-ItemProperty -Path $FullRegistryPath -Name $Name -Value $Value -Type DWord -Force
+    }
+}
+
+# 1. Enforce macro signing policy (common)
+Set-UserRegDWord "software\policies\microsoft\office\16.0\common\security" "vbawarnings" 3
+Write-Host "[+] Digital signing for Office macros enforced." -ForegroundColor Green
+
+# 2. Block macros from the Internet for key Office applications
+$Apps = @("excel", "word", "powerpoint", "access", "visio")
+foreach ($App in $Apps) {
+    Set-UserRegDWord "software\policies\microsoft\office\16.0\$App\security" "blockcontentexecutionfrominternet" 1
+}
+Write-Host "[+] VBA macro blocks from Internet applied to Office applications." -ForegroundColor Green
+
+# 3. Disable OLE Package execution in Outlook (Policies and Preferences branches)
+Set-UserRegDWord "software\policies\microsoft\office\16.0\outlook\security" "ShowOLEPackageObj" 0
+Set-UserRegDWord "software\microsoft\office\16.0\outlook\security" "ShowOLEPackageObj" 0
+Write-Host "[+] Outlook OLE Package execution blocked." -ForegroundColor Green
+```
+
+*To verify the current Office security settings:*
+
+[Download Script: Get-OfficeSecurityStatus.ps1](audit_scripts/Get-OfficeSecurityStatus.ps1)
+
+```powershell
+# Get-OfficeSecurityStatus.ps1
+# Description: Audits Microsoft Office macro settings and Outlook OLE package restrictions.
+
+Write-Host "--- Auditing Microsoft Office Security Baseline ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+# Helper to audit registry values under HKCU
+function Test-UserRegistryValue ($Path, $Name, $ExpectedValue) {
+    $FullRegistryPath = "HKCU:\$Path"
+    $Val = Get-ItemProperty -Path $FullRegistryPath -Name $Name -ErrorAction SilentlyContinue
+    $Actual = if ($val) { $val.$Name } else { "" }
+    $Color = "Red"
+    if ($Actual -eq $ExpectedValue) {
+        $Color = "Green"
+    } else {
+        $script:Vulnerable = $true
+    }
+    Write-Host "    - User Registry: $Name | Actual: '$Actual' (Expected: '$ExpectedValue')" -ForegroundColor $Color
+}
+
+# 1. Audit macro signing warning
+Test-UserRegistryValue "software\policies\microsoft\office\16.0\common\security" "vbawarnings" 3
+
+# 2. Audit macro Internet blocks
+$Apps = @("excel", "word", "powerpoint", "access", "visio")
+foreach ($App in $Apps) {
+    Test-UserRegistryValue "software\policies\microsoft\office\16.0\$App\security" "blockcontentexecutionfrominternet" 1
+}
+
+# 3. Audit Outlook OLE package block
+Test-UserRegistryValue "software\policies\microsoft\office\16.0\outlook\security" "ShowOLEPackageObj" 0
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+}
+```
+
+---
+
+<div id="08-endpoints-configure-office-security-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendations on restricting application execution, blocking external scripts, and application sandboxing.
+* **CIS Microsoft Office Benchmark**: Section on Office Common Security settings, VBA warnings, and blocking macros in internet files.
+* **Microsoft Security Baseline**: Recommended settings for Microsoft Office and Office 365 ProPlus Security.
+* **DoD Microsoft Outlook STIG**: Restrictions on active content, remote attachments, and OLE execution behavior.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-disable-windows-script-host-md"></div>
+
+<div id="08-endpoints-disable-windows-script-host-md-req-end-034-disable-windows-script-host-and-remap-scripting-extensions"></div>
+# [REQ-END-034] Disable Windows Script Host and Remap Scripting Extensions
+
+<div id="08-endpoints-disable-windows-script-host-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Member Workstations (Endpoints)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="08-endpoints-disable-windows-script-host-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path (WSH Disable)**: Computer Configuration\Preferences\Windows Settings\Registry
+  * **GPO Path (Associations)**: User Configuration\Preferences\Control Panel Settings\Folder Options
+  * **Registry Location**:
+    * `HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings`
+      * `Enabled` = `0` (REG_DWORD)
+    * `HKCU\SOFTWARE\Microsoft\Windows Script Host\Settings`
+      * `Enabled` = `0` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-disable-windows-script-host-md-rationale"></div>
+## Rationale
+Windows Script Host (WSH), which executes VBScript and JScript files (`wscript.exe` and `cscript.exe`), is frequently targeted by threat actors in phishing campaigns and initial access vectors. By placing a script file (e.g., `.vbs`, `.js`, `.wsf`, `.hta`) in an email attachment or download path, attackers can execute arbitrary code on the system if a user opens the file.
+
+Enforcing these deactivation controls ensures:
+1. **Attack Surface Reduction**: Disabling WSH globally blocks the execution of JScript and VBScript files via the standard scripting engines on the workstation.
+2. **Defense-in-Depth File Associations**: Remapping the default file handler for typical scripting extensions to `notepad.exe` ensures that if a scripting file is double-clicked by an administrator or user, the file opens as plaintext in Notepad for inspection rather than executing its contents.
+
+---
+
+<div id="08-endpoints-disable-windows-script-host-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Script Dependencies**: Any legacy administrative scripts (such as logon scripts or backup routines) written in VBScript or JScript will fail to run. All internal workstation management scripts must be written in PowerShell 5.1+ and executed under secure execution policies.
+* **Explorer Associations**: Double-clicking on a `.js` or `.vbs` configuration file will open Notepad instead of running the script.
+
+---
+
+<div id="08-endpoints-disable-windows-script-host-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-disable-windows-script-host-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+<div id="08-endpoints-disable-windows-script-host-md-step-1-disable-wsh-via-gpo-registry-preferences"></div>
+#### Step 1: Disable WSH via GPO Registry Preferences
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoint GPO (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Create a new **Registry Item**:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `Enabled`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `0`
+
+<div id="08-endpoints-disable-windows-script-host-md-step-2-configure-script-file-extensions-to-open-in-notepad"></div>
+#### Step 2: Configure Script File Extensions to Open in Notepad
+1. Navigate to: `User Configuration\Preferences\Control Panel Settings\Folder Options`
+2. Right-click and select **New -> Open With**:
+   * **File Extension**: `vbs`
+   * **Associated Program**: `%SystemRoot%\System32\notepad.exe`
+   * **Set as default**: Check
+3. Repeat the process for the following extensions: `vbe`, `js`, `jse`, `wsf`, `wsh`, `hta`.
+
+---
+
+<div id="08-endpoints-disable-windows-script-host-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Configure the local registry settings to disable WSH and remap associations.
+
+[Download Script: Disable-Wsh.ps1](implementation_scripts/Disable-Wsh.ps1)
+
+```powershell
+# Disable-Wsh.ps1
+# Description: Disables Windows Script Host globally in HKLM and HKCU registry hives, and remaps script file associations to Notepad.
+
+Write-Host "Applying Windows Script Host and file association hardening..." -ForegroundColor Cyan
+
+# 1. Disable WSH globally
+$RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (-not (Test-Path $RegistryHklm)) {
+    New-Item -Path $RegistryHklm -Force | Out-Null
+}
+Set-ItemProperty -Path $RegistryHklm -Name "Enabled" -Value 0 -Type DWord -Force
+Write-Host "[+] WSH globally disabled in HKLM." -ForegroundColor Green
+
+$RegistryHkcu = "HKCU:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (-not (Test-Path $RegistryHkcu)) {
+    New-Item -Path $RegistryHkcu -Force | Out-Null
+}
+Set-ItemProperty -Path $RegistryHkcu -Name "Enabled" -Value 0 -Type DWord -Force
+Write-Host "[+] WSH disabled in current user HKCU hive." -ForegroundColor Green
+
+# 2. Remap script file extensions to notepad
+$Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
+foreach ($Ext in $Extensions) {
+    $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
+    
+    # Update Class Association to Notepad
+    if (-not (Test-Path $ProgIdPath)) {
+        New-Item -Path $ProgIdPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $ProgIdPath -Name "" -Value "txtfile" -Type String -Force
+    Write-Host "    Mapped .$Ext extension to txtfile handler." -ForegroundColor Gray
+}
+Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundColor Green
+```
+
+*To verify the WSH configuration state:*
+
+[Download Script: Get-WshStatus.ps1](audit_scripts/Get-WshStatus.ps1)
+
+```powershell
+# Get-WshStatus.ps1
+# Description: Audits Windows Script Host registry state and script file extension association handlers.
+
+Write-Host "--- Auditing Windows Script Host Hardening ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+# 1. Audit WSH Registry settings
+$RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (Test-Path $RegistryHklm) {
+    $ValHklm = (Get-ItemProperty -Path $RegistryHklm -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
+    if ($ValHklm -eq 0) {
+        Write-Host "    - HKLM WSH Enabled: 0 (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: HKLM WSH is enabled or not configured (Value: '$ValHklm')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "    - VULNERABLE: HKLM WSH settings key is missing (Expected: Enabled = 0)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 2. Audit file associations
+$Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
+foreach ($Ext in $Extensions) {
+    $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
+    if (Test-Path $ProgIdPath) {
+        $Handler = (Get-ItemProperty -Path $ProgIdPath -Name "" -ErrorAction SilentlyContinue).""
+        if ($Handler -eq "txtfile" -or $Handler -match "notepad") {
+            Write-Host "    - Extension .$Ext Handler: $Handler (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: Extension .$Ext Handler is '$Handler' (Expected: txtfile/notepad)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: Extension .$Ext Class Registry key not found." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+}
+```
+
+---
+
+<div id="08-endpoints-disable-windows-script-host-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendations on workstation OS minimization and script execution control.
+* **DoD Windows 11 Computer STIG v2r6**: V-219661 (Windows Script Host disablement and script restriction).
+* **CIS Microsoft Windows Client Benchmark**: Section 18.9 (Administrative templates for script execution safety).
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="roadmap-implementation-plan-md"></div>
 
 <div id="roadmap-implementation-plan-md-implementation-plan-and-prioritized-roadmap"></div>
@@ -36088,6 +37105,8 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-PAW-028 - Disable Unnecessary System Services for PAWs](#07-paws-disable-unnecessary-system-services-md)**: Reduces active service footprints.
 * **[REQ-PAW-029 - Configure System Administrative Templates for PAWs](#07-paws-configure-system-administrative-templates-md)**: Custom registry rules.
 * **[REQ-PAW-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](#07-paws-disable-unused-features-md)**: Disables legacy .NET 3.5, PowerShell 2.0, SMBv1, and unused platform features.
+* **[REQ-PAW-033 - Configure Microsoft Office Security and Block OLE Packages](#07-paws-configure-office-security-md)**: Blocks VBA macros in external files and Outlook OLE packages.
+* **[REQ-PAW-034 - Disable Windows Script Host and Remap Scripting Extensions](#07-paws-disable-windows-script-host-md)**: Disables WSH execution and maps extension defaults to Notepad.
 
 <div id="roadmap-implementation-plan-md-endpoint-requirements"></div>
 ### Endpoint Requirements
@@ -36108,6 +37127,8 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-END-030 - Configure svchost.exe Mitigation Options](#08-endpoints-configure-svchost-mitigation-md)**: Restricts binary loading to Microsoft-signed code.
 * **[REQ-END-031 - Enable Kernel-Mode Hardware-Enforced Stack Protection](#08-endpoints-enable-kernel-shadow-stacks-md)**: Mitigates Return-Oriented Programming (ROP) exploits.
 * **[REQ-END-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](#08-endpoints-disable-unused-features-md)**: Disables legacy .NET 3.5, PowerShell 2.0, SMBv1, and unused optional features.
+* **[REQ-END-033 - Configure Microsoft Office Security and Block OLE Packages](#08-endpoints-configure-office-security-md)**: Blocks VBA macros in external files and Outlook OLE packages.
+* **[REQ-END-034 - Disable Windows Script Host and Remap Scripting Extensions](#08-endpoints-disable-windows-script-host-md)**: Disables WSH execution and maps extension defaults to Notepad.
 
 ---
 
