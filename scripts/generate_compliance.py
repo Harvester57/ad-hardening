@@ -144,13 +144,21 @@ def normalize_reg_check(key_path, name, vtype, val):
         elif data.startswith("'") and data.endswith("'"):
             data = data[1:-1]
             
-    return {
+    is_delete = False
+    if 'delete' in data.lower() or 'not configured' in data.lower():
+        is_delete = True
+        
+    res = {
         'hive': hive,
         'key': key,
         'name': name,
         'type': vtype.lower(),
         'data': data
     }
+    if is_delete:
+        res['existence'] = 'none_exist'
+        
+    return res
 
 subcat_mapping = {
     'audit kerberos authentication service': 'kerberos_authentication_service',
@@ -770,18 +778,23 @@ def generate_oval(requirements, output_path):
                 })
                 
                 # registry_test
-                test_el = ET.SubElement(tests_el, w_tag('registry_test'), {
+                test_attrs = {
                     'id': f"oval:org.adhardening:tst:{sub_id}",
                     'version': '1',
                     'comment': comment,
                     'check': 'all'
-                })
+                }
+                if chk.get('existence') == 'none_exist':
+                    test_attrs['existence'] = 'none_exist'
+                    
+                test_el = ET.SubElement(tests_el, w_tag('registry_test'), test_attrs)
                 ET.SubElement(test_el, w_tag('object'), {
                     'object_ref': f"oval:org.adhardening:obj:{sub_id}"
                 })
-                ET.SubElement(test_el, w_tag('state'), {
-                    'state_ref': f"oval:org.adhardening:ste:{sub_id}"
-                })
+                if chk.get('existence') != 'none_exist':
+                    ET.SubElement(test_el, w_tag('state'), {
+                        'state_ref': f"oval:org.adhardening:ste:{sub_id}"
+                    })
                 
                 # registry_object
                 obj_el = ET.SubElement(objs_el, w_tag('registry_object'), {
@@ -796,18 +809,19 @@ def generate_oval(requirements, output_path):
                 name_el.text = chk['name']
                 
                 # registry_state
-                state_el = ET.SubElement(states_el, w_tag('registry_state'), {
-                    'id': f"oval:org.adhardening:ste:{sub_id}",
-                    'version': '1'
-                })
-                type_el = ET.SubElement(state_el, w_tag('type'))
-                type_el.text = chk['type']
-                
-                datatype = 'int' if chk['type'] == 'reg_dword' else 'string'
-                val_el = ET.SubElement(state_el, w_tag('value'), {
-                    'datatype': datatype
-                })
-                val_el.text = chk['data']
+                if chk.get('existence') != 'none_exist':
+                    state_el = ET.SubElement(states_el, w_tag('registry_state'), {
+                        'id': f"oval:org.adhardening:ste:{sub_id}",
+                        'version': '1'
+                    })
+                    type_el = ET.SubElement(state_el, w_tag('type'))
+                    type_el.text = chk['type']
+                    
+                    datatype = 'int' if chk['type'] == 'reg_dword' else 'string'
+                    val_el = ET.SubElement(state_el, w_tag('value'), {
+                        'datatype': datatype
+                    })
+                    val_el.text = chk['data']
                 
         # Native Service Checks
         if req['service_checks']:
