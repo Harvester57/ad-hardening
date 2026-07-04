@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-04T01:18:04Z</oval:timestamp>
+    <oval:timestamp>2026-07-04T01:22:58Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1002" version="1" class="compliance">
@@ -1026,8 +1026,58 @@ This control introduces four primary hardening mechanisms:
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SOFTWARE\Microsoft\AMSI Value FeatureBits" test_ref="oval:org.adhardening:tst:8007001" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\System Value EnableSmartScreen" test_ref="oval:org.adhardening:tst:8007002" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\System Value ShellSmartScreenLevel" test_ref="oval:org.adhardening:tst:8007003" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Value DisableAntiSpyware" test_ref="oval:org.adhardening:tst:8007002" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Value PUAProtection" test_ref="oval:org.adhardening:tst:8007003" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Value DisableLocalAdminMerge" test_ref="oval:org.adhardening:tst:8007004" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Value HideExclusionsFromLocalAdmins" test_ref="oval:org.adhardening:tst:8007005" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Value RandomizeScheduleTaskTimes" test_ref="oval:org.adhardening:tst:8007006" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions Value DisableLocalAdminConfiguration" test_ref="oval:org.adhardening:tst:8007007" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions Value DisableAutoExclusions" test_ref="oval:org.adhardening:tst:8007008" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Spynet Value LocalSettingOverrideSpynetReporting" test_ref="oval:org.adhardening:tst:8007009" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Features Value PassiveRemediation" test_ref="oval:org.adhardening:tst:8007010" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\Network Protection Value AllowNetworkProtectionOnWinServer" test_ref="oval:org.adhardening:tst:8007011" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine Value EnableFileHashComputation" test_ref="oval:org.adhardening:tst:8007012" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\NIS Value EnableConvertWarnToBlock" test_ref="oval:org.adhardening:tst:8007013" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\NIS Value AllowSwitchToAsyncInspection" test_ref="oval:org.adhardening:tst:8007014" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection Value OobeEnableRtpAndSigUpdate" test_ref="oval:org.adhardening:tst:8007015" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Reporting Value EnableDynamicSignatureDroppedEventReporting" test_ref="oval:org.adhardening:tst:8007016" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Scan Value QuickScanIncludeExclusions" test_ref="oval:org.adhardening:tst:8007017" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Scan Value DisablePackedExeScanning" test_ref="oval:org.adhardening:tst:8007018" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Scan Value ScheduleDay" test_ref="oval:org.adhardening:tst:8007019" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Scan Value DisableEmailScanning" test_ref="oval:org.adhardening:tst:8007020" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Scan Value DisableHeuristics" test_ref="oval:org.adhardening:tst:8007021" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Scan Value DaysWithoutCatchupQuickScan" test_ref="oval:org.adhardening:tst:8007022" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates Value ASSignatureDue" test_ref="oval:org.adhardening:tst:8007023" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates Value AVSignatureDue" test_ref="oval:org.adhardening:tst:8007024" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates Value ScheduleDay" test_ref="oval:org.adhardening:tst:8007025" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 56a863a9-875e-4185-98a7-b882c64b5ce5" test_ref="oval:org.adhardening:tst:8007026" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c" test_ref="oval:org.adhardening:tst:8007027" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value d4f940ab-401b-4efc-aadc-ad5f3c50688a" test_ref="oval:org.adhardening:tst:8007028" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2" test_ref="oval:org.adhardening:tst:8007029" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value be9ba2d9-53ea-4cdc-84e5-9b1eeee46550" test_ref="oval:org.adhardening:tst:8007030" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 01443614-cd74-433a-b99e-2ecdc07bfc25" test_ref="oval:org.adhardening:tst:8007031" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 5beb7efe-fd9a-4556-801d-275e5ffc04cc" test_ref="oval:org.adhardening:tst:8007032" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value d3e037e1-3eb8-44c8-a917-57927947596d" test_ref="oval:org.adhardening:tst:8007033" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 3b576869-a4ec-4529-8536-b80a7769e899" test_ref="oval:org.adhardening:tst:8007034" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84" test_ref="oval:org.adhardening:tst:8007035" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 26190899-1602-49e8-8b27-eb1d0a1ce869" test_ref="oval:org.adhardening:tst:8007036" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value e6db77e5-3df2-4cf1-b95a-636979351e5b" test_ref="oval:org.adhardening:tst:8007037" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value d1e49aac-8f56-4280-b9ba-993a6d77406c" test_ref="oval:org.adhardening:tst:8007038" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4" test_ref="oval:org.adhardening:tst:8007039" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b" test_ref="oval:org.adhardening:tst:8007040" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value c1db55ab-c21a-4637-bb3f-a12568109d35" test_ref="oval:org.adhardening:tst:8007041" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Threats Value Threats_ThreatSeverityDefaultAction" test_ref="oval:org.adhardening:tst:8007042" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction Value 1" test_ref="oval:org.adhardening:tst:8007043" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction Value 2" test_ref="oval:org.adhardening:tst:8007044" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction Value 4" test_ref="oval:org.adhardening:tst:8007045" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction Value 5" test_ref="oval:org.adhardening:tst:8007046" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Family options Value UILockdown" test_ref="oval:org.adhardening:tst:8007047" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Defender\Features Value TamperProtection" test_ref="oval:org.adhardening:tst:8007048" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Environment Value MP_FORCE_USE_SANDBOX" test_ref="oval:org.adhardening:tst:8007049" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\System Value EnableSmartScreen" test_ref="oval:org.adhardening:tst:8007050" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\System Value ShellSmartScreenLevel" test_ref="oval:org.adhardening:tst:8007051" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\OneDrive Value DisableFileSyncNGSC" test_ref="oval:org.adhardening:tst:8007052" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments Value ScanWithAntiVirus" test_ref="oval:org.adhardening:tst:8007053" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8008" version="1" class="compliance">
@@ -4441,13 +4491,213 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:8007001" />
       <windows:state state_ref="oval:org.adhardening:ste:8007001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8007002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\System Value EnableSmartScreen" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8007002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Value DisableAntiSpyware" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8007002" />
       <windows:state state_ref="oval:org.adhardening:ste:8007002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8007003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\System Value ShellSmartScreenLevel" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8007003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Value PUAProtection" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8007003" />
       <windows:state state_ref="oval:org.adhardening:ste:8007003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007004" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Value DisableLocalAdminMerge" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007004" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007005" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Value HideExclusionsFromLocalAdmins" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007005" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007005" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007006" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Value RandomizeScheduleTaskTimes" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007006" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007006" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007007" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions Value DisableLocalAdminConfiguration" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007007" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007007" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007008" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions Value DisableAutoExclusions" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007008" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007008" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007009" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Spynet Value LocalSettingOverrideSpynetReporting" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007009" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007009" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007010" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Features Value PassiveRemediation" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007010" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007010" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007011" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\Network Protection Value AllowNetworkProtectionOnWinServer" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007011" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007011" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007012" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine Value EnableFileHashComputation" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007012" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007012" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007013" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\NIS Value EnableConvertWarnToBlock" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007013" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007013" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007014" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\NIS Value AllowSwitchToAsyncInspection" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007014" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007014" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007015" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection Value OobeEnableRtpAndSigUpdate" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007015" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007015" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007016" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Reporting Value EnableDynamicSignatureDroppedEventReporting" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007016" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007016" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007017" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Scan Value QuickScanIncludeExclusions" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007017" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007017" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007018" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Scan Value DisablePackedExeScanning" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007018" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007018" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007019" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Scan Value ScheduleDay" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007019" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007019" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007020" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Scan Value DisableEmailScanning" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007020" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007020" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007021" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Scan Value DisableHeuristics" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007021" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007021" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007022" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Scan Value DaysWithoutCatchupQuickScan" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007022" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007022" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007023" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates Value ASSignatureDue" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007023" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007023" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007024" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates Value AVSignatureDue" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007024" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007024" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007025" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates Value ScheduleDay" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007025" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007025" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007026" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 56a863a9-875e-4185-98a7-b882c64b5ce5" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007026" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007026" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007027" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007027" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007027" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007028" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value d4f940ab-401b-4efc-aadc-ad5f3c50688a" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007028" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007028" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007029" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007029" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007029" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007030" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value be9ba2d9-53ea-4cdc-84e5-9b1eeee46550" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007030" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007030" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007031" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 01443614-cd74-433a-b99e-2ecdc07bfc25" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007031" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007031" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007032" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 5beb7efe-fd9a-4556-801d-275e5ffc04cc" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007032" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007032" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007033" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value d3e037e1-3eb8-44c8-a917-57927947596d" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007033" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007033" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007034" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 3b576869-a4ec-4529-8536-b80a7769e899" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007034" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007034" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007035" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007035" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007035" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007036" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 26190899-1602-49e8-8b27-eb1d0a1ce869" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007036" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007036" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007037" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value e6db77e5-3df2-4cf1-b95a-636979351e5b" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007037" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007037" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007038" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value d1e49aac-8f56-4280-b9ba-993a6d77406c" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007038" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007038" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007039" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007039" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007039" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007040" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value 92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007040" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007040" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007041" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules Value c1db55ab-c21a-4637-bb3f-a12568109d35" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007041" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007041" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007042" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Threats Value Threats_ThreatSeverityDefaultAction" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007042" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007042" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007043" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction Value 1" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007043" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007043" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007044" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction Value 2" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007044" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007044" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007045" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction Value 4" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007045" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007045" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007046" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction Value 5" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007046" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007046" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007047" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Family options Value UILockdown" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007047" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007047" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007048" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Defender\Features Value TamperProtection" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007048" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007048" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007049" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Environment Value MP_FORCE_USE_SANDBOX" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007049" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007049" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007050" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\System Value EnableSmartScreen" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007050" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007050" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007051" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\System Value ShellSmartScreenLevel" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007051" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007051" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007052" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\OneDrive Value DisableFileSyncNGSC" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007052" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007052" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8007053" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments Value ScanWithAntiVirus" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8007053" />
+      <windows:state state_ref="oval:org.adhardening:ste:8007053" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8008001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate Value DoNotConnectToWindowsUpdateInternetLocations" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8008001" />
@@ -7633,13 +7883,263 @@ Enforcing these deactivation controls ensures:
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8007002" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\System</windows:key>
-      <windows:name>EnableSmartScreen</windows:name>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender</windows:key>
+      <windows:name>DisableAntiSpyware</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8007003" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender</windows:key>
+      <windows:name>PUAProtection</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007004" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender</windows:key>
+      <windows:name>DisableLocalAdminMerge</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007005" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender</windows:key>
+      <windows:name>HideExclusionsFromLocalAdmins</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007006" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender</windows:key>
+      <windows:name>RandomizeScheduleTaskTimes</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007007" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions</windows:key>
+      <windows:name>DisableLocalAdminConfiguration</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007008" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions</windows:key>
+      <windows:name>DisableAutoExclusions</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007009" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Spynet</windows:key>
+      <windows:name>LocalSettingOverrideSpynetReporting</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007010" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Features</windows:key>
+      <windows:name>PassiveRemediation</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007011" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\Network Protection</windows:key>
+      <windows:name>AllowNetworkProtectionOnWinServer</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007012" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine</windows:key>
+      <windows:name>EnableFileHashComputation</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007013" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\NIS</windows:key>
+      <windows:name>EnableConvertWarnToBlock</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007014" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\NIS</windows:key>
+      <windows:name>AllowSwitchToAsyncInspection</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007015" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection</windows:key>
+      <windows:name>OobeEnableRtpAndSigUpdate</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007016" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Reporting</windows:key>
+      <windows:name>EnableDynamicSignatureDroppedEventReporting</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007017" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Scan</windows:key>
+      <windows:name>QuickScanIncludeExclusions</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007018" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Scan</windows:key>
+      <windows:name>DisablePackedExeScanning</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007019" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Scan</windows:key>
+      <windows:name>ScheduleDay</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007020" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Scan</windows:key>
+      <windows:name>DisableEmailScanning</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007021" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Scan</windows:key>
+      <windows:name>DisableHeuristics</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007022" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Scan</windows:key>
+      <windows:name>DaysWithoutCatchupQuickScan</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007023" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates</windows:key>
+      <windows:name>ASSignatureDue</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007024" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates</windows:key>
+      <windows:name>AVSignatureDue</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007025" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates</windows:key>
+      <windows:name>ScheduleDay</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007026" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>56a863a9-875e-4185-98a7-b882c64b5ce5</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007027" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007028" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>d4f940ab-401b-4efc-aadc-ad5f3c50688a</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007029" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007030" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>be9ba2d9-53ea-4cdc-84e5-9b1eeee46550</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007031" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>01443614-cd74-433a-b99e-2ecdc07bfc25</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007032" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>5beb7efe-fd9a-4556-801d-275e5ffc04cc</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007033" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>d3e037e1-3eb8-44c8-a917-57927947596d</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007034" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>3b576869-a4ec-4529-8536-b80a7769e899</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007035" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007036" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>26190899-1602-49e8-8b27-eb1d0a1ce869</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007037" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>e6db77e5-3df2-4cf1-b95a-636979351e5b</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007038" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>d1e49aac-8f56-4280-b9ba-993a6d77406c</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007039" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007040" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007041" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules</windows:key>
+      <windows:name>c1db55ab-c21a-4637-bb3f-a12568109d35</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007042" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Threats</windows:key>
+      <windows:name>Threats_ThreatSeverityDefaultAction</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007043" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction</windows:key>
+      <windows:name>1</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007044" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction</windows:key>
+      <windows:name>2</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007045" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction</windows:key>
+      <windows:name>4</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007046" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction</windows:key>
+      <windows:name>5</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007047" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Family options</windows:key>
+      <windows:name>UILockdown</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007048" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows Defender\Features</windows:key>
+      <windows:name>TamperProtection</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007049" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Environment</windows:key>
+      <windows:name>MP_FORCE_USE_SANDBOX</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007050" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\System</windows:key>
+      <windows:name>EnableSmartScreen</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007051" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\System</windows:key>
       <windows:name>ShellSmartScreenLevel</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007052" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\OneDrive</windows:key>
+      <windows:name>DisableFileSyncNGSC</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8007053" version="1">
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments</windows:key>
+      <windows:name>ScanWithAntiVirus</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8008001" version="1">
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -11229,11 +11729,211 @@ Enforcing these deactivation controls ensures:
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8007002" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8007003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007005" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007006" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007007" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007008" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007009" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007010" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007011" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007012" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007013" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007014" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007015" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007016" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007017" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007018" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007019" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007020" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007021" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007022" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">7</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007023" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">7</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007024" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">7</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007025" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007026" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007027" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007028" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007029" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007030" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007031" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007032" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007033" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007034" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007035" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007036" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007037" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007038" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007039" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007040" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007041" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007042" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007043" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007044" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007045" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007046" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007047" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007048" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">5</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007049" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007050" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007051" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string">Block</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007052" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8007053" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">3</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8008001" version="1">
       <windows:type>reg_dword</windows:type>
