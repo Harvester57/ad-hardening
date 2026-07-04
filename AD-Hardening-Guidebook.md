@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: ed60692 | Generated: July 04, 2026</span>
+      <span>Commit: 5c16bcd | Generated: July 04, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -5411,8 +5411,19 @@ if (Test-Path $AmsiPath) {
 * **GPO Path / Registry Location**:
   * **Service Configuration (GPO)**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Application Identity` -> Automatic
   * **AppLocker Path (GPO)**: `Computer Configuration\Policies\Windows Settings\Security Settings\Application Control Policies\AppLocker`
-  * **Registry Location (Service)**: `HKLM\SYSTEM\CurrentControlSet\Services\AppIDSvc` -> `Start` = `2` (REG_DWORD)
-  * **Registry Location (Enforcement)**: `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
+  * **Registry Locations**:
+    * `HKLM\SYSTEM\CurrentControlSet\Services\AppIDSvc`
+      * `Start` = `2` (REG_DWORD)
+    * `HKLM\Software\Policies\Microsoft\Windows\SrpV2\Exe`
+      * `EnforcementMode` = `1` (REG_DWORD)
+    * `HKLM\Software\Policies\Microsoft\Windows\SrpV2\Msi`
+      * `EnforcementMode` = `1` (REG_DWORD)
+    * `HKLM\Software\Policies\Microsoft\Windows\SrpV2\Script`
+      * `EnforcementMode` = `1` (REG_DWORD)
+    * `HKLM\Software\Policies\Microsoft\Windows\SrpV2\Appx`
+      * `EnforcementMode` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat`
+      * `Prevent16BitApp` = `1` (REG_DWORD)
 
 ---
 
@@ -7996,7 +8007,7 @@ if ($null -eq $Value -or $Value.$ValueName -ne 1) {
   * **Registry Locations**:
     * `HKLM\System\CurrentControlSet\Services\W32Time\Parameters` -> `Type` = `"NTP"`
     * `HKLM\System\CurrentControlSet\Services\W32Time\Config` -> `AnnounceFlags` = `5` (REG_DWORD)
-    * `HKLM\System\CurrentControlSet\Services\W32Time\Parameters` -> `NtpServer` = `"[NtpServerAddress],0x8"` (REG_SZ)
+    * `HKLM\System\CurrentControlSet\Services\W32Time\Parameters` -> `NtpServer` = `"time.windows.com,0x8"` (REG_SZ)
 
 ---
 

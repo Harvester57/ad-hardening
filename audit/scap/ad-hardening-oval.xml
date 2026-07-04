@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-04T01:34:26Z</oval:timestamp>
+    <oval:timestamp>2026-07-04T19:15:16Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1002" version="1" class="compliance">
@@ -585,6 +585,11 @@ Enforcing AppLocker policies on Domain Controllers provides the following defens
 4. **Defends Against AppLocker Bypasses**: Abusing trusted, signed Microsoft binaries (such as `msbuild.exe`, `installutil.exe`, `regasm.exe`, `regsvcs.exe`, `mshta.exe`, `regsvr32.exe`, `rundll32.exe`) allows attackers to execute arbitrary code bypassing default AppLocker rules. This control blocks these "Living off the Land" binaries (LOLBins) and prevents execution from user-writeable paths under `%WINDIR%` (such as `Tasks`, `Temp`, `tracing`, `spool\drivers\color`, etc.).</description>
       </metadata>
       <criteria operator="AND">
+        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows\SrpV2\Exe Value EnforcementMode" test_ref="oval:org.adhardening:tst:2021001" />
+        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows\SrpV2\Msi Value EnforcementMode" test_ref="oval:org.adhardening:tst:2021002" />
+        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows\SrpV2\Script Value EnforcementMode" test_ref="oval:org.adhardening:tst:2021003" />
+        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows\SrpV2\Appx Value EnforcementMode" test_ref="oval:org.adhardening:tst:2021004" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\AppCompat Value Prevent16BitApp" test_ref="oval:org.adhardening:tst:2021005" />
         <criterion comment="Check Startup Configuration for Service AppIDSvc" test_ref="oval:org.adhardening:tst:2021150" />
       </criteria>
     </definition>
@@ -745,7 +750,7 @@ Specifically, the following settings are configured to protect the Tier 0 admini
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value EnableDynamicContentInWSB" test_ref="oval:org.adhardening:tst:2027023" />
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\CurrentVersion\Software Protection Platform Value NoGenTicket" test_ref="oval:org.adhardening:tst:2027024" />
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\WindowsInkWorkspace Value AllowSuggestedAppsInWindowsInkWorkspace" test_ref="oval:org.adhardening:tst:2027025" />
-        <criterion comment="Check Registry Key Software\Policies\Microsoft\Assistance\Client\1 Value NoImplicitFeedback" test_ref="oval:org.adhardening:tst:2027026" />
+        <criterion comment="Check Registry Key Software\Policies\Microsoft\Assistance\Client\1.0 Value NoImplicitFeedback" test_ref="oval:org.adhardening:tst:2027026" />
         <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows\CloudContent Value DisableTailoredExperiencesWithDiagnosticData" test_ref="oval:org.adhardening:tst:2027027" />
         <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows\CloudContent Value DisableWindowsSpotlightFeatures" test_ref="oval:org.adhardening:tst:2027028" />
         <criterion comment="Check Registry Key Software\Policies\Microsoft\WindowsMediaPlayer Value PreventCodecDownload" test_ref="oval:org.adhardening:tst:2027029" />
@@ -1781,9 +1786,11 @@ Hardening these settings ensures:
 3. **OLE Package Disablement**: Restricting Outlook OLE package activation (`ShowOLEPackageObj = 0`) blocks the execution of dangerous embedded objects in email messages.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Check Registry Key software\policies\microsoft\office\16 Value vbawarnings" test_ref="oval:org.adhardening:tst:8033001" />
-        <criterion comment="Check Registry Key software\policies\microsoft\office\16 Value blockcontentexecutionfrominternet" test_ref="oval:org.adhardening:tst:8033002" />
-        <criterion comment="Check Registry Key software\policies\microsoft\office\16 Value ShowOLEPackageObj" test_ref="oval:org.adhardening:tst:8033003" />
+        <criterion comment="Check Registry Key software\policies\microsoft\office\16.0\common\security Value vbawarnings" test_ref="oval:org.adhardening:tst:8033001" />
+        <criterion comment="Check Registry Key software\policies\microsoft\office\16.0\excel\security Value blockcontentexecutionfrominternet" test_ref="oval:org.adhardening:tst:8033002" />
+        <criterion comment="Check Registry Key software\policies\microsoft\office\16.0\word\security Value blockcontentexecutionfrominternet" test_ref="oval:org.adhardening:tst:8033003" />
+        <criterion comment="Check Registry Key software\policies\microsoft\office\16.0\powerpoint\security Value blockcontentexecutionfrominternet" test_ref="oval:org.adhardening:tst:8033004" />
+        <criterion comment="Check Registry Key software\policies\microsoft\office\16.0\outlook\security Value ShowOLEPackageObj" test_ref="oval:org.adhardening:tst:8033005" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8034" version="1" class="compliance">
@@ -2495,14 +2502,18 @@ By default, legacy .NET Framework applications (targeting .NET 3.5 or earlier) a
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Cryptography\Configuration\SSL\00010002 Value SystemDefaultTlsVersions" test_ref="oval:org.adhardening:tst:4006002" />
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Cryptography\Configuration\SSL\00010002 Value AllowStrongNameBypass" test_ref="oval:org.adhardening:tst:4006003" />
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Cryptography\Configuration\SSL\00010002 Value DefaultSecureProtocols" test_ref="oval:org.adhardening:tst:4006004" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft Value SchUseStrongCrypto" test_ref="oval:org.adhardening:tst:4006005" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft Value SystemDefaultTlsVersions" test_ref="oval:org.adhardening:tst:4006006" />
-        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft Value SchUseStrongCrypto" test_ref="oval:org.adhardening:tst:4006007" />
-        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft Value SystemDefaultTlsVersions" test_ref="oval:org.adhardening:tst:4006008" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft Value AllowStrongNameBypass" test_ref="oval:org.adhardening:tst:4006009" />
-        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft Value AllowStrongNameBypass" test_ref="oval:org.adhardening:tst:4006010" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp Value DefaultSecureProtocols" test_ref="oval:org.adhardening:tst:4006011" />
-        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp Value DefaultSecureProtocols" test_ref="oval:org.adhardening:tst:4006012" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\.NETFramework\v4.0.30319 Value SchUseStrongCrypto" test_ref="oval:org.adhardening:tst:4006005" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\.NETFramework\v4.0.30319 Value SystemDefaultTlsVersions" test_ref="oval:org.adhardening:tst:4006006" />
+        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319 Value SchUseStrongCrypto" test_ref="oval:org.adhardening:tst:4006007" />
+        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319 Value SystemDefaultTlsVersions" test_ref="oval:org.adhardening:tst:4006008" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\.NETFramework\v2.0.50727 Value SchUseStrongCrypto" test_ref="oval:org.adhardening:tst:4006009" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\.NETFramework\v2.0.50727 Value SystemDefaultTlsVersions" test_ref="oval:org.adhardening:tst:4006010" />
+        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727 Value SchUseStrongCrypto" test_ref="oval:org.adhardening:tst:4006011" />
+        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727 Value SystemDefaultTlsVersions" test_ref="oval:org.adhardening:tst:4006012" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\.NETFramework Value AllowStrongNameBypass" test_ref="oval:org.adhardening:tst:4006013" />
+        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\.NETFramework Value AllowStrongNameBypass" test_ref="oval:org.adhardening:tst:4006014" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp Value DefaultSecureProtocols" test_ref="oval:org.adhardening:tst:4006015" />
+        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp Value DefaultSecureProtocols" test_ref="oval:org.adhardening:tst:4006016" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:4007" version="1" class="compliance">
@@ -3796,9 +3807,11 @@ Hardening these settings ensures:
 3. **OLE Package Disablement**: Restricting Outlook OLE package activation (`ShowOLEPackageObj = 0`) blocks the execution of dangerous embedded objects in email messages.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Check Registry Key software\policies\microsoft\office\16 Value vbawarnings" test_ref="oval:org.adhardening:tst:7033001" />
-        <criterion comment="Check Registry Key software\policies\microsoft\office\16 Value blockcontentexecutionfrominternet" test_ref="oval:org.adhardening:tst:7033002" />
-        <criterion comment="Check Registry Key software\policies\microsoft\office\16 Value ShowOLEPackageObj" test_ref="oval:org.adhardening:tst:7033003" />
+        <criterion comment="Check Registry Key software\policies\microsoft\office\16.0\common\security Value vbawarnings" test_ref="oval:org.adhardening:tst:7033001" />
+        <criterion comment="Check Registry Key software\policies\microsoft\office\16.0\excel\security Value blockcontentexecutionfrominternet" test_ref="oval:org.adhardening:tst:7033002" />
+        <criterion comment="Check Registry Key software\policies\microsoft\office\16.0\word\security Value blockcontentexecutionfrominternet" test_ref="oval:org.adhardening:tst:7033003" />
+        <criterion comment="Check Registry Key software\policies\microsoft\office\16.0\powerpoint\security Value blockcontentexecutionfrominternet" test_ref="oval:org.adhardening:tst:7033004" />
+        <criterion comment="Check Registry Key software\policies\microsoft\office\16.0\outlook\security Value ShowOLEPackageObj" test_ref="oval:org.adhardening:tst:7033005" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7034" version="1" class="compliance">
@@ -4055,6 +4068,26 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:2020005" />
       <windows:state state_ref="oval:org.adhardening:ste:2020005" />
     </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2021001" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows\SrpV2\Exe Value EnforcementMode" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2021001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2021001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2021002" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows\SrpV2\Msi Value EnforcementMode" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2021002" />
+      <windows:state state_ref="oval:org.adhardening:ste:2021002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2021003" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows\SrpV2\Script Value EnforcementMode" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2021003" />
+      <windows:state state_ref="oval:org.adhardening:ste:2021003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2021004" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows\SrpV2\Appx Value EnforcementMode" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2021004" />
+      <windows:state state_ref="oval:org.adhardening:ste:2021004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2021005" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\AppCompat Value Prevent16BitApp" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2021005" />
+      <windows:state state_ref="oval:org.adhardening:ste:2021005" />
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:2021150" version="1" comment="Check Startup Configuration for Service AppIDSvc" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2021150" />
       <windows:state state_ref="oval:org.adhardening:ste:2021150" />
@@ -4287,7 +4320,7 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:2027025" />
       <windows:state state_ref="oval:org.adhardening:ste:2027025" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2027026" version="1" comment="Check Registry Key Software\Policies\Microsoft\Assistance\Client\1 Value NoImplicitFeedback" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:2027026" version="1" comment="Check Registry Key Software\Policies\Microsoft\Assistance\Client\1.0 Value NoImplicitFeedback" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2027026" />
       <windows:state state_ref="oval:org.adhardening:ste:2027026" />
     </windows:registry_test>
@@ -5667,17 +5700,25 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:8032" />
       <windows:state state_ref="oval:org.adhardening:ste:8032" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8033001" version="1" comment="Check Registry Key software\policies\microsoft\office\16 Value vbawarnings" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8033001" version="1" comment="Check Registry Key software\policies\microsoft\office\16.0\common\security Value vbawarnings" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8033001" />
       <windows:state state_ref="oval:org.adhardening:ste:8033001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8033002" version="1" comment="Check Registry Key software\policies\microsoft\office\16 Value blockcontentexecutionfrominternet" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8033002" version="1" comment="Check Registry Key software\policies\microsoft\office\16.0\excel\security Value blockcontentexecutionfrominternet" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8033002" />
       <windows:state state_ref="oval:org.adhardening:ste:8033002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8033003" version="1" comment="Check Registry Key software\policies\microsoft\office\16 Value ShowOLEPackageObj" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8033003" version="1" comment="Check Registry Key software\policies\microsoft\office\16.0\word\security Value blockcontentexecutionfrominternet" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8033003" />
       <windows:state state_ref="oval:org.adhardening:ste:8033003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8033004" version="1" comment="Check Registry Key software\policies\microsoft\office\16.0\powerpoint\security Value blockcontentexecutionfrominternet" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8033004" />
+      <windows:state state_ref="oval:org.adhardening:ste:8033004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8033005" version="1" comment="Check Registry Key software\policies\microsoft\office\16.0\outlook\security Value ShowOLEPackageObj" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8033005" />
+      <windows:state state_ref="oval:org.adhardening:ste:8033005" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8034001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8034001" />
@@ -5895,37 +5936,53 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:4006004" />
       <windows:state state_ref="oval:org.adhardening:ste:4006004" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:4006005" version="1" comment="Check Registry Key SOFTWARE\Microsoft Value SchUseStrongCrypto" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:4006005" version="1" comment="Check Registry Key SOFTWARE\Microsoft\.NETFramework\v4.0.30319 Value SchUseStrongCrypto" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4006005" />
       <windows:state state_ref="oval:org.adhardening:ste:4006005" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:4006006" version="1" comment="Check Registry Key SOFTWARE\Microsoft Value SystemDefaultTlsVersions" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:4006006" version="1" comment="Check Registry Key SOFTWARE\Microsoft\.NETFramework\v4.0.30319 Value SystemDefaultTlsVersions" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4006006" />
       <windows:state state_ref="oval:org.adhardening:ste:4006006" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:4006007" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft Value SchUseStrongCrypto" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:4006007" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319 Value SchUseStrongCrypto" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4006007" />
       <windows:state state_ref="oval:org.adhardening:ste:4006007" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:4006008" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft Value SystemDefaultTlsVersions" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:4006008" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319 Value SystemDefaultTlsVersions" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4006008" />
       <windows:state state_ref="oval:org.adhardening:ste:4006008" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:4006009" version="1" comment="Check Registry Key SOFTWARE\Microsoft Value AllowStrongNameBypass" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:4006009" version="1" comment="Check Registry Key SOFTWARE\Microsoft\.NETFramework\v2.0.50727 Value SchUseStrongCrypto" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4006009" />
       <windows:state state_ref="oval:org.adhardening:ste:4006009" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:4006010" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft Value AllowStrongNameBypass" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:4006010" version="1" comment="Check Registry Key SOFTWARE\Microsoft\.NETFramework\v2.0.50727 Value SystemDefaultTlsVersions" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4006010" />
       <windows:state state_ref="oval:org.adhardening:ste:4006010" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:4006011" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp Value DefaultSecureProtocols" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:4006011" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727 Value SchUseStrongCrypto" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4006011" />
       <windows:state state_ref="oval:org.adhardening:ste:4006011" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:4006012" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp Value DefaultSecureProtocols" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:4006012" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727 Value SystemDefaultTlsVersions" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4006012" />
       <windows:state state_ref="oval:org.adhardening:ste:4006012" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:4006013" version="1" comment="Check Registry Key SOFTWARE\Microsoft\.NETFramework Value AllowStrongNameBypass" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:4006013" />
+      <windows:state state_ref="oval:org.adhardening:ste:4006013" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:4006014" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\.NETFramework Value AllowStrongNameBypass" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:4006014" />
+      <windows:state state_ref="oval:org.adhardening:ste:4006014" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:4006015" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp Value DefaultSecureProtocols" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:4006015" />
+      <windows:state state_ref="oval:org.adhardening:ste:4006015" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:4006016" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp Value DefaultSecureProtocols" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:4006016" />
+      <windows:state state_ref="oval:org.adhardening:ste:4006016" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:4007001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters Value SMB1" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4007001" />
@@ -7023,17 +7080,25 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:7032" />
       <windows:state state_ref="oval:org.adhardening:ste:7032" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7033001" version="1" comment="Check Registry Key software\policies\microsoft\office\16 Value vbawarnings" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7033001" version="1" comment="Check Registry Key software\policies\microsoft\office\16.0\common\security Value vbawarnings" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7033001" />
       <windows:state state_ref="oval:org.adhardening:ste:7033001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7033002" version="1" comment="Check Registry Key software\policies\microsoft\office\16 Value blockcontentexecutionfrominternet" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7033002" version="1" comment="Check Registry Key software\policies\microsoft\office\16.0\excel\security Value blockcontentexecutionfrominternet" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7033002" />
       <windows:state state_ref="oval:org.adhardening:ste:7033002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7033003" version="1" comment="Check Registry Key software\policies\microsoft\office\16 Value ShowOLEPackageObj" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7033003" version="1" comment="Check Registry Key software\policies\microsoft\office\16.0\word\security Value blockcontentexecutionfrominternet" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7033003" />
       <windows:state state_ref="oval:org.adhardening:ste:7033003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7033004" version="1" comment="Check Registry Key software\policies\microsoft\office\16.0\powerpoint\security Value blockcontentexecutionfrominternet" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7033004" />
+      <windows:state state_ref="oval:org.adhardening:ste:7033004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7033005" version="1" comment="Check Registry Key software\policies\microsoft\office\16.0\outlook\security Value ShowOLEPackageObj" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7033005" />
+      <windows:state state_ref="oval:org.adhardening:ste:7033005" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7034001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7034001" />
@@ -7389,6 +7454,36 @@ Enforcing these deactivation controls ensures:
       <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Remote Encryption Protection</windows:key>
       <windows:name>RemoteEncryptionProtectionAggressiveness</windows:name>
     </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2021001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Policies\Microsoft\Windows\SrpV2\Exe</windows:key>
+      <windows:name>EnforcementMode</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2021002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Policies\Microsoft\Windows\SrpV2\Msi</windows:key>
+      <windows:name>EnforcementMode</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2021003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Policies\Microsoft\Windows\SrpV2\Script</windows:key>
+      <windows:name>EnforcementMode</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2021004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Policies\Microsoft\Windows\SrpV2\Appx</windows:key>
+      <windows:name>EnforcementMode</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2021005" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\AppCompat</windows:key>
+      <windows:name>Prevent16BitApp</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:2021150" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -7740,7 +7835,7 @@ Enforcing these deactivation controls ensures:
     <windows:registry_object id="oval:org.adhardening:obj:2027026" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
-      <windows:key>Software\Policies\Microsoft\Assistance\Client\1</windows:key>
+      <windows:key>Software\Policies\Microsoft\Assistance\Client\1.0</windows:key>
       <windows:name>NoImplicitFeedback</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:2027027" version="1">
@@ -9816,19 +9911,31 @@ Enforcing these deactivation controls ensures:
     <windows:registry_object id="oval:org.adhardening:obj:8033001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
-      <windows:key>software\policies\microsoft\office\16</windows:key>
+      <windows:key>software\policies\microsoft\office\16.0\common\security</windows:key>
       <windows:name>vbawarnings</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8033002" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
-      <windows:key>software\policies\microsoft\office\16</windows:key>
+      <windows:key>software\policies\microsoft\office\16.0\excel\security</windows:key>
       <windows:name>blockcontentexecutionfrominternet</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8033003" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
-      <windows:key>software\policies\microsoft\office\16</windows:key>
+      <windows:key>software\policies\microsoft\office\16.0\word\security</windows:key>
+      <windows:name>blockcontentexecutionfrominternet</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8033004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_CURRENT_USER</windows:hive>
+      <windows:key>software\policies\microsoft\office\16.0\powerpoint\security</windows:key>
+      <windows:name>blockcontentexecutionfrominternet</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8033005" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_CURRENT_USER</windows:hive>
+      <windows:key>software\policies\microsoft\office\16.0\outlook\security</windows:key>
       <windows:name>ShowOLEPackageObj</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8034001" version="1">
@@ -10158,46 +10265,70 @@ Enforcing these deactivation controls ensures:
     <windows:registry_object id="oval:org.adhardening:obj:4006005" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft</windows:key>
+      <windows:key>SOFTWARE\Microsoft\.NETFramework\v4.0.30319</windows:key>
       <windows:name>SchUseStrongCrypto</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:4006006" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft</windows:key>
+      <windows:key>SOFTWARE\Microsoft\.NETFramework\v4.0.30319</windows:key>
       <windows:name>SystemDefaultTlsVersions</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:4006007" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Wow6432Node\Microsoft</windows:key>
+      <windows:key>SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319</windows:key>
       <windows:name>SchUseStrongCrypto</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:4006008" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Wow6432Node\Microsoft</windows:key>
+      <windows:key>SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319</windows:key>
       <windows:name>SystemDefaultTlsVersions</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:4006009" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft</windows:key>
-      <windows:name>AllowStrongNameBypass</windows:name>
+      <windows:key>SOFTWARE\Microsoft\.NETFramework\v2.0.50727</windows:key>
+      <windows:name>SchUseStrongCrypto</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:4006010" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Wow6432Node\Microsoft</windows:key>
-      <windows:name>AllowStrongNameBypass</windows:name>
+      <windows:key>SOFTWARE\Microsoft\.NETFramework\v2.0.50727</windows:key>
+      <windows:name>SystemDefaultTlsVersions</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:4006011" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727</windows:key>
+      <windows:name>SchUseStrongCrypto</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:4006012" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v2.0.50727</windows:key>
+      <windows:name>SystemDefaultTlsVersions</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:4006013" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\.NETFramework</windows:key>
+      <windows:name>AllowStrongNameBypass</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:4006014" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Wow6432Node\Microsoft\.NETFramework</windows:key>
+      <windows:name>AllowStrongNameBypass</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:4006015" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp</windows:key>
       <windows:name>DefaultSecureProtocols</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:4006012" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:4006016" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp</windows:key>
@@ -11850,19 +11981,31 @@ Enforcing these deactivation controls ensures:
     <windows:registry_object id="oval:org.adhardening:obj:7033001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
-      <windows:key>software\policies\microsoft\office\16</windows:key>
+      <windows:key>software\policies\microsoft\office\16.0\common\security</windows:key>
       <windows:name>vbawarnings</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7033002" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
-      <windows:key>software\policies\microsoft\office\16</windows:key>
+      <windows:key>software\policies\microsoft\office\16.0\excel\security</windows:key>
       <windows:name>blockcontentexecutionfrominternet</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7033003" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
-      <windows:key>software\policies\microsoft\office\16</windows:key>
+      <windows:key>software\policies\microsoft\office\16.0\word\security</windows:key>
+      <windows:name>blockcontentexecutionfrominternet</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7033004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_CURRENT_USER</windows:hive>
+      <windows:key>software\policies\microsoft\office\16.0\powerpoint\security</windows:key>
+      <windows:name>blockcontentexecutionfrominternet</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7033005" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_CURRENT_USER</windows:hive>
+      <windows:key>software\policies\microsoft\office\16.0\outlook\security</windows:key>
       <windows:name>ShowOLEPackageObj</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7034001" version="1">
@@ -12105,6 +12248,26 @@ Enforcing these deactivation controls ensures:
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:2020005" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2021001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2021002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2021003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2021004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2021005" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
@@ -12378,7 +12541,7 @@ Enforcing these deactivation controls ensures:
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:2031003" version="1">
       <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string">[NtpServerAddress],0x8</windows:value>
+      <windows:value datatype="string">time.windows.com,0x8</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001001" version="1">
       <windows:type>reg_dword</windows:type>
@@ -13718,6 +13881,14 @@ Enforcing these deactivation controls ensures:
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8033003" version="1">
       <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8033004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8033005" version="1">
+      <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8034001" version="1">
@@ -13954,17 +14125,33 @@ Enforcing these deactivation controls ensures:
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:4006009" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:4006010" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:4006011" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">2048</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:4006012" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:4006013" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:4006014" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:4006015" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2048</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:4006016" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">2048</windows:value>
     </windows:registry_state>
@@ -15073,6 +15260,14 @@ Enforcing these deactivation controls ensures:
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7033003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7033004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7033005" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>

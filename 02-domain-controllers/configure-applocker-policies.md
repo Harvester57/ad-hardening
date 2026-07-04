@@ -11,8 +11,19 @@
 * **GPO Path / Registry Location**:
   * **Service Configuration (GPO)**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Application Identity` -> Automatic
   * **AppLocker Path (GPO)**: `Computer Configuration\Policies\Windows Settings\Security Settings\Application Control Policies\AppLocker`
-  * **Registry Location (Service)**: `HKLM\SYSTEM\CurrentControlSet\Services\AppIDSvc` -> `Start` = `2` (REG_DWORD)
-  * **Registry Location (Enforcement)**: `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
+  * **Registry Locations**:
+    * `HKLM\SYSTEM\CurrentControlSet\Services\AppIDSvc`
+      * `Start` = `2` (REG_DWORD)
+    * `HKLM\Software\Policies\Microsoft\Windows\SrpV2\Exe`
+      * `EnforcementMode` = `1` (REG_DWORD)
+    * `HKLM\Software\Policies\Microsoft\Windows\SrpV2\Msi`
+      * `EnforcementMode` = `1` (REG_DWORD)
+    * `HKLM\Software\Policies\Microsoft\Windows\SrpV2\Script`
+      * `EnforcementMode` = `1` (REG_DWORD)
+    * `HKLM\Software\Policies\Microsoft\Windows\SrpV2\Appx`
+      * `EnforcementMode` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat`
+      * `Prevent16BitApp` = `1` (REG_DWORD)
 
 ---
 

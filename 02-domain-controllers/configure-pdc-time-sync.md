@@ -13,7 +13,7 @@
   * **Registry Locations**:
     * `HKLM\System\CurrentControlSet\Services\W32Time\Parameters` -> `Type` = `"NTP"`
     * `HKLM\System\CurrentControlSet\Services\W32Time\Config` -> `AnnounceFlags` = `5` (REG_DWORD)
-    * `HKLM\System\CurrentControlSet\Services\W32Time\Parameters` -> `NtpServer` = `"[NtpServerAddress],0x8"` (REG_SZ)
+    * `HKLM\System\CurrentControlSet\Services\W32Time\Parameters` -> `NtpServer` = `"time.windows.com,0x8"` (REG_SZ)
 
 ---
 

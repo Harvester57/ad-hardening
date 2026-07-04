@@ -484,11 +484,11 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                         continue
                     
                     # Parse registry
-                    path_match = re.search(r'`?((?:HKLM|HKCU|HKEY_LOCAL_MACHINE|HKEY_CURRENT_USER)\\[a-zA-Z0-9_\\ -]+)`?', line_strip, re.IGNORECASE)
+                    path_match = re.search(r'`?((?:HKLM|HKCU|HKEY_LOCAL_MACHINE|HKEY_CURRENT_USER)\\[a-zA-Z0-9_\\ \.-]+)`?', line_strip, re.IGNORECASE)
                     if not path_match:
-                        path_match = re.search(r'`?((?:SYSTEM|SOFTWARE)\\CurrentControlSet\\[a-zA-Z0-9_\\ -]+)`?', line_strip, re.IGNORECASE)
+                        path_match = re.search(r'`?((?:SYSTEM|SOFTWARE)\\CurrentControlSet\\[a-zA-Z0-9_\\ \.-]+)`?', line_strip, re.IGNORECASE)
                         if not path_match:
-                            path_match = re.search(r'`?((?:SYSTEM|SOFTWARE)\\Policies\\[a-zA-Z0-9_\\ -]+)`?', line_strip, re.IGNORECASE)
+                            path_match = re.search(r'`?((?:SYSTEM|SOFTWARE)\\Policies\\[a-zA-Z0-9_\\ \.-]+)`?', line_strip, re.IGNORECASE)
                             
                     if path_match:
                         current_key = path_match.group(1).strip()
