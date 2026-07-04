@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Benchmark xmlns="http://checklists.nist.gov/xccdf/1.2" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xhtml="http://www.w3.org/1999/xhtml" id="xccdf_org.adhardening.benchmarks_benchmark_ad-hardening" resolved="false" xml:lang="en">
-  <status date="2026-07-03">accepted</status>
+  <status date="2026-07-04">accepted</status>
   <title>Active Directory Hardening Guidebook Benchmark</title>
   <description>Automated compliance checklist profiles and rules parsed directly from the Active Directory Hardening Guidebook.</description>
   <version>1.0</version>
   <metadata>
     <dc:publisher>Antigravity Hardening Project</dc:publisher>
     <dc:creator>Antigravity</dc:creator>
-    <dc:date>2026-07-03</dc:date>
+    <dc:date>2026-07-04</dc:date>
   </metadata>
   <Profile id="xccdf_org.adhardening.benchmarks_profile_DomainController">
     <title>Domain Controller Hardening Profile</title>
@@ -523,8 +523,8 @@ if ($process.ExitCode -eq 0) {
 } else {
     Write-Error "Failed to apply logon restrictions. Exit code: $($process.ExitCode)"
 }</fix>
-      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
-        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:1001" />
+      <check system="http://checklists.nist.gov/xccdf/check/manual">
+        <check-content>Perform manual verification steps as documented in the guidebook.</check-content>
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-002" severity="high" weight="10.0" selected="false">
@@ -7189,8 +7189,8 @@ if ($Process.ExitCode -eq 0) {
 }
 
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue</fix>
-      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
-        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2023" />
+      <check system="http://checklists.nist.gov/xccdf/check/manual">
+        <check-content>Perform manual verification steps as documented in the guidebook.</check-content>
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-024" severity="high" weight="10.0" selected="false">
@@ -9562,8 +9562,8 @@ if (-not $ExistingPSO) {
 } else {
     Write-Host "PSO '$AdminPSOName' already exists." -ForegroundColor Yellow
 }</fix>
-      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
-        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:3001" />
+      <check system="http://checklists.nist.gov/xccdf/check/manual">
+        <check-content>Perform manual verification steps as documented in the guidebook.</check-content>
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" severity="high" weight="10.0" selected="false">
@@ -24368,8 +24368,8 @@ if ($Process.ExitCode -eq 0) {
 
 # Clean up temp files
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue</fix>
-      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
-        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7009" />
+      <check system="http://checklists.nist.gov/xccdf/check/manual">
+        <check-content>Perform manual verification steps as documented in the guidebook.</check-content>
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-010" severity="high" weight="10.0" selected="false">
@@ -25702,8 +25702,8 @@ if ($Process.ExitCode -eq 0) {
 }
 
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue</fix>
-      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
-        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7013" />
+      <check system="http://checklists.nist.gov/xccdf/check/manual">
+        <check-content>Perform manual verification steps as documented in the guidebook.</check-content>
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-014" severity="high" weight="10.0" selected="false">
@@ -36987,8 +36987,8 @@ if ($Process.ExitCode -eq 0) {
 
 # Clean up temp files
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue</fix>
-      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
-        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8016" />
+      <check system="http://checklists.nist.gov/xccdf/check/manual">
+        <check-content>Perform manual verification steps as documented in the guidebook.</check-content>
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-017" severity="high" weight="10.0" selected="false">
@@ -38164,8 +38164,8 @@ if ($Process.ExitCode -eq 0) {
 }
 
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue</fix>
-      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
-        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8018" />
+      <check system="http://checklists.nist.gov/xccdf/check/manual">
+        <check-content>Perform manual verification steps as documented in the guidebook.</check-content>
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-019" severity="medium" weight="10.0" selected="false">

@@ -8,6 +8,7 @@
 
 ## Implementation Details
 * **Priority**: High
+* **Assessment**: Manual
 * **GPO Path / Registry Location**: Active Directory System Container: `CN=Password Settings Container,CN=System,DC=[Domain]`
 
 ---

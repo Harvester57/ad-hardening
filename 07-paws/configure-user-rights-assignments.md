@@ -8,6 +8,7 @@
 
 ## Implementation Details
 * **Priority**: High
+* **Assessment**: Manual
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
   * **Registry Location**: Configured via Group Policy or local Security Database (`secedit` templates).
