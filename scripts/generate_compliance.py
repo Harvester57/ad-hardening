@@ -1118,6 +1118,10 @@ def generate_oval(requirements, output_path):
                     'id': f"oval:org.adhardening:obj:{sub_id}",
                     'version': '1'
                 })
+                # Add 64-bit registry view behavior to prevent Wow6432Node redirection failures
+                ET.SubElement(obj_el, w_tag('behaviors'), {
+                    'windows_view': '64_bit'
+                })
                 hive_el = ET.SubElement(obj_el, w_tag('hive'))
                 hive_el.text = chk['hive']
                 key_el = ET.SubElement(obj_el, w_tag('key'))
@@ -1185,6 +1189,10 @@ def generate_oval(requirements, output_path):
                 obj_el = ET.SubElement(objs_el, w_tag('registry_object'), {
                     'id': f"oval:org.adhardening:obj:{sub_id}",
                     'version': '1'
+                })
+                # Add 64-bit registry view behavior to prevent Wow6432Node redirection failures
+                ET.SubElement(obj_el, w_tag('behaviors'), {
+                    'windows_view': '64_bit'
                 })
                 hive_el = ET.SubElement(obj_el, w_tag('hive'))
                 hive_el.text = 'HKEY_LOCAL_MACHINE'
@@ -1434,6 +1442,10 @@ def generate_oval(requirements, output_path):
             obj_el = ET.SubElement(objs_el, w_tag('registry_object'), {
                 'id': f"oval:org.adhardening:obj:{req['numeric_id']}",
                 'version': '1'
+            })
+            # Add 64-bit registry view behavior to prevent Wow6432Node redirection failures
+            ET.SubElement(obj_el, w_tag('behaviors'), {
+                'windows_view': '64_bit'
             })
             hive_el = ET.SubElement(obj_el, w_tag('hive'))
             hive_el.text = 'HKEY_LOCAL_MACHINE'
