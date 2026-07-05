@@ -1531,47 +1531,45 @@ def generate_oval(requirements, output_path):
                 thr_el.text = str(l['lockout_threshold'])
                 
         # Native Advanced Audit Policy Check
-        # Native Advanced Audit Policy Check
-        # (Omitted due to schema version incompatibility in common OVAL 5.11.2 validators like OpenSCAP)
-        # if req['audit_policy']:
-        #     has_native = True
-        #     sub_id = req['numeric_id'] * 1000 + 920
-        #     comment = f"Check Advanced Audit Policy configurations"
-        #     
-        #     ET.SubElement(criteria, o_tag('criterion'), {
-        #         'comment': comment,
-        #         'test_ref': f"oval:org.adhardening:tst:{sub_id}"
-        #     })
-        #     
-        #     # auditeventpolicysubcategories_test
-        #     test_el = ET.SubElement(tests_el, w_tag('auditeventpolicysubcategories_test'), {
-        #         'id': f"oval:org.adhardening:tst:{sub_id}",
-        #         'version': '1',
-        #         'comment': comment,
-        #         'check': 'all'
-        #     })
-        #     ET.SubElement(test_el, w_tag('object'), {
-        #         'object_ref': f"oval:org.adhardening:obj:{sub_id}"
-        #     })
-        #     ET.SubElement(test_el, w_tag('state'), {
-        #         'state_ref': f"oval:org.adhardening:ste:{sub_id}"
-        #     })
-        #     
-        #     # auditeventpolicysubcategories_object
-        #     ET.SubElement(objs_el, w_tag('auditeventpolicysubcategories_object'), {
-        #         'id': f"oval:org.adhardening:obj:{sub_id}",
-        #         'version': '1'
-        #     })
-        #     
-        #     # auditeventpolicysubcategories_state
-        #     state_el = ET.SubElement(states_el, w_tag('auditeventpolicysubcategories_state'), {
-        #         'id': f"oval:org.adhardening:ste:{sub_id}",
-        #         'version': '1'
-        #     })
-        #     
-        #     for item in req['audit_policy']:
-        #         item_el = ET.SubElement(state_el, w_tag(item['subcat']))
-        #         item_el.text = item['setting']
+        if req['audit_policy']:
+            has_native = True
+            sub_id = req['numeric_id'] * 1000 + 920
+            comment = f"Check Advanced Audit Policy configurations"
+            
+            ET.SubElement(criteria, o_tag('criterion'), {
+                'comment': comment,
+                'test_ref': f"oval:org.adhardening:tst:{sub_id}"
+            })
+            
+            # auditeventpolicysubcategories_test
+            test_el = ET.SubElement(tests_el, w_tag('auditeventpolicysubcategories_test'), {
+                'id': f"oval:org.adhardening:tst:{sub_id}",
+                'version': '1',
+                'comment': comment,
+                'check': 'all'
+            })
+            ET.SubElement(test_el, w_tag('object'), {
+                'object_ref': f"oval:org.adhardening:obj:{sub_id}"
+            })
+            ET.SubElement(test_el, w_tag('state'), {
+                'state_ref': f"oval:org.adhardening:ste:{sub_id}"
+            })
+            
+            # auditeventpolicysubcategories_object
+            ET.SubElement(objs_el, w_tag('auditeventpolicysubcategories_object'), {
+                'id': f"oval:org.adhardening:obj:{sub_id}",
+                'version': '1'
+            })
+            
+            # auditeventpolicysubcategories_state
+            state_el = ET.SubElement(states_el, w_tag('auditeventpolicysubcategories_state'), {
+                'id': f"oval:org.adhardening:ste:{sub_id}",
+                'version': '1'
+            })
+            
+            for item in req['audit_policy']:
+                item_el = ET.SubElement(state_el, w_tag(item['subcat']))
+                item_el.text = item['setting']
                 
         # Fallback to Placeholder Registry Test if no native checks were generated
         if not has_native and req['audit_script']:
