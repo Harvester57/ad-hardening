@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-05T19:12:23Z</oval:timestamp>
+    <oval:timestamp>2026-07-05T19:46:03Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -2646,7 +2646,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing account logon events captures authentication requests processed by the local system or the domain controller, which is critical for identifying Kerberoasting, NTLM relaying, and brute-force attempts.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-DC-137 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:2137" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:2137920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:2138" version="1" class="compliance">
@@ -2662,7 +2662,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing account management logs security principal modifications (creations, deletions, password resets, group modifications) to detect privilege escalation attempts on domain or local administrative groups.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-DC-138 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:2138" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:2138920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:2139" version="1" class="compliance">
@@ -2678,7 +2678,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Detailed tracking records process creations and device arrivals to ensure EDR/SIEM visibility into executable command lines and hardware plug events.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-DC-139 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:2139" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:2139920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:2140" version="1" class="compliance">
@@ -2694,7 +2694,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing Directory Service changes captures creations, modifications, and deletions of Active Directory objects, providing an essential trail for monitoring structural domain modifications.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-DC-140 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:2140" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:2140920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:2141" version="1" class="compliance">
@@ -2710,7 +2710,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing logon/logoff events monitors administrative session states, special elevations, and failed logon attempts, which is critical for finding unauthorized remote access or lateral movement.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-DC-141 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:2141" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:2141920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:2142" version="1" class="compliance">
@@ -2726,7 +2726,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing object access (files, registry keys, and shares) helps monitor unauthorized modifications to system configuration files and access to restricted shares.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-DC-142 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:2142" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:2142920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:2143" version="1" class="compliance">
@@ -2742,7 +2742,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing policy changes tracks attempts to modify authorization policies, auditing configuration changes, or firewall rule alterations to hide adversarial tracks.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-DC-143 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:2143" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:2143920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:2144" version="1" class="compliance">
@@ -2758,7 +2758,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing sensitive privilege use logs attempts by processes or users to exercise rights like ActAsPartOfTypeOperatingSystem or LoadDrivers, identifying potential privilege escalations.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-DC-144 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:2144" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:2144920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:2145" version="1" class="compliance">
@@ -2774,7 +2774,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing system security extensions, integrity violations, and driver arrivals monitors boot health and tampering of host security services.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-DC-145 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:2145" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:2145920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8001" version="1" class="compliance">
@@ -5449,7 +5449,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
         <description>Auditing account logon events captures authentication requests processed by the local system or the domain controller, which is critical for identifying Kerberoasting, NTLM relaying, and brute-force attempts.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-END-142 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8142" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:8142920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8143" version="1" class="compliance">
@@ -5465,7 +5465,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
         <description>Auditing account management logs security principal modifications (creations, deletions, password resets, group modifications) to detect privilege escalation attempts on domain or local administrative groups.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-END-143 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8143" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:8143920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8144" version="1" class="compliance">
@@ -5481,7 +5481,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
         <description>Detailed tracking records process creations and device arrivals to ensure EDR/SIEM visibility into executable command lines and hardware plug events.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-END-144 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8144" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:8144920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8146" version="1" class="compliance">
@@ -5497,7 +5497,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
         <description>Auditing logon/logoff events monitors administrative session states, special elevations, and failed logon attempts, which is critical for finding unauthorized remote access or lateral movement.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-END-146 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8146" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:8146920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8147" version="1" class="compliance">
@@ -5513,7 +5513,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
         <description>Auditing object access (files, registry keys, and shares) helps monitor unauthorized modifications to system configuration files and access to restricted shares.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-END-147 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8147" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:8147920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8148" version="1" class="compliance">
@@ -5529,7 +5529,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
         <description>Auditing policy changes tracks attempts to modify authorization policies, auditing configuration changes, or firewall rule alterations to hide adversarial tracks.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-END-148 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8148" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:8148920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8149" version="1" class="compliance">
@@ -5545,7 +5545,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
         <description>Auditing sensitive privilege use logs attempts by processes or users to exercise rights like ActAsPartOfTypeOperatingSystem or LoadDrivers, identifying potential privilege escalations.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-END-149 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8149" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:8149920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8150" version="1" class="compliance">
@@ -5561,7 +5561,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
         <description>Auditing system security extensions, integrity violations, and driver arrivals monitors boot health and tampering of host security services.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-END-150 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8150" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:8150920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8151" version="1" class="compliance">
@@ -9342,7 +9342,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing account logon events captures authentication requests processed by the local system or the workstation, which is critical for identifying Kerberoasting, NTLM relaying, and brute-force attempts.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-131 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7131" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:7131920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7132" version="1" class="compliance">
@@ -9358,7 +9358,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing account management logs security principal modifications (creations, deletions, password resets, group modifications) to detect privilege escalation attempts on domain or local administrative groups.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-132 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7132" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:7132920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7133" version="1" class="compliance">
@@ -9374,7 +9374,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Detailed tracking records process creations and device arrivals to ensure EDR/SIEM visibility into executable command lines and hardware plug events.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-133 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7133" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:7133920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7135" version="1" class="compliance">
@@ -9390,7 +9390,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing logon/logoff events monitors administrative session states, special elevations, and failed logon attempts, which is critical for finding unauthorized remote access or lateral movement.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-135 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7135" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:7135920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7136" version="1" class="compliance">
@@ -9406,7 +9406,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing object access (files, registry keys, and shares) helps monitor unauthorized modifications to system configuration files and access to restricted shares.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-136 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7136" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:7136920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7137" version="1" class="compliance">
@@ -9422,7 +9422,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing policy changes tracks attempts to modify authorization policies, auditing configuration changes, or firewall rule alterations to hide adversarial tracks.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-137 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7137" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:7137920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7138" version="1" class="compliance">
@@ -9438,7 +9438,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing sensitive privilege use logs attempts by processes or users to exercise rights like ActAsPartOfTypeOperatingSystem or LoadDrivers, identifying potential privilege escalations.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-138 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7138" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:7138920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7139" version="1" class="compliance">
@@ -9454,7 +9454,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <description>Auditing system security extensions, integrity violations, and driver arrivals monitors boot health and tampering of host security services.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-139 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7139" />
+        <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:7139920" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7140" version="1" class="compliance">
@@ -10641,42 +10641,42 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:2136002" />
       <windows:state state_ref="oval:org.adhardening:ste:2136002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2137" version="1" comment="Placeholder check for REQ-DC-137 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2137" />
-      <windows:state state_ref="oval:org.adhardening:ste:2137" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2138" version="1" comment="Placeholder check for REQ-DC-138 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2138" />
-      <windows:state state_ref="oval:org.adhardening:ste:2138" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2139" version="1" comment="Placeholder check for REQ-DC-139 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2139" />
-      <windows:state state_ref="oval:org.adhardening:ste:2139" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2140" version="1" comment="Placeholder check for REQ-DC-140 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2140" />
-      <windows:state state_ref="oval:org.adhardening:ste:2140" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2141" version="1" comment="Placeholder check for REQ-DC-141 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2141" />
-      <windows:state state_ref="oval:org.adhardening:ste:2141" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2142" version="1" comment="Placeholder check for REQ-DC-142 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2142" />
-      <windows:state state_ref="oval:org.adhardening:ste:2142" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2143" version="1" comment="Placeholder check for REQ-DC-143 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2143" />
-      <windows:state state_ref="oval:org.adhardening:ste:2143" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2144" version="1" comment="Placeholder check for REQ-DC-144 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2144" />
-      <windows:state state_ref="oval:org.adhardening:ste:2144" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2145" version="1" comment="Placeholder check for REQ-DC-145 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2145" />
-      <windows:state state_ref="oval:org.adhardening:ste:2145" />
-    </windows:registry_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:2137920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2137920" />
+      <windows:state state_ref="oval:org.adhardening:ste:2137920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:2138920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2138920" />
+      <windows:state state_ref="oval:org.adhardening:ste:2138920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:2139920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2139920" />
+      <windows:state state_ref="oval:org.adhardening:ste:2139920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:2140920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2140920" />
+      <windows:state state_ref="oval:org.adhardening:ste:2140920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:2141920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2141920" />
+      <windows:state state_ref="oval:org.adhardening:ste:2141920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:2142920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2142920" />
+      <windows:state state_ref="oval:org.adhardening:ste:2142920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:2143920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2143920" />
+      <windows:state state_ref="oval:org.adhardening:ste:2143920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:2144920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2144920" />
+      <windows:state state_ref="oval:org.adhardening:ste:2144920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:2145920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2145920" />
+      <windows:state state_ref="oval:org.adhardening:ste:2145920" />
+    </windows:auditeventpolicysubcategories_test>
     <windows:registry_test id="oval:org.adhardening:tst:8001001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001001" />
       <windows:state state_ref="oval:org.adhardening:ste:8001001" />
@@ -12229,38 +12229,38 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:8141002" />
       <windows:state state_ref="oval:org.adhardening:ste:8141002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8142" version="1" comment="Placeholder check for REQ-END-142 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8142" />
-      <windows:state state_ref="oval:org.adhardening:ste:8142" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8143" version="1" comment="Placeholder check for REQ-END-143 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8143" />
-      <windows:state state_ref="oval:org.adhardening:ste:8143" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8144" version="1" comment="Placeholder check for REQ-END-144 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8144" />
-      <windows:state state_ref="oval:org.adhardening:ste:8144" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8146" version="1" comment="Placeholder check for REQ-END-146 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8146" />
-      <windows:state state_ref="oval:org.adhardening:ste:8146" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8147" version="1" comment="Placeholder check for REQ-END-147 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8147" />
-      <windows:state state_ref="oval:org.adhardening:ste:8147" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8148" version="1" comment="Placeholder check for REQ-END-148 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8148" />
-      <windows:state state_ref="oval:org.adhardening:ste:8148" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8149" version="1" comment="Placeholder check for REQ-END-149 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8149" />
-      <windows:state state_ref="oval:org.adhardening:ste:8149" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8150" version="1" comment="Placeholder check for REQ-END-150 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8150" />
-      <windows:state state_ref="oval:org.adhardening:ste:8150" />
-    </windows:registry_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:8142920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8142920" />
+      <windows:state state_ref="oval:org.adhardening:ste:8142920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:8143920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8143920" />
+      <windows:state state_ref="oval:org.adhardening:ste:8143920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:8144920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8144920" />
+      <windows:state state_ref="oval:org.adhardening:ste:8144920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:8146920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8146920" />
+      <windows:state state_ref="oval:org.adhardening:ste:8146920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:8147920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8147920" />
+      <windows:state state_ref="oval:org.adhardening:ste:8147920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:8148920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8148920" />
+      <windows:state state_ref="oval:org.adhardening:ste:8148920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:8149920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8149920" />
+      <windows:state state_ref="oval:org.adhardening:ste:8149920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:8150920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8150920" />
+      <windows:state state_ref="oval:org.adhardening:ste:8150920" />
+    </windows:auditeventpolicysubcategories_test>
     <windows:registry_test id="oval:org.adhardening:tst:8151001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8151001" />
       <windows:state state_ref="oval:org.adhardening:ste:8151001" />
@@ -14008,38 +14008,38 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:7130002" />
       <windows:state state_ref="oval:org.adhardening:ste:7130002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7131" version="1" comment="Placeholder check for REQ-PAW-131 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7131" />
-      <windows:state state_ref="oval:org.adhardening:ste:7131" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7132" version="1" comment="Placeholder check for REQ-PAW-132 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7132" />
-      <windows:state state_ref="oval:org.adhardening:ste:7132" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7133" version="1" comment="Placeholder check for REQ-PAW-133 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7133" />
-      <windows:state state_ref="oval:org.adhardening:ste:7133" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7135" version="1" comment="Placeholder check for REQ-PAW-135 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7135" />
-      <windows:state state_ref="oval:org.adhardening:ste:7135" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7136" version="1" comment="Placeholder check for REQ-PAW-136 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7136" />
-      <windows:state state_ref="oval:org.adhardening:ste:7136" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7137" version="1" comment="Placeholder check for REQ-PAW-137 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7137" />
-      <windows:state state_ref="oval:org.adhardening:ste:7137" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7138" version="1" comment="Placeholder check for REQ-PAW-138 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7138" />
-      <windows:state state_ref="oval:org.adhardening:ste:7138" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7139" version="1" comment="Placeholder check for REQ-PAW-139 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7139" />
-      <windows:state state_ref="oval:org.adhardening:ste:7139" />
-    </windows:registry_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:7131920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7131920" />
+      <windows:state state_ref="oval:org.adhardening:ste:7131920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:7132920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7132920" />
+      <windows:state state_ref="oval:org.adhardening:ste:7132920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:7133920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7133920" />
+      <windows:state state_ref="oval:org.adhardening:ste:7133920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:7135920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7135920" />
+      <windows:state state_ref="oval:org.adhardening:ste:7135920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:7136920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7136920" />
+      <windows:state state_ref="oval:org.adhardening:ste:7136920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:7137920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7137920" />
+      <windows:state state_ref="oval:org.adhardening:ste:7137920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:7138920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7138920" />
+      <windows:state state_ref="oval:org.adhardening:ste:7138920" />
+    </windows:auditeventpolicysubcategories_test>
+    <windows:auditeventpolicysubcategories_test id="oval:org.adhardening:tst:7139920" version="1" comment="Check Advanced Audit Policy configurations" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7139920" />
+      <windows:state state_ref="oval:org.adhardening:ste:7139920" />
+    </windows:auditeventpolicysubcategories_test>
     <windows:registry_test id="oval:org.adhardening:tst:7140001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7140001" />
       <windows:state state_ref="oval:org.adhardening:ste:7140001" />
@@ -15470,60 +15470,15 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\ LogLevel</windows:key>
       <windows:name>LogLevel</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2137" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2138" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2139" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2140" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2141" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2142" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2143" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2144" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2145" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:2137920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:2138920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:2139920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:2140920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:2141920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:2142920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:2143920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:2144920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:2145920" version="1" />
     <windows:registry_object id="oval:org.adhardening:obj:8001001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -17758,54 +17713,14 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\ LogLevel</windows:key>
       <windows:name>LogLevel</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8142" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8143" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8144" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8146" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8147" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8148" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8149" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8150" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:8142920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:8143920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:8144920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:8146920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:8147920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:8148920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:8149920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:8150920" version="1" />
     <windows:registry_object id="oval:org.adhardening:obj:8151001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -20333,54 +20248,14 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\ LogLevel</windows:key>
       <windows:name>LogLevel</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7131" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7132" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7133" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7135" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7136" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7137" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7138" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7139" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
-    </windows:registry_object>
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:7131920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:7132920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:7133920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:7135920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:7136920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:7137920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:7138920" version="1" />
+    <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:7139920" version="1" />
     <windows:registry_object id="oval:org.adhardening:obj:7140001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -21404,42 +21279,58 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2137" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2138" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2139" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2140" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2141" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2142" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2143" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2144" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2145" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2137920" version="1">
+      <windows:kerberos_authentication_service>AUDIT_SUCCESS_FAILURE</windows:kerberos_authentication_service>
+      <windows:kerberos_service_ticket_operations>AUDIT_SUCCESS_FAILURE</windows:kerberos_service_ticket_operations>
+      <windows:credential_validation>AUDIT_SUCCESS_FAILURE</windows:credential_validation>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2138920" version="1">
+      <windows:user_account_management>AUDIT_SUCCESS_FAILURE</windows:user_account_management>
+      <windows:security_group_management>AUDIT_SUCCESS_FAILURE</windows:security_group_management>
+      <windows:application_group_management>AUDIT_SUCCESS_FAILURE</windows:application_group_management>
+      <windows:computer_account_management>AUDIT_SUCCESS_FAILURE</windows:computer_account_management>
+      <windows:distribution_group_management>AUDIT_SUCCESS</windows:distribution_group_management>
+      <windows:other_account_management_events>AUDIT_SUCCESS_FAILURE</windows:other_account_management_events>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2139920" version="1">
+      <windows:process_creation>AUDIT_SUCCESS_FAILURE</windows:process_creation>
+      <windows:dpapi_activity>AUDIT_SUCCESS_FAILURE</windows:dpapi_activity>
+      <windows:pnp_activity>AUDIT_SUCCESS</windows:pnp_activity>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2140920" version="1">
+      <windows:directory_service_changes>AUDIT_SUCCESS_FAILURE</windows:directory_service_changes>
+      <windows:directory_service_access>AUDIT_SUCCESS_FAILURE</windows:directory_service_access>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2141920" version="1">
+      <windows:logon>AUDIT_SUCCESS_FAILURE</windows:logon>
+      <windows:logoff>AUDIT_SUCCESS</windows:logoff>
+      <windows:special_logon>AUDIT_SUCCESS_FAILURE</windows:special_logon>
+      <windows:account_lockout>AUDIT_SUCCESS_FAILURE</windows:account_lockout>
+      <windows:other_logon_logoff_events>AUDIT_SUCCESS_FAILURE</windows:other_logon_logoff_events>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2142920" version="1">
+      <windows:handle_manipulation>AUDIT_SUCCESS_FAILURE</windows:handle_manipulation>
+      <windows:registry>AUDIT_SUCCESS_FAILURE</windows:registry>
+      <windows:file_share>AUDIT_SUCCESS_FAILURE</windows:file_share>
+      <windows:detailed_file_share>AUDIT_FAILURE</windows:detailed_file_share>
+      <windows:other_object_access_events>AUDIT_SUCCESS_FAILURE</windows:other_object_access_events>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2143920" version="1">
+      <windows:audit_policy_change>AUDIT_SUCCESS_FAILURE</windows:audit_policy_change>
+      <windows:authentication_policy_change>AUDIT_SUCCESS</windows:authentication_policy_change>
+      <windows:authorization_policy_change>AUDIT_SUCCESS</windows:authorization_policy_change>
+      <windows:other_policy_change_events>AUDIT_FAILURE</windows:other_policy_change_events>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2144920" version="1">
+      <windows:sensitive_privilege_use>AUDIT_SUCCESS_FAILURE</windows:sensitive_privilege_use>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2145920" version="1">
+      <windows:ipsec_driver>AUDIT_SUCCESS_FAILURE</windows:ipsec_driver>
+      <windows:other_system_events>AUDIT_SUCCESS_FAILURE</windows:other_system_events>
+      <windows:security_state_change>AUDIT_SUCCESS_FAILURE</windows:security_state_change>
+      <windows:security_system_extension>AUDIT_SUCCESS_FAILURE</windows:security_system_extension>
+      <windows:system_integrity>AUDIT_SUCCESS_FAILURE</windows:system_integrity>
+    </windows:auditeventpolicysubcategories_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -22934,38 +22825,47 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8142" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8143" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8144" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8146" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8147" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8148" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8149" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8150" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8142920" version="1">
+      <windows:credential_validation>AUDIT_SUCCESS_FAILURE</windows:credential_validation>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8143920" version="1">
+      <windows:user_account_management>AUDIT_SUCCESS_FAILURE</windows:user_account_management>
+      <windows:security_group_management>AUDIT_SUCCESS_FAILURE</windows:security_group_management>
+      <windows:other_account_management_events>AUDIT_SUCCESS_FAILURE</windows:other_account_management_events>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8144920" version="1">
+      <windows:process_creation>AUDIT_SUCCESS_FAILURE</windows:process_creation>
+      <windows:dpapi_activity>AUDIT_SUCCESS_FAILURE</windows:dpapi_activity>
+      <windows:pnp_activity>AUDIT_SUCCESS</windows:pnp_activity>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8146920" version="1">
+      <windows:logon>AUDIT_SUCCESS_FAILURE</windows:logon>
+      <windows:logoff>AUDIT_SUCCESS</windows:logoff>
+      <windows:special_logon>AUDIT_SUCCESS_FAILURE</windows:special_logon>
+      <windows:account_lockout>AUDIT_SUCCESS_FAILURE</windows:account_lockout>
+      <windows:other_logon_logoff_events>AUDIT_SUCCESS_FAILURE</windows:other_logon_logoff_events>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8147920" version="1">
+      <windows:registry>AUDIT_FAILURE</windows:registry>
+      <windows:file_share>AUDIT_FAILURE</windows:file_share>
+      <windows:detailed_file_share>AUDIT_FAILURE</windows:detailed_file_share>
+      <windows:handle_manipulation>AUDIT_FAILURE</windows:handle_manipulation>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8148920" version="1">
+      <windows:audit_policy_change>AUDIT_SUCCESS_FAILURE</windows:audit_policy_change>
+      <windows:authentication_policy_change>AUDIT_SUCCESS</windows:authentication_policy_change>
+      <windows:authorization_policy_change>AUDIT_SUCCESS</windows:authorization_policy_change>
+      <windows:other_policy_change_events>AUDIT_FAILURE</windows:other_policy_change_events>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8149920" version="1">
+      <windows:sensitive_privilege_use>AUDIT_SUCCESS_FAILURE</windows:sensitive_privilege_use>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8150920" version="1">
+      <windows:other_system_events>AUDIT_SUCCESS_FAILURE</windows:other_system_events>
+      <windows:security_state_change>AUDIT_SUCCESS_FAILURE</windows:security_state_change>
+      <windows:security_system_extension>AUDIT_SUCCESS_FAILURE</windows:security_system_extension>
+      <windows:system_integrity>AUDIT_SUCCESS_FAILURE</windows:system_integrity>
+    </windows:auditeventpolicysubcategories_state>
     <windows:registry_state id="oval:org.adhardening:ste:8151001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
@@ -24676,38 +24576,50 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7131" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7132" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7133" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7135" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7136" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7137" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7138" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7139" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
-    </windows:registry_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7131920" version="1">
+      <windows:credential_validation>AUDIT_SUCCESS_FAILURE</windows:credential_validation>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7132920" version="1">
+      <windows:user_account_management>AUDIT_SUCCESS_FAILURE</windows:user_account_management>
+      <windows:security_group_management>AUDIT_SUCCESS_FAILURE</windows:security_group_management>
+      <windows:computer_account_management>AUDIT_SUCCESS_FAILURE</windows:computer_account_management>
+      <windows:other_account_management_events>AUDIT_SUCCESS_FAILURE</windows:other_account_management_events>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7133920" version="1">
+      <windows:process_creation>AUDIT_SUCCESS_FAILURE</windows:process_creation>
+      <windows:dpapi_activity>AUDIT_SUCCESS_FAILURE</windows:dpapi_activity>
+      <windows:pnp_activity>AUDIT_SUCCESS</windows:pnp_activity>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7135920" version="1">
+      <windows:logon>AUDIT_SUCCESS_FAILURE</windows:logon>
+      <windows:logoff>AUDIT_SUCCESS</windows:logoff>
+      <windows:special_logon>AUDIT_SUCCESS_FAILURE</windows:special_logon>
+      <windows:account_lockout>AUDIT_SUCCESS_FAILURE</windows:account_lockout>
+      <windows:other_logon_logoff_events>AUDIT_SUCCESS_FAILURE</windows:other_logon_logoff_events>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7136920" version="1">
+      <windows:handle_manipulation>AUDIT_SUCCESS_FAILURE</windows:handle_manipulation>
+      <windows:registry>AUDIT_SUCCESS_FAILURE</windows:registry>
+      <windows:file_share>AUDIT_SUCCESS_FAILURE</windows:file_share>
+      <windows:detailed_file_share>AUDIT_FAILURE</windows:detailed_file_share>
+      <windows:other_object_access_events>AUDIT_SUCCESS_FAILURE</windows:other_object_access_events>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7137920" version="1">
+      <windows:audit_policy_change>AUDIT_SUCCESS_FAILURE</windows:audit_policy_change>
+      <windows:authentication_policy_change>AUDIT_SUCCESS</windows:authentication_policy_change>
+      <windows:authorization_policy_change>AUDIT_SUCCESS</windows:authorization_policy_change>
+      <windows:other_policy_change_events>AUDIT_FAILURE</windows:other_policy_change_events>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7138920" version="1">
+      <windows:sensitive_privilege_use>AUDIT_SUCCESS_FAILURE</windows:sensitive_privilege_use>
+    </windows:auditeventpolicysubcategories_state>
+    <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7139920" version="1">
+      <windows:ipsec_driver>AUDIT_SUCCESS_FAILURE</windows:ipsec_driver>
+      <windows:other_system_events>AUDIT_SUCCESS_FAILURE</windows:other_system_events>
+      <windows:security_state_change>AUDIT_SUCCESS_FAILURE</windows:security_state_change>
+      <windows:security_system_extension>AUDIT_SUCCESS_FAILURE</windows:security_system_extension>
+      <windows:system_integrity>AUDIT_SUCCESS_FAILURE</windows:system_integrity>
+    </windows:auditeventpolicysubcategories_state>
     <windows:registry_state id="oval:org.adhardening:ste:7140001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>

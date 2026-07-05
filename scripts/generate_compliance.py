@@ -688,6 +688,29 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                                 'subcat': elem_name,
                                 'setting': setting_val
                             })
+                            
+                    # Advanced Audit Policies subcategory list format (e.g., Subcategory: `Registry` -> `Failure`)
+                    subcat_match = re.search(r'Subcategory:\s*`?([^`\->]+?)`?\s*->\s*`?([^`\r\n\.]+?)`?\.?$', line_strip, re.IGNORECASE)
+                    if subcat_match:
+                        subcat_name = subcat_match.group(1).strip()
+                        setting_text = subcat_match.group(2).strip()
+                        
+                        setting_val = "AUDIT_NONE"
+                        if "Success and Failure" in setting_text or ("Success" in setting_text and "Failure" in setting_text):
+                            setting_val = "AUDIT_SUCCESS_FAILURE"
+                        elif "Success" in setting_text:
+                            setting_val = "AUDIT_SUCCESS"
+                        elif "Failure" in setting_text:
+                            setting_val = "AUDIT_FAILURE"
+                            
+                        key = f"audit {subcat_name.lower().replace('_', ' ').strip()}"
+                        elem_name = subcat_mapping.get(key)
+                        if elem_name:
+                            if not any(ap['subcat'] == elem_name for ap in audit_policy):
+                                audit_policy.append({
+                                    'subcat': elem_name,
+                                    'setting': setting_val
+                                })
                                     
                 # Inject user rights for Restrict Tier Logons requirement
                 if 'implement-administrative-tiering-model.md' in rel_path.lower():
