@@ -963,12 +963,12 @@ def generate_xccdf(requirements, output_path, repo_root):
         g_title = ET.SubElement(group_el, x_tag('title'))
         g_title.text = mod_name
         
-        for req in reqs:
+        def render_rule(parent, req):
             severity = req['priority'].lower()
             if severity not in ['high', 'medium', 'low']:
                 severity = 'medium'
                 
-            rule_el = ET.SubElement(group_el, x_tag('Rule'), {
+            rule_el = ET.SubElement(parent, x_tag('Rule'), {
                 'id': f'xccdf_org.adhardening.benchmarks_rule_{req["id"]}',
                 'severity': severity,
                 'weight': '10.0',
@@ -1034,6 +1034,59 @@ def generate_xccdf(requirements, output_path, repo_root):
                         'href': 'ad-hardening-oval.xml',
                         'name': f"oval:org.adhardening:def:{req['numeric_id']}"
                     })
+
+        # Categorize requirements
+        subcategories = {
+            'Attack Surface Reduction (ASR) Rules': [],
+            'Defender Antivirus': [],
+            'User Rights Assignments': [],
+            'User Profile Restrictions': [],
+            'Services Hardening': [],
+            'Advanced Security Audit Policies': [],
+            'Flat': []
+        }
+        
+        for req in reqs:
+            filepath = req['markdown_file'].lower()
+            if '/defender/asr/' in filepath:
+                subcategories['Attack Surface Reduction (ASR) Rules'].append(req)
+            elif '/defender/' in filepath:
+                subcategories['Defender Antivirus'].append(req)
+            elif '/user-rights/' in filepath:
+                subcategories['User Rights Assignments'].append(req)
+            elif '/user-profile/' in filepath:
+                subcategories['User Profile Restrictions'].append(req)
+            elif '/services/' in filepath:
+                subcategories['Services Hardening'].append(req)
+            elif '/audit-policy/' in filepath:
+                subcategories['Advanced Security Audit Policies'].append(req)
+            else:
+                subcategories['Flat'].append(req)
+
+        # 1. Render flat requirements directly under group_el
+        for req in subcategories['Flat']:
+            render_rule(group_el, req)
+            
+        # 2. Render subcategory Groups under group_el
+        for sub_title in [
+            'Defender Antivirus',
+            'Attack Surface Reduction (ASR) Rules',
+            'User Rights Assignments',
+            'User Profile Restrictions',
+            'Services Hardening',
+            'Advanced Security Audit Policies'
+        ]:
+            sub_reqs = subcategories[sub_title]
+            if not sub_reqs:
+                continue
+                
+            sub_group_id = f"{group_id}_" + re.sub(r'[^a-zA-Z0-9]', '_', sub_title)
+            sub_group_el = ET.SubElement(group_el, x_tag('Group'), {'id': sub_group_id})
+            sg_title = ET.SubElement(sub_group_el, x_tag('title'))
+            sg_title.text = sub_title
+            
+            for req in sub_reqs:
+                render_rule(sub_group_el, req)
                 
     ET.indent(root, space="  ")
     tree = ET.ElementTree(root)
