@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 3c3b68f | Generated: July 05, 2026</span>
+      <span>Commit: 557ef55 | Generated: July 05, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -37611,6 +37611,8 @@ This phase establishes the physical boundaries, hardware-based trust mechanisms,
 * **[REQ-DC-017 - Harden Microsoft DNS AD Container Permissions](#02-domain-controllers-harden-dns-container-permissions-md)**: Prevents server-level DNS hijack DLLs.
 * **[REQ-DC-018 - Harden Virtualization Hosts for Domain Controllers](#02-domain-controllers-harden-dc-virtualization-hosts-md)**: Places virtualized domain controllers inside a secure Tier 0 host boundary.
 * **[REQ-DC-023 - Configure User Rights Assignments for Domain Controllers](#02-domain-controllers-configure-user-rights-assignments-md)**: Limits operator rights on DCs.
+* **[REQ-DC-032 - Enable UEFI Secure Boot](#02-domain-controllers-enable-secure-boot-md)**: Requirement to enforce hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on Domain Controllers.
+* **[REQ-DC-033 - Configure Secure Boot Revocations and Bootloader Updates](#02-domain-controllers-configure-secure-boot-revocations-md)**: Requirement to configure and enforce BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.
 
 <div id="roadmap-implementation-plan-md-identities-services-requirements"></div>
 ### Identities & Services Requirements
@@ -37633,17 +37635,19 @@ This phase establishes the physical boundaries, hardware-based trust mechanisms,
 * **[REQ-PAW-009 - Configure User Rights Assignments for PAWs](#07-paws-configure-user-rights-assignments-md)**: Restricts debugging, impersonation, and interactive logins on PAWs.
 * **[REQ-PAW-011 - Harden DMA and Physical Security for PAWs](#07-paws-harden-dma-and-physical-security-md)**: Blocks sleep states and limits external bus operations.
 * **[REQ-PAW-022 - Disable Incoming Remote Desktop Access for PAWs](#07-paws-restrict-rdp-access-md)**: Blocks remote lateral logins to administrative devices.
-* **[REQ-PAW-030 - Enable Secure Boot](#07-paws-enable-secure-boot-md)**: Locks the bootloader signatures.
+* **[REQ-PAW-030 - Enable UEFI Secure Boot for PAWs](#07-paws-enable-secure-boot-md)**: Mandates hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on the operating system for PAWs.
+* **[REQ-PAW-035 - Configure Secure Boot Revocations and Bootloader Updates for PAWs](#07-paws-configure-secure-boot-revocations-md)**: Configures and enforces BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware for PAWs.
 
 <div id="roadmap-implementation-plan-md-endpoint-requirements"></div>
 ### Endpoint Requirements
 * **[REQ-END-005 - Restrict Remote Desktop Access](#08-endpoints-restrict-rdp-access-md)**: Prevents incoming RDP connections.
-* **[REQ-END-009 - Enable Secure Boot](#08-endpoints-enable-secure-boot-md)**: Enforces boot-path signature checks.
+* **[REQ-END-009 - Enable UEFI Secure Boot](#08-endpoints-enable-secure-boot-md)**: Mandates hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on the operating system.
 * **[REQ-END-012 - Enable BitLocker and Network Unlock](#08-endpoints-enable-bitlocker-md)**: Protects client data storage using BitLocker.
 * **[REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-configure-uefi-security-md)**: Secures UEFI parameters on client workstations.
 * **[REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-enable-hardware-virtualization-and-dma-protection-md)**: Enables hardware VBS requisites.
 * **[REQ-END-016 - Configure User Rights Assignments](#08-endpoints-configure-user-rights-assignments-md)**: Disables token impersonation and program debugging for standard users.
 * **[REQ-END-017 - Harden DMA and Physical Security](#08-endpoints-harden-dma-and-physical-security-md)**: Disables client standby states and limits DMA peripherals.
+* **[REQ-END-035 - Configure Secure Boot Revocations and Bootloader Updates](#08-endpoints-configure-secure-boot-revocations-md)**: Configures and enforces BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.
 
 ---
 
