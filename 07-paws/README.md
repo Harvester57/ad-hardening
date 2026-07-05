@@ -91,8 +91,8 @@ This directory contains the physical isolation policies and operating system sec
 29. **[REQ-PAW-029 - Configure System Administrative Templates for PAWs](configure-system-administrative-templates.md)**
     Enforces custom administrative template settings including SMBv1 driver blocks and event log size extensions.
 
-30. **[REQ-PAW-030 - Enable Secure Boot for PAWs](enable-secure-boot.md)**
-    Verifies Secure Boot, locks Device Guard VBS levels, and triggers OS-level BlackLotus DBX/SVN revocation updates.
+30. **[REQ-PAW-030 - Enable UEFI Secure Boot for PAWs](enable-secure-boot.md)**
+    Mandates hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on the operating system for PAWs.
 
 31. **[REQ-PAW-031 - Enforce Smart Card Logon for PAWs](enforce-smartcard-logon-paws.md)**
     Enforces the 'Interactive logon: Require smart card' GPO policy locally to suppress username/password fields and force hardware-bound authentication.
@@ -105,6 +105,9 @@ This directory contains the physical isolation policies and operating system sec
 
 34. **[REQ-PAW-034 - Disable Windows Script Host and Remap Scripting Extensions](disable-windows-script-host.md)**
     Disables Windows Script Host execution globally and remaps standard scripting extensions (.vbs, .js, etc.) to open in Notepad by default to prevent execution by double-click.
+
+35. **[REQ-PAW-035 - Configure Secure Boot Revocations and Bootloader Updates for PAWs](configure-secure-boot-revocations.md)**
+    Configures and enforces BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware for PAWs.
 
 
 

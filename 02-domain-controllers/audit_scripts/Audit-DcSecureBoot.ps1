@@ -1,4 +1,4 @@
-# Audit-PawSecureBoot.ps1
+# Audit-DcSecureBoot.ps1
 # Description: Queries UEFI Secure Boot parameters and audits UEFI Secure Boot status.
 
 Write-Host "--- Auditing UEFI Secure Boot ---" -ForegroundColor Cyan

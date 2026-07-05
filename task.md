@@ -10,6 +10,19 @@
   - [x] Parse advanced audit policies defined as lists (e.g., Audit Directory Service Changes)
   - [x] Inject user rights for Restrict Tier Logons requirements
   - [x] Migrate 60 requirements and compile 2,300+ native registry tests
+- [x] Endpoint tasks
+  - [x] Refactor Module 08 (Endpoints):
+  - [x] Rename/refactor `enable-secure-boot.md` to `[REQ-END-009] Enable UEFI Secure Boot` (using `UEFISecureBootEnabled = 1`).
+  - [x] Create `configure-secure-boot-revocations.md` for `[REQ-END-035]` (using `AvailableUpdates >= 64`).
+  - [x] Update `08-endpoints/README.md`.
+- [x] Refactor Module 07 (PAWs):
+  - [x] Rename/refactor `enable-secure-boot.md` to `[REQ-PAW-030] Enable UEFI Secure Boot for PAWs` (using `UEFISecureBootEnabled = 1`).
+  - [x] Create `configure-secure-boot-revocations.md` for `[REQ-PAW-035]` (using `AvailableUpdates >= 64`).
+  - [x] Update `07-paws/README.md`.
+- [x] Implement Module 02 (Domain Controllers):
+  - [x] Create `enable-secure-boot.md` for `[REQ-DC-032] Enable UEFI Secure Boot`.
+  - [x] Create `configure-secure-boot-revocations.md` for `[REQ-DC-033] Configure Secure Boot Revocations and Bootloader Updates`.
+  - [x] Update `02-domain-controllers/README.md`.
 - [x] Compliance Audit Framework Improvements
   - [x] Update AGENTS.md rule to mandate compliance manifest rebuilding & validation
   - [x] Implement a schema-aware linter/validator for XCCDF and OVAL definitions (scripts/validate_compliance.py)

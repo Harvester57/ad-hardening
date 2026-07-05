@@ -30,8 +30,8 @@ To prevent initial access and lateral movement, the following unitary technical 
 8. **[REQ-END-008 - WSUS Client Configuration](wsus-client-config.md)**
    Enforces update client registry baselines to ensure workstations pull OS patches and security signatures exclusively from the local, offline WSUS server.
 
-9. **[REQ-END-009 - Enable Secure Boot](enable-secure-boot.md)**
-   Mandates hardware-rooted platform integrity checks, preventing bootkits, rootkits, and unauthorized bootloader modifications.
+9. **[REQ-END-009 - Enable UEFI Secure Boot](enable-secure-boot.md)**
+   Mandates hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on the operating system.
 
 10. **[REQ-END-010 - Enable VBS and Credential Guard](enable-vbs-credential-guard.md)**
     Activates Virtualization-Based Security (VBS) and Credential Guard to protect password hashes and Kerberos tickets in an isolated virtual container, mitigating LSASS dumping.
@@ -107,5 +107,8 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 34. **[REQ-END-034 - Disable Windows Script Host and Remap Scripting Extensions](disable-windows-script-host.md)**
     Disables Windows Script Host execution globally and remaps standard scripting extensions (.vbs, .js, etc.) to open in Notepad by default to prevent execution by double-click.
+
+35. **[REQ-END-035 - Configure Secure Boot Revocations and Bootloader Updates](configure-secure-boot-revocations.md)**
+    Configures and enforces BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.
 
 

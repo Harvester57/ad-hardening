@@ -112,6 +112,16 @@ def normalize_reg_check(key_path, name, vtype, val):
     vtype = vtype.strip().upper()
     data = val.strip()
     
+    op = 'equals'
+    if '>=' in data:
+        op = 'greater than or equal'
+    elif '<=' in data:
+        op = 'less than or equal'
+    elif '>' in data:
+        op = 'greater than'
+    elif '<' in data:
+        op = 'less than'
+        
     if 'DWORD' in vtype or vtype in ['0XFF', '1', '0', 'REG_DWORD']:
         vtype = 'REG_DWORD'
     elif 'SZ' in vtype:
@@ -120,17 +130,21 @@ def normalize_reg_check(key_path, name, vtype, val):
         vtype = 'REG_BINARY'
     else:
         # Default based on data shape
-        if data.isdigit() or data.lower().startswith('0x'):
+        if data.isdigit() or data.lower().startswith('0x') or any(o in data for o in ['>=', '<=', '>', '<']):
             vtype = 'REG_DWORD'
         else:
             vtype = 'REG_SZ'
             
     # Clean value based on type
     if vtype == 'REG_DWORD':
-        if data.lower().startswith('0x'):
-            try:
-                data = str(int(data, 16))
-            except ValueError:
+        if data.lower().startswith('0x') or ('0x' in data.lower()):
+            hex_match = re.search(r'0x[a-fA-F0-9]+', data)
+            if hex_match:
+                try:
+                    data = str(int(hex_match.group(0), 16))
+                except ValueError:
+                    data = '1'
+            else:
                 data = '1'
         else:
             data_digits = re.search(r'\d+', data)
@@ -153,7 +167,8 @@ def normalize_reg_check(key_path, name, vtype, val):
         'key': key,
         'name': name,
         'type': vtype.lower(),
-        'data': data
+        'data': data,
+        'operation': op
     }
     if is_delete:
         res['existence'] = 'none_exist'
@@ -1207,9 +1222,10 @@ def generate_oval(requirements, output_path):
                     type_el.text = chk['type']
                     
                     datatype = 'int' if chk['type'] == 'reg_dword' else 'string'
-                    val_el = ET.SubElement(state_el, w_tag('value'), {
-                        'datatype': datatype
-                    })
+                    val_attrs = {'datatype': datatype}
+                    if chk.get('operation') and chk['operation'] != 'equals':
+                        val_attrs['operation'] = chk['operation']
+                    val_el = ET.SubElement(state_el, w_tag('value'), val_attrs)
                     val_el.text = chk['data']
                 
         # Native Service Checks

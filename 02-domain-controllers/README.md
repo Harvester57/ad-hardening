@@ -66,8 +66,7 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to secure DSRM restore mode logon behavior and recovery credentials parameters.
 * **[REQ-DC-031 - Configure NTP Time Synchronization on the PDC Emulator](configure-pdc-time-sync.md)**
   Requirement to configure NTP time synchronization on the PDC Emulator to serve as a reliable time source and secure Kerberos exchanges.
-
-
-
-
-
+* **[REQ-DC-032 - Enable UEFI Secure Boot](enable-secure-boot.md)**
+  Requirement to enforce hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on Domain Controllers.
+* **[REQ-DC-033 - Configure Secure Boot Revocations and Bootloader Updates](configure-secure-boot-revocations.md)**
+  Requirement to configure and enforce BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.

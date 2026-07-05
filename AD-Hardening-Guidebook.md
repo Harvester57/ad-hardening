@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 9392af9 | Generated: July 05, 2026</span>
+      <span>Commit: dcfafc7 | Generated: July 05, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1633,11 +1633,10 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to secure DSRM restore mode logon behavior and recovery credentials parameters.
 * **[REQ-DC-031 - Configure NTP Time Synchronization on the PDC Emulator](#02-domain-controllers-configure-pdc-time-sync-md)**
   Requirement to configure NTP time synchronization on the PDC Emulator to serve as a reliable time source and secure Kerberos exchanges.
-
-
-
-
-
+* **[REQ-DC-032 - Enable UEFI Secure Boot](#02-domain-controllers-enable-secure-boot-md)**
+  Requirement to enforce hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on Domain Controllers.
+* **[REQ-DC-033 - Configure Secure Boot Revocations and Bootloader Updates](#02-domain-controllers-configure-secure-boot-revocations-md)**
+  Requirement to configure and enforce BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.
 
 
 <div style="page-break-before: always;"></div>
@@ -8247,6 +8246,251 @@ if ($IsPdc) {
 * **ANSSI AD Hardening Guide**: Section 2.1 (Domain Controller requirements)
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.9.51.1 (Ensure 'Configure Windows NTP Client' is set to 'Enabled')
 * **Microsoft Security Guidance**: Windows Time Service Technical Reference
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-enable-secure-boot-md"></div>
+
+<div id="02-domain-controllers-enable-secure-boot-md-req-dc-032-enable-uefi-secure-boot"></div>
+# [REQ-DC-032] Enable UEFI Secure Boot
+
+<div id="02-domain-controllers-enable-secure-boot-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-enable-secure-boot-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * UEFI Firmware configuration (Hardware/BIOS level or Hypervisor/VM level)
+  * HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State
+    * `UEFISecureBootEnabled` = `1` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-enable-secure-boot-md-rationale"></div>
+## Rationale
+Secure Boot is a security standard developed by members of the PC industry to help ensure that a device boots using only software that is trusted by the Original Equipment Manufacturer (OEM).
+
+When the PC starts, the firmware checks the signature of each piece of boot software, including UEFI firmware drivers (also known as Option ROMs), EFI applications, and the operating system. If the signatures are valid, the PC boots, and the firmware gives control to the operating system.
+
+For Tier 0 assets like Domain Controllers, firmware integrity is critical. If Secure Boot is disabled:
+1. **Bootkits & Rootkits**: Attackers with physical access or hosting infrastructure control (in virtual environments) can replace the boot manager with a malicious bootloader (bootkit) to bypass LSASS protections and all OS security controls before the Windows kernel loads.
+2. **Virtualization-Based Security**: Advanced security boundaries (like LSA Protection and Device Guard) depend on hardware-rooted trust. Without UEFI Secure Boot active, virtualization-based security capabilities cannot execute with proper system measurements.
+
+---
+
+<div id="02-domain-controllers-enable-secure-boot-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Virtual Domain Controllers**: When running Domain Controllers as virtual machines, UEFI and Secure Boot must be enabled in the hypervisor settings (e.g., Gen 2 VMs in Hyper-V with Secure Boot enabled, or EFI boot with Secure Boot enabled in VMware vSphere).
+* **BIOS Mode Conversion**: Physical Domain Controllers running in legacy BIOS mode (CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires partition style migration (MBR to GPT) and BIOS changes; refer to [REQ-DC-018 - Harden Virtualization Hosts for Domain Controllers](#02-domain-controllers-harden-dc-virtualization-hosts-md) for virtualization host hardening requirements.
+
+---
+
+<div id="02-domain-controllers-enable-secure-boot-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-enable-secure-boot-md-option-a-firmware-hypervisor-configuration-preferred"></div>
+### Option A: Firmware / Hypervisor Configuration (Preferred)
+
+UEFI Secure Boot must be configured at the hardware or hypervisor layer:
+
+* **Physical Servers**: Access the UEFI firmware configuration utility during POST (Delete, F2, F10, or F12) and enable **Secure Boot** in the Security settings.
+* **Hyper-V Gen 2 Virtual Machines**:
+  1. Open **Hyper-V Manager**.
+  2. Select the Domain Controller VM and open its **Settings**.
+  3. Navigate to **Security** -> check **Enable Secure Boot** -> select **Microsoft Windows** template.
+* **VMware vSphere Virtual Machines**:
+  1. Open the **vSphere Client**.
+  2. Edit settings of the Domain Controller VM -> go to **VM Options** -> **Boot Options**.
+  3. Set Firmware to **EFI** and check **Enable UEFI Secure Boot**.
+
+---
+
+<div id="02-domain-controllers-enable-secure-boot-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Secure Boot cannot be configured from within the OS using registry settings. However, you must programmatically audit the state of Secure Boot to flag non-compliant hardware.
+
+Run the following script to check the status of Secure Boot on the Domain Controller:
+
+[Download Script: Audit-DcSecureBoot.ps1](audit_scripts/Audit-DcSecureBoot.ps1)
+
+```powershell
+# Audit-DcSecureBoot.ps1
+# Description: Queries UEFI Secure Boot parameters and audits UEFI Secure Boot status.
+
+Write-Host "--- Auditing UEFI Secure Boot ---" -ForegroundColor Cyan
+
+$script:NonCompliant = $false
+
+# 1. Verify boot environment type
+if ($env:firmware_type -eq "UEFI") {
+    Write-Host "    - Boot Environment Type: UEFI" -ForegroundColor Green
+} else {
+    Write-Host "    - VULNERABLE: System booted in Legacy BIOS mode (CSM enabled) or firmware type is unrecognized." -ForegroundColor Red
+    $script:NonCompliant = $true
+}
+
+# 2. Verify Secure Boot status
+try {
+    # Confirm-SecureBootUEFI returns $true if Secure Boot is active, $false if disabled,
+    # and throws an exception if the platform does not support UEFI or Secure Boot.
+    $SecureBootState = Confirm-SecureBootUEFI -ErrorAction Stop
+    
+    $Color = if ($SecureBootState -eq $true) { "Green" } else { "Red" }
+    Write-Host "    - Secure Boot Active: $SecureBootState" -ForegroundColor $Color
+    if ($SecureBootState -eq $false) { $script:NonCompliant = $true }
+} catch [System.PlatformNotSupportedException] {
+    Write-Host "    - VULNERABLE: UEFI Secure Boot is not supported on this platform (Legacy BIOS mode)." -ForegroundColor Red
+    $script:NonCompliant = $true
+} catch {
+    # If cmdlet throws unauthorized access or not enabled error
+    Write-Host "    - VULNERABLE: Secure Boot is disabled in firmware or cannot be verified. Error: $($_.Exception.Message)" -ForegroundColor Red
+    $script:NonCompliant = $true
+}
+
+if ($script:NonCompliant) {
+    exit 1
+}
+```
+
+---
+
+<div id="02-domain-controllers-enable-secure-boot-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **CIS Microsoft Windows Server Benchmark**: Section 18.8 (Virtualization Based Security Prerequisites)
+* **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-configure-secure-boot-revocations-md"></div>
+
+<div id="02-domain-controllers-configure-secure-boot-revocations-md-req-dc-033-configure-secure-boot-revocations-and-bootloader-updates"></div>
+# [REQ-DC-033] Configure Secure Boot Revocations and Bootloader Updates
+
+<div id="02-domain-controllers-configure-secure-boot-revocations-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-configure-secure-boot-revocations-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **BlackLotus Revocation Updates (CVE-2023-24932)**: `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`
+    * `AvailableUpdates` = `>= 64` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-configure-secure-boot-revocations-md-rationale"></div>
+## Rationale
+A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit).
+
+To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.
+
+---
+
+<div id="02-domain-controllers-configure-secure-boot-revocations-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **BlackLotus Mitigation Risks**: Enforcing the BlackLotus DBX and SVN updates is a permanent, non-reversible action once written to the device firmware. If an administrator attempts to boot the machine using older, unpatched Windows installation media or recovery disks, the system will reject the boot manager and fail to boot. All recovery and deployment media must be updated with current security patches before applying these mitigations.
+
+---
+
+<div id="02-domain-controllers-configure-secure-boot-revocations-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-configure-secure-boot-revocations-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+To configure the update triggers for the DBX and Code Integrity boot manager revocations, define Registry GPO Preferences inside the Domain Controllers GPO:
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Create or edit a GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Create registry items to deploy the `AvailableUpdates` DWORD under `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`.
+   * *Phase 1 (Apply DBX Update)*: Set `AvailableUpdates` = `64` (REG_DWORD)
+   * *Phase 2 (Apply SVN and DB Updates)*: Set `AvailableUpdates` = `384` (REG_DWORD, sum of 256 and 128)
+   * *Phase 3 (Enforce Code Integrity Boot Policy)*: Set `AvailableUpdates` = `512` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-configure-secure-boot-revocations-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the BlackLotus mitigation update trigger:
+
+[Download Script: Set-DcSecureBootRevocations.ps1](implementation_scripts/Set-DcSecureBootRevocations.ps1)
+
+```powershell
+# Set-DcSecureBootRevocations.ps1
+# Description: Triggers Secure Boot DBX and Code Integrity revocation updates for BlackLotus mitigation.
+
+Write-Host "--- Configuring BlackLotus Secure Boot Mitigations ---" -ForegroundColor Cyan
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
+if (-not (Test-Path $Path)) {
+    New-Item -Path $Path -Force | Out-Null
+}
+
+# Trigger DBX Update (Phase 1 DBX Update = 64)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green
+```
+
+---
+
+<div id="02-domain-controllers-configure-secure-boot-revocations-md-audit-script"></div>
+### Audit Script
+
+Run the following script to check the status of Secure Boot revocations on the local machine:
+
+[Download Script: Audit-DcSecureBootRevocations.ps1](audit_scripts/Audit-DcSecureBootRevocations.ps1)
+
+```powershell
+# Audit-DcSecureBootRevocations.ps1
+# Description: Queries UEFI Secure Boot parameters and audits BlackLotus mitigation registry settings.
+
+Write-Host "--- Auditing BlackLotus Mitigations ---" -ForegroundColor Cyan
+
+$script:NonCompliant = $false
+
+# Audit AvailableUpdates registry key
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
+if (Test-Path $Path) {
+    $Val = Get-ItemProperty -Path $Path -Name "AvailableUpdates" -ErrorAction SilentlyContinue
+    $UpdateVal = if ($Val) { $Val.AvailableUpdates } else { 0 }
+    
+    # Check if at least DBX update (64) is enabled
+    if ($UpdateVal -ge 64) {
+        Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Compliant)" -ForegroundColor Green
+    } else {
+        Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
+        $script:NonCompliant = $true
+    }
+} else {
+    Write-Host "    - BlackLotus Revocation Updates: Registry path not found (Non-Compliant)" -ForegroundColor Red
+    $script:NonCompliant = $true
+}
+
+if ($script:NonCompliant) {
+    exit 1
+}
+```
+
+---
+
+<div id="02-domain-controllers-configure-secure-boot-revocations-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Security Baseline Focus**: Windows Administrative Templates (Secure Boot Revocation Updates)
+* **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
 
 
 <div style="page-break-before: always;"></div>
@@ -19330,8 +19574,8 @@ This directory contains the physical isolation policies and operating system sec
 29. **[REQ-PAW-029 - Configure System Administrative Templates for PAWs](#07-paws-configure-system-administrative-templates-md)**
     Enforces custom administrative template settings including SMBv1 driver blocks and event log size extensions.
 
-30. **[REQ-PAW-030 - Enable Secure Boot for PAWs](#07-paws-enable-secure-boot-md)**
-    Verifies Secure Boot, locks Device Guard VBS levels, and triggers OS-level BlackLotus DBX/SVN revocation updates.
+30. **[REQ-PAW-030 - Enable UEFI Secure Boot for PAWs](#07-paws-enable-secure-boot-md)**
+    Mandates hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on the operating system for PAWs.
 
 31. **[REQ-PAW-031 - Enforce Smart Card Logon for PAWs](#07-paws-enforce-smartcard-logon-paws-md)**
     Enforces the 'Interactive logon: Require smart card' GPO policy locally to suppress username/password fields and force hardware-bound authentication.
@@ -19344,6 +19588,9 @@ This directory contains the physical isolation policies and operating system sec
 
 34. **[REQ-PAW-034 - Disable Windows Script Host and Remap Scripting Extensions](#07-paws-disable-windows-script-host-md)**
     Disables Windows Script Host execution globally and remaps standard scripting extensions (.vbs, .js, etc.) to open in Notepad by default to prevent execution by double-click.
+
+35. **[REQ-PAW-035 - Configure Secure Boot Revocations and Bootloader Updates for PAWs](#07-paws-configure-secure-boot-revocations-md)**
+    Configures and enforces BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware for PAWs.
 
 
 
@@ -26814,13 +27061,13 @@ if ($script:Vulnerable) {
 
 <div id="07-paws-enable-secure-boot-md"></div>
 
-<div id="07-paws-enable-secure-boot-md-req-paw-030-enable-secure-boot"></div>
-# [REQ-PAW-030] Enable Secure Boot
+<div id="07-paws-enable-secure-boot-md-req-paw-030-enable-uefi-secure-boot-for-paws"></div>
+# [REQ-PAW-030] Enable UEFI Secure Boot for PAWs
 
 <div id="07-paws-enable-secure-boot-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs).
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows 11 Enterprise.
 
 ---
 
@@ -26829,8 +27076,8 @@ if ($script:Vulnerable) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * UEFI Firmware configuration (Hardware/BIOS level)
-  * Computer Configuration\Administrative Templates\System\Device Guard\Turn On Virtualization Based Security
-  * **BlackLotus Revocation Updates (CVE-2023-24932)**: `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot` -> `AvailableUpdates` (REG_DWORD = 64 | 256 | 128 | 512 dependent on mitigation phase)
+  * HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State
+    * `UEFISecureBootEnabled` = `1` (REG_DWORD)
 
 ---
 
@@ -26843,43 +27090,29 @@ When the PC starts, the firmware checks the signature of each piece of boot soft
 If Secure Boot is disabled:
 1. **Bootkits & Rootkits**: Attackers with physical access or local administrator privileges can replace the system bootloader with a malicious bootloader (bootkit). This bootkit executes before the Windows operating system loads, allowing it to bypass all Windows security controls, disable antivirus software, and run completely undetected.
 2. **Virtualization-Based Security**: Advanced Windows defenses (like Credential Guard and Device Guard) depend on hardware-rooted trust. If Secure Boot is disabled, Virtualization-Based Security (VBS) cannot verify platform integrity, rendering these protections ineffective.
-3. **BlackLotus Bootkit Bypass Mitigations (CVE-2023-24932)**: A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit). To fully mitigate this threat, Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.
 
 ---
 
 <div id="07-paws-enable-secure-boot-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **BIOS Mode Conversion**: Systems running in legacy BIOS mode (Compatibility Support Module - CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires changing partition styles from MBR to GPT (using tools like `MBR2GPT.exe`) and changing firmware settings; refer to [REQ-PAW-011 - UEFI Firmware Security Hardening](#07-paws-configure-uefi-security-md) for firmware settings. Improper conversion can cause boot failures if not executed correctly.
+* **BIOS Mode Conversion**: Systems running in legacy BIOS mode (Compatibility Support Module - CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires changing partition styles from MBR to GPT (using tools like `MBR2GPT.exe`) and changing firmware settings; refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-configure-uefi-security-md) for firmware settings. Improper conversion can cause boot failures if not executed correctly.
 * **Dual-Boot Systems**: If the workstation dual-boots with unsigned Linux distributions or runs legacy recovery media, the firmware will reject the bootloader, preventing boot.
-* **BlackLotus Mitigation Risks**: Enforcing the BlackLotus DBX and SVN updates is a permanent, non-reversible action once written to the device firmware. If an administrator attempts to boot the machine using older, unpatched Windows installation media or recovery disks, the system will reject the boot manager and fail to boot. All recovery and deployment media must be updated with current security patches before applying these mitigations.
 
 ---
 
 <div id="07-paws-enable-secure-boot-md-implementation-steps"></div>
 ## Implementation Steps
 
-<div id="07-paws-enable-secure-boot-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
-### Option A: Group Policy Object (GPO) Configuration (Preferred)
+<div id="07-paws-enable-secure-boot-md-option-a-manual-uefi-firmware-configuration-preferred"></div>
+### Option A: Manual UEFI Firmware Configuration (Preferred)
 
-UEFI Secure Boot must be enabled in the hardware firmware menu directly (BIOS settings). However, you can enforce policies to audit and lock VBS to require Secure Boot:
+UEFI Secure Boot must be enabled in the hardware firmware menu directly (BIOS settings) during system startup:
 
-1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Create or edit a GPO linked to the PAWs OU (e.g., `GPO_Hardening_PAWs`).
-3. Navigate to:
-   `Computer Configuration\Administrative Templates\System\Device Guard`
-4. Configure the setting:
-   * **Policy**: `Turn On Virtualization Based Security`
-   * **Setting**: `Enabled`
-     * **Select Platform Security Level**: Select `Secure Boot` or `Secure Boot and DMA Protection` in the dropdown menu.
-
-<div id="07-paws-enable-secure-boot-md-deploy-blacklotus-revocation-registry-keys-via-gpo-preferences"></div>
-#### Deploy BlackLotus Revocation Registry Keys via GPO Preferences
-To configure the update triggers for the DBX and Code Integrity boot manager revocations, define Registry GPO Preferences inside the PAW GPO:
-1. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
-2. Create registry items to deploy the `AvailableUpdates` DWORD under `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`.
-   * *Phase 1 (Apply DBX Update)*: Set `AvailableUpdates` = 64 (REG_DWORD)
-   * *Phase 2 (Apply SVN and DB Updates)*: Set `AvailableUpdates` = 384 (REG_DWORD, sum of 256 and 128)
-   * *Phase 3 (Enforce Code Integrity Boot Policy)*: Set `AvailableUpdates` = 512 (REG_DWORD)
+1. Turn on or restart the workstation and access the UEFI utility screen by pressing the vendor-specific key during POST (typically Delete, F2, F10, or F12).
+2. Navigate to the **Security** or **Secure Boot** section:
+   * Ensure **Secure Boot** is set to **Enabled**.
+   * Ensure the **Secure Boot Mode** is set to **Deployed** or **User Mode** (not Setup Mode).
+3. Save the configuration and restart the workstation.
 
 ---
 
@@ -26894,39 +27127,35 @@ Run the following script to check the status of Secure Boot on the local machine
 
 ```powershell
 # Audit-PawSecureBoot.ps1
-# Queries UEFI Secure Boot parameters and audits BlackLotus mitigation registry settings.
+# Description: Queries UEFI Secure Boot parameters and audits UEFI Secure Boot status.
 
-Write-Host "--- Auditing UEFI Secure Boot & BlackLotus Mitigations ---" -ForegroundColor Cyan
+Write-Host "--- Auditing UEFI Secure Boot ---" -ForegroundColor Cyan
 
 $script:NonCompliant = $false
 
+# 1. Verify boot environment type
+if ($env:firmware_type -eq "UEFI") {
+    Write-Host "    - Boot Environment Type: UEFI" -ForegroundColor Green
+} else {
+    Write-Host "    - VULNERABLE: System booted in Legacy BIOS mode (CSM enabled) or firmware type is unrecognized." -ForegroundColor Red
+    $script:NonCompliant = $true
+}
+
+# 2. Verify Secure Boot status
 try {
+    # Confirm-SecureBootUEFI returns $true if Secure Boot is active, $false if disabled,
+    # and throws an exception if the platform does not support UEFI or Secure Boot.
     $SecureBootState = Confirm-SecureBootUEFI -ErrorAction Stop
     
     $Color = if ($SecureBootState -eq $true) { "Green" } else { "Red" }
     Write-Host "    - Secure Boot Active: $SecureBootState" -ForegroundColor $Color
     if ($SecureBootState -eq $false) { $script:NonCompliant = $true }
 } catch [System.PlatformNotSupportedException] {
-    Write-Host "    - UEFI Secure Boot is not supported on this platform (Legacy BIOS mode)." -ForegroundColor Red
+    Write-Host "    - VULNERABLE: UEFI Secure Boot is not supported on this platform (Legacy BIOS mode)." -ForegroundColor Red
     $script:NonCompliant = $true
 } catch {
-    Write-Host "    - Secure Boot is disabled in firmware or cannot be verified. Error: $($_.Exception.Message)" -ForegroundColor Red
-    $script:NonCompliant = $true
-}
-
-$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
-if (Test-Path $Path) {
-    $Val = Get-ItemProperty -Path $Path -Name "AvailableUpdates" -ErrorAction SilentlyContinue
-    $UpdateVal = if ($Val) { $Val.AvailableUpdates } else { 0 }
-    
-    if ($UpdateVal -ge 64) {
-        Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal" -ForegroundColor Green
-    } else {
-        Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
-        $script:NonCompliant = $true
-    }
-} else {
-    Write-Host "    - BlackLotus Revocation Updates: Registry path not found" -ForegroundColor Red
+    # If cmdlet throws unauthorized access or not enabled error
+    Write-Host "    - VULNERABLE: Secure Boot is disabled in firmware or cannot be verified. Error: $($_.Exception.Message)" -ForegroundColor Red
     $script:NonCompliant = $true
 }
 
@@ -26935,46 +27164,11 @@ if ($script:NonCompliant) {
 }
 ```
 
-To verify platform boot style (UEFI vs Legacy BIOS):
-```powershell
-$BootType = Get-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control" -Name "PEFirmwareType" -ErrorAction SilentlyContinue
-if ($BootType) {
-    $TypeVal = $BootType.PEFirmwareType
-    $BootColor = if ($TypeVal -eq 2) { "Green" } else { "Red" }
-    $TypeName = if ($TypeVal -eq 2) { "UEFI" } else { "Legacy BIOS" }
-    Write-Host "    - Boot Environment Type: $TypeName ($TypeVal)" -ForegroundColor $BootColor
-} else {
-    Write-Host "    - Boot Environment Type could not be read from registry." -ForegroundColor Yellow
-}
-```
-
----
-
-<div id="07-paws-enable-secure-boot-md-remediation-script"></div>
-### Remediation Script
-
-[Download Script: Set-PawSecureBoot.ps1](implementation_scripts/Set-PawSecureBoot.ps1)
-
-```powershell
-# Set-PawSecureBoot.ps1
-# Description: Triggers Secure Boot DBX and Code Integrity revocation updates for BlackLotus mitigation.
-
-Write-Host "--- Configuring BlackLotus Secure Boot Mitigations ---" -ForegroundColor Cyan
-
-$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
-if (-not (Test-Path $Path)) {
-    New-Item -Path $Path -Force | Out-Null
-}
-
-Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
-Write-Host "BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green
-```
-
 ---
 
 <div id="07-paws-enable-secure-boot-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10 Benchmark**: Section 18.8.14.1 (Configure Turn On Virtualization Based Security: Select Platform Security Level)
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8 (VBS Prerequisites)
 * **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
 
 
@@ -27671,6 +27865,132 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="07-paws-configure-secure-boot-revocations-md"></div>
+
+<div id="07-paws-configure-secure-boot-revocations-md-req-paw-035-configure-secure-boot-revocations-and-bootloader-updates-for-paws"></div>
+# [REQ-PAW-035] Configure Secure Boot Revocations and Bootloader Updates for PAWs
+
+<div id="07-paws-configure-secure-boot-revocations-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs).
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-configure-secure-boot-revocations-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **BlackLotus Revocation Updates (CVE-2023-24932)**: `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`
+    * `AvailableUpdates` = `>= 64` (REG_DWORD)
+
+---
+
+<div id="07-paws-configure-secure-boot-revocations-md-rationale"></div>
+## Rationale
+A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit).
+
+To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.
+
+---
+
+<div id="07-paws-configure-secure-boot-revocations-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **BlackLotus Mitigation Risks**: Enforcing the BlackLotus DBX and SVN updates is a permanent, non-reversible action once written to the device firmware. If an administrator attempts to boot the machine using older, unpatched Windows installation media or recovery disks, the system will reject the boot manager and fail to boot. All recovery and deployment media must be updated with current security patches before applying these mitigations.
+
+---
+
+<div id="07-paws-configure-secure-boot-revocations-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-configure-secure-boot-revocations-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+To configure the update triggers for the DBX and Code Integrity boot manager revocations, define Registry GPO Preferences inside the PAW GPO:
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Create or edit a GPO linked to the PAWs OU (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Create registry items to deploy the `AvailableUpdates` DWORD under `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`.
+   * *Phase 1 (Apply DBX Update)*: Set `AvailableUpdates` = `64` (REG_DWORD)
+   * *Phase 2 (Apply SVN and DB Updates)*: Set `AvailableUpdates` = `384` (REG_DWORD, sum of 256 and 128)
+   * *Phase 3 (Enforce Code Integrity Boot Policy)*: Set `AvailableUpdates` = `512` (REG_DWORD)
+
+---
+
+<div id="07-paws-configure-secure-boot-revocations-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the BlackLotus mitigation update trigger:
+
+[Download Script: Set-PawSecureBootRevocations.ps1](implementation_scripts/Set-PawSecureBootRevocations.ps1)
+
+```powershell
+# Set-PawSecureBootRevocations.ps1
+# Description: Triggers Secure Boot DBX and Code Integrity revocation updates for BlackLotus mitigation.
+
+Write-Host "--- Configuring BlackLotus Secure Boot Mitigations ---" -ForegroundColor Cyan
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
+if (-not (Test-Path $Path)) {
+    New-Item -Path $Path -Force | Out-Null
+}
+
+# Trigger DBX Update (Phase 1 DBX Update = 64)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green
+```
+
+---
+
+<div id="07-paws-configure-secure-boot-revocations-md-audit-script"></div>
+### Audit Script
+
+Run the following script to check the status of Secure Boot revocations on the local machine:
+
+[Download Script: Audit-PawSecureBootRevocations.ps1](audit_scripts/Audit-PawSecureBootRevocations.ps1)
+
+```powershell
+# Audit-PawSecureBootRevocations.ps1
+# Description: Queries UEFI Secure Boot parameters and audits BlackLotus mitigation registry settings.
+
+Write-Host "--- Auditing BlackLotus Mitigations ---" -ForegroundColor Cyan
+
+$script:NonCompliant = $false
+
+# Audit AvailableUpdates registry key
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
+if (Test-Path $Path) {
+    $Val = Get-ItemProperty -Path $Path -Name "AvailableUpdates" -ErrorAction SilentlyContinue
+    $UpdateVal = if ($Val) { $Val.AvailableUpdates } else { 0 }
+    
+    # Check if at least DBX update (64) is enabled
+    if ($UpdateVal -ge 64) {
+        Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Compliant)" -ForegroundColor Green
+    } else {
+        Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
+        $script:NonCompliant = $true
+    }
+} else {
+    Write-Host "    - BlackLotus Revocation Updates: Registry path not found (Non-Compliant)" -ForegroundColor Red
+    $script:NonCompliant = $true
+}
+
+if ($script:NonCompliant) {
+    exit 1
+}
+```
+
+---
+
+<div id="07-paws-configure-secure-boot-revocations-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Security Baseline Focus**: Windows Administrative Templates (Secure Boot Revocation Updates)
+* **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="08-endpoints-README-md"></div>
 
 <div id="08-endpoints-README-md-module-8-endpoint-hardening"></div>
@@ -27707,8 +28027,8 @@ To prevent initial access and lateral movement, the following unitary technical 
 8. **[REQ-END-008 - WSUS Client Configuration](#08-endpoints-wsus-client-config-md)**
    Enforces update client registry baselines to ensure workstations pull OS patches and security signatures exclusively from the local, offline WSUS server.
 
-9. **[REQ-END-009 - Enable Secure Boot](#08-endpoints-enable-secure-boot-md)**
-   Mandates hardware-rooted platform integrity checks, preventing bootkits, rootkits, and unauthorized bootloader modifications.
+9. **[REQ-END-009 - Enable UEFI Secure Boot](#08-endpoints-enable-secure-boot-md)**
+   Mandates hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on the operating system.
 
 10. **[REQ-END-010 - Enable VBS and Credential Guard](#08-endpoints-enable-vbs-credential-guard-md)**
     Activates Virtualization-Based Security (VBS) and Credential Guard to protect password hashes and Kerberos tickets in an isolated virtual container, mitigating LSASS dumping.
@@ -27784,6 +28104,9 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 34. **[REQ-END-034 - Disable Windows Script Host and Remap Scripting Extensions](#08-endpoints-disable-windows-script-host-md)**
     Disables Windows Script Host execution globally and remaps standard scripting extensions (.vbs, .js, etc.) to open in Notepad by default to prevent execution by double-click.
+
+35. **[REQ-END-035 - Configure Secure Boot Revocations and Bootloader Updates](#08-endpoints-configure-secure-boot-revocations-md)**
+    Configures and enforces BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.
 
 
 
@@ -30012,8 +30335,8 @@ Write-Host "    - Delivery Optimization DODownloadMode: $($DOVal | Out-String).T
 
 <div id="08-endpoints-enable-secure-boot-md"></div>
 
-<div id="08-endpoints-enable-secure-boot-md-req-end-009-enable-secure-boot"></div>
-# [REQ-END-009] Enable Secure Boot
+<div id="08-endpoints-enable-secure-boot-md-req-end-009-enable-uefi-secure-boot"></div>
+# [REQ-END-009] Enable UEFI Secure Boot
 
 <div id="08-endpoints-enable-secure-boot-md-target-scope"></div>
 ## Target Scope
@@ -30027,21 +30350,20 @@ Write-Host "    - Delivery Optimization DODownloadMode: $($DOVal | Out-String).T
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * UEFI Firmware configuration (Hardware/BIOS level)
-  * Computer Configuration\Administrative Templates\System\Device Guard\Turn On Virtualization Based Security
-  * **BlackLotus Revocation Updates (CVE-2023-24932)**: `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot` -> `AvailableUpdates` (REG_DWORD = `64` | `256` | `128` | `512` dependent on mitigation phase)
+  * HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State
+    * `UEFISecureBootEnabled` = `1` (REG_DWORD)
 
 ---
 
 <div id="08-endpoints-enable-secure-boot-md-rationale"></div>
 ## Rationale
-Secure Boot is a security standard developed by members of the PC industry to help ensure that a device boots using only software that is trusted by the Original Equipment Manufacturer (OEM). 
+Secure Boot is a security standard developed by members of the PC industry to help ensure that a device boots using only software that is trusted by the Original Equipment Manufacturer (OEM).
 
 When the PC starts, the firmware checks the signature of each piece of boot software, including UEFI firmware drivers (also known as Option ROMs), EFI applications, and the operating system. If the signatures are valid, the PC boots, and the firmware gives control to the operating system.
 
 If Secure Boot is disabled:
 1. **Bootkits & Rootkits**: Attackers with physical access or local administrator privileges can replace the system bootloader with a malicious bootloader (bootkit). This bootkit executes before the Windows operating system loads, allowing it to bypass all Windows security controls, disable antivirus software, and run completely undetected.
 2. **Virtualization-Based Security**: Advanced Windows defenses (like Credential Guard and Device Guard) depend on hardware-rooted trust. If Secure Boot is disabled, Virtualization-Based Security (VBS) cannot verify platform integrity, rendering these protections ineffective.
-3. **BlackLotus Bootkit Bypass Mitigations (CVE-2023-24932)**: A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit). To fully mitigate this threat, Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.
 
 ---
 
@@ -30049,37 +30371,22 @@ If Secure Boot is disabled:
 ## Legacy Impact & Compatibility
 * **BIOS Mode Conversion**: Systems running in legacy BIOS mode (Compatibility Support Module - CSM) instead of Native UEFI cannot use Secure Boot. Converting these systems requires changing partition styles from MBR to GPT (using tools like `MBR2GPT.exe`) and changing firmware settings; refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-configure-uefi-security-md) for firmware settings. Improper conversion can cause boot failures if not executed correctly.
 * **Dual-Boot Systems**: If the workstation dual-boots with unsigned Linux distributions or runs legacy recovery media, the firmware will reject the bootloader, preventing boot.
-* **BlackLotus Mitigation Risks**: Enforcing the BlackLotus DBX and SVN updates is a permanent, non-reversible action once written to the device firmware. If an administrator attempts to boot the machine using older, unpatched Windows installation media or recovery disks, the system will reject the boot manager and fail to boot. All recovery and deployment media must be updated with current security patches before applying these mitigations.
 
 ---
 
 <div id="08-endpoints-enable-secure-boot-md-implementation-steps"></div>
 ## Implementation Steps
 
-<div id="08-endpoints-enable-secure-boot-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
-### Option A: Group Policy Object (GPO) Configuration (Preferred)
+<div id="08-endpoints-enable-secure-boot-md-option-a-manual-uefi-firmware-configuration-preferred"></div>
+### Option A: Manual UEFI Firmware Configuration (Preferred)
 
-UEFI Secure Boot must be enabled in the hardware firmware menu directly (BIOS settings). However, you can enforce policies to audit and lock VBS to require Secure Boot:
+UEFI Secure Boot must be enabled in the hardware firmware menu directly (BIOS settings) during system startup:
 
-1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
-3. Navigate to:
-   `Computer Configuration\Administrative Templates\System\Device Guard`
-4. Configure the setting:
-   * **Policy**: `Turn On Virtualization Based Security`
-   * **Setting**: `Enabled`
-    * **Select Platform Security Level**: Select `Secure Boot` or `Secure Boot and DMA Protection` in the dropdown menu.
-
-<div id="08-endpoints-enable-secure-boot-md-2-deploy-blacklotus-revocation-registry-keys-via-gpo-preferences"></div>
-#### 2. Deploy BlackLotus Revocation Registry Keys via GPO Preferences
-To configure the update triggers for the DBX and Code Integrity boot manager revocations, define Registry GPO Preferences inside the endpoints GPO:
-1. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
-2. Create registry items to deploy the `AvailableUpdates` DWORD under `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`.
-   * *Phase 1 (Apply DBX Update)*: Set `AvailableUpdates` = `64` (REG_DWORD)
-   * *Phase 2 (Apply SVN and DB Updates)*: Set `AvailableUpdates` = `384` (REG_DWORD, sum of 256 and 128)
-   * *Phase 3 (Enforce Code Integrity Boot Policy)*: Set `AvailableUpdates` = `512` (REG_DWORD)
-
-*Note: Enforcing this policy ensures Windows will refuse to enable Virtualization-Based Security unless the local firmware has UEFI Secure Boot successfully active.*
+1. Turn on or restart the workstation and access the UEFI utility screen by pressing the vendor-specific key during POST (typically Delete, F2, F10, or F12).
+2. Navigate to the **Security** or **Secure Boot** section:
+   * Ensure **Secure Boot** is set to **Enabled**.
+   * Ensure the **Secure Boot Mode** is set to **Deployed** or **User Mode** (not Setup Mode).
+3. Save the configuration and restart the workstation.
 
 ---
 
@@ -30094,12 +30401,21 @@ Run the following script to check the status of Secure Boot on the local machine
 
 ```powershell
 # Audit-SecureBoot.ps1
-# Queries UEFI Secure Boot parameters and audits BlackLotus mitigation registry settings.
+# Description: Queries UEFI Secure Boot parameters and audits UEFI Secure Boot status.
 
-Write-Host "--- Auditing UEFI Secure Boot & BlackLotus Mitigations ---" -ForegroundColor Cyan
+Write-Host "--- Auditing UEFI Secure Boot ---" -ForegroundColor Cyan
 
 $script:NonCompliant = $false
 
+# 1. Verify boot environment type
+if ($env:firmware_type -eq "UEFI") {
+    Write-Host "    - Boot Environment Type: UEFI" -ForegroundColor Green
+} else {
+    Write-Host "    - VULNERABLE: System booted in Legacy BIOS mode (CSM enabled) or firmware type is unrecognized." -ForegroundColor Red
+    $script:NonCompliant = $true
+}
+
+# 2. Verify Secure Boot status
 try {
     # Confirm-SecureBootUEFI returns $true if Secure Boot is active, $false if disabled,
     # and throws an exception if the platform does not support UEFI or Secure Boot.
@@ -30117,73 +30433,16 @@ try {
     $script:NonCompliant = $true
 }
 
-# Audit AvailableUpdates registry key
-$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
-if (Test-Path $Path) {
-    $Val = Get-ItemProperty -Path $Path -Name "AvailableUpdates" -ErrorAction SilentlyContinue
-    $UpdateVal = if ($Val) { $Val.AvailableUpdates } else { 0 }
-    
-    # Check if at least DBX update (64) is enabled
-    if ($UpdateVal -ge 64) {
-        Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Compliant)" -ForegroundColor Green
-    } else {
-        Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
-        $script:NonCompliant = $true
-    }
-} else {
-    Write-Host "    - BlackLotus Revocation Updates: Registry path not found (Non-Compliant)" -ForegroundColor Red
-    $script:NonCompliant = $true
-}
-
 if ($script:NonCompliant) {
     exit 1
 }
 ```
 
-*To verify platform boot style (UEFI vs Legacy BIOS):*
-```powershell
-# Check boot type environment variable
-$BootType = Get-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control" -Name "PEFirmwareType" -ErrorAction SilentlyContinue
-if ($BootType) {
-    # PEFirmwareType: 1 = BIOS, 2 = UEFI
-    $TypeVal = $BootType.PEFirmwareType
-    $BootColor = if ($TypeVal -eq 2) { "Green" } else { "Red" }
-    $TypeName = if ($TypeVal -eq 2) { "UEFI" } else { "Legacy BIOS" }
-    Write-Host "    - Boot Environment Type: $TypeName ($TypeVal)" -ForegroundColor $BootColor
-} else {
-    Write-Host "    - Boot Environment Type could not be read from registry." -ForegroundColor Yellow
-}
-```
-
----
-
-<div id="08-endpoints-enable-secure-boot-md-remediation-script"></div>
-### Remediation Script
-
-[Download Script: Set-SecureBoot.ps1](implementation_scripts/Set-SecureBoot.ps1)
-
-```powershell
-# Set-SecureBoot.ps1
-# Description: Triggers Secure Boot DBX and Code Integrity revocation updates for BlackLotus mitigation.
-
-Write-Host "--- Configuring BlackLotus Secure Boot Mitigations ---" -ForegroundColor Cyan
-
-$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
-if (-not (Test-Path $Path)) {
-    New-Item -Path $Path -Force | Out-Null
-}
-
-# Trigger DBX Update (Phase 1 DBX Update = 64)
-Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
-Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green
-```
-```
-
 ---
 
 <div id="08-endpoints-enable-secure-boot-md-sources-compliance-references"></div>
-## 🔗 Sources & Compliance References
-* **CIS Microsoft Windows 10 Benchmark**: Section 18.8.14.1 (Configure Turn On Virtualization Based Security: Select Platform Security Level)
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8 (VBS Prerequisites)
 * **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
 
 
@@ -31010,8 +31269,6 @@ if ($script:Vulnerable) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * UEFI Firmware Configuration Menu
-  * HKLM\SYSTEM\CurrentControlSet\Control
-    * `PEFirmwareType` = `2` (REG_DWORD)
   * HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State
     * `UEFISecureBootEnabled` = `1` (REG_DWORD)
 
@@ -31033,32 +31290,32 @@ Securing the firmware level ensures:
 
 <div id="08-endpoints-configure-uefi-security-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Enterprise Management**: Configuring UEFI passwords manually across thousands of endpoints is administratively impractical. Enterprise deployment tools (such as Dell Command | Configure, HP Client Management Script Library, or Lenovo BIOS WMI interfaces) must be used to automate setting and updating BIOS passwords.
-* **Imaging Workflows**: Standard corporate imaging (PXE boot) requires network boot to be temporarily enabled. If PXE is required, it must be restricted to authorized enterprise subnets and secured with PXE access passwords in the deployment console (e.g., MECM/SCCM).
-* **Legacy Partitions**: Legacy BIOS endpoints running on MBR partition layouts must be converted to GPT using MBR2GPT.exe prior to enabling native UEFI boot mode.
+* **Administrative Overhead**: Technicians must enter the UEFI administrator password to make hardware changes or perform local diagnostics. This password must be securely generated and stored in a central, encrypted vault.
+* **Legacy OS Incompatibility**: Operating systems or recovery environments that do not support native UEFI boot will fail to start. This is acceptable as Tier 2 systems must only run modern, authorized Windows 10/11 Enterprise installations.
+* **Partition Format**: Converting an existing Legacy BIOS installation to UEFI requires repartitioning the primary storage device from Master Boot Record (MBR) to GUID Partition Table (GPT) using utility tools like MBR2GPT.exe.
 
 ---
 
 <div id="08-endpoints-configure-uefi-security-md-implementation-steps"></div>
 ## Implementation Steps
 
-<div id="08-endpoints-configure-uefi-security-md-option-a-uefi-firmware-configuration-preferred"></div>
-### Option A: UEFI Firmware Configuration (Preferred)
+<div id="08-endpoints-configure-uefi-security-md-option-a-manual-uefi-firmware-configuration-preferred"></div>
+### Option A: Manual UEFI Firmware Configuration (Preferred)
 
-UEFI parameters can be configured manually on individual systems or programmatically automated using enterprise vendor tools.
+UEFI settings must be configured directly within the hardware platform firmware interface during system startup.
 
-<div id="08-endpoints-configure-uefi-security-md-1-manual-uefi-configuration-small-environments-or-standalone-servers"></div>
-#### 1. Manual UEFI Configuration (Small Environments or Standalone Servers)
-1. Restart the system and press the vendor-specific key during startup POST (typically Delete, F2, F10, or F12) to enter the UEFI utility.
-2. Locate the **Security** tab:
-   * Define a strong **Administrator Password** (also called **Supervisor Password**). Do not set a User Password, as that prompts for password entry on every standard boot.
-3. Locate the **Boot** or **System Configuration** tab:
-   * Set the **Boot Mode** to **UEFI Only** or **Native UEFI**.
-   * Set **CSM (Compatibility Support Module)** or **Legacy Support** to **Disabled**.
+1. Turn on or restart the workstation and access the UEFI utility screen by pressing the vendor-specific key during POST (typically Delete, F2, F10, or F12).
+2. Navigate to the **Security** or **Authentication** section:
+   * Select the option to set the **Administrator Password** (also referred to as the **Supervisor Password**). Do not configure a User Password, as that prompts for authentication on every boot rather than only when entering configuration settings.
+   * Enter a strong, complex password. Record this password in the team's secure credential repository.
+3. Navigate to the **Boot** or **System Configuration** section:
+   * Locate the **Boot Mode** setting and set it to **UEFI Only** or **Native UEFI**.
+   * Locate **CSM (Compatibility Support Module)** or **Legacy Boot Support** and set it to **Disabled**.
    * Locate **Fast Boot** or **Quick Boot** and set it to **Disabled** (forcing complete POST diagnostics and full TPM initialization on every boot).
-   * Locate the **Boot Order / Priority**:
-     * Set the primary internal storage drive (Windows Boot Manager) as the first and only boot option.
-     * Disable secondary boot sources (USB, CD/DVD, PXE Network Boot) or require the UEFI administrator password for boot override menus (typically accessed via F12).
+   * Locate **Boot Order** (or **Boot Priority**):
+     * Set the primary boot option to the internal system storage drive (typically containing the Windows Boot Manager partition).
+     * Disable all other boot options (such as USB, SD Card, Optical Drive, and Network PXE Boot) or set them to disabled in the boot menu.
+     * Enable the option to prompt for the UEFI administrator password if a user attempts to access the boot override menu (typically F12 or F8).
 4. Navigate to the **Advanced**, **CPU Configuration**, or **Security Chip** section:
    * Locate **Intel Virtualization Technology (VT-x)** or **AMD-V** and set it to **Enabled**.
    * Locate **Intel VT for Directed I/O (VT-d)** or **AMD IOMMU** and set it to **Enabled** (required for IOMMU/Kernel DMA Protection).
@@ -31071,32 +31328,7 @@ UEFI parameters can be configured manually on individual systems or programmatic
      * **Signature Database (db)**: Must only contain "Microsoft Windows Production PCA 2011" and "Windows UEFI CA 2023". Remove "Microsoft UEFI CA 2011" and "Microsoft Option ROM UEFI CA 2023" unless strictly required by specific physical PCIe expansion hardware.
 6. Navigate to the **Advanced** or **Firmware Update** section:
    * Locate the option for **BIOS Flash Protection** or **Firmware Rollback Protection** and set it to **Enabled** or **Block Downgrades**.
-7. Save settings and exit the utility.
-
-<div id="08-endpoints-configure-uefi-security-md-2-programmatic-configuration-enterprise-deployment"></div>
-#### 2. Programmatic Configuration (Enterprise Deployment)
-Use OEM utilities to deploy the UEFI password and boot configuration:
-* **Dell Systems**: Use Dell Command | Configure (`cctk.exe`):
-```cmd
-cctk.exe --setuppwd=YourSecureEnterpriseBIOSPassword
-cctk.exe --bootorder=hdd
-cctk.exe --legacydevorder=
-cctk.exe --embuefipxe=disable
-cctk.exe --virtualization=enable
-cctk.exe --vt-d=enable
-cctk.exe --fastboot=disable
-cctk.exe --mor=enable
-```
-* **HP Systems**: Use HP Client Management Script Library (CMSL) in PowerShell:
-```powershell
-Set-HPBiosSettingValue -Setting "Set BIOS Administrator Password" -Value "YourSecureEnterpriseBIOSPassword"
-Set-HPBiosSettingValue -Setting "Configure Legacy Boot" -Value "Disable"
-Set-HPBiosSettingValue -Setting "Boot Order" -Value "Hard Drive"
-Set-HPBiosSettingValue -Setting "Virtualization Technology (VTx)" -Value "Enable"
-Set-HPBiosSettingValue -Setting "Virtualization Technology Directed I/O (VTd)" -Value "Enable"
-Set-HPBiosSettingValue -Setting "Fast Boot" -Value "Disable"
-Set-HPBiosSettingValue -Setting "Memory Overwrite Request" -Value "Enable"
-```
+7. Save the configuration and restart the workstation.
 
 ---
 
@@ -31116,18 +31348,10 @@ Run the following script to verify native UEFI boot, Secure Boot state, and retr
 Write-Host "--- Auditing UEFI Security Baseline ---" -ForegroundColor Cyan
 
 # 1. Verify boot environment type
-$RegPath = "HKLM:\System\CurrentControlSet\Control"
-$FirmwareProperty = Get-ItemProperty -Path $RegPath -Name "PEFirmwareType" -ErrorAction SilentlyContinue
-
-if ($FirmwareProperty) {
-    $FirmwareValue = $FirmwareProperty.PEFirmwareType
-    if ($FirmwareValue -eq 2) {
-        Write-Host "Status: Native UEFI mode is active." -ForegroundColor Green
-    } else {
-        Write-Host "VULNERABLE: System booted in Legacy BIOS mode (CSM enabled). Value: $($FirmwareValue)" -ForegroundColor Red
-    }
+if ($env:firmware_type -eq "UEFI") {
+    Write-Host "Status: Native UEFI mode is active." -ForegroundColor Green
 } else {
-    Write-Host "VULNERABLE: Boot environment type could not be read from registry." -ForegroundColor Red
+    Write-Host "VULNERABLE: System booted in Legacy BIOS mode (CSM enabled) or firmware type is unrecognized." -ForegroundColor Red
 }
 
 # 2. Audit Secure Boot status
@@ -37004,6 +37228,132 @@ if ($script:Vulnerable) {
 * **ANSSI AD Hardening Guide**: Recommendations on workstation OS minimization and script execution control.
 * **DoD Windows 11 Computer STIG v2r6**: V-219661 (Windows Script Host disablement and script restriction).
 * **CIS Microsoft Windows Client Benchmark**: Section 18.9 (Administrative templates for script execution safety).
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-configure-secure-boot-revocations-md"></div>
+
+<div id="08-endpoints-configure-secure-boot-revocations-md-req-end-035-configure-secure-boot-revocations-and-bootloader-updates"></div>
+# [REQ-END-035] Configure Secure Boot Revocations and Bootloader Updates
+
+<div id="08-endpoints-configure-secure-boot-revocations-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-configure-secure-boot-revocations-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **BlackLotus Revocation Updates (CVE-2023-24932)**: `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`
+    * `AvailableUpdates` = `>= 64` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-configure-secure-boot-revocations-md-rationale"></div>
+## Rationale
+A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit). 
+
+To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.
+
+---
+
+<div id="08-endpoints-configure-secure-boot-revocations-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **BlackLotus Mitigation Risks**: Enforcing the BlackLotus DBX and SVN updates is a permanent, non-reversible action once written to the device firmware. If an administrator attempts to boot the machine using older, unpatched Windows installation media or recovery disks, the system will reject the boot manager and fail to boot. All recovery and deployment media must be updated with current security patches before applying these mitigations.
+
+---
+
+<div id="08-endpoints-configure-secure-boot-revocations-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-configure-secure-boot-revocations-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+To configure the update triggers for the DBX and Code Integrity boot manager revocations, define Registry GPO Preferences inside the endpoints GPO:
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Create registry items to deploy the `AvailableUpdates` DWORD under `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`.
+   * *Phase 1 (Apply DBX Update)*: Set `AvailableUpdates` = `64` (REG_DWORD)
+   * *Phase 2 (Apply SVN and DB Updates)*: Set `AvailableUpdates` = `384` (REG_DWORD, sum of 256 and 128)
+   * *Phase 3 (Enforce Code Integrity Boot Policy)*: Set `AvailableUpdates` = `512` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-configure-secure-boot-revocations-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the BlackLotus mitigation update trigger:
+
+[Download Script: Set-SecureBootRevocations.ps1](implementation_scripts/Set-SecureBootRevocations.ps1)
+
+```powershell
+# Set-SecureBootRevocations.ps1
+# Description: Triggers Secure Boot DBX and Code Integrity revocation updates for BlackLotus mitigation.
+
+Write-Host "--- Configuring BlackLotus Secure Boot Mitigations ---" -ForegroundColor Cyan
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
+if (-not (Test-Path $Path)) {
+    New-Item -Path $Path -Force | Out-Null
+}
+
+# Trigger DBX Update (Phase 1 DBX Update = 64)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green
+```
+
+---
+
+<div id="08-endpoints-configure-secure-boot-revocations-md-audit-script"></div>
+### Audit Script
+
+Run the following script to check the status of Secure Boot revocations on the local machine:
+
+[Download Script: Audit-SecureBootRevocations.ps1](audit_scripts/Audit-SecureBootRevocations.ps1)
+
+```powershell
+# Audit-SecureBootRevocations.ps1
+# Description: Queries UEFI Secure Boot parameters and audits BlackLotus mitigation registry settings.
+
+Write-Host "--- Auditing BlackLotus Mitigations ---" -ForegroundColor Cyan
+
+$script:NonCompliant = $false
+
+# Audit AvailableUpdates registry key
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
+if (Test-Path $Path) {
+    $Val = Get-ItemProperty -Path $Path -Name "AvailableUpdates" -ErrorAction SilentlyContinue
+    $UpdateVal = if ($Val) { $Val.AvailableUpdates } else { 0 }
+    
+    # Check if at least DBX update (64) is enabled
+    if ($UpdateVal -ge 64) {
+        Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Compliant)" -ForegroundColor Green
+    } else {
+        Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
+        $script:NonCompliant = $true
+    }
+} else {
+    Write-Host "    - BlackLotus Revocation Updates: Registry path not found (Non-Compliant)" -ForegroundColor Red
+    $script:NonCompliant = $true
+}
+
+if ($script:NonCompliant) {
+    exit 1
+}
+```
+
+---
+
+<div id="08-endpoints-configure-secure-boot-revocations-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **Microsoft Security Baseline Focus**: Windows Administrative Templates (Secure Boot Revocation Updates)
+* **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
 
 
 <div style="page-break-before: always;"></div>

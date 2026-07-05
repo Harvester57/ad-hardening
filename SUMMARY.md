@@ -45,6 +45,8 @@
     * [REQ-DC-029 - Configure svchost.exe Mitigation Options](02-domain-controllers/configure-svchost-mitigation.md)
     * [REQ-DC-030 - Secure Directory Services Restore Mode (DSRM) and Recovery Parameters](02-domain-controllers/harden-dsrm-recovery-mode.md)
     * [REQ-DC-031 - Configure NTP Time Synchronization on the PDC Emulator](02-domain-controllers/configure-pdc-time-sync.md)
+    * [REQ-DC-032 - Enable UEFI Secure Boot](02-domain-controllers/enable-secure-boot.md)
+    * [REQ-DC-033 - Configure Secure Boot Revocations and Bootloader Updates](02-domain-controllers/configure-secure-boot-revocations.md)
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)
@@ -136,11 +138,12 @@
     * [REQ-PAW-027 - Configure Windows Defender Firewall and Block LOLBins for PAWs](07-paws/configure-windows-firewall.md)
     * [REQ-PAW-028 - Disable Unnecessary System Services for PAWs](07-paws/disable-unnecessary-system-services.md)
     * [REQ-PAW-029 - Configure System Administrative Templates for PAWs](07-paws/configure-system-administrative-templates.md)
-    * [REQ-PAW-030 - Enable Secure Boot for PAWs](07-paws/enable-secure-boot.md)
+    * [REQ-PAW-030 - Enable UEFI Secure Boot for PAWs](07-paws/enable-secure-boot.md)
     * [REQ-PAW-031 - Enforce Smart Card Logon for PAWs](07-paws/enforce-smartcard-logon-paws.md)
     * [REQ-PAW-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](07-paws/disable-unused-features.md)
     * [REQ-PAW-033 - Configure Microsoft Office Security and Block OLE Packages](07-paws/configure-office-security.md)
     * [REQ-PAW-034 - Disable Windows Script Host and Remap Scripting Extensions](07-paws/disable-windows-script-host.md)
+    * [REQ-PAW-035 - Configure Secure Boot Revocations and Bootloader Updates for PAWs](07-paws/configure-secure-boot-revocations.md)
 ## Module 8: Endpoint Hardening
 * [Module 8: Endpoint Hardening](08-endpoints/README.md)
     * [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](08-endpoints/harden-network-and-name-resolution.md)
@@ -151,7 +154,7 @@
     * [REQ-END-006 - Restrict Local Administrators Group](08-endpoints/restrict-local-admins.md)
     * [REQ-END-007 - Windows Defender Antivirus Baseline and Exploit Guard](08-endpoints/defender-antivirus.md)
     * [REQ-END-008 - WSUS Client Configuration](08-endpoints/wsus-client-config.md)
-    * [REQ-END-009 - Enable Secure Boot](08-endpoints/enable-secure-boot.md)
+    * [REQ-END-009 - Enable UEFI Secure Boot](08-endpoints/enable-secure-boot.md)
     * [REQ-END-010 - Enable VBS and Credential Guard](08-endpoints/enable-vbs-credential-guard.md)
     * [REQ-END-011 - Configure Windows Defender Application Control](08-endpoints/configure-wdac.md)
     * [REQ-END-012 - Enable BitLocker and Network Unlock](08-endpoints/enable-bitlocker.md)
@@ -177,6 +180,7 @@
     * [REQ-END-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](08-endpoints/disable-unused-features.md)
     * [REQ-END-033 - Configure Microsoft Office Security and Block OLE Packages](08-endpoints/configure-office-security.md)
     * [REQ-END-034 - Disable Windows Script Host and Remap Scripting Extensions](08-endpoints/disable-windows-script-host.md)
+    * [REQ-END-035 - Configure Secure Boot Revocations and Bootloader Updates](08-endpoints/configure-secure-boot-revocations.md)
 
 ## Implementation Roadmap
 * [Implementation Plan and Prioritized Roadmap](roadmap/implementation-plan.md)

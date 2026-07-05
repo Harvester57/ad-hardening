@@ -4,18 +4,10 @@
 Write-Host "--- Auditing UEFI Security Baseline ---" -ForegroundColor Cyan
 
 # 1. Verify boot environment type
-$RegPath = "HKLM:\System\CurrentControlSet\Control"
-$FirmwareProperty = Get-ItemProperty -Path $RegPath -Name "PEFirmwareType" -ErrorAction SilentlyContinue
-
-if ($FirmwareProperty) {
-    $FirmwareValue = $FirmwareProperty.PEFirmwareType
-    if ($FirmwareValue -eq 2) {
-        Write-Host "Status: Native UEFI mode is active." -ForegroundColor Green
-    } else {
-        Write-Host "VULNERABLE: System booted in Legacy BIOS mode (CSM enabled). Value: $($FirmwareValue)" -ForegroundColor Red
-    }
+if ($env:firmware_type -eq "UEFI") {
+    Write-Host "Status: Native UEFI mode is active." -ForegroundColor Green
 } else {
-    Write-Host "VULNERABLE: Boot environment type could not be read from registry." -ForegroundColor Red
+    Write-Host "VULNERABLE: System booted in Legacy BIOS mode (CSM enabled) or firmware type is unrecognized." -ForegroundColor Red
 }
 
 # 2. Audit Secure Boot status

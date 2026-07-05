@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-05T12:15:20Z</oval:timestamp>
+    <oval:timestamp>2026-07-05T12:42:40Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -955,6 +955,46 @@ Configuring the PDC Emulator as a reliable NTP server synchronizing with a secur
         <criterion comment="Check Registry Key System\CurrentControlSet\Services\W32Time\Parameters Value NtpServer" test_ref="oval:org.adhardening:tst:2031003" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:2032" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-032] Enable UEFI Secure Boot</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Secure Boot is a security standard developed by members of the PC industry to help ensure that a device boots using only software that is trusted by the Original Equipment Manufacturer (OEM).
+
+When the PC starts, the firmware checks the signature of each piece of boot software, including UEFI firmware drivers (also known as Option ROMs), EFI applications, and the operating system. If the signatures are valid, the PC boots, and the firmware gives control to the operating system.
+
+For Tier 0 assets like Domain Controllers, firmware integrity is critical. If Secure Boot is disabled:
+1. **Bootkits &amp; Rootkits**: Attackers with physical access or hosting infrastructure control (in virtual environments) can replace the boot manager with a malicious bootloader (bootkit) to bypass LSASS protections and all OS security controls before the Windows kernel loads.
+2. **Virtualization-Based Security**: Advanced security boundaries (like LSA Protection and Device Guard) depend on hardware-rooted trust. Without UEFI Secure Boot active, virtualization-based security capabilities cannot execute with proper system measurements.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" test_ref="oval:org.adhardening:tst:2032001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:2033" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-033] Configure Secure Boot Revocations and Bootloader Updates</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit).
+
+To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:2033001" />
+      </criteria>
+    </definition>
     <definition id="oval:org.adhardening:def:8001" version="1" class="compliance">
       <metadata>
         <title>[REQ-END-001] Harden Network Parameters and Disable Legacy Name Resolution</title>
@@ -1223,7 +1263,7 @@ Enforcing the intranet update service location redirects all system update queri
     </definition>
     <definition id="oval:org.adhardening:def:8009" version="1" class="compliance">
       <metadata>
-        <title>[REQ-END-009] Enable Secure Boot</title>
+        <title>[REQ-END-009] Enable UEFI Secure Boot</title>
         <affected family="windows">
           <platform>Microsoft Windows Server 2016</platform>
           <platform>Microsoft Windows Server 2019</platform>
@@ -1231,17 +1271,16 @@ Enforcing the intranet update service location redirects all system update queri
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Secure Boot is a security standard developed by members of the PC industry to help ensure that a device boots using only software that is trusted by the Original Equipment Manufacturer (OEM). 
+        <description>Secure Boot is a security standard developed by members of the PC industry to help ensure that a device boots using only software that is trusted by the Original Equipment Manufacturer (OEM).
 
 When the PC starts, the firmware checks the signature of each piece of boot software, including UEFI firmware drivers (also known as Option ROMs), EFI applications, and the operating system. If the signatures are valid, the PC boots, and the firmware gives control to the operating system.
 
 If Secure Boot is disabled:
 1. **Bootkits &amp; Rootkits**: Attackers with physical access or local administrator privileges can replace the system bootloader with a malicious bootloader (bootkit). This bootkit executes before the Windows operating system loads, allowing it to bypass all Windows security controls, disable antivirus software, and run completely undetected.
-2. **Virtualization-Based Security**: Advanced Windows defenses (like Credential Guard and Device Guard) depend on hardware-rooted trust. If Secure Boot is disabled, Virtualization-Based Security (VBS) cannot verify platform integrity, rendering these protections ineffective.
-3. **BlackLotus Bootkit Bypass Mitigations (CVE-2023-24932)**: A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit). To fully mitigate this threat, Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.</description>
+2. **Virtualization-Based Security**: Advanced Windows defenses (like Credential Guard and Device Guard) depend on hardware-rooted trust. If Secure Boot is disabled, Virtualization-Based Security (VBS) cannot verify platform integrity, rendering these protections ineffective.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:8009001" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" test_ref="oval:org.adhardening:tst:8009001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8010" version="1" class="compliance">
@@ -1386,8 +1425,7 @@ Securing the firmware level ensures:
 6. **Platform Measurement Integrity**: Disabling Fast Boot forces the firmware to execute full hardware initialization, device checks, and complete TPM self-tests/PCR measurements at every boot, ensuring platform integrity and correct state validation.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control Value PEFirmwareType" test_ref="oval:org.adhardening:tst:8013001" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" test_ref="oval:org.adhardening:tst:8013002" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" test_ref="oval:org.adhardening:tst:8013001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8014" version="1" class="compliance">
@@ -2090,6 +2128,24 @@ Enforcing these deactivation controls ensures:
       <criteria operator="AND">
         <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:8034001" />
         <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:8034002" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8035" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-035] Configure Secure Boot Revocations and Bootloader Updates</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit). 
+
+To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:8035001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:3001" version="1" class="compliance">
@@ -4214,7 +4270,7 @@ Additionally:
     </definition>
     <definition id="oval:org.adhardening:def:7030" version="1" class="compliance">
       <metadata>
-        <title>[REQ-PAW-030] Enable Secure Boot</title>
+        <title>[REQ-PAW-030] Enable UEFI Secure Boot for PAWs</title>
         <affected family="windows">
           <platform>Microsoft Windows Server 2016</platform>
           <platform>Microsoft Windows Server 2019</platform>
@@ -4228,11 +4284,10 @@ When the PC starts, the firmware checks the signature of each piece of boot soft
 
 If Secure Boot is disabled:
 1. **Bootkits &amp; Rootkits**: Attackers with physical access or local administrator privileges can replace the system bootloader with a malicious bootloader (bootkit). This bootkit executes before the Windows operating system loads, allowing it to bypass all Windows security controls, disable antivirus software, and run completely undetected.
-2. **Virtualization-Based Security**: Advanced Windows defenses (like Credential Guard and Device Guard) depend on hardware-rooted trust. If Secure Boot is disabled, Virtualization-Based Security (VBS) cannot verify platform integrity, rendering these protections ineffective.
-3. **BlackLotus Bootkit Bypass Mitigations (CVE-2023-24932)**: A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit). To fully mitigate this threat, Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.</description>
+2. **Virtualization-Based Security**: Advanced Windows defenses (like Credential Guard and Device Guard) depend on hardware-rooted trust. If Secure Boot is disabled, Virtualization-Based Security (VBS) cannot verify platform integrity, rendering these protections ineffective.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:7030001" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" test_ref="oval:org.adhardening:tst:7030001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7031" version="1" class="compliance">
@@ -4322,6 +4377,24 @@ Enforcing these deactivation controls ensures:
       <criteria operator="AND">
         <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:7034001" />
         <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:7034002" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7035" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-035] Configure Secure Boot Revocations and Bootloader Updates for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit).
+
+To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:7035001" />
       </criteria>
     </definition>
   </definitions>
@@ -5134,6 +5207,14 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:2031003" />
       <windows:state state_ref="oval:org.adhardening:ste:2031003" />
     </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2032001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2032001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2032001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2033001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2033001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2033001" />
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8001001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001001" />
       <windows:state state_ref="oval:org.adhardening:ste:8001001" />
@@ -5526,7 +5607,7 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:8008005" />
       <windows:state state_ref="oval:org.adhardening:ste:8008005" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8009001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8009001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8009001" />
       <windows:state state_ref="oval:org.adhardening:ste:8009001" />
     </windows:registry_test>
@@ -5750,13 +5831,9 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:8012048" />
       <windows:state state_ref="oval:org.adhardening:ste:8012048" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8013001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control Value PEFirmwareType" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8013001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8013001" />
       <windows:state state_ref="oval:org.adhardening:ste:8013001" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8013002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8013002" />
-      <windows:state state_ref="oval:org.adhardening:ste:8013002" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8014001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8014001" />
@@ -6789,6 +6866,10 @@ Enforcing these deactivation controls ensures:
     <windows:registry_test id="oval:org.adhardening:tst:8034002" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8034002" />
       <windows:state state_ref="oval:org.adhardening:ste:8034002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8035001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8035001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8035001" />
     </windows:registry_test>
     <windows:passwordpolicy_test id="oval:org.adhardening:tst:3001900" version="1" comment="Check local Password Policy settings" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:3001900" />
@@ -8541,7 +8622,7 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:7029086" />
       <windows:state state_ref="oval:org.adhardening:ste:7029086" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7030001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7030001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7030001" />
       <windows:state state_ref="oval:org.adhardening:ste:7030001" />
     </windows:registry_test>
@@ -8580,6 +8661,10 @@ Enforcing these deactivation controls ensures:
     <windows:registry_test id="oval:org.adhardening:tst:7034002" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7034002" />
       <windows:state state_ref="oval:org.adhardening:ste:7034002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7035001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7035001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7035001" />
     </windows:registry_test>
   </tests>
   <objects>
@@ -9690,6 +9775,18 @@ Enforcing these deactivation controls ensures:
       <windows:key>System\CurrentControlSet\Services\W32Time\Parameters</windows:key>
       <windows:name>NtpServer</windows:name>
     </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2032001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\SecureBoot\State</windows:key>
+      <windows:name>UEFISecureBootEnabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2033001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Secureboot</windows:key>
+      <windows:name>AvailableUpdates</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8001001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -10287,8 +10384,8 @@ Enforcing these deactivation controls ensures:
     <windows:registry_object id="oval:org.adhardening:obj:8009001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Secureboot</windows:key>
-      <windows:name>AvailableUpdates</windows:name>
+      <windows:key>SYSTEM\CurrentControlSet\Control\SecureBoot\State</windows:key>
+      <windows:name>UEFISecureBootEnabled</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8010001" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -10621,12 +10718,6 @@ Enforcing these deactivation controls ensures:
       <windows:name>RDVDenyWriteAccess</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8013001" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control</windows:key>
-      <windows:name>PEFirmwareType</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8013002" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Control\SecureBoot\State</windows:key>
@@ -12079,6 +12170,12 @@ Enforcing these deactivation controls ensures:
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Windows Script Host\Settings</windows:key>
       <windows:name>Enabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8035001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Secureboot</windows:key>
+      <windows:name>AvailableUpdates</windows:name>
     </windows:registry_object>
     <windows:passwordpolicy_object id="oval:org.adhardening:obj:3001900" version="1" />
     <windows:lockoutpolicy_object id="oval:org.adhardening:obj:3001910" version="1" />
@@ -14616,8 +14713,8 @@ Enforcing these deactivation controls ensures:
     <windows:registry_object id="oval:org.adhardening:obj:7030001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Secureboot</windows:key>
-      <windows:name>AvailableUpdates</windows:name>
+      <windows:key>SYSTEM\CurrentControlSet\Control\SecureBoot\State</windows:key>
+      <windows:name>UEFISecureBootEnabled</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7031001" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -14672,6 +14769,12 @@ Enforcing these deactivation controls ensures:
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Windows Script Host\Settings</windows:key>
       <windows:name>Enabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7035001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Secureboot</windows:key>
+      <windows:name>AvailableUpdates</windows:name>
     </windows:registry_object>
   </objects>
   <states>
@@ -15433,6 +15536,14 @@ Enforcing these deactivation controls ensures:
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string">[NtpServerAddress],0x8</windows:value>
     </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2032001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2033001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int" operation="greater than or equal">64</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -15815,7 +15926,7 @@ Enforcing these deactivation controls ensures:
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8009001" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">64</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8010001" version="1">
       <windows:type>reg_dword</windows:type>
@@ -16038,10 +16149,6 @@ Enforcing these deactivation controls ensures:
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8013001" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">2</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8013002" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
@@ -17030,6 +17137,10 @@ Enforcing these deactivation controls ensures:
     <windows:registry_state id="oval:org.adhardening:ste:8034002" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8035001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int" operation="greater than or equal">64</windows:value>
     </windows:registry_state>
     <windows:passwordpolicy_state id="oval:org.adhardening:ste:3001900" version="1">
       <windows:min_passwd_len datatype="int">20</windows:min_passwd_len>
@@ -18747,7 +18858,7 @@ Enforcing these deactivation controls ensures:
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7030001" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">64</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7031001" version="1">
       <windows:type>reg_dword</windows:type>
@@ -18784,6 +18895,10 @@ Enforcing these deactivation controls ensures:
     <windows:registry_state id="oval:org.adhardening:ste:7034002" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7035001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int" operation="greater than or equal">64</windows:value>
     </windows:registry_state>
   </states>
 </oval_definitions>

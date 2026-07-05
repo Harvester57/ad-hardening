@@ -10,8 +10,6 @@
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * UEFI Firmware Configuration Menu
-  * HKLM\SYSTEM\CurrentControlSet\Control
-    * `PEFirmwareType` = `2` (REG_DWORD)
   * HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State
     * `UEFISecureBootEnabled` = `1` (REG_DWORD)
 
@@ -31,29 +29,30 @@ Securing the firmware level ensures:
 ---
 
 ## Legacy Impact & Compatibility
-* **Enterprise Management**: Configuring UEFI passwords manually across thousands of endpoints is administratively impractical. Enterprise deployment tools (such as Dell Command | Configure, HP Client Management Script Library, or Lenovo BIOS WMI interfaces) must be used to automate setting and updating BIOS passwords.
-* **Imaging Workflows**: Standard corporate imaging (PXE boot) requires network boot to be temporarily enabled. If PXE is required, it must be restricted to authorized enterprise subnets and secured with PXE access passwords in the deployment console (e.g., MECM/SCCM).
-* **Legacy Partitions**: Legacy BIOS endpoints running on MBR partition layouts must be converted to GPT using MBR2GPT.exe prior to enabling native UEFI boot mode.
+* **Administrative Overhead**: Technicians must enter the UEFI administrator password to make hardware changes or perform local diagnostics. This password must be securely generated and stored in a central, encrypted vault.
+* **Legacy OS Incompatibility**: Operating systems or recovery environments that do not support native UEFI boot will fail to start. This is acceptable as Tier 2 systems must only run modern, authorized Windows 10/11 Enterprise installations.
+* **Partition Format**: Converting an existing Legacy BIOS installation to UEFI requires repartitioning the primary storage device from Master Boot Record (MBR) to GUID Partition Table (GPT) using utility tools like MBR2GPT.exe.
 
 ---
 
 ## Implementation Steps
 
-### Option A: UEFI Firmware Configuration (Preferred)
+### Option A: Manual UEFI Firmware Configuration (Preferred)
 
-UEFI parameters can be configured manually on individual systems or programmatically automated using enterprise vendor tools.
+UEFI settings must be configured directly within the hardware platform firmware interface during system startup.
 
-#### 1. Manual UEFI Configuration (Small Environments or Standalone Servers)
-1. Restart the system and press the vendor-specific key during startup POST (typically Delete, F2, F10, or F12) to enter the UEFI utility.
-2. Locate the **Security** tab:
-   * Define a strong **Administrator Password** (also called **Supervisor Password**). Do not set a User Password, as that prompts for password entry on every standard boot.
-3. Locate the **Boot** or **System Configuration** tab:
-   * Set the **Boot Mode** to **UEFI Only** or **Native UEFI**.
-   * Set **CSM (Compatibility Support Module)** or **Legacy Support** to **Disabled**.
+1. Turn on or restart the workstation and access the UEFI utility screen by pressing the vendor-specific key during POST (typically Delete, F2, F10, or F12).
+2. Navigate to the **Security** or **Authentication** section:
+   * Select the option to set the **Administrator Password** (also referred to as the **Supervisor Password**). Do not configure a User Password, as that prompts for authentication on every boot rather than only when entering configuration settings.
+   * Enter a strong, complex password. Record this password in the team's secure credential repository.
+3. Navigate to the **Boot** or **System Configuration** section:
+   * Locate the **Boot Mode** setting and set it to **UEFI Only** or **Native UEFI**.
+   * Locate **CSM (Compatibility Support Module)** or **Legacy Boot Support** and set it to **Disabled**.
    * Locate **Fast Boot** or **Quick Boot** and set it to **Disabled** (forcing complete POST diagnostics and full TPM initialization on every boot).
-   * Locate the **Boot Order / Priority**:
-     * Set the primary internal storage drive (Windows Boot Manager) as the first and only boot option.
-     * Disable secondary boot sources (USB, CD/DVD, PXE Network Boot) or require the UEFI administrator password for boot override menus (typically accessed via F12).
+   * Locate **Boot Order** (or **Boot Priority**):
+     * Set the primary boot option to the internal system storage drive (typically containing the Windows Boot Manager partition).
+     * Disable all other boot options (such as USB, SD Card, Optical Drive, and Network PXE Boot) or set them to disabled in the boot menu.
+     * Enable the option to prompt for the UEFI administrator password if a user attempts to access the boot override menu (typically F12 or F8).
 4. Navigate to the **Advanced**, **CPU Configuration**, or **Security Chip** section:
    * Locate **Intel Virtualization Technology (VT-x)** or **AMD-V** and set it to **Enabled**.
    * Locate **Intel VT for Directed I/O (VT-d)** or **AMD IOMMU** and set it to **Enabled** (required for IOMMU/Kernel DMA Protection).
@@ -66,31 +65,7 @@ UEFI parameters can be configured manually on individual systems or programmatic
      * **Signature Database (db)**: Must only contain "Microsoft Windows Production PCA 2011" and "Windows UEFI CA 2023". Remove "Microsoft UEFI CA 2011" and "Microsoft Option ROM UEFI CA 2023" unless strictly required by specific physical PCIe expansion hardware.
 6. Navigate to the **Advanced** or **Firmware Update** section:
    * Locate the option for **BIOS Flash Protection** or **Firmware Rollback Protection** and set it to **Enabled** or **Block Downgrades**.
-7. Save settings and exit the utility.
-
-#### 2. Programmatic Configuration (Enterprise Deployment)
-Use OEM utilities to deploy the UEFI password and boot configuration:
-* **Dell Systems**: Use Dell Command | Configure (`cctk.exe`):
-```cmd
-cctk.exe --setuppwd=YourSecureEnterpriseBIOSPassword
-cctk.exe --bootorder=hdd
-cctk.exe --legacydevorder=
-cctk.exe --embuefipxe=disable
-cctk.exe --virtualization=enable
-cctk.exe --vt-d=enable
-cctk.exe --fastboot=disable
-cctk.exe --mor=enable
-```
-* **HP Systems**: Use HP Client Management Script Library (CMSL) in PowerShell:
-```powershell
-Set-HPBiosSettingValue -Setting "Set BIOS Administrator Password" -Value "YourSecureEnterpriseBIOSPassword"
-Set-HPBiosSettingValue -Setting "Configure Legacy Boot" -Value "Disable"
-Set-HPBiosSettingValue -Setting "Boot Order" -Value "Hard Drive"
-Set-HPBiosSettingValue -Setting "Virtualization Technology (VTx)" -Value "Enable"
-Set-HPBiosSettingValue -Setting "Virtualization Technology Directed I/O (VTd)" -Value "Enable"
-Set-HPBiosSettingValue -Setting "Fast Boot" -Value "Disable"
-Set-HPBiosSettingValue -Setting "Memory Overwrite Request" -Value "Enable"
-```
+7. Save the configuration and restart the workstation.
 
 ---
 
@@ -109,18 +84,10 @@ Run the following script to verify native UEFI boot, Secure Boot state, and retr
 Write-Host "--- Auditing UEFI Security Baseline ---" -ForegroundColor Cyan
 
 # 1. Verify boot environment type
-$RegPath = "HKLM:\System\CurrentControlSet\Control"
-$FirmwareProperty = Get-ItemProperty -Path $RegPath -Name "PEFirmwareType" -ErrorAction SilentlyContinue
-
-if ($FirmwareProperty) {
-    $FirmwareValue = $FirmwareProperty.PEFirmwareType
-    if ($FirmwareValue -eq 2) {
-        Write-Host "Status: Native UEFI mode is active." -ForegroundColor Green
-    } else {
-        Write-Host "VULNERABLE: System booted in Legacy BIOS mode (CSM enabled). Value: $($FirmwareValue)" -ForegroundColor Red
-    }
+if ($env:firmware_type -eq "UEFI") {
+    Write-Host "Status: Native UEFI mode is active." -ForegroundColor Green
 } else {
-    Write-Host "VULNERABLE: Boot environment type could not be read from registry." -ForegroundColor Red
+    Write-Host "VULNERABLE: System booted in Legacy BIOS mode (CSM enabled) or firmware type is unrecognized." -ForegroundColor Red
 }
 
 # 2. Audit Secure Boot status
