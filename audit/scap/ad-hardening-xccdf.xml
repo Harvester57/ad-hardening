@@ -180,6 +180,7 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-018" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-019" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-020" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-001" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-003" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-004" selected="true" />
@@ -219,6 +220,7 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-006" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-007" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-016" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-001" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-003" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-004" selected="true" />
@@ -542,6 +544,7 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-006" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-007" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-016" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-001" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-003" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-004" selected="true" />
@@ -31538,6 +31541,103 @@ Write-Host "Intra-DC management blocking rules applied successfully." -Foregroun
   </Group>
   <Group id="xccdf_org.adhardening.benchmarks_group_Module_5__Logging__Monitoring___SIEM">
     <title>Module 5: Logging, Monitoring &amp; SIEM</title>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-001" severity="high" weight="10.0" selected="false">
+      <title>[REQ-LOG-001] Configure Advanced Security Audit Policies</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers, Member Servers, Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016 (and above), Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>05-logging-monitoring/configure-advanced-audit-policies.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Standard Windows security event logging is basic and fails to capture critical event vectors, leading to visibility gaps during compromises. Enforcing refined subcategory audit policies ensures detailed Success and Failure logs for logon attempts, privilege use, process creations, and registry modifications without overloading log stores.</xhtml:p>
+        <xhtml:p>This requirement acts as the primary logging baseline, enforcing category overrides and linking to profile-specific submodules matching each system's security tier.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>) on a management host.</xhtml:li>
+          <xhtml:li>Edit the corresponding baseline GPO (e.g. <xhtml:code>GPO_Hardening_Baseline</xhtml:code>).</xhtml:li>
+          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the following setting:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>*: <xhtml:code>Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Setting</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="implementation_scripts/Configure-AdvancedAuditPolicies.ps1">Download Script: Configure-AdvancedAuditPolicies.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-AdvancedAuditPolicies.ps1
+# Description: Enforces Advanced Audit Policy Overrides registry value.
+
+$RegPath = "reg:\HKLM\System\CurrentControlSet\Control\Lsa"
+$ValueName = "SCENoApplyLegacyAuditPolicy"
+
+Write-Host "Enforcing Advanced Security Audit Policies override settings..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value 1 -Type DWord -Force
+Write-Host "Advanced Audit Policy overrides enforced successfully." -ForegroundColor Green</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To verify the setting has been applied:</xhtml:em>
+          <xhtml:a href="audit_scripts/Get-AdvancedAuditPoliciesStatus.ps1">Download Script: Get-AdvancedAuditPoliciesStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-AdvancedAuditPoliciesStatus.ps1
+# Description: Audits the Advanced Audit Policy Overrides registry value.
+
+$RegPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+$ValueName = "SCENoApplyLegacyAuditPolicy"
+
+$val = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+if ($val -eq 1) {
+    Write-Host "Advanced Security Audit Policy Overrides are correctly enabled." -ForegroundColor Green
+} else {
+    Write-Host "Advanced Security Audit Policy Overrides are disabled!" -ForegroundColor Red
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-AdvancedAuditPolicies.ps1
+# Description: Enforces Advanced Audit Policy Overrides registry value.
+
+$RegPath = "reg:\HKLM\System\CurrentControlSet\Control\Lsa"
+$ValueName = "SCENoApplyLegacyAuditPolicy"
+
+Write-Host "Enforcing Advanced Security Audit Policies override settings..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value 1 -Type DWord -Force
+Write-Host "Advanced Audit Policy overrides enforced successfully." -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:5001" />
+      </check>
+    </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-002" severity="high" weight="10.0" selected="false">
       <title>[REQ-LOG-002] Configure PowerShell and Command-Line Auditing</title>
       <description>

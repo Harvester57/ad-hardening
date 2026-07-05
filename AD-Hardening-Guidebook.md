@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: bc207e0 | Generated: July 05, 2026</span>
+      <span>Commit: 98319cc | Generated: July 05, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1740,16 +1740,18 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure and enforce BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.
 * **[REQ-DC-034 - Configure Windows Defender Application Control](#02-domain-controllers-configure-wdac-md)**
   Requirement to deploy Windows Defender Application Control (WDAC) on Domain Controllers in Audit Mode to block unauthorized system-level binaries and scripts.
-* **[REQ-DC-136 - Audit Policy: Advanced Audit Policy Overrides](#02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md)**
-* **[REQ-DC-137 - Audit Policy: Account Logon Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md)**
-* **[REQ-DC-138 - Audit Policy: Account Management Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-account-management-md)**
-* **[REQ-DC-139 - Audit Policy: Detailed Tracking Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md)**
-* **[REQ-DC-140 - Audit Policy: Directory Service Access Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md)**
-* **[REQ-DC-141 - Audit Policy: Logon and Logoff Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md)**
-* **[REQ-DC-142 - Audit Policy: Object Access Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-object-access-md)**
-* **[REQ-DC-143 - Audit Policy: Policy Change Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md)**
-* **[REQ-DC-144 - Audit Policy: Privilege Use Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md)**
-* **[REQ-DC-145 - Audit Policy: System Events Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-system-events-md)**
+* **[REQ-DC-135 - Configure Advanced Security Audit Policies for Domain Controllers](#02-domain-controllers-audit-policy-README-md)**
+  Enforces granular Windows security audit policies (including logons, group memberships, directory service modifications, and object access) to log critical threat telemetry on Domain Controllers.
+  * **[REQ-DC-136 - Audit Policy: Advanced Audit Policy Overrides](#02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md)**
+  * **[REQ-DC-137 - Audit Policy: Account Logon Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md)**
+  * **[REQ-DC-138 - Audit Policy: Account Management Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-account-management-md)**
+  * **[REQ-DC-139 - Audit Policy: Detailed Tracking Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md)**
+  * **[REQ-DC-140 - Audit Policy: Directory Service Access Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md)**
+  * **[REQ-DC-141 - Audit Policy: Logon and Logoff Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md)**
+  * **[REQ-DC-142 - Audit Policy: Object Access Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-object-access-md)**
+  * **[REQ-DC-143 - Audit Policy: Policy Change Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md)**
+  * **[REQ-DC-144 - Audit Policy: Privilege Use Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md)**
+  * **[REQ-DC-145 - Audit Policy: System Events Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-system-events-md)**
 
 
 <div style="page-break-before: always;"></div>
@@ -20707,6 +20709,116 @@ if ($Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="02-domain-controllers-audit-policy-README-md"></div>
+
+<div id="02-domain-controllers-audit-policy-README-md-req-dc-135-configure-advanced-security-audit-policies-for-domain-controllers"></div>
+# [REQ-DC-135] Configure Advanced Security Audit Policies for Domain Controllers
+
+<div id="02-domain-controllers-audit-policy-README-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016 (and above)
+
+---
+
+<div id="02-domain-controllers-audit-policy-README-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Policy**: `Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings`
+  * **Setting**: `Enabled`
+  * **Registry Location**: `HKLM\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy` = `1` (DWord)
+
+---
+
+<div id="02-domain-controllers-audit-policy-README-md-rationale"></div>
+## Rationale
+Enforcing category overrides on Domain Controllers is a prerequisite to ensure that the refined audit subcategories (such as Directory Service Access, Kerberos operations, etc.) are correctly logged and not masked by basic legacy policies.
+
+---
+
+<div id="02-domain-controllers-audit-policy-README-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Ensure the Security log size is at least 1GB to prevent rollover.
+
+---
+
+<div id="02-domain-controllers-audit-policy-README-md-submodule-requirements"></div>
+## Submodule Requirements
+The child policies under this parent requirement:
+* **[REQ-DC-136 - Audit Policy: Advanced Audit Policy Overrides](#02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md)**
+* **[REQ-DC-137 - Audit Policy: Account Logon Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md)**
+* **[REQ-DC-138 - Audit Policy: Account Management Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-account-management-md)**
+* **[REQ-DC-139 - Audit Policy: Detailed Tracking Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md)**
+* **[REQ-DC-140 - Audit Policy: Directory Service Access Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md)**
+* **[REQ-DC-141 - Audit Policy: Logon and Logoff Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md)**
+* **[REQ-DC-142 - Audit Policy: Object Access Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-object-access-md)**
+* **[REQ-DC-143 - Audit Policy: Policy Change Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md)**
+* **[REQ-DC-144 - Audit Policy: Privilege Use Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md)**
+* **[REQ-DC-145 - Audit Policy: System Events Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-system-events-md)**
+
+---
+
+<div id="02-domain-controllers-audit-policy-README-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-audit-policy-README-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+2. Configure the following setting:
+   * **Policy**: `Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings`
+   * **Setting**: `Enabled`
+
+---
+
+<div id="02-domain-controllers-audit-policy-README-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-DcAuditPoliciesParent.ps1](../implementation_scripts/Configure-DcAuditPoliciesParent.ps1)
+
+```powershell
+# Configure-DcAuditPoliciesParent.ps1
+# Description: Enforces Advanced Audit Policy Overrides registry value.
+
+$RegPath = "reg:\HKLM\System\CurrentControlSet\Control\Lsa"
+$ValueName = "SCENoApplyLegacyAuditPolicy"
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value 1 -Type DWord -Force
+Write-Host "Enforced SCENoApplyLegacyAuditPolicy = 1 on Domain Controller" -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+[Download Script: Get-DcAuditPoliciesParentStatus.ps1](../audit_scripts/Get-DcAuditPoliciesParentStatus.ps1)
+
+```powershell
+# Get-DcAuditPoliciesParentStatus.ps1
+# Description: Audits the Advanced Audit Policy Overrides registry value.
+
+$RegPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+$ValueName = "SCENoApplyLegacyAuditPolicy"
+
+$val = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+if ($val -eq 1) {
+    Write-Host "Advanced Security Audit Policy Overrides are correctly enabled." -ForegroundColor Green
+} else {
+    Write-Host "Advanced Security Audit Policy Overrides are disabled!" -ForegroundColor Red
+}
+```
+
+---
+
+<div id="02-domain-controllers-audit-policy-README-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R48
+* **CIS Benchmark**: Section 9 and 17
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md"></div>
 
 <div id="02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md-req-dc-136-audit-policy-advanced-audit-policy-overrides-on-domain-controllers"></div>
@@ -28837,80 +28949,109 @@ This directory contains configuration policies for security log auditing, PowerS
 
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md"></div>
 
-<div id="05-logging-monitoring-configure-advanced-audit-policies-md-configure-advanced-security-audit-policies"></div>
-# Configure Advanced Security Audit Policies
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-req-log-001-configure-advanced-security-audit-policies"></div>
+# [REQ-LOG-001] Configure Advanced Security Audit Policies
 
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md-target-scope"></div>
 ## Target Scope
-* **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise.
+* **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations
+* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise
 
 ---
 
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**: Stored under `Advanced Audit Policy Configuration` and Lsa registry overrides.
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Policy**: `Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings`
+  * **Setting**: `Enabled`
+  * **Registry Location**: `HKLM\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy` = `1` (DWord)
 
 ---
 
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md-rationale"></div>
 ## Rationale
-Standard Windows event logging is basic and fails to capture critical event vectors, leading to visibility gaps during compromises. Enforcing refined subcategory audit policies ensures detailed Success and Failure logs for logon attempts, privilege use, process creations, and registry modifications without overloading log stores.
+Standard Windows security event logging is basic and fails to capture critical event vectors, leading to visibility gaps during compromises. Enforcing refined subcategory audit policies ensures detailed Success and Failure logs for logon attempts, privilege use, process creations, and registry modifications without overloading log stores. 
 
-This module is split into profile-specific advanced audit submodules mapping to each system's security tier.
+This requirement acts as the primary logging baseline, enforcing category overrides and linking to profile-specific submodules matching each system's security tier.
+
+---
+
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Set local Security Event Log size to a minimum of 512MB to prevent premature rollover of security auditing data.
 
 ---
 
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md-modular-profile-audit-policies"></div>
 ## Modular Profile Audit Policies
+This logging requirement is split into profile-specific advanced audit submodules mapping to each system's security tier:
+* **[REQ-DC-135 - Configure Advanced Security Audit Policies for Domain Controllers](#02-domain-controllers-audit-policy-README-md)**
+* **[REQ-PAW-129 - Configure Advanced Security Audit Policies for PAWs](#07-paws-audit-policy-README-md)**
+* **[REQ-END-140 - Configure Advanced Security Audit Policies for Endpoints](#08-endpoints-audit-policy-README-md)**
 
-<div id="05-logging-monitoring-configure-advanced-audit-policies-md-1-domain-controller-audit-submodule-module-2"></div>
-### 1. Domain Controller Audit Submodule (Module 2)
-The complete set of advanced audit policies for Domain Controllers:
-* **[REQ-DC-136 - Audit Policy: Advanced Audit Policy Overrides](#02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md)**
-* **[REQ-DC-137 - Audit Policy: Account Logon Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md)**
-* **[REQ-DC-138 - Audit Policy: Account Management Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-account-management-md)**
-* **[REQ-DC-139 - Audit Policy: Detailed Tracking Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md)**
-* **[REQ-DC-140 - Audit Policy: Directory Service Access Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md)**
-* **[REQ-DC-141 - Audit Policy: Logon and Logoff Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md)**
-* **[REQ-DC-142 - Audit Policy: Object Access Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-object-access-md)**
-* **[REQ-DC-143 - Audit Policy: Policy Change Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md)**
-* **[REQ-DC-144 - Audit Policy: Privilege Use Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md)**
-* **[REQ-DC-145 - Audit Policy: System Events Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-system-events-md)**
+---
 
-<div id="05-logging-monitoring-configure-advanced-audit-policies-md-2-paw-audit-submodule-module-7"></div>
-### 2. PAW Audit Submodule (Module 7)
-The complete set of advanced audit policies for Privileged Access Workstations:
-* **[REQ-PAW-130 - Audit Policy: Advanced Audit Policy Overrides for PAWs](#07-paws-audit-policy-configure-paw-audit-audit-override-md)**
-* **[REQ-PAW-131 - Audit Policy: Account Logon Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-account-logon-md)**
-* **[REQ-PAW-132 - Audit Policy: Account Management Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-account-management-md)**
-* **[REQ-PAW-133 - Audit Policy: Detailed Tracking Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-detailed-tracking-md)**
-* **[REQ-PAW-134 - Audit Policy: Logon and Logoff Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-logon-logoff-md)**
-* **[REQ-PAW-135 - Audit Policy: Object Access Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-object-access-md)**
-* **[REQ-PAW-136 - Audit Policy: Policy Change Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-policy-change-md)**
-* **[REQ-PAW-137 - Audit Policy: Privilege Use Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-privilege-use-md)**
-* **[REQ-PAW-138 - Audit Policy: System Events Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-system-events-md)**
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-implementation-steps"></div>
+## Implementation Steps
 
-<div id="05-logging-monitoring-configure-advanced-audit-policies-md-3-endpoint-audit-submodule-module-8"></div>
-### 3. Endpoint Audit Submodule (Module 8)
-The complete set of advanced audit policies for Client Workstations:
-* **[REQ-END-141 - Audit Policy: Advanced Audit Policy Overrides for Endpoints](#08-endpoints-audit-policy-configure-end-audit-audit-override-md)**
-* **[REQ-END-142 - Audit Policy: Account Logon Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-account-logon-md)**
-* **[REQ-END-143 - Audit Policy: Account Management Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-account-management-md)**
-* **[REQ-END-144 - Audit Policy: Detailed Tracking Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md)**
-* **[REQ-END-145 - Audit Policy: Logon and Logoff Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-logon-logoff-md)**
-* **[REQ-END-146 - Audit Policy: Object Access Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-object-access-md)**
-* **[REQ-END-147 - Audit Policy: Policy Change Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-policy-change-md)**
-* **[REQ-END-148 - Audit Policy: Privilege Use Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-privilege-use-md)**
-* **[REQ-END-149 - Audit Policy: System Events Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-system-events-md)**
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
+2. Edit the corresponding baseline GPO (e.g. `GPO_Hardening_Baseline`).
+3. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the following setting:
+   * **Policy**: `Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings`
+   * **Setting**: `Enabled`
+
+---
+
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-AdvancedAuditPolicies.ps1](implementation_scripts/Configure-AdvancedAuditPolicies.ps1)
+
+```powershell
+# Configure-AdvancedAuditPolicies.ps1
+# Description: Enforces Advanced Audit Policy Overrides registry value.
+
+$RegPath = "reg:\HKLM\System\CurrentControlSet\Control\Lsa"
+$ValueName = "SCENoApplyLegacyAuditPolicy"
+
+Write-Host "Enforcing Advanced Security Audit Policies override settings..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value 1 -Type DWord -Force
+Write-Host "Advanced Audit Policy overrides enforced successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+[Download Script: Get-AdvancedAuditPoliciesStatus.ps1](audit_scripts/Get-AdvancedAuditPoliciesStatus.ps1)
+
+```powershell
+# Get-AdvancedAuditPoliciesStatus.ps1
+# Description: Audits the Advanced Audit Policy Overrides registry value.
+
+$RegPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+$ValueName = "SCENoApplyLegacyAuditPolicy"
+
+$val = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+if ($val -eq 1) {
+    Write-Host "Advanced Security Audit Policy Overrides are correctly enabled." -ForegroundColor Green
+} else {
+    Write-Host "Advanced Security Audit Policy Overrides are disabled!" -ForegroundColor Red
+}
+```
 
 ---
 
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md-sources-compliance-references"></div>
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R48
-* **CIS Microsoft Windows Benchmarks**: Section 9 and 17
+* **CIS Benchmark**: Section 9 and 17
 
 
 <div style="page-break-before: always;"></div>
@@ -33043,6 +33184,9 @@ This directory contains the physical isolation policies and operating system sec
 
 36. **[REQ-PAW-036 - Configure Windows Defender Application Control](#07-paws-configure-wdac-md)**
     Deploys Windows Defender Application Control (WDAC) on PAWs in Audit Mode to block unauthorized system-level binaries and scripts.
+
+37. **[REQ-PAW-129 - Configure Advanced Security Audit Policies for PAWs](#07-paws-audit-policy-README-md)**
+    Enforces granular Windows security audit policies (including logons, group memberships, registry access, and system events) to log critical threat telemetry on privileged access workstations.
     * **[REQ-PAW-130 - Audit Policy: Advanced Audit Policy Overrides for PAWs](#07-paws-audit-policy-configure-paw-audit-audit-override-md)**
     * **[REQ-PAW-131 - Audit Policy: Account Logon Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-account-logon-md)**
     * **[REQ-PAW-132 - Audit Policy: Account Management Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-account-management-md)**
@@ -52334,6 +52478,115 @@ if ($Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="07-paws-audit-policy-README-md"></div>
+
+<div id="07-paws-audit-policy-README-md-req-paw-129-configure-advanced-security-audit-policies-for-paws"></div>
+# [REQ-PAW-129] Configure Advanced Security Audit Policies for PAWs
+
+<div id="07-paws-audit-policy-README-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-audit-policy-README-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Policy**: `Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings`
+  * **Setting**: `Enabled`
+  * **Registry Location**: `HKLM\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy` = `1` (DWord)
+
+---
+
+<div id="07-paws-audit-policy-README-md-rationale"></div>
+## Rationale
+Enforcing category overrides on PAWs is a prerequisite to ensure that the refined audit subcategories (such as Logon, Object Access, System Events, etc.) are correctly logged and not masked by basic legacy policies.
+
+---
+
+<div id="07-paws-audit-policy-README-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Ensure the Security log size is at least 512MB to prevent rollover.
+
+---
+
+<div id="07-paws-audit-policy-README-md-submodule-requirements"></div>
+## Submodule Requirements
+The child policies under this parent requirement:
+* **[REQ-PAW-130 - Audit Policy: Advanced Audit Policy Overrides for PAWs](#07-paws-audit-policy-configure-paw-audit-audit-override-md)**
+* **[REQ-PAW-131 - Audit Policy: Account Logon Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-account-logon-md)**
+* **[REQ-PAW-132 - Audit Policy: Account Management Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-account-management-md)**
+* **[REQ-PAW-133 - Audit Policy: Detailed Tracking Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-detailed-tracking-md)**
+* **[REQ-PAW-134 - Audit Policy: Logon and Logoff Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-logon-logoff-md)**
+* **[REQ-PAW-135 - Audit Policy: Object Access Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-object-access-md)**
+* **[REQ-PAW-136 - Audit Policy: Policy Change Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-policy-change-md)**
+* **[REQ-PAW-137 - Audit Policy: Privilege Use Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-privilege-use-md)**
+* **[REQ-PAW-138 - Audit Policy: System Events Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-system-events-md)**
+
+---
+
+<div id="07-paws-audit-policy-README-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-audit-policy-README-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+2. Configure the following setting:
+   * **Policy**: `Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings`
+   * **Setting**: `Enabled`
+
+---
+
+<div id="07-paws-audit-policy-README-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditPoliciesParent.ps1](../implementation_scripts/Configure-PawAuditPoliciesParent.ps1)
+
+```powershell
+# Configure-PawAuditPoliciesParent.ps1
+# Description: Enforces Advanced Audit Policy Overrides registry value.
+
+$RegPath = "reg:\HKLM\System\CurrentControlSet\Control\Lsa"
+$ValueName = "SCENoApplyLegacyAuditPolicy"
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value 1 -Type DWord -Force
+Write-Host "Enforced SCENoApplyLegacyAuditPolicy = 1 on PAW" -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+[Download Script: Get-PawAuditPoliciesParentStatus.ps1](../audit_scripts/Get-PawAuditPoliciesParentStatus.ps1)
+
+```powershell
+# Get-PawAuditPoliciesParentStatus.ps1
+# Description: Audits the Advanced Audit Policy Overrides registry value.
+
+$RegPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+$ValueName = "SCENoApplyLegacyAuditPolicy"
+
+$val = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+if ($val -eq 1) {
+    Write-Host "Advanced Security Audit Policy Overrides are correctly enabled." -ForegroundColor Green
+} else {
+    Write-Host "Advanced Security Audit Policy Overrides are disabled!" -ForegroundColor Red
+}
+```
+
+---
+
+<div id="07-paws-audit-policy-README-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R48
+* **CIS Benchmark**: Section 9 and 17
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="07-paws-audit-policy-configure-paw-audit-audit-override-md"></div>
 
 <div id="07-paws-audit-policy-configure-paw-audit-audit-override-md-req-paw-130-audit-policy-advanced-audit-policy-overrides-for-paws"></div>
@@ -53778,6 +54031,9 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 36. **[REQ-END-036 - Enable WDAC Driver Blocklist](#08-endpoints-enable-wdac-driver-blocklist-md)**
     Enforces the Microsoft Vulnerable Driver Blocklist via Windows Defender Application Control (WDAC) to prevent known vulnerable or malicious drivers from loading in kernel space, mitigating Bring Your Own Vulnerable Driver (BYOVD) attacks.
+
+37. **[REQ-END-140 - Configure Advanced Security Audit Policies for Endpoints](#08-endpoints-audit-policy-README-md)**
+    Enforces granular Windows security audit policies (including logons, group memberships, registry access, and system events) to log critical threat telemetry on Tier 2 client workstations.
     * **[REQ-END-141 - Audit Policy: Advanced Audit Policy Overrides for Endpoints](#08-endpoints-audit-policy-configure-end-audit-audit-override-md)**
     * **[REQ-END-142 - Audit Policy: Account Logon Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-account-logon-md)**
     * **[REQ-END-143 - Audit Policy: Account Management Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-account-management-md)**
@@ -75056,6 +75312,115 @@ if ($Vulnerable) {
 * **ANSSI Active Directory Hardening Guide**: Recommendations on system component code integrity and driver signature enforcement.
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.14.3 / 18.9.31.2 (Deploy Windows Defender Application Control / Memory Integrity).
 * **Microsoft Security Guidance**: Microsoft recommended driver block rules documentation.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-audit-policy-README-md"></div>
+
+<div id="08-endpoints-audit-policy-README-md-req-end-140-configure-advanced-security-audit-policies-for-endpoints"></div>
+# [REQ-END-140] Configure Advanced Security Audit Policies for Endpoints
+
+<div id="08-endpoints-audit-policy-README-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-audit-policy-README-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Policy**: `Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings`
+  * **Setting**: `Enabled`
+  * **Registry Location**: `HKLM\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy` = `1` (DWord)
+
+---
+
+<div id="08-endpoints-audit-policy-README-md-rationale"></div>
+## Rationale
+Enforcing category overrides on client workstations is a prerequisite to ensure that the refined audit subcategories (such as Logon, Object Access, System Events, etc.) are correctly logged and not masked by basic legacy policies.
+
+---
+
+<div id="08-endpoints-audit-policy-README-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Ensure the Security log size is at least 512MB to prevent rollover.
+
+---
+
+<div id="08-endpoints-audit-policy-README-md-submodule-requirements"></div>
+## Submodule Requirements
+The child policies under this parent requirement:
+* **[REQ-END-141 - Audit Policy: Advanced Audit Policy Overrides for Endpoints](#08-endpoints-audit-policy-configure-end-audit-audit-override-md)**
+* **[REQ-END-142 - Audit Policy: Account Logon Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-account-logon-md)**
+* **[REQ-END-143 - Audit Policy: Account Management Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-account-management-md)**
+* **[REQ-END-144 - Audit Policy: Detailed Tracking Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md)**
+* **[REQ-END-145 - Audit Policy: Logon and Logoff Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-logon-logoff-md)**
+* **[REQ-END-146 - Audit Policy: Object Access Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-object-access-md)**
+* **[REQ-END-147 - Audit Policy: Policy Change Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-policy-change-md)**
+* **[REQ-END-148 - Audit Policy: Privilege Use Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-privilege-use-md)**
+* **[REQ-END-149 - Audit Policy: System Events Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-system-events-md)**
+
+---
+
+<div id="08-endpoints-audit-policy-README-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-audit-policy-README-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+2. Configure the following setting:
+   * **Policy**: `Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings`
+   * **Setting**: `Enabled`
+
+---
+
+<div id="08-endpoints-audit-policy-README-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditPoliciesParent.ps1](../implementation_scripts/Configure-EndAuditPoliciesParent.ps1)
+
+```powershell
+# Configure-EndAuditPoliciesParent.ps1
+# Description: Enforces Advanced Audit Policy Overrides registry value.
+
+$RegPath = "reg:\HKLM\System\CurrentControlSet\Control\Lsa"
+$ValueName = "SCENoApplyLegacyAuditPolicy"
+
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value 1 -Type DWord -Force
+Write-Host "Enforced SCENoApplyLegacyAuditPolicy = 1 on Endpoint" -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+[Download Script: Get-EndAuditPoliciesParentStatus.ps1](../audit_scripts/Get-EndAuditPoliciesParentStatus.ps1)
+
+```powershell
+# Get-EndAuditPoliciesParentStatus.ps1
+# Description: Audits the Advanced Audit Policy Overrides registry value.
+
+$RegPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+$ValueName = "SCENoApplyLegacyAuditPolicy"
+
+$val = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+if ($val -eq 1) {
+    Write-Host "Advanced Security Audit Policy Overrides are correctly enabled." -ForegroundColor Green
+} else {
+    Write-Host "Advanced Security Audit Policy Overrides are disabled!" -ForegroundColor Red
+}
+```
+
+---
+
+<div id="08-endpoints-audit-policy-README-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendation R48
+* **CIS Benchmark**: Section 9 and 17
 
 
 <div style="page-break-before: always;"></div>

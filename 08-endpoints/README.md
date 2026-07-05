@@ -228,6 +228,9 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 36. **[REQ-END-036 - Enable WDAC Driver Blocklist](enable-wdac-driver-blocklist.md)**
     Enforces the Microsoft Vulnerable Driver Blocklist via Windows Defender Application Control (WDAC) to prevent known vulnerable or malicious drivers from loading in kernel space, mitigating Bring Your Own Vulnerable Driver (BYOVD) attacks.
+
+37. **[REQ-END-140 - Configure Advanced Security Audit Policies for Endpoints](audit-policy/README.md)**
+    Enforces granular Windows security audit policies (including logons, group memberships, registry access, and system events) to log critical threat telemetry on Tier 2 client workstations.
     * **[REQ-END-141 - Audit Policy: Advanced Audit Policy Overrides for Endpoints](audit-policy/configure-end-audit-audit-override.md)**
     * **[REQ-END-142 - Audit Policy: Account Logon Auditing for Endpoints](audit-policy/configure-end-audit-account-logon.md)**
     * **[REQ-END-143 - Audit Policy: Account Management Auditing for Endpoints](audit-policy/configure-end-audit-account-management.md)**

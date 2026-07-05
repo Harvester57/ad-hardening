@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-05T19:49:19Z</oval:timestamp>
+    <oval:timestamp>2026-07-05T19:55:03Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -6188,6 +6188,24 @@ Additionally, administrators historically deployed custom login or management sc
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-ID-020 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:3020" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:5001" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-LOG-001] Configure Advanced Security Audit Policies</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Standard Windows security event logging is basic and fails to capture critical event vectors, leading to visibility gaps during compromises. Enforcing refined subcategory audit policies ensures detailed Success and Failure logs for logon attempts, privilege use, process creations, and registry modifications without overloading log stores. 
+
+This requirement acts as the primary logging baseline, enforcing category overrides and linking to profile-specific submodules matching each system's security tier.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-LOG-001 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:5001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:5002" version="1" class="compliance">
@@ -12441,6 +12459,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:3020" />
       <windows:state state_ref="oval:org.adhardening:ste:3020" />
     </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:5001" version="1" comment="Placeholder check for REQ-LOG-001 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:5001" />
+      <windows:state state_ref="oval:org.adhardening:ste:5001" />
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:5002001" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit Value ProcessCreationIncludeCmdLine_Enabled" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:5002001" />
       <windows:state state_ref="oval:org.adhardening:ste:5002001" />
@@ -17981,6 +18003,12 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:5001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:5002001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -23043,6 +23071,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:3020" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:5001" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>

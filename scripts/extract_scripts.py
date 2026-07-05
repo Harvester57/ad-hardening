@@ -32,7 +32,7 @@ def main():
             dirs[:] = [d for d in dirs if d not in ["implementation_scripts", "audit_scripts"]]
             
             for file in sorted(files):
-                if not file.endswith(".md") or file.lower() == "readme.md":
+                if not file.endswith(".md") or (file.lower() == "readme.md" and root == module_path):
                     continue
                     
                 file_path = os.path.join(root, file)
