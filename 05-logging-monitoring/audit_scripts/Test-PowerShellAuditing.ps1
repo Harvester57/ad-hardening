@@ -5,10 +5,10 @@ Write-Host "--- Auditing PowerShell & Command Line Auditing ---" -ForegroundColo
 
 # 1. Audit Process Command-Line Logging
 $ProcPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit"
-$CmdLineVal = Get-ItemProperty -Path $ProcPath -Name "ProcessCreationIncludeCmdLine_Policy" -ErrorAction SilentlyContinue
+$CmdLineVal = Get-ItemProperty -Path $ProcPath -Name "ProcessCreationIncludeCmdLine_Enabled" -ErrorAction SilentlyContinue
 $CmdSetting = 0
 if ($CmdLineVal) {
-    $CmdSetting = $CmdLineVal.ProcessCreationIncludeCmdLine_Policy
+    $CmdSetting = $CmdLineVal.ProcessCreationIncludeCmdLine_Enabled
 }
 $CmdColor = "Red"
 if ($CmdSetting -eq 1) {

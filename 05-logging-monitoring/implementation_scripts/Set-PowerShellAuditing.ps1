@@ -9,7 +9,7 @@ $ProcAuditReg = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System
 if (-not (Test-Path $ProcAuditReg)) {
     New-Item -Path $ProcAuditReg -Force | Out-Null
 }
-Set-ItemProperty -Path $ProcAuditReg -Name "ProcessCreationIncludeCmdLine_Policy" -Value 1 -Type DWord
+Set-ItemProperty -Path $ProcAuditReg -Name "ProcessCreationIncludeCmdLine_Enabled" -Value 1 -Type DWord
 Write-Host "    Command line process auditing enabled." -ForegroundColor Green
 
 # 2. Configure PowerShell Script Block Logging

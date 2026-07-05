@@ -10,7 +10,7 @@
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **Process Command-Line**: `Computer Configuration\Policies\Administrative Templates\System\Audit Process Creation\Include command line in process creation events`
-    - Registry: `HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit\ProcessCreationIncludeCmdLine_Policy` (Value: 1)
+    - Registry: `HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit\ProcessCreationIncludeCmdLine_Enabled` (Value: 1)
   * **PowerShell Script Block Logging**: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows PowerShell\Turn on PowerShell Script Block Logging`
     - Registry: `HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\EnableScriptBlockLogging` (Value: 1)
     - Registry: `HKLM:\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging\EnableScriptBlockInvocationLogging` (Value: 0)
@@ -89,7 +89,7 @@ $ProcAuditReg = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System
 if (-not (Test-Path $ProcAuditReg)) {
     New-Item -Path $ProcAuditReg -Force | Out-Null
 }
-Set-ItemProperty -Path $ProcAuditReg -Name "ProcessCreationIncludeCmdLine_Policy" -Value 1 -Type DWord
+Set-ItemProperty -Path $ProcAuditReg -Name "ProcessCreationIncludeCmdLine_Enabled" -Value 1 -Type DWord
 Write-Host "    Command line process auditing enabled." -ForegroundColor Green
 
 # 2. Configure PowerShell Script Block Logging
@@ -175,10 +175,10 @@ Write-Host "--- Auditing PowerShell & Command Line Auditing ---" -ForegroundColo
 
 # 1. Audit Process Command-Line Logging
 $ProcPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit"
-$CmdLineVal = Get-ItemProperty -Path $ProcPath -Name "ProcessCreationIncludeCmdLine_Policy" -ErrorAction SilentlyContinue
+$CmdLineVal = Get-ItemProperty -Path $ProcPath -Name "ProcessCreationIncludeCmdLine_Enabled" -ErrorAction SilentlyContinue
 $CmdSetting = 0
 if ($CmdLineVal) {
-    $CmdSetting = $CmdLineVal.ProcessCreationIncludeCmdLine_Policy
+    $CmdSetting = $CmdLineVal.ProcessCreationIncludeCmdLine_Enabled
 }
 $CmdColor = "Red"
 if ($CmdSetting -eq 1) {
