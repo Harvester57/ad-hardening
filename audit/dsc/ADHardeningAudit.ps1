@@ -86,6 +86,7 @@ Configuration ADHardeningAudit {
             "02-domain-controllers\audit_scripts\Get-SYSVOLDfsrMigrationStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-UnnecessaryServicesStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-UntrustedFontBlockingStatus.ps1",
+            "02-domain-controllers\audit_scripts\Test-DCWDACStatus.ps1",
             "03-identities-services\audit_scripts\Audit-KerberosPreAuth.ps1",
             "03-identities-services\audit_scripts\Audit-MachineAccountQuota.ps1",
             "03-identities-services\audit_scripts\Audit-OUAccidentalDeletion.ps1",
@@ -157,6 +158,7 @@ Configuration ADHardeningAudit {
             "07-paws\audit_scripts\Test-PawUserProfileRestrictions.ps1",
             "07-paws\audit_scripts\Test-PawUserRightsAssignments.ps1",
             "07-paws\audit_scripts\Test-PawVBSCredentialGuard.ps1",
+            "07-paws\audit_scripts\Test-PawWDACStatus.ps1",
             "07-paws\audit_scripts\Test-PawWSUSClientStatus.ps1"
         )
     }
@@ -168,6 +170,7 @@ Configuration ADHardeningAudit {
             "08-endpoints\audit_scripts\Audit-SecureBootRevocations.ps1",
             "08-endpoints\audit_scripts\Audit-UEFISecurity.ps1",
             "08-endpoints\audit_scripts\Get-DefenderAdvancedStatus.ps1",
+            "08-endpoints\audit_scripts\Get-DriverBlocklistStatus.ps1",
             "08-endpoints\audit_scripts\Get-ElamPolicyStatus.ps1",
             "08-endpoints\audit_scripts\Get-ExploitProtectionStatus.ps1",
             "08-endpoints\audit_scripts\Get-LsaProtectionStatus.ps1",

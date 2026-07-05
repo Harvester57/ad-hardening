@@ -47,6 +47,7 @@
     * [REQ-DC-031 - Configure NTP Time Synchronization on the PDC Emulator](02-domain-controllers/configure-pdc-time-sync.md)
     * [REQ-DC-032 - Enable UEFI Secure Boot](02-domain-controllers/enable-secure-boot.md)
     * [REQ-DC-033 - Configure Secure Boot Revocations and Bootloader Updates](02-domain-controllers/configure-secure-boot-revocations.md)
+    * [REQ-DC-034 - Configure Windows Defender Application Control](02-domain-controllers/configure-wdac.md)
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)
@@ -144,6 +145,7 @@
     * [REQ-PAW-033 - Configure Microsoft Office Security and Block OLE Packages](07-paws/configure-office-security.md)
     * [REQ-PAW-034 - Disable Windows Script Host and Remap Scripting Extensions](07-paws/disable-windows-script-host.md)
     * [REQ-PAW-035 - Configure Secure Boot Revocations and Bootloader Updates for PAWs](07-paws/configure-secure-boot-revocations.md)
+    * [REQ-PAW-036 - Configure Windows Defender Application Control](07-paws/configure-wdac.md)
 ## Module 8: Endpoint Hardening
 * [Module 8: Endpoint Hardening](08-endpoints/README.md)
     * [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](08-endpoints/harden-network-and-name-resolution.md)
@@ -181,6 +183,7 @@
     * [REQ-END-033 - Configure Microsoft Office Security and Block OLE Packages](08-endpoints/configure-office-security.md)
     * [REQ-END-034 - Disable Windows Script Host and Remap Scripting Extensions](08-endpoints/disable-windows-script-host.md)
     * [REQ-END-035 - Configure Secure Boot Revocations and Bootloader Updates](08-endpoints/configure-secure-boot-revocations.md)
+    * [REQ-END-036 - Enable WDAC Driver Blocklist](08-endpoints/enable-wdac-driver-blocklist.md)
 
 ## Implementation Roadmap
 * [Implementation Plan and Prioritized Roadmap](roadmap/implementation-plan.md)

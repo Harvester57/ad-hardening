@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 16daf62 | Generated: July 05, 2026</span>
+      <span>Commit: af1773e | Generated: July 05, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1637,6 +1637,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to enforce hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on Domain Controllers.
 * **[REQ-DC-033 - Configure Secure Boot Revocations and Bootloader Updates](#02-domain-controllers-configure-secure-boot-revocations-md)**
   Requirement to configure and enforce BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.
+* **[REQ-DC-034 - Configure Windows Defender Application Control](#02-domain-controllers-configure-wdac-md)**
+  Requirement to deploy Windows Defender Application Control (WDAC) on Domain Controllers in Audit Mode to block unauthorized system-level binaries and scripts.
 
 
 <div style="page-break-before: always;"></div>
@@ -8507,6 +8509,183 @@ if ($script:NonCompliant) {
 ## Sources & Compliance References
 * **Microsoft KB5068202**: Registry key updates for Secure Boot: Windows devices with IT-managed updates
 * **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-configure-wdac-md"></div>
+
+<div id="02-domain-controllers-configure-wdac-md-req-dc-034-configure-windows-defender-application-control"></div>
+# [REQ-DC-034] Configure Windows Defender Application Control
+
+<div id="02-domain-controllers-configure-wdac-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025
+
+---
+
+<div id="02-domain-controllers-configure-wdac-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Deploy Windows Defender Application Control
+  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard\CodeIntegrityPolicyPaths`
+
+---
+
+<div id="02-domain-controllers-configure-wdac-md-rationale"></div>
+## Rationale
+Domain Controllers represent the highest privilege tier (Tier 0) in an Active Directory forest. Traditional signature-based antivirus solutions are easily bypassed by custom, compiled executables, memory injection scripts, or zero-day payloads.
+
+**Windows Defender Application Control (WDAC)** enforces a strict trust-based model for binary and script execution. By restricting the operating system to only run signed, trusted system files and administrative utilities, WDAC blocks unauthorized software, remote access tools, and custom malware. Deploying WDAC on Domain Controllers mitigates administrative credential dumping, domain compromises, and malware execution in kernel or user space.
+
+---
+
+<div id="02-domain-controllers-configure-wdac-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Pre-requisite (Memory Integrity/HVCI)**: Hypervisor-Protected Code Integrity (HVCI) must be active to enforce code integrity policies at the hypervisor layer. Refer to [REQ-DC-007 - Disable Credential Guard](#02-domain-controllers-disable-credential-guard-md) to ensure Memory Integrity (HVCI) and Virtualization-Based Security (VBS) are fully active.
+* **Administrative Overhead**: Any new software, agents, or drivers deployed to Domain Controllers must be digitally signed by a trusted publisher or explicitly allowed by the WDAC code integrity policy. Unsigned administrative scripts will be blocked.
+* **Audit Mode Deployment**: To prevent service disruption, the WDAC baseline policy must be deployed in **Audit Mode** initially. This allows administrators to verify that no critical server roles (DNS, AD DS, DHCP, backup agents) or monitoring services are blocked in production before shifting to enforcement mode.
+
+---
+
+<div id="02-domain-controllers-configure-wdac-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-configure-wdac-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+To deploy WDAC via Group Policy, the policy XML must first be generated, compiled, and placed in a secure shared intranet network path or local path on Domain Controllers.
+
+<div id="02-domain-controllers-configure-wdac-md-1-generate-and-compile-the-policy-on-a-reference-domain-controller"></div>
+#### 1. Generate and Compile the Policy (on a Reference Domain Controller)
+Run the following PowerShell commands to generate the Microsoft Default Windows baseline policy:
+```powershell
+# Generate the baseline policy XML
+New-CIPolicy -MultiplePolicyFormat -Level FilePublisher -FilePath "C:\WDAC\DCBaselinePolicy.xml" -UserPEs
+
+# Compile the XML policy into a binary CIP file
+ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\DCBaselinePolicy.xml" -BinaryFilePath "C:\WDAC\DCBaselinePolicy.cip"
+```
+
+<div id="02-domain-controllers-configure-wdac-md-2-deploy-the-policy-via-gpo"></div>
+#### 2. Deploy the Policy via GPO
+1. Copy the compiled `DCBaselinePolicy.cip` file to a local secure directory on all target Domain Controllers (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b`) or host it on a network share.
+2. Open the **Group Policy Management Console** (`gpmc.msc`).
+3. Create or edit a GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
+4. Navigate to:
+   `Computer Configuration\Administrative Templates\System\Device Guard`
+5. Configure the following setting:
+   * **Policy**: `Deploy Windows Defender Application Control`
+   * **Setting**: `Enabled`
+   * **Code Integrity Policy File Path**: Enter the local path (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b`) or network share path.
+
+---
+
+<div id="02-domain-controllers-configure-wdac-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to generate a baseline WDAC policy, enable Audit Mode, and configure local parameters.
+
+<div id="02-domain-controllers-configure-wdac-md-configure-dcwdaclocalpolicyps1"></div>
+# Configure-DCWDACLocalPolicy.ps1
+
+[Download Script: Configure-DCWDACLocalPolicy.ps1](implementation_scripts/Configure-DCWDACLocalPolicy.ps1)
+
+```powershell
+# Configure-DCWDACLocalPolicy.ps1
+# Description: Generates a baseline local Code Integrity policy for Domain Controllers, sets it to Audit Mode, and compiles it.
+
+Write-Host "--- Configuring Domain Controller WDAC Local Policy Baseline ---" -ForegroundColor Cyan
+
+# Create working directories
+$WdacDir = "C:\Windows\System32\CodeIntegrity"
+if (-not (Test-Path $WdacDir)) {
+    New-Item -Path $WdacDir -ItemType Directory -Force | Out-Null
+}
+
+# 1. Generate the Default Windows Policy
+Write-Host "[+] Generating Default Windows code integrity rules..." -ForegroundColor Gray
+$PolicyXml = "C:\Windows\Temp\DCDefaultWindows.xml"
+$PolicyBin = "$WdacDir\SIPolicy.p7b"
+
+# Create a policy based on Microsoft's default rules (trusts Windows, Store, and Driver files)
+New-CIPolicy -FilePath $PolicyXml -Level Windows -UserPEs -ErrorAction Stop
+
+# 2. Set Policy to Audit Mode (Rule Option 3 represents Audit Mode)
+Write-Host "[+] Setting WDAC policy to Audit Mode for baseline logging..." -ForegroundColor Gray
+Set-RuleOption -FilePath $PolicyXml -Option 3 -ErrorAction SilentlyContinue
+
+# 3. Compile the XML into the binary policy expected by the bootloader
+Write-Host "[+] Compiling Code Integrity XML into SIPolicy.p7b..." -ForegroundColor Gray
+ConvertFrom-CIPolicy -XmlFilePath $PolicyXml -BinaryFilePath $PolicyBin -ErrorAction Stop
+
+# Cleanup temp files
+if (Test-Path $PolicyXml) { Remove-Item $PolicyXml -Force }
+
+Write-Host "[+] Local WDAC baseline policy configured. Reboot required." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+<div id="02-domain-controllers-configure-wdac-md-test-dcwdacstatusps1"></div>
+# Test-DCWDACStatus.ps1
+
+[Download Script: Test-DCWDACStatus.ps1](audit_scripts/Test-DCWDACStatus.ps1)
+
+```powershell
+# Test-DCWDACStatus.ps1
+# Description: Audits the local Domain Controller to check if Code Integrity policies and HVCI are active.
+
+Write-Host "--- Auditing Domain Controller WDAC State ---" -ForegroundColor Cyan
+$Vulnerable = $false
+
+# 1. Query WMI class for Code Integrity status
+try {
+    $CI = Get-CimInstance -Namespace "Root\Microsoft\Windows\CI" -ClassName "MSFT_Sipolicy" -ErrorAction Stop
+    if ($null -ne $CI -and $CI.Count -gt 0) {
+        Write-Host "`n[+] Found $($CI.Count) active Code Integrity policies." -ForegroundColor Green
+        foreach ($Policy in $CI) {
+            Write-Host "    - Policy: $($Policy.FriendlyName) | ID: $($Policy.PolicyID) | Enforced: $($Policy.EnforcementMode)" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "`n[-] No active Code Integrity / WDAC policies detected via WMI." -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "`n[-] Could not query WMI MSFT_Sipolicy. This is expected if no WDAC policies are currently deployed." -ForegroundColor Gray
+}
+
+# 2. Check Memory Integrity (HVCI) configuration
+$ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
+if (Test-Path $ScenariosPath) {
+    $HvciStatus = Get-ItemProperty -Path $ScenariosPath -Name "Enabled" -ErrorAction SilentlyContinue
+    if ($null -ne $HvciStatus -and $HvciStatus.Enabled -eq 1) {
+        Write-Host "[+] Memory Integrity (HVCI) is enabled." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: Memory Integrity (HVCI) is disabled in the registry." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "[!] VULNERABLE: Memory Integrity scenario registry path does not exist." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+# 3. Final Verdict
+if ($Vulnerable) {
+    Write-Host "`n[!] Verification FAILED: One or more driver security controls are not configured." -ForegroundColor Red
+} else {
+    Write-Host "`n[+] Verification PASSED: WDAC driver settings and HVCI are correctly configured." -ForegroundColor Green
+}
+```
+
+---
+
+<div id="02-domain-controllers-configure-wdac-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendations on system component code integrity and application control restrictions.
+* **CIS Microsoft Windows Server Benchmark**: Section 18.8.14.3 (Deploy Windows Defender Application Control / Memory Integrity).
+* **Microsoft Security Guidance**: Windows Defender Application Control Deployment Guide.
 
 
 <div style="page-break-before: always;"></div>
@@ -19608,6 +19787,10 @@ This directory contains the physical isolation policies and operating system sec
 35. **[REQ-PAW-035 - Configure Secure Boot Revocations and Bootloader Updates for PAWs](#07-paws-configure-secure-boot-revocations-md)**
     Configures and enforces BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware for PAWs.
 
+36. **[REQ-PAW-036 - Configure Windows Defender Application Control](#07-paws-configure-wdac-md)**
+    Deploys Windows Defender Application Control (WDAC) on PAWs in Audit Mode to block unauthorized system-level binaries and scripts.
+
+
 
 
 
@@ -28023,6 +28206,183 @@ if ($script:NonCompliant) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="07-paws-configure-wdac-md"></div>
+
+<div id="07-paws-configure-wdac-md-req-paw-036-configure-windows-defender-application-control"></div>
+# [REQ-PAW-036] Configure Windows Defender Application Control
+
+<div id="07-paws-configure-wdac-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10, Windows 11 (Enterprise and Professional editions)
+
+---
+
+<div id="07-paws-configure-wdac-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Deploy Windows Defender Application Control
+  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard\CodeIntegrityPolicyPaths`
+
+---
+
+<div id="07-paws-configure-wdac-md-rationale"></div>
+## Rationale
+Privileged Access Workstations (PAWs) are dedicated administrative hosts used to manage high-value assets such as Domain Controllers and identity systems. Because they handle Tier 0 administrative credentials, they are highly targeted by adversaries.
+
+**Windows Defender Application Control (WDAC)** provides kernel-enforced application control to ensure that only trusted code executes on PAWs. Standard application control options like AppLocker operate primarily in user mode, whereas WDAC enforces integrity at both the kernel (KMCI) and user mode (UMCI) levels. Implementing a baseline WDAC policy that restricts software execution exclusively to Microsoft-signed code and trusted system components blocks unauthorized administrative tools, remote monitoring agents, and malicious payloads.
+
+---
+
+<div id="07-paws-configure-wdac-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Pre-requisite (Memory Integrity/HVCI)**: Hypervisor-Protected Code Integrity (HVCI) must be active to enforce code integrity policies at the hypervisor layer. Refer to [REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](#07-paws-enable-vbs-credential-guard-md) to ensure Memory Integrity (HVCI) and Virtualization-Based Security (VBS) are fully active.
+* **Administrative Overhead**: Standard users and administrators cannot install or execute arbitrary software. Any administration tool, package, or script must be signed by a trusted publisher or explicitly allowed by the WDAC policy.
+* **Audit Mode Deployment**: To prevent disruption of critical administrative tasks, the WDAC baseline policy must be deployed in **Audit Mode** initially. This allows tracking would-be blocks in the Event Viewer without interrupting daily operations, allowing the baseline to be fully tuned before enforcement.
+
+---
+
+<div id="07-paws-configure-wdac-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-configure-wdac-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+To deploy WDAC via Group Policy, the policy XML must first be generated, compiled, and placed in a secure shared intranet network path or local path on target hosts.
+
+<div id="07-paws-configure-wdac-md-1-generate-and-compile-the-policy-on-a-reference-paw-host"></div>
+#### 1. Generate and Compile the Policy (on a Reference PAW Host)
+Run the following PowerShell commands to generate the Microsoft Default Windows baseline policy:
+```powershell
+# Generate the baseline policy XML
+New-CIPolicy -MultiplePolicyFormat -Level FilePublisher -FilePath "C:\WDAC\PawBaselinePolicy.xml" -UserPEs
+
+# Compile the XML policy into a binary CIP file
+ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\PawBaselinePolicy.xml" -BinaryFilePath "C:\WDAC\PawBaselinePolicy.cip"
+```
+
+<div id="07-paws-configure-wdac-md-2-deploy-the-policy-via-gpo"></div>
+#### 2. Deploy the Policy via GPO
+1. Copy the compiled `PawBaselinePolicy.cip` file to a local secure directory on all target PAWs (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b`) or host it on a network share.
+2. Open the **Group Policy Management Console** (`gpmc.msc`).
+3. Create or edit a GPO linked to the PAWs OU (e.g., `GPO_Hardening_PAWs`).
+4. Navigate to:
+   `Computer Configuration\Administrative Templates\System\Device Guard`
+5. Configure the following setting:
+   * **Policy**: `Deploy Windows Defender Application Control`
+   * **Setting**: `Enabled`
+   * **Code Integrity Policy File Path**: Enter the local path (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b`) or network share path.
+
+---
+
+<div id="07-paws-configure-wdac-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to generate a baseline WDAC policy, enable Audit Mode, and configure local parameters.
+
+<div id="07-paws-configure-wdac-md-configure-pawwdaclocalpolicyps1"></div>
+# Configure-PawWDACLocalPolicy.ps1
+
+[Download Script: Configure-PawWDACLocalPolicy.ps1](implementation_scripts/Configure-PawWDACLocalPolicy.ps1)
+
+```powershell
+# Configure-PawWDACLocalPolicy.ps1
+# Description: Generates a baseline local Code Integrity policy for PAWs, sets it to Audit Mode, and compiles it.
+
+Write-Host "--- Configuring PAW WDAC Local Policy Baseline ---" -ForegroundColor Cyan
+
+# Create working directories
+$WdacDir = "C:\Windows\System32\CodeIntegrity"
+if (-not (Test-Path $WdacDir)) {
+    New-Item -Path $WdacDir -ItemType Directory -Force | Out-Null
+}
+
+# 1. Generate the Default Windows Policy
+Write-Host "[+] Generating Default Windows code integrity rules..." -ForegroundColor Gray
+$PolicyXml = "C:\Windows\Temp\PawDefaultWindows.xml"
+$PolicyBin = "$WdacDir\SIPolicy.p7b"
+
+# Create a policy based on Microsoft's default rules (trusts Windows, Store, and Driver files)
+New-CIPolicy -FilePath $PolicyXml -Level Windows -UserPEs -ErrorAction Stop
+
+# 2. Set Policy to Audit Mode (Rule Option 3 represents Audit Mode)
+Write-Host "[+] Setting WDAC policy to Audit Mode for baseline logging..." -ForegroundColor Gray
+Set-RuleOption -FilePath $PolicyXml -Option 3 -ErrorAction SilentlyContinue
+
+# 3. Compile the XML into the binary policy expected by the bootloader
+Write-Host "[+] Compiling Code Integrity XML into SIPolicy.p7b..." -ForegroundColor Gray
+ConvertFrom-CIPolicy -XmlFilePath $PolicyXml -BinaryFilePath $PolicyBin -ErrorAction Stop
+
+# Cleanup temp files
+if (Test-Path $PolicyXml) { Remove-Item $PolicyXml -Force }
+
+Write-Host "[+] Local WDAC baseline policy configured. Reboot required." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+<div id="07-paws-configure-wdac-md-test-pawwdacstatusps1"></div>
+# Test-PawWDACStatus.ps1
+
+[Download Script: Test-PawWDACStatus.ps1](audit_scripts/Test-PawWDACStatus.ps1)
+
+```powershell
+# Test-PawWDACStatus.ps1
+# Description: Audits the local PAW to check if Code Integrity policies and HVCI are active.
+
+Write-Host "--- Auditing PAW WDAC State ---" -ForegroundColor Cyan
+$Vulnerable = $false
+
+# 1. Query WMI class for Code Integrity status
+try {
+    $CI = Get-CimInstance -Namespace "Root\Microsoft\Windows\CI" -ClassName "MSFT_Sipolicy" -ErrorAction Stop
+    if ($null -ne $CI -and $CI.Count -gt 0) {
+        Write-Host "`n[+] Found $($CI.Count) active Code Integrity policies." -ForegroundColor Green
+        foreach ($Policy in $CI) {
+            Write-Host "    - Policy: $($Policy.FriendlyName) | ID: $($Policy.PolicyID) | Enforced: $($Policy.EnforcementMode)" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "`n[-] No active Code Integrity / WDAC policies detected via WMI." -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "`n[-] Could not query WMI MSFT_Sipolicy. This is expected if no WDAC policies are currently deployed." -ForegroundColor Gray
+}
+
+# 2. Check Memory Integrity (HVCI) configuration
+$ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
+if (Test-Path $ScenariosPath) {
+    $HvciStatus = Get-ItemProperty -Path $ScenariosPath -Name "Enabled" -ErrorAction SilentlyContinue
+    if ($null -ne $HvciStatus -and $HvciStatus.Enabled -eq 1) {
+        Write-Host "[+] Memory Integrity (HVCI) is enabled." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: Memory Integrity (HVCI) is disabled in the registry." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "[!] VULNERABLE: Memory Integrity scenario registry path does not exist." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+# 3. Final Verdict
+if ($Vulnerable) {
+    Write-Host "`n[!] Verification FAILED: One or more driver security controls are not configured." -ForegroundColor Red
+} else {
+    Write-Host "`n[+] Verification PASSED: WDAC driver settings and HVCI are correctly configured." -ForegroundColor Green
+}
+```
+
+---
+
+<div id="07-paws-configure-wdac-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendations on system component code integrity and application control restrictions.
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.14.3 (Deploy Windows Defender Application Control / Memory Integrity).
+* **Microsoft Security Guidance**: Windows Defender Application Control Deployment Guide.
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="08-endpoints-README-md"></div>
 
 <div id="08-endpoints-README-md-module-8-endpoint-hardening"></div>
@@ -28139,6 +28499,10 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 35. **[REQ-END-035 - Configure Secure Boot Revocations and Bootloader Updates](#08-endpoints-configure-secure-boot-revocations-md)**
     Configures and enforces BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.
+
+36. **[REQ-END-036 - Enable WDAC Driver Blocklist](#08-endpoints-enable-wdac-driver-blocklist-md)**
+    Enforces the Microsoft Vulnerable Driver Blocklist via Windows Defender Application Control (WDAC) to prevent known vulnerable or malicious drivers from loading in kernel space, mitigating Bring Your Own Vulnerable Driver (BYOVD) attacks.
+
 
 
 
@@ -30650,9 +31014,8 @@ try {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\System\Device Guard\Deploy Windows Defender Application Control
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard\CodeIntegrityPolicyPaths
-  * HKLM\SYSTEM\CurrentControlSet\Control\CI\Config\VulnerableDriverBlocklistEnable = 1 (REG_DWORD)
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Deploy Windows Defender Application Control
+  * **Registry Location**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\DeviceGuard\CodeIntegrityPolicyPaths`
 
 ---
 
@@ -30665,15 +31028,14 @@ Traditional signature-based antivirus solutions scan for known malware patterns.
 If WDAC is not configured:
 1. **Payload Execution**: Standard users can execute downloaded scripts (e.g., PowerShell, VBScript) or binary files, facilitating initial access.
 2. **Antivirus Bypass**: Attackers can run obfuscated code, compile payloads on the target endpoint using built-in Windows compilers (e.g., `csc.exe`), or run memory injection scripts that standard antivirus signatures miss.
-3. **Driver Exploitation (BYOVD)**: Attackers can load vulnerable, cryptographically signed third-party drivers (Bring Your Own Vulnerable Driver) to execute arbitrary code in kernel space, disable security agents, or dump LSASS memory.
 
-Deploying a strict WDAC baseline ensures that only binaries and scripts signed by Microsoft, trusted system developers, or located in protected directories (such as Windows system folders) are allowed to execute. Enforcing the Microsoft Vulnerable Driver Blocklist specifically mitigates BYOVD attacks in kernel space.
+Deploying a strict WDAC baseline ensures that only binaries and scripts signed by Microsoft, trusted system developers, or located in protected directories (such as Windows system folders) are allowed to execute.
 
 ---
 
 <div id="08-endpoints-configure-wdac-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Pre-requisite (Memory Integrity/HVCI)**: Enforcing the vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-END-010 - Enable VBS and Credential Guard](#08-endpoints-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-configure-uefi-security-md) and [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-enable-hardware-virtualization-and-dma-protection-md) for firmware setup.
+* **Pre-requisite (Memory Integrity/HVCI)**: Enforcing Windows Defender Application Control policies securely requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-END-010 - Enable VBS and Credential Guard](#08-endpoints-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-configure-uefi-security-md) and [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-enable-hardware-virtualization-and-dma-protection-md) for firmware setup.
 * **Administrative Overhead**: Any new enterprise software must be added to the code integrity trust policy (by digital signature or folder exceptions). Deploying unapproved third-party software will trigger blocks.
 * **User Script Blocks**: Administrators and power users cannot write and run custom PowerShell or VBS scripts locally unless the scripts are digitally signed by a trusted certificate in the WDAC policy or run in a directory excluded by the rules.
 * **Audit Phase Mandate**: To prevent severe business disruption, WDAC policies must always be deployed in **Audit Mode** first. This logs would-be blocks to the Event Viewer without interrupting execution, allowing administrators to gather a list of required applications and construct rules before shifting to **Enforced Mode**.
@@ -30710,13 +31072,6 @@ ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\BaselinePolicy.xml" -BinaryFilePath "
    * **Policy**: `Deploy Windows Defender Application Control`
    * **Setting**: `Enabled`
    * **Code Integrity Policy File Path**: Enter the path to the policy file (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b` or a UNC share path).
-6. To ensure the built-in system driver blocklist is active on modern builds, configure the following registry setting via Group Policy Preferences:
-   * **Path**: Computer Configuration\Preferences\Windows Settings\Registry
-   * **Hive**: `HKEY_LOCAL_MACHINE`
-   * **Key Path**: `SYSTEM\CurrentControlSet\Control\CI\Config`
-   * **Value Name**: `VulnerableDriverBlocklistEnable`
-   * **Value Type**: `REG_DWORD`
-   * **Value Data**: `1`
 
 ---
 
@@ -30725,11 +31080,14 @@ ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\BaselinePolicy.xml" -BinaryFilePath "
 
 Run the following scripts locally to generate a baseline WDAC policy, enable Audit Mode, and configure local registry parameters.
 
+<div id="08-endpoints-configure-wdac-md-configure-wdaclocalpolicyps1"></div>
+# Configure-WDACLocalPolicy.ps1
+
 [Download Script: Configure-WDACLocalPolicy.ps1](implementation_scripts/Configure-WDACLocalPolicy.ps1)
 
 ```powershell
 # Configure-WDACLocalPolicy.ps1
-# Generates a baseline local Code Integrity policy, sets it to Audit Mode, and enables the Vulnerable Driver Blocklist.
+# Description: Generates a baseline local Code Integrity policy, sets it to Audit Mode, and compiles it.
 
 Write-Host "--- Configuring WDAC Local Policy Baseline ---" -ForegroundColor Cyan
 
@@ -30755,28 +31113,24 @@ Set-RuleOption -FilePath $PolicyXml -Option 3 -ErrorAction SilentlyContinue
 Write-Host "[+] Compiling Code Integrity XML into SIPolicy.p7b..." -ForegroundColor Gray
 ConvertFrom-CIPolicy -XmlFilePath $PolicyXml -BinaryFilePath $PolicyBin -ErrorAction Stop
 
-# 4. Enable Vulnerable Driver Blocklist in Registry
-Write-Host "[+] Enabling Vulnerable Driver Blocklist in registry..." -ForegroundColor Gray
-$ConfigPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
-if (-not (Test-Path $ConfigPath)) {
-    New-Item -Path $ConfigPath -Force | Out-Null
-}
-Set-ItemProperty -Path $ConfigPath -Name "VulnerableDriverBlocklistEnable" -Value 1 -Type DWord -ErrorAction Stop
-
 # Cleanup temp files
 if (Test-Path $PolicyXml) { Remove-Item $PolicyXml -Force }
 
-Write-Host "[+] Local WDAC baseline policy and driver blocklist configured. Reboot required." -ForegroundColor Green
+Write-Host "[+] Local WDAC baseline policy configured. Reboot required." -ForegroundColor Green
 ```
 
 *To audit the running WDAC policy states:*
+
+<div id="08-endpoints-configure-wdac-md-test-wdacstatusps1"></div>
+# Test-WDACStatus.ps1
+
 [Download Script: Test-WDACStatus.ps1](audit_scripts/Test-WDACStatus.ps1)
 
 ```powershell
 # Test-WDACStatus.ps1
-# Audits the local system to check if Code Integrity policies, the Vulnerable Driver Blocklist, and HVCI are active.
+# Description: Audits the local system to check if Code Integrity policies and HVCI are active.
 
-Write-Host "--- Auditing WDAC and Driver Blocklist State ---" -ForegroundColor Cyan
+Write-Host "--- Auditing WDAC State ---" -ForegroundColor Cyan
 $Vulnerable = $false
 
 # 1. Query WMI class for Code Integrity status
@@ -30794,23 +31148,7 @@ try {
     Write-Host "`n[-] Could not query WMI MSFT_Sipolicy. This is expected if no WDAC policies are currently deployed." -ForegroundColor Gray
 }
 
-# 2. Check Vulnerable Driver Blocklist Registry configuration
-$ConfigPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
-$ValueName = "VulnerableDriverBlocklistEnable"
-if (Test-Path $ConfigPath) {
-    $RegValue = Get-ItemProperty -Path $ConfigPath -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $RegValue -and $RegValue.$ValueName -eq 1) {
-        Write-Host "[+] Vulnerable Driver Blocklist is enabled in the registry." -ForegroundColor Green
-    } else {
-        Write-Host "[!] VULNERABLE: Vulnerable Driver Blocklist is disabled or not set in the registry." -ForegroundColor Red
-        $Vulnerable = $true
-    }
-} else {
-    Write-Host "[!] VULNERABLE: Code Integrity Config registry path does not exist." -ForegroundColor Red
-    $Vulnerable = $true
-}
-
-# 3. Check Memory Integrity (HVCI) configuration
+# 2. Check Memory Integrity (HVCI) configuration
 $ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
 if (Test-Path $ScenariosPath) {
     $HvciStatus = Get-ItemProperty -Path $ScenariosPath -Name "Enabled" -ErrorAction SilentlyContinue
@@ -30825,7 +31163,7 @@ if (Test-Path $ScenariosPath) {
     $Vulnerable = $true
 }
 
-# 4. Final Verdict
+# 3. Final Verdict
 if ($Vulnerable) {
     Write-Host "`n[!] Verification FAILED: One or more driver security controls are not configured." -ForegroundColor Red
 } else {
@@ -37406,6 +37744,184 @@ if ($script:NonCompliant) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="08-endpoints-enable-wdac-driver-blocklist-md"></div>
+
+<div id="08-endpoints-enable-wdac-driver-blocklist-md-req-end-036-enable-wdac-driver-blocklist"></div>
+# [REQ-END-036] Enable WDAC Driver Blocklist
+
+<div id="08-endpoints-enable-wdac-driver-blocklist-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations
+* **Operating Systems**: Windows 10, Windows 11 (Enterprise and Professional editions)
+
+---
+
+<div id="08-endpoints-enable-wdac-driver-blocklist-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Device Guard\Deploy Windows Defender Application Control
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\CI\Config` -> `VulnerableDriverBlocklistEnable` = `1` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-enable-wdac-driver-blocklist-md-rationale"></div>
+## Rationale
+Attackers frequently employ "Bring Your Own Vulnerable Driver" (BYOVD) attacks to bypass Windows kernel protections on standard endpoints. In a BYOVD attack, an adversary with administrative privileges installs a legitimate, cryptographically signed third-party driver that contains a known, exploitable vulnerability. The attacker then exploits this vulnerability to execute arbitrary code with kernel privileges, allowing them to disable security agents, dump LSASS memory, or tamper with system integrity.
+
+Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender Application Control (WDAC) prevents known vulnerable or malicious drivers from loading in kernel space. By restricting the WDAC policy to **Kernel Mode Code Integrity (KMCI) only** (omitting user-mode enforcement), the control shields the system kernel from driver-based exploits on endpoint hosts without introducing administrative overhead or blocking standard user-mode applications.
+
+---
+
+<div id="08-endpoints-enable-wdac-driver-blocklist-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-END-010 - Enable VBS and Credential Guard](#08-endpoints-enable-vbs-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled. Secure Boot and CPU virtualization are strict pre-requisites; refer to [REQ-END-013 - UEFI Firmware Security Hardening](#08-endpoints-configure-uefi-security-md) and [REQ-END-014 - Enable Hardware Virtualization and DMA Protection](#08-endpoints-enable-hardware-virtualization-and-dma-protection-md) for firmware configuration.
+* **Compatibility with Legacy Drivers**: Third-party backup, monitoring, or hardware administration software running deprecated, vulnerable drivers may fail to load. All such software must be updated to use secure, modern drivers.
+* **Deployment Testing**: To prevent system instability, the WDAC blocklist policy should be deployed in **Audit Mode** initially to verify that no critical operational drivers are blocked in production before shifting to enforcement mode.
+
+---
+
+<div id="08-endpoints-enable-wdac-driver-blocklist-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-enable-wdac-driver-blocklist-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+To enforce the driver blocklist across all endpoints, you can deploy the Microsoft recommended block rules as a custom WDAC policy.
+
+1. Download the Microsoft recommended driver block rules XML from the official Microsoft documentation.
+2. Edit the XML to ensure it operates in **Audit Mode** first, then convert the XML configuration into a binary format:
+```powershell
+ConvertFrom-CIPolicy -XmlFilePath "C:\WDAC\DriverBlocklist.xml" -BinaryFilePath "C:\WDAC\SIPolicy.p7b"
+```
+3. Copy the compiled `SIPolicy.p7b` file to a secure local path on all target endpoints (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b`) or a share.
+4. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain management host.
+5. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
+6. Navigate to:
+   `Computer Configuration\Administrative Templates\System\Device Guard`
+7. Configure the following setting:
+   * **Policy**: `Deploy Windows Defender Application Control`
+   * **Setting**: `Enabled`
+   * **Code Integrity Policy File Path**: Enter the local or network path to the policy file (e.g., `C:\Windows\System32\CodeIntegrity\SIPolicy.p7b`).
+8. To ensure the built-in system driver blocklist is active on modern builds, configure the following registry setting via Group Policy Preferences:
+   * **Path**: `Computer Configuration\Preferences\Windows Settings\Registry`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Control\CI\Config`
+   * **Value Name**: `VulnerableDriverBlocklistEnable`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `1`
+
+---
+
+<div id="08-endpoints-enable-wdac-driver-blocklist-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following scripts locally to enable the Vulnerable Driver Blocklist registry key and ensure proper configuration.
+
+<div id="08-endpoints-enable-wdac-driver-blocklist-md-configure-driverblocklistps1"></div>
+# Configure-DriverBlocklist.ps1
+
+[Download Script: Configure-DriverBlocklist.ps1](implementation_scripts/Configure-DriverBlocklist.ps1)
+
+```powershell
+# Configure-DriverBlocklist.ps1
+# Description: Enables the Microsoft Vulnerable Driver Blocklist in the registry and validates VBS/HVCI settings.
+
+Write-Host "Applying hardening requirement: Enable WDAC Driver Blocklist..." -ForegroundColor Cyan
+
+# 1. Configure the registry settings to enable the blocklist
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
+$ValueName = "VulnerableDriverBlocklistEnable"
+
+if (-not (Test-Path $RegPath)) {
+    Write-Host "[+] Creating registry path: $RegPath" -ForegroundColor Gray
+    New-Item -Path $RegPath -Force | Out-Null
+}
+
+Write-Host "[+] Setting registry value: $ValueName = 1" -ForegroundColor Gray
+Set-ItemProperty -Path $RegPath -Name $ValueName -Value 1 -Type DWord -ErrorAction Stop
+
+# 2. Validate VBS / HVCI Configuration
+$ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
+if (Test-Path $ScenariosPath) {
+    $HvciStatus = Get-ItemProperty -Path $ScenariosPath -Name "Enabled" -ErrorAction SilentlyContinue
+    if ($null -ne $HvciStatus -and $HvciStatus.Enabled -eq 1) {
+        Write-Host "[+] Pre-requisite Check: Memory Integrity (HVCI) is enabled." -ForegroundColor Green
+    } else {
+        Write-Host "[!] Warning: Memory Integrity (HVCI) is disabled. The blocklist requires HVCI for hypervisor enforcement." -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[!] Warning: Memory Integrity scenario configuration not found. Check VBS settings." -ForegroundColor Yellow
+}
+
+Write-Host "[+] Configuration applied successfully. A reboot is required to activate the blocklist." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+<div id="08-endpoints-enable-wdac-driver-blocklist-md-get-driverblockliststatusps1"></div>
+# Get-DriverBlocklistStatus.ps1
+
+[Download Script: Get-DriverBlocklistStatus.ps1](audit_scripts/Get-DriverBlocklistStatus.ps1)
+
+```powershell
+# Get-DriverBlocklistStatus.ps1
+# Description: Audits the configuration of the Microsoft Vulnerable Driver Blocklist and HVCI state.
+
+Write-Host "--- Auditing Vulnerable Driver Blocklist ---" -ForegroundColor Cyan
+$Vulnerable = $false
+
+# 1. Check registry value
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\CI\Config"
+$ValueName = "VulnerableDriverBlocklistEnable"
+
+if (Test-Path $RegPath) {
+    $RegValue = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $RegValue -and $RegValue.$ValueName -eq 1) {
+        Write-Host "[+] Vulnerable Driver Blocklist is enabled in the registry." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: Vulnerable Driver Blocklist is disabled or not set in the registry." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "[!] VULNERABLE: Code Integrity Config registry key does not exist." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+# 2. Check HVCI Status
+$ScenariosPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity"
+if (Test-Path $ScenariosPath) {
+    $HvciStatus = Get-ItemProperty -Path $ScenariosPath -Name "Enabled" -ErrorAction SilentlyContinue
+    if ($null -ne $HvciStatus -and $HvciStatus.Enabled -eq 1) {
+        Write-Host "[+] Memory Integrity (HVCI) is enabled." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: Memory Integrity (HVCI) is disabled in the registry." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+} else {
+    Write-Host "[!] VULNERABLE: Memory Integrity scenario registry path does not exist." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+# 3. Final Verdict
+if ($Vulnerable) {
+    Write-Host "`n[!] Verification FAILED: The Vulnerable Driver Blocklist is not fully secured." -ForegroundColor Red
+} else {
+    Write-Host "`n[+] Verification PASSED: The Vulnerable Driver Blocklist and HVCI are correctly configured." -ForegroundColor Green
+}
+```
+
+---
+
+<div id="08-endpoints-enable-wdac-driver-blocklist-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendations on system component code integrity and driver signature enforcement.
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.14.3 / 18.9.31.2 (Deploy Windows Defender Application Control / Memory Integrity).
+* **Microsoft Security Guidance**: Microsoft recommended driver block rules documentation.
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="roadmap-implementation-plan-md"></div>
 
 <div id="roadmap-implementation-plan-md-implementation-plan-and-prioritized-roadmap"></div>
@@ -37681,6 +38197,7 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](#02-domain-controllers-configure-telemetry-privacy-md)**: Limits diagnostics collection.
 * **[REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](#02-domain-controllers-configure-untrusted-font-blocking-md)**: Protects kernel font parser.
 * **[REQ-DC-029 - Configure svchost.exe Mitigation Options](#02-domain-controllers-configure-svchost-mitigation-md)**: Limits svchost sub-process execution.
+* **[REQ-DC-034 - Configure Windows Defender Application Control](#02-domain-controllers-configure-wdac-md)**: Deploys code integrity rules.
 
 <div id="roadmap-implementation-plan-md-identities-services-requirements"></div>
 ### Identities & Services Requirements
@@ -37717,6 +38234,7 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-PAW-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](#07-paws-disable-unused-features-md)**: Disables legacy .NET 3.5, PowerShell 2.0, SMBv1, and unused platform features.
 * **[REQ-PAW-033 - Configure Microsoft Office Security and Block OLE Packages](#07-paws-configure-office-security-md)**: Blocks VBA macros in external files and Outlook OLE packages.
 * **[REQ-PAW-034 - Disable Windows Script Host and Remap Scripting Extensions](#07-paws-disable-windows-script-host-md)**: Disables WSH execution and maps extension defaults to Notepad.
+* **[REQ-PAW-036 - Configure Windows Defender Application Control](#07-paws-configure-wdac-md)**: Deploys code integrity rules.
 
 <div id="roadmap-implementation-plan-md-endpoint-requirements"></div>
 ### Endpoint Requirements
@@ -37739,6 +38257,7 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-END-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](#08-endpoints-disable-unused-features-md)**: Disables legacy .NET 3.5, PowerShell 2.0, SMBv1, and unused optional features.
 * **[REQ-END-033 - Configure Microsoft Office Security and Block OLE Packages](#08-endpoints-configure-office-security-md)**: Blocks VBA macros in external files and Outlook OLE packages.
 * **[REQ-END-034 - Disable Windows Script Host and Remap Scripting Extensions](#08-endpoints-disable-windows-script-host-md)**: Disables WSH execution and maps extension defaults to Notepad.
+* **[REQ-END-036 - Enable WDAC Driver Blocklist](#08-endpoints-enable-wdac-driver-blocklist-md)**: Blocks known vulnerable drivers on Endpoints.
 
 ---
 
@@ -37801,14 +38320,14 @@ This document maps the recommendations of the **ANSSI (French National Agency fo
 | :--- | :--- | :--- | :--- | :--- |
 | **R1** | Define and implement a logical partitioning model (Tiering) | Tiering / Admin Boundaries | **Covered** | [REQ-ARCH-001](#01-architecture-implement-administrative-tiering-model-md), [REQ-ARCH-002](#01-architecture-restrict-mgmt-protocols-md), [REQ-ARCH-003](#01-architecture-audit-privileged-groups-md) |
 | **R2** | Limit and control administrative privileges | Account Restrictions | **Covered** | [REQ-ARCH-001](#01-architecture-implement-administrative-tiering-model-md), [REQ-END-006](#08-endpoints-restrict-local-admins-md), [REQ-PAW-003](#07-paws-restrict-local-administrators-md) |
-| **R3** | Use dedicated administrative accounts and secure stations | PAW & Admin Accounts | **Covered** | [REQ-ARCH-001](#01-architecture-implement-administrative-tiering-model-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-PAW-002](#07-paws-enable-lsa-protection-md), [REQ-PAW-003](#07-paws-restrict-local-administrators-md), [REQ-PAW-004](#07-paws-enable-bitlocker-md), [REQ-PAW-005](#07-paws-configure-uefi-security-md), [REQ-PAW-006](#07-paws-enable-hardware-virtualization-and-dma-protection-md), [REQ-PAW-007](#07-paws-disable-wpbt-md), [REQ-PAW-008](#07-paws-defender-antivirus-md), [REQ-PAW-009](#07-paws-configure-user-rights-assignments-md), [REQ-PAW-010](#07-paws-enable-vbs-credential-guard-md), [REQ-PAW-011](#07-paws-harden-dma-and-physical-security-md), [REQ-PAW-012](#07-paws-enable-wdac-driver-blocklist-md), [REQ-PAW-013](#07-paws-configure-account-policies-md) |
+| **R3** | Use dedicated administrative accounts and secure stations | PAW & Admin Accounts | **Covered** | [REQ-ARCH-001](#01-architecture-implement-administrative-tiering-model-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-PAW-002](#07-paws-enable-lsa-protection-md), [REQ-PAW-003](#07-paws-restrict-local-administrators-md), [REQ-PAW-004](#07-paws-enable-bitlocker-md), [REQ-PAW-005](#07-paws-configure-uefi-security-md), [REQ-PAW-006](#07-paws-enable-hardware-virtualization-and-dma-protection-md), [REQ-PAW-007](#07-paws-disable-wpbt-md), [REQ-PAW-008](#07-paws-defender-antivirus-md), [REQ-PAW-009](#07-paws-configure-user-rights-assignments-md), [REQ-PAW-010](#07-paws-enable-vbs-credential-guard-md), [REQ-PAW-011](#07-paws-harden-dma-and-physical-security-md), [REQ-PAW-012](#07-paws-enable-wdac-driver-blocklist-md), [REQ-PAW-013](#07-paws-configure-account-policies-md), [REQ-PAW-036](#07-paws-configure-wdac-md) |
 | **R4** | Minimize services and software on Domain Controllers | Service Minimization | **Covered** | [REQ-DC-008](#02-domain-controllers-disable-print-spooler-md), [REQ-DC-012](#02-domain-controllers-disable-unnecessary-services-md) |
 | **R5** | Keep Forest and Domain functional levels up-to-date | Functional Levels | **Covered** | [REQ-ARCH-004](#01-architecture-keep-functional-levels-up-to-date-md) |
 | **R6** | Restrict membership of default administrative groups | Privileged Group Audit | **Covered** | [REQ-ARCH-003](#01-architecture-audit-privileged-groups-md), [REQ-ID-010](#03-identities-services-restrict-schema-admins-md) |
 | **R7** | Configure IPsec transport mode for domain isolation | Network Cryptography | **Covered** | [REQ-NET-004](#04-network-firewall-configure-ipsec-domain-isolation-md), [REQ-NET-005](#04-network-firewall-harden-ipsec-cryptography-md) |
 | **R8** | Restrict administration protocols to dedicated subnets and jump hosts | Management Ports & Subnets | **Covered** | [REQ-NET-001](#04-network-firewall-configure-ad-port-matrix-md), [REQ-NET-002](#04-network-firewall-restrict-rpc-dynamic-ports-md), [REQ-NET-003](#04-network-firewall-configure-workstation-isolation-md), [REQ-ARCH-002](#01-architecture-restrict-mgmt-protocols-md) |
 | **R9** | Deploy Local Administrator Password Solution (LAPS) | Local Admin Passwords | **Covered** | [REQ-ID-002](#03-identities-services-enable-laps-md) |
-| **R10** | Restrict authentication delegation and administrative tool execution | AppLocker / Delegation | **Covered** | [REQ-DC-021](#02-domain-controllers-configure-applocker-policies-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-END-027](#08-endpoints-configure-applocker-policies-md) |
+| **R10** | Restrict authentication delegation and administrative tool execution | AppLocker / Delegation | **Covered** | [REQ-DC-021](#02-domain-controllers-configure-applocker-policies-md), [REQ-DC-034](#02-domain-controllers-configure-wdac-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-PAW-036](#07-paws-configure-wdac-md), [REQ-END-011](#08-endpoints-configure-wdac-md), [REQ-END-027](#08-endpoints-configure-applocker-policies-md) |
 | **R11** | Enforce NTLM restriction policies | NTLM Restriction | **Covered** | [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md) |
 | **R12** | Disable obsolete name resolution protocols (LLMNR/NetBIOS) | Name Resolution | **Covered** | [REQ-DC-002](#02-domain-controllers-disable-multicast-name-resolution-md), [REQ-END-001](#08-endpoints-harden-network-and-name-resolution-md) |
 | **R13** | Deprecate legacy protocols and enforce transport security | Obsolete Protocols | **Covered** | [REQ-DC-001](#02-domain-controllers-disable-smbv1-md), [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md) |
@@ -37916,7 +38435,7 @@ This document maps the focus areas of the **Microsoft Security Baselines** (Doma
 | **LSA Protection** | Configure Local Security Authority (LSA) to run as a protected process (LSA Protection). | Credential Isolation | **Covered** | [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-PAW-002](#07-paws-enable-lsa-protection-md), [REQ-END-023](#08-endpoints-enable-lsa-protection-md) |
 | **Protocol Deprecation** | Disable legacy protocols (SMBv1, NTLMv1, digest authentication) across servers and endpoints. | Legacy Protocols | **Covered** | [REQ-DC-001](#02-domain-controllers-disable-smbv1-md), [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md), [REQ-END-026](#08-endpoints-configure-system-administrative-templates-md) |
 | **AppLocker** | Deploy AppLocker application control policies to restrict unauthorized software execution. | Application Control | **Covered** | [REQ-DC-021](#02-domain-controllers-configure-applocker-policies-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-END-027](#08-endpoints-configure-applocker-policies-md) |
-| **Windows Defender Application Control** | Deploy Windows Defender Application Control (WDAC) and Driver Blocklists. | Application Control | **Covered** | [REQ-DC-022](#02-domain-controllers-enable-wdac-driver-blocklist-md), [REQ-PAW-012](#07-paws-enable-wdac-driver-blocklist-md), [REQ-END-011](#08-endpoints-configure-wdac-md) |
+| **Windows Defender Application Control** | Deploy Windows Defender Application Control (WDAC) and Driver Blocklists. | Application Control | **Covered** | [REQ-DC-022](#02-domain-controllers-enable-wdac-driver-blocklist-md), [REQ-DC-034](#02-domain-controllers-configure-wdac-md), [REQ-PAW-012](#07-paws-enable-wdac-driver-blocklist-md), [REQ-PAW-036](#07-paws-configure-wdac-md), [REQ-END-011](#08-endpoints-configure-wdac-md), [REQ-END-036](#08-endpoints-enable-wdac-driver-blocklist-md) |
 | **BitLocker** | Enforce BitLocker drive encryption with TPM and Startup PIN configurations. | Data Protection | **Covered** | [REQ-PAW-004](#07-paws-enable-bitlocker-md), [REQ-END-012](#08-endpoints-enable-bitlocker-md) |
 | **DMA Protection** | Enable hardware virtualization-based security and Kernel DMA Protection. | Hardware Integrity | **Covered** | [REQ-PAW-006](#07-paws-enable-hardware-virtualization-and-dma-protection-md), [REQ-END-014](#08-endpoints-enable-hardware-virtualization-and-dma-protection-md) |
 | **Secure Boot** | Enforce UEFI Secure Boot and hardware platform security settings. | Hardware Integrity | **Covered** | [REQ-PAW-005](#07-paws-configure-uefi-security-md), [REQ-END-009](#08-endpoints-enable-secure-boot-md) |

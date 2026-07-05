@@ -70,3 +70,5 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to enforce hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on Domain Controllers.
 * **[REQ-DC-033 - Configure Secure Boot Revocations and Bootloader Updates](configure-secure-boot-revocations.md)**
   Requirement to configure and enforce BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.
+* **[REQ-DC-034 - Configure Windows Defender Application Control](configure-wdac.md)**
+  Requirement to deploy Windows Defender Application Control (WDAC) on Domain Controllers in Audit Mode to block unauthorized system-level binaries and scripts.

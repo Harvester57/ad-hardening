@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-05T13:24:53Z</oval:timestamp>
+    <oval:timestamp>2026-07-05T17:47:42Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -997,6 +997,24 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:2033001" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:2034" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-034] Configure Windows Defender Application Control</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Domain Controllers represent the highest privilege tier (Tier 0) in an Active Directory forest. Traditional signature-based antivirus solutions are easily bypassed by custom, compiled executables, memory injection scripts, or zero-day payloads.
+
+**Windows Defender Application Control (WDAC)** enforces a strict trust-based model for binary and script execution. By restricting the operating system to only run signed, trusted system files and administrative utilities, WDAC blocks unauthorized software, remote access tools, and custom malware. Deploying WDAC on Domain Controllers mitigates administrative credential dumping, domain compromises, and malware execution in kernel or user space.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-DC-034 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:2034" />
+      </criteria>
+    </definition>
     <definition id="oval:org.adhardening:def:8001" version="1" class="compliance">
       <metadata>
         <title>[REQ-END-001] Harden Network Parameters and Disable Legacy Name Resolution</title>
@@ -1331,12 +1349,11 @@ Enforcing VBS and Credential Guard prevents in-memory credential harvesting, bre
 If WDAC is not configured:
 1. **Payload Execution**: Standard users can execute downloaded scripts (e.g., PowerShell, VBScript) or binary files, facilitating initial access.
 2. **Antivirus Bypass**: Attackers can run obfuscated code, compile payloads on the target endpoint using built-in Windows compilers (e.g., `csc.exe`), or run memory injection scripts that standard antivirus signatures miss.
-3. **Driver Exploitation (BYOVD)**: Attackers can load vulnerable, cryptographically signed third-party drivers (Bring Your Own Vulnerable Driver) to execute arbitrary code in kernel space, disable security agents, or dump LSASS memory.
 
-Deploying a strict WDAC baseline ensures that only binaries and scripts signed by Microsoft, trusted system developers, or located in protected directories (such as Windows system folders) are allowed to execute. Enforcing the Microsoft Vulnerable Driver Blocklist specifically mitigates BYOVD attacks in kernel space.</description>
+Deploying a strict WDAC baseline ensures that only binaries and scripts signed by Microsoft, trusted system developers, or located in protected directories (such as Windows system folders) are allowed to execute.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\CI\Config Value VulnerableDriverBlocklistEnable" test_ref="oval:org.adhardening:tst:8011001" />
+        <criterion comment="Placeholder check for REQ-END-011 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8011" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8012" version="1" class="compliance">
@@ -2150,6 +2167,24 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:8035001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8036" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-036] Enable WDAC Driver Blocklist</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Attackers frequently employ "Bring Your Own Vulnerable Driver" (BYOVD) attacks to bypass Windows kernel protections on standard endpoints. In a BYOVD attack, an adversary with administrative privileges installs a legitimate, cryptographically signed third-party driver that contains a known, exploitable vulnerability. The attacker then exploits this vulnerability to execute arbitrary code with kernel privileges, allowing them to disable security agents, dump LSASS memory, or tamper with system integrity.
+
+Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender Application Control (WDAC) prevents known vulnerable or malicious drivers from loading in kernel space. By restricting the WDAC policy to **Kernel Mode Code Integrity (KMCI) only** (omitting user-mode enforcement), the control shields the system kernel from driver-based exploits on endpoint hosts without introducing administrative overhead or blocking standard user-mode applications.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\CI\Config Value VulnerableDriverBlocklistEnable" test_ref="oval:org.adhardening:tst:8036001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:3001" version="1" class="compliance">
@@ -4403,6 +4438,24 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:7035001" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:7036" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-036] Configure Windows Defender Application Control</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Privileged Access Workstations (PAWs) are dedicated administrative hosts used to manage high-value assets such as Domain Controllers and identity systems. Because they handle Tier 0 administrative credentials, they are highly targeted by adversaries.
+
+**Windows Defender Application Control (WDAC)** provides kernel-enforced application control to ensure that only trusted code executes on PAWs. Standard application control options like AppLocker operate primarily in user mode, whereas WDAC enforces integrity at both the kernel (KMCI) and user mode (UMCI) levels. Implementing a baseline WDAC policy that restricts software execution exclusively to Microsoft-signed code and trusted system components blocks unauthorized administrative tools, remote monitoring agents, and malicious payloads.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-PAW-036 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7036" />
+      </criteria>
+    </definition>
   </definitions>
   <tests>
     <windows:userright_test id="oval:org.adhardening:tst:1001210" version="1" comment="Check User Right Assignment SeDenyInteractiveLogonRight" check="all">
@@ -5221,6 +5274,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:2033001" />
       <windows:state state_ref="oval:org.adhardening:ste:2033001" />
     </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2034" version="1" comment="Placeholder check for REQ-DC-034 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2034" />
+      <windows:state state_ref="oval:org.adhardening:ste:2034" />
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8001001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001001" />
       <windows:state state_ref="oval:org.adhardening:ste:8001001" />
@@ -5641,9 +5698,9 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:8010006" />
       <windows:state state_ref="oval:org.adhardening:ste:8010006" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8011001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\CI\Config Value VulnerableDriverBlocklistEnable" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8011001" />
-      <windows:state state_ref="oval:org.adhardening:ste:8011001" />
+    <windows:registry_test id="oval:org.adhardening:tst:8011" version="1" comment="Placeholder check for REQ-END-011 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8011" />
+      <windows:state state_ref="oval:org.adhardening:ste:8011" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8012001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value AllowNetworkUnlock" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8012001" />
@@ -6876,6 +6933,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_test id="oval:org.adhardening:tst:8035001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8035001" />
       <windows:state state_ref="oval:org.adhardening:ste:8035001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8036001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\CI\Config Value VulnerableDriverBlocklistEnable" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8036001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8036001" />
     </windows:registry_test>
     <windows:passwordpolicy_test id="oval:org.adhardening:tst:3001900" version="1" comment="Check local Password Policy settings" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:3001900" />
@@ -8672,6 +8733,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:7035001" />
       <windows:state state_ref="oval:org.adhardening:ste:7035001" />
     </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7036" version="1" comment="Placeholder check for REQ-PAW-036 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7036" />
+      <windows:state state_ref="oval:org.adhardening:ste:7036" />
+    </windows:registry_test>
   </tests>
   <objects>
     <windows:userright_object id="oval:org.adhardening:obj:1001210" version="1">
@@ -9793,6 +9858,12 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SYSTEM\CurrentControlSet\Control\Secureboot</windows:key>
       <windows:name>AvailableUpdates</windows:name>
     </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2034" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8001001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -10429,11 +10500,11 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceGuard</windows:key>
       <windows:name>HVCIMATRequired</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8011001" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8011" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\CI\Config</windows:key>
-      <windows:name>VulnerableDriverBlocklistEnable</windows:name>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8012001" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -12182,6 +12253,12 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Control\Secureboot</windows:key>
       <windows:name>AvailableUpdates</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8036001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\CI\Config</windows:key>
+      <windows:name>VulnerableDriverBlocklistEnable</windows:name>
     </windows:registry_object>
     <windows:passwordpolicy_object id="oval:org.adhardening:obj:3001900" version="1" />
     <windows:lockoutpolicy_object id="oval:org.adhardening:obj:3001910" version="1" />
@@ -14782,6 +14859,12 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SYSTEM\CurrentControlSet\Control\Secureboot</windows:key>
       <windows:name>AvailableUpdates</windows:name>
     </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7036" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
   </objects>
   <states>
     <windows:userright_state id="oval:org.adhardening:ste:9999" version="1">
@@ -15550,6 +15633,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">22852</windows:value>
     </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2034" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -15958,9 +16045,9 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8011001" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+    <windows:registry_state id="oval:org.adhardening:ste:8011" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8012001" version="1">
       <windows:type>reg_dword</windows:type>
@@ -17147,6 +17234,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_state id="oval:org.adhardening:ste:8035001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">22852</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8036001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:passwordpolicy_state id="oval:org.adhardening:ste:3001900" version="1">
       <windows:min_passwd_len datatype="int">20</windows:min_passwd_len>
@@ -18905,6 +18996,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_state id="oval:org.adhardening:ste:7035001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">22852</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7036" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
   </states>
 </oval_definitions>

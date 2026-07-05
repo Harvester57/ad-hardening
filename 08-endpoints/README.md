@@ -111,4 +111,8 @@ To prevent initial access and lateral movement, the following unitary technical 
 35. **[REQ-END-035 - Configure Secure Boot Revocations and Bootloader Updates](configure-secure-boot-revocations.md)**
     Configures and enforces BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.
 
+36. **[REQ-END-036 - Enable WDAC Driver Blocklist](enable-wdac-driver-blocklist.md)**
+    Enforces the Microsoft Vulnerable Driver Blocklist via Windows Defender Application Control (WDAC) to prevent known vulnerable or malicious drivers from loading in kernel space, mitigating Bring Your Own Vulnerable Driver (BYOVD) attacks.
+
+
 

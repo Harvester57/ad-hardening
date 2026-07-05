@@ -1,7 +1,7 @@
-# Test-WDACStatus.ps1
-# Description: Audits the local system to check if Code Integrity policies and HVCI are active.
+# Test-DCWDACStatus.ps1
+# Description: Audits the local Domain Controller to check if Code Integrity policies and HVCI are active.
 
-Write-Host "--- Auditing WDAC State ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Domain Controller WDAC State ---" -ForegroundColor Cyan
 $Vulnerable = $false
 
 # 1. Query WMI class for Code Integrity status

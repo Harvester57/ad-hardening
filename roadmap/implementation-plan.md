@@ -236,6 +236,7 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](../02-domain-controllers/configure-telemetry-privacy.md)**: Limits diagnostics collection.
 * **[REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](../02-domain-controllers/configure-untrusted-font-blocking.md)**: Protects kernel font parser.
 * **[REQ-DC-029 - Configure svchost.exe Mitigation Options](../02-domain-controllers/configure-svchost-mitigation.md)**: Limits svchost sub-process execution.
+* **[REQ-DC-034 - Configure Windows Defender Application Control](../02-domain-controllers/configure-wdac.md)**: Deploys code integrity rules.
 
 ### Identities & Services Requirements
 * **[REQ-ID-017 - Disable Machine Account Quota](../03-identities-services/disable-machine-account-quota.md)**: Reduces the Machine Account Quota (ms-DS-MachineAccountQuota) to 0 to prevent unauthorized machine domain joins.
@@ -269,6 +270,7 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-PAW-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](../07-paws/disable-unused-features.md)**: Disables legacy .NET 3.5, PowerShell 2.0, SMBv1, and unused platform features.
 * **[REQ-PAW-033 - Configure Microsoft Office Security and Block OLE Packages](../07-paws/configure-office-security.md)**: Blocks VBA macros in external files and Outlook OLE packages.
 * **[REQ-PAW-034 - Disable Windows Script Host and Remap Scripting Extensions](../07-paws/disable-windows-script-host.md)**: Disables WSH execution and maps extension defaults to Notepad.
+* **[REQ-PAW-036 - Configure Windows Defender Application Control](../07-paws/configure-wdac.md)**: Deploys code integrity rules.
 
 ### Endpoint Requirements
 * **[REQ-END-004 - Block Removable Storage](../08-endpoints/block-removable-storage.md)**: Prevents data exfiltration and USB storage execution.
@@ -290,6 +292,7 @@ This phase introduces strict operational controls, software restrictions (AppLoc
 * **[REQ-END-032 - Disable Unused Windows Features and PowerShell 2.0 Engine](../08-endpoints/disable-unused-features.md)**: Disables legacy .NET 3.5, PowerShell 2.0, SMBv1, and unused optional features.
 * **[REQ-END-033 - Configure Microsoft Office Security and Block OLE Packages](../08-endpoints/configure-office-security.md)**: Blocks VBA macros in external files and Outlook OLE packages.
 * **[REQ-END-034 - Disable Windows Script Host and Remap Scripting Extensions](../08-endpoints/disable-windows-script-host.md)**: Disables WSH execution and maps extension defaults to Notepad.
+* **[REQ-END-036 - Enable WDAC Driver Blocklist](../08-endpoints/enable-wdac-driver-blocklist.md)**: Blocks known vulnerable drivers on Endpoints.
 
 ---
 

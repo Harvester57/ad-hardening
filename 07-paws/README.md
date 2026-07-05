@@ -109,5 +109,9 @@ This directory contains the physical isolation policies and operating system sec
 35. **[REQ-PAW-035 - Configure Secure Boot Revocations and Bootloader Updates for PAWs](configure-secure-boot-revocations.md)**
     Configures and enforces BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware for PAWs.
 
+36. **[REQ-PAW-036 - Configure Windows Defender Application Control](configure-wdac.md)**
+    Deploys Windows Defender Application Control (WDAC) on PAWs in Audit Mode to block unauthorized system-level binaries and scripts.
+
+
 
 

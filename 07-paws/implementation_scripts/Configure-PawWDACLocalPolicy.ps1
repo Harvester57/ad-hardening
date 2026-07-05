@@ -1,7 +1,7 @@
-# Configure-WDACLocalPolicy.ps1
-# Description: Generates a baseline local Code Integrity policy, sets it to Audit Mode, and compiles it.
+# Configure-PawWDACLocalPolicy.ps1
+# Description: Generates a baseline local Code Integrity policy for PAWs, sets it to Audit Mode, and compiles it.
 
-Write-Host "--- Configuring WDAC Local Policy Baseline ---" -ForegroundColor Cyan
+Write-Host "--- Configuring PAW WDAC Local Policy Baseline ---" -ForegroundColor Cyan
 
 # Create working directories
 $WdacDir = "C:\Windows\System32\CodeIntegrity"
@@ -11,7 +11,7 @@ if (-not (Test-Path $WdacDir)) {
 
 # 1. Generate the Default Windows Policy
 Write-Host "[+] Generating Default Windows code integrity rules..." -ForegroundColor Gray
-$PolicyXml = "C:\Windows\Temp\DefaultWindows.xml"
+$PolicyXml = "C:\Windows\Temp\PawDefaultWindows.xml"
 $PolicyBin = "$WdacDir\SIPolicy.p7b"
 
 # Create a policy based on Microsoft's default rules (trusts Windows, Store, and Driver files)
