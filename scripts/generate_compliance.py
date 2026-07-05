@@ -447,6 +447,18 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                 lockout_policy = {}
                 audit_policy = []
                 
+                # Parse user rights assignments from the mandatory Registry Location metadata line
+                ura_detail_match = re.search(
+                    r'under privilege\s+`?(Se[a-zA-Z0-9_]+)`?\s+set\s+to\s+`?([^`\n\r]+?)`?\.?\r?\n?$',
+                    content,
+                    re.MULTILINE | re.IGNORECASE
+                )
+                if ura_detail_match:
+                    right_name = ura_detail_match.group(1)
+                    val_str = ura_detail_match.group(2)
+                    sids = re.findall(r'S-1-[0-9-]+', val_str)
+                    user_rights[right_name] = sids
+                
                 # Helper helper to route service start key
                 def add_reg_or_service_check(chk):
                     key = chk['key']
