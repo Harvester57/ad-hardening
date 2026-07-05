@@ -44,7 +44,18 @@ The following individual User Profile restriction rules must be configured:
 12. **[REQ-END-137 - User Profile: Interactive Logon Inactivity Timeout](user-profile/configure-up-inactivity-timeout.md)**
 13. **[REQ-END-138 - User Profile: Windows Installer Hardening](user-profile/configure-up-installer-hardening.md)**
 14. **[REQ-END-139 - User Profile: Secondary Logon Service Lockdown](user-profile/configure-up-seclogon-service.md)**
-15. **[REQ-END-140 - User Profile: Exploit Guard and Speculative Mitigations](user-profile/configure-up-system-mitigations.md)**
+15. **[REQ-END-150 - User Profile: Structured Exception Handling Overwrite Protection (SEOP) for Endpoints](user-profile/configure-end-up-sehop.md)**
+16. **[REQ-END-151 - User Profile: Directory Protection Mode for Endpoints](user-profile/configure-end-up-protection-mode.md)**
+17. **[REQ-END-152 - User Profile: Address Space Layout Randomization (ASLR) Image Relocation for Endpoints](user-profile/configure-end-up-aslr-relocation.md)**
+18. **[REQ-END-153 - User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for Endpoints](user-profile/configure-end-up-speculative-mitigations.md)**
+19. **[REQ-END-154 - User Profile: Authenticode Certificate Padding Check for Endpoints](user-profile/configure-end-up-cert-padding.md)**
+20. **[REQ-END-155 - User Profile: Command Processor Batch File Locking for Endpoints](user-profile/configure-end-up-lock-batch-files.md)**
+21. **[REQ-END-156 - User Profile: Time-Travel Debugging (TTD) Recording Policy for Endpoints](user-profile/configure-end-up-ttd-recording.md)**
+22. **[REQ-END-157 - User Profile: Trusted Root Store Protected Roots Certificate Restriction for Endpoints](user-profile/configure-end-up-protected-roots.md)**
+23. **[REQ-END-158 - User Profile: Disabling Injection of AppInit DLLs for Endpoints](user-profile/configure-end-up-appinit-dlls.md)**
+24. **[REQ-END-159 - User Profile: Preservation of Attachment Zone Information for Endpoints](user-profile/configure-end-up-attachment-zone.md)**
+25. **[REQ-END-160 - User Profile: Disable Windows Game DVR for Endpoints](user-profile/configure-end-up-game-dvr.md)**
+26. **[REQ-END-161 - User Profile: Restrict Windows Ink Workspace on Lock Screen for Endpoints](user-profile/configure-end-up-ink-workspace.md)**
 
 ---
 

@@ -147,7 +147,18 @@ This directory contains the physical isolation policies and operating system sec
     * **[REQ-PAW-126 - User Profile: Interactive Logon Inactivity Timeout for PAWs](user-profile/configure-up-inactivity-timeout.md)**
     * **[REQ-PAW-127 - User Profile: Windows Installer Hardening for PAWs](user-profile/configure-up-installer-hardening.md)**
     * **[REQ-PAW-128 - User Profile: Secondary Logon Service Lockdown for PAWs](user-profile/configure-up-seclogon-service.md)**
-    * **[REQ-PAW-129 - User Profile: Exploit Guard and Speculative Mitigations for PAWs](user-profile/configure-up-system-mitigations.md)**
+    * **[REQ-PAW-140 - User Profile: Structured Exception Handling Overwrite Protection (SEOP) for PAWs](user-profile/configure-paw-up-sehop.md)**
+    * **[REQ-PAW-141 - User Profile: Directory Protection Mode for PAWs](user-profile/configure-paw-up-protection-mode.md)**
+    * **[REQ-PAW-142 - User Profile: Address Space Layout Randomization (ASLR) Image Relocation for PAWs](user-profile/configure-paw-up-aslr-relocation.md)**
+    * **[REQ-PAW-143 - User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for PAWs](user-profile/configure-paw-up-speculative-mitigations.md)**
+    * **[REQ-PAW-144 - User Profile: Authenticode Certificate Padding Check for PAWs](user-profile/configure-paw-up-cert-padding.md)**
+    * **[REQ-PAW-145 - User Profile: Command Processor Batch File Locking for PAWs](user-profile/configure-paw-up-lock-batch-files.md)**
+    * **[REQ-PAW-146 - User Profile: Time-Travel Debugging (TTD) Recording Policy for PAWs](user-profile/configure-paw-up-ttd-recording.md)**
+    * **[REQ-PAW-147 - User Profile: Trusted Root Store Protected Roots Certificate Restriction for PAWs](user-profile/configure-paw-up-protected-roots.md)**
+    * **[REQ-PAW-148 - User Profile: Disabling Injection of AppInit DLLs for PAWs](user-profile/configure-paw-up-appinit-dlls.md)**
+    * **[REQ-PAW-149 - User Profile: Preservation of Attachment Zone Information for PAWs](user-profile/configure-paw-up-attachment-zone.md)**
+    * **[REQ-PAW-150 - User Profile: Disable Windows Game DVR for PAWs](user-profile/configure-paw-up-game-dvr.md)**
+    * **[REQ-PAW-151 - User Profile: Restrict Windows Ink Workspace on Lock Screen for PAWs](user-profile/configure-paw-up-ink-workspace.md)**
 
 25. **[REQ-PAW-025 - Configure Exploit Protection Profile for PAWs](configure-exploit-protection.md)**
     Configures and enforces a system-wide Microsoft Defender Exploit Protection profile to apply advanced memory mitigations (DEP, ASLR, CFG, SEHOP, Heap Integrity) on all PAWs.

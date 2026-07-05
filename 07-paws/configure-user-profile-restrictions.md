@@ -44,7 +44,18 @@ The following individual User Profile restriction rules must be configured:
 12. **[REQ-PAW-126 - User Profile: Interactive Logon Inactivity Timeout for PAWs](user-profile/configure-up-inactivity-timeout.md)**
 13. **[REQ-PAW-127 - User Profile: Windows Installer Hardening for PAWs](user-profile/configure-up-installer-hardening.md)**
 14. **[REQ-PAW-128 - User Profile: Secondary Logon Service Lockdown for PAWs](user-profile/configure-up-seclogon-service.md)**
-15. **[REQ-PAW-129 - User Profile: Exploit Guard and Speculative Mitigations for PAWs](user-profile/configure-up-system-mitigations.md)**
+15. **[REQ-PAW-140 - User Profile: Structured Exception Handling Overwrite Protection (SEOP) for PAWs](user-profile/configure-paw-up-sehop.md)**
+16. **[REQ-PAW-141 - User Profile: Directory Protection Mode for PAWs](user-profile/configure-paw-up-protection-mode.md)**
+17. **[REQ-PAW-142 - User Profile: Address Space Layout Randomization (ASLR) Image Relocation for PAWs](user-profile/configure-paw-up-aslr-relocation.md)**
+18. **[REQ-PAW-143 - User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for PAWs](user-profile/configure-paw-up-speculative-mitigations.md)**
+19. **[REQ-PAW-144 - User Profile: Authenticode Certificate Padding Check for PAWs](user-profile/configure-paw-up-cert-padding.md)**
+20. **[REQ-PAW-145 - User Profile: Command Processor Batch File Locking for PAWs](user-profile/configure-paw-up-lock-batch-files.md)**
+21. **[REQ-PAW-146 - User Profile: Time-Travel Debugging (TTD) Recording Policy for PAWs](user-profile/configure-paw-up-ttd-recording.md)**
+22. **[REQ-PAW-147 - User Profile: Trusted Root Store Protected Roots Certificate Restriction for PAWs](user-profile/configure-paw-up-protected-roots.md)**
+23. **[REQ-PAW-148 - User Profile: Disabling Injection of AppInit DLLs for PAWs](user-profile/configure-paw-up-appinit-dlls.md)**
+24. **[REQ-PAW-149 - User Profile: Preservation of Attachment Zone Information for PAWs](user-profile/configure-paw-up-attachment-zone.md)**
+25. **[REQ-PAW-150 - User Profile: Disable Windows Game DVR for PAWs](user-profile/configure-paw-up-game-dvr.md)**
+26. **[REQ-PAW-151 - User Profile: Restrict Windows Ink Workspace on Lock Screen for PAWs](user-profile/configure-paw-up-ink-workspace.md)**
 
 ---
 

@@ -358,7 +358,6 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-126" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-127" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-128" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-129" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-130" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-131" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-132" selected="true" />
@@ -368,6 +367,18 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-137" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-138" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-139" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-140" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-141" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-142" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-143" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-144" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-145" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-146" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-147" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-148" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-149" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-150" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-151" selected="true" />
   </Profile>
   <Profile id="xccdf_org.adhardening.benchmarks_profile_Endpoint">
     <title>Endpoint Hardening Profile</title>
@@ -506,7 +517,6 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-137" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-138" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-139" selected="true" />
-    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-140" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-141" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-142" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-143" selected="true" />
@@ -516,6 +526,18 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-148" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-149" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-150" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-151" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-152" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-153" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-154" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-155" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-156" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-157" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-158" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-159" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-160" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-161" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-162" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-006" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-007" selected="true" />
@@ -55828,220 +55850,6 @@ Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Services\seclogon" "Start" "4" "D
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7128" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-129" severity="high" weight="10.0" selected="false">
-      <title>[REQ-PAW-129] User Profile: Exploit Guard and Speculative Mitigations for PAWs</title>
-      <description>
-        <xhtml:p>
-          <xhtml:strong>Target Scope:</xhtml:strong>
-        </xhtml:p>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.</xhtml:li>
-        </xhtml:ul>
-        <xhtml:p>
-          <xhtml:strong>File Path: </xhtml:strong>
-          <xhtml:code>07-paws/user-profile/configure-up-system-mitigations.md</xhtml:code>
-        </xhtml:p>
-      </description>
-      <rationale>
-        <xhtml:p>Enforces Address Space Layout Randomization (ASLR) force relocation, Spectre/Meltdown speculative execution overrides, SEHOP, time-travel debugging recording locks, Authenticode padding validation, and AppInit DLL bans.</xhtml:p>
-      </rationale>
-      <fixtext>
-        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
-        <xhtml:ol>
-          <xhtml:li>Define secondary logon service startup type:</xhtml:li>
-          <xhtml:li>* Navigate to: <xhtml:code>Computer Configuration \ Policies \ Windows Settings \ Security Settings \ System Services</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:em> Double-click `Secondary Logon`, check </xhtml:em>
-            <xhtml:em>Define this policy setting</xhtml:em>
-            <xhtml:em>, and set startup mode to </xhtml:em>
-            <xhtml:em>Disabled</xhtml:em>
-            <xhtml:em />
-          </xhtml:li>
-          <xhtml:li>Configure Attachment Zone retention:</xhtml:li>
-          <xhtml:li>* Navigate to: <xhtml:code>User Configuration \ Administrative Templates \ Windows Components \ Attachment Manager</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>* Configure the policy:</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Policy</xhtml:em>
-            <xhtml:em>: `Do not preserve zone information in file attachments` -&gt; Set to </xhtml:em>
-            <xhtml:em>Disabled</xhtml:em>* (forces SaveZoneInformation = 2)</xhtml:li>
-          <xhtml:li>Configure Windows Ink Workspace above lock restrictions:</xhtml:li>
-          <xhtml:li>* Navigate to: <xhtml:code>Computer Configuration \ Administrative Templates \ Windows Components \ Windows Ink Workspace</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>* Configure the policy:</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Policy</xhtml:em>
-            <xhtml:em>: `Allow Windows Ink Workspace` -&gt; Set to </xhtml:em>
-            <xhtml:em>Enabled</xhtml:em>
-            <xhtml:em> and select </xhtml:em>
-            <xhtml:em>On, but disallow clicks above lock</xhtml:em>* (value 1)</xhtml:li>
-          <xhtml:li>Deploy the remaining custom system mitigation registry preferences:</xhtml:li>
-          <xhtml:li>* Navigate to: <xhtml:code>Computer Configuration \ Preferences \ Windows Settings \ Registry</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:em> Create new </xhtml:em>
-            <xhtml:em>Registry Items</xhtml:em>* for:</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>ASLR Force Randomization</xhtml:em>*: Key <xhtml:code>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</xhtml:code> | Value <xhtml:code>MoveImages</xhtml:code> = <xhtml:code>0xFFFFFFFF</xhtml:code> (DWord)</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>CPU Spectre Overrides</xhtml:em>*: Key <xhtml:code>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</xhtml:code> | Value <xhtml:code>FeatureSettingsOverride</xhtml:code> = <xhtml:code>72</xhtml:code> (DWord), <xhtml:code>FeatureSettingsOverrideMask</xhtml:code> = <xhtml:code>3</xhtml:code> (DWord)</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>System Objects Protection</xhtml:em>*: Key <xhtml:code>SYSTEM\CurrentControlSet\Control\Session Manager</xhtml:code> | Value <xhtml:code>ProtectionMode</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Strict Authenticode cert padding check</xhtml:em>*: Key <xhtml:code>Software\Microsoft\Cryptography\Wintrust\Config</xhtml:code> | Value <xhtml:code>EnableCertPaddingCheck</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord) and Wow6432Node equivalent.</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Secure Batch Processing</xhtml:em>*: Key <xhtml:code>SOFTWARE\Microsoft\Command Processor</xhtml:code> | Value <xhtml:code>LockBatchFilesWhenInUse</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Disable Time-Travel Debugging</xhtml:em>*: Key <xhtml:code>SOFTWARE\Microsoft\TTD</xhtml:code> | Value <xhtml:code>RecordingPolicy</xhtml:code> = <xhtml:code>2</xhtml:code> (DWord)</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Protected Roots Flags</xhtml:em>*: Key <xhtml:code>SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots</xhtml:code> | Value <xhtml:code>Flags</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Disable AppInit DLLs</xhtml:em>*: Key <xhtml:code>Software\Microsoft\Windows NT\CurrentVersion\Windows</xhtml:code> | Value <xhtml:code>LoadAppInit_DLLs</xhtml:code> = <xhtml:code>0</xhtml:code> (DWord)</xhtml:li>
-        </xhtml:ol>
-        <xhtml:hr />
-        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>
-          <xhtml:a href="../implementation_scripts/Configure-PawUpsystemmitigations.ps1">Download Script: Configure-PawUpsystemmitigations.ps1</xhtml:a>
-        </xhtml:p>
-        <xhtml:pre>
-          <xhtml:code># Configure-PawUpsystemmitigations.ps1
-# Configure-PawUpsystemmitigations.ps1
-Write-Host "Applying User Profile restriction: system-mitigations..." -ForegroundColor Cyan
-
-function Set-RegValue {
-    [CmdletBinding(SupportsShouldProcess)]
-    param (
-        [string]$hive,
-        [string]$keyPath,
-        [string]$name,
-        [string]$value,
-        [string]$type
-    )
-    if ($PSCmdlet.ShouldProcess("$hive\$keyPath", "Set registry value $name to $value")) {
-        $fullPath = "$hive\$keyPath"
-        $parent = Split-Path -Path $fullPath
-        if (-not (Test-Path $parent)) { New-Item -Path $parent -Force | Out-Null }
-        if (-not (Test-Path $fullPath)) { New-Item -Path $fullPath -Force | Out-Null }
-        Set-ItemProperty -Path $fullPath -Name $name -Value $value -Type $type -Force
-    }
-}
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\kernel" "DisableExceptionChainValidation" "0" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager" "ProtectionMode" "1" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" "4294967295" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" "72" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" "3" "DWord"
-Set-RegValue "HKLM:" "Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1" "DWord"
-Set-RegValue "HKLM:" "Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" "1" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\TTD" "RecordingPolicy" "2" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" "1" "DWord"
-Set-RegValue "HKLM:" "Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" "0" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" "2" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\Windows\GameDVR" "AllowGameDVR" "0" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" "1" "DWord"
-</xhtml:code>
-        </xhtml:pre>
-        <xhtml:p>
-          <xhtml:em>To audit the hardening status:</xhtml:em>
-          <xhtml:a href="../audit_scripts/Get-PawUpsystemmitigationsStatus.ps1">Download Script: Get-PawUpsystemmitigationsStatus.ps1</xhtml:a>
-        </xhtml:p>
-        <xhtml:pre>
-          <xhtml:code># Get-PawUpsystemmitigationsStatus.ps1
-# Get-PawUpsystemmitigationsStatus.ps1
-$script:Vulnerable = $false
-
-function Test-RegValue {
-    param (
-        [string]$hive,
-        [string]$keyPath,
-        [string]$name,
-        [string]$expected
-    )
-    $fullPath = "$hive\$keyPath"
-    $val = Get-ItemProperty -Path $fullPath -Name $name -ErrorAction SilentlyContinue
-    $actual = if ($val) { $val.$name } else { "" }
-    if ($actual -ne $expected) {
-        $script:Vulnerable = $true
-    }
-}
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\kernel" "DisableExceptionChainValidation" "0"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager" "ProtectionMode" "1"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" "4294967295"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" "72"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" "3"
-Test-RegValue "HKLM:" "Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1"
-Test-RegValue "HKLM:" "Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1"
-Test-RegValue "HKLM:" "SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" "1"
-Test-RegValue "HKLM:" "SOFTWARE\Microsoft\TTD" "RecordingPolicy" "2"
-Test-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" "1"
-Test-RegValue "HKLM:" "Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" "0"
-Test-RegValue "HKLM:" "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" "2"
-Test-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\Windows\GameDVR" "AllowGameDVR" "0"
-Test-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" "1"
-
-if ($script:Vulnerable) {
-    Write-Output "Non-Compliant"
-    exit 1
-} else {
-    Write-Output "Compliant"
-    exit 0
-}</xhtml:code>
-        </xhtml:pre>
-        <xhtml:hr />
-      </fixtext>
-      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawUpsystemmitigations.ps1
-# Configure-PawUpsystemmitigations.ps1
-Write-Host "Applying User Profile restriction: system-mitigations..." -ForegroundColor Cyan
-
-function Set-RegValue {
-    [CmdletBinding(SupportsShouldProcess)]
-    param (
-        [string]$hive,
-        [string]$keyPath,
-        [string]$name,
-        [string]$value,
-        [string]$type
-    )
-    if ($PSCmdlet.ShouldProcess("$hive\$keyPath", "Set registry value $name to $value")) {
-        $fullPath = "$hive\$keyPath"
-        $parent = Split-Path -Path $fullPath
-        if (-not (Test-Path $parent)) { New-Item -Path $parent -Force | Out-Null }
-        if (-not (Test-Path $fullPath)) { New-Item -Path $fullPath -Force | Out-Null }
-        Set-ItemProperty -Path $fullPath -Name $name -Value $value -Type $type -Force
-    }
-}
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\kernel" "DisableExceptionChainValidation" "0" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager" "ProtectionMode" "1" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" "4294967295" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" "72" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" "3" "DWord"
-Set-RegValue "HKLM:" "Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1" "DWord"
-Set-RegValue "HKLM:" "Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" "1" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\TTD" "RecordingPolicy" "2" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" "1" "DWord"
-Set-RegValue "HKLM:" "Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" "0" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" "2" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\Windows\GameDVR" "AllowGameDVR" "0" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" "1" "DWord"</fix>
-      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
-        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7129" />
-      </check>
-    </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-130" severity="high" weight="10.0" selected="false">
       <title>[REQ-PAW-130] Audit Policy: Advanced Audit Policy Overrides for PAWs</title>
       <description>
@@ -57310,6 +57118,989 @@ if ($Process.ExitCode -eq 0) {
 }</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7139" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-140" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-140] User Profile: Structured Exception Handling Overwrite Protection (SEHOP) for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/user-profile/configure-paw-up-sehop.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Structured Exception Handling Overwrite Protection (SEHOP) detects and thwarts exploits targeting structured exception handler corruption, a common stack exploitation technique.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel\DisableExceptionChainValidation</xhtml:code> = <xhtml:code>0</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-PawAuditSehop.ps1">Download Script: Configure-PawAuditSehop.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawAuditSehop.ps1
+Write-Host "Enforcing System Mitigation control: sehop..." -ForegroundColor Cyan
+
+# Set Registry value: DisableExceptionChainValidation
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Name "DisableExceptionChainValidation" -Value 0 -Type DWord -Force
+Write-Host "    Enforced DisableExceptionChainValidation = 0" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-PawAuditSehopStatus.ps1">Download Script: Get-PawAuditSehopStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawAuditSehopStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: DisableExceptionChainValidation
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Name "DisableExceptionChainValidation" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.DisableExceptionChainValidation -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawAuditSehop.ps1
+Write-Host "Enforcing System Mitigation control: sehop..." -ForegroundColor Cyan
+
+# Set Registry value: DisableExceptionChainValidation
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Name "DisableExceptionChainValidation" -Value 0 -Type DWord -Force
+Write-Host "    Enforced DisableExceptionChainValidation = 0" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7140" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-141" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-141] User Profile: Directory Protection Mode for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/user-profile/configure-paw-up-protection-mode.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Setting ProtectionMode to 1 restricts access to crucial system folders like System32, enforcing strict ACLs and protecting against write tampering.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\ProtectionMode</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-PawAuditProtectionmode.ps1">Download Script: Configure-PawAuditProtectionmode.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawAuditProtectionmode.ps1
+Write-Host "Enforcing System Mitigation control: protection-mode..." -ForegroundColor Cyan
+
+# Set Registry value: ProtectionMode
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "ProtectionMode" -Value 1 -Type DWord -Force
+Write-Host "    Enforced ProtectionMode = 1" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-PawAuditProtectionmodeStatus.ps1">Download Script: Get-PawAuditProtectionmodeStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawAuditProtectionmodeStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: ProtectionMode
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "ProtectionMode" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.ProtectionMode -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawAuditProtectionmode.ps1
+Write-Host "Enforcing System Mitigation control: protection-mode..." -ForegroundColor Cyan
+
+# Set Registry value: ProtectionMode
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "ProtectionMode" -Value 1 -Type DWord -Force
+Write-Host "    Enforced ProtectionMode = 1" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7141" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-142" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-142] User Profile: Address Space Layout Randomization (ASLR) Image Relocation for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/user-profile/configure-paw-up-aslr-relocation.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Enforcing Address Space Layout Randomization (ASLR) image relocation (MoveImages) forces all dynamic modules to relocate, neutralizing hardcoded ROP payload chains.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\MoveImages</xhtml:code> = <xhtml:code>4294967295</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-PawAuditAslrrelocation.ps1">Download Script: Configure-PawAuditAslrrelocation.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawAuditAslrrelocation.ps1
+Write-Host "Enforcing System Mitigation control: aslr-relocation..." -ForegroundColor Cyan
+
+# Set Registry value: MoveImages
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "MoveImages" -Value 4294967295 -Type DWord -Force
+Write-Host "    Enforced MoveImages = 4294967295" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-PawAuditAslrrelocationStatus.ps1">Download Script: Get-PawAuditAslrrelocationStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawAuditAslrrelocationStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: MoveImages
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "MoveImages" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.MoveImages -ne 4294967295) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawAuditAslrrelocation.ps1
+Write-Host "Enforcing System Mitigation control: aslr-relocation..." -ForegroundColor Cyan
+
+# Set Registry value: MoveImages
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "MoveImages" -Value 4294967295 -Type DWord -Force
+Write-Host "    Enforced MoveImages = 4294967295" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7142" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-143" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-143] User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/user-profile/configure-paw-up-speculative-mitigations.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Enforces hardware-backed speculative execution mitigations (Spectre, Meltdown, MDS) to prevent side-channel leaks of sensitive kernel-space data.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverride</xhtml:code> = <xhtml:code>72</xhtml:code> (DWord)</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverrideMask</xhtml:code> = <xhtml:code>3</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-PawAuditSpeculativemitigations.ps1">Download Script: Configure-PawAuditSpeculativemitigations.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawAuditSpeculativemitigations.ps1
+Write-Host "Enforcing System Mitigation control: speculative-mitigations..." -ForegroundColor Cyan
+
+# Set Registry value: FeatureSettingsOverride
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverride" -Value 72 -Type DWord -Force
+Write-Host "    Enforced FeatureSettingsOverride = 72" -ForegroundColor Green
+
+# Set Registry value: FeatureSettingsOverrideMask
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverrideMask" -Value 3 -Type DWord -Force
+Write-Host "    Enforced FeatureSettingsOverrideMask = 3" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-PawAuditSpeculativemitigationsStatus.ps1">Download Script: Get-PawAuditSpeculativemitigationsStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawAuditSpeculativemitigationsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: FeatureSettingsOverride
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverride" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.FeatureSettingsOverride -ne 72) {
+    $script:Vulnerable = $true
+}
+
+# Audit Registry value: FeatureSettingsOverrideMask
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverrideMask" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.FeatureSettingsOverrideMask -ne 3) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawAuditSpeculativemitigations.ps1
+Write-Host "Enforcing System Mitigation control: speculative-mitigations..." -ForegroundColor Cyan
+
+# Set Registry value: FeatureSettingsOverride
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverride" -Value 72 -Type DWord -Force
+Write-Host "    Enforced FeatureSettingsOverride = 72" -ForegroundColor Green
+
+# Set Registry value: FeatureSettingsOverrideMask
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverrideMask" -Value 3 -Type DWord -Force
+Write-Host "    Enforced FeatureSettingsOverrideMask = 3" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7143" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-144" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-144] User Profile: Authenticode Signature Certificate Padding Check for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/user-profile/configure-paw-up-cert-padding.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Blocks padding execution attacks on Authenticode signed binaries by validating that there is no extra unverified payload appended to the certificate signature block.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\Software\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-PawAuditCertpadding.ps1">Download Script: Configure-PawAuditCertpadding.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawAuditCertpadding.ps1
+Write-Host "Enforcing System Mitigation control: cert-padding..." -ForegroundColor Cyan
+
+# Set Registry value: EnableCertPaddingCheck
+if (-not (Test-Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config")) { New-Item -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -Value 1 -Type DWord -Force
+Write-Host "    Enforced EnableCertPaddingCheck = 1" -ForegroundColor Green
+
+# Set Registry value: EnableCertPaddingCheck
+if (-not (Test-Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config")) { New-Item -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -Value 1 -Type DWord -Force
+Write-Host "    Enforced EnableCertPaddingCheck = 1" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-PawAuditCertpaddingStatus.ps1">Download Script: Get-PawAuditCertpaddingStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawAuditCertpaddingStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: EnableCertPaddingCheck
+$RegVal = Get-ItemProperty -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.EnableCertPaddingCheck -ne 1) {
+    $script:Vulnerable = $true
+}
+
+# Audit Registry value: EnableCertPaddingCheck
+$RegVal = Get-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.EnableCertPaddingCheck -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawAuditCertpadding.ps1
+Write-Host "Enforcing System Mitigation control: cert-padding..." -ForegroundColor Cyan
+
+# Set Registry value: EnableCertPaddingCheck
+if (-not (Test-Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config")) { New-Item -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -Value 1 -Type DWord -Force
+Write-Host "    Enforced EnableCertPaddingCheck = 1" -ForegroundColor Green
+
+# Set Registry value: EnableCertPaddingCheck
+if (-not (Test-Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config")) { New-Item -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -Value 1 -Type DWord -Force
+Write-Host "    Enforced EnableCertPaddingCheck = 1" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7144" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-145" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-145] User Profile: Command Processor Batch File Locking for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/user-profile/configure-paw-up-lock-batch-files.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Locking batch scripts when executing prevents attackers or concurrent processes from rewriting script lines on-the-fly, neutralizing dynamic code modification hijacks.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SOFTWARE\Microsoft\Command Processor\LockBatchFilesWhenInUse</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-PawAuditLockbatchfiles.ps1">Download Script: Configure-PawAuditLockbatchfiles.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawAuditLockbatchfiles.ps1
+Write-Host "Enforcing System Mitigation control: lock-batch-files..." -ForegroundColor Cyan
+
+# Set Registry value: LockBatchFilesWhenInUse
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Command Processor")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Name "LockBatchFilesWhenInUse" -Value 1 -Type DWord -Force
+Write-Host "    Enforced LockBatchFilesWhenInUse = 1" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-PawAuditLockbatchfilesStatus.ps1">Download Script: Get-PawAuditLockbatchfilesStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawAuditLockbatchfilesStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: LockBatchFilesWhenInUse
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Name "LockBatchFilesWhenInUse" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.LockBatchFilesWhenInUse -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawAuditLockbatchfiles.ps1
+Write-Host "Enforcing System Mitigation control: lock-batch-files..." -ForegroundColor Cyan
+
+# Set Registry value: LockBatchFilesWhenInUse
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Command Processor")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Name "LockBatchFilesWhenInUse" -Value 1 -Type DWord -Force
+Write-Host "    Enforced LockBatchFilesWhenInUse = 1" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7145" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-146" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-146] User Profile: Time-Travel Debugging (TTD) Recording Policy for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/user-profile/configure-paw-up-ttd-recording.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Disables and locks down user-mode Time-Travel Debugging (TTD) traces, preventing local adversaries from capturing memory dumps and private cryptographic structures from administrative processes.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SOFTWARE\Microsoft\TTD\RecordingPolicy</xhtml:code> = <xhtml:code>2</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-PawAuditTtdrecording.ps1">Download Script: Configure-PawAuditTtdrecording.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawAuditTtdrecording.ps1
+Write-Host "Enforcing System Mitigation control: ttd-recording..." -ForegroundColor Cyan
+
+# Set Registry value: RecordingPolicy
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\TTD")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Name "RecordingPolicy" -Value 2 -Type DWord -Force
+Write-Host "    Enforced RecordingPolicy = 2" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-PawAuditTtdrecordingStatus.ps1">Download Script: Get-PawAuditTtdrecordingStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawAuditTtdrecordingStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: RecordingPolicy
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Name "RecordingPolicy" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.RecordingPolicy -ne 2) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawAuditTtdrecording.ps1
+Write-Host "Enforcing System Mitigation control: ttd-recording..." -ForegroundColor Cyan
+
+# Set Registry value: RecordingPolicy
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\TTD")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Name "RecordingPolicy" -Value 2 -Type DWord -Force
+Write-Host "    Enforced RecordingPolicy = 2" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7146" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-147" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-147] User Profile: Trusted Root Store Protected Roots Certificate Restriction for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/user-profile/configure-paw-up-protected-roots.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Restricts users from installing root certificates into the trusted root store, preventing root CA hijack actions and man-in-the-middle proxy injection attacks.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots\Flags</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-PawAuditProtectedroots.ps1">Download Script: Configure-PawAuditProtectedroots.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawAuditProtectedroots.ps1
+Write-Host "Enforcing System Mitigation control: protected-roots..." -ForegroundColor Cyan
+
+# Set Registry value: Flags
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Name "Flags" -Value 1 -Type DWord -Force
+Write-Host "    Enforced Flags = 1" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-PawAuditProtectedrootsStatus.ps1">Download Script: Get-PawAuditProtectedrootsStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawAuditProtectedrootsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: Flags
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Name "Flags" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.Flags -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawAuditProtectedroots.ps1
+Write-Host "Enforcing System Mitigation control: protected-roots..." -ForegroundColor Cyan
+
+# Set Registry value: Flags
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Name "Flags" -Value 1 -Type DWord -Force
+Write-Host "    Enforced Flags = 1" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7147" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-148" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-148] User Profile: Disabling Injection of AppInit DLLs for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/user-profile/configure-paw-up-appinit-dlls.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>AppInit DLL injection is a legacy mechanism that loads arbitrary user DLLs into every process that links user32.dll. Enforcing a complete ban (value 0) prevents unauthorized injection hooks.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows\LoadAppInit_DLLs</xhtml:code> = <xhtml:code>0</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-PawAuditAppinitdlls.ps1">Download Script: Configure-PawAuditAppinitdlls.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawAuditAppinitdlls.ps1
+Write-Host "Enforcing System Mitigation control: appinit-dlls..." -ForegroundColor Cyan
+
+# Set Registry value: LoadAppInit_DLLs
+if (-not (Test-Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows")) { New-Item -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Name "LoadAppInit_DLLs" -Value 0 -Type DWord -Force
+Write-Host "    Enforced LoadAppInit_DLLs = 0" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-PawAuditAppinitdllsStatus.ps1">Download Script: Get-PawAuditAppinitdllsStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawAuditAppinitdllsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: LoadAppInit_DLLs
+$RegVal = Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Name "LoadAppInit_DLLs" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.LoadAppInit_DLLs -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawAuditAppinitdlls.ps1
+Write-Host "Enforcing System Mitigation control: appinit-dlls..." -ForegroundColor Cyan
+
+# Set Registry value: LoadAppInit_DLLs
+if (-not (Test-Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows")) { New-Item -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Name "LoadAppInit_DLLs" -Value 0 -Type DWord -Force
+Write-Host "    Enforced LoadAppInit_DLLs = 0" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7148" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-149" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-149] User Profile: Preservation of Attachment Zone Information for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/user-profile/configure-paw-up-attachment-zone.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Ensures the Attachment Manager preserves the Zone.Identifier alternate data stream (ADS) marking files downloaded from untrusted web zones, enforcing SmartScreen check prompts.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Navigate to: <xhtml:code>User Configuration \ Administrative Templates \ Windows Components \ Attachment Manager</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the policy:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Do not preserve zone information in file attachments` -&gt; Set to </xhtml:em>
+            <xhtml:em>Disabled</xhtml:em>* (which configures <xhtml:code>SaveZoneInformation</xhtml:code> = <xhtml:code>2</xhtml:code> to preserve zone information)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-PawAuditAttachmentzone.ps1">Download Script: Configure-PawAuditAttachmentzone.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawAuditAttachmentzone.ps1
+Write-Host "Enforcing System Mitigation control: attachment-zone..." -ForegroundColor Cyan
+
+# Set Registry value: SaveZoneInformation
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Name "SaveZoneInformation" -Value 2 -Type DWord -Force
+Write-Host "    Enforced SaveZoneInformation = 2" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-PawAuditAttachmentzoneStatus.ps1">Download Script: Get-PawAuditAttachmentzoneStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawAuditAttachmentzoneStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: SaveZoneInformation
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Name "SaveZoneInformation" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.SaveZoneInformation -ne 2) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawAuditAttachmentzone.ps1
+Write-Host "Enforcing System Mitigation control: attachment-zone..." -ForegroundColor Cyan
+
+# Set Registry value: SaveZoneInformation
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Name "SaveZoneInformation" -Value 2 -Type DWord -Force
+Write-Host "    Enforced SaveZoneInformation = 2" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7149" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-150" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-150] User Profile: Disable Windows Game DVR for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/user-profile/configure-paw-up-game-dvr.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Disabling Game DVR blocks background media recording agents, conserving local computing cycles and preventing administrative session leakage via broadcast APIs.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration \ Administrative Templates \ Windows Components \ Windows Game Recording and Broadcasting</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the policy:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Enables or disables Windows Game Recording and Broadcasting` -&gt; Set to </xhtml:em>
+            <xhtml:em>Disabled</xhtml:em>* (which configures <xhtml:code>AllowGameDVR</xhtml:code> = <xhtml:code>0</xhtml:code>)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-PawAuditGamedvr.ps1">Download Script: Configure-PawAuditGamedvr.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawAuditGamedvr.ps1
+Write-Host "Enforcing System Mitigation control: game-dvr..." -ForegroundColor Cyan
+
+# Set Registry value: AllowGameDVR
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -Value 0 -Type DWord -Force
+Write-Host "    Enforced AllowGameDVR = 0" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-PawAuditGamedvrStatus.ps1">Download Script: Get-PawAuditGamedvrStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawAuditGamedvrStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: AllowGameDVR
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.AllowGameDVR -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawAuditGamedvr.ps1
+Write-Host "Enforcing System Mitigation control: game-dvr..." -ForegroundColor Cyan
+
+# Set Registry value: AllowGameDVR
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -Value 0 -Type DWord -Force
+Write-Host "    Enforced AllowGameDVR = 0" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7150" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-151" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-151] User Profile: Restrict Windows Ink Workspace on Lock Screen for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/user-profile/configure-paw-up-ink-workspace.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Disabling access to the Windows Ink Workspace on the lock screen prevents unauthorized physical users from invoking drawing tools, scripts, or apps without authenticating.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration \ Administrative Templates \ Windows Components \ Windows Ink Workspace</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the policy:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Allow Windows Ink Workspace` -&gt; Set to </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>
+            <xhtml:em>: Choose </xhtml:em>
+            <xhtml:em>On, but disallow access above lock</xhtml:em>* (which configures <xhtml:code>AllowWindowsInkWorkspace</xhtml:code> = <xhtml:code>1</xhtml:code>)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-PawAuditInkworkspace.ps1">Download Script: Configure-PawAuditInkworkspace.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawAuditInkworkspace.ps1
+Write-Host "Enforcing System Mitigation control: ink-workspace..." -ForegroundColor Cyan
+
+# Set Registry value: AllowWindowsInkWorkspace
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Name "AllowWindowsInkWorkspace" -Value 1 -Type DWord -Force
+Write-Host "    Enforced AllowWindowsInkWorkspace = 1" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-PawAuditInkworkspaceStatus.ps1">Download Script: Get-PawAuditInkworkspaceStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawAuditInkworkspaceStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: AllowWindowsInkWorkspace
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Name "AllowWindowsInkWorkspace" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.AllowWindowsInkWorkspace -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawAuditInkworkspace.ps1
+Write-Host "Enforcing System Mitigation control: ink-workspace..." -ForegroundColor Cyan
+
+# Set Registry value: AllowWindowsInkWorkspace
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Name "AllowWindowsInkWorkspace" -Value 1 -Type DWord -Force
+Write-Host "    Enforced AllowWindowsInkWorkspace = 1" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7151" />
       </check>
     </Rule>
   </Group>
@@ -79614,217 +80405,6 @@ Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Services\seclogon" "Start" "4" "D
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8139" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-140" severity="high" weight="10.0" selected="false">
-      <title>[REQ-END-140] User Profile: Exploit Guard and Speculative Mitigations</title>
-      <description>
-        <xhtml:p>
-          <xhtml:strong>Target Scope:</xhtml:strong>
-        </xhtml:p>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 (and above) Enterprise/Professional</xhtml:li>
-        </xhtml:ul>
-        <xhtml:p>
-          <xhtml:strong>File Path: </xhtml:strong>
-          <xhtml:code>08-endpoints/user-profile/configure-up-system-mitigations.md</xhtml:code>
-        </xhtml:p>
-      </description>
-      <rationale>
-        <xhtml:p>Enforces Address Space Layout Randomization (ASLR) force relocation, Spectre/Meltdown speculative execution overrides, SEHOP, time-travel debugging recording locks, Authenticode padding validation, and AppInit DLL bans.</xhtml:p>
-      </rationale>
-      <fixtext>
-        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
-        <xhtml:ol>
-          <xhtml:li>Define secondary logon service startup type:</xhtml:li>
-          <xhtml:li>* Navigate to: <xhtml:code>Computer Configuration \ Policies \ Windows Settings \ Security Settings \ System Services</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:em> Double-click `Secondary Logon`, check </xhtml:em>
-            <xhtml:em>Define this policy setting</xhtml:em>
-            <xhtml:em>, and set startup mode to </xhtml:em>
-            <xhtml:em>Disabled</xhtml:em>
-            <xhtml:em />
-          </xhtml:li>
-          <xhtml:li>Configure Attachment Zone retention:</xhtml:li>
-          <xhtml:li>* Navigate to: <xhtml:code>User Configuration \ Administrative Templates \ Windows Components \ Attachment Manager</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>* Configure the policy:</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Policy</xhtml:em>
-            <xhtml:em>: `Do not preserve zone information in file attachments` -&gt; Set to </xhtml:em>
-            <xhtml:em>Disabled</xhtml:em>* (forces SaveZoneInformation = 2)</xhtml:li>
-          <xhtml:li>Configure Windows Ink Workspace above lock restrictions:</xhtml:li>
-          <xhtml:li>* Navigate to: <xhtml:code>Computer Configuration \ Administrative Templates \ Windows Components \ Windows Ink Workspace</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>* Configure the policy:</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Policy</xhtml:em>
-            <xhtml:em>: `Allow Windows Ink Workspace` -&gt; Set to </xhtml:em>
-            <xhtml:em>Enabled</xhtml:em>
-            <xhtml:em> and select </xhtml:em>
-            <xhtml:em>On, but disallow clicks above lock</xhtml:em>* (value 1)</xhtml:li>
-          <xhtml:li>Deploy the remaining custom system mitigation registry preferences:</xhtml:li>
-          <xhtml:li>* Navigate to: <xhtml:code>Computer Configuration \ Preferences \ Windows Settings \ Registry</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:em> Create new </xhtml:em>
-            <xhtml:em>Registry Items</xhtml:em>* for:</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>ASLR Force Randomization</xhtml:em>*: Key <xhtml:code>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</xhtml:code> | Value <xhtml:code>MoveImages</xhtml:code> = <xhtml:code>0xFFFFFFFF</xhtml:code> (DWord)</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>CPU Spectre Overrides</xhtml:em>*: Key <xhtml:code>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</xhtml:code> | Value <xhtml:code>FeatureSettingsOverride</xhtml:code> = <xhtml:code>72</xhtml:code> (DWord), <xhtml:code>FeatureSettingsOverrideMask</xhtml:code> = <xhtml:code>3</xhtml:code> (DWord)</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>System Objects Protection</xhtml:em>*: Key <xhtml:code>SYSTEM\CurrentControlSet\Control\Session Manager</xhtml:code> | Value <xhtml:code>ProtectionMode</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Strict Authenticode cert padding check</xhtml:em>*: Key <xhtml:code>Software\Microsoft\Cryptography\Wintrust\Config</xhtml:code> | Value <xhtml:code>EnableCertPaddingCheck</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord) and Wow6432Node equivalent.</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Secure Batch Processing</xhtml:em>*: Key <xhtml:code>SOFTWARE\Microsoft\Command Processor</xhtml:code> | Value <xhtml:code>LockBatchFilesWhenInUse</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Disable Time-Travel Debugging</xhtml:em>*: Key <xhtml:code>SOFTWARE\Microsoft\TTD</xhtml:code> | Value <xhtml:code>RecordingPolicy</xhtml:code> = <xhtml:code>2</xhtml:code> (DWord)</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Protected Roots Flags</xhtml:em>*: Key <xhtml:code>SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots</xhtml:code> | Value <xhtml:code>Flags</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Disable AppInit DLLs</xhtml:em>*: Key <xhtml:code>Software\Microsoft\Windows NT\CurrentVersion\Windows</xhtml:code> | Value <xhtml:code>LoadAppInit_DLLs</xhtml:code> = <xhtml:code>0</xhtml:code> (DWord)</xhtml:li>
-        </xhtml:ol>
-        <xhtml:hr />
-        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>
-          <xhtml:a href="../implementation_scripts/Configure-Upsystemmitigations.ps1">Download Script: Configure-Upsystemmitigations.ps1</xhtml:a>
-        </xhtml:p>
-        <xhtml:pre>
-          <xhtml:code># Configure-Upsystemmitigations.ps1
-Write-Host "Applying User Profile restriction: system-mitigations..." -ForegroundColor Cyan
-
-function Set-RegValue {
-    [CmdletBinding(SupportsShouldProcess)]
-    param (
-        [string]$hive,
-        [string]$keyPath,
-        [string]$name,
-        [string]$value,
-        [string]$type
-    )
-    if ($PSCmdlet.ShouldProcess("$hive\$keyPath", "Set registry value $name to $value")) {
-        $fullPath = "$hive\$keyPath"
-        $parent = Split-Path -Path $fullPath
-        if (-not (Test-Path $parent)) { New-Item -Path $parent -Force | Out-Null }
-        if (-not (Test-Path $fullPath)) { New-Item -Path $fullPath -Force | Out-Null }
-        Set-ItemProperty -Path $fullPath -Name $name -Value $value -Type $type -Force
-    }
-}
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\kernel" "DisableExceptionChainValidation" "0" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager" "ProtectionMode" "1" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" "4294967295" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" "72" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" "3" "DWord"
-Set-RegValue "HKLM:" "Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1" "DWord"
-Set-RegValue "HKLM:" "Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" "1" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\TTD" "RecordingPolicy" "2" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" "1" "DWord"
-Set-RegValue "HKLM:" "Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" "0" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" "2" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\Windows\GameDVR" "AllowGameDVR" "0" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" "1" "DWord"
-</xhtml:code>
-        </xhtml:pre>
-        <xhtml:p>
-          <xhtml:em>To audit the hardening status:</xhtml:em>
-          <xhtml:a href="../audit_scripts/Get-UpsystemmitigationsStatus.ps1">Download Script: Get-UpsystemmitigationsStatus.ps1</xhtml:a>
-        </xhtml:p>
-        <xhtml:pre>
-          <xhtml:code># Get-UpsystemmitigationsStatus.ps1
-$script:Vulnerable = $false
-
-function Test-RegValue {
-    param (
-        [string]$hive,
-        [string]$keyPath,
-        [string]$name,
-        [string]$expected
-    )
-    $fullPath = "$hive\$keyPath"
-    $val = Get-ItemProperty -Path $fullPath -Name $name -ErrorAction SilentlyContinue
-    $actual = if ($val) { $val.$name } else { "" }
-    if ($actual -ne $expected) {
-        $script:Vulnerable = $true
-    }
-}
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\kernel" "DisableExceptionChainValidation" "0"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager" "ProtectionMode" "1"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" "4294967295"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" "72"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" "3"
-Test-RegValue "HKLM:" "Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1"
-Test-RegValue "HKLM:" "Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1"
-Test-RegValue "HKLM:" "SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" "1"
-Test-RegValue "HKLM:" "SOFTWARE\Microsoft\TTD" "RecordingPolicy" "2"
-Test-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" "1"
-Test-RegValue "HKLM:" "Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" "0"
-Test-RegValue "HKLM:" "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" "2"
-Test-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\Windows\GameDVR" "AllowGameDVR" "0"
-Test-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" "1"
-
-if ($script:Vulnerable) {
-    Write-Output "Non-Compliant"
-    exit 1
-} else {
-    Write-Output "Compliant"
-    exit 0
-}</xhtml:code>
-        </xhtml:pre>
-        <xhtml:hr />
-      </fixtext>
-      <fix system="urn:xccdf:fix:script:powershell"># Configure-Upsystemmitigations.ps1
-Write-Host "Applying User Profile restriction: system-mitigations..." -ForegroundColor Cyan
-
-function Set-RegValue {
-    [CmdletBinding(SupportsShouldProcess)]
-    param (
-        [string]$hive,
-        [string]$keyPath,
-        [string]$name,
-        [string]$value,
-        [string]$type
-    )
-    if ($PSCmdlet.ShouldProcess("$hive\$keyPath", "Set registry value $name to $value")) {
-        $fullPath = "$hive\$keyPath"
-        $parent = Split-Path -Path $fullPath
-        if (-not (Test-Path $parent)) { New-Item -Path $parent -Force | Out-Null }
-        if (-not (Test-Path $fullPath)) { New-Item -Path $fullPath -Force | Out-Null }
-        Set-ItemProperty -Path $fullPath -Name $name -Value $value -Type $type -Force
-    }
-}
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\kernel" "DisableExceptionChainValidation" "0" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager" "ProtectionMode" "1" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" "4294967295" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" "72" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" "3" "DWord"
-Set-RegValue "HKLM:" "Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1" "DWord"
-Set-RegValue "HKLM:" "Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" "1" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\TTD" "RecordingPolicy" "2" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" "1" "DWord"
-Set-RegValue "HKLM:" "Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" "0" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" "2" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\Windows\GameDVR" "AllowGameDVR" "0" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" "1" "DWord"</fix>
-      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
-        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8140" />
-      </check>
-    </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-141" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-141] Audit Policy: Advanced Audit Policy Overrides for Endpoints</title>
       <description>
@@ -81021,6 +81601,989 @@ if ($Process.ExitCode -eq 0) {
 }</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8150" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-151" severity="high" weight="10.0" selected="false">
+      <title>[REQ-END-151] User Profile: Structured Exception Handling Overwrite Protection (SEHOP) for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise/Professional</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/user-profile/configure-end-up-sehop.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Structured Exception Handling Overwrite Protection (SEHOP) detects and thwarts exploits targeting structured exception handler corruption, a common stack exploitation technique.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel\DisableExceptionChainValidation</xhtml:code> = <xhtml:code>0</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-EndAuditSehop.ps1">Download Script: Configure-EndAuditSehop.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndAuditSehop.ps1
+Write-Host "Enforcing System Mitigation control: sehop..." -ForegroundColor Cyan
+
+# Set Registry value: DisableExceptionChainValidation
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Name "DisableExceptionChainValidation" -Value 0 -Type DWord -Force
+Write-Host "    Enforced DisableExceptionChainValidation = 0" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-EndAuditSehopStatus.ps1">Download Script: Get-EndAuditSehopStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndAuditSehopStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: DisableExceptionChainValidation
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Name "DisableExceptionChainValidation" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.DisableExceptionChainValidation -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndAuditSehop.ps1
+Write-Host "Enforcing System Mitigation control: sehop..." -ForegroundColor Cyan
+
+# Set Registry value: DisableExceptionChainValidation
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Name "DisableExceptionChainValidation" -Value 0 -Type DWord -Force
+Write-Host "    Enforced DisableExceptionChainValidation = 0" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8151" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-152" severity="high" weight="10.0" selected="false">
+      <title>[REQ-END-152] User Profile: Directory Protection Mode for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise/Professional</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/user-profile/configure-end-up-protection-mode.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Setting ProtectionMode to 1 restricts access to crucial system folders like System32, enforcing strict ACLs and protecting against write tampering.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\ProtectionMode</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-EndAuditProtectionmode.ps1">Download Script: Configure-EndAuditProtectionmode.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndAuditProtectionmode.ps1
+Write-Host "Enforcing System Mitigation control: protection-mode..." -ForegroundColor Cyan
+
+# Set Registry value: ProtectionMode
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "ProtectionMode" -Value 1 -Type DWord -Force
+Write-Host "    Enforced ProtectionMode = 1" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-EndAuditProtectionmodeStatus.ps1">Download Script: Get-EndAuditProtectionmodeStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndAuditProtectionmodeStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: ProtectionMode
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "ProtectionMode" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.ProtectionMode -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndAuditProtectionmode.ps1
+Write-Host "Enforcing System Mitigation control: protection-mode..." -ForegroundColor Cyan
+
+# Set Registry value: ProtectionMode
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "ProtectionMode" -Value 1 -Type DWord -Force
+Write-Host "    Enforced ProtectionMode = 1" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8152" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-153" severity="high" weight="10.0" selected="false">
+      <title>[REQ-END-153] User Profile: Address Space Layout Randomization (ASLR) Image Relocation for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise/Professional</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/user-profile/configure-end-up-aslr-relocation.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Enforcing Address Space Layout Randomization (ASLR) image relocation (MoveImages) forces all dynamic modules to relocate, neutralizing hardcoded ROP payload chains.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\MoveImages</xhtml:code> = <xhtml:code>4294967295</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-EndAuditAslrrelocation.ps1">Download Script: Configure-EndAuditAslrrelocation.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndAuditAslrrelocation.ps1
+Write-Host "Enforcing System Mitigation control: aslr-relocation..." -ForegroundColor Cyan
+
+# Set Registry value: MoveImages
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "MoveImages" -Value 4294967295 -Type DWord -Force
+Write-Host "    Enforced MoveImages = 4294967295" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-EndAuditAslrrelocationStatus.ps1">Download Script: Get-EndAuditAslrrelocationStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndAuditAslrrelocationStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: MoveImages
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "MoveImages" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.MoveImages -ne 4294967295) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndAuditAslrrelocation.ps1
+Write-Host "Enforcing System Mitigation control: aslr-relocation..." -ForegroundColor Cyan
+
+# Set Registry value: MoveImages
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "MoveImages" -Value 4294967295 -Type DWord -Force
+Write-Host "    Enforced MoveImages = 4294967295" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8153" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-154" severity="high" weight="10.0" selected="false">
+      <title>[REQ-END-154] User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise/Professional</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/user-profile/configure-end-up-speculative-mitigations.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Enforces hardware-backed speculative execution mitigations (Spectre, Meltdown, MDS) to prevent side-channel leaks of sensitive kernel-space data.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverride</xhtml:code> = <xhtml:code>72</xhtml:code> (DWord)</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverrideMask</xhtml:code> = <xhtml:code>3</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-EndAuditSpeculativemitigations.ps1">Download Script: Configure-EndAuditSpeculativemitigations.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndAuditSpeculativemitigations.ps1
+Write-Host "Enforcing System Mitigation control: speculative-mitigations..." -ForegroundColor Cyan
+
+# Set Registry value: FeatureSettingsOverride
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverride" -Value 72 -Type DWord -Force
+Write-Host "    Enforced FeatureSettingsOverride = 72" -ForegroundColor Green
+
+# Set Registry value: FeatureSettingsOverrideMask
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverrideMask" -Value 3 -Type DWord -Force
+Write-Host "    Enforced FeatureSettingsOverrideMask = 3" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-EndAuditSpeculativemitigationsStatus.ps1">Download Script: Get-EndAuditSpeculativemitigationsStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndAuditSpeculativemitigationsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: FeatureSettingsOverride
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverride" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.FeatureSettingsOverride -ne 72) {
+    $script:Vulnerable = $true
+}
+
+# Audit Registry value: FeatureSettingsOverrideMask
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverrideMask" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.FeatureSettingsOverrideMask -ne 3) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndAuditSpeculativemitigations.ps1
+Write-Host "Enforcing System Mitigation control: speculative-mitigations..." -ForegroundColor Cyan
+
+# Set Registry value: FeatureSettingsOverride
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverride" -Value 72 -Type DWord -Force
+Write-Host "    Enforced FeatureSettingsOverride = 72" -ForegroundColor Green
+
+# Set Registry value: FeatureSettingsOverrideMask
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverrideMask" -Value 3 -Type DWord -Force
+Write-Host "    Enforced FeatureSettingsOverrideMask = 3" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8154" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-155" severity="high" weight="10.0" selected="false">
+      <title>[REQ-END-155] User Profile: Authenticode Signature Certificate Padding Check for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise/Professional</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/user-profile/configure-end-up-cert-padding.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Blocks padding execution attacks on Authenticode signed binaries by validating that there is no extra unverified payload appended to the certificate signature block.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\Software\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-EndAuditCertpadding.ps1">Download Script: Configure-EndAuditCertpadding.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndAuditCertpadding.ps1
+Write-Host "Enforcing System Mitigation control: cert-padding..." -ForegroundColor Cyan
+
+# Set Registry value: EnableCertPaddingCheck
+if (-not (Test-Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config")) { New-Item -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -Value 1 -Type DWord -Force
+Write-Host "    Enforced EnableCertPaddingCheck = 1" -ForegroundColor Green
+
+# Set Registry value: EnableCertPaddingCheck
+if (-not (Test-Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config")) { New-Item -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -Value 1 -Type DWord -Force
+Write-Host "    Enforced EnableCertPaddingCheck = 1" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-EndAuditCertpaddingStatus.ps1">Download Script: Get-EndAuditCertpaddingStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndAuditCertpaddingStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: EnableCertPaddingCheck
+$RegVal = Get-ItemProperty -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.EnableCertPaddingCheck -ne 1) {
+    $script:Vulnerable = $true
+}
+
+# Audit Registry value: EnableCertPaddingCheck
+$RegVal = Get-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.EnableCertPaddingCheck -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndAuditCertpadding.ps1
+Write-Host "Enforcing System Mitigation control: cert-padding..." -ForegroundColor Cyan
+
+# Set Registry value: EnableCertPaddingCheck
+if (-not (Test-Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config")) { New-Item -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -Value 1 -Type DWord -Force
+Write-Host "    Enforced EnableCertPaddingCheck = 1" -ForegroundColor Green
+
+# Set Registry value: EnableCertPaddingCheck
+if (-not (Test-Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config")) { New-Item -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -Value 1 -Type DWord -Force
+Write-Host "    Enforced EnableCertPaddingCheck = 1" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8155" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-156" severity="high" weight="10.0" selected="false">
+      <title>[REQ-END-156] User Profile: Command Processor Batch File Locking for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise/Professional</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/user-profile/configure-end-up-lock-batch-files.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Locking batch scripts when executing prevents attackers or concurrent processes from rewriting script lines on-the-fly, neutralizing dynamic code modification hijacks.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SOFTWARE\Microsoft\Command Processor\LockBatchFilesWhenInUse</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-EndAuditLockbatchfiles.ps1">Download Script: Configure-EndAuditLockbatchfiles.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndAuditLockbatchfiles.ps1
+Write-Host "Enforcing System Mitigation control: lock-batch-files..." -ForegroundColor Cyan
+
+# Set Registry value: LockBatchFilesWhenInUse
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Command Processor")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Name "LockBatchFilesWhenInUse" -Value 1 -Type DWord -Force
+Write-Host "    Enforced LockBatchFilesWhenInUse = 1" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-EndAuditLockbatchfilesStatus.ps1">Download Script: Get-EndAuditLockbatchfilesStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndAuditLockbatchfilesStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: LockBatchFilesWhenInUse
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Name "LockBatchFilesWhenInUse" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.LockBatchFilesWhenInUse -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndAuditLockbatchfiles.ps1
+Write-Host "Enforcing System Mitigation control: lock-batch-files..." -ForegroundColor Cyan
+
+# Set Registry value: LockBatchFilesWhenInUse
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Command Processor")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Name "LockBatchFilesWhenInUse" -Value 1 -Type DWord -Force
+Write-Host "    Enforced LockBatchFilesWhenInUse = 1" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8156" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-157" severity="high" weight="10.0" selected="false">
+      <title>[REQ-END-157] User Profile: Time-Travel Debugging (TTD) Recording Policy for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise/Professional</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/user-profile/configure-end-up-ttd-recording.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Disables and locks down user-mode Time-Travel Debugging (TTD) traces, preventing local adversaries from capturing memory dumps and private cryptographic structures from administrative processes.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SOFTWARE\Microsoft\TTD\RecordingPolicy</xhtml:code> = <xhtml:code>2</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-EndAuditTtdrecording.ps1">Download Script: Configure-EndAuditTtdrecording.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndAuditTtdrecording.ps1
+Write-Host "Enforcing System Mitigation control: ttd-recording..." -ForegroundColor Cyan
+
+# Set Registry value: RecordingPolicy
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\TTD")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Name "RecordingPolicy" -Value 2 -Type DWord -Force
+Write-Host "    Enforced RecordingPolicy = 2" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-EndAuditTtdrecordingStatus.ps1">Download Script: Get-EndAuditTtdrecordingStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndAuditTtdrecordingStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: RecordingPolicy
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Name "RecordingPolicy" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.RecordingPolicy -ne 2) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndAuditTtdrecording.ps1
+Write-Host "Enforcing System Mitigation control: ttd-recording..." -ForegroundColor Cyan
+
+# Set Registry value: RecordingPolicy
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\TTD")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Name "RecordingPolicy" -Value 2 -Type DWord -Force
+Write-Host "    Enforced RecordingPolicy = 2" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8157" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-158" severity="high" weight="10.0" selected="false">
+      <title>[REQ-END-158] User Profile: Trusted Root Store Protected Roots Certificate Restriction for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise/Professional</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/user-profile/configure-end-up-protected-roots.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Restricts users from installing root certificates into the trusted root store, preventing root CA hijack actions and man-in-the-middle proxy injection attacks.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots\Flags</xhtml:code> = <xhtml:code>1</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-EndAuditProtectedroots.ps1">Download Script: Configure-EndAuditProtectedroots.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndAuditProtectedroots.ps1
+Write-Host "Enforcing System Mitigation control: protected-roots..." -ForegroundColor Cyan
+
+# Set Registry value: Flags
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Name "Flags" -Value 1 -Type DWord -Force
+Write-Host "    Enforced Flags = 1" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-EndAuditProtectedrootsStatus.ps1">Download Script: Get-EndAuditProtectedrootsStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndAuditProtectedrootsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: Flags
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Name "Flags" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.Flags -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndAuditProtectedroots.ps1
+Write-Host "Enforcing System Mitigation control: protected-roots..." -ForegroundColor Cyan
+
+# Set Registry value: Flags
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Name "Flags" -Value 1 -Type DWord -Force
+Write-Host "    Enforced Flags = 1" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8158" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-159" severity="high" weight="10.0" selected="false">
+      <title>[REQ-END-159] User Profile: Disabling Injection of AppInit DLLs for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise/Professional</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/user-profile/configure-end-up-appinit-dlls.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>AppInit DLL injection is a legacy mechanism that loads arbitrary user DLLs into every process that links user32.dll. Enforcing a complete ban (value 0) prevents unauthorized injection hooks.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Deploy the following Registry settings using Group Policy Preferences (Registry Extension):</xhtml:li>
+          <xhtml:li>* Registry: <xhtml:code>HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows\LoadAppInit_DLLs</xhtml:code> = <xhtml:code>0</xhtml:code> (DWord)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-EndAuditAppinitdlls.ps1">Download Script: Configure-EndAuditAppinitdlls.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndAuditAppinitdlls.ps1
+Write-Host "Enforcing System Mitigation control: appinit-dlls..." -ForegroundColor Cyan
+
+# Set Registry value: LoadAppInit_DLLs
+if (-not (Test-Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows")) { New-Item -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Name "LoadAppInit_DLLs" -Value 0 -Type DWord -Force
+Write-Host "    Enforced LoadAppInit_DLLs = 0" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-EndAuditAppinitdllsStatus.ps1">Download Script: Get-EndAuditAppinitdllsStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndAuditAppinitdllsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: LoadAppInit_DLLs
+$RegVal = Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Name "LoadAppInit_DLLs" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.LoadAppInit_DLLs -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndAuditAppinitdlls.ps1
+Write-Host "Enforcing System Mitigation control: appinit-dlls..." -ForegroundColor Cyan
+
+# Set Registry value: LoadAppInit_DLLs
+if (-not (Test-Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows")) { New-Item -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Name "LoadAppInit_DLLs" -Value 0 -Type DWord -Force
+Write-Host "    Enforced LoadAppInit_DLLs = 0" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8159" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-160" severity="high" weight="10.0" selected="false">
+      <title>[REQ-END-160] User Profile: Preservation of Attachment Zone Information for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise/Professional</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/user-profile/configure-end-up-attachment-zone.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Ensures the Attachment Manager preserves the Zone.Identifier alternate data stream (ADS) marking files downloaded from untrusted web zones, enforcing SmartScreen check prompts.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Navigate to: <xhtml:code>User Configuration \ Administrative Templates \ Windows Components \ Attachment Manager</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the policy:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Do not preserve zone information in file attachments` -&gt; Set to </xhtml:em>
+            <xhtml:em>Disabled</xhtml:em>* (which configures <xhtml:code>SaveZoneInformation</xhtml:code> = <xhtml:code>2</xhtml:code> to preserve zone information)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-EndAuditAttachmentzone.ps1">Download Script: Configure-EndAuditAttachmentzone.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndAuditAttachmentzone.ps1
+Write-Host "Enforcing System Mitigation control: attachment-zone..." -ForegroundColor Cyan
+
+# Set Registry value: SaveZoneInformation
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Name "SaveZoneInformation" -Value 2 -Type DWord -Force
+Write-Host "    Enforced SaveZoneInformation = 2" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-EndAuditAttachmentzoneStatus.ps1">Download Script: Get-EndAuditAttachmentzoneStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndAuditAttachmentzoneStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: SaveZoneInformation
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Name "SaveZoneInformation" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.SaveZoneInformation -ne 2) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndAuditAttachmentzone.ps1
+Write-Host "Enforcing System Mitigation control: attachment-zone..." -ForegroundColor Cyan
+
+# Set Registry value: SaveZoneInformation
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Name "SaveZoneInformation" -Value 2 -Type DWord -Force
+Write-Host "    Enforced SaveZoneInformation = 2" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8160" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-161" severity="high" weight="10.0" selected="false">
+      <title>[REQ-END-161] User Profile: Disable Windows Game DVR for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise/Professional</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/user-profile/configure-end-up-game-dvr.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Disabling Game DVR blocks background media recording agents, conserving local computing cycles and preventing administrative session leakage via broadcast APIs.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration \ Administrative Templates \ Windows Components \ Windows Game Recording and Broadcasting</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the policy:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Enables or disables Windows Game Recording and Broadcasting` -&gt; Set to </xhtml:em>
+            <xhtml:em>Disabled</xhtml:em>* (which configures <xhtml:code>AllowGameDVR</xhtml:code> = <xhtml:code>0</xhtml:code>)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-EndAuditGamedvr.ps1">Download Script: Configure-EndAuditGamedvr.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndAuditGamedvr.ps1
+Write-Host "Enforcing System Mitigation control: game-dvr..." -ForegroundColor Cyan
+
+# Set Registry value: AllowGameDVR
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -Value 0 -Type DWord -Force
+Write-Host "    Enforced AllowGameDVR = 0" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-EndAuditGamedvrStatus.ps1">Download Script: Get-EndAuditGamedvrStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndAuditGamedvrStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: AllowGameDVR
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.AllowGameDVR -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndAuditGamedvr.ps1
+Write-Host "Enforcing System Mitigation control: game-dvr..." -ForegroundColor Cyan
+
+# Set Registry value: AllowGameDVR
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -Value 0 -Type DWord -Force
+Write-Host "    Enforced AllowGameDVR = 0" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8161" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-162" severity="high" weight="10.0" selected="false">
+      <title>[REQ-END-162] User Profile: Restrict Windows Ink Workspace on Lock Screen for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise/Professional</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/user-profile/configure-end-up-ink-workspace.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Disabling access to the Windows Ink Workspace on the lock screen prevents unauthorized physical users from invoking drawing tools, scripts, or apps without authenticating.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration \ Administrative Templates \ Windows Components \ Windows Ink Workspace</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the policy:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Allow Windows Ink Workspace` -&gt; Set to </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>
+            <xhtml:em>: Choose </xhtml:em>
+            <xhtml:em>On, but disallow access above lock</xhtml:em>* (which configures <xhtml:code>AllowWindowsInkWorkspace</xhtml:code> = <xhtml:code>1</xhtml:code>)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>
+          <xhtml:a href="../implementation_scripts/Configure-EndAuditInkworkspace.ps1">Download Script: Configure-EndAuditInkworkspace.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndAuditInkworkspace.ps1
+Write-Host "Enforcing System Mitigation control: ink-workspace..." -ForegroundColor Cyan
+
+# Set Registry value: AllowWindowsInkWorkspace
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Name "AllowWindowsInkWorkspace" -Value 1 -Type DWord -Force
+Write-Host "    Enforced AllowWindowsInkWorkspace = 1" -ForegroundColor Green
+
+</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit the hardening status:</xhtml:em>
+          <xhtml:a href="../audit_scripts/Get-EndAuditInkworkspaceStatus.ps1">Download Script: Get-EndAuditInkworkspaceStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndAuditInkworkspaceStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: AllowWindowsInkWorkspace
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Name "AllowWindowsInkWorkspace" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.AllowWindowsInkWorkspace -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndAuditInkworkspace.ps1
+Write-Host "Enforcing System Mitigation control: ink-workspace..." -ForegroundColor Cyan
+
+# Set Registry value: AllowWindowsInkWorkspace
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Name "AllowWindowsInkWorkspace" -Value 1 -Type DWord -Force
+Write-Host "    Enforced AllowWindowsInkWorkspace = 1" -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8162" />
       </check>
     </Rule>
   </Group>

@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-05T18:50:14Z</oval:timestamp>
+    <oval:timestamp>2026-07-05T19:01:58Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -5419,29 +5419,6 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
         <criterion comment="Placeholder check for REQ-END-139 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8139" />
       </criteria>
     </definition>
-    <definition id="oval:org.adhardening:def:8140" version="1" class="compliance">
-      <metadata>
-        <title>[REQ-END-140] User Profile: Exploit Guard and Speculative Mitigations</title>
-        <affected family="windows">
-          <platform>Microsoft Windows Server 2016</platform>
-          <platform>Microsoft Windows Server 2019</platform>
-          <platform>Microsoft Windows Server 2022</platform>
-          <platform>Microsoft Windows 10</platform>
-          <platform>Microsoft Windows 11</platform>
-        </affected>
-        <description>Enforces Address Space Layout Randomization (ASLR) force relocation, Spectre/Meltdown speculative execution overrides, SEHOP, time-travel debugging recording locks, Authenticode padding validation, and AppInit DLL bans.</description>
-      </metadata>
-      <criteria operator="AND">
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value MoveImages" test_ref="oval:org.adhardening:tst:8140001" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value FeatureSettingsOverride" test_ref="oval:org.adhardening:tst:8140002" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value ProtectionMode" test_ref="oval:org.adhardening:tst:8140003" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:8140004" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value LockBatchFilesWhenInUse" test_ref="oval:org.adhardening:tst:8140005" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value RecordingPolicy" test_ref="oval:org.adhardening:tst:8140006" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots Value Flags" test_ref="oval:org.adhardening:tst:8140007" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots Value LoadAppInit_DLLs" test_ref="oval:org.adhardening:tst:8140008" />
-      </criteria>
-    </definition>
     <definition id="oval:org.adhardening:def:8141" version="1" class="compliance">
       <metadata>
         <title>[REQ-END-141] Audit Policy: Advanced Audit Policy Overrides for Endpoints</title>
@@ -5585,6 +5562,200 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-150 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8150" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8151" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-151] User Profile: Structured Exception Handling Overwrite Protection (SEHOP) for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Structured Exception Handling Overwrite Protection (SEHOP) detects and thwarts exploits targeting structured exception handler corruption, a common stack exploitation technique.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" test_ref="oval:org.adhardening:tst:8151001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8152" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-152] User Profile: Directory Protection Mode for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Setting ProtectionMode to 1 restricts access to crucial system folders like System32, enforcing strict ACLs and protecting against write tampering.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value ProtectionMode" test_ref="oval:org.adhardening:tst:8152001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8153" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-153] User Profile: Address Space Layout Randomization (ASLR) Image Relocation for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Enforcing Address Space Layout Randomization (ASLR) image relocation (MoveImages) forces all dynamic modules to relocate, neutralizing hardcoded ROP payload chains.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value MoveImages" test_ref="oval:org.adhardening:tst:8153001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8154" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-154] User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Enforces hardware-backed speculative execution mitigations (Spectre, Meltdown, MDS) to prevent side-channel leaks of sensitive kernel-space data.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value FeatureSettingsOverride" test_ref="oval:org.adhardening:tst:8154001" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value FeatureSettingsOverrideMask" test_ref="oval:org.adhardening:tst:8154002" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8155" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-155] User Profile: Authenticode Signature Certificate Padding Check for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Blocks padding execution attacks on Authenticode signed binaries by validating that there is no extra unverified payload appended to the certificate signature block.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key Software\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:8155001" />
+        <criterion comment="Check Registry Key Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:8155002" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8156" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-156] User Profile: Command Processor Batch File Locking for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Locking batch scripts when executing prevents attackers or concurrent processes from rewriting script lines on-the-fly, neutralizing dynamic code modification hijacks.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Command Processor Value LockBatchFilesWhenInUse" test_ref="oval:org.adhardening:tst:8156001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8157" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-157] User Profile: Time-Travel Debugging (TTD) Recording Policy for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Disables and locks down user-mode Time-Travel Debugging (TTD) traces, preventing local adversaries from capturing memory dumps and private cryptographic structures from administrative processes.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\TTD Value RecordingPolicy" test_ref="oval:org.adhardening:tst:8157001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8158" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-158] User Profile: Trusted Root Store Protected Roots Certificate Restriction for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Restricts users from installing root certificates into the trusted root store, preventing root CA hijack actions and man-in-the-middle proxy injection attacks.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots Value Flags" test_ref="oval:org.adhardening:tst:8158001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8159" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-159] User Profile: Disabling Injection of AppInit DLLs for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>AppInit DLL injection is a legacy mechanism that loads arbitrary user DLLs into every process that links user32.dll. Enforcing a complete ban (value 0) prevents unauthorized injection hooks.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Windows Value LoadAppInit_DLLs" test_ref="oval:org.adhardening:tst:8159001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8160" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-160] User Profile: Preservation of Attachment Zone Information for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Ensures the Attachment Manager preserves the Zone.Identifier alternate data stream (ADS) marking files downloaded from untrusted web zones, enforcing SmartScreen check prompts.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments Value SaveZoneInformation" test_ref="oval:org.adhardening:tst:8160001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8161" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-161] User Profile: Disable Windows Game DVR for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Disabling Game DVR blocks background media recording agents, conserving local computing cycles and preventing administrative session leakage via broadcast APIs.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\GameDVR Value AllowGameDVR" test_ref="oval:org.adhardening:tst:8161001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8162" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-162] User Profile: Restrict Windows Ink Workspace on Lock Screen for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Disabling access to the Windows Ink Workspace on the lock screen prevents unauthorized physical users from invoking drawing tools, scripts, or apps without authenticating.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\WindowsInkWorkspace Value AllowWindowsInkWorkspace" test_ref="oval:org.adhardening:tst:8162001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:3001" version="1" class="compliance">
@@ -9141,29 +9312,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <criterion comment="Placeholder check for REQ-PAW-128 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7128" />
       </criteria>
     </definition>
-    <definition id="oval:org.adhardening:def:7129" version="1" class="compliance">
-      <metadata>
-        <title>[REQ-PAW-129] User Profile: Exploit Guard and Speculative Mitigations for PAWs</title>
-        <affected family="windows">
-          <platform>Microsoft Windows Server 2016</platform>
-          <platform>Microsoft Windows Server 2019</platform>
-          <platform>Microsoft Windows Server 2022</platform>
-          <platform>Microsoft Windows 10</platform>
-          <platform>Microsoft Windows 11</platform>
-        </affected>
-        <description>Enforces Address Space Layout Randomization (ASLR) force relocation, Spectre/Meltdown speculative execution overrides, SEHOP, time-travel debugging recording locks, Authenticode padding validation, and AppInit DLL bans.</description>
-      </metadata>
-      <criteria operator="AND">
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value MoveImages" test_ref="oval:org.adhardening:tst:7129001" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value FeatureSettingsOverride" test_ref="oval:org.adhardening:tst:7129002" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value ProtectionMode" test_ref="oval:org.adhardening:tst:7129003" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:7129004" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value LockBatchFilesWhenInUse" test_ref="oval:org.adhardening:tst:7129005" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value RecordingPolicy" test_ref="oval:org.adhardening:tst:7129006" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots Value Flags" test_ref="oval:org.adhardening:tst:7129007" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots Value LoadAppInit_DLLs" test_ref="oval:org.adhardening:tst:7129008" />
-      </criteria>
-    </definition>
     <definition id="oval:org.adhardening:def:7130" version="1" class="compliance">
       <metadata>
         <title>[REQ-PAW-130] Audit Policy: Advanced Audit Policy Overrides for PAWs</title>
@@ -9307,6 +9455,200 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-139 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7139" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7140" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-140] User Profile: Structured Exception Handling Overwrite Protection (SEHOP) for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Structured Exception Handling Overwrite Protection (SEHOP) detects and thwarts exploits targeting structured exception handler corruption, a common stack exploitation technique.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" test_ref="oval:org.adhardening:tst:7140001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7141" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-141] User Profile: Directory Protection Mode for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Setting ProtectionMode to 1 restricts access to crucial system folders like System32, enforcing strict ACLs and protecting against write tampering.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value ProtectionMode" test_ref="oval:org.adhardening:tst:7141001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7142" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-142] User Profile: Address Space Layout Randomization (ASLR) Image Relocation for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Enforcing Address Space Layout Randomization (ASLR) image relocation (MoveImages) forces all dynamic modules to relocate, neutralizing hardcoded ROP payload chains.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value MoveImages" test_ref="oval:org.adhardening:tst:7142001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7143" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-143] User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Enforces hardware-backed speculative execution mitigations (Spectre, Meltdown, MDS) to prevent side-channel leaks of sensitive kernel-space data.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value FeatureSettingsOverride" test_ref="oval:org.adhardening:tst:7143001" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value FeatureSettingsOverrideMask" test_ref="oval:org.adhardening:tst:7143002" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7144" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-144] User Profile: Authenticode Signature Certificate Padding Check for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Blocks padding execution attacks on Authenticode signed binaries by validating that there is no extra unverified payload appended to the certificate signature block.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key Software\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:7144001" />
+        <criterion comment="Check Registry Key Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:7144002" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7145" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-145] User Profile: Command Processor Batch File Locking for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Locking batch scripts when executing prevents attackers or concurrent processes from rewriting script lines on-the-fly, neutralizing dynamic code modification hijacks.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Command Processor Value LockBatchFilesWhenInUse" test_ref="oval:org.adhardening:tst:7145001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7146" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-146] User Profile: Time-Travel Debugging (TTD) Recording Policy for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Disables and locks down user-mode Time-Travel Debugging (TTD) traces, preventing local adversaries from capturing memory dumps and private cryptographic structures from administrative processes.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\TTD Value RecordingPolicy" test_ref="oval:org.adhardening:tst:7146001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7147" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-147] User Profile: Trusted Root Store Protected Roots Certificate Restriction for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Restricts users from installing root certificates into the trusted root store, preventing root CA hijack actions and man-in-the-middle proxy injection attacks.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots Value Flags" test_ref="oval:org.adhardening:tst:7147001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7148" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-148] User Profile: Disabling Injection of AppInit DLLs for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>AppInit DLL injection is a legacy mechanism that loads arbitrary user DLLs into every process that links user32.dll. Enforcing a complete ban (value 0) prevents unauthorized injection hooks.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Windows Value LoadAppInit_DLLs" test_ref="oval:org.adhardening:tst:7148001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7149" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-149] User Profile: Preservation of Attachment Zone Information for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Ensures the Attachment Manager preserves the Zone.Identifier alternate data stream (ADS) marking files downloaded from untrusted web zones, enforcing SmartScreen check prompts.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments Value SaveZoneInformation" test_ref="oval:org.adhardening:tst:7149001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7150" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-150] User Profile: Disable Windows Game DVR for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Disabling Game DVR blocks background media recording agents, conserving local computing cycles and preventing administrative session leakage via broadcast APIs.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\GameDVR Value AllowGameDVR" test_ref="oval:org.adhardening:tst:7150001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7151" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-151] User Profile: Restrict Windows Ink Workspace on Lock Screen for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Disabling access to the Windows Ink Workspace on the lock screen prevents unauthorized physical users from invoking drawing tools, scripts, or apps without authenticating.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\WindowsInkWorkspace Value AllowWindowsInkWorkspace" test_ref="oval:org.adhardening:tst:7151001" />
       </criteria>
     </definition>
   </definitions>
@@ -11879,38 +12221,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:8139" />
       <windows:state state_ref="oval:org.adhardening:ste:8139" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8140001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value MoveImages" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8140001" />
-      <windows:state state_ref="oval:org.adhardening:ste:8140001" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8140002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value FeatureSettingsOverride" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8140002" />
-      <windows:state state_ref="oval:org.adhardening:ste:8140002" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8140003" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value ProtectionMode" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8140003" />
-      <windows:state state_ref="oval:org.adhardening:ste:8140003" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8140004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value EnableCertPaddingCheck" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8140004" />
-      <windows:state state_ref="oval:org.adhardening:ste:8140004" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8140005" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value LockBatchFilesWhenInUse" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8140005" />
-      <windows:state state_ref="oval:org.adhardening:ste:8140005" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8140006" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value RecordingPolicy" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8140006" />
-      <windows:state state_ref="oval:org.adhardening:ste:8140006" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8140007" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots Value Flags" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8140007" />
-      <windows:state state_ref="oval:org.adhardening:ste:8140007" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8140008" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots Value LoadAppInit_DLLs" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8140008" />
-      <windows:state state_ref="oval:org.adhardening:ste:8140008" />
-    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8141001" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa\ SCENoApplyLegacyAuditPolicy Value SCENoApplyLegacyAuditPolicy" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8141001" />
       <windows:state state_ref="oval:org.adhardening:ste:8141001" />
@@ -11950,6 +12260,62 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_test id="oval:org.adhardening:tst:8150" version="1" comment="Placeholder check for REQ-END-150 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8150" />
       <windows:state state_ref="oval:org.adhardening:ste:8150" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8151001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8151001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8151001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8152001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value ProtectionMode" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8152001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8152001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8153001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value MoveImages" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8153001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8153001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8154001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value FeatureSettingsOverride" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8154001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8154001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8154002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value FeatureSettingsOverrideMask" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8154002" />
+      <windows:state state_ref="oval:org.adhardening:ste:8154002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8155001" version="1" comment="Check Registry Key Software\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8155001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8155001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8155002" version="1" comment="Check Registry Key Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8155002" />
+      <windows:state state_ref="oval:org.adhardening:ste:8155002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8156001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Command Processor Value LockBatchFilesWhenInUse" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8156001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8156001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8157001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\TTD Value RecordingPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8157001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8157001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8158001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots Value Flags" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8158001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8158001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8159001" version="1" comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Windows Value LoadAppInit_DLLs" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8159001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8159001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8160001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments Value SaveZoneInformation" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8160001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8160001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8161001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\GameDVR Value AllowGameDVR" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8161001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8161001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8162001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\WindowsInkWorkspace Value AllowWindowsInkWorkspace" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8162001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8162001" />
     </windows:registry_test>
     <windows:passwordpolicy_test id="oval:org.adhardening:tst:3001900" version="1" comment="Check local Password Policy settings" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:3001900" />
@@ -13634,38 +14000,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:7128" />
       <windows:state state_ref="oval:org.adhardening:ste:7128" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7129001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value MoveImages" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7129001" />
-      <windows:state state_ref="oval:org.adhardening:ste:7129001" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7129002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value FeatureSettingsOverride" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7129002" />
-      <windows:state state_ref="oval:org.adhardening:ste:7129002" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7129003" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value ProtectionMode" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7129003" />
-      <windows:state state_ref="oval:org.adhardening:ste:7129003" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7129004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value EnableCertPaddingCheck" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7129004" />
-      <windows:state state_ref="oval:org.adhardening:ste:7129004" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7129005" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value LockBatchFilesWhenInUse" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7129005" />
-      <windows:state state_ref="oval:org.adhardening:ste:7129005" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7129006" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value RecordingPolicy" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7129006" />
-      <windows:state state_ref="oval:org.adhardening:ste:7129006" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7129007" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots Value Flags" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7129007" />
-      <windows:state state_ref="oval:org.adhardening:ste:7129007" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7129008" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots Value LoadAppInit_DLLs" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7129008" />
-      <windows:state state_ref="oval:org.adhardening:ste:7129008" />
-    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7130001" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa\ SCENoApplyLegacyAuditPolicy Value SCENoApplyLegacyAuditPolicy" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7130001" />
       <windows:state state_ref="oval:org.adhardening:ste:7130001" />
@@ -13705,6 +14039,62 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_test id="oval:org.adhardening:tst:7139" version="1" comment="Placeholder check for REQ-PAW-139 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7139" />
       <windows:state state_ref="oval:org.adhardening:ste:7139" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7140001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7140001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7140001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7141001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager Value ProtectionMode" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7141001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7141001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7142001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value MoveImages" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7142001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7142001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7143001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value FeatureSettingsOverride" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7143001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7143001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7143002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management Value FeatureSettingsOverrideMask" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7143002" />
+      <windows:state state_ref="oval:org.adhardening:ste:7143002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7144001" version="1" comment="Check Registry Key Software\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7144001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7144001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7144002" version="1" comment="Check Registry Key Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7144002" />
+      <windows:state state_ref="oval:org.adhardening:ste:7144002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7145001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Command Processor Value LockBatchFilesWhenInUse" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7145001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7145001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7146001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\TTD Value RecordingPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7146001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7146001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7147001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots Value Flags" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7147001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7147001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7148001" version="1" comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Windows Value LoadAppInit_DLLs" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7148001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7148001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7149001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments Value SaveZoneInformation" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7149001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7149001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7150001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\GameDVR Value AllowGameDVR" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7150001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7150001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7151001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\WindowsInkWorkspace Value AllowWindowsInkWorkspace" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7151001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7151001" />
     </windows:registry_test>
   </tests>
   <objects>
@@ -17547,54 +17937,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8140001" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</windows:key>
-      <windows:name>MoveImages</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8140002" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</windows:key>
-      <windows:name>FeatureSettingsOverride</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8140003" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager</windows:key>
-      <windows:name>ProtectionMode</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8140004" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager</windows:key>
-      <windows:name>EnableCertPaddingCheck</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8140005" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager</windows:key>
-      <windows:name>LockBatchFilesWhenInUse</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8140006" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager</windows:key>
-      <windows:name>RecordingPolicy</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8140007" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots</windows:key>
-      <windows:name>Flags</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8140008" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots</windows:key>
-      <windows:name>LoadAppInit_DLLs</windows:name>
-    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8141001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -17654,6 +17996,90 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8151001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\kernel</windows:key>
+      <windows:name>DisableExceptionChainValidation</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8152001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager</windows:key>
+      <windows:name>ProtectionMode</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8153001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</windows:key>
+      <windows:name>MoveImages</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8154001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</windows:key>
+      <windows:name>FeatureSettingsOverride</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8154002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</windows:key>
+      <windows:name>FeatureSettingsOverrideMask</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8155001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Cryptography\Wintrust\Config</windows:key>
+      <windows:name>EnableCertPaddingCheck</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8155002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config</windows:key>
+      <windows:name>EnableCertPaddingCheck</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8156001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Command Processor</windows:key>
+      <windows:name>LockBatchFilesWhenInUse</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8157001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\TTD</windows:key>
+      <windows:name>RecordingPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8158001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots</windows:key>
+      <windows:name>Flags</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8159001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Windows NT\CurrentVersion\Windows</windows:key>
+      <windows:name>LoadAppInit_DLLs</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8160001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments</windows:key>
+      <windows:name>SaveZoneInformation</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8161001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\GameDVR</windows:key>
+      <windows:name>AllowGameDVR</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8162001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\WindowsInkWorkspace</windows:key>
+      <windows:name>AllowWindowsInkWorkspace</windows:name>
     </windows:registry_object>
     <windows:passwordpolicy_object id="oval:org.adhardening:obj:3001900" version="1" />
     <windows:lockoutpolicy_object id="oval:org.adhardening:obj:3001910" version="1" />
@@ -20155,54 +20581,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7129001" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</windows:key>
-      <windows:name>MoveImages</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7129002" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</windows:key>
-      <windows:name>FeatureSettingsOverride</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7129003" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager</windows:key>
-      <windows:name>ProtectionMode</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7129004" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager</windows:key>
-      <windows:name>EnableCertPaddingCheck</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7129005" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager</windows:key>
-      <windows:name>LockBatchFilesWhenInUse</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7129006" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager</windows:key>
-      <windows:name>RecordingPolicy</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7129007" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots</windows:key>
-      <windows:name>Flags</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7129008" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots</windows:key>
-      <windows:name>LoadAppInit_DLLs</windows:name>
-    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7130001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -20262,6 +20640,90 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7140001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\kernel</windows:key>
+      <windows:name>DisableExceptionChainValidation</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7141001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager</windows:key>
+      <windows:name>ProtectionMode</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7142001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</windows:key>
+      <windows:name>MoveImages</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7143001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</windows:key>
+      <windows:name>FeatureSettingsOverride</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7143002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management</windows:key>
+      <windows:name>FeatureSettingsOverrideMask</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7144001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Cryptography\Wintrust\Config</windows:key>
+      <windows:name>EnableCertPaddingCheck</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7144002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config</windows:key>
+      <windows:name>EnableCertPaddingCheck</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7145001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Command Processor</windows:key>
+      <windows:name>LockBatchFilesWhenInUse</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7146001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\TTD</windows:key>
+      <windows:name>RecordingPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7147001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots</windows:key>
+      <windows:name>Flags</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7148001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Windows NT\CurrentVersion\Windows</windows:key>
+      <windows:name>LoadAppInit_DLLs</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7149001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments</windows:key>
+      <windows:name>SaveZoneInformation</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7150001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\GameDVR</windows:key>
+      <windows:name>AllowGameDVR</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7151001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\WindowsInkWorkspace</windows:key>
+      <windows:name>AllowWindowsInkWorkspace</windows:name>
     </windows:registry_object>
   </objects>
   <states>
@@ -22823,38 +23285,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8140001" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">4294967295</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8140002" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">72</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8140003" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8140004" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string">`1` (DWord) and Wow6432Node equivalent.</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8140005" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8140006" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">2</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8140007" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8140008" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8141001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -22894,6 +23324,62 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_state id="oval:org.adhardening:ste:8150" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8151001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8152001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8153001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4294967295</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8154001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">72</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8154002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">3</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8155001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8155002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8156001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8157001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8158001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8159001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8160001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8161001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8162001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:passwordpolicy_state id="oval:org.adhardening:ste:3001900" version="1">
       <windows:min_passwd_len datatype="int">20</windows:min_passwd_len>
@@ -24582,38 +25068,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7129001" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">4294967295</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7129002" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">72</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7129003" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7129004" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string">`1` (DWord) and Wow6432Node equivalent.</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7129005" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7129006" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">2</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7129007" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7129008" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7130001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -24653,6 +25107,62 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_state id="oval:org.adhardening:ste:7139" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7140001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7141001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7142001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4294967295</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7143001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">72</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7143002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">3</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7144001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7144002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7145001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7146001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7147001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7148001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7149001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7150001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7151001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
   </states>
 </oval_definitions>

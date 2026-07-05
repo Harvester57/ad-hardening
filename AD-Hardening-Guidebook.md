@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 5885ca6 | Generated: July 05, 2026</span>
+      <span>Commit: a02d008 | Generated: July 05, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -28868,16 +28868,16 @@ This module is split into profile-specific advanced audit submodules mapping to 
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md-1-domain-controller-audit-submodule-module-2"></div>
 ### 1. Domain Controller Audit Submodule (Module 2)
 The complete set of advanced audit policies for Domain Controllers:
-* **[REQ-DC-136 - Audit Policy: Advanced Audit Policy Overrides](#05-logging-monitoring-configure-dc-audit-audit-override-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-audit-override.md`)
-* **[REQ-DC-137 - Audit Policy: Account Logon Auditing](#05-logging-monitoring-configure-dc-audit-account-logon-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-account-logon.md`)
-* **[REQ-DC-138 - Audit Policy: Account Management Auditing](#05-logging-monitoring-configure-dc-audit-account-management-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-account-management.md`)
-* **[REQ-DC-139 - Audit Policy: Detailed Tracking Auditing](#05-logging-monitoring-configure-dc-audit-detailed-tracking-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-detailed-tracking.md`)
-* **[REQ-DC-140 - Audit Policy: Directory Service Access Auditing](#05-logging-monitoring-configure-dc-audit-ds-access-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-ds-access.md`)
-* **[REQ-DC-141 - Audit Policy: Logon and Logoff Auditing](#05-logging-monitoring-configure-dc-audit-logon-logoff-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-logon-logoff.md`)
-* **[REQ-DC-142 - Audit Policy: Object Access Auditing](#05-logging-monitoring-configure-dc-audit-object-access-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-object-access.md`)
-* **[REQ-DC-143 - Audit Policy: Policy Change Auditing](#05-logging-monitoring-configure-dc-audit-policy-change-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-policy-change.md`)
-* **[REQ-DC-144 - Audit Policy: Privilege Use Auditing](#05-logging-monitoring-configure-dc-audit-privilege-use-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-privilege-use.md`)
-* **[REQ-DC-145 - Audit Policy: System Events Auditing](#05-logging-monitoring-configure-dc-audit-system-events-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-system-events.md`)
+* **[REQ-DC-136 - Audit Policy: Advanced Audit Policy Overrides](#02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md)**
+* **[REQ-DC-137 - Audit Policy: Account Logon Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md)**
+* **[REQ-DC-138 - Audit Policy: Account Management Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-account-management-md)**
+* **[REQ-DC-139 - Audit Policy: Detailed Tracking Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md)**
+* **[REQ-DC-140 - Audit Policy: Directory Service Access Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md)**
+* **[REQ-DC-141 - Audit Policy: Logon and Logoff Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md)**
+* **[REQ-DC-142 - Audit Policy: Object Access Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-object-access-md)**
+* **[REQ-DC-143 - Audit Policy: Policy Change Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md)**
+* **[REQ-DC-144 - Audit Policy: Privilege Use Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md)**
+* **[REQ-DC-145 - Audit Policy: System Events Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-system-events-md)**
 
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md-2-paw-audit-submodule-module-7"></div>
 ### 2. PAW Audit Submodule (Module 7)
@@ -32975,7 +32975,18 @@ This directory contains the physical isolation policies and operating system sec
     * **[REQ-PAW-126 - User Profile: Interactive Logon Inactivity Timeout for PAWs](#07-paws-user-profile-configure-up-inactivity-timeout-md)**
     * **[REQ-PAW-127 - User Profile: Windows Installer Hardening for PAWs](#07-paws-user-profile-configure-up-installer-hardening-md)**
     * **[REQ-PAW-128 - User Profile: Secondary Logon Service Lockdown for PAWs](#07-paws-user-profile-configure-up-seclogon-service-md)**
-    * **[REQ-PAW-129 - User Profile: Exploit Guard and Speculative Mitigations for PAWs](#07-paws-user-profile-configure-up-system-mitigations-md)**
+    * **[REQ-PAW-140 - User Profile: Structured Exception Handling Overwrite Protection (SEOP) for PAWs](#07-paws-user-profile-configure-paw-up-sehop-md)**
+    * **[REQ-PAW-141 - User Profile: Directory Protection Mode for PAWs](#07-paws-user-profile-configure-paw-up-protection-mode-md)**
+    * **[REQ-PAW-142 - User Profile: Address Space Layout Randomization (ASLR) Image Relocation for PAWs](#07-paws-user-profile-configure-paw-up-aslr-relocation-md)**
+    * **[REQ-PAW-143 - User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for PAWs](#07-paws-user-profile-configure-paw-up-speculative-mitigations-md)**
+    * **[REQ-PAW-144 - User Profile: Authenticode Certificate Padding Check for PAWs](#07-paws-user-profile-configure-paw-up-cert-padding-md)**
+    * **[REQ-PAW-145 - User Profile: Command Processor Batch File Locking for PAWs](#07-paws-user-profile-configure-paw-up-lock-batch-files-md)**
+    * **[REQ-PAW-146 - User Profile: Time-Travel Debugging (TTD) Recording Policy for PAWs](#07-paws-user-profile-configure-paw-up-ttd-recording-md)**
+    * **[REQ-PAW-147 - User Profile: Trusted Root Store Protected Roots Certificate Restriction for PAWs](#07-paws-user-profile-configure-paw-up-protected-roots-md)**
+    * **[REQ-PAW-148 - User Profile: Disabling Injection of AppInit DLLs for PAWs](#07-paws-user-profile-configure-paw-up-appinit-dlls-md)**
+    * **[REQ-PAW-149 - User Profile: Preservation of Attachment Zone Information for PAWs](#07-paws-user-profile-configure-paw-up-attachment-zone-md)**
+    * **[REQ-PAW-150 - User Profile: Disable Windows Game DVR for PAWs](#07-paws-user-profile-configure-paw-up-game-dvr-md)**
+    * **[REQ-PAW-151 - User Profile: Restrict Windows Ink Workspace on Lock Screen for PAWs](#07-paws-user-profile-configure-paw-up-ink-workspace-md)**
 
 25. **[REQ-PAW-025 - Configure Exploit Protection Profile for PAWs](#07-paws-configure-exploit-protection-md)**
     Configures and enforces a system-wide Microsoft Defender Exploit Protection profile to apply advanced memory mitigations (DEP, ASLR, CFG, SEHOP, Heap Integrity) on all PAWs.
@@ -43900,7 +43911,18 @@ The following individual User Profile restriction rules must be configured:
 12. **[REQ-PAW-126 - User Profile: Interactive Logon Inactivity Timeout for PAWs](#07-paws-user-profile-configure-up-inactivity-timeout-md)**
 13. **[REQ-PAW-127 - User Profile: Windows Installer Hardening for PAWs](#07-paws-user-profile-configure-up-installer-hardening-md)**
 14. **[REQ-PAW-128 - User Profile: Secondary Logon Service Lockdown for PAWs](#07-paws-user-profile-configure-up-seclogon-service-md)**
-15. **[REQ-PAW-129 - User Profile: Exploit Guard and Speculative Mitigations for PAWs](#07-paws-user-profile-configure-up-system-mitigations-md)**
+15. **[REQ-PAW-140 - User Profile: Structured Exception Handling Overwrite Protection (SEOP) for PAWs](#07-paws-user-profile-configure-paw-up-sehop-md)**
+16. **[REQ-PAW-141 - User Profile: Directory Protection Mode for PAWs](#07-paws-user-profile-configure-paw-up-protection-mode-md)**
+17. **[REQ-PAW-142 - User Profile: Address Space Layout Randomization (ASLR) Image Relocation for PAWs](#07-paws-user-profile-configure-paw-up-aslr-relocation-md)**
+18. **[REQ-PAW-143 - User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for PAWs](#07-paws-user-profile-configure-paw-up-speculative-mitigations-md)**
+19. **[REQ-PAW-144 - User Profile: Authenticode Certificate Padding Check for PAWs](#07-paws-user-profile-configure-paw-up-cert-padding-md)**
+20. **[REQ-PAW-145 - User Profile: Command Processor Batch File Locking for PAWs](#07-paws-user-profile-configure-paw-up-lock-batch-files-md)**
+21. **[REQ-PAW-146 - User Profile: Time-Travel Debugging (TTD) Recording Policy for PAWs](#07-paws-user-profile-configure-paw-up-ttd-recording-md)**
+22. **[REQ-PAW-147 - User Profile: Trusted Root Store Protected Roots Certificate Restriction for PAWs](#07-paws-user-profile-configure-paw-up-protected-roots-md)**
+23. **[REQ-PAW-148 - User Profile: Disabling Injection of AppInit DLLs for PAWs](#07-paws-user-profile-configure-paw-up-appinit-dlls-md)**
+24. **[REQ-PAW-149 - User Profile: Preservation of Attachment Zone Information for PAWs](#07-paws-user-profile-configure-paw-up-attachment-zone-md)**
+25. **[REQ-PAW-150 - User Profile: Disable Windows Game DVR for PAWs](#07-paws-user-profile-configure-paw-up-game-dvr-md)**
+26. **[REQ-PAW-151 - User Profile: Restrict Windows Ink Workspace on Lock Screen for PAWs](#07-paws-user-profile-configure-paw-up-ink-workspace-md)**
 
 ---
 
@@ -45748,162 +45770,79 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<div id="07-paws-user-profile-configure-up-system-mitigations-md"></div>
+<div id="07-paws-user-profile-configure-paw-up-sehop-md"></div>
 
-<div id="07-paws-user-profile-configure-up-system-mitigations-md-req-paw-129-user-profile-exploit-guard-and-speculative-mitigations-for-paws"></div>
-# [REQ-PAW-129] User Profile: Exploit Guard and Speculative Mitigations for PAWs
+<div id="07-paws-user-profile-configure-paw-up-sehop-md-req-paw-140-user-profile-structured-exception-handling-overwrite-protection-sehop-for-paws"></div>
+# [REQ-PAW-140] User Profile: Structured Exception Handling Overwrite Protection (SEHOP) for PAWs
 
-<div id="07-paws-user-profile-configure-up-system-mitigations-md-target-scope"></div>
+<div id="07-paws-user-profile-configure-paw-up-sehop-md-target-scope"></div>
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
 
 ---
 
-<div id="07-paws-user-profile-configure-up-system-mitigations-md-implementation-details"></div>
+<div id="07-paws-user-profile-configure-paw-up-sehop-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * **Registry Locations**:
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel\DisableExceptionChainValidation` = `0` (DWord)
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\ProtectionMode` = `1` (DWord)
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\MoveImages` = `4294967295` (DWord)
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverride` = `72` (DWord)
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverrideMask` = `3` (DWord)
-  * `HKLM\Software\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck` = `1` (DWord)
-  * `HKLM\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck` = `1` (DWord)
-  * `HKLM\SOFTWARE\Microsoft\Command Processor\LockBatchFilesWhenInUse` = `1` (DWord)
-  * `HKLM\SOFTWARE\Microsoft\TTD\RecordingPolicy` = `2` (DWord)
-  * `HKLM\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots\Flags` = `1` (DWord)
-  * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows\LoadAppInit_DLLs` = `0` (DWord)
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments\SaveZoneInformation` = `2` (DWord)
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR\AllowGameDVR` = `0` (DWord)
-  * `HKLM\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace\AllowWindowsInkWorkspace` = `1` (DWord)
+  * **Registry Settings**:
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel\DisableExceptionChainValidation` = `0` (DWord)
 
 
 ---
 
-<div id="07-paws-user-profile-configure-up-system-mitigations-md-rationale"></div>
+<div id="07-paws-user-profile-configure-paw-up-sehop-md-rationale"></div>
 ## Rationale
-Enforces Address Space Layout Randomization (ASLR) force relocation, Spectre/Meltdown speculative execution overrides, SEHOP, time-travel debugging recording locks, Authenticode padding validation, and AppInit DLL bans.
+Structured Exception Handling Overwrite Protection (SEHOP) detects and thwarts exploits targeting structured exception handler corruption, a common stack exploitation technique.
 
 ---
 
-<div id="07-paws-user-profile-configure-up-system-mitigations-md-legacy-impact-compatibility"></div>
+<div id="07-paws-user-profile-configure-paw-up-sehop-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricts user customizations on administrative consoles. No operational impact is expected on dedicated PAW consoles.
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
 
 ---
 
-<div id="07-paws-user-profile-configure-up-system-mitigations-md-implementation-steps"></div>
+<div id="07-paws-user-profile-configure-paw-up-sehop-md-implementation-steps"></div>
 ## Implementation Steps
 
-<div id="07-paws-user-profile-configure-up-system-mitigations-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+<div id="07-paws-user-profile-configure-paw-up-sehop-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Define secondary logon service startup type:
-   * Navigate to: `Computer Configuration \ Policies \ Windows Settings \ Security Settings \ System Services`
-   * Double-click `Secondary Logon`, check **Define this policy setting**, and set startup mode to **Disabled**
-2. Configure Attachment Zone retention:
-   * Navigate to: `User Configuration \ Administrative Templates \ Windows Components \ Attachment Manager`
-   * Configure the policy:
-     * **Policy**: `Do not preserve zone information in file attachments` -> Set to **Disabled** (forces SaveZoneInformation = 2)
-3. Configure Windows Ink Workspace above lock restrictions:
-   * Navigate to: `Computer Configuration \ Administrative Templates \ Windows Components \ Windows Ink Workspace`
-   * Configure the policy:
-     * **Policy**: `Allow Windows Ink Workspace` -> Set to **Enabled** and select **On, but disallow clicks above lock** (value 1)
-4. Deploy the remaining custom system mitigation registry preferences:
-   * Navigate to: `Computer Configuration \ Preferences \ Windows Settings \ Registry`
-   * Create new **Registry Items** for:
-     * **ASLR Force Randomization**: Key `SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management` | Value `MoveImages` = `0xFFFFFFFF` (DWord)
-     * **CPU Spectre Overrides**: Key `SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management` | Value `FeatureSettingsOverride` = `72` (DWord), `FeatureSettingsOverrideMask` = `3` (DWord)
-     * **System Objects Protection**: Key `SYSTEM\CurrentControlSet\Control\Session Manager` | Value `ProtectionMode` = `1` (DWord)
-     * **Strict Authenticode cert padding check**: Key `Software\Microsoft\Cryptography\Wintrust\Config` | Value `EnableCertPaddingCheck` = `1` (DWord) and Wow6432Node equivalent.
-     * **Secure Batch Processing**: Key `SOFTWARE\Microsoft\Command Processor` | Value `LockBatchFilesWhenInUse` = `1` (DWord)
-     * **Disable Time-Travel Debugging**: Key `SOFTWARE\Microsoft\TTD` | Value `RecordingPolicy` = `2` (DWord)
-     * **Protected Roots Flags**: Key `SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots` | Value `Flags` = `1` (DWord)
-     * **Disable AppInit DLLs**: Key `Software\Microsoft\Windows NT\CurrentVersion\Windows` | Value `LoadAppInit_DLLs` = `0` (DWord)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel\DisableExceptionChainValidation` = `0` (DWord)
+
 
 ---
 
-<div id="07-paws-user-profile-configure-up-system-mitigations-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+<div id="07-paws-user-profile-configure-paw-up-sehop-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
-[Download Script: Configure-PawUpsystemmitigations.ps1](../implementation_scripts/Configure-PawUpsystemmitigations.ps1)
+[Download Script: Configure-PawAuditSehop.ps1](../implementation_scripts/Configure-PawAuditSehop.ps1)
 
 ```powershell
-# Configure-PawUpsystemmitigations.ps1
-# Configure-PawUpsystemmitigations.ps1
-Write-Host "Applying User Profile restriction: system-mitigations..." -ForegroundColor Cyan
+# Configure-PawAuditSehop.ps1
+Write-Host "Enforcing System Mitigation control: sehop..." -ForegroundColor Cyan
 
-function Set-RegValue {
-    [CmdletBinding(SupportsShouldProcess)]
-    param (
-        [string]$hive,
-        [string]$keyPath,
-        [string]$name,
-        [string]$value,
-        [string]$type
-    )
-    if ($PSCmdlet.ShouldProcess("$hive\$keyPath", "Set registry value $name to $value")) {
-        $fullPath = "$hive\$keyPath"
-        $parent = Split-Path -Path $fullPath
-        if (-not (Test-Path $parent)) { New-Item -Path $parent -Force | Out-Null }
-        if (-not (Test-Path $fullPath)) { New-Item -Path $fullPath -Force | Out-Null }
-        Set-ItemProperty -Path $fullPath -Name $name -Value $value -Type $type -Force
-    }
-}
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\kernel" "DisableExceptionChainValidation" "0" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager" "ProtectionMode" "1" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" "4294967295" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" "72" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" "3" "DWord"
-Set-RegValue "HKLM:" "Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1" "DWord"
-Set-RegValue "HKLM:" "Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" "1" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\TTD" "RecordingPolicy" "2" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" "1" "DWord"
-Set-RegValue "HKLM:" "Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" "0" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" "2" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\Windows\GameDVR" "AllowGameDVR" "0" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" "1" "DWord"
+# Set Registry value: DisableExceptionChainValidation
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Name "DisableExceptionChainValidation" -Value 0 -Type DWord -Force
+Write-Host "    Enforced DisableExceptionChainValidation = 0" -ForegroundColor Green
+
 
 ```
 
 *To audit the hardening status:*
-[Download Script: Get-PawUpsystemmitigationsStatus.ps1](../audit_scripts/Get-PawUpsystemmitigationsStatus.ps1)
+[Download Script: Get-PawAuditSehopStatus.ps1](../audit_scripts/Get-PawAuditSehopStatus.ps1)
 
 ```powershell
-# Get-PawUpsystemmitigationsStatus.ps1
-# Get-PawUpsystemmitigationsStatus.ps1
+# Get-PawAuditSehopStatus.ps1
 $script:Vulnerable = $false
 
-function Test-RegValue {
-    param (
-        [string]$hive,
-        [string]$keyPath,
-        [string]$name,
-        [string]$expected
-    )
-    $fullPath = "$hive\$keyPath"
-    $val = Get-ItemProperty -Path $fullPath -Name $name -ErrorAction SilentlyContinue
-    $actual = if ($val) { $val.$name } else { "" }
-    if ($actual -ne $expected) {
-        $script:Vulnerable = $true
-    }
+# Audit Registry value: DisableExceptionChainValidation
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Name "DisableExceptionChainValidation" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.DisableExceptionChainValidation -ne 0) {
+    $script:Vulnerable = $true
 }
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\kernel" "DisableExceptionChainValidation" "0"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager" "ProtectionMode" "1"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" "4294967295"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" "72"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" "3"
-Test-RegValue "HKLM:" "Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1"
-Test-RegValue "HKLM:" "Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1"
-Test-RegValue "HKLM:" "SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" "1"
-Test-RegValue "HKLM:" "SOFTWARE\Microsoft\TTD" "RecordingPolicy" "2"
-Test-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" "1"
-Test-RegValue "HKLM:" "Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" "0"
-Test-RegValue "HKLM:" "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" "2"
-Test-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\Windows\GameDVR" "AllowGameDVR" "0"
-Test-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" "1"
 
 if ($script:Vulnerable) {
     Write-Output "Non-Compliant"
@@ -45916,10 +45855,1063 @@ if ($script:Vulnerable) {
 
 ---
 
-<div id="07-paws-user-profile-configure-up-system-mitigations-md-sources-compliance-references"></div>
+<div id="07-paws-user-profile-configure-paw-up-sehop-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **CIS Microsoft Windows Benchmark**: PAW workstation restrictions
-* **ANSSI Active Directory Hardening Guide**: Workstation baseline guide
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-protection-mode-md"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-protection-mode-md-req-paw-141-user-profile-directory-protection-mode-for-paws"></div>
+# [REQ-PAW-141] User Profile: Directory Protection Mode for PAWs
+
+<div id="07-paws-user-profile-configure-paw-up-protection-mode-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-protection-mode-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\ProtectionMode` = `1` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-protection-mode-md-rationale"></div>
+## Rationale
+Setting ProtectionMode to 1 restricts access to crucial system folders like System32, enforcing strict ACLs and protecting against write tampering.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-protection-mode-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-protection-mode-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-user-profile-configure-paw-up-protection-mode-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\ProtectionMode` = `1` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-protection-mode-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditProtectionmode.ps1](../implementation_scripts/Configure-PawAuditProtectionmode.ps1)
+
+```powershell
+# Configure-PawAuditProtectionmode.ps1
+Write-Host "Enforcing System Mitigation control: protection-mode..." -ForegroundColor Cyan
+
+# Set Registry value: ProtectionMode
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "ProtectionMode" -Value 1 -Type DWord -Force
+Write-Host "    Enforced ProtectionMode = 1" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditProtectionmodeStatus.ps1](../audit_scripts/Get-PawAuditProtectionmodeStatus.ps1)
+
+```powershell
+# Get-PawAuditProtectionmodeStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: ProtectionMode
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "ProtectionMode" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.ProtectionMode -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-protection-mode-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-aslr-relocation-md"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-aslr-relocation-md-req-paw-142-user-profile-address-space-layout-randomization-aslr-image-relocation-for-paws"></div>
+# [REQ-PAW-142] User Profile: Address Space Layout Randomization (ASLR) Image Relocation for PAWs
+
+<div id="07-paws-user-profile-configure-paw-up-aslr-relocation-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-aslr-relocation-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\MoveImages` = `4294967295` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-aslr-relocation-md-rationale"></div>
+## Rationale
+Enforcing Address Space Layout Randomization (ASLR) image relocation (MoveImages) forces all dynamic modules to relocate, neutralizing hardcoded ROP payload chains.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-aslr-relocation-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-aslr-relocation-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-user-profile-configure-paw-up-aslr-relocation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\MoveImages` = `4294967295` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-aslr-relocation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditAslrrelocation.ps1](../implementation_scripts/Configure-PawAuditAslrrelocation.ps1)
+
+```powershell
+# Configure-PawAuditAslrrelocation.ps1
+Write-Host "Enforcing System Mitigation control: aslr-relocation..." -ForegroundColor Cyan
+
+# Set Registry value: MoveImages
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "MoveImages" -Value 4294967295 -Type DWord -Force
+Write-Host "    Enforced MoveImages = 4294967295" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditAslrrelocationStatus.ps1](../audit_scripts/Get-PawAuditAslrrelocationStatus.ps1)
+
+```powershell
+# Get-PawAuditAslrrelocationStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: MoveImages
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "MoveImages" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.MoveImages -ne 4294967295) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-aslr-relocation-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-speculative-mitigations-md"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-speculative-mitigations-md-req-paw-143-user-profile-speculative-execution-mitigations-spectremeltdown-for-paws"></div>
+# [REQ-PAW-143] User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for PAWs
+
+<div id="07-paws-user-profile-configure-paw-up-speculative-mitigations-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-speculative-mitigations-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverride` = `72` (DWord)
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverrideMask` = `3` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-speculative-mitigations-md-rationale"></div>
+## Rationale
+Enforces hardware-backed speculative execution mitigations (Spectre, Meltdown, MDS) to prevent side-channel leaks of sensitive kernel-space data.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-speculative-mitigations-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-speculative-mitigations-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-user-profile-configure-paw-up-speculative-mitigations-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverride` = `72` (DWord)
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverrideMask` = `3` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-speculative-mitigations-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditSpeculativemitigations.ps1](../implementation_scripts/Configure-PawAuditSpeculativemitigations.ps1)
+
+```powershell
+# Configure-PawAuditSpeculativemitigations.ps1
+Write-Host "Enforcing System Mitigation control: speculative-mitigations..." -ForegroundColor Cyan
+
+# Set Registry value: FeatureSettingsOverride
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverride" -Value 72 -Type DWord -Force
+Write-Host "    Enforced FeatureSettingsOverride = 72" -ForegroundColor Green
+
+# Set Registry value: FeatureSettingsOverrideMask
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverrideMask" -Value 3 -Type DWord -Force
+Write-Host "    Enforced FeatureSettingsOverrideMask = 3" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditSpeculativemitigationsStatus.ps1](../audit_scripts/Get-PawAuditSpeculativemitigationsStatus.ps1)
+
+```powershell
+# Get-PawAuditSpeculativemitigationsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: FeatureSettingsOverride
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverride" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.FeatureSettingsOverride -ne 72) {
+    $script:Vulnerable = $true
+}
+
+# Audit Registry value: FeatureSettingsOverrideMask
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverrideMask" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.FeatureSettingsOverrideMask -ne 3) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-speculative-mitigations-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-cert-padding-md"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-cert-padding-md-req-paw-144-user-profile-authenticode-signature-certificate-padding-check-for-paws"></div>
+# [REQ-PAW-144] User Profile: Authenticode Signature Certificate Padding Check for PAWs
+
+<div id="07-paws-user-profile-configure-paw-up-cert-padding-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-cert-padding-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\Software\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck` = `1` (DWord)
+  * Registry: `HKLM\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck` = `1` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-cert-padding-md-rationale"></div>
+## Rationale
+Blocks padding execution attacks on Authenticode signed binaries by validating that there is no extra unverified payload appended to the certificate signature block.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-cert-padding-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-cert-padding-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-user-profile-configure-paw-up-cert-padding-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\Software\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck` = `1` (DWord)
+  * Registry: `HKLM\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck` = `1` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-cert-padding-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditCertpadding.ps1](../implementation_scripts/Configure-PawAuditCertpadding.ps1)
+
+```powershell
+# Configure-PawAuditCertpadding.ps1
+Write-Host "Enforcing System Mitigation control: cert-padding..." -ForegroundColor Cyan
+
+# Set Registry value: EnableCertPaddingCheck
+if (-not (Test-Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config")) { New-Item -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -Value 1 -Type DWord -Force
+Write-Host "    Enforced EnableCertPaddingCheck = 1" -ForegroundColor Green
+
+# Set Registry value: EnableCertPaddingCheck
+if (-not (Test-Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config")) { New-Item -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -Value 1 -Type DWord -Force
+Write-Host "    Enforced EnableCertPaddingCheck = 1" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditCertpaddingStatus.ps1](../audit_scripts/Get-PawAuditCertpaddingStatus.ps1)
+
+```powershell
+# Get-PawAuditCertpaddingStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: EnableCertPaddingCheck
+$RegVal = Get-ItemProperty -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.EnableCertPaddingCheck -ne 1) {
+    $script:Vulnerable = $true
+}
+
+# Audit Registry value: EnableCertPaddingCheck
+$RegVal = Get-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.EnableCertPaddingCheck -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-cert-padding-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-lock-batch-files-md"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-lock-batch-files-md-req-paw-145-user-profile-command-processor-batch-file-locking-for-paws"></div>
+# [REQ-PAW-145] User Profile: Command Processor Batch File Locking for PAWs
+
+<div id="07-paws-user-profile-configure-paw-up-lock-batch-files-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-lock-batch-files-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SOFTWARE\Microsoft\Command Processor\LockBatchFilesWhenInUse` = `1` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-lock-batch-files-md-rationale"></div>
+## Rationale
+Locking batch scripts when executing prevents attackers or concurrent processes from rewriting script lines on-the-fly, neutralizing dynamic code modification hijacks.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-lock-batch-files-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-lock-batch-files-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-user-profile-configure-paw-up-lock-batch-files-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SOFTWARE\Microsoft\Command Processor\LockBatchFilesWhenInUse` = `1` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-lock-batch-files-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditLockbatchfiles.ps1](../implementation_scripts/Configure-PawAuditLockbatchfiles.ps1)
+
+```powershell
+# Configure-PawAuditLockbatchfiles.ps1
+Write-Host "Enforcing System Mitigation control: lock-batch-files..." -ForegroundColor Cyan
+
+# Set Registry value: LockBatchFilesWhenInUse
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Command Processor")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Name "LockBatchFilesWhenInUse" -Value 1 -Type DWord -Force
+Write-Host "    Enforced LockBatchFilesWhenInUse = 1" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditLockbatchfilesStatus.ps1](../audit_scripts/Get-PawAuditLockbatchfilesStatus.ps1)
+
+```powershell
+# Get-PawAuditLockbatchfilesStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: LockBatchFilesWhenInUse
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Name "LockBatchFilesWhenInUse" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.LockBatchFilesWhenInUse -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-lock-batch-files-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-ttd-recording-md"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-ttd-recording-md-req-paw-146-user-profile-time-travel-debugging-ttd-recording-policy-for-paws"></div>
+# [REQ-PAW-146] User Profile: Time-Travel Debugging (TTD) Recording Policy for PAWs
+
+<div id="07-paws-user-profile-configure-paw-up-ttd-recording-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-ttd-recording-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SOFTWARE\Microsoft\TTD\RecordingPolicy` = `2` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-ttd-recording-md-rationale"></div>
+## Rationale
+Disables and locks down user-mode Time-Travel Debugging (TTD) traces, preventing local adversaries from capturing memory dumps and private cryptographic structures from administrative processes.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-ttd-recording-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-ttd-recording-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-user-profile-configure-paw-up-ttd-recording-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SOFTWARE\Microsoft\TTD\RecordingPolicy` = `2` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-ttd-recording-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditTtdrecording.ps1](../implementation_scripts/Configure-PawAuditTtdrecording.ps1)
+
+```powershell
+# Configure-PawAuditTtdrecording.ps1
+Write-Host "Enforcing System Mitigation control: ttd-recording..." -ForegroundColor Cyan
+
+# Set Registry value: RecordingPolicy
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\TTD")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Name "RecordingPolicy" -Value 2 -Type DWord -Force
+Write-Host "    Enforced RecordingPolicy = 2" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditTtdrecordingStatus.ps1](../audit_scripts/Get-PawAuditTtdrecordingStatus.ps1)
+
+```powershell
+# Get-PawAuditTtdrecordingStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: RecordingPolicy
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Name "RecordingPolicy" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.RecordingPolicy -ne 2) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-ttd-recording-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-protected-roots-md"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-protected-roots-md-req-paw-147-user-profile-trusted-root-store-protected-roots-certificate-restriction-for-paws"></div>
+# [REQ-PAW-147] User Profile: Trusted Root Store Protected Roots Certificate Restriction for PAWs
+
+<div id="07-paws-user-profile-configure-paw-up-protected-roots-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-protected-roots-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots\Flags` = `1` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-protected-roots-md-rationale"></div>
+## Rationale
+Restricts users from installing root certificates into the trusted root store, preventing root CA hijack actions and man-in-the-middle proxy injection attacks.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-protected-roots-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-protected-roots-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-user-profile-configure-paw-up-protected-roots-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots\Flags` = `1` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-protected-roots-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditProtectedroots.ps1](../implementation_scripts/Configure-PawAuditProtectedroots.ps1)
+
+```powershell
+# Configure-PawAuditProtectedroots.ps1
+Write-Host "Enforcing System Mitigation control: protected-roots..." -ForegroundColor Cyan
+
+# Set Registry value: Flags
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Name "Flags" -Value 1 -Type DWord -Force
+Write-Host "    Enforced Flags = 1" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditProtectedrootsStatus.ps1](../audit_scripts/Get-PawAuditProtectedrootsStatus.ps1)
+
+```powershell
+# Get-PawAuditProtectedrootsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: Flags
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Name "Flags" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.Flags -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-protected-roots-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-appinit-dlls-md"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-appinit-dlls-md-req-paw-148-user-profile-disabling-injection-of-appinit-dlls-for-paws"></div>
+# [REQ-PAW-148] User Profile: Disabling Injection of AppInit DLLs for PAWs
+
+<div id="07-paws-user-profile-configure-paw-up-appinit-dlls-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-appinit-dlls-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows\LoadAppInit_DLLs` = `0` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-appinit-dlls-md-rationale"></div>
+## Rationale
+AppInit DLL injection is a legacy mechanism that loads arbitrary user DLLs into every process that links user32.dll. Enforcing a complete ban (value 0) prevents unauthorized injection hooks.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-appinit-dlls-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-appinit-dlls-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-user-profile-configure-paw-up-appinit-dlls-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows\LoadAppInit_DLLs` = `0` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-appinit-dlls-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditAppinitdlls.ps1](../implementation_scripts/Configure-PawAuditAppinitdlls.ps1)
+
+```powershell
+# Configure-PawAuditAppinitdlls.ps1
+Write-Host "Enforcing System Mitigation control: appinit-dlls..." -ForegroundColor Cyan
+
+# Set Registry value: LoadAppInit_DLLs
+if (-not (Test-Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows")) { New-Item -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Name "LoadAppInit_DLLs" -Value 0 -Type DWord -Force
+Write-Host "    Enforced LoadAppInit_DLLs = 0" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditAppinitdllsStatus.ps1](../audit_scripts/Get-PawAuditAppinitdllsStatus.ps1)
+
+```powershell
+# Get-PawAuditAppinitdllsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: LoadAppInit_DLLs
+$RegVal = Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Name "LoadAppInit_DLLs" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.LoadAppInit_DLLs -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-appinit-dlls-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-attachment-zone-md"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-attachment-zone-md-req-paw-149-user-profile-preservation-of-attachment-zone-information-for-paws"></div>
+# [REQ-PAW-149] User Profile: Preservation of Attachment Zone Information for PAWs
+
+<div id="07-paws-user-profile-configure-paw-up-attachment-zone-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-attachment-zone-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments\SaveZoneInformation` = `2` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-attachment-zone-md-rationale"></div>
+## Rationale
+Ensures the Attachment Manager preserves the Zone.Identifier alternate data stream (ADS) marking files downloaded from untrusted web zones, enforcing SmartScreen check prompts.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-attachment-zone-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-attachment-zone-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-user-profile-configure-paw-up-attachment-zone-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Navigate to: `User Configuration \ Administrative Templates \ Windows Components \ Attachment Manager`
+2. Configure the policy:
+   * **Policy**: `Do not preserve zone information in file attachments` -> Set to **Disabled** (which configures `SaveZoneInformation` = `2` to preserve zone information)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-attachment-zone-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditAttachmentzone.ps1](../implementation_scripts/Configure-PawAuditAttachmentzone.ps1)
+
+```powershell
+# Configure-PawAuditAttachmentzone.ps1
+Write-Host "Enforcing System Mitigation control: attachment-zone..." -ForegroundColor Cyan
+
+# Set Registry value: SaveZoneInformation
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Name "SaveZoneInformation" -Value 2 -Type DWord -Force
+Write-Host "    Enforced SaveZoneInformation = 2" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditAttachmentzoneStatus.ps1](../audit_scripts/Get-PawAuditAttachmentzoneStatus.ps1)
+
+```powershell
+# Get-PawAuditAttachmentzoneStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: SaveZoneInformation
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Name "SaveZoneInformation" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.SaveZoneInformation -ne 2) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-attachment-zone-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-game-dvr-md"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-game-dvr-md-req-paw-150-user-profile-disable-windows-game-dvr-for-paws"></div>
+# [REQ-PAW-150] User Profile: Disable Windows Game DVR for PAWs
+
+<div id="07-paws-user-profile-configure-paw-up-game-dvr-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-game-dvr-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR\AllowGameDVR` = `0` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-game-dvr-md-rationale"></div>
+## Rationale
+Disabling Game DVR blocks background media recording agents, conserving local computing cycles and preventing administrative session leakage via broadcast APIs.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-game-dvr-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-game-dvr-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-user-profile-configure-paw-up-game-dvr-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Navigate to: `Computer Configuration \ Administrative Templates \ Windows Components \ Windows Game Recording and Broadcasting`
+2. Configure the policy:
+   * **Policy**: `Enables or disables Windows Game Recording and Broadcasting` -> Set to **Disabled** (which configures `AllowGameDVR` = `0`)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-game-dvr-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditGamedvr.ps1](../implementation_scripts/Configure-PawAuditGamedvr.ps1)
+
+```powershell
+# Configure-PawAuditGamedvr.ps1
+Write-Host "Enforcing System Mitigation control: game-dvr..." -ForegroundColor Cyan
+
+# Set Registry value: AllowGameDVR
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -Value 0 -Type DWord -Force
+Write-Host "    Enforced AllowGameDVR = 0" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditGamedvrStatus.ps1](../audit_scripts/Get-PawAuditGamedvrStatus.ps1)
+
+```powershell
+# Get-PawAuditGamedvrStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: AllowGameDVR
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.AllowGameDVR -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-game-dvr-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-ink-workspace-md"></div>
+
+<div id="07-paws-user-profile-configure-paw-up-ink-workspace-md-req-paw-151-user-profile-restrict-windows-ink-workspace-on-lock-screen-for-paws"></div>
+# [REQ-PAW-151] User Profile: Restrict Windows Ink Workspace on Lock Screen for PAWs
+
+<div id="07-paws-user-profile-configure-paw-up-ink-workspace-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-ink-workspace-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace\AllowWindowsInkWorkspace` = `1` (DWord)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-ink-workspace-md-rationale"></div>
+## Rationale
+Disabling access to the Windows Ink Workspace on the lock screen prevents unauthorized physical users from invoking drawing tools, scripts, or apps without authenticating.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-ink-workspace-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-ink-workspace-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-user-profile-configure-paw-up-ink-workspace-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Navigate to: `Computer Configuration \ Administrative Templates \ Windows Components \ Windows Ink Workspace`
+2. Configure the policy:
+   * **Policy**: `Allow Windows Ink Workspace` -> Set to **Enabled**
+   * **Action**: Choose **On, but disallow access above lock** (which configures `AllowWindowsInkWorkspace` = `1`)
+
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-ink-workspace-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditInkworkspace.ps1](../implementation_scripts/Configure-PawAuditInkworkspace.ps1)
+
+```powershell
+# Configure-PawAuditInkworkspace.ps1
+Write-Host "Enforcing System Mitigation control: ink-workspace..." -ForegroundColor Cyan
+
+# Set Registry value: AllowWindowsInkWorkspace
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Name "AllowWindowsInkWorkspace" -Value 1 -Type DWord -Force
+Write-Host "    Enforced AllowWindowsInkWorkspace = 1" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditInkworkspaceStatus.ps1](../audit_scripts/Get-PawAuditInkworkspaceStatus.ps1)
+
+```powershell
+# Get-PawAuditInkworkspaceStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: AllowWindowsInkWorkspace
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Name "AllowWindowsInkWorkspace" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.AllowWindowsInkWorkspace -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-user-profile-configure-paw-up-ink-workspace-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
 
 
 <div style="page-break-before: always;"></div>
@@ -52703,7 +53695,18 @@ To prevent initial access and lateral movement, the following unitary technical 
     * **[REQ-END-137 - User Profile: Interactive Logon Inactivity Timeout](#08-endpoints-user-profile-configure-up-inactivity-timeout-md)**
     * **[REQ-END-138 - User Profile: Windows Installer Hardening](#08-endpoints-user-profile-configure-up-installer-hardening-md)**
     * **[REQ-END-139 - User Profile: Secondary Logon Service Lockdown](#08-endpoints-user-profile-configure-up-seclogon-service-md)**
-    * **[REQ-END-140 - User Profile: Exploit Guard and Speculative Mitigations](#08-endpoints-user-profile-configure-up-system-mitigations-md)**
+    * **[REQ-END-151 - User Profile: Structured Exception Handling Overwrite Protection (SEOP) for Endpoints](#08-endpoints-user-profile-configure-end-up-sehop-md)**
+    * **[REQ-END-152 - User Profile: Directory Protection Mode for Endpoints](#08-endpoints-user-profile-configure-end-up-protection-mode-md)**
+    * **[REQ-END-153 - User Profile: Address Space Layout Randomization (ASLR) Image Relocation for Endpoints](#08-endpoints-user-profile-configure-end-up-aslr-relocation-md)**
+    * **[REQ-END-154 - User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for Endpoints](#08-endpoints-user-profile-configure-end-up-speculative-mitigations-md)**
+    * **[REQ-END-155 - User Profile: Authenticode Certificate Padding Check for Endpoints](#08-endpoints-user-profile-configure-end-up-cert-padding-md)**
+    * **[REQ-END-156 - User Profile: Command Processor Batch File Locking for Endpoints](#08-endpoints-user-profile-configure-end-up-lock-batch-files-md)**
+    * **[REQ-END-157 - User Profile: Time-Travel Debugging (TTD) Recording Policy for Endpoints](#08-endpoints-user-profile-configure-end-up-ttd-recording-md)**
+    * **[REQ-END-158 - User Profile: Trusted Root Store Protected Roots Certificate Restriction for Endpoints](#08-endpoints-user-profile-configure-end-up-protected-roots-md)**
+    * **[REQ-END-159 - User Profile: Disabling Injection of AppInit DLLs for Endpoints](#08-endpoints-user-profile-configure-end-up-appinit-dlls-md)**
+    * **[REQ-END-160 - User Profile: Preservation of Attachment Zone Information for Endpoints](#08-endpoints-user-profile-configure-end-up-attachment-zone-md)**
+    * **[REQ-END-161 - User Profile: Disable Windows Game DVR for Endpoints](#08-endpoints-user-profile-configure-end-up-game-dvr-md)**
+    * **[REQ-END-162 - User Profile: Restrict Windows Ink Workspace on Lock Screen for Endpoints](#08-endpoints-user-profile-configure-end-up-ink-workspace-md)**
 
 20. **[REQ-END-020 - Configure Exploit Protection Profile](#08-endpoints-configure-exploit-protection-md)**
     Configures and enforces a system-wide Microsoft Defender Exploit Protection profile to apply advanced memory mitigations (DEP, ASLR, CFG, SEHOP, Heap Integrity) on all endpoints.
@@ -64433,7 +65436,18 @@ The following individual User Profile restriction rules must be configured:
 12. **[REQ-END-137 - User Profile: Interactive Logon Inactivity Timeout](#08-endpoints-user-profile-configure-up-inactivity-timeout-md)**
 13. **[REQ-END-138 - User Profile: Windows Installer Hardening](#08-endpoints-user-profile-configure-up-installer-hardening-md)**
 14. **[REQ-END-139 - User Profile: Secondary Logon Service Lockdown](#08-endpoints-user-profile-configure-up-seclogon-service-md)**
-15. **[REQ-END-140 - User Profile: Exploit Guard and Speculative Mitigations](#08-endpoints-user-profile-configure-up-system-mitigations-md)**
+15. **[REQ-END-150 - User Profile: Structured Exception Handling Overwrite Protection (SEOP) for Endpoints](#08-endpoints-user-profile-configure-end-up-sehop-md)**
+16. **[REQ-END-151 - User Profile: Directory Protection Mode for Endpoints](#08-endpoints-user-profile-configure-end-up-protection-mode-md)**
+17. **[REQ-END-152 - User Profile: Address Space Layout Randomization (ASLR) Image Relocation for Endpoints](#08-endpoints-user-profile-configure-end-up-aslr-relocation-md)**
+18. **[REQ-END-153 - User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for Endpoints](#08-endpoints-user-profile-configure-end-up-speculative-mitigations-md)**
+19. **[REQ-END-154 - User Profile: Authenticode Certificate Padding Check for Endpoints](#08-endpoints-user-profile-configure-end-up-cert-padding-md)**
+20. **[REQ-END-155 - User Profile: Command Processor Batch File Locking for Endpoints](#08-endpoints-user-profile-configure-end-up-lock-batch-files-md)**
+21. **[REQ-END-156 - User Profile: Time-Travel Debugging (TTD) Recording Policy for Endpoints](#08-endpoints-user-profile-configure-end-up-ttd-recording-md)**
+22. **[REQ-END-157 - User Profile: Trusted Root Store Protected Roots Certificate Restriction for Endpoints](#08-endpoints-user-profile-configure-end-up-protected-roots-md)**
+23. **[REQ-END-158 - User Profile: Disabling Injection of AppInit DLLs for Endpoints](#08-endpoints-user-profile-configure-end-up-appinit-dlls-md)**
+24. **[REQ-END-159 - User Profile: Preservation of Attachment Zone Information for Endpoints](#08-endpoints-user-profile-configure-end-up-attachment-zone-md)**
+25. **[REQ-END-160 - User Profile: Disable Windows Game DVR for Endpoints](#08-endpoints-user-profile-configure-end-up-game-dvr-md)**
+26. **[REQ-END-161 - User Profile: Restrict Windows Ink Workspace on Lock Screen for Endpoints](#08-endpoints-user-profile-configure-end-up-ink-workspace-md)**
 
 ---
 
@@ -66253,160 +67267,79 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
-<div id="08-endpoints-user-profile-configure-up-system-mitigations-md"></div>
+<div id="08-endpoints-user-profile-configure-end-up-sehop-md"></div>
 
-<div id="08-endpoints-user-profile-configure-up-system-mitigations-md-req-end-140-user-profile-exploit-guard-and-speculative-mitigations"></div>
-# [REQ-END-140] User Profile: Exploit Guard and Speculative Mitigations
+<div id="08-endpoints-user-profile-configure-end-up-sehop-md-req-end-151-user-profile-structured-exception-handling-overwrite-protection-sehop-for-endpoints"></div>
+# [REQ-END-151] User Profile: Structured Exception Handling Overwrite Protection (SEHOP) for Endpoints
 
-<div id="08-endpoints-user-profile-configure-up-system-mitigations-md-target-scope"></div>
+<div id="08-endpoints-user-profile-configure-end-up-sehop-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 2 Client Workstations
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
 
 ---
 
-<div id="08-endpoints-user-profile-configure-up-system-mitigations-md-implementation-details"></div>
+<div id="08-endpoints-user-profile-configure-end-up-sehop-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * **Registry Locations**:
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel\DisableExceptionChainValidation` = `0` (DWord)
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\ProtectionMode` = `1` (DWord)
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\MoveImages` = `4294967295` (DWord)
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverride` = `72` (DWord)
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverrideMask` = `3` (DWord)
-  * `HKLM\Software\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck` = `1` (DWord)
-  * `HKLM\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck` = `1` (DWord)
-  * `HKLM\SOFTWARE\Microsoft\Command Processor\LockBatchFilesWhenInUse` = `1` (DWord)
-  * `HKLM\SOFTWARE\Microsoft\TTD\RecordingPolicy` = `2` (DWord)
-  * `HKLM\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots\Flags` = `1` (DWord)
-  * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows\LoadAppInit_DLLs` = `0` (DWord)
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments\SaveZoneInformation` = `2` (DWord)
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR\AllowGameDVR` = `0` (DWord)
-  * `HKLM\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace\AllowWindowsInkWorkspace` = `1` (DWord)
+  * **Registry Settings**:
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel\DisableExceptionChainValidation` = `0` (DWord)
 
 
 ---
 
-<div id="08-endpoints-user-profile-configure-up-system-mitigations-md-rationale"></div>
+<div id="08-endpoints-user-profile-configure-end-up-sehop-md-rationale"></div>
 ## Rationale
-Enforces Address Space Layout Randomization (ASLR) force relocation, Spectre/Meltdown speculative execution overrides, SEHOP, time-travel debugging recording locks, Authenticode padding validation, and AppInit DLL bans.
+Structured Exception Handling Overwrite Protection (SEHOP) detects and thwarts exploits targeting structured exception handler corruption, a common stack exploitation technique.
 
 ---
 
-<div id="08-endpoints-user-profile-configure-up-system-mitigations-md-legacy-impact-compatibility"></div>
+<div id="08-endpoints-user-profile-configure-end-up-sehop-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricts client customization features. Verify compatibility in staging environments.
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
 
 ---
 
-<div id="08-endpoints-user-profile-configure-up-system-mitigations-md-implementation-steps"></div>
+<div id="08-endpoints-user-profile-configure-end-up-sehop-md-implementation-steps"></div>
 ## Implementation Steps
 
-<div id="08-endpoints-user-profile-configure-up-system-mitigations-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+<div id="08-endpoints-user-profile-configure-end-up-sehop-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Define secondary logon service startup type:
-   * Navigate to: `Computer Configuration \ Policies \ Windows Settings \ Security Settings \ System Services`
-   * Double-click `Secondary Logon`, check **Define this policy setting**, and set startup mode to **Disabled**
-2. Configure Attachment Zone retention:
-   * Navigate to: `User Configuration \ Administrative Templates \ Windows Components \ Attachment Manager`
-   * Configure the policy:
-     * **Policy**: `Do not preserve zone information in file attachments` -> Set to **Disabled** (forces SaveZoneInformation = 2)
-3. Configure Windows Ink Workspace above lock restrictions:
-   * Navigate to: `Computer Configuration \ Administrative Templates \ Windows Components \ Windows Ink Workspace`
-   * Configure the policy:
-     * **Policy**: `Allow Windows Ink Workspace` -> Set to **Enabled** and select **On, but disallow clicks above lock** (value 1)
-4. Deploy the remaining custom system mitigation registry preferences:
-   * Navigate to: `Computer Configuration \ Preferences \ Windows Settings \ Registry`
-   * Create new **Registry Items** for:
-     * **ASLR Force Randomization**: Key `SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management` | Value `MoveImages` = `0xFFFFFFFF` (DWord)
-     * **CPU Spectre Overrides**: Key `SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management` | Value `FeatureSettingsOverride` = `72` (DWord), `FeatureSettingsOverrideMask` = `3` (DWord)
-     * **System Objects Protection**: Key `SYSTEM\CurrentControlSet\Control\Session Manager` | Value `ProtectionMode` = `1` (DWord)
-     * **Strict Authenticode cert padding check**: Key `Software\Microsoft\Cryptography\Wintrust\Config` | Value `EnableCertPaddingCheck` = `1` (DWord) and Wow6432Node equivalent.
-     * **Secure Batch Processing**: Key `SOFTWARE\Microsoft\Command Processor` | Value `LockBatchFilesWhenInUse` = `1` (DWord)
-     * **Disable Time-Travel Debugging**: Key `SOFTWARE\Microsoft\TTD` | Value `RecordingPolicy` = `2` (DWord)
-     * **Protected Roots Flags**: Key `SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots` | Value `Flags` = `1` (DWord)
-     * **Disable AppInit DLLs**: Key `Software\Microsoft\Windows NT\CurrentVersion\Windows` | Value `LoadAppInit_DLLs` = `0` (DWord)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel\DisableExceptionChainValidation` = `0` (DWord)
+
 
 ---
 
-<div id="08-endpoints-user-profile-configure-up-system-mitigations-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+<div id="08-endpoints-user-profile-configure-end-up-sehop-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
-[Download Script: Configure-Upsystemmitigations.ps1](../implementation_scripts/Configure-Upsystemmitigations.ps1)
+[Download Script: Configure-EndAuditSehop.ps1](../implementation_scripts/Configure-EndAuditSehop.ps1)
 
 ```powershell
-# Configure-Upsystemmitigations.ps1
-Write-Host "Applying User Profile restriction: system-mitigations..." -ForegroundColor Cyan
+# Configure-EndAuditSehop.ps1
+Write-Host "Enforcing System Mitigation control: sehop..." -ForegroundColor Cyan
 
-function Set-RegValue {
-    [CmdletBinding(SupportsShouldProcess)]
-    param (
-        [string]$hive,
-        [string]$keyPath,
-        [string]$name,
-        [string]$value,
-        [string]$type
-    )
-    if ($PSCmdlet.ShouldProcess("$hive\$keyPath", "Set registry value $name to $value")) {
-        $fullPath = "$hive\$keyPath"
-        $parent = Split-Path -Path $fullPath
-        if (-not (Test-Path $parent)) { New-Item -Path $parent -Force | Out-Null }
-        if (-not (Test-Path $fullPath)) { New-Item -Path $fullPath -Force | Out-Null }
-        Set-ItemProperty -Path $fullPath -Name $name -Value $value -Type $type -Force
-    }
-}
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\kernel" "DisableExceptionChainValidation" "0" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager" "ProtectionMode" "1" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" "4294967295" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" "72" "DWord"
-Set-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" "3" "DWord"
-Set-RegValue "HKLM:" "Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1" "DWord"
-Set-RegValue "HKLM:" "Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" "1" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\TTD" "RecordingPolicy" "2" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" "1" "DWord"
-Set-RegValue "HKLM:" "Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" "0" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" "2" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\Windows\GameDVR" "AllowGameDVR" "0" "DWord"
-Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" "1" "DWord"
+# Set Registry value: DisableExceptionChainValidation
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Name "DisableExceptionChainValidation" -Value 0 -Type DWord -Force
+Write-Host "    Enforced DisableExceptionChainValidation = 0" -ForegroundColor Green
+
 
 ```
 
 *To audit the hardening status:*
-[Download Script: Get-UpsystemmitigationsStatus.ps1](../audit_scripts/Get-UpsystemmitigationsStatus.ps1)
+[Download Script: Get-EndAuditSehopStatus.ps1](../audit_scripts/Get-EndAuditSehopStatus.ps1)
 
 ```powershell
-# Get-UpsystemmitigationsStatus.ps1
+# Get-EndAuditSehopStatus.ps1
 $script:Vulnerable = $false
 
-function Test-RegValue {
-    param (
-        [string]$hive,
-        [string]$keyPath,
-        [string]$name,
-        [string]$expected
-    )
-    $fullPath = "$hive\$keyPath"
-    $val = Get-ItemProperty -Path $fullPath -Name $name -ErrorAction SilentlyContinue
-    $actual = if ($val) { $val.$name } else { "" }
-    if ($actual -ne $expected) {
-        $script:Vulnerable = $true
-    }
+# Audit Registry value: DisableExceptionChainValidation
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" -Name "DisableExceptionChainValidation" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.DisableExceptionChainValidation -ne 0) {
+    $script:Vulnerable = $true
 }
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\kernel" "DisableExceptionChainValidation" "0"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager" "ProtectionMode" "1"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "MoveImages" "4294967295"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverride" "72"
-Test-RegValue "HKLM:" "SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" "FeatureSettingsOverrideMask" "3"
-Test-RegValue "HKLM:" "Software\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1"
-Test-RegValue "HKLM:" "Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" "EnableCertPaddingCheck" "1"
-Test-RegValue "HKLM:" "SOFTWARE\Microsoft\Command Processor" "LockBatchFilesWhenInUse" "1"
-Test-RegValue "HKLM:" "SOFTWARE\Microsoft\TTD" "RecordingPolicy" "2"
-Test-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" "Flags" "1"
-Test-RegValue "HKLM:" "Software\Microsoft\Windows NT\CurrentVersion\Windows" "LoadAppInit_DLLs" "0"
-Test-RegValue "HKLM:" "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" "SaveZoneInformation" "2"
-Test-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\Windows\GameDVR" "AllowGameDVR" "0"
-Test-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" "AllowWindowsInkWorkspace" "1"
 
 if ($script:Vulnerable) {
     Write-Output "Non-Compliant"
@@ -66419,10 +67352,1063 @@ if ($script:Vulnerable) {
 
 ---
 
-<div id="08-endpoints-user-profile-configure-up-system-mitigations-md-sources-compliance-references"></div>
+<div id="08-endpoints-user-profile-configure-end-up-sehop-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **CIS Microsoft Windows Benchmark**: User profile privacy and shell lockdown controls
 * **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-protection-mode-md"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-protection-mode-md-req-end-152-user-profile-directory-protection-mode-for-endpoints"></div>
+# [REQ-END-152] User Profile: Directory Protection Mode for Endpoints
+
+<div id="08-endpoints-user-profile-configure-end-up-protection-mode-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-protection-mode-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\ProtectionMode` = `1` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-protection-mode-md-rationale"></div>
+## Rationale
+Setting ProtectionMode to 1 restricts access to crucial system folders like System32, enforcing strict ACLs and protecting against write tampering.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-protection-mode-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-protection-mode-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-user-profile-configure-end-up-protection-mode-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\ProtectionMode` = `1` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-protection-mode-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditProtectionmode.ps1](../implementation_scripts/Configure-EndAuditProtectionmode.ps1)
+
+```powershell
+# Configure-EndAuditProtectionmode.ps1
+Write-Host "Enforcing System Mitigation control: protection-mode..." -ForegroundColor Cyan
+
+# Set Registry value: ProtectionMode
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "ProtectionMode" -Value 1 -Type DWord -Force
+Write-Host "    Enforced ProtectionMode = 1" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditProtectionmodeStatus.ps1](../audit_scripts/Get-EndAuditProtectionmodeStatus.ps1)
+
+```powershell
+# Get-EndAuditProtectionmodeStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: ProtectionMode
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "ProtectionMode" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.ProtectionMode -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-protection-mode-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-aslr-relocation-md"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-aslr-relocation-md-req-end-153-user-profile-address-space-layout-randomization-aslr-image-relocation-for-endpoints"></div>
+# [REQ-END-153] User Profile: Address Space Layout Randomization (ASLR) Image Relocation for Endpoints
+
+<div id="08-endpoints-user-profile-configure-end-up-aslr-relocation-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-aslr-relocation-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\MoveImages` = `4294967295` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-aslr-relocation-md-rationale"></div>
+## Rationale
+Enforcing Address Space Layout Randomization (ASLR) image relocation (MoveImages) forces all dynamic modules to relocate, neutralizing hardcoded ROP payload chains.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-aslr-relocation-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-aslr-relocation-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-user-profile-configure-end-up-aslr-relocation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\MoveImages` = `4294967295` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-aslr-relocation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditAslrrelocation.ps1](../implementation_scripts/Configure-EndAuditAslrrelocation.ps1)
+
+```powershell
+# Configure-EndAuditAslrrelocation.ps1
+Write-Host "Enforcing System Mitigation control: aslr-relocation..." -ForegroundColor Cyan
+
+# Set Registry value: MoveImages
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "MoveImages" -Value 4294967295 -Type DWord -Force
+Write-Host "    Enforced MoveImages = 4294967295" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditAslrrelocationStatus.ps1](../audit_scripts/Get-EndAuditAslrrelocationStatus.ps1)
+
+```powershell
+# Get-EndAuditAslrrelocationStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: MoveImages
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "MoveImages" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.MoveImages -ne 4294967295) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-aslr-relocation-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-speculative-mitigations-md"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-speculative-mitigations-md-req-end-154-user-profile-speculative-execution-mitigations-spectremeltdown-for-endpoints"></div>
+# [REQ-END-154] User Profile: Speculative Execution Mitigations (Spectre/Meltdown) for Endpoints
+
+<div id="08-endpoints-user-profile-configure-end-up-speculative-mitigations-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-speculative-mitigations-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverride` = `72` (DWord)
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverrideMask` = `3` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-speculative-mitigations-md-rationale"></div>
+## Rationale
+Enforces hardware-backed speculative execution mitigations (Spectre, Meltdown, MDS) to prevent side-channel leaks of sensitive kernel-space data.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-speculative-mitigations-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-speculative-mitigations-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-user-profile-configure-end-up-speculative-mitigations-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverride` = `72` (DWord)
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\FeatureSettingsOverrideMask` = `3` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-speculative-mitigations-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditSpeculativemitigations.ps1](../implementation_scripts/Configure-EndAuditSpeculativemitigations.ps1)
+
+```powershell
+# Configure-EndAuditSpeculativemitigations.ps1
+Write-Host "Enforcing System Mitigation control: speculative-mitigations..." -ForegroundColor Cyan
+
+# Set Registry value: FeatureSettingsOverride
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverride" -Value 72 -Type DWord -Force
+Write-Host "    Enforced FeatureSettingsOverride = 72" -ForegroundColor Green
+
+# Set Registry value: FeatureSettingsOverrideMask
+if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management")) { New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverrideMask" -Value 3 -Type DWord -Force
+Write-Host "    Enforced FeatureSettingsOverrideMask = 3" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditSpeculativemitigationsStatus.ps1](../audit_scripts/Get-EndAuditSpeculativemitigationsStatus.ps1)
+
+```powershell
+# Get-EndAuditSpeculativemitigationsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: FeatureSettingsOverride
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverride" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.FeatureSettingsOverride -ne 72) {
+    $script:Vulnerable = $true
+}
+
+# Audit Registry value: FeatureSettingsOverrideMask
+$RegVal = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "FeatureSettingsOverrideMask" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.FeatureSettingsOverrideMask -ne 3) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-speculative-mitigations-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-cert-padding-md"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-cert-padding-md-req-end-155-user-profile-authenticode-signature-certificate-padding-check-for-endpoints"></div>
+# [REQ-END-155] User Profile: Authenticode Signature Certificate Padding Check for Endpoints
+
+<div id="08-endpoints-user-profile-configure-end-up-cert-padding-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-cert-padding-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\Software\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck` = `1` (DWord)
+  * Registry: `HKLM\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck` = `1` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-cert-padding-md-rationale"></div>
+## Rationale
+Blocks padding execution attacks on Authenticode signed binaries by validating that there is no extra unverified payload appended to the certificate signature block.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-cert-padding-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-cert-padding-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-user-profile-configure-end-up-cert-padding-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\Software\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck` = `1` (DWord)
+  * Registry: `HKLM\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config\EnableCertPaddingCheck` = `1` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-cert-padding-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditCertpadding.ps1](../implementation_scripts/Configure-EndAuditCertpadding.ps1)
+
+```powershell
+# Configure-EndAuditCertpadding.ps1
+Write-Host "Enforcing System Mitigation control: cert-padding..." -ForegroundColor Cyan
+
+# Set Registry value: EnableCertPaddingCheck
+if (-not (Test-Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config")) { New-Item -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -Value 1 -Type DWord -Force
+Write-Host "    Enforced EnableCertPaddingCheck = 1" -ForegroundColor Green
+
+# Set Registry value: EnableCertPaddingCheck
+if (-not (Test-Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config")) { New-Item -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -Value 1 -Type DWord -Force
+Write-Host "    Enforced EnableCertPaddingCheck = 1" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditCertpaddingStatus.ps1](../audit_scripts/Get-EndAuditCertpaddingStatus.ps1)
+
+```powershell
+# Get-EndAuditCertpaddingStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: EnableCertPaddingCheck
+$RegVal = Get-ItemProperty -Path "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.EnableCertPaddingCheck -ne 1) {
+    $script:Vulnerable = $true
+}
+
+# Audit Registry value: EnableCertPaddingCheck
+$RegVal = Get-ItemProperty -Path "HKLM:\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config" -Name "EnableCertPaddingCheck" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.EnableCertPaddingCheck -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-cert-padding-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-lock-batch-files-md"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-lock-batch-files-md-req-end-156-user-profile-command-processor-batch-file-locking-for-endpoints"></div>
+# [REQ-END-156] User Profile: Command Processor Batch File Locking for Endpoints
+
+<div id="08-endpoints-user-profile-configure-end-up-lock-batch-files-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-lock-batch-files-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SOFTWARE\Microsoft\Command Processor\LockBatchFilesWhenInUse` = `1` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-lock-batch-files-md-rationale"></div>
+## Rationale
+Locking batch scripts when executing prevents attackers or concurrent processes from rewriting script lines on-the-fly, neutralizing dynamic code modification hijacks.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-lock-batch-files-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-lock-batch-files-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-user-profile-configure-end-up-lock-batch-files-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SOFTWARE\Microsoft\Command Processor\LockBatchFilesWhenInUse` = `1` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-lock-batch-files-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditLockbatchfiles.ps1](../implementation_scripts/Configure-EndAuditLockbatchfiles.ps1)
+
+```powershell
+# Configure-EndAuditLockbatchfiles.ps1
+Write-Host "Enforcing System Mitigation control: lock-batch-files..." -ForegroundColor Cyan
+
+# Set Registry value: LockBatchFilesWhenInUse
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Command Processor")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Name "LockBatchFilesWhenInUse" -Value 1 -Type DWord -Force
+Write-Host "    Enforced LockBatchFilesWhenInUse = 1" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditLockbatchfilesStatus.ps1](../audit_scripts/Get-EndAuditLockbatchfilesStatus.ps1)
+
+```powershell
+# Get-EndAuditLockbatchfilesStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: LockBatchFilesWhenInUse
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Command Processor" -Name "LockBatchFilesWhenInUse" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.LockBatchFilesWhenInUse -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-lock-batch-files-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-ttd-recording-md"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-ttd-recording-md-req-end-157-user-profile-time-travel-debugging-ttd-recording-policy-for-endpoints"></div>
+# [REQ-END-157] User Profile: Time-Travel Debugging (TTD) Recording Policy for Endpoints
+
+<div id="08-endpoints-user-profile-configure-end-up-ttd-recording-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-ttd-recording-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SOFTWARE\Microsoft\TTD\RecordingPolicy` = `2` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-ttd-recording-md-rationale"></div>
+## Rationale
+Disables and locks down user-mode Time-Travel Debugging (TTD) traces, preventing local adversaries from capturing memory dumps and private cryptographic structures from administrative processes.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-ttd-recording-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-ttd-recording-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-user-profile-configure-end-up-ttd-recording-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SOFTWARE\Microsoft\TTD\RecordingPolicy` = `2` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-ttd-recording-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditTtdrecording.ps1](../implementation_scripts/Configure-EndAuditTtdrecording.ps1)
+
+```powershell
+# Configure-EndAuditTtdrecording.ps1
+Write-Host "Enforcing System Mitigation control: ttd-recording..." -ForegroundColor Cyan
+
+# Set Registry value: RecordingPolicy
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\TTD")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Name "RecordingPolicy" -Value 2 -Type DWord -Force
+Write-Host "    Enforced RecordingPolicy = 2" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditTtdrecordingStatus.ps1](../audit_scripts/Get-EndAuditTtdrecordingStatus.ps1)
+
+```powershell
+# Get-EndAuditTtdrecordingStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: RecordingPolicy
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\TTD" -Name "RecordingPolicy" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.RecordingPolicy -ne 2) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-ttd-recording-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-protected-roots-md"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-protected-roots-md-req-end-158-user-profile-trusted-root-store-protected-roots-certificate-restriction-for-endpoints"></div>
+# [REQ-END-158] User Profile: Trusted Root Store Protected Roots Certificate Restriction for Endpoints
+
+<div id="08-endpoints-user-profile-configure-end-up-protected-roots-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-protected-roots-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots\Flags` = `1` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-protected-roots-md-rationale"></div>
+## Rationale
+Restricts users from installing root certificates into the trusted root store, preventing root CA hijack actions and man-in-the-middle proxy injection attacks.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-protected-roots-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-protected-roots-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-user-profile-configure-end-up-protected-roots-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots\Flags` = `1` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-protected-roots-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditProtectedroots.ps1](../implementation_scripts/Configure-EndAuditProtectedroots.ps1)
+
+```powershell
+# Configure-EndAuditProtectedroots.ps1
+Write-Host "Enforcing System Mitigation control: protected-roots..." -ForegroundColor Cyan
+
+# Set Registry value: Flags
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Name "Flags" -Value 1 -Type DWord -Force
+Write-Host "    Enforced Flags = 1" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditProtectedrootsStatus.ps1](../audit_scripts/Get-EndAuditProtectedrootsStatus.ps1)
+
+```powershell
+# Get-EndAuditProtectedrootsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: Flags
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\SystemCertificates\Root\ProtectedRoots" -Name "Flags" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.Flags -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-protected-roots-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-appinit-dlls-md"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-appinit-dlls-md-req-end-159-user-profile-disabling-injection-of-appinit-dlls-for-endpoints"></div>
+# [REQ-END-159] User Profile: Disabling Injection of AppInit DLLs for Endpoints
+
+<div id="08-endpoints-user-profile-configure-end-up-appinit-dlls-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-appinit-dlls-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows\LoadAppInit_DLLs` = `0` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-appinit-dlls-md-rationale"></div>
+## Rationale
+AppInit DLL injection is a legacy mechanism that loads arbitrary user DLLs into every process that links user32.dll. Enforcing a complete ban (value 0) prevents unauthorized injection hooks.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-appinit-dlls-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-appinit-dlls-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-user-profile-configure-end-up-appinit-dlls-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
+  * Registry: `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows\LoadAppInit_DLLs` = `0` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-appinit-dlls-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditAppinitdlls.ps1](../implementation_scripts/Configure-EndAuditAppinitdlls.ps1)
+
+```powershell
+# Configure-EndAuditAppinitdlls.ps1
+Write-Host "Enforcing System Mitigation control: appinit-dlls..." -ForegroundColor Cyan
+
+# Set Registry value: LoadAppInit_DLLs
+if (-not (Test-Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows")) { New-Item -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Name "LoadAppInit_DLLs" -Value 0 -Type DWord -Force
+Write-Host "    Enforced LoadAppInit_DLLs = 0" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditAppinitdllsStatus.ps1](../audit_scripts/Get-EndAuditAppinitdllsStatus.ps1)
+
+```powershell
+# Get-EndAuditAppinitdllsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: LoadAppInit_DLLs
+$RegVal = Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Windows" -Name "LoadAppInit_DLLs" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.LoadAppInit_DLLs -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-appinit-dlls-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-attachment-zone-md"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-attachment-zone-md-req-end-160-user-profile-preservation-of-attachment-zone-information-for-endpoints"></div>
+# [REQ-END-160] User Profile: Preservation of Attachment Zone Information for Endpoints
+
+<div id="08-endpoints-user-profile-configure-end-up-attachment-zone-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-attachment-zone-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments\SaveZoneInformation` = `2` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-attachment-zone-md-rationale"></div>
+## Rationale
+Ensures the Attachment Manager preserves the Zone.Identifier alternate data stream (ADS) marking files downloaded from untrusted web zones, enforcing SmartScreen check prompts.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-attachment-zone-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-attachment-zone-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-user-profile-configure-end-up-attachment-zone-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Navigate to: `User Configuration \ Administrative Templates \ Windows Components \ Attachment Manager`
+2. Configure the policy:
+   * **Policy**: `Do not preserve zone information in file attachments` -> Set to **Disabled** (which configures `SaveZoneInformation` = `2` to preserve zone information)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-attachment-zone-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditAttachmentzone.ps1](../implementation_scripts/Configure-EndAuditAttachmentzone.ps1)
+
+```powershell
+# Configure-EndAuditAttachmentzone.ps1
+Write-Host "Enforcing System Mitigation control: attachment-zone..." -ForegroundColor Cyan
+
+# Set Registry value: SaveZoneInformation
+if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments")) { New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Name "SaveZoneInformation" -Value 2 -Type DWord -Force
+Write-Host "    Enforced SaveZoneInformation = 2" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditAttachmentzoneStatus.ps1](../audit_scripts/Get-EndAuditAttachmentzoneStatus.ps1)
+
+```powershell
+# Get-EndAuditAttachmentzoneStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: SaveZoneInformation
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Attachments" -Name "SaveZoneInformation" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.SaveZoneInformation -ne 2) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-attachment-zone-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-game-dvr-md"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-game-dvr-md-req-end-161-user-profile-disable-windows-game-dvr-for-endpoints"></div>
+# [REQ-END-161] User Profile: Disable Windows Game DVR for Endpoints
+
+<div id="08-endpoints-user-profile-configure-end-up-game-dvr-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-game-dvr-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR\AllowGameDVR` = `0` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-game-dvr-md-rationale"></div>
+## Rationale
+Disabling Game DVR blocks background media recording agents, conserving local computing cycles and preventing administrative session leakage via broadcast APIs.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-game-dvr-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-game-dvr-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-user-profile-configure-end-up-game-dvr-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Navigate to: `Computer Configuration \ Administrative Templates \ Windows Components \ Windows Game Recording and Broadcasting`
+2. Configure the policy:
+   * **Policy**: `Enables or disables Windows Game Recording and Broadcasting` -> Set to **Disabled** (which configures `AllowGameDVR` = `0`)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-game-dvr-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditGamedvr.ps1](../implementation_scripts/Configure-EndAuditGamedvr.ps1)
+
+```powershell
+# Configure-EndAuditGamedvr.ps1
+Write-Host "Enforcing System Mitigation control: game-dvr..." -ForegroundColor Cyan
+
+# Set Registry value: AllowGameDVR
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -Value 0 -Type DWord -Force
+Write-Host "    Enforced AllowGameDVR = 0" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditGamedvrStatus.ps1](../audit_scripts/Get-EndAuditGamedvrStatus.ps1)
+
+```powershell
+# Get-EndAuditGamedvrStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: AllowGameDVR
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\GameDVR" -Name "AllowGameDVR" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.AllowGameDVR -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-game-dvr-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-ink-workspace-md"></div>
+
+<div id="08-endpoints-user-profile-configure-end-up-ink-workspace-md-req-end-162-user-profile-restrict-windows-ink-workspace-on-lock-screen-for-endpoints"></div>
+# [REQ-END-162] User Profile: Restrict Windows Ink Workspace on Lock Screen for Endpoints
+
+<div id="08-endpoints-user-profile-configure-end-up-ink-workspace-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-ink-workspace-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Registry Settings**:
+  * Registry: `HKLM\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace\AllowWindowsInkWorkspace` = `1` (DWord)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-ink-workspace-md-rationale"></div>
+## Rationale
+Disabling access to the Windows Ink Workspace on the lock screen prevents unauthorized physical users from invoking drawing tools, scripts, or apps without authenticating.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-ink-workspace-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-ink-workspace-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-user-profile-configure-end-up-ink-workspace-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Navigate to: `Computer Configuration \ Administrative Templates \ Windows Components \ Windows Ink Workspace`
+2. Configure the policy:
+   * **Policy**: `Allow Windows Ink Workspace` -> Set to **Enabled**
+   * **Action**: Choose **On, but disallow access above lock** (which configures `AllowWindowsInkWorkspace` = `1`)
+
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-ink-workspace-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditInkworkspace.ps1](../implementation_scripts/Configure-EndAuditInkworkspace.ps1)
+
+```powershell
+# Configure-EndAuditInkworkspace.ps1
+Write-Host "Enforcing System Mitigation control: ink-workspace..." -ForegroundColor Cyan
+
+# Set Registry value: AllowWindowsInkWorkspace
+if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace")) { New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Force | Out-Null }
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Name "AllowWindowsInkWorkspace" -Value 1 -Type DWord -Force
+Write-Host "    Enforced AllowWindowsInkWorkspace = 1" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditInkworkspaceStatus.ps1](../audit_scripts/Get-EndAuditInkworkspaceStatus.ps1)
+
+```powershell
+# Get-EndAuditInkworkspaceStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry value: AllowWindowsInkWorkspace
+$RegVal = Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace" -Name "AllowWindowsInkWorkspace" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.AllowWindowsInkWorkspace -ne 1) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-user-profile-configure-end-up-ink-workspace-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client security baselines
+* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
 
 
 <div style="page-break-before: always;"></div>
