@@ -26,7 +26,7 @@ Architectural choices must be made and established **before** implementing indiv
 * Secures AD trust relationships to prevent domain containment breaches.
 
 ### Architectural Requirements
-* **[REQ-ARCH-001 - Restrict Tier Logons](../01-architecture/restrict-tier-logons.md)**: Enforces GPO logon restrictions to isolate administrative tiers.
+* **[REQ-ARCH-001 - Implement Active Directory Administrative Tiering Model](../01-architecture/implement-administrative-tiering-model.md)**: Enforces GPO logon restrictions to isolate administrative tiers.
 * **[REQ-ARCH-002 - Restrict Administrative Management Protocols](../01-architecture/restrict-mgmt-protocols.md)**: Secures management access paths.
 * **[REQ-ARCH-003 - Audit Privileged Groups](../01-architecture/audit-privileged-groups.md)**: Enforces monitoring and strict controls on Tier 0 group memberships.
 * **[REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](../01-architecture/keep-functional-levels-up-to-date.md)**: Ensures modern AD security features are active.

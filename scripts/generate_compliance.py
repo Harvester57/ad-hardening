@@ -670,7 +670,7 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                             })
                                     
                 # Inject user rights for Restrict Tier Logons requirement
-                if 'restrict-tier-logons.md' in rel_path.lower():
+                if 'implement-administrative-tiering-model.md' in rel_path.lower():
                     t0_sids = ['S-1-5-21-.*-512', 'S-1-5-21-.*-519', 'S-1-5-21-.*-518']
                     user_rights['SeDenyInteractiveLogonRight'] = t0_sids
                     user_rights['SeDenyNetworkLogonRight'] = t0_sids

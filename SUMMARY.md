@@ -5,7 +5,7 @@
 ## Module 1: Architecture & Administrative Tiering
 * [Module 1: Architecture & Administrative Tiering](01-architecture/README.md)
     * [Tiering and Architecture Overview](01-architecture/tiering-and-architecture.md)
-    * [REQ-ARCH-001 - Restrict Tier Logons](01-architecture/restrict-tier-logons.md)
+    * [REQ-ARCH-001 - Implement Active Directory Administrative Tiering Model](01-architecture/implement-administrative-tiering-model.md)
     * [REQ-ARCH-002 - Restrict Administrative Management Protocols](01-architecture/restrict-mgmt-protocols.md)
     * [REQ-ARCH-003 - Audit Privileged Groups](01-architecture/audit-privileged-groups.md)
     * [REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](01-architecture/keep-functional-levels-up-to-date.md)

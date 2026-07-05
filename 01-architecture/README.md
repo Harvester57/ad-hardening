@@ -9,8 +9,8 @@ This directory contains the Active Directory Administrative Tiering Model defini
 
 ## Technical Hardening Controls
 
-1. **[REQ-ARCH-001 - Restrict Tier Logons](restrict-tier-logons.md)**
-   Enforces User Rights Assignment GPOs to block high-privilege administrators (Tier 0/1) from authenticating interactively or via network logon on lower-tier computers (Tier 1/2), preventing credential exposure in LSASS memory.
+1. **[REQ-ARCH-001 - Implement Active Directory Administrative Tiering Model](implement-administrative-tiering-model.md)**
+   Enforces User Rights Assignment GPOs to implement the Active Directory administrative tiering model by blocking high-privilege administrators (Tier 0/1) from authenticating interactively or via network logon on lower-tier computers (Tier 1/2), preventing credential exposure in LSASS memory.
 
 2. **[REQ-ARCH-002 - Restrict Administrative Management Protocols](restrict-mgmt-protocols.md)**
    Restricts inbound Remote Desktop (RDP) and Windows Remote Management (WinRM) administrative protocols to dedicated, secure administrative subnets and jump hosts.

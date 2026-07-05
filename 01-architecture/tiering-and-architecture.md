@@ -70,8 +70,8 @@ Managing a tiered environment requires strict adherence to operational routing p
 
 To enforce this theoretical architecture on Domain Controllers and client computers, you must configure the following technical controls:
 
-1. **[REQ-ARCH-001 - Restrict Tier Logons](restrict-tier-logons.md)**
-   Enforces User Rights Assignment GPOs to deny Tier 0 administrative accounts from logging on to Tier 1 and Tier 2 machines, and Tier 1 administrative accounts from logging on to Tier 2 machines.
+1. **[REQ-ARCH-001 - Implement Active Directory Administrative Tiering Model](implement-administrative-tiering-model.md)**
+   Enforces User Rights Assignment GPOs to implement the Active Directory administrative tiering model by denying Tier 0 administrative accounts from logging on to Tier 1 and Tier 2 machines, and Tier 1 administrative accounts from logging on to Tier 2 machines.
 
 2. **[REQ-ARCH-002 - Restrict Administrative Management Protocols](restrict-mgmt-protocols.md)**
    Enforces network-level restriction of RDP (TCP 3389) and WinRM (TCP 5985/5986) management traffic to specific administrative IP ranges and Jump Host IP addresses.

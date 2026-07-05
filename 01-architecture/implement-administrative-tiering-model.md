@@ -1,4 +1,4 @@
-# [REQ-ARCH-001] Restrict Tier Logons
+# [REQ-ARCH-001] Implement Active Directory Administrative Tiering Model
 
 ## Target Scope
 * **Applicable Systems**: Tier 1 member servers and Tier 2 client workstations.

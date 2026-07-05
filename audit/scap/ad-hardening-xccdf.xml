@@ -227,7 +227,7 @@
   <Group id="xccdf_org.adhardening.benchmarks_group_Module_1__Architecture___Administrative_Tiering">
     <title>Module 1: Architecture &amp; Administrative Tiering</title>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-001" severity="high" weight="10.0" selected="false">
-      <title>[REQ-ARCH-001] Restrict Tier Logons</title>
+      <title>[REQ-ARCH-001] Implement Active Directory Administrative Tiering Model</title>
       <description>
         <xhtml:p>
           <xhtml:strong>Target Scope:</xhtml:strong>
@@ -240,7 +240,7 @@
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
-          <xhtml:code>01-architecture/restrict-tier-logons.md</xhtml:code>
+          <xhtml:code>01-architecture/implement-administrative-tiering-model.md</xhtml:code>
         </xhtml:p>
       </description>
       <rationale>

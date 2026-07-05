@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 34ba3b9 | Generated: July 05, 2026</span>
+      <span>Commit: 16daf62 | Generated: July 05, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -198,8 +198,8 @@ This directory contains the Active Directory Administrative Tiering Model defini
 <div id="01-architecture-README-md-technical-hardening-controls"></div>
 ## Technical Hardening Controls
 
-1. **[REQ-ARCH-001 - Restrict Tier Logons](#01-architecture-restrict-tier-logons-md)**
-   Enforces User Rights Assignment GPOs to block high-privilege administrators (Tier 0/1) from authenticating interactively or via network logon on lower-tier computers (Tier 1/2), preventing credential exposure in LSASS memory.
+1. **[REQ-ARCH-001 - Implement Active Directory Administrative Tiering Model](#01-architecture-implement-administrative-tiering-model-md)**
+   Enforces User Rights Assignment GPOs to implement the Active Directory administrative tiering model by blocking high-privilege administrators (Tier 0/1) from authenticating interactively or via network logon on lower-tier computers (Tier 1/2), preventing credential exposure in LSASS memory.
 
 2. **[REQ-ARCH-002 - Restrict Administrative Management Protocols](#01-architecture-restrict-mgmt-protocols-md)**
    Restricts inbound Remote Desktop (RDP) and Windows Remote Management (WinRM) administrative protocols to dedicated, secure administrative subnets and jump hosts.
@@ -308,8 +308,8 @@ Managing a tiered environment requires strict adherence to operational routing p
 
 To enforce this theoretical architecture on Domain Controllers and client computers, you must configure the following technical controls:
 
-1. **[REQ-ARCH-001 - Restrict Tier Logons](#01-architecture-restrict-tier-logons-md)**
-   Enforces User Rights Assignment GPOs to deny Tier 0 administrative accounts from logging on to Tier 1 and Tier 2 machines, and Tier 1 administrative accounts from logging on to Tier 2 machines.
+1. **[REQ-ARCH-001 - Implement Active Directory Administrative Tiering Model](#01-architecture-implement-administrative-tiering-model-md)**
+   Enforces User Rights Assignment GPOs to implement the Active Directory administrative tiering model by denying Tier 0 administrative accounts from logging on to Tier 1 and Tier 2 machines, and Tier 1 administrative accounts from logging on to Tier 2 machines.
 
 2. **[REQ-ARCH-002 - Restrict Administrative Management Protocols](#01-architecture-restrict-mgmt-protocols-md)**
    Enforces network-level restriction of RDP (TCP 3389) and WinRM (TCP 5985/5986) management traffic to specific administrative IP ranges and Jump Host IP addresses.
@@ -320,19 +320,19 @@ To enforce this theoretical architecture on Domain Controllers and client comput
 
 <div style="page-break-before: always;"></div>
 
-<div id="01-architecture-restrict-tier-logons-md"></div>
+<div id="01-architecture-implement-administrative-tiering-model-md"></div>
 
-<div id="01-architecture-restrict-tier-logons-md-req-arch-001-restrict-tier-logons"></div>
-# [REQ-ARCH-001] Restrict Tier Logons
+<div id="01-architecture-implement-administrative-tiering-model-md-req-arch-001-implement-active-directory-administrative-tiering-model"></div>
+# [REQ-ARCH-001] Implement Active Directory Administrative Tiering Model
 
-<div id="01-architecture-restrict-tier-logons-md-target-scope"></div>
+<div id="01-architecture-implement-administrative-tiering-model-md-target-scope"></div>
 ## Target Scope
 * **Applicable Systems**: Tier 1 member servers and Tier 2 client workstations.
 * **Operating Systems**: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.
 
 ---
 
-<div id="01-architecture-restrict-tier-logons-md-implementation-details"></div>
+<div id="01-architecture-implement-administrative-tiering-model-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
@@ -340,7 +340,7 @@ To enforce this theoretical architecture on Domain Controllers and client comput
 
 ---
 
-<div id="01-architecture-restrict-tier-logons-md-rationale"></div>
+<div id="01-architecture-implement-administrative-tiering-model-md-rationale"></div>
 ## Rationale
 To successfully enforce the administrative tiering model, the boundaries must be programmatically restricted. Active Directory administrative groups (such as `Domain Admins`, `Enterprise Admins`, and `Schema Admins`) must be explicitly blocked from authenticating to lower-tier systems. 
 
@@ -350,22 +350,22 @@ By configuring Group Policy objects to explicitly deny logon rights (interactive
 
 ---
 
-<div id="01-architecture-restrict-tier-logons-md-legacy-impact-compatibility"></div>
+<div id="01-architecture-implement-administrative-tiering-model-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
 * **Administration Access**: Technicians cannot log on to workstations or member servers using Domain Admin accounts. They must use dedicated administrative credentials assigned to that specific tier (e.g., `a2-florian` for workstation support) or use local administrator accounts managed by LAPS.
 * **Remote Support Tools**: Automated support tools or scripts that authenticate using Domain Admin accounts to query local client registry hives or modify system files will be blocked. These tools must be reconfigured to authenticate using dedicated service accounts or Tier 1/2 administrative accounts.
 
 ---
 
-<div id="01-architecture-restrict-tier-logons-md-implementation-steps"></div>
+<div id="01-architecture-implement-administrative-tiering-model-md-implementation-steps"></div>
 ## Implementation Steps
 
-<div id="01-architecture-restrict-tier-logons-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+<div id="01-architecture-implement-administrative-tiering-model-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 To prevent Tier 0 credentials from being exposed on Tier 1 and Tier 2 systems, configure the logon restrictions using GPOs linked to the Tier 1 (Member Servers) and Tier 2 (Workstations) OUs.
 
-<div id="01-architecture-restrict-tier-logons-md-1-configure-tier-1-logon-restrictions-gpo"></div>
+<div id="01-architecture-implement-administrative-tiering-model-md-1-configure-tier-1-logon-restrictions-gpo"></div>
 #### 1. Configure Tier 1 Logon Restrictions GPO
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create a GPO linked to the **Tier 1 Member Servers** OU (e.g., `GPO_Restrictions_Tier1`).
@@ -378,7 +378,7 @@ To prevent Tier 0 credentials from being exposed on Tier 1 and Tier 2 systems, c
    * **Deny log on locally**: Add `Domain Admins`, `Enterprise Admins`, `Schema Admins`.
    * **Deny log on through Remote Desktop Services**: Add `Domain Admins`, `Enterprise Admins`, `Schema Admins`.
 
-<div id="01-architecture-restrict-tier-logons-md-2-configure-tier-2-logon-restrictions-gpo"></div>
+<div id="01-architecture-implement-administrative-tiering-model-md-2-configure-tier-2-logon-restrictions-gpo"></div>
 #### 2. Configure Tier 2 Logon Restrictions GPO
 1. Create a GPO linked to the **Tier 2 Workstations** OU (e.g., `GPO_Restrictions_Tier2`).
 2. Navigate to the same path:
@@ -392,7 +392,7 @@ To prevent Tier 0 credentials from being exposed on Tier 1 and Tier 2 systems, c
 
 ---
 
-<div id="01-architecture-restrict-tier-logons-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+<div id="01-architecture-implement-administrative-tiering-model-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
 Use this script to configure local security database files via `secedit` to deny specified administrative groups from logging on locally, over the network, or via Remote Desktop.
@@ -530,7 +530,7 @@ if (Test-Path $secConfigPath) { Remove-Item $secConfigPath -Force }
 
 ---
 
-<div id="01-architecture-restrict-tier-logons-md-sources-compliance-references"></div>
+<div id="01-architecture-implement-administrative-tiering-model-md-sources-compliance-references"></div>
 ## 🔗 Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations R1, R2, and R3 (Administrative isolation and account restriction rules)
 * **CIS Microsoft Windows Server 2016 Benchmark**: Section 18.2 (User Rights Assignment)
@@ -37441,7 +37441,7 @@ Architectural choices must be made and established **before** implementing indiv
 
 <div id="roadmap-implementation-plan-md-architectural-requirements"></div>
 ### Architectural Requirements
-* **[REQ-ARCH-001 - Restrict Tier Logons](#01-architecture-restrict-tier-logons-md)**: Enforces GPO logon restrictions to isolate administrative tiers.
+* **[REQ-ARCH-001 - Implement Active Directory Administrative Tiering Model](#01-architecture-implement-administrative-tiering-model-md)**: Enforces GPO logon restrictions to isolate administrative tiers.
 * **[REQ-ARCH-002 - Restrict Administrative Management Protocols](#01-architecture-restrict-mgmt-protocols-md)**: Secures management access paths.
 * **[REQ-ARCH-003 - Audit Privileged Groups](#01-architecture-audit-privileged-groups-md)**: Enforces monitoring and strict controls on Tier 0 group memberships.
 * **[REQ-ARCH-004 - Keep Domain and Forest Functional Levels Up-To-Date](#01-architecture-keep-functional-levels-up-to-date-md)**: Ensures modern AD security features are active.
@@ -37799,9 +37799,9 @@ This document maps the recommendations of the **ANSSI (French National Agency fo
 
 | ID | Recommendation Description | Category | Status | Mapped Technical Control(s) |
 | :--- | :--- | :--- | :--- | :--- |
-| **R1** | Define and implement a logical partitioning model (Tiering) | Tiering / Admin Boundaries | **Covered** | [REQ-ARCH-001](#01-architecture-restrict-tier-logons-md), [REQ-ARCH-002](#01-architecture-restrict-mgmt-protocols-md), [REQ-ARCH-003](#01-architecture-audit-privileged-groups-md) |
-| **R2** | Limit and control administrative privileges | Account Restrictions | **Covered** | [REQ-ARCH-001](#01-architecture-restrict-tier-logons-md), [REQ-END-006](#08-endpoints-restrict-local-admins-md), [REQ-PAW-003](#07-paws-restrict-local-administrators-md) |
-| **R3** | Use dedicated administrative accounts and secure stations | PAW & Admin Accounts | **Covered** | [REQ-ARCH-001](#01-architecture-restrict-tier-logons-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-PAW-002](#07-paws-enable-lsa-protection-md), [REQ-PAW-003](#07-paws-restrict-local-administrators-md), [REQ-PAW-004](#07-paws-enable-bitlocker-md), [REQ-PAW-005](#07-paws-configure-uefi-security-md), [REQ-PAW-006](#07-paws-enable-hardware-virtualization-and-dma-protection-md), [REQ-PAW-007](#07-paws-disable-wpbt-md), [REQ-PAW-008](#07-paws-defender-antivirus-md), [REQ-PAW-009](#07-paws-configure-user-rights-assignments-md), [REQ-PAW-010](#07-paws-enable-vbs-credential-guard-md), [REQ-PAW-011](#07-paws-harden-dma-and-physical-security-md), [REQ-PAW-012](#07-paws-enable-wdac-driver-blocklist-md), [REQ-PAW-013](#07-paws-configure-account-policies-md) |
+| **R1** | Define and implement a logical partitioning model (Tiering) | Tiering / Admin Boundaries | **Covered** | [REQ-ARCH-001](#01-architecture-implement-administrative-tiering-model-md), [REQ-ARCH-002](#01-architecture-restrict-mgmt-protocols-md), [REQ-ARCH-003](#01-architecture-audit-privileged-groups-md) |
+| **R2** | Limit and control administrative privileges | Account Restrictions | **Covered** | [REQ-ARCH-001](#01-architecture-implement-administrative-tiering-model-md), [REQ-END-006](#08-endpoints-restrict-local-admins-md), [REQ-PAW-003](#07-paws-restrict-local-administrators-md) |
+| **R3** | Use dedicated administrative accounts and secure stations | PAW & Admin Accounts | **Covered** | [REQ-ARCH-001](#01-architecture-implement-administrative-tiering-model-md), [REQ-PAW-001](#07-paws-configure-applocker-policies-md), [REQ-PAW-002](#07-paws-enable-lsa-protection-md), [REQ-PAW-003](#07-paws-restrict-local-administrators-md), [REQ-PAW-004](#07-paws-enable-bitlocker-md), [REQ-PAW-005](#07-paws-configure-uefi-security-md), [REQ-PAW-006](#07-paws-enable-hardware-virtualization-and-dma-protection-md), [REQ-PAW-007](#07-paws-disable-wpbt-md), [REQ-PAW-008](#07-paws-defender-antivirus-md), [REQ-PAW-009](#07-paws-configure-user-rights-assignments-md), [REQ-PAW-010](#07-paws-enable-vbs-credential-guard-md), [REQ-PAW-011](#07-paws-harden-dma-and-physical-security-md), [REQ-PAW-012](#07-paws-enable-wdac-driver-blocklist-md), [REQ-PAW-013](#07-paws-configure-account-policies-md) |
 | **R4** | Minimize services and software on Domain Controllers | Service Minimization | **Covered** | [REQ-DC-008](#02-domain-controllers-disable-print-spooler-md), [REQ-DC-012](#02-domain-controllers-disable-unnecessary-services-md) |
 | **R5** | Keep Forest and Domain functional levels up-to-date | Functional Levels | **Covered** | [REQ-ARCH-004](#01-architecture-keep-functional-levels-up-to-date-md) |
 | **R6** | Restrict membership of default administrative groups | Privileged Group Audit | **Covered** | [REQ-ARCH-003](#01-architecture-audit-privileged-groups-md), [REQ-ID-010](#03-identities-services-restrict-schema-admins-md) |
@@ -37866,7 +37866,7 @@ This document maps the **CIS Benchmarks** sections for Windows Server (2016, 201
 | **1.1** | Password Policy (Complexity, Length, Age, History) | Account Policies | **Covered** | [REQ-ID-001](#03-identities-services-enforce-fgpp-md), [REQ-PAW-013](#07-paws-configure-account-policies-md), [REQ-END-018](#08-endpoints-configure-account-policies-md) |
 | **1.2** | Account Lockout Policy (Threshold, Duration) | Account Policies | **Covered** | [REQ-PAW-013](#07-paws-configure-account-policies-md), [REQ-END-018](#08-endpoints-configure-account-policies-md) |
 | **1.3** | Kerberos Policy (Ticket Lifetimes, Clock Tolerance) | Account Policies | **Covered** | [REQ-END-018](#08-endpoints-configure-account-policies-md) |
-| **2.2** | User Rights Assignment (Deny logons, Allow logons, DC Operator Restrictions) | Local Policies | **Covered** | [REQ-ARCH-001](#01-architecture-restrict-tier-logons-md), [REQ-ID-007](#03-identities-services-restrict-service-account-logons-md), [REQ-DC-023](#02-domain-controllers-configure-user-rights-assignments-md), [REQ-PAW-009](#07-paws-configure-user-rights-assignments-md), [REQ-END-016](#08-endpoints-configure-user-rights-assignments-md) |
+| **2.2** | User Rights Assignment (Deny logons, Allow logons, DC Operator Restrictions) | Local Policies | **Covered** | [REQ-ARCH-001](#01-architecture-implement-administrative-tiering-model-md), [REQ-ID-007](#03-identities-services-restrict-service-account-logons-md), [REQ-DC-023](#02-domain-controllers-configure-user-rights-assignments-md), [REQ-PAW-009](#07-paws-configure-user-rights-assignments-md), [REQ-END-016](#08-endpoints-configure-user-rights-assignments-md) |
 | **2.3** | Security Options (LSA, LAN Manager, LDAP Signing, SMB Signing) | Local Policies | **Covered** | [REQ-DC-003](#02-domain-controllers-disable-ntlmv1-md), [REQ-DC-004](#02-domain-controllers-enforce-ldap-signing-md), [REQ-DC-005](#02-domain-controllers-enforce-ldap-channel-binding-md), [REQ-DC-006](#02-domain-controllers-enable-lsa-protection-md), [REQ-DC-009](#02-domain-controllers-enforce-smb-signing-md), [REQ-DC-010](#02-domain-controllers-restrict-kerberos-encryption-md), [REQ-DC-011](#02-domain-controllers-restrict-ntds-sam-api-md), [REQ-DC-014](#02-domain-controllers-restrict-ntlm-md), [REQ-DC-024](#02-domain-controllers-configure-dsheuristics-md), [REQ-DC-025](#02-domain-controllers-configure-security-options-md) |
 | **9.1** | Windows Defender Firewall Profiles (Domain, Private, Public) | Firewall | **Covered** | [REQ-NET-001](#04-network-firewall-configure-ad-port-matrix-md), [REQ-NET-008](#04-network-firewall-configure-firewall-logging-md), [REQ-END-022](#08-endpoints-configure-windows-firewall-md) |
 | **18.2** | Local Administrator Password Solution (LAPS) settings | Administrative Templates | **Covered** | [REQ-ID-002](#03-identities-services-enable-laps-md) |
