@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 5c16bcd | Generated: July 04, 2026</span>
+      <span>Commit: 3524f21 | Generated: July 05, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -39,7 +39,7 @@ pdf_options:
     <li>Tier 2 Client Workstations: Windows 10 and above</li>
   </ul>
   <hr>
-  <p><em>Generated dynamically on: July 04, 2026</em></p>
+  <p><em>Generated dynamically on: July 05, 2026</em></p>
 </div>
 
 <div id="README-md"></div>
@@ -4808,24 +4808,73 @@ mstsc.exe /RestrictedAdmin
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection
-  * Computer Configuration\Preferences\Windows Settings\Environment
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR
-  * HKLM\SOFTWARE\Microsoft\Windows Defender\Features
-  * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
-  * HKLM\SOFTWARE\Microsoft\AMSI
-    * FeatureBits = 2 (REG_DWORD)
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet
-    * SpynetReporting = 0 (REG_DWORD)
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Reporting
-    * DisableGenericRePorts = 1 (REG_DWORD)
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection
-    * BruteForceProtectionAggressiveness = 1 (REG_DWORD)
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Remote Encryption Protection
-    * RemoteEncryptionProtectionAggressiveness = 1 (REG_DWORD)
+  * **GPO Paths**:
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus`
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
+    * `Computer Configuration\Preferences\Windows Settings\Environment`
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender`
+      * `DisableAntiSpyware` = `0` (REG_DWORD)
+      * `PUAProtection` = `1` (REG_DWORD)
+      * `DisableLocalAdminMerge` = `1` (REG_DWORD)
+      * `HideExclusionsFromLocalAdmins` = `1` (REG_DWORD)
+      * `RandomizeScheduleTaskTimes` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions`
+      * `DisableLocalAdminConfiguration` = `1` (REG_DWORD)
+      * `DisableAutoExclusions` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Features`
+      * `PassiveRemediation` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\Network Protection`
+      * `AllowNetworkProtectionOnWinServer` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine`
+      * `EnableFileHashComputation` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\NIS`
+      * `EnableConvertWarnToBlock` = `1` (REG_DWORD)
+      * `AllowSwitchToAsyncInspection` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection`
+      * `OobeEnableRtpAndSigUpdate` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Reporting`
+      * `EnableDynamicSignatureDroppedEventReporting` = `1` (REG_DWORD)
+      * `DisableGenericRePorts` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet`
+      * `SpynetReporting` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection`
+      * `BruteForceProtectionAggressiveness` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Remote Encryption Protection`
+      * `RemoteEncryptionProtectionAggressiveness` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Scan`
+      * `QuickScanIncludeExclusions` = `1` (REG_DWORD)
+      * `DisablePackedExeScanning` = `0` (REG_DWORD)
+      * `ScheduleDay` = `0` (REG_DWORD)
+      * `DisableEmailScanning` = `0` (REG_DWORD)
+      * `DisableHeuristics` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates`
+      * `ASSignatureDue` = `7` (REG_DWORD)
+      * `AVSignatureDue` = `7` (REG_DWORD)
+      * `ScheduleDay` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules`
+      * `56a863a9-875e-4185-98a7-b882c64b5ce5` = `1` (REG_SZ)
+      * `9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2` = `1` (REG_SZ)
+      * `5beb7efe-fd9a-4556-801d-275e5ffc04cc` = `1` (REG_SZ)
+      * `e6db77e5-3df2-4cf1-b95a-636979351e5b` = `1` (REG_SZ)
+      * `d1e49aac-8f56-4280-b9ba-993a6d77406c` = `2` (REG_SZ)
+      * `c1db55ab-c21a-4637-bb3f-a12568109d35` = `1` (REG_SZ)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Threats`
+      * `Threats_ThreatSeverityDefaultAction` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction`
+      * `1` = `2` (REG_DWORD)
+      * `2` = `2` (REG_DWORD)
+      * `4` = `2` (REG_DWORD)
+      * `5` = `2` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Family options`
+      * `UILockdown` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Microsoft\Windows Defender\Features`
+      * `TamperProtection` = `5` (REG_DWORD)
+    * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment`
+      * `MP_FORCE_USE_SANDBOX` = `1` (REG_SZ)
+    * `HKLM\SOFTWARE\Microsoft\AMSI`
+      * `FeatureBits` = `2` (REG_DWORD)
 
 ---
 
@@ -8007,7 +8056,7 @@ if ($null -eq $Value -or $Value.$ValueName -ne 1) {
   * **Registry Locations**:
     * `HKLM\System\CurrentControlSet\Services\W32Time\Parameters` -> `Type` = `"NTP"`
     * `HKLM\System\CurrentControlSet\Services\W32Time\Config` -> `AnnounceFlags` = `5` (REG_DWORD)
-    * `HKLM\System\CurrentControlSet\Services\W32Time\Parameters` -> `NtpServer` = `"time.windows.com,0x8"` (REG_SZ)
+    * `HKLM\System\CurrentControlSet\Services\W32Time\Parameters` -> `NtpServer` = `"[NtpServerAddress],0x8"` (REG_SZ)
 
 ---
 
@@ -20679,16 +20728,76 @@ if ($RegistryValue) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection
-  * Computer Configuration\Preferences\Windows Settings\Environment
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR
-  * HKLM\SOFTWARE\Microsoft\Windows Defender\Features
-  * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
-  * HKLM\SOFTWARE\Microsoft\AMSI
-    * FeatureBits = 2 (REG_DWORD)
+  * **GPO Paths**:
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus`
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
+    * `Computer Configuration\Preferences\Windows Settings\Environment`
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender`
+      * `DisableAntiSpyware` = `0` (REG_DWORD)
+      * `PUAProtection` = `1` (REG_DWORD)
+      * `DisableLocalAdminMerge` = `1` (REG_DWORD)
+      * `HideExclusionsFromLocalAdmins` = `1` (REG_DWORD)
+      * `RandomizeScheduleTaskTimes` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions`
+      * `DisableLocalAdminConfiguration` = `1` (REG_DWORD)
+      * `DisableAutoExclusions` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Features`
+      * `PassiveRemediation` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\Network Protection`
+      * `AllowNetworkProtectionOnWinServer` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine`
+      * `EnableFileHashComputation` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\NIS`
+      * `EnableConvertWarnToBlock` = `1` (REG_DWORD)
+      * `AllowSwitchToAsyncInspection` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection`
+      * `OobeEnableRtpAndSigUpdate` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Reporting`
+      * `EnableDynamicSignatureDroppedEventReporting` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Scan`
+      * `QuickScanIncludeExclusions` = `1` (REG_DWORD)
+      * `DisablePackedExeScanning` = `0` (REG_DWORD)
+      * `ScheduleDay` = `0` (REG_DWORD)
+      * `DisableEmailScanning` = `0` (REG_DWORD)
+      * `DisableHeuristics` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates`
+      * `ASSignatureDue` = `7` (REG_DWORD)
+      * `AVSignatureDue` = `7` (REG_DWORD)
+      * `ScheduleDay` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules`
+      * `56a863a9-875e-4185-98a7-b882c64b5ce5` = `1` (REG_SZ)
+      * `7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c` = `1` (REG_SZ)
+      * `d4f940ab-401b-4efc-aadc-ad5f3c50688a` = `1` (REG_SZ)
+      * `9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2` = `1` (REG_SZ)
+      * `be9ba2d9-53ea-4cdc-84e5-9b1eeee46550` = `1` (REG_SZ)
+      * `01443614-cd74-433a-b99e-2ecdc07bfc25` = `1` (REG_SZ)
+      * `5beb7efe-fd9a-4556-801d-275e5ffc04cc` = `1` (REG_SZ)
+      * `d3e037e1-3eb8-44c8-a917-57927947596d` = `1` (REG_SZ)
+      * `3b576869-a4ec-4529-8536-b80a7769e899` = `1` (REG_SZ)
+      * `75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84` = `1` (REG_SZ)
+      * `26190899-1602-49e8-8b27-eb1d0a1ce869` = `1` (REG_SZ)
+      * `e6db77e5-3df2-4cf1-b95a-636979351e5b` = `1` (REG_SZ)
+      * `d1e49aac-8f56-4280-b9ba-993a6d77406c` = `1` (REG_SZ)
+      * `b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4` = `1` (REG_SZ)
+      * `92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b` = `1` (REG_SZ)
+      * `c1db55ab-c21a-4637-bb3f-a12568109d35` = `1` (REG_SZ)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Threats`
+      * `Threats_ThreatSeverityDefaultAction` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction`
+      * `1` = `2` (REG_DWORD)
+      * `2` = `2` (REG_DWORD)
+      * `4` = `2` (REG_DWORD)
+      * `5` = `2` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Family options`
+      * `UILockdown` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Microsoft\Windows Defender\Features`
+      * `TamperProtection` = `5` (REG_DWORD)
+    * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment`
+      * `MP_FORCE_USE_SANDBOX` = `1` (REG_SZ)
+    * `HKLM\SOFTWARE\Microsoft\AMSI`
+      * `FeatureBits` = `2` (REG_DWORD)
 
 ---
 
@@ -26286,7 +26395,7 @@ Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feed
 if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main")) {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Force | Out-Null
 }
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Name "NotifyDisableIEOptions" -Value 1 -Type DWord
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Name "NotifyDisableIEOptions" -Value 0 -Type DWord
 
 # Key Path: HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9
 if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9")) {
@@ -26657,6 +26766,7 @@ Test-RegValue -RecNum "18.10.26.4.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Mi
 Test-RegValue -RecNum "18.10.26.4.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -ValueName "MaxSize" -ExpectedValue 32768
 Test-RegValue -RecNum "18.10.29.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Explorer" -ValueName "DisableMotWOnInsecurePathCopy" -ExpectedValue 0
 Test-RegValue -RecNum "18.10.29.5" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -ValueName "PreXPSP2ShellProtocolBehavior" -ExpectedValue 0
+Test-RegValue -RecNum "18.10.35.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -ValueName "NotifyDisableIEOptions" -ExpectedValue 0
 Test-RegValue -RecNum "18.10.58.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -ValueName "DisableEnclosureDownload" -ExpectedValue 1
 Test-RegValue -RecNum "18.10.58.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -ValueName "AllowBasicAuthInClear" -ExpectedValue 0
 Test-RegValue -RecNum "18.10.43.11.1.1.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -ValueName "BruteForceProtectionConfiguredState" -ExpectedValue 2
@@ -33213,6 +33323,9 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-configure-exploit-protection-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Paths**:
     * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Exploit Guard\Exploit Protection` -> **Use a common set of exploit protection settings**
@@ -34932,7 +35045,7 @@ Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feed
 if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main")) {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Force | Out-Null
 }
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Name "NotifyDisableIEOptions" -Value 1 -Type DWord
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Name "NotifyDisableIEOptions" -Value 0 -Type DWord
 
 # Key Path: HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9
 if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9")) {
@@ -35303,7 +35416,7 @@ Test-RegValue -RecNum "18.10.26.4.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Mi
 Test-RegValue -RecNum "18.10.26.4.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -ValueName "MaxSize" -ExpectedValue 32768
 Test-RegValue -RecNum "18.10.29.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Explorer" -ValueName "DisableMotWOnInsecurePathCopy" -ExpectedValue 0
 Test-RegValue -RecNum "18.10.29.5" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -ValueName "PreXPSP2ShellProtocolBehavior" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.35.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -ValueName "NotifyDisableIEOptions" -ExpectedValue 1
+Test-RegValue -RecNum "18.10.35.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -ValueName "NotifyDisableIEOptions" -ExpectedValue 0
 Test-RegValue -RecNum "18.10.43.11.1.1.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -ValueName "BruteForceProtectionConfiguredState" -ExpectedValue 2
 Test-RegValue -RecNum "18.10.43.13.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -ValueName "DisablePackedExeScanning" -ExpectedValue 0
 Test-RegValue -RecNum "18.10.58.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -ValueName "DisableEnclosureDownload" -ExpectedValue 1

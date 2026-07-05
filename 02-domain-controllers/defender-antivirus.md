@@ -9,24 +9,73 @@
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction
-  * Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection
-  * Computer Configuration\Preferences\Windows Settings\Environment
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR
-  * HKLM\SOFTWARE\Microsoft\Windows Defender\Features
-  * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment
-  * HKLM\SOFTWARE\Microsoft\AMSI
-    * FeatureBits = 2 (REG_DWORD)
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet
-    * SpynetReporting = 0 (REG_DWORD)
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Reporting
-    * DisableGenericRePorts = 1 (REG_DWORD)
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection
-    * BruteForceProtectionAggressiveness = 1 (REG_DWORD)
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Remote Encryption Protection
-    * RemoteEncryptionProtectionAggressiveness = 1 (REG_DWORD)
+  * **GPO Paths**:
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus`
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Antivirus\Windows Defender Exploit Guard\Attack Surface Reduction`
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Security\Tamper Protection`
+    * `Computer Configuration\Preferences\Windows Settings\Environment`
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender`
+      * `DisableAntiSpyware` = `0` (REG_DWORD)
+      * `PUAProtection` = `1` (REG_DWORD)
+      * `DisableLocalAdminMerge` = `1` (REG_DWORD)
+      * `HideExclusionsFromLocalAdmins` = `1` (REG_DWORD)
+      * `RandomizeScheduleTaskTimes` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Exclusions`
+      * `DisableLocalAdminConfiguration` = `1` (REG_DWORD)
+      * `DisableAutoExclusions` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Features`
+      * `PassiveRemediation` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\Network Protection`
+      * `AllowNetworkProtectionOnWinServer` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine`
+      * `EnableFileHashComputation` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\NIS`
+      * `EnableConvertWarnToBlock` = `1` (REG_DWORD)
+      * `AllowSwitchToAsyncInspection` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection`
+      * `OobeEnableRtpAndSigUpdate` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Reporting`
+      * `EnableDynamicSignatureDroppedEventReporting` = `1` (REG_DWORD)
+      * `DisableGenericRePorts` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet`
+      * `SpynetReporting` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection`
+      * `BruteForceProtectionAggressiveness` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Remote Encryption Protection`
+      * `RemoteEncryptionProtectionAggressiveness` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Scan`
+      * `QuickScanIncludeExclusions` = `1` (REG_DWORD)
+      * `DisablePackedExeScanning` = `0` (REG_DWORD)
+      * `ScheduleDay` = `0` (REG_DWORD)
+      * `DisableEmailScanning` = `0` (REG_DWORD)
+      * `DisableHeuristics` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates`
+      * `ASSignatureDue` = `7` (REG_DWORD)
+      * `AVSignatureDue` = `7` (REG_DWORD)
+      * `ScheduleDay` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules`
+      * `56a863a9-875e-4185-98a7-b882c64b5ce5` = `1` (REG_SZ)
+      * `9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2` = `1` (REG_SZ)
+      * `5beb7efe-fd9a-4556-801d-275e5ffc04cc` = `1` (REG_SZ)
+      * `e6db77e5-3df2-4cf1-b95a-636979351e5b` = `1` (REG_SZ)
+      * `d1e49aac-8f56-4280-b9ba-993a6d77406c` = `2` (REG_SZ)
+      * `c1db55ab-c21a-4637-bb3f-a12568109d35` = `1` (REG_SZ)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Threats`
+      * `Threats_ThreatSeverityDefaultAction` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Threats\ThreatSeverityDefaultAction`
+      * `1` = `2` (REG_DWORD)
+      * `2` = `2` (REG_DWORD)
+      * `4` = `2` (REG_DWORD)
+      * `5` = `2` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Family options`
+      * `UILockdown` = `1` (REG_DWORD)
+    * `HKLM\SOFTWARE\Microsoft\Windows Defender\Features`
+      * `TamperProtection` = `5` (REG_DWORD)
+    * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment`
+      * `MP_FORCE_USE_SANDBOX` = `1` (REG_SZ)
+    * `HKLM\SOFTWARE\Microsoft\AMSI`
+      * `FeatureBits` = `2` (REG_DWORD)
 
 ---
 

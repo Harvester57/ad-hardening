@@ -202,13 +202,24 @@ def parse_ps1_for_registry_and_services(script_content):
     registry_checks = []
     service_checks = []
     
-    # 1. Extract variables representing registry paths
+    # 1. Extract variables representing registry paths and values
     var_defs = {}
+    val_defs = {}
+    
+    # Path variables (usually HKLM/HKCU)
     var_matches = re.finditer(r'\$([a-zA-Z0-9_]+)\s*=\s*["\']((?:HKLM|HKCU|HKEY_LOCAL_MACHINE|HKEY_CURRENT_USER)[^"\']+)["\']', script_content, re.IGNORECASE)
     for m in var_matches:
         var_name = m.group(1)
         val_path = m.group(2).replace(':', '')
         var_defs[var_name] = val_path
+        
+    # Value variables (strings or integers)
+    val_matches = re.finditer(r'\$([a-zA-Z0-9_]+)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([0-9]+))', script_content)
+    for m in val_matches:
+        var_name = m.group(1)
+        val_value = m.group(2) if m.group(2) is not None else (m.group(3) if m.group(3) is not None else m.group(4))
+        if val_value is not None:
+            val_defs[var_name] = val_value
         
     # 2. Extract Set-ItemProperty / New-ItemProperty calls
     set_prop_pattern = r'(?:Set-ItemProperty|New-ItemProperty)\s+-Path\s+(\$[a-zA-Z0-9_]+|"[^"]+"|\'[^\']+\')\s+-Name\s+("[^"]+"|\'[^\']+\'|[a-zA-Z0-9_]+)\s+-Value\s+("[^"]+"|\'[^\']+\'|[a-zA-Z0-9_]+|[0-9]+|\$[a-zA-Z0-9_]+)'
@@ -223,6 +234,10 @@ def parse_ps1_for_registry_and_services(script_content):
             path = var_defs.get(var_name, "")
         else:
             path = path_raw.strip('"\'').replace(':', '')
+            
+        if value_raw.startswith('$'):
+            var_name = value_raw[1:]
+            value_raw = val_defs.get(var_name, value_raw)
             
         if path and name_raw:
             line_start = script_content.rfind('\n', 0, m.start()) + 1
@@ -246,13 +261,13 @@ def parse_ps1_for_registry_and_services(script_content):
                     vtype = "REG_SZ"
                     
             chk = normalize_reg_check(path, name_raw, vtype, value_raw)
-            if not any(c['key'] == chk['key'] and c['name'] == chk['name'] for c in registry_checks):
+            if not any(c['key'] == chk['key'] and c['name'] == chk['name'] and c['hive'] == chk['hive'] for c in registry_checks):
                 registry_checks.append(chk)
             
     # 3. Extract custom helper functions
     custom_helpers = [('Set-RegDWord', 'REG_DWORD'), ('Set-RegString', 'REG_SZ'), ('Set-RegMultiString', 'REG_MULTI_SZ')]
     for helper_name, vtype in custom_helpers:
-        helper_pattern = rf'{helper_name}\s+("[^"]+"|\'[^\']+\'|\$[a-zA-Z0-9_]+)\s+("[^"]+"|\'[^\']+\')\s+("[^"]+"|\'[^\']+\'|[a-zA-Z0-9_]+|[0-9]+)'
+        helper_pattern = rf'{helper_name}\s+("[^"]+"|\'[^\']+\'|\$[a-zA-Z0-9_]+)\s+("[^"]+"|\'[^\']+\')\s+("[^"]+"|\'[^\']+\'|\$[a-zA-Z0-9_]+|[a-zA-Z0-9_]+|[0-9]+)'
         for m in re.finditer(helper_pattern, script_content, re.IGNORECASE):
             path_raw = m.group(1).strip()
             name_raw = m.group(2).strip().strip('"\'')
@@ -265,9 +280,13 @@ def parse_ps1_for_registry_and_services(script_content):
             else:
                 path = path_raw.strip('"\'').replace(':', '')
                 
+            if value_raw.startswith('$'):
+                var_name = value_raw[1:]
+                value_raw = val_defs.get(var_name, value_raw)
+                
             if path and name_raw:
                 chk = normalize_reg_check(path, name_raw, vtype, value_raw)
-                if not any(c['key'] == chk['key'] and c['name'] == chk['name'] for c in registry_checks):
+                if not any(c['key'] == chk['key'] and c['name'] == chk['name'] and c['hive'] == chk['hive'] for c in registry_checks):
                     registry_checks.append(chk)
                 
     # 4. Extract Set-Service calls
@@ -428,7 +447,7 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                                 'start_type': svc_start
                             })
                     else:
-                        if not any(c['key'] == key and c['name'] == name for c in registry_checks):
+                        if not any(c['key'] == key and c['name'] == name and c['hive'] == chk['hive'] for c in registry_checks):
                             registry_checks.append(chk)
                 
                 # 1. First format (Key Path, Value Name, Value Type, Value Data list)
@@ -494,11 +513,24 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                         current_key = path_match.group(1).strip()
                         
                     if current_key:
-                        val_match = re.search(r'`?([^`=\s]+)`?\s*=\s*`?([^`\s]+)`?(?:\s*\(([^)]+)\))?', line_strip)
+                        val_match = re.search(r'`?([^`=\s]+)`?\s*=\s*(.+)', line_strip)
                         if val_match:
                             name = val_match.group(1).strip()
-                            val = val_match.group(2).strip()
-                            vtype = val_match.group(3) if val_match.group(3) else "UNKNOWN"
+                            val_and_type = val_match.group(2).strip()
+                            type_match = re.search(r'\s*\((REG_[A-Z0-9_]+|DWORD|SZ|BINARY|MULTI_SZ|UNKNOWN)[^)]*\)\s*$', val_and_type, re.IGNORECASE)
+                            if type_match:
+                                vtype = type_match.group(1)
+                                val_part = val_and_type[:type_match.start()].strip()
+                            else:
+                                vtype = "UNKNOWN"
+                                val_part = val_and_type
+                            if val_part.startswith('`') and val_part.endswith('`'):
+                                val_part = val_part[1:-1].strip()
+                            if val_part.startswith('"') and val_part.endswith('"'):
+                                val_part = val_part[1:-1].strip()
+                            elif val_part.startswith("'") and val_part.endswith("'"):
+                                val_part = val_part[1:-1].strip()
+                            val = val_part
                             
                             if '\\' not in name and '/' not in name and len(name) < 100 and name.lower() not in ['path', 'key path', 'value name', 'value type', 'value data', 'registry location']:
                                 name_upper = name.upper()
@@ -1125,7 +1157,13 @@ def generate_oval(requirements, output_path):
                 hive_el = ET.SubElement(obj_el, w_tag('hive'))
                 hive_el.text = chk['hive']
                 key_el = ET.SubElement(obj_el, w_tag('key'))
-                key_el.text = chk['key']
+                key_val = chk['key']
+                if '.*' in key_val or '<' in key_val or '?' in key_val:
+                    key_val_regex = key_val.replace('<InterfaceKey>', '.*').replace('<', '.*').replace('>', '.*')
+                    key_el.set('operation', 'pattern match')
+                    key_el.text = key_val_regex
+                else:
+                    key_el.text = key_val
                 name_el = ET.SubElement(obj_el, w_tag('name'))
                 name_el.text = chk['name']
                 
