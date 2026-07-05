@@ -8,7 +8,6 @@
 
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
 * **GPO Paths / Registry Locations**:
   * **GPO Paths**:
     * `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Account Lockout Policy`

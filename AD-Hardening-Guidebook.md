@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 3524f21 | Generated: July 05, 2026</span>
+      <span>Commit: e200f25 | Generated: July 05, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -335,7 +335,6 @@ To enforce this theoretical architecture on Domain Controllers and client comput
 <div id="01-architecture-restrict-tier-logons-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
 * **GPO Path / Registry Location**:
   * Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment
 
@@ -6054,7 +6053,6 @@ if ($Vulnerable) {
 <div id="02-domain-controllers-configure-user-rights-assignments-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
   * **Registry Location**: Configured via Local Security Database template (`secedit` Privilege Rights area).
@@ -8341,7 +8339,6 @@ This directory contains security requirements and policies designed to protect a
 <div id="03-identities-services-enforce-fgpp-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
 * **GPO Path / Registry Location**: Active Directory System Container: `CN=Password Settings Container,CN=System,DC=[Domain]`
 
 ---
@@ -20293,8 +20290,12 @@ if ($DmaVal -and $DmaVal.DeviceEnumerationPolicy -eq 0) {
 <div id="07-paws-configure-uefi-security-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
-* **GPO Path / Registry Location**: Hardware/UEFI Firmware Configuration Menu
+* **GPO Path / Registry Location**:
+  * UEFI Firmware Configuration Menu
+  * HKLM\SYSTEM\CurrentControlSet\Control
+    * `PEFirmwareType` = `2` (REG_DWORD)
+  * HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State
+    * `UEFISecureBootEnabled` = `1` (REG_DWORD)
 
 ---
 
@@ -20437,10 +20438,10 @@ if ($BiosDetails) {
 <div id="07-paws-enable-hardware-virtualization-and-dma-protection-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\System\Kernel DMA Protection
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Kernel DMA Protection
+  * **Registry Location**: HKLM\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection
+    * `DeviceEnumerationPolicy` = `0` (REG_DWORD)
 
 ---
 
@@ -21313,7 +21314,6 @@ if (Test-Path $AmsiPath) {
 <div id="07-paws-configure-user-rights-assignments-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
   * **Registry Location**: Configured via Group Policy or local Security Database (`secedit` templates).
@@ -22169,7 +22169,6 @@ if ($Vulnerable) {
 <div id="07-paws-configure-account-policies-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
 * **GPO Paths / Registry Locations**:
   * **GPO Paths**:
     * `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Account Lockout Policy`
@@ -31006,8 +31005,12 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-configure-uefi-security-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
-* **GPO Path / Registry Location**: Hardware/UEFI Firmware Configuration Menu
+* **GPO Path / Registry Location**:
+  * UEFI Firmware Configuration Menu
+  * HKLM\SYSTEM\CurrentControlSet\Control
+    * `PEFirmwareType` = `2` (REG_DWORD)
+  * HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State
+    * `UEFISecureBootEnabled` = `1` (REG_DWORD)
 
 ---
 
@@ -31175,10 +31178,10 @@ if ($BiosDetails) {
 <div id="08-endpoints-enable-hardware-virtualization-and-dma-protection-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\System\Kernel DMA Protection
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Kernel DMA Protection
+  * **Registry Location**: HKLM\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection
+    * `DeviceEnumerationPolicy` = `0` (REG_DWORD)
 
 ---
 
@@ -31465,7 +31468,6 @@ if ($RegistryValue) {
 <div id="08-endpoints-configure-user-rights-assignments-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
   * **Registry Location**: Stored inside the local Security Database (`secedit` under User Rights Area).
@@ -32061,7 +32063,6 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block
 <div id="08-endpoints-configure-account-policies-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
 * **GPO Paths / Registry Locations**:
   * **GPO Paths**:
     * `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Account Lockout Policy`

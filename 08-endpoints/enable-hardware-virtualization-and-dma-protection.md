@@ -8,10 +8,10 @@
 
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
 * **GPO Path / Registry Location**:
-  * Computer Configuration\Administrative Templates\System\Kernel DMA Protection
-  * HKLM\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection
+  * **GPO Path**: Computer Configuration\Administrative Templates\System\Kernel DMA Protection
+  * **Registry Location**: HKLM\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection
+    * `DeviceEnumerationPolicy` = `0` (REG_DWORD)
 
 ---
 

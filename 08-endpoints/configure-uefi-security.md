@@ -8,8 +8,12 @@
 
 ## Implementation Details
 * **Priority**: High
-* **Assessment**: Manual
-* **GPO Path / Registry Location**: Hardware/UEFI Firmware Configuration Menu
+* **GPO Path / Registry Location**:
+  * UEFI Firmware Configuration Menu
+  * HKLM\SYSTEM\CurrentControlSet\Control
+    * `PEFirmwareType` = `2` (REG_DWORD)
+  * HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State
+    * `UEFISecureBootEnabled` = `1` (REG_DWORD)
 
 ---
 
