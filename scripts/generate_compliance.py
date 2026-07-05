@@ -409,6 +409,10 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                 if script_match:
                     script_name = script_match.group(1)
                     module_dir = os.path.dirname(rel_path).replace('\\', '/')
+                    parts = module_dir.split('/')
+                    while len(parts) > 1 and parts[-1] in ['services', 'defender', 'asr', 'user-rights', 'user-profile']:
+                        parts.pop()
+                    module_dir = '/'.join(parts)
                     audit_script = f"{module_dir}/audit_scripts/{script_name}"
                 
                 # Extract implementation script URL relative target
@@ -417,6 +421,10 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                 if impl_match:
                     impl_name = impl_match.group(1)
                     module_dir = os.path.dirname(rel_path).replace('\\', '/')
+                    parts = module_dir.split('/')
+                    while len(parts) > 1 and parts[-1] in ['services', 'defender', 'asr', 'user-rights', 'user-profile']:
+                        parts.pop()
+                    module_dir = '/'.join(parts)
                     impl_script = f"{module_dir}/implementation_scripts/{impl_name}"
                 
                 # Extract implementation steps text block

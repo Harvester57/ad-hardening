@@ -26,6 +26,45 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 7. **[REQ-END-007 - Windows Defender Antivirus Baseline and Exploit Guard](defender-antivirus.md)**
    Configures Windows Defender Antivirus, enabling real-time scanning, behavioral monitoring, preventing local exclusion modifications, enforcing Attack Surface Reduction (ASR) rules, activating Tamper Protection, and enabling AppContainer sandbox isolation.
+   * **[REQ-END-057 - Disable Real-Time Monitoring and Behavior Monitoring Override](defender/disable-real-time-monitoring-and-behavior-monitoring-override.md)**
+   * **[REQ-END-058 - Configure Potentially Unwanted Applications (PUA) Protection](defender/configure-potentially-unwanted-applications-pua-protection.md)**
+   * **[REQ-END-059 - Prevent Local List Merging and Exclusions Configuration](defender/prevent-local-list-merging-and-exclusions-configuration.md)**
+   * **[REQ-END-060 - Configure Auto Exclusions Configuration](defender/configure-auto-exclusions-configuration.md)**
+   * **[REQ-END-061 - Prevent MAPS Local Setting Override](defender/prevent-maps-local-setting-override.md)**
+   * **[REQ-END-062 - Enable EDR in Block Mode](defender/enable-edr-in-block-mode.md)**
+   * **[REQ-END-063 - Allow Network Protection on Windows Server](defender/allow-network-protection-on-windows-server.md)**
+   * **[REQ-END-064 - Enable File Hash Computation](defender/enable-file-hash-computation.md)**
+   * **[REQ-END-065 - Configure Network Inspection System (NIS) settings](defender/configure-network-inspection-system-nis-settings.md)**
+   * **[REQ-END-066 - Configure OOBE Real-Time Protection and Security Intelligence](defender/configure-oobe-real-time-protection-and-security-intelligence.md)**
+   * **[REQ-END-067 - Enable Dynamic Signature Dropped Event Reporting](defender/enable-dynamic-signature-dropped-event-reporting.md)**
+   * **[REQ-END-068 - Configure Quick Scan and Scanning Exclusions](defender/configure-quick-scan-and-scanning-exclusions.md)**
+   * **[REQ-END-069 - Configure Scheduled Scan Parameters](defender/configure-scheduled-scan-parameters.md)**
+   * **[REQ-END-070 - Configure Security Intelligence Update Schedule](defender/configure-security-intelligence-update-schedule.md)**
+   * **[REQ-END-071 - Configure Attack Surface Reduction Rules](defender/configure-attack-surface-reduction-rules.md)**
+      * **[REQ-END-080 - ASR: Block abuse of exploited vulnerable signed drivers](defender/asr/block-vulnerable-signed-drivers.md)**
+      * **[REQ-END-081 - ASR: Block Adobe Reader from creating child processes](defender/asr/block-adobe-reader-child-processes.md)**
+      * **[REQ-END-082 - ASR: Block all Office applications from creating child processes](defender/asr/block-office-child-processes.md)**
+      * **[REQ-END-083 - ASR: Block credential stealing from the Windows local security authority subsystem](defender/asr/block-lsass-credential-stealing.md)**
+      * **[REQ-END-084 - ASR: Block executable content from email client and webmail](defender/asr/block-email-executable-content.md)**
+      * **[REQ-END-085 - ASR: Block executable files from running unless they meet a prevalence, age, or trusted list criterion](defender/asr/block-low-prevalence-executable-files.md)**
+      * **[REQ-END-086 - ASR: Block execution of potentially obfuscated scripts](defender/asr/block-obfuscated-scripts.md)**
+      * **[REQ-END-087 - ASR: Block JavaScript or VBScript from launching downloaded executable content](defender/asr/block-script-launching-downloaded-content.md)**
+      * **[REQ-END-088 - ASR: Block Office applications from creating executable content](defender/asr/block-office-executable-content-creation.md)**
+      * **[REQ-END-089 - ASR: Block Office applications from injecting code into other processes](defender/asr/block-office-code-injection.md)**
+      * **[REQ-END-090 - ASR: Block Office communication application from creating child processes](defender/asr/block-office-communication-child-processes.md)**
+      * **[REQ-END-091 - ASR: Block persistence through WMI event subscription](defender/asr/block-wmi-event-subscription-persistence.md)**
+      * **[REQ-END-092 - ASR: Block process creations originating from PSExec and WMI commands](defender/asr/block-psexec-wmi-process-creations.md)**
+      * **[REQ-END-093 - ASR: Block untrusted and unsigned processes that run from USB](defender/asr/block-unsigned-processes-running-from-usb.md)**
+      * **[REQ-END-094 - ASR: Block Win32 API calls from Office macros](defender/asr/block-win32-api-calls-from-office-macros.md)**
+      * **[REQ-END-095 - ASR: Use advanced protection against ransomware](defender/asr/use-advanced-protection-against-ransomware.md)**
+   * **[REQ-END-072 - Configure Threat Severity Default Quarantine Actions](defender/configure-threat-severity-default-quarantine-actions.md)**
+   * **[REQ-END-073 - Configure Family Options UI Lockdown](defender/configure-family-options-ui-lockdown.md)**
+   * **[REQ-END-074 - Configure Tamper Protection](defender/configure-tamper-protection.md)**
+   * **[REQ-END-075 - Configure Sandbox Execution Environment](defender/configure-sandbox-execution-environment.md)**
+   * **[REQ-END-076 - Configure AMSI Authenticode Signature Verification](defender/configure-amsi-authenticode-signature-verification.md)**
+   * **[REQ-END-077 - Configure File Explorer SmartScreen](defender/configure-file-explorer-smartscreen.md)**
+   * **[REQ-END-078 - Disable OneDrive File Sync](defender/disable-onedrive-file-sync.md)**
+   * **[REQ-END-079 - Enforce Antivirus Scan on Opening Attachments](defender/enforce-antivirus-scan-on-opening-attachments.md)**
 
 8. **[REQ-END-008 - WSUS Client Configuration](wsus-client-config.md)**
    Enforces update client registry baselines to ensure workstations pull OS patches and security signatures exclusively from the local, offline WSUS server.
@@ -53,6 +92,36 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 16. **[REQ-END-016 - Configure User Rights Assignments](configure-user-rights-assignments.md)**
     Restricts critical user rights assignments (URAs) such as debugging programs, token impersonation, and local logon permissions on standard client endpoints.
+    * **[REQ-END-096 - Configure User Rights: Access Credential Manager as a trusted caller](user-rights/configure-ura-setrustedcredmanaccessprivilege.md)**
+    * **[REQ-END-097 - Configure User Rights: Access this computer from the network](user-rights/configure-ura-senetworklogonright.md)**
+    * **[REQ-END-098 - Configure User Rights: Act as part of the operating system](user-rights/configure-ura-setcbprivilege.md)**
+    * **[REQ-END-099 - Configure User Rights: Allow log on locally](user-rights/configure-ura-seinteractivelogonright.md)**
+    * **[REQ-END-100 - Configure User Rights: Back up files and directories](user-rights/configure-ura-sebackupprivilege.md)**
+    * **[REQ-END-101 - Configure User Rights: Change the system time](user-rights/configure-ura-sesystemtimeprivilege.md)**
+    * **[REQ-END-102 - Configure User Rights: Change the time zone](user-rights/configure-ura-setimezoneprivilege.md)**
+    * **[REQ-END-103 - Configure User Rights: Create a pagefile](user-rights/configure-ura-secreatepagefileprivilege.md)**
+    * **[REQ-END-104 - Configure User Rights: Create a token object](user-rights/configure-ura-secreatetokenprivilege.md)**
+    * **[REQ-END-105 - Configure User Rights: Create global objects](user-rights/configure-ura-secreateglobalprivilege.md)**
+    * **[REQ-END-106 - Configure User Rights: Create permanent shared objects](user-rights/configure-ura-secreatepermanentprivilege.md)**
+    * **[REQ-END-107 - Configure User Rights: Create symbolic links](user-rights/configure-ura-secreatesymboliclinkprivilege.md)**
+    * **[REQ-END-108 - Configure User Rights: Debug programs](user-rights/configure-ura-sedebugprivilege.md)**
+    * **[REQ-END-109 - Configure User Rights: Enable computer and user accounts to be trusted for delegation](user-rights/configure-ura-seenabledelegationprivilege.md)**
+    * **[REQ-END-110 - Configure User Rights: Force shutdown from a remote system](user-rights/configure-ura-seremoteshutdownprivilege.md)**
+    * **[REQ-END-111 - Configure User Rights: Impersonate a client after authentication](user-rights/configure-ura-seimpersonateprivilege.md)**
+    * **[REQ-END-112 - Configure User Rights: Increase scheduling priority](user-rights/configure-ura-seincreasebasepriorityprivilege.md)**
+    * **[REQ-END-113 - Configure User Rights: Load and unload device drivers](user-rights/configure-ura-seloaddriverprivilege.md)**
+    * **[REQ-END-114 - Configure User Rights: Lock pages in memory](user-rights/configure-ura-selockmemoryprivilege.md)**
+    * **[REQ-END-115 - Configure User Rights: Manage auditing and security log](user-rights/configure-ura-sesecurityprivilege.md)**
+    * **[REQ-END-116 - Configure User Rights: Modify firmware environment values](user-rights/configure-ura-sesystemenvironmentprivilege.md)**
+    * **[REQ-END-117 - Configure User Rights: Perform volume maintenance tasks](user-rights/configure-ura-semanagevolumeprivilege.md)**
+    * **[REQ-END-118 - Configure User Rights: Profile single process](user-rights/configure-ura-seprofilesingleprocessprivilege.md)**
+    * **[REQ-END-119 - Configure User Rights: Profile system performance](user-rights/configure-ura-sesystemprofileprivilege.md)**
+    * **[REQ-END-120 - Configure User Rights: Replace a process level token](user-rights/configure-ura-seassignprimarytokenprivilege.md)**
+    * **[REQ-END-121 - Configure User Rights: Restore files and directories](user-rights/configure-ura-serestoreprivilege.md)**
+    * **[REQ-END-122 - Configure User Rights: Take ownership of files or other objects](user-rights/configure-ura-setakeownershipprivilege.md)**
+    * **[REQ-END-123 - Configure User Rights: Modify an object label](user-rights/configure-ura-serelabelprivilege.md)**
+    * **[REQ-END-124 - Configure User Rights: Deny access to this computer from the network](user-rights/configure-ura-sedenynetworklogonright.md)**
+    * **[REQ-END-125 - Configure User Rights: Deny log on through Remote Desktop Services](user-rights/configure-ura-sedenyremoteinteractivelogonright.md)**
 
 17. **[REQ-END-017 - Harden DMA and Physical Security](harden-dma-and-physical-security.md)**
     Mitigates physical access threat vectors by disabling standby sleep states (S1-S3), disabling external DMA device enumeration under lock, blocking legacy SBP-2 device classes, and denying write access to removable drives without BitLocker protection.
@@ -62,6 +131,21 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 19. **[REQ-END-019 - Configure User Profile Restrictions](configure-user-profile-restrictions.md)**
     Locks down user profile registry settings (HKCU) to disable toast notifications on the lock screen and block third-party application suggestions.
+    * **[REQ-END-126 - User Profile: Toast Notifications Lock Screen Restrictions](user-profile/configure-up-toast-notifications.md)**
+    * **[REQ-END-127 - User Profile: Spotlight and Consumer Features Restrictions](user-profile/configure-up-spotlight-consumer.md)**
+    * **[REQ-END-128 - User Profile: Windows Copilot Restrictions](user-profile/configure-up-windows-copilot.md)**
+    * **[REQ-END-129 - User Profile: In-Place Sharing Restrictions](user-profile/configure-up-inplace-sharing.md)**
+    * **[REQ-END-130 - User Profile: Shell RunAs User Suppression](user-profile/configure-up-runas-suppression.md)**
+    * **[REQ-END-131 - User Profile: Personalization and Privacy Restrictions](user-profile/configure-up-personalization-privacy.md)**
+    * **[REQ-END-132 - User Profile: Group Policy Processing Behaviors](user-profile/configure-up-gp-processing.md)**
+    * **[REQ-END-133 - User Profile: Telemetry and Inventory Collection Restrictions](user-profile/configure-up-telemetry-inventory.md)**
+    * **[REQ-END-134 - User Profile: Explorer Security and Memory Protections](user-profile/configure-up-explorer-security.md)**
+    * **[REQ-END-135 - User Profile: Internet Explorer Options and Feeds Restrictions](user-profile/configure-up-ie-security.md)**
+    * **[REQ-END-136 - User Profile: Interactive Logon Warning Banners](user-profile/configure-up-logon-banners.md)**
+    * **[REQ-END-137 - User Profile: Interactive Logon Inactivity Timeout](user-profile/configure-up-inactivity-timeout.md)**
+    * **[REQ-END-138 - User Profile: Windows Installer Hardening](user-profile/configure-up-installer-hardening.md)**
+    * **[REQ-END-139 - User Profile: Secondary Logon Service Lockdown](user-profile/configure-up-seclogon-service.md)**
+    * **[REQ-END-140 - User Profile: Exploit Guard and Speculative Mitigations](user-profile/configure-up-system-mitigations.md)**
 
 20. **[REQ-END-020 - Configure Exploit Protection Profile](configure-exploit-protection.md)**
     Configures and enforces a system-wide Microsoft Defender Exploit Protection profile to apply advanced memory mitigations (DEP, ASLR, CFG, SEHOP, Heap Integrity) on all endpoints.
@@ -77,6 +161,26 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 24. **[REQ-END-024 - Disable Unnecessary System Services](disable-unnecessary-system-services.md)**
     Disables unnecessary and high-risk system services to minimize the attack surface of standard client endpoints and member servers.
+    * **[REQ-END-037 - Disable Computer Browser Service (Browser)](services/disable-browser.md)**
+    * **[REQ-END-038 - Disable Infrared Monitor Service (irmon)](services/disable-irmon.md)**
+    * **[REQ-END-039 - Disable Internet Connection Sharing (ICS) Service (SharedAccess)](services/disable-sharedaccess.md)**
+    * **[REQ-END-040 - Disable LxssManager Service (LxssManager)](services/disable-lxssmanager.md)**
+    * **[REQ-END-041 - Disable Microsoft FTP Service (FTPSVC)](services/disable-ftpsvc.md)**
+    * **[REQ-END-042 - Disable OpenSSH SSH Server Service (sshd)](services/disable-sshd.md)**
+    * **[REQ-END-043 - Disable Remote Procedure Call (RPC) Locator Service (RpcLocator)](services/disable-rpclocator.md)**
+    * **[REQ-END-044 - Disable Routing and Remote Access Service (RemoteAccess)](services/disable-remoteaccess.md)**
+    * **[REQ-END-045 - Disable Simple TCP/IP Services (simptcp)](services/disable-simptcp.md)**
+    * **[REQ-END-046 - Disable Special Administration Console Helper Service (sacsvr)](services/disable-sacsvr.md)**
+    * **[REQ-END-047 - Disable SSDP Discovery Service (SSDPSRV)](services/disable-ssdpsrv.md)**
+    * **[REQ-END-048 - Disable UPnP Device Host Service (upnphost)](services/disable-upnphost.md)**
+    * **[REQ-END-049 - Disable Web Management Service (WMSvc)](services/disable-wmsvc.md)**
+    * **[REQ-END-050 - Disable Windows Media Player Network Sharing Service (WMPNetworkSvc)](services/disable-wmpnetworksvc.md)**
+    * **[REQ-END-051 - Disable Windows Mobile Hotspot Service (icssvc)](services/disable-icssvc.md)**
+    * **[REQ-END-052 - Disable World Wide Web Publishing Service (W3SVC)](services/disable-w3svc.md)**
+    * **[REQ-END-053 - Disable Xbox Accessory Management Service (XboxGipSvc)](services/disable-xboxgipsvc.md)**
+    * **[REQ-END-054 - Disable Xbox Live Auth Manager Service (XblAuthManager)](services/disable-xblauthmanager.md)**
+    * **[REQ-END-055 - Disable Xbox Live Game Save Service (XblGameSave)](services/disable-xblgamesave.md)**
+    * **[REQ-END-056 - Disable Xbox Live Networking Service (XboxNetApiSvc)](services/disable-xboxnetapisvc.md)**
 
 25. **[REQ-END-025 - Configure Secure Printing and Print Spooler Policies](configure-printing-and-spooler.md)**
     Configures printing security, RPC over TCP communication, Point and Print restrictions, and Redirection Guard, and disables incoming print spooler connections.

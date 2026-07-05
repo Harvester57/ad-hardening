@@ -27,9 +27,67 @@ This directory contains the physical isolation policies and operating system sec
 
 8. **[REQ-PAW-008 - Windows Defender Antivirus PAW Baseline and Exploit Guard](defender-antivirus.md)**
    Configures Windows Defender Antivirus on PAWs, enabling real-time scanning, behavioral monitoring, preventing local exclusion modifications, enforcing all ASR rules in strict Block mode, activating Tamper Protection, and enabling AppContainer sandbox isolation.
+   * **[REQ-PAW-057 - Disable Real-Time Monitoring and Behavior Monitoring Override for PAWs](defender/disable-real-time-monitoring-and-behavior-monitoring-override.md)**
+   * **[REQ-PAW-058 - Configure Potentially Unwanted Applications (PUA) Protection for PAWs](defender/configure-potentially-unwanted-applications-pua-protection.md)**
+   * **[REQ-PAW-059 - Prevent Local List Merging and Exclusions Configuration for PAWs](defender/prevent-local-list-merging-and-exclusions-configuration.md)**
+   * **[REQ-PAW-060 - Configure Auto Exclusions Configuration for PAWs](defender/configure-auto-exclusions-configuration.md)**
+   * **[REQ-PAW-061 - Enable EDR in Block Mode for PAWs](defender/enable-edr-in-block-mode.md)**
+   * **[REQ-PAW-062 - Allow Network Protection on Windows Server for PAWs](defender/allow-network-protection-on-windows-server.md)**
+   * **[REQ-PAW-063 - Enable File Hash Computation for PAWs](defender/enable-file-hash-computation.md)**
+   * **[REQ-PAW-064 - Configure Network Inspection System (NIS) settings for PAWs](defender/configure-network-inspection-system-nis-settings.md)**
+   * **[REQ-PAW-065 - Configure OOBE Real-Time Protection and Security Intelligence for PAWs](defender/configure-oobe-real-time-protection-and-security-intelligence.md)**
+   * **[REQ-PAW-066 - Enable Dynamic Signature Dropped Event Reporting for PAWs](defender/enable-dynamic-signature-dropped-event-reporting.md)**
+   * **[REQ-PAW-067 - Configure Quick Scan and Scanning Exclusions for PAWs](defender/configure-quick-scan-and-scanning-exclusions.md)**
+   * **[REQ-PAW-068 - Configure Scheduled Scan Parameters for PAWs](defender/configure-scheduled-scan-parameters.md)**
+   * **[REQ-PAW-069 - Configure Security Intelligence Update Schedule for PAWs](defender/configure-security-intelligence-update-schedule.md)**
+   * **[REQ-PAW-070 - Configure Attack Surface Reduction Rules for PAWs](defender/configure-attack-surface-reduction-rules.md)**
+      * **[REQ-PAW-076 - ASR: Block abuse of exploited vulnerable signed drivers for PAWs](defender/asr/block-vulnerable-signed-drivers.md)**
+      * **[REQ-PAW-077 - ASR: Block Adobe Reader from creating child processes for PAWs](defender/asr/block-adobe-reader-child-processes.md)**
+      * **[REQ-PAW-078 - ASR: Block all Office applications from creating child processes for PAWs](defender/asr/block-office-child-processes.md)**
+      * **[REQ-PAW-079 - ASR: Block credential stealing from the Windows local security authority subsystem for PAWs](defender/asr/block-lsass-credential-stealing.md)**
+      * **[REQ-PAW-080 - ASR: Block executable content from email client and webmail for PAWs](defender/asr/block-email-executable-content.md)**
+      * **[REQ-PAW-081 - ASR: Block executable files from running unless they meet a prevalence, age, or trusted list criterion for PAWs](defender/asr/block-low-prevalence-executable-files.md)**
+      * **[REQ-PAW-082 - ASR: Block execution of potentially obfuscated scripts for PAWs](defender/asr/block-obfuscated-scripts.md)**
+      * **[REQ-PAW-083 - ASR: Block JavaScript or VBScript from launching downloaded executable content for PAWs](defender/asr/block-script-launching-downloaded-content.md)**
+      * **[REQ-PAW-084 - ASR: Block Office applications from creating executable content for PAWs](defender/asr/block-office-executable-content-creation.md)**
+      * **[REQ-PAW-085 - ASR: Block Office applications from injecting code into other processes for PAWs](defender/asr/block-office-code-injection.md)**
+      * **[REQ-PAW-086 - ASR: Block Office communication application from creating child processes for PAWs](defender/asr/block-office-communication-child-processes.md)**
+      * **[REQ-PAW-087 - ASR: Block persistence through WMI event subscription for PAWs](defender/asr/block-wmi-event-subscription-persistence.md)**
+      * **[REQ-PAW-088 - ASR: Block process creations originating from PSExec and WMI commands for PAWs](defender/asr/block-psexec-wmi-process-creations.md)**
+      * **[REQ-PAW-089 - ASR: Block untrusted and unsigned processes that run from USB for PAWs](defender/asr/block-unsigned-processes-running-from-usb.md)**
+      * **[REQ-PAW-090 - ASR: Block Win32 API calls from Office macros for PAWs](defender/asr/block-win32-api-calls-from-office-macros.md)**
+      * **[REQ-PAW-091 - ASR: Use advanced protection against ransomware for PAWs](defender/asr/use-advanced-protection-against-ransomware.md)**
+   * **[REQ-PAW-071 - Configure Threat Severity Default Quarantine Actions for PAWs](defender/configure-threat-severity-default-quarantine-actions.md)**
+   * **[REQ-PAW-072 - Configure Family Options UI Lockdown for PAWs](defender/configure-family-options-ui-lockdown.md)**
+   * **[REQ-PAW-073 - Configure Tamper Protection for PAWs](defender/configure-tamper-protection.md)**
+   * **[REQ-PAW-074 - Configure Sandbox Execution Environment for PAWs](defender/configure-sandbox-execution-environment.md)**
+   * **[REQ-PAW-075 - Configure AMSI Authenticode Signature Verification for PAWs](defender/configure-amsi-authenticode-signature-verification.md)**
 
 9. **[REQ-PAW-009 - Configure User Rights Assignments for PAWs](configure-user-rights-assignments.md)**
    Restricts critical user rights assignments (URAs) such as debugging programs, token impersonation, and denying network/interactive logon permissions for standard accounts on PAWs.
+   * **[REQ-PAW-092 - Configure User Rights: Access Credential Manager as a trusted caller for PAWs](user-rights/configure-ura-setrustedcredmanaccessprivilege.md)**
+   * **[REQ-PAW-093 - Configure User Rights: Access this computer from the network for PAWs](user-rights/configure-ura-senetworklogonright.md)**
+   * **[REQ-PAW-094 - Configure User Rights: Act as part of the operating system for PAWs](user-rights/configure-ura-setcbprivilege.md)**
+   * **[REQ-PAW-095 - Configure User Rights: Allow log on locally for PAWs](user-rights/configure-ura-seinteractivelogonright.md)**
+   * **[REQ-PAW-096 - Configure User Rights: Back up files and directories for PAWs](user-rights/configure-ura-sebackupprivilege.md)**
+   * **[REQ-PAW-097 - Configure User Rights: Create a pagefile for PAWs](user-rights/configure-ura-secreatepagefileprivilege.md)**
+   * **[REQ-PAW-098 - Configure User Rights: Create a token object for PAWs](user-rights/configure-ura-secreatetokenprivilege.md)**
+   * **[REQ-PAW-099 - Configure User Rights: Create global objects for PAWs](user-rights/configure-ura-secreateglobalprivilege.md)**
+   * **[REQ-PAW-100 - Configure User Rights: Create permanent shared objects for PAWs](user-rights/configure-ura-secreatepermanentprivilege.md)**
+   * **[REQ-PAW-101 - Configure User Rights: Debug programs for PAWs](user-rights/configure-ura-sedebugprivilege.md)**
+   * **[REQ-PAW-102 - Configure User Rights: Enable computer and user accounts to be trusted for delegation for PAWs](user-rights/configure-ura-seenabledelegationprivilege.md)**
+   * **[REQ-PAW-103 - Configure User Rights: Force shutdown from a remote system for PAWs](user-rights/configure-ura-seremoteshutdownprivilege.md)**
+   * **[REQ-PAW-104 - Configure User Rights: Impersonate a client after authentication for PAWs](user-rights/configure-ura-seimpersonateprivilege.md)**
+   * **[REQ-PAW-105 - Configure User Rights: Load and unload device drivers for PAWs](user-rights/configure-ura-seloaddriverprivilege.md)**
+   * **[REQ-PAW-106 - Configure User Rights: Lock pages in memory for PAWs](user-rights/configure-ura-selockmemoryprivilege.md)**
+   * **[REQ-PAW-107 - Configure User Rights: Manage auditing and security log for PAWs](user-rights/configure-ura-sesecurityprivilege.md)**
+   * **[REQ-PAW-108 - Configure User Rights: Modify firmware environment values for PAWs](user-rights/configure-ura-sesystemenvironmentprivilege.md)**
+   * **[REQ-PAW-109 - Configure User Rights: Perform volume maintenance tasks for PAWs](user-rights/configure-ura-semanagevolumeprivilege.md)**
+   * **[REQ-PAW-110 - Configure User Rights: Profile single process for PAWs](user-rights/configure-ura-seprofilesingleprocessprivilege.md)**
+   * **[REQ-PAW-111 - Configure User Rights: Restore files and directories for PAWs](user-rights/configure-ura-serestoreprivilege.md)**
+   * **[REQ-PAW-112 - Configure User Rights: Take ownership of files or other objects for PAWs](user-rights/configure-ura-setakeownershipprivilege.md)**
+   * **[REQ-PAW-113 - Configure User Rights: Deny access to this computer from the network for PAWs](user-rights/configure-ura-sedenynetworklogonright.md)**
+   * **[REQ-PAW-114 - Configure User Rights: Deny log on through Remote Desktop Services for PAWs](user-rights/configure-ura-sedenyremoteinteractivelogonright.md)**
 
 10. **[REQ-PAW-010 - Enable VBS and Credential Guard for PAWs](enable-vbs-credential-guard.md)**
     Configures Virtualization-Based Security (VBS), Credential Guard (with UEFI Lock), System Guard Secure Launch, and memory protections to shield LSASS from credential dumping attacks on PAWs.
@@ -75,6 +133,21 @@ This directory contains the physical isolation policies and operating system sec
 
 24. **[REQ-PAW-024 - Configure User Profile and System Restrictions for PAWs](configure-user-profile-restrictions.md)**
     Locks down user profile registry settings and key system security policies including inactivity timeouts, secondary logon, and ASLR force.
+    * **[REQ-PAW-115 - User Profile: Toast Notifications Lock Screen Restrictions for PAWs](user-profile/configure-up-toast-notifications.md)**
+    * **[REQ-PAW-116 - User Profile: Spotlight and Consumer Features Restrictions for PAWs](user-profile/configure-up-spotlight-consumer.md)**
+    * **[REQ-PAW-117 - User Profile: Windows Copilot Restrictions for PAWs](user-profile/configure-up-windows-copilot.md)**
+    * **[REQ-PAW-118 - User Profile: In-Place Sharing Restrictions for PAWs](user-profile/configure-up-inplace-sharing.md)**
+    * **[REQ-PAW-119 - User Profile: Shell RunAs User Suppression for PAWs](user-profile/configure-up-runas-suppression.md)**
+    * **[REQ-PAW-120 - User Profile: Personalization and Privacy Restrictions for PAWs](user-profile/configure-up-personalization-privacy.md)**
+    * **[REQ-PAW-121 - User Profile: Group Policy Processing Behaviors for PAWs](user-profile/configure-up-gp-processing.md)**
+    * **[REQ-PAW-122 - User Profile: Telemetry and Inventory Collection Restrictions for PAWs](user-profile/configure-up-telemetry-inventory.md)**
+    * **[REQ-PAW-123 - User Profile: Explorer Security and Memory Protections for PAWs](user-profile/configure-up-explorer-security.md)**
+    * **[REQ-PAW-124 - User Profile: Internet Explorer Options and Feeds Restrictions for PAWs](user-profile/configure-up-ie-security.md)**
+    * **[REQ-PAW-125 - User Profile: Interactive Logon Warning Banners for PAWs](user-profile/configure-up-logon-banners.md)**
+    * **[REQ-PAW-126 - User Profile: Interactive Logon Inactivity Timeout for PAWs](user-profile/configure-up-inactivity-timeout.md)**
+    * **[REQ-PAW-127 - User Profile: Windows Installer Hardening for PAWs](user-profile/configure-up-installer-hardening.md)**
+    * **[REQ-PAW-128 - User Profile: Secondary Logon Service Lockdown for PAWs](user-profile/configure-up-seclogon-service.md)**
+    * **[REQ-PAW-129 - User Profile: Exploit Guard and Speculative Mitigations for PAWs](user-profile/configure-up-system-mitigations.md)**
 
 25. **[REQ-PAW-025 - Configure Exploit Protection Profile for PAWs](configure-exploit-protection.md)**
     Configures and enforces a system-wide Microsoft Defender Exploit Protection profile to apply advanced memory mitigations (DEP, ASLR, CFG, SEHOP, Heap Integrity) on all PAWs.
@@ -87,6 +160,26 @@ This directory contains the physical isolation policies and operating system sec
 
 28. **[REQ-PAW-028 - Disable Unnecessary System Services for PAWs](disable-unnecessary-system-services.md)**
     Disables unnecessary and high-risk system services to minimize the attack surface of administrative endpoints.
+    * **[REQ-PAW-037 - Disable Computer Browser Service for PAWs (Browser)](services/disable-browser.md)**
+    * **[REQ-PAW-038 - Disable Infrared Monitor Service for PAWs (irmon)](services/disable-irmon.md)**
+    * **[REQ-PAW-039 - Disable Internet Connection Sharing (ICS) Service for PAWs (SharedAccess)](services/disable-sharedaccess.md)**
+    * **[REQ-PAW-040 - Disable LxssManager Service for PAWs (LxssManager)](services/disable-lxssmanager.md)**
+    * **[REQ-PAW-041 - Disable Microsoft FTP Service for PAWs (FTPSVC)](services/disable-ftpsvc.md)**
+    * **[REQ-PAW-042 - Disable OpenSSH SSH Server Service for PAWs (sshd)](services/disable-sshd.md)**
+    * **[REQ-PAW-043 - Disable Remote Procedure Call (RPC) Locator Service for PAWs (RpcLocator)](services/disable-rpclocator.md)**
+    * **[REQ-PAW-044 - Disable Routing and Remote Access Service for PAWs (RemoteAccess)](services/disable-remoteaccess.md)**
+    * **[REQ-PAW-045 - Disable Simple TCP/IP Services for PAWs (simptcp)](services/disable-simptcp.md)**
+    * **[REQ-PAW-046 - Disable Special Administration Console Helper Service for PAWs (sacsvr)](services/disable-sacsvr.md)**
+    * **[REQ-PAW-047 - Disable SSDP Discovery Service for PAWs (SSDPSRV)](services/disable-ssdpsrv.md)**
+    * **[REQ-PAW-048 - Disable UPnP Device Host Service for PAWs (upnphost)](services/disable-upnphost.md)**
+    * **[REQ-PAW-049 - Disable Web Management Service for PAWs (WMSvc)](services/disable-wmsvc.md)**
+    * **[REQ-PAW-050 - Disable Windows Media Player Network Sharing Service for PAWs (WMPNetworkSvc)](services/disable-wmpnetworksvc.md)**
+    * **[REQ-PAW-051 - Disable Windows Mobile Hotspot Service for PAWs (icssvc)](services/disable-icssvc.md)**
+    * **[REQ-PAW-052 - Disable World Wide Web Publishing Service for PAWs (W3SVC)](services/disable-w3svc.md)**
+    * **[REQ-PAW-053 - Disable Xbox Accessory Management Service for PAWs (XboxGipSvc)](services/disable-xboxgipsvc.md)**
+    * **[REQ-PAW-054 - Disable Xbox Live Auth Manager Service for PAWs (XblAuthManager)](services/disable-xblauthmanager.md)**
+    * **[REQ-PAW-055 - Disable Xbox Live Game Save Service for PAWs (XblGameSave)](services/disable-xblgamesave.md)**
+    * **[REQ-PAW-056 - Disable Xbox Live Networking Service for PAWs (XboxNetApiSvc)](services/disable-xboxnetapisvc.md)**
 
 29. **[REQ-PAW-029 - Configure System Administrative Templates for PAWs](configure-system-administrative-templates.md)**
     Enforces custom administrative template settings including SMBv1 driver blocks and event log size extensions.

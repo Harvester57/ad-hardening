@@ -1,4 +1,4 @@
-# [REQ-PAW-009] Configure User Rights Assignments for PAWs
+# Configure User Rights Assignments for PAWs
 
 ## Target Scope
 * **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
@@ -10,259 +10,52 @@
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-  * **Registry Location**: Configured via Group Policy or local Security Database (`secedit` templates).
+  * **Registry Location**: Stored inside local security database under privilege definitions.
 
 ---
 
 ## Rationale
-Privileged Access Workstations (PAWs) host the most sensitive credentials in the enterprise. To prevent credential theft, session hijacking, or administrative privilege escalation, User Rights Assignments (URAs) must be hardened to the highest standard:
+Enforcing strict User Rights Assignments (URAs) on PAWs limits the execution footprint of administrative helper binaries, service accounts, and logon permissions to minimize the privilege footprint and prevent administrative impersonation.
 
-1. **Deny Standard Users Local Logon (`SeInteractiveLogonRight`)**: Unlike standard endpoints, standard domain users must never log on to a PAW. Only dedicated Tier 0 administrators are allowed console access. Removing `BUILTIN\Users` from local logon rights ensures standard users cannot execute local code on a PAW.
-2. **Restrict Network Access (`SeNetworkLogonRight`)**: Restricting network access strictly to local Administrators prevents domain users from initiating network-based connections to the PAW, cutting off remote exploitation paths.
-3. **Restricting Debugging and Impersonation (`SeDebugPrivilege` / `SeImpersonatePrivilege`)**: Restricting these rights to the built-in local Administrators group prevents any running application from dumping LSA memory or hijacking service tokens.
-4. **Deny Local Account Remote Logon (`SeDenyNetworkLogonRight` / `SeDenyRemoteInteractiveLogonRight`)**: Blocking network and Remote Desktop logons for local accounts (SIDs `S-1-5-113` and `S-1-5-114`) on the PAW provides defense-in-depth, preventing lateral network logons via local accounts.
+This submodule contains individual requirement rules for each User Rights Assignment control enforced on PAWs.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Dedicated Admin Accounts Required**: Administrators must use dedicated Tier 0 administrative accounts to authenticate to the console of a PAW. Standard domain user accounts will be blocked from logging on.
-* **Management Overhead**: Service mappings must be verified. All operations on PAWs must execute under the local Administrator or authorized administrative accounts.
+* **Maximum Console Isolation**: Standard domain users and non-administrative services have no permission assignments on PAW consoles. Operational impact should be non-existent because PAWs are restricted to pure administrative functions.
 
 ---
 
-## Implementation Steps
+## Enforced User Rights Assignments on PAWs
 
-### Option A: Group Policy Object (GPO) Configuration (Preferred)
+The following individual URA rules must be configured:
 
-1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit the PAW GPO (e.g., `GPO_Hardening_PAW`).
-3. Navigate to:
-   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-4. Configure the following policies as specified:
-
-| Policy Setting | Allowed Security Principals (SIDs / Groups) |
-| :--- | :--- |
-| **Access Credential Manager as a trusted caller** | No one (Empty) |
-| **Access this computer from the network** | `BUILTIN\Administrators` |
-| **Act as part of the operating system** | No one (Empty) |
-| **Allow log on locally** | `BUILTIN\Administrators` |
-| **Back up files and directories** | `BUILTIN\Administrators` |
-| **Create a pagefile** | `BUILTIN\Administrators` |
-| **Create a token object** | No one (Empty) |
-| **Create global objects** | `Administrators`, `LOCAL SERVICE`, `NETWORK SERVICE`, `SERVICE` |
-| **Create permanent shared objects** | No one (Empty) |
-| **Debug programs** | `BUILTIN\Administrators` |
-| **Enable computer and user accounts to be trusted for delegation** | No one (Empty) |
-| **Force shutdown from a remote system** | `BUILTIN\Administrators` |
-| **Impersonate a client after authentication** | `Administrators`, `LOCAL SERVICE`, `NETWORK SERVICE`, `SERVICE` |
-| **Load and unload device drivers** | `BUILTIN\Administrators` |
-| **Lock pages in memory** | No one (Empty) |
-| **Manage auditing and security log** | `BUILTIN\Administrators` |
-| **Modify firmware environment values** | `BUILTIN\Administrators` |
-| **Perform volume maintenance tasks** | `BUILTIN\Administrators` |
-| **Profile single process** | `BUILTIN\Administrators` |
-| **Deny access to this computer from the network** | Local account (SID `S-1-5-113`), Local account and member of Administrators group (SID `S-1-5-114`) |
-| **Deny log on through Remote Desktop Services** | Local account (SID `S-1-5-113`), Local account and member of Administrators group (SID `S-1-5-114`) |
-| **Restore files and directories** | `BUILTIN\Administrators` |
-| **Take ownership of files or other objects** | `BUILTIN\Administrators` |
-
-5. Link the GPO to the PAWs Organizational Unit (OU).
-
----
-
-### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
-
-Configure User Rights Assignments locally on the PAW using `secedit.exe` and PowerShell.
-
-[Download Script: Set-PawUserRightsAssignments.ps1](implementation_scripts/Set-PawUserRightsAssignments.ps1)
-
-```powershell
-# Set-PawUserRightsAssignments.ps1
-# Description: Enforces the PAW user rights assignments baseline configuration using secedit templates.
-
-Write-Host "Applying PAW User Rights Assignments hardening..." -ForegroundColor Cyan
-
-# 1. Create a secure temporary path for security templates
-$SecTempDir = Join-Path $env:TEMP "PawSecurityTemplates"
-if (-not (Test-Path $SecTempDir)) {
-    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
-}
-
-$CfgFile = Join-Path $SecTempDir "paw_user_rights.cfg"
-$LogFile = Join-Path $SecTempDir "secedit.log"
-$DbFile = Join-Path $SecTempDir "secedit.sdb"
-
-# 2. Export current security configuration
-Write-Host "[*] Exporting current security configuration..." -ForegroundColor Gray
-$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
-if ($Process.ExitCode -ne 0) {
-    Write-Error "Failed to export current security database settings."
-    return
-}
-
-# 3. Read and modify the configuration file
-$ConfigText = Get-Content -Path $CfgFile -Raw
-$HasPrivilegeSection = $ConfigText -match "\[Privilege Rights\]"
-
-if (-not $HasPrivilegeSection) {
-    $ConfigText += "`r`n[Privilege Rights]`r`n"
-}
-
-# Define the baseline User Rights Assignments (Stricter for PAWs)
-$BaselineRights = @{
-    "SeTrustedCredManAccessPrivilege" = ""
-    "SeNetworkLogonRight"             = "*S-1-5-32-544"
-    "SeTcbPrivilege"                  = ""
-    "SeInteractiveLogonRight"         = "*S-1-5-32-544"
-    "SeBackupPrivilege"               = "*S-1-5-32-544"
-    "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
-    "SeCreateTokenPrivilege"          = ""
-    "SeCreateGlobalPrivilege"         = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
-    "SeCreatePermanentPrivilege"      = ""
-    "SeDebugPrivilege"                = "*S-1-5-32-544"
-    "SeEnableDelegationPrivilege"     = ""
-    "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
-    "SeImpersonatePrivilege"          = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
-    "SeLoadDriverPrivilege"           = "*S-1-5-32-544"
-    "SeLockMemoryPrivilege"           = ""
-    "SeSecurityPrivilege"             = "*S-1-5-32-544"
-    "SeSystemEnvironmentPrivilege"    = "*S-1-5-32-544"
-    "SeManageVolumePrivilege"         = "*S-1-5-32-544"
-    "SeProfileSingleProcessPrivilege" = "*S-1-5-32-544"
-    "SeRestorePrivilege"              = "*S-1-5-32-544"
-    "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
-    "SeDenyNetworkLogonRight"             = "*S-1-5-113,*S-1-5-114"
-    "SeDenyRemoteInteractiveLogonRight"   = "*S-1-5-113,*S-1-5-114"
-}
-
-# Re-build [Privilege Rights] section line-by-line
-$Lines = $ConfigText -split "`r?`n"
-$NewLines = @()
-$InPrivilegeSection = $false
-
-foreach ($Line in $Lines) {
-    if ($Line -match "^\[(.*)\]$") {
-        $SectionName = $Matches[1]
-        if ($SectionName -eq "Privilege Rights") {
-            $InPrivilegeSection = $true
-            $NewLines += $Line
-            continue
-        } else {
-            $InPrivilegeSection = $false
-        }
-    }
-    
-    if ($InPrivilegeSection) {
-        $IsManaged = $false
-        foreach ($Key in $BaselineRights.Keys) {
-            if ($Line -match "^\s*$($Key)\s*=") {
-                $IsManaged = $true
-                break
-            }
-        }
-        if (-not $IsManaged) {
-            $NewLines += $Line
-        }
-    } else {
-        $NewLines += $Line
-    }
-}
-
-# Append our managed settings into the Privilege section
-$FinalLines = @()
-foreach ($Line in $NewLines) {
-    $FinalLines += $Line
-    if ($Line -eq "[Privilege Rights]") {
-        foreach ($Key in $BaselineRights.Keys) {
-            $Val = $BaselineRights[$Key]
-            $FinalLines += "$($Key) = $($Val)"
-        }
-    }
-}
-
-$FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
-
-# 4. Import the modified configuration file
-Write-Host "[*] Importing updated security configuration template..." -ForegroundColor Gray
-$Process = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas USER_RIGHTS /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
-if ($Process.ExitCode -eq 0) {
-    Write-Host "[+] PAW User Rights Assignments applied successfully." -ForegroundColor Green
-} else {
-    Write-Error "Failed to apply PAW user rights assignments. Exit Code: $($Process.ExitCode)"
-}
-
-# Clean up temp files
-Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
-```
-
-*To audit local PAW User Rights Assignments:*
-[Download Script: Test-PawUserRightsAssignments.ps1](audit_scripts/Test-PawUserRightsAssignments.ps1)
-
-```powershell
-# Test-PawUserRightsAssignments.ps1
-# Description: Exports local user rights assignments and checks them against the PAW baseline.
-
-Write-Host "--- Auditing PAW User Rights Assignments ---" -ForegroundColor Cyan
-
-$SecTempDir = Join-Path $env:TEMP "PawAuditSecurityTemplates"
-if (-not (Test-Path $SecTempDir)) {
-    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
-}
-
-$CfgFile = Join-Path $SecTempDir "paw_user_rights_audit.cfg"
-$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
-if ($Process.ExitCode -ne 0) {
-    Write-Error "Failed to export current configuration database."
-    return
-}
-
-$ConfigContent = Get-Content -Path $CfgFile -Raw
-$BaselineRights = @{
-    "SeTrustedCredManAccessPrivilege" = ""
-    "SeNetworkLogonRight"             = "*S-1-5-32-544"
-    "SeTcbPrivilege"                  = ""
-    "SeInteractiveLogonRight"         = "*S-1-5-32-544"
-    "SeBackupPrivilege"               = "*S-1-5-32-544"
-    "SeCreatePagefilePrivilege"       = "*S-1-5-32-544"
-    "SeCreateTokenPrivilege"          = ""
-    "SeCreateGlobalPrivilege"         = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
-    "SeCreatePermanentPrivilege"      = ""
-    "SeDebugPrivilege"                = "*S-1-5-32-544"
-    "SeEnableDelegationPrivilege"     = ""
-    "SeRemoteShutdownPrivilege"       = "*S-1-5-32-544"
-    "SeImpersonatePrivilege"          = "*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6"
-    "SeLoadDriverPrivilege"           = "*S-1-5-32-544"
-    "SeLockMemoryPrivilege"           = ""
-    "SeSecurityPrivilege"             = "*S-1-5-32-544"
-    "SeSystemEnvironmentPrivilege"    = "*S-1-5-32-544"
-    "SeManageVolumePrivilege"         = "*S-1-5-32-544"
-    "SeProfileSingleProcessPrivilege" = "*S-1-5-32-544"
-    "SeRestorePrivilege"              = "*S-1-5-32-544"
-    "SeTakeOwnershipPrivilege"        = "*S-1-5-32-544"
-    "SeDenyNetworkLogonRight"             = "*S-1-5-113,*S-1-5-114"
-    "SeDenyRemoteInteractiveLogonRight"   = "*S-1-5-113,*S-1-5-114"
-}
-
-foreach ($Key in $BaselineRights.Keys) {
-    $Expected = $BaselineRights[$Key]
-    if ($ConfigContent -match "(?m)^\s*$($Key)\s*=\s*(.*)\s*$") {
-        $Actual = $Matches[1].Trim()
-    } else {
-        $Actual = ""
-    }
-    
-    $Color = "Red"
-    if ($Actual -eq $Expected) {
-        $Color = "Green"
-    }
-    Write-Host "    - Privilege: $($Key) | Actual: '$($Actual)' (Expected: '$($Expected)')" -ForegroundColor $Color
-}
-
-Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
-```
+1. **[REQ-PAW-092 - Configure User Rights: Access Credential Manager as a trusted caller for PAWs](user-rights/configure-ura-setrustedcredmanaccessprivilege.md)**
+2. **[REQ-PAW-093 - Configure User Rights: Access this computer from the network for PAWs](user-rights/configure-ura-senetworklogonright.md)**
+3. **[REQ-PAW-094 - Configure User Rights: Act as part of the operating system for PAWs](user-rights/configure-ura-setcbprivilege.md)**
+4. **[REQ-PAW-095 - Configure User Rights: Allow log on locally for PAWs](user-rights/configure-ura-seinteractivelogonright.md)**
+5. **[REQ-PAW-096 - Configure User Rights: Back up files and directories for PAWs](user-rights/configure-ura-sebackupprivilege.md)**
+6. **[REQ-PAW-097 - Configure User Rights: Create a pagefile for PAWs](user-rights/configure-ura-secreatepagefileprivilege.md)**
+7. **[REQ-PAW-098 - Configure User Rights: Create a token object for PAWs](user-rights/configure-ura-secreatetokenprivilege.md)**
+8. **[REQ-PAW-099 - Configure User Rights: Create global objects for PAWs](user-rights/configure-ura-secreateglobalprivilege.md)**
+9. **[REQ-PAW-100 - Configure User Rights: Create permanent shared objects for PAWs](user-rights/configure-ura-secreatepermanentprivilege.md)**
+10. **[REQ-PAW-101 - Configure User Rights: Debug programs for PAWs](user-rights/configure-ura-sedebugprivilege.md)**
+11. **[REQ-PAW-102 - Configure User Rights: Enable computer and user accounts to be trusted for delegation for PAWs](user-rights/configure-ura-seenabledelegationprivilege.md)**
+12. **[REQ-PAW-103 - Configure User Rights: Force shutdown from a remote system for PAWs](user-rights/configure-ura-seremoteshutdownprivilege.md)**
+13. **[REQ-PAW-104 - Configure User Rights: Impersonate a client after authentication for PAWs](user-rights/configure-ura-seimpersonateprivilege.md)**
+14. **[REQ-PAW-105 - Configure User Rights: Load and unload device drivers for PAWs](user-rights/configure-ura-seloaddriverprivilege.md)**
+15. **[REQ-PAW-106 - Configure User Rights: Lock pages in memory for PAWs](user-rights/configure-ura-selockmemoryprivilege.md)**
+16. **[REQ-PAW-107 - Configure User Rights: Manage auditing and security log for PAWs](user-rights/configure-ura-sesecurityprivilege.md)**
+17. **[REQ-PAW-108 - Configure User Rights: Modify firmware environment values for PAWs](user-rights/configure-ura-sesystemenvironmentprivilege.md)**
+18. **[REQ-PAW-109 - Configure User Rights: Perform volume maintenance tasks for PAWs](user-rights/configure-ura-semanagevolumeprivilege.md)**
+19. **[REQ-PAW-110 - Configure User Rights: Profile single process for PAWs](user-rights/configure-ura-seprofilesingleprocessprivilege.md)**
+20. **[REQ-PAW-111 - Configure User Rights: Restore files and directories for PAWs](user-rights/configure-ura-serestoreprivilege.md)**
+21. **[REQ-PAW-112 - Configure User Rights: Take ownership of files or other objects for PAWs](user-rights/configure-ura-setakeownershipprivilege.md)**
+22. **[REQ-PAW-113 - Configure User Rights: Deny access to this computer from the network for PAWs](user-rights/configure-ura-sedenynetworklogonright.md)**
+23. **[REQ-PAW-114 - Configure User Rights: Deny log on through Remote Desktop Services for PAWs](user-rights/configure-ura-sedenyremoteinteractivelogonright.md)**
 
 ---
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.2 (User Rights Assignment)
-* **ANSSI AD Hardening Guide**: Recommendations on administrative workstation isolation and URA restrictions
+* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+* **Microsoft Security Baseline**: User Rights Configuration specifications

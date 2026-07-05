@@ -28,68 +28,77 @@ def main():
         impl_dir = os.path.join(module_path, "implementation_scripts")
         audit_dir = os.path.join(module_path, "audit_scripts")
         
-        for file in sorted(os.listdir(module_path)):
-            if not file.endswith(".md") or file.lower() == "readme.md":
-                continue
-                
-            file_path = os.path.join(module_path, file)
-            with open(file_path, "r", encoding="utf-8") as f:
-                content = f.read()
-                
-            matches = code_block_pattern.findall(content)
-            if not matches:
-                continue
-                
-            modified = False
-            for full_block, code_content in matches:
-                code_lines = code_content.strip().split("\n")
-                if not code_lines:
-                    continue
-                first_line = code_lines[0].strip()
-                
-                # Match comments like '# Name.ps1'
-                filename_match = re.match(r'^#\s*([a-zA-Z0-9_-]+\.ps1)', first_line, re.IGNORECASE)
-                if not filename_match:
+        for root, dirs, files in os.walk(module_path):
+            dirs[:] = [d for d in dirs if d not in ["implementation_scripts", "audit_scripts"]]
+            
+            for file in sorted(files):
+                if not file.endswith(".md") or file.lower() == "readme.md":
                     continue
                     
-                filename = filename_match.group(1)
-                
-                # Classify implementation vs audit
-                lower_name = filename.lower()
-                is_audit = (
-                    lower_name.startswith("audit-") or
-                    lower_name.startswith("test-") or
-                    lower_name.startswith("get-") or
-                    lower_name.startswith("check-")
-                )
-                
-                folder_name = "audit_scripts" if is_audit else "implementation_scripts"
-                target_dir = audit_dir if is_audit else impl_dir
-                
-                # Ensure the target directory exists
-                os.makedirs(target_dir, exist_ok=True)
-                
-                # Write the script content to the target file
-                script_path = os.path.join(target_dir, filename)
-                # Normalize line endings to Windows style CRLF (since this repository runs on Windows)
-                normalized_code = code_content.replace('\r\n', '\n').replace('\n', '\r\n')
-                with open(script_path, "w", encoding="utf-8", newline="") as sf:
-                    sf.write(normalized_code + "\r\n")
-                total_extracted += 1
-                
-                # Check if download link is already present in the markdown file
-                link_text = f"[Download Script: {filename}]({folder_name}/{filename})"
-                if link_text not in content:
-                    # Insert the download link right before the code block
-                    new_block = f"{link_text}\n\n{full_block}"
-                    content = content.replace(full_block, new_block, 1)
-                    modified = True
-                    total_linked += 1
+                file_path = os.path.join(root, file)
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
                     
-            if modified:
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(content)
+                matches = code_block_pattern.findall(content)
+                if not matches:
+                    continue
                     
+                modified = False
+                for full_block, code_content in matches:
+                    code_lines = code_content.strip().split("\n")
+                    if not code_lines:
+                        continue
+                    first_line = code_lines[0].strip()
+                    
+                    # Match comments like '# Name.ps1'
+                    filename_match = re.match(r'^#\s*([a-zA-Z0-9_-]+\.ps1)', first_line, re.IGNORECASE)
+                    if not filename_match:
+                        continue
+                        
+                    filename = filename_match.group(1)
+                    
+                    # Classify implementation vs audit
+                    lower_name = filename.lower()
+                    is_audit = (
+                        lower_name.startswith("audit-") or
+                        lower_name.startswith("test-") or
+                        lower_name.startswith("get-") or
+                        lower_name.startswith("check-")
+                    )
+                    
+                    folder_name = "audit_scripts" if is_audit else "implementation_scripts"
+                    target_dir = audit_dir if is_audit else impl_dir
+                    
+                    # Ensure the target directory exists
+                    os.makedirs(target_dir, exist_ok=True)
+                    
+                    # Write the script content to the target file
+                    script_path = os.path.join(target_dir, filename)
+                    # Normalize line endings to Windows style CRLF (since this repository runs on Windows)
+                    normalized_code = code_content.replace('\r\n', '\n').replace('\n', '\r\n')
+                    with open(script_path, "w", encoding="utf-8", newline="") as sf:
+                        sf.write(normalized_code + "\r\n")
+                    total_extracted += 1
+                    
+                    # Compute relative prefix from markdown file's directory to the module path
+                    if root == module_path:
+                        prefix = ""
+                    else:
+                        prefix = os.path.relpath(module_path, root).replace('\\', '/') + "/"
+                    
+                    # Check if download link is already present in the markdown file
+                    link_text = f"[Download Script: {filename}]({prefix}{folder_name}/{filename})"
+                    if link_text not in content:
+                        # Insert the download link right before the code block
+                        new_block = f"{link_text}\n\n{full_block}"
+                        content = content.replace(full_block, new_block, 1)
+                        modified = True
+                        total_linked += 1
+                        
+                if modified:
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        f.write(content)
+                        
     print(f"Extraction complete! Extracted {total_extracted} scripts and added {total_linked} links.")
 
 if __name__ == "__main__":
