@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Benchmark xmlns="http://checklists.nist.gov/xccdf/1.2" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xhtml="http://www.w3.org/1999/xhtml" id="xccdf_org.adhardening.benchmarks_benchmark_ad-hardening" resolved="false" xml:lang="en">
-  <status date="2026-07-05">accepted</status>
+  <status date="2026-07-06">accepted</status>
   <title>Active Directory Hardening Guidebook Benchmark</title>
   <description>Automated compliance checklist profiles and rules parsed directly from the Active Directory Hardening Guidebook.</description>
   <version>1.0</version>
   <metadata>
     <dc:publisher>Antigravity Hardening Project</dc:publisher>
     <dc:creator>Antigravity</dc:creator>
-    <dc:date>2026-07-05</dc:date>
+    <dc:date>2026-07-06</dc:date>
   </metadata>
   <Profile id="xccdf_org.adhardening.benchmarks_profile_DomainController">
     <title>Domain Controller Hardening Profile</title>
