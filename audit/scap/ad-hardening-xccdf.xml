@@ -9513,6 +9513,7 @@ if ($script:NonCompliant) {
       <rationale>
         <xhtml:p>A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit).</xhtml:p>
         <xhtml:p>To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the <xhtml:code>AvailableUpdates</xhtml:code> registry key, which instructs the OS boot manager to write the revocation variables to firmware.</xhtml:p>
+        <xhtml:p>According to the latest Microsoft guidelines, the recommended trigger value for enterprise deployments to apply all security updates (including the new Windows UEFI CA 2023 certificates and boot manager updates) is <xhtml:strong>`0x5944`</xhtml:strong> (hex) / <xhtml:strong>`22852`</xhtml:strong> (decimal). As the OS processes this bitmask, the value is cleared incrementally, ending up at <xhtml:strong>`0x4000`</xhtml:strong> (hex) / <xhtml:strong>`16384`</xhtml:strong> (decimal) upon successful completion.</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
@@ -9522,13 +9523,30 @@ if ($script:NonCompliant) {
           <xhtml:li>Create or edit a GPO linked to the Domain Controllers OU (e.g., <xhtml:code>GPO_Hardening_DomainControllers</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Preferences\Windows Settings\Registry</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Create registry items to deploy the <xhtml:code>AvailableUpdates</xhtml:code> DWORD under <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Secureboot</xhtml:code>.</xhtml:li>
+          <xhtml:li>Create a registry item to deploy the <xhtml:code>AvailableUpdates</xhtml:code> DWORD under <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Secureboot</xhtml:code>.</xhtml:li>
           <xhtml:li>
-            <xhtml:em> </xhtml:em>Phase 1 (Apply DBX Update)*: Set <xhtml:code>AvailableUpdates</xhtml:code> = <xhtml:code>64</xhtml:code> (REG_DWORD)</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
           <xhtml:li>
-            <xhtml:em> </xhtml:em>Phase 2 (Apply SVN and DB Updates)*: Set <xhtml:code>AvailableUpdates</xhtml:code> = <xhtml:code>384</xhtml:code> (REG_DWORD, sum of 256 and 128)</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
           <xhtml:li>
-            <xhtml:em> </xhtml:em>Phase 3 (Enforce Code Integrity Boot Policy)*: Set <xhtml:code>AvailableUpdates</xhtml:code> = <xhtml:code>512</xhtml:code> (REG_DWORD)</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SYSTEM\CurrentControlSet\Control\Secureboot</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>AvailableUpdates</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>22852</xhtml:code> (Decimal) or <xhtml:code>5944</xhtml:code> (Hex)</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -9547,9 +9565,9 @@ if (-not (Test-Path $Path)) {
     New-Item -Path $Path -Force | Out-Null
 }
 
-# Trigger DBX Update (Phase 1 DBX Update = 64)
-Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
-Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green</xhtml:code>
+# Trigger updates (0x5944 = 22852)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 22852 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX and 2023 CA revocation updates configured in registry. A system reboot is required." -ForegroundColor Green</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
         <xhtml:h3>Audit Script</xhtml:h3>
@@ -9565,14 +9583,14 @@ Write-Host "--- Auditing BlackLotus Mitigations ---" -ForegroundColor Cyan
 
 $script:NonCompliant = $false
 
-# Audit AvailableUpdates registry key
+# 1. Audit AvailableUpdates registry key
 $Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
 if (Test-Path $Path) {
     $Val = Get-ItemProperty -Path $Path -Name "AvailableUpdates" -ErrorAction SilentlyContinue
     $UpdateVal = if ($Val) { $Val.AvailableUpdates } else { 0 }
     
-    # Check if at least DBX update (64) is enabled
-    if ($UpdateVal -ge 64) {
+    # Check if configured (&gt;= 0x4000 / 16384)
+    if ($UpdateVal -ge 16384) {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Compliant)" -ForegroundColor Green
     } else {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
@@ -9581,6 +9599,17 @@ if (Test-Path $Path) {
 } else {
     Write-Host "    - BlackLotus Revocation Updates: Registry path not found (Non-Compliant)" -ForegroundColor Red
     $script:NonCompliant = $true
+}
+
+# 2. Audit UEFICA2023Status (if present)
+$ServicingPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing"
+if (Test-Path $ServicingPath) {
+    $ServVal = Get-ItemProperty -Path $ServicingPath -Name "UEFICA2023Status" -ErrorAction SilentlyContinue
+    if ($ServVal) {
+        $Status = $ServVal.UEFICA2023Status
+        $Color = if ($Status -eq "Updated") { "Green" } else { "Yellow" }
+        Write-Host "    - UEFI CA 2023 Update Status: $Status" -ForegroundColor $Color
+    }
 }
 
 if ($script:NonCompliant) {
@@ -9599,9 +9628,9 @@ if (-not (Test-Path $Path)) {
     New-Item -Path $Path -Force | Out-Null
 }
 
-# Trigger DBX Update (Phase 1 DBX Update = 64)
-Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
-Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green</fix>
+# Trigger updates (0x5944 = 22852)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 22852 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX and 2023 CA revocation updates configured in registry. A system reboot is required." -ForegroundColor Green</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2033" />
       </check>
@@ -32253,6 +32282,7 @@ Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundCo
       <rationale>
         <xhtml:p>A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit).</xhtml:p>
         <xhtml:p>To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the <xhtml:code>AvailableUpdates</xhtml:code> registry key, which instructs the OS boot manager to write the revocation variables to firmware.</xhtml:p>
+        <xhtml:p>According to the latest Microsoft guidelines, the recommended trigger value for enterprise deployments to apply all security updates (including the new Windows UEFI CA 2023 certificates and boot manager updates) is <xhtml:strong>`0x5944`</xhtml:strong> (hex) / <xhtml:strong>`22852`</xhtml:strong> (decimal). As the OS processes this bitmask, the value is cleared incrementally, ending up at <xhtml:strong>`0x4000`</xhtml:strong> (hex) / <xhtml:strong>`16384`</xhtml:strong> (decimal) upon successful completion.</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
@@ -32262,13 +32292,30 @@ Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundCo
           <xhtml:li>Create or edit a GPO linked to the PAWs OU (e.g., <xhtml:code>GPO_Hardening_PAWs</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Preferences\Windows Settings\Registry</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Create registry items to deploy the <xhtml:code>AvailableUpdates</xhtml:code> DWORD under <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Secureboot</xhtml:code>.</xhtml:li>
+          <xhtml:li>Create a registry item to deploy the <xhtml:code>AvailableUpdates</xhtml:code> DWORD under <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Secureboot</xhtml:code>.</xhtml:li>
           <xhtml:li>
-            <xhtml:em> </xhtml:em>Phase 1 (Apply DBX Update)*: Set <xhtml:code>AvailableUpdates</xhtml:code> = <xhtml:code>64</xhtml:code> (REG_DWORD)</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
           <xhtml:li>
-            <xhtml:em> </xhtml:em>Phase 2 (Apply SVN and DB Updates)*: Set <xhtml:code>AvailableUpdates</xhtml:code> = <xhtml:code>384</xhtml:code> (REG_DWORD, sum of 256 and 128)</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
           <xhtml:li>
-            <xhtml:em> </xhtml:em>Phase 3 (Enforce Code Integrity Boot Policy)*: Set <xhtml:code>AvailableUpdates</xhtml:code> = <xhtml:code>512</xhtml:code> (REG_DWORD)</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SYSTEM\CurrentControlSet\Control\Secureboot</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>AvailableUpdates</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>22852</xhtml:code> (Decimal) or <xhtml:code>5944</xhtml:code> (Hex)</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -32287,9 +32334,9 @@ if (-not (Test-Path $Path)) {
     New-Item -Path $Path -Force | Out-Null
 }
 
-# Trigger DBX Update (Phase 1 DBX Update = 64)
-Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
-Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green</xhtml:code>
+# Trigger updates (0x5944 = 22852)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 22852 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX and 2023 CA revocation updates configured in registry. A system reboot is required." -ForegroundColor Green</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
         <xhtml:h3>Audit Script</xhtml:h3>
@@ -32305,14 +32352,14 @@ Write-Host "--- Auditing BlackLotus Mitigations ---" -ForegroundColor Cyan
 
 $script:NonCompliant = $false
 
-# Audit AvailableUpdates registry key
+# 1. Audit AvailableUpdates registry key
 $Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
 if (Test-Path $Path) {
     $Val = Get-ItemProperty -Path $Path -Name "AvailableUpdates" -ErrorAction SilentlyContinue
     $UpdateVal = if ($Val) { $Val.AvailableUpdates } else { 0 }
     
-    # Check if at least DBX update (64) is enabled
-    if ($UpdateVal -ge 64) {
+    # Check if configured (&gt;= 0x4000 / 16384)
+    if ($UpdateVal -ge 16384) {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Compliant)" -ForegroundColor Green
     } else {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
@@ -32321,6 +32368,17 @@ if (Test-Path $Path) {
 } else {
     Write-Host "    - BlackLotus Revocation Updates: Registry path not found (Non-Compliant)" -ForegroundColor Red
     $script:NonCompliant = $true
+}
+
+# 2. Audit UEFICA2023Status (if present)
+$ServicingPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing"
+if (Test-Path $ServicingPath) {
+    $ServVal = Get-ItemProperty -Path $ServicingPath -Name "UEFICA2023Status" -ErrorAction SilentlyContinue
+    if ($ServVal) {
+        $Status = $ServVal.UEFICA2023Status
+        $Color = if ($Status -eq "Updated") { "Green" } else { "Yellow" }
+        Write-Host "    - UEFI CA 2023 Update Status: $Status" -ForegroundColor $Color
+    }
 }
 
 if ($script:NonCompliant) {
@@ -32339,9 +32397,9 @@ if (-not (Test-Path $Path)) {
     New-Item -Path $Path -Force | Out-Null
 }
 
-# Trigger DBX Update (Phase 1 DBX Update = 64)
-Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
-Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green</fix>
+# Trigger updates (0x5944 = 22852)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 22852 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX and 2023 CA revocation updates configured in registry. A system reboot is required." -ForegroundColor Green</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7035" />
       </check>
@@ -44076,6 +44134,7 @@ Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundCo
       <rationale>
         <xhtml:p>A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit).</xhtml:p>
         <xhtml:p>To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the <xhtml:code>AvailableUpdates</xhtml:code> registry key, which instructs the OS boot manager to write the revocation variables to firmware.</xhtml:p>
+        <xhtml:p>According to the latest Microsoft guidelines, the recommended trigger value for enterprise deployments to apply all security updates (including the new Windows UEFI CA 2023 certificates and boot manager updates) is <xhtml:strong>`0x5944`</xhtml:strong> (hex) / <xhtml:strong>`22852`</xhtml:strong> (decimal). As the OS processes this bitmask, the value is cleared incrementally, ending up at <xhtml:strong>`0x4000`</xhtml:strong> (hex) / <xhtml:strong>`16384`</xhtml:strong> (decimal) upon successful completion.</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
@@ -44085,13 +44144,30 @@ Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundCo
           <xhtml:li>Create or edit a GPO linked to the workstations OU (e.g., <xhtml:code>GPO_Hardening_Workstations</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Preferences\Windows Settings\Registry</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Create registry items to deploy the <xhtml:code>AvailableUpdates</xhtml:code> DWORD under <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Secureboot</xhtml:code>.</xhtml:li>
+          <xhtml:li>Create a registry item to deploy the <xhtml:code>AvailableUpdates</xhtml:code> DWORD under <xhtml:code>HKLM\SYSTEM\CurrentControlSet\Control\Secureboot</xhtml:code>.</xhtml:li>
           <xhtml:li>
-            <xhtml:em> </xhtml:em>Phase 1 (Apply DBX Update)*: Set <xhtml:code>AvailableUpdates</xhtml:code> = <xhtml:code>64</xhtml:code> (REG_DWORD)</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
           <xhtml:li>
-            <xhtml:em> </xhtml:em>Phase 2 (Apply SVN and DB Updates)*: Set <xhtml:code>AvailableUpdates</xhtml:code> = <xhtml:code>384</xhtml:code> (REG_DWORD, sum of 256 and 128)</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
           <xhtml:li>
-            <xhtml:em> </xhtml:em>Phase 3 (Enforce Code Integrity Boot Policy)*: Set <xhtml:code>AvailableUpdates</xhtml:code> = <xhtml:code>512</xhtml:code> (REG_DWORD)</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SYSTEM\CurrentControlSet\Control\Secureboot</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>AvailableUpdates</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>22852</xhtml:code> (Decimal) or <xhtml:code>5944</xhtml:code> (Hex)</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -44110,9 +44186,9 @@ if (-not (Test-Path $Path)) {
     New-Item -Path $Path -Force | Out-Null
 }
 
-# Trigger DBX Update (Phase 1 DBX Update = 64)
-Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
-Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green</xhtml:code>
+# Trigger updates (0x5944 = 22852)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 22852 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX and 2023 CA revocation updates configured in registry. A system reboot is required." -ForegroundColor Green</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
         <xhtml:h3>Audit Script</xhtml:h3>
@@ -44128,14 +44204,14 @@ Write-Host "--- Auditing BlackLotus Mitigations ---" -ForegroundColor Cyan
 
 $script:NonCompliant = $false
 
-# Audit AvailableUpdates registry key
+# 1. Audit AvailableUpdates registry key
 $Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
 if (Test-Path $Path) {
     $Val = Get-ItemProperty -Path $Path -Name "AvailableUpdates" -ErrorAction SilentlyContinue
     $UpdateVal = if ($Val) { $Val.AvailableUpdates } else { 0 }
     
-    # Check if at least DBX update (64) is enabled
-    if ($UpdateVal -ge 64) {
+    # Check if configured (&gt;= 0x4000 / 16384)
+    if ($UpdateVal -ge 16384) {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Compliant)" -ForegroundColor Green
     } else {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
@@ -44144,6 +44220,17 @@ if (Test-Path $Path) {
 } else {
     Write-Host "    - BlackLotus Revocation Updates: Registry path not found (Non-Compliant)" -ForegroundColor Red
     $script:NonCompliant = $true
+}
+
+# 2. Audit UEFICA2023Status (if present)
+$ServicingPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing"
+if (Test-Path $ServicingPath) {
+    $ServVal = Get-ItemProperty -Path $ServicingPath -Name "UEFICA2023Status" -ErrorAction SilentlyContinue
+    if ($ServVal) {
+        $Status = $ServVal.UEFICA2023Status
+        $Color = if ($Status -eq "Updated") { "Green" } else { "Yellow" }
+        Write-Host "    - UEFI CA 2023 Update Status: $Status" -ForegroundColor $Color
+    }
 }
 
 if ($script:NonCompliant) {
@@ -44162,9 +44249,9 @@ if (-not (Test-Path $Path)) {
     New-Item -Path $Path -Force | Out-Null
 }
 
-# Trigger DBX Update (Phase 1 DBX Update = 64)
-Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
-Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green</fix>
+# Trigger updates (0x5944 = 22852)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 22852 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX and 2023 CA revocation updates configured in registry. A system reboot is required." -ForegroundColor Green</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8035" />
       </check>

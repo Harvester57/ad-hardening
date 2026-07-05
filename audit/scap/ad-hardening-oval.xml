@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-05T12:42:40Z</oval:timestamp>
+    <oval:timestamp>2026-07-05T12:48:47Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -989,7 +989,9 @@ For Tier 0 assets like Domain Controllers, firmware integrity is critical. If Se
         </affected>
         <description>A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit).
 
-To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.</description>
+To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.
+
+According to the latest Microsoft guidelines, the recommended trigger value for enterprise deployments to apply all security updates (including the new Windows UEFI CA 2023 certificates and boot manager updates) is **`0x5944`** (hex) / **`22852`** (decimal). As the OS processes this bitmask, the value is cleared incrementally, ending up at **`0x4000`** (hex) / **`16384`** (decimal) upon successful completion.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:2033001" />
@@ -2142,7 +2144,9 @@ Enforcing these deactivation controls ensures:
         </affected>
         <description>A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit). 
 
-To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.</description>
+To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.
+
+According to the latest Microsoft guidelines, the recommended trigger value for enterprise deployments to apply all security updates (including the new Windows UEFI CA 2023 certificates and boot manager updates) is **`0x5944`** (hex) / **`22852`** (decimal). As the OS processes this bitmask, the value is cleared incrementally, ending up at **`0x4000`** (hex) / **`16384`** (decimal) upon successful completion.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:8035001" />
@@ -4391,7 +4395,9 @@ Enforcing these deactivation controls ensures:
         </affected>
         <description>A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit).
 
-To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.</description>
+To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.
+
+According to the latest Microsoft guidelines, the recommended trigger value for enterprise deployments to apply all security updates (including the new Windows UEFI CA 2023 certificates and boot manager updates) is **`0x5944`** (hex) / **`22852`** (decimal). As the OS processes this bitmask, the value is cleared incrementally, ending up at **`0x4000`** (hex) / **`16384`** (decimal) upon successful completion.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" test_ref="oval:org.adhardening:tst:7035001" />
@@ -15542,7 +15548,7 @@ To fully mitigate this threat (CVE-2023-24932), Windows update revocations must 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:2033001" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int" operation="greater than or equal">64</windows:value>
+      <windows:value datatype="int">22852</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001001" version="1">
       <windows:type>reg_dword</windows:type>
@@ -17140,7 +17146,7 @@ To fully mitigate this threat (CVE-2023-24932), Windows update revocations must 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8035001" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int" operation="greater than or equal">64</windows:value>
+      <windows:value datatype="int">22852</windows:value>
     </windows:registry_state>
     <windows:passwordpolicy_state id="oval:org.adhardening:ste:3001900" version="1">
       <windows:min_passwd_len datatype="int">20</windows:min_passwd_len>
@@ -18898,7 +18904,7 @@ To fully mitigate this threat (CVE-2023-24932), Windows update revocations must 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7035001" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int" operation="greater than or equal">64</windows:value>
+      <windows:value datatype="int">22852</windows:value>
     </windows:registry_state>
   </states>
 </oval_definitions>

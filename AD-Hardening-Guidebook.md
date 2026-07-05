@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: dcfafc7 | Generated: July 05, 2026</span>
+      <span>Commit: 3c3b68f | Generated: July 05, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -8386,7 +8386,7 @@ if ($script:NonCompliant) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **BlackLotus Revocation Updates (CVE-2023-24932)**: `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`
-    * `AvailableUpdates` = `>= 64` (REG_DWORD)
+    * `AvailableUpdates` = `>= 0x4000` (REG_DWORD)
 
 ---
 
@@ -8395,6 +8395,8 @@ if ($script:NonCompliant) {
 A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit).
 
 To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.
+
+According to the latest Microsoft guidelines, the recommended trigger value for enterprise deployments to apply all security updates (including the new Windows UEFI CA 2023 certificates and boot manager updates) is **`0x5944`** (hex) / **`22852`** (decimal). As the OS processes this bitmask, the value is cleared incrementally, ending up at **`0x4000`** (hex) / **`16384`** (decimal) upon successful completion.
 
 ---
 
@@ -8415,10 +8417,13 @@ To configure the update triggers for the DBX and Code Integrity boot manager rev
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
 3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
-4. Create registry items to deploy the `AvailableUpdates` DWORD under `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`.
-   * *Phase 1 (Apply DBX Update)*: Set `AvailableUpdates` = `64` (REG_DWORD)
-   * *Phase 2 (Apply SVN and DB Updates)*: Set `AvailableUpdates` = `384` (REG_DWORD, sum of 256 and 128)
-   * *Phase 3 (Enforce Code Integrity Boot Policy)*: Set `AvailableUpdates` = `512` (REG_DWORD)
+4. Create a registry item to deploy the `AvailableUpdates` DWORD under `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`.
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Control\Secureboot`
+   * **Value Name**: `AvailableUpdates`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `22852` (Decimal) or `5944` (Hex)
 
 ---
 
@@ -8440,9 +8445,9 @@ if (-not (Test-Path $Path)) {
     New-Item -Path $Path -Force | Out-Null
 }
 
-# Trigger DBX Update (Phase 1 DBX Update = 64)
-Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
-Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green
+# Trigger updates (0x5944 = 22852)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 22852 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX and 2023 CA revocation updates configured in registry. A system reboot is required." -ForegroundColor Green
 ```
 
 ---
@@ -8462,14 +8467,14 @@ Write-Host "--- Auditing BlackLotus Mitigations ---" -ForegroundColor Cyan
 
 $script:NonCompliant = $false
 
-# Audit AvailableUpdates registry key
+# 1. Audit AvailableUpdates registry key
 $Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
 if (Test-Path $Path) {
     $Val = Get-ItemProperty -Path $Path -Name "AvailableUpdates" -ErrorAction SilentlyContinue
     $UpdateVal = if ($Val) { $Val.AvailableUpdates } else { 0 }
     
-    # Check if at least DBX update (64) is enabled
-    if ($UpdateVal -ge 64) {
+    # Check if configured (>= 0x4000 / 16384)
+    if ($UpdateVal -ge 16384) {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Compliant)" -ForegroundColor Green
     } else {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
@@ -8478,6 +8483,17 @@ if (Test-Path $Path) {
 } else {
     Write-Host "    - BlackLotus Revocation Updates: Registry path not found (Non-Compliant)" -ForegroundColor Red
     $script:NonCompliant = $true
+}
+
+# 2. Audit UEFICA2023Status (if present)
+$ServicingPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing"
+if (Test-Path $ServicingPath) {
+    $ServVal = Get-ItemProperty -Path $ServicingPath -Name "UEFICA2023Status" -ErrorAction SilentlyContinue
+    if ($ServVal) {
+        $Status = $ServVal.UEFICA2023Status
+        $Color = if ($Status -eq "Updated") { "Green" } else { "Yellow" }
+        Write-Host "    - UEFI CA 2023 Update Status: $Status" -ForegroundColor $Color
+    }
 }
 
 if ($script:NonCompliant) {
@@ -8489,7 +8505,7 @@ if ($script:NonCompliant) {
 
 <div id="02-domain-controllers-configure-secure-boot-revocations-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **Microsoft Security Baseline Focus**: Windows Administrative Templates (Secure Boot Revocation Updates)
+* **Microsoft KB5068202**: Registry key updates for Secure Boot: Windows devices with IT-managed updates
 * **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
 
 
@@ -27882,7 +27898,7 @@ if ($script:Vulnerable) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **BlackLotus Revocation Updates (CVE-2023-24932)**: `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`
-    * `AvailableUpdates` = `>= 64` (REG_DWORD)
+    * `AvailableUpdates` = `>= 0x4000` (REG_DWORD)
 
 ---
 
@@ -27891,6 +27907,8 @@ if ($script:Vulnerable) {
 A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit).
 
 To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.
+
+According to the latest Microsoft guidelines, the recommended trigger value for enterprise deployments to apply all security updates (including the new Windows UEFI CA 2023 certificates and boot manager updates) is **`0x5944`** (hex) / **`22852`** (decimal). As the OS processes this bitmask, the value is cleared incrementally, ending up at **`0x4000`** (hex) / **`16384`** (decimal) upon successful completion.
 
 ---
 
@@ -27911,10 +27929,13 @@ To configure the update triggers for the DBX and Code Integrity boot manager rev
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to the PAWs OU (e.g., `GPO_Hardening_PAWs`).
 3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
-4. Create registry items to deploy the `AvailableUpdates` DWORD under `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`.
-   * *Phase 1 (Apply DBX Update)*: Set `AvailableUpdates` = `64` (REG_DWORD)
-   * *Phase 2 (Apply SVN and DB Updates)*: Set `AvailableUpdates` = `384` (REG_DWORD, sum of 256 and 128)
-   * *Phase 3 (Enforce Code Integrity Boot Policy)*: Set `AvailableUpdates` = `512` (REG_DWORD)
+4. Create a registry item to deploy the `AvailableUpdates` DWORD under `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`.
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Control\Secureboot`
+   * **Value Name**: `AvailableUpdates`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `22852` (Decimal) or `5944` (Hex)
 
 ---
 
@@ -27936,9 +27957,9 @@ if (-not (Test-Path $Path)) {
     New-Item -Path $Path -Force | Out-Null
 }
 
-# Trigger DBX Update (Phase 1 DBX Update = 64)
-Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
-Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green
+# Trigger updates (0x5944 = 22852)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 22852 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX and 2023 CA revocation updates configured in registry. A system reboot is required." -ForegroundColor Green
 ```
 
 ---
@@ -27958,14 +27979,14 @@ Write-Host "--- Auditing BlackLotus Mitigations ---" -ForegroundColor Cyan
 
 $script:NonCompliant = $false
 
-# Audit AvailableUpdates registry key
+# 1. Audit AvailableUpdates registry key
 $Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
 if (Test-Path $Path) {
     $Val = Get-ItemProperty -Path $Path -Name "AvailableUpdates" -ErrorAction SilentlyContinue
     $UpdateVal = if ($Val) { $Val.AvailableUpdates } else { 0 }
     
-    # Check if at least DBX update (64) is enabled
-    if ($UpdateVal -ge 64) {
+    # Check if configured (>= 0x4000 / 16384)
+    if ($UpdateVal -ge 16384) {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Compliant)" -ForegroundColor Green
     } else {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
@@ -27974,6 +27995,17 @@ if (Test-Path $Path) {
 } else {
     Write-Host "    - BlackLotus Revocation Updates: Registry path not found (Non-Compliant)" -ForegroundColor Red
     $script:NonCompliant = $true
+}
+
+# 2. Audit UEFICA2023Status (if present)
+$ServicingPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing"
+if (Test-Path $ServicingPath) {
+    $ServVal = Get-ItemProperty -Path $ServicingPath -Name "UEFICA2023Status" -ErrorAction SilentlyContinue
+    if ($ServVal) {
+        $Status = $ServVal.UEFICA2023Status
+        $Color = if ($Status -eq "Updated") { "Green" } else { "Yellow" }
+        Write-Host "    - UEFI CA 2023 Update Status: $Status" -ForegroundColor $Color
+    }
 }
 
 if ($script:NonCompliant) {
@@ -27985,7 +28017,7 @@ if ($script:NonCompliant) {
 
 <div id="07-paws-configure-secure-boot-revocations-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **Microsoft Security Baseline Focus**: Windows Administrative Templates (Secure Boot Revocation Updates)
+* **Microsoft KB5068202**: Registry key updates for Secure Boot: Windows devices with IT-managed updates
 * **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
 
 
@@ -37249,7 +37281,7 @@ if ($script:Vulnerable) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **BlackLotus Revocation Updates (CVE-2023-24932)**: `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`
-    * `AvailableUpdates` = `>= 64` (REG_DWORD)
+    * `AvailableUpdates` = `>= 0x4000` (REG_DWORD)
 
 ---
 
@@ -37258,6 +37290,8 @@ if ($script:Vulnerable) {
 A vulnerability in the Windows Boot Manager allows an attacker with physical access or local administrative rights to bypass UEFI Secure Boot and execute unsigned code during the boot process (BlackLotus bootkit). 
 
 To fully mitigate this threat (CVE-2023-24932), Windows update revocations must be applied to the UEFI variables (DBX list) and code integrity SVN policies must be updated. This is managed via the `AvailableUpdates` registry key, which instructs the OS boot manager to write the revocation variables to firmware.
+
+According to the latest Microsoft guidelines, the recommended trigger value for enterprise deployments to apply all security updates (including the new Windows UEFI CA 2023 certificates and boot manager updates) is **`0x5944`** (hex) / **`22852`** (decimal). As the OS processes this bitmask, the value is cleared incrementally, ending up at **`0x4000`** (hex) / **`16384`** (decimal) upon successful completion.
 
 ---
 
@@ -37278,10 +37312,13 @@ To configure the update triggers for the DBX and Code Integrity boot manager rev
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Create or edit a GPO linked to the workstations OU (e.g., `GPO_Hardening_Workstations`).
 3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
-4. Create registry items to deploy the `AvailableUpdates` DWORD under `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`.
-   * *Phase 1 (Apply DBX Update)*: Set `AvailableUpdates` = `64` (REG_DWORD)
-   * *Phase 2 (Apply SVN and DB Updates)*: Set `AvailableUpdates` = `384` (REG_DWORD, sum of 256 and 128)
-   * *Phase 3 (Enforce Code Integrity Boot Policy)*: Set `AvailableUpdates` = `512` (REG_DWORD)
+4. Create a registry item to deploy the `AvailableUpdates` DWORD under `HKLM\SYSTEM\CurrentControlSet\Control\Secureboot`.
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Control\Secureboot`
+   * **Value Name**: `AvailableUpdates`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `22852` (Decimal) or `5944` (Hex)
 
 ---
 
@@ -37303,9 +37340,9 @@ if (-not (Test-Path $Path)) {
     New-Item -Path $Path -Force | Out-Null
 }
 
-# Trigger DBX Update (Phase 1 DBX Update = 64)
-Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
-Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green
+# Trigger updates (0x5944 = 22852)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 22852 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX and 2023 CA revocation updates configured in registry. A system reboot is required." -ForegroundColor Green
 ```
 
 ---
@@ -37325,14 +37362,14 @@ Write-Host "--- Auditing BlackLotus Mitigations ---" -ForegroundColor Cyan
 
 $script:NonCompliant = $false
 
-# Audit AvailableUpdates registry key
+# 1. Audit AvailableUpdates registry key
 $Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Secureboot"
 if (Test-Path $Path) {
     $Val = Get-ItemProperty -Path $Path -Name "AvailableUpdates" -ErrorAction SilentlyContinue
     $UpdateVal = if ($Val) { $Val.AvailableUpdates } else { 0 }
     
-    # Check if at least DBX update (64) is enabled
-    if ($UpdateVal -ge 64) {
+    # Check if configured (>= 0x4000 / 16384)
+    if ($UpdateVal -ge 16384) {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Compliant)" -ForegroundColor Green
     } else {
         Write-Host "    - BlackLotus Revocation Updates (AvailableUpdates): $UpdateVal (Non-Compliant - DBX/SVN revocations not triggered)" -ForegroundColor Red
@@ -37341,6 +37378,17 @@ if (Test-Path $Path) {
 } else {
     Write-Host "    - BlackLotus Revocation Updates: Registry path not found (Non-Compliant)" -ForegroundColor Red
     $script:NonCompliant = $true
+}
+
+# 2. Audit UEFICA2023Status (if present)
+$ServicingPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing"
+if (Test-Path $ServicingPath) {
+    $ServVal = Get-ItemProperty -Path $ServicingPath -Name "UEFICA2023Status" -ErrorAction SilentlyContinue
+    if ($ServVal) {
+        $Status = $ServVal.UEFICA2023Status
+        $Color = if ($Status -eq "Updated") { "Green" } else { "Yellow" }
+        Write-Host "    - UEFI CA 2023 Update Status: $Status" -ForegroundColor $Color
+    }
 }
 
 if ($script:NonCompliant) {
@@ -37352,7 +37400,7 @@ if ($script:NonCompliant) {
 
 <div id="08-endpoints-configure-secure-boot-revocations-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **Microsoft Security Baseline Focus**: Windows Administrative Templates (Secure Boot Revocation Updates)
+* **Microsoft KB5068202**: Registry key updates for Secure Boot: Windows devices with IT-managed updates
 * **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
 
 

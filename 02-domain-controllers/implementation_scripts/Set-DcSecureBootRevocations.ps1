@@ -8,6 +8,6 @@ if (-not (Test-Path $Path)) {
     New-Item -Path $Path -Force | Out-Null
 }
 
-# Trigger DBX Update (Phase 1 DBX Update = 64)
-Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 64 -Type DWord -Force | Out-Null
-Write-Host "[+] BlackLotus DBX revocation update configured in registry. A system reboot is required." -ForegroundColor Green
+# Trigger updates (0x5944 = 22852)
+Set-ItemProperty -Path $Path -Name "AvailableUpdates" -Value 22852 -Type DWord -Force | Out-Null
+Write-Host "[+] BlackLotus DBX and 2023 CA revocation updates configured in registry. A system reboot is required." -ForegroundColor Green
