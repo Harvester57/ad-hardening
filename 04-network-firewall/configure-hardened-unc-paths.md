@@ -18,7 +18,7 @@
     * `\\*\NETLOGON` = `RequireIntegrity=1,RequireMutualAuthentication=1` (REG_SZ)
     * `\\*\SYSVOL` = `RequireIntegrity=1,RequireMutualAuthentication=1` (REG_SZ)
   * **Registry Location (Guest Logons)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation` -> `AllowInsecureGuestAuth` = `0` (REG_DWORD)
-  * **Registry Location (LDAP Client)**: `HKLM\System\CurrentControlSet\Services\LDAP` -> `LDAPClientIntegrity` = `2` (REG_DWORD)
+  * **Registry Location (LDAP Client)**: `HKLM\System\CurrentControlSet\Services\LDAP` -> `ldapclientintegrity` = `2` (REG_DWORD)
 
 ---
 
@@ -103,7 +103,7 @@ $LdapPath = "HKLM:\System\CurrentControlSet\Services\LDAP"
 if (-not (Test-Path $LdapPath)) {
     New-Item -Path $LdapPath -Force | Out-Null
 }
-Set-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -Value 2 -Type DWord -ErrorAction Stop
+Set-ItemProperty -Path $LdapPath -Name "ldapclientintegrity" -Value 2 -Type DWord -ErrorAction Stop
 Write-Host "[+] LDAP Client signing requirement set to Require signing." -ForegroundColor Green
 ```
 
@@ -140,8 +140,8 @@ Write-Host "    - Allow Insecure Guest Logons: $GuestSetting (Expected: 0)" -For
 
 # 3. Audit LDAP Client Signing
 $LdapPath = "HKLM:\System\CurrentControlSet\Services\LDAP"
-$LdapVal = Get-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -ErrorAction SilentlyContinue
-$LdapSetting = if ($LdapVal) { $LdapVal.LDAPClientIntegrity } else { 0 }
+$LdapVal = Get-ItemProperty -Path $LdapPath -Name "ldapclientintegrity" -ErrorAction SilentlyContinue
+$LdapSetting = if ($LdapVal) { $LdapVal.ldapclientintegrity } else { 0 }
 $LdapColor = if ($LdapSetting -eq 2) { "Green" } else { "Red" }
 Write-Host "    - LDAP Client Integrity (Signing): $LdapSetting (Expected: 2 - Require)" -ForegroundColor $LdapColor
 ```
