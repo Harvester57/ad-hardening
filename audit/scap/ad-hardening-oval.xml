@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-05T19:46:03Z</oval:timestamp>
+    <oval:timestamp>2026-07-05T19:49:19Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -21280,40 +21280,39 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2137920" version="1">
+      <windows:credential_validation>AUDIT_SUCCESS_FAILURE</windows:credential_validation>
       <windows:kerberos_authentication_service>AUDIT_SUCCESS_FAILURE</windows:kerberos_authentication_service>
       <windows:kerberos_service_ticket_operations>AUDIT_SUCCESS_FAILURE</windows:kerberos_service_ticket_operations>
-      <windows:credential_validation>AUDIT_SUCCESS_FAILURE</windows:credential_validation>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2138920" version="1">
-      <windows:user_account_management>AUDIT_SUCCESS_FAILURE</windows:user_account_management>
-      <windows:security_group_management>AUDIT_SUCCESS_FAILURE</windows:security_group_management>
       <windows:application_group_management>AUDIT_SUCCESS_FAILURE</windows:application_group_management>
       <windows:computer_account_management>AUDIT_SUCCESS_FAILURE</windows:computer_account_management>
       <windows:distribution_group_management>AUDIT_SUCCESS</windows:distribution_group_management>
       <windows:other_account_management_events>AUDIT_SUCCESS_FAILURE</windows:other_account_management_events>
+      <windows:security_group_management>AUDIT_SUCCESS_FAILURE</windows:security_group_management>
+      <windows:user_account_management>AUDIT_SUCCESS_FAILURE</windows:user_account_management>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2139920" version="1">
-      <windows:process_creation>AUDIT_SUCCESS_FAILURE</windows:process_creation>
       <windows:dpapi_activity>AUDIT_SUCCESS_FAILURE</windows:dpapi_activity>
-      <windows:pnp_activity>AUDIT_SUCCESS</windows:pnp_activity>
+      <windows:process_creation>AUDIT_SUCCESS_FAILURE</windows:process_creation>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2140920" version="1">
-      <windows:directory_service_changes>AUDIT_SUCCESS_FAILURE</windows:directory_service_changes>
       <windows:directory_service_access>AUDIT_SUCCESS_FAILURE</windows:directory_service_access>
+      <windows:directory_service_changes>AUDIT_SUCCESS_FAILURE</windows:directory_service_changes>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2141920" version="1">
-      <windows:logon>AUDIT_SUCCESS_FAILURE</windows:logon>
-      <windows:logoff>AUDIT_SUCCESS</windows:logoff>
-      <windows:special_logon>AUDIT_SUCCESS_FAILURE</windows:special_logon>
       <windows:account_lockout>AUDIT_SUCCESS_FAILURE</windows:account_lockout>
+      <windows:logoff>AUDIT_SUCCESS</windows:logoff>
+      <windows:logon>AUDIT_SUCCESS_FAILURE</windows:logon>
       <windows:other_logon_logoff_events>AUDIT_SUCCESS_FAILURE</windows:other_logon_logoff_events>
+      <windows:special_logon>AUDIT_SUCCESS_FAILURE</windows:special_logon>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2142920" version="1">
-      <windows:handle_manipulation>AUDIT_SUCCESS_FAILURE</windows:handle_manipulation>
-      <windows:registry>AUDIT_SUCCESS_FAILURE</windows:registry>
-      <windows:file_share>AUDIT_SUCCESS_FAILURE</windows:file_share>
       <windows:detailed_file_share>AUDIT_FAILURE</windows:detailed_file_share>
+      <windows:file_share>AUDIT_SUCCESS_FAILURE</windows:file_share>
+      <windows:handle_manipulation>AUDIT_SUCCESS_FAILURE</windows:handle_manipulation>
       <windows:other_object_access_events>AUDIT_SUCCESS_FAILURE</windows:other_object_access_events>
+      <windows:registry>AUDIT_SUCCESS_FAILURE</windows:registry>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:2143920" version="1">
       <windows:audit_policy_change>AUDIT_SUCCESS_FAILURE</windows:audit_policy_change>
@@ -22829,27 +22828,26 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:credential_validation>AUDIT_SUCCESS_FAILURE</windows:credential_validation>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8143920" version="1">
-      <windows:user_account_management>AUDIT_SUCCESS_FAILURE</windows:user_account_management>
-      <windows:security_group_management>AUDIT_SUCCESS_FAILURE</windows:security_group_management>
       <windows:other_account_management_events>AUDIT_SUCCESS_FAILURE</windows:other_account_management_events>
+      <windows:security_group_management>AUDIT_SUCCESS_FAILURE</windows:security_group_management>
+      <windows:user_account_management>AUDIT_SUCCESS_FAILURE</windows:user_account_management>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8144920" version="1">
-      <windows:process_creation>AUDIT_SUCCESS_FAILURE</windows:process_creation>
       <windows:dpapi_activity>AUDIT_SUCCESS_FAILURE</windows:dpapi_activity>
-      <windows:pnp_activity>AUDIT_SUCCESS</windows:pnp_activity>
+      <windows:process_creation>AUDIT_SUCCESS_FAILURE</windows:process_creation>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8146920" version="1">
-      <windows:logon>AUDIT_SUCCESS_FAILURE</windows:logon>
-      <windows:logoff>AUDIT_SUCCESS</windows:logoff>
-      <windows:special_logon>AUDIT_SUCCESS_FAILURE</windows:special_logon>
       <windows:account_lockout>AUDIT_SUCCESS_FAILURE</windows:account_lockout>
+      <windows:logoff>AUDIT_SUCCESS</windows:logoff>
+      <windows:logon>AUDIT_SUCCESS_FAILURE</windows:logon>
       <windows:other_logon_logoff_events>AUDIT_SUCCESS_FAILURE</windows:other_logon_logoff_events>
+      <windows:special_logon>AUDIT_SUCCESS_FAILURE</windows:special_logon>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8147920" version="1">
-      <windows:registry>AUDIT_FAILURE</windows:registry>
-      <windows:file_share>AUDIT_FAILURE</windows:file_share>
       <windows:detailed_file_share>AUDIT_FAILURE</windows:detailed_file_share>
+      <windows:file_share>AUDIT_FAILURE</windows:file_share>
       <windows:handle_manipulation>AUDIT_FAILURE</windows:handle_manipulation>
+      <windows:registry>AUDIT_FAILURE</windows:registry>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:8148920" version="1">
       <windows:audit_policy_change>AUDIT_SUCCESS_FAILURE</windows:audit_policy_change>
@@ -24580,29 +24578,28 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:credential_validation>AUDIT_SUCCESS_FAILURE</windows:credential_validation>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7132920" version="1">
-      <windows:user_account_management>AUDIT_SUCCESS_FAILURE</windows:user_account_management>
-      <windows:security_group_management>AUDIT_SUCCESS_FAILURE</windows:security_group_management>
       <windows:computer_account_management>AUDIT_SUCCESS_FAILURE</windows:computer_account_management>
       <windows:other_account_management_events>AUDIT_SUCCESS_FAILURE</windows:other_account_management_events>
+      <windows:security_group_management>AUDIT_SUCCESS_FAILURE</windows:security_group_management>
+      <windows:user_account_management>AUDIT_SUCCESS_FAILURE</windows:user_account_management>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7133920" version="1">
-      <windows:process_creation>AUDIT_SUCCESS_FAILURE</windows:process_creation>
       <windows:dpapi_activity>AUDIT_SUCCESS_FAILURE</windows:dpapi_activity>
-      <windows:pnp_activity>AUDIT_SUCCESS</windows:pnp_activity>
+      <windows:process_creation>AUDIT_SUCCESS_FAILURE</windows:process_creation>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7135920" version="1">
-      <windows:logon>AUDIT_SUCCESS_FAILURE</windows:logon>
-      <windows:logoff>AUDIT_SUCCESS</windows:logoff>
-      <windows:special_logon>AUDIT_SUCCESS_FAILURE</windows:special_logon>
       <windows:account_lockout>AUDIT_SUCCESS_FAILURE</windows:account_lockout>
+      <windows:logoff>AUDIT_SUCCESS</windows:logoff>
+      <windows:logon>AUDIT_SUCCESS_FAILURE</windows:logon>
       <windows:other_logon_logoff_events>AUDIT_SUCCESS_FAILURE</windows:other_logon_logoff_events>
+      <windows:special_logon>AUDIT_SUCCESS_FAILURE</windows:special_logon>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7136920" version="1">
-      <windows:handle_manipulation>AUDIT_SUCCESS_FAILURE</windows:handle_manipulation>
-      <windows:registry>AUDIT_SUCCESS_FAILURE</windows:registry>
-      <windows:file_share>AUDIT_SUCCESS_FAILURE</windows:file_share>
       <windows:detailed_file_share>AUDIT_FAILURE</windows:detailed_file_share>
+      <windows:file_share>AUDIT_SUCCESS_FAILURE</windows:file_share>
+      <windows:handle_manipulation>AUDIT_SUCCESS_FAILURE</windows:handle_manipulation>
       <windows:other_object_access_events>AUDIT_SUCCESS_FAILURE</windows:other_object_access_events>
+      <windows:registry>AUDIT_SUCCESS_FAILURE</windows:registry>
     </windows:auditeventpolicysubcategories_state>
     <windows:auditeventpolicysubcategories_state id="oval:org.adhardening:ste:7137920" version="1">
       <windows:audit_policy_change>AUDIT_SUCCESS_FAILURE</windows:audit_policy_change>

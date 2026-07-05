@@ -82639,7 +82639,7 @@ if ($Process.ExitCode -eq 0) {
       </Rule>
     </Group>
   </Group>
-  <TestResult id="xccdf_org.open-scap_testresult_xccdf_org.adhardening.benchmarks_profile_Endpoint" start-time="2026-07-05T21:43:43" end-time="2026-07-05T21:43:43" version="1.0" test-system="cpe:/a:redhat:openscap:1.3.0">
+  <TestResult id="xccdf_org.open-scap_testresult_xccdf_org.adhardening.benchmarks_profile_Endpoint" start-time="2026-07-05T21:49:37" end-time="2026-07-05T21:49:37" version="1.0" test-system="cpe:/a:redhat:openscap:1.3.0">
     <benchmark href="ad-hardening-xccdf.xml" id="xccdf_org.adhardening.benchmarks_benchmark_ad-hardening"/>
     <title>OSCAP Scan Result</title>
     <identity authenticated="false" privileged="false">Florian</identity>
@@ -82669,2022 +82669,2022 @@ if ($Process.ExitCode -eq 0) {
       <fact name="urn:xccdf:fact:ethernet:MAC" type="string">6E-2F-80-49-6D-26</fact>
       <fact name="urn:xccdf:fact:ethernet:MAC" type="string">00-15-5D-B8-36-08</fact>
     </target-facts>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-001" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-001" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-002" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-002" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-003" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-003" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-004" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-004" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-005" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-005" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-006" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-006" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-007" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ARCH-007" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-001" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-001" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-002" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-002" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-003" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-003" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-004" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-004" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-005" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-005" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-006" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-006" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-007" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-007" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-008" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-008" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-009" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-009" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-010" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-010" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-011" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-011" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-013" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-013" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-014" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-014" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-015" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-015" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-016" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-016" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-017" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-017" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-018" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-018" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-019" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-019" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-021" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-021" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-022" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-022" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-024" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-024" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-025" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-025" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-026" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-026" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-027" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-027" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-028" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-028" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-029" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-029" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-030" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-030" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-031" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-031" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-032" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-032" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-033" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-033" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-034" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-034" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-075" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-075" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-076" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-076" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-077" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-077" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-078" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-078" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-079" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-079" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-080" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-080" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-081" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-081" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-082" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-082" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-083" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-083" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-084" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-084" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-085" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-085" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-086" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-086" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-087" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-087" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-088" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-088" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-090" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-090" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-091" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-091" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-092" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-092" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-093" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-093" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-094" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-094" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-095" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-095" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-096" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-096" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-097" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-097" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-098" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-098" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-099" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-099" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-100" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-100" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-101" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-101" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-102" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-102" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-103" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-103" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-104" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-104" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-105" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-105" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-106" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-106" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-107" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-107" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-108" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-108" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-109" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-109" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-110" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-110" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-111" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-111" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-112" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-112" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-113" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-113" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-114" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-114" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-115" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-115" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-116" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-116" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-117" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-117" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-118" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-118" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-119" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-119" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-120" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-120" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-121" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-121" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-122" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-122" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-123" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-123" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-124" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-124" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-125" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-125" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-126" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-126" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-127" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-127" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-128" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-128" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-129" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-129" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-130" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-130" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-131" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-131" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-132" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-132" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-133" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-133" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-134" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-134" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-135" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-135" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-035" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-035" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-036" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-036" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-037" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-037" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-038" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-038" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-039" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-039" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-040" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-040" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-041" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-041" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-042" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-042" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-043" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-043" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-044" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-044" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-045" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-045" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-046" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-046" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-047" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-047" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-048" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-048" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-049" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-049" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-050" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-050" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-051" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-051" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-052" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-052" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-053" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-053" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-054" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-054" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-055" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-055" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-056" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-056" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-057" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-057" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-058" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-058" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-059" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-059" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-060" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-060" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-061" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-061" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-062" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-062" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-063" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-063" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-064" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-064" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-065" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-065" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-066" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-066" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-067" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-067" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-068" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-068" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-069" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-069" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-070" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-070" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-071" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-071" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-072" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-072" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-073" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-073" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-074" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-074" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-136" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-136" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-137" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-137" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-138" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-138" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-139" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-139" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-140" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-140" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-141" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-141" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-142" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-142" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-143" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-143" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-144" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-144" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-145" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-145" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-001" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-001" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:3002" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-003" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-003" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-004" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-004" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-005" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-005" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-006" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-006" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:3006" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-007" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-007" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:3007" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-008" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-008" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-009" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-009" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-010" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-010" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-011" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-011" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-012" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-012" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-013" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-013" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-014" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-014" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-015" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-015" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-016" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-016" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:3016" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-017" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-017" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-018" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-018" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-019" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-019" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-020" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-020" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-001" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-001" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:4001" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-002" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-002" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-003" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-003" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:4003" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-004" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-004" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:4004" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-005" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-005" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:4005" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-006" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-006" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:4006" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-007" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-007" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:4007" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-008" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-008" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:4008" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-009" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-009" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:4009" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-010" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-010" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:4010" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-011" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-011" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-012" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-012" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-013" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-NET-013" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-002" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-002" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:5002" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-003" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-003" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:5003" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-004" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-004" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:5004" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-005" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-005" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-006" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-LOG-006" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-001" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-001" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-002" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-002" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-003" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-003" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:6003" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-004" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-004" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:6004" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-005" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-005" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-006" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-006" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-007" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-007" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-008" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-008" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-009" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-009" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-010" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-010" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-011" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-011" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-012" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-012" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:6012" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-013" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-013" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-001" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-001" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-002" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-002" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-003" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-003" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-004" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-004" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-005" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-005" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-006" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-006" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-007" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-007" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-010" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-010" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-011" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-011" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-012" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-012" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-013" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-013" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-014" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-014" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-015" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-015" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-016" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-016" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-017" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-017" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-018" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-018" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-019" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-019" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-020" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-020" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-021" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-021" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-022" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-022" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-023" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-023" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-025" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-025" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-026" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-026" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-027" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-027" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-029" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-029" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-030" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-030" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-031" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-031" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-032" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-032" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-033" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-033" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-034" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-034" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-035" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-035" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-036" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-036" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-057" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-057" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-058" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-058" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-059" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-059" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-060" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-060" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-061" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-061" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-062" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-062" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-063" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-063" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-064" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-064" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-065" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-065" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-066" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-066" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-067" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-067" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-068" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-068" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-069" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-069" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-071" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-071" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-072" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-072" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-073" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-073" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-074" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-074" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-075" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-075" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-076" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-076" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-077" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-077" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-078" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-078" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-079" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-079" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-080" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-080" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-081" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-081" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-082" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-082" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-083" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-083" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-084" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-084" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-085" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-085" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-086" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-086" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-087" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-087" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-088" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-088" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-089" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-089" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-090" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-090" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-091" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-091" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-092" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-092" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-093" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-093" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-094" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-094" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-095" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-095" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-096" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-096" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-097" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-097" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-098" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-098" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-099" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-099" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-100" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-100" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-101" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-101" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-102" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-102" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-103" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-103" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-104" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-104" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-105" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-105" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-106" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-106" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-107" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-107" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-108" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-108" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-109" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-109" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-110" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-110" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-111" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-111" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-112" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-112" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-113" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-113" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-114" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-114" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-115" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-115" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-116" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-116" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-117" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-117" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-118" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-118" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-119" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-119" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-120" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-120" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-121" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-121" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-122" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-122" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-123" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-123" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-124" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-124" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-125" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-125" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-126" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-126" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-127" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-127" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-128" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-128" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-140" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-140" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-141" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-141" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-142" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-142" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-143" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-143" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-144" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-144" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-145" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-145" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-146" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-146" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-147" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-147" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-148" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-148" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-149" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-149" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-150" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-150" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-151" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-151" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-037" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-037" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-038" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-038" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-039" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-039" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-040" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-040" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-041" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-041" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-042" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-042" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-043" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-043" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-044" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-044" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-045" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-045" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-046" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-046" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-047" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-047" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-048" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-048" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-049" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-049" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-050" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-050" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-051" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-051" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-052" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-052" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-053" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-053" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-054" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-054" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-055" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-055" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-056" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-056" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-130" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-130" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-131" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-131" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-132" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-132" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-133" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-133" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-135" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-135" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-136" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-136" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-137" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-137" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-138" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-138" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-139" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-139" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>notselected</result>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-001" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-001" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8001" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-002" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-002" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8002" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-003" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-003" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8003" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-004" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-004" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8004" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-005" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-005" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8005" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-006" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-006" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8006" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-008" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-008" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8008" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-009" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-009" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8009" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-010" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-010" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8010" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-011" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-011" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8011" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-012" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-012" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8012" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-013" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-013" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8013" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-014" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-014" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8014" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-015" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-015" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8015" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-017" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-017" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8017" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-018" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-018" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8018" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-020" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-020" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8020" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-021" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-021" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8021" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-022" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-022" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8022" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-023" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-023" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8023" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-025" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-025" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8025" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-026" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-026" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8026" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-027" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-027" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8027" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-028" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-028" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8028" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-029" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-029" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8029" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-030" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-030" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8030" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-031" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-031" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8031" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-032" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-032" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8032" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-033" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-033" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8033" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-034" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-034" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8034" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-035" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-035" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8035" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-036" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-036" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8036" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-057" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-057" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8057" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-058" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-058" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8058" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-059" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-059" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8059" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-060" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-060" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8060" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-061" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-061" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8061" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-062" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-062" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8062" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-063" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-063" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8063" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-064" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-064" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8064" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-065" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-065" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8065" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-066" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-066" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8066" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-067" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-067" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8067" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-068" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-068" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8068" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-069" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-069" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8069" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-070" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-070" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8070" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-072" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-072" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8072" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-073" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-073" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8073" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-074" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-074" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8074" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-075" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-075" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8075" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-076" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-076" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8076" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-077" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-077" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8077" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-078" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-078" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8078" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-079" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-079" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8079" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-080" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-080" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8080" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-081" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-081" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8081" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-082" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-082" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8082" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-083" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-083" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8083" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-084" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-084" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8084" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-085" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-085" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8085" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-086" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-086" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8086" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-087" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-087" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8087" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-088" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-088" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8088" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-089" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-089" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8089" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-090" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-090" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8090" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-091" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-091" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8091" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-092" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-092" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8092" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-093" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-093" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8093" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-094" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-094" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8094" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-095" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-095" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8095" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-096" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-096" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8096" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-097" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-097" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8097" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-098" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-098" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8098" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-099" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-099" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8099" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-100" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-100" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8100" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-101" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-101" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8101" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-102" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-102" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8102" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-103" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-103" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8103" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-104" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-104" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8104" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-105" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-105" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8105" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-106" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-106" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8106" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-107" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-107" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8107" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-108" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-108" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8108" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-109" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-109" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8109" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-110" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-110" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8110" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-111" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-111" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8111" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-112" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-112" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8112" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-113" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-113" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8113" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-114" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-114" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8114" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-115" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-115" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8115" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-116" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-116" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8116" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-117" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-117" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8117" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-118" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-118" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8118" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-119" time="2026-07-05T21:43:43" severity="low" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-119" time="2026-07-05T21:49:37" severity="low" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8119" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-120" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-120" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8120" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-121" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-121" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8121" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-122" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-122" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8122" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-123" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-123" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8123" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-124" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-124" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8124" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-125" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-125" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8125" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-126" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-126" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8126" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-127" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-127" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8127" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-128" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-128" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8128" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-129" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-129" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8129" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-130" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-130" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8130" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-131" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-131" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8131" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-132" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-132" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8132" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-133" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-133" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8133" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-134" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-134" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8134" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-135" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-135" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8135" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-136" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-136" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8136" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-137" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-137" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8137" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-138" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-138" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8138" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-139" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-139" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8139" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-151" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-151" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8151" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-152" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-152" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8152" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-153" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-153" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8153" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-154" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-154" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8154" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-155" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-155" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8155" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-156" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-156" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8156" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-157" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-157" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8157" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-158" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-158" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8158" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-159" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-159" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8159" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-160" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-160" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8160" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-161" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-161" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>pass</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8161" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-162" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-162" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8162" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-037" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-037" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8037" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-038" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-038" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8038" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-039" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-039" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8039" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-040" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-040" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8040" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-041" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-041" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8041" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-042" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-042" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8042" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-043" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-043" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8043" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-044" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-044" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8044" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-045" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-045" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8045" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-046" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-046" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8046" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-047" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-047" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8047" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-048" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-048" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8048" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-049" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-049" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8049" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-050" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-050" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8050" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-051" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-051" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8051" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-052" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-052" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8052" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-053" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-053" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8053" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-054" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-054" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8054" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-055" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-055" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8055" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-056" time="2026-07-05T21:43:43" severity="medium" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-056" time="2026-07-05T21:49:37" severity="medium" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8056" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-141" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-141" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
       <result>fail</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8141" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-142" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
-      <result>pass</result>
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-142" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
+      <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8142" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-143" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
-      <result>pass</result>
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-143" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
+      <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8143" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-144" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
-      <result>pass</result>
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-144" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
+      <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8144" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-146" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
-      <result>pass</result>
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-146" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
+      <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8146" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-147" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
-      <result>pass</result>
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-147" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
+      <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8147" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-148" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
-      <result>pass</result>
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-148" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
+      <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8148" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-149" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
-      <result>pass</result>
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-149" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
+      <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8149" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-150" time="2026-07-05T21:43:43" severity="high" weight="10.000000">
-      <result>pass</result>
+    <rule-result idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-150" time="2026-07-05T21:49:37" severity="high" weight="10.000000">
+      <result>unknown</result>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref name="oval:org.adhardening:def:8150" href="ad-hardening-oval.xml"/>
       </check>
     </rule-result>
-    <score system="urn:xccdf:scoring:default" maximum="100.000000">80.522385</score>
+    <score system="urn:xccdf:scoring:default" maximum="100.000000">80.467850</score>
   </TestResult>
 </Benchmark>

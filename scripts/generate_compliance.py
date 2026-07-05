@@ -213,6 +213,84 @@ subcat_mapping = {
     'audit system integrity': 'system_integrity'
 }
 
+OVAL_SUBCAT_ORDER = [
+    # Account Logon
+    'credential_validation',
+    'kerberos_authentication_service',
+    'kerberos_service_ticket_operations',
+    'kerberos_ticket_events',
+    'other_account_logon_events',
+    
+    # Account Management
+    'application_group_management',
+    'computer_account_management',
+    'distribution_group_management',
+    'other_account_management_events',
+    'security_group_management',
+    'user_account_management',
+    
+    # Detailed Tracking
+    'dpapi_activity',
+    'process_creation',
+    'process_termination',
+    'rpc_events',
+    
+    # DS Access
+    'directory_service_access',
+    'directory_service_changes',
+    'directory_service_replication',
+    'detailed_directory_service_replication',
+    
+    # Logon/Logoff
+    'account_lockout',
+    'ipsec_extended_mode',
+    'ipsec_main_mode',
+    'ipsec_quick_mode',
+    'logoff',
+    'logon',
+    'network_policy_server',
+    'other_logon_logoff_events',
+    'special_logon',
+    'logon_claims',
+    'user_device_claims',
+    
+    # Object Access
+    'application_generated',
+    'certification_services',
+    'detailed_file_share',
+    'file_share',
+    'file_system',
+    'filtering_platform_connection',
+    'filtering_platform_packet_drop',
+    'handle_manipulation',
+    'kernel_object',
+    'other_object_access_events',
+    'registry',
+    'sam',
+    'removable_storage',
+    'central_access_policy_staging',
+    
+    # Policy Change
+    'audit_policy_change',
+    'authentication_policy_change',
+    'authorization_policy_change',
+    'filtering_platform_policy_change',
+    'mpssvc_rule_level_policy_change',
+    'other_policy_change_events',
+    
+    # Privilege Use
+    'non_sensitive_privilege_use',
+    'sensitive_privilege_use',
+    'other_privilege_use_events',
+    
+    # System
+    'ipsec_driver',
+    'other_system_events',
+    'security_state_change',
+    'security_system_extension',
+    'system_integrity'
+]
+
 def parse_ps1_for_registry_and_services(script_content):
     registry_checks = []
     service_checks = []
@@ -1590,7 +1668,15 @@ def generate_oval(requirements, output_path):
                 'version': '1'
             })
             
-            for item in req['audit_policy']:
+            # Sort child elements according to OVAL_SUBCAT_ORDER to satisfy strict XML Schema sequence constraints
+            sorted_items = []
+            for subcat_name in OVAL_SUBCAT_ORDER:
+                for item in req['audit_policy']:
+                    if item['subcat'] == subcat_name:
+                        sorted_items.append(item)
+                        break
+            
+            for item in sorted_items:
                 item_el = ET.SubElement(state_el, w_tag(item['subcat']))
                 item_el.text = item['setting']
                 
