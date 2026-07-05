@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-05T11:47:52Z</oval:timestamp>
+    <oval:timestamp>2026-07-05T11:58:29Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -2874,8 +2874,10 @@ Enforcing these channel-level controls mitigates the following threat vectors:
 3. **LDAP Session Hijacking**: Forcing outgoing LDAP client connections to negotiate signing protects directory queries made by Member Servers or Domain Controllers (acting as clients) from interception, packet tampering, or sniffing.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation Value AllowInsecureGuestAuth" test_ref="oval:org.adhardening:tst:4009001" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\LDAP Value LDAPClientIntegrity" test_ref="oval:org.adhardening:tst:4009002" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths Value \\*\NETLOGON" test_ref="oval:org.adhardening:tst:4009001" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths Value \\*\SYSVOL" test_ref="oval:org.adhardening:tst:4009002" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation Value AllowInsecureGuestAuth" test_ref="oval:org.adhardening:tst:4009003" />
+        <criterion comment="Check Registry Key System\CurrentControlSet\Services\LDAP Value LDAPClientIntegrity" test_ref="oval:org.adhardening:tst:4009004" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:4010" version="1" class="compliance">
@@ -7061,13 +7063,21 @@ Enforcing these deactivation controls ensures:
       <windows:object object_ref="oval:org.adhardening:obj:4008" />
       <windows:state state_ref="oval:org.adhardening:ste:4008" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:4009001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation Value AllowInsecureGuestAuth" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:4009001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths Value \\*\NETLOGON" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4009001" />
       <windows:state state_ref="oval:org.adhardening:ste:4009001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:4009002" version="1" comment="Check Registry Key System\CurrentControlSet\Services\LDAP Value LDAPClientIntegrity" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:4009002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths Value \\*\SYSVOL" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4009002" />
       <windows:state state_ref="oval:org.adhardening:ste:4009002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:4009003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation Value AllowInsecureGuestAuth" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:4009003" />
+      <windows:state state_ref="oval:org.adhardening:ste:4009003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:4009004" version="1" comment="Check Registry Key System\CurrentControlSet\Services\LDAP Value LDAPClientIntegrity" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:4009004" />
+      <windows:state state_ref="oval:org.adhardening:ste:4009004" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:4010001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WinRM\Client Value AllowBasic" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4010001" />
@@ -12471,10 +12481,22 @@ Enforcing these deactivation controls ensures:
     <windows:registry_object id="oval:org.adhardening:obj:4009001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths</windows:key>
+      <windows:name>\\*\NETLOGON</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:4009002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths</windows:key>
+      <windows:name>\\*\SYSVOL</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:4009003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation</windows:key>
       <windows:name>AllowInsecureGuestAuth</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:4009002" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:4009004" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>System\CurrentControlSet\Services\LDAP</windows:key>
@@ -17282,12 +17304,20 @@ Enforcing these deactivation controls ensures:
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:4009001" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">RequireIntegrity=1,RequireMutualAuthentication=1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:4009002" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">RequireIntegrity=1,RequireMutualAuthentication=1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:4009003" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:4009002" version="1">
+    <windows:registry_state id="oval:org.adhardening:ste:4009004" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+      <windows:value datatype="int">2</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:4010001" version="1">
       <windows:type>reg_dword</windows:type>

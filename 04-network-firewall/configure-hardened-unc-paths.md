@@ -13,10 +13,12 @@
     * Path: `\\*\NETLOGON` | Value: `RequireIntegrity=1,RequireMutualAuthentication=1`
     * Path: `\\*\SYSVOL` | Value: `RequireIntegrity=1,RequireMutualAuthentication=1`
   * **Insecure Guest Logons (GPO)**: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Workstation\Enable insecure guest logons` -> Disabled
-  * **LDAP Client Signing (GPO)**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\Network security: LDAP client signing requirements` -> Negotiate signing
+  * **LDAP Client Signing (GPO)**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\Network security: LDAP client signing requirements` -> Require signing
   * **Registry Location (UNC Paths)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths`
+    * `\\*\NETLOGON` = `RequireIntegrity=1,RequireMutualAuthentication=1` (REG_SZ)
+    * `\\*\SYSVOL` = `RequireIntegrity=1,RequireMutualAuthentication=1` (REG_SZ)
   * **Registry Location (Guest Logons)**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation` -> `AllowInsecureGuestAuth` = `0` (REG_DWORD)
-  * **Registry Location (LDAP Client)**: `HKLM\System\CurrentControlSet\Services\LDAP` -> `LDAPClientIntegrity` = `1` (REG_DWORD)
+  * **Registry Location (LDAP Client)**: `HKLM\System\CurrentControlSet\Services\LDAP` -> `LDAPClientIntegrity` = `2` (REG_DWORD)
 
 ---
 
@@ -63,7 +65,7 @@ Enforcing these channel-level controls mitigates the following threat vectors:
 1. Navigate to:
    `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
 2. Double-click **Network security: LDAP client signing requirements**.
-3. Set it to **Negotiate signing** and click **OK**.
+3. Set it to **Require signing** and click **OK**.
 
 ---
 
@@ -101,8 +103,8 @@ $LdapPath = "HKLM:\System\CurrentControlSet\Services\LDAP"
 if (-not (Test-Path $LdapPath)) {
     New-Item -Path $LdapPath -Force | Out-Null
 }
-Set-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -Value 1 -Type DWord -ErrorAction Stop
-Write-Host "[+] LDAP Client signing requirement set to Negotiate signing." -ForegroundColor Green
+Set-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -Value 2 -Type DWord -ErrorAction Stop
+Write-Host "[+] LDAP Client signing requirement set to Require signing." -ForegroundColor Green
 ```
 
 *To audit the network provider, Lanman workstation, and LDAP client signing configurations:*
@@ -140,8 +142,8 @@ Write-Host "    - Allow Insecure Guest Logons: $GuestSetting (Expected: 0)" -For
 $LdapPath = "HKLM:\System\CurrentControlSet\Services\LDAP"
 $LdapVal = Get-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -ErrorAction SilentlyContinue
 $LdapSetting = if ($LdapVal) { $LdapVal.LDAPClientIntegrity } else { 0 }
-$LdapColor = if ($LdapSetting -eq 1) { "Green" } else { "Red" }
-Write-Host "    - LDAP Client Integrity (Signing): $LdapSetting (Expected: 1 - Negotiate)" -ForegroundColor $LdapColor
+$LdapColor = if ($LdapSetting -eq 2) { "Green" } else { "Red" }
+Write-Host "    - LDAP Client Integrity (Signing): $LdapSetting (Expected: 2 - Require)" -ForegroundColor $LdapColor
 ```
 
 ---

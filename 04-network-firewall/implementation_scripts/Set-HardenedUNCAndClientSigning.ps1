@@ -25,5 +25,5 @@ $LdapPath = "HKLM:\System\CurrentControlSet\Services\LDAP"
 if (-not (Test-Path $LdapPath)) {
     New-Item -Path $LdapPath -Force | Out-Null
 }
-Set-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -Value 1 -Type DWord -ErrorAction Stop
-Write-Host "[+] LDAP Client signing requirement set to Negotiate signing." -ForegroundColor Green
+Set-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -Value 2 -Type DWord -ErrorAction Stop
+Write-Host "[+] LDAP Client signing requirement set to Require signing." -ForegroundColor Green

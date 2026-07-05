@@ -15644,7 +15644,7 @@ Write-Host "Firewall logging and operational settings configuration completed su
             <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options</xhtml:code>
           </xhtml:li>
           <xhtml:li>Double-click <xhtml:strong>Network security: LDAP client signing requirements</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Set it to <xhtml:strong>Negotiate signing</xhtml:strong> and click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Set it to <xhtml:strong>Require signing</xhtml:strong> and click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -15680,8 +15680,8 @@ $LdapPath = "HKLM:\System\CurrentControlSet\Services\LDAP"
 if (-not (Test-Path $LdapPath)) {
     New-Item -Path $LdapPath -Force | Out-Null
 }
-Set-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -Value 1 -Type DWord -ErrorAction Stop
-Write-Host "[+] LDAP Client signing requirement set to Negotiate signing." -ForegroundColor Green</xhtml:code>
+Set-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -Value 2 -Type DWord -ErrorAction Stop
+Write-Host "[+] LDAP Client signing requirement set to Require signing." -ForegroundColor Green</xhtml:code>
         </xhtml:pre>
         <xhtml:p>
           <xhtml:em>To audit the network provider, Lanman workstation, and LDAP client signing configurations:</xhtml:em>
@@ -15719,8 +15719,8 @@ Write-Host "    - Allow Insecure Guest Logons: $GuestSetting (Expected: 0)" -For
 $LdapPath = "HKLM:\System\CurrentControlSet\Services\LDAP"
 $LdapVal = Get-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -ErrorAction SilentlyContinue
 $LdapSetting = if ($LdapVal) { $LdapVal.LDAPClientIntegrity } else { 0 }
-$LdapColor = if ($LdapSetting -eq 1) { "Green" } else { "Red" }
-Write-Host "    - LDAP Client Integrity (Signing): $LdapSetting (Expected: 1 - Negotiate)" -ForegroundColor $LdapColor</xhtml:code>
+$LdapColor = if ($LdapSetting -eq 2) { "Green" } else { "Red" }
+Write-Host "    - LDAP Client Integrity (Signing): $LdapSetting (Expected: 2 - Require)" -ForegroundColor $LdapColor</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
@@ -15751,8 +15751,8 @@ $LdapPath = "HKLM:\System\CurrentControlSet\Services\LDAP"
 if (-not (Test-Path $LdapPath)) {
     New-Item -Path $LdapPath -Force | Out-Null
 }
-Set-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -Value 1 -Type DWord -ErrorAction Stop
-Write-Host "[+] LDAP Client signing requirement set to Negotiate signing." -ForegroundColor Green</fix>
+Set-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -Value 2 -Type DWord -ErrorAction Stop
+Write-Host "[+] LDAP Client signing requirement set to Require signing." -ForegroundColor Green</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4009" />
       </check>

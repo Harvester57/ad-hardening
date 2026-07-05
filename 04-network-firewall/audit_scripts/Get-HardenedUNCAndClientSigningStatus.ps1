@@ -29,5 +29,5 @@ Write-Host "    - Allow Insecure Guest Logons: $GuestSetting (Expected: 0)" -For
 $LdapPath = "HKLM:\System\CurrentControlSet\Services\LDAP"
 $LdapVal = Get-ItemProperty -Path $LdapPath -Name "LDAPClientIntegrity" -ErrorAction SilentlyContinue
 $LdapSetting = if ($LdapVal) { $LdapVal.LDAPClientIntegrity } else { 0 }
-$LdapColor = if ($LdapSetting -eq 1) { "Green" } else { "Red" }
-Write-Host "    - LDAP Client Integrity (Signing): $LdapSetting (Expected: 1 - Negotiate)" -ForegroundColor $LdapColor
+$LdapColor = if ($LdapSetting -eq 2) { "Green" } else { "Red" }
+Write-Host "    - LDAP Client Integrity (Signing): $LdapSetting (Expected: 2 - Require)" -ForegroundColor $LdapColor

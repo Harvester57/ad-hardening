@@ -532,7 +532,10 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                                 val_part = val_part[1:-1].strip()
                             val = val_part
                             
-                            if '\\' not in name and '/' not in name and len(name) < 100 and name.lower() not in ['path', 'key path', 'value name', 'value type', 'value data', 'registry location']:
+                            is_valid_name = True
+                            if ('\\' in name or '/' in name) and 'HardenedPaths' not in current_key:
+                                is_valid_name = False
+                            if is_valid_name and len(name) < 100 and name.lower() not in ['path', 'key path', 'value name', 'value type', 'value data', 'registry location']:
                                 name_upper = name.upper()
                                 if not name.startswith('(') and not name.endswith(')') and name_upper not in ['REG_DWORD', 'REG_SZ', 'REG_EXPAND_SZ', 'REG_MULTI_SZ', 'REG_BINARY', 'DWORD']:
                                     normalized = normalize_reg_check(current_key, name, vtype, val)
