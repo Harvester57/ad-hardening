@@ -1123,17 +1123,30 @@ def generate_oval(requirements, output_path):
             for idx, chk in enumerate(req['registry_checks'], start=1):
                 sub_id = req['numeric_id'] * 1000 + idx
                 comment = f"Check Registry Key {chk['key']} Value {chk['name']}"
+                is_inv_logging = (chk['name'] == 'EnableScriptBlockInvocationLogging')
                 
-                ET.SubElement(criteria, o_tag('criterion'), {
-                    'comment': comment,
-                    'test_ref': f"oval:org.adhardening:tst:{sub_id}"
-                })
+                if is_inv_logging:
+                    or_criteria = ET.SubElement(criteria, o_tag('criteria'), {'operator': 'OR'})
+                    ET.SubElement(or_criteria, o_tag('criterion'), {
+                        'comment': comment + " is 0",
+                        'test_ref': f"oval:org.adhardening:tst:{sub_id}"
+                    })
+                    sub_id_missing = sub_id + 500
+                    ET.SubElement(or_criteria, o_tag('criterion'), {
+                        'comment': comment + " is missing",
+                        'test_ref': f"oval:org.adhardening:tst:{sub_id_missing}"
+                    })
+                else:
+                    ET.SubElement(criteria, o_tag('criterion'), {
+                        'comment': comment,
+                        'test_ref': f"oval:org.adhardening:tst:{sub_id}"
+                    })
                 
                 # registry_test
                 test_attrs = {
                     'id': f"oval:org.adhardening:tst:{sub_id}",
                     'version': '1',
-                    'comment': comment,
+                    'comment': comment + " is 0" if is_inv_logging else comment,
                     'check': 'all'
                 }
                 if chk.get('existence') == 'none_exist':
@@ -1146,6 +1159,20 @@ def generate_oval(requirements, output_path):
                 if chk.get('existence') != 'none_exist':
                     ET.SubElement(test_el, w_tag('state'), {
                         'state_ref': f"oval:org.adhardening:ste:{sub_id}"
+                    })
+                
+                if is_inv_logging:
+                    sub_id_missing = sub_id + 500
+                    test_attrs_missing = {
+                        'id': f"oval:org.adhardening:tst:{sub_id_missing}",
+                        'version': '1',
+                        'comment': comment + " is missing",
+                        'check': 'all',
+                        'check_existence': 'none_exist'
+                    }
+                    test_el_missing = ET.SubElement(tests_el, w_tag('registry_test'), test_attrs_missing)
+                    ET.SubElement(test_el_missing, w_tag('object'), {
+                        'object_ref': f"oval:org.adhardening:obj:{sub_id}"
                     })
                 
                 # registry_object

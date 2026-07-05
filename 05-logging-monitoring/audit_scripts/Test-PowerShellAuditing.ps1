@@ -71,7 +71,8 @@ $TransDir = ""
 if ($TransDirVal) {
     $TransDir = $TransDirVal.OutputDirectory
 }
-Write-Host "    - PowerShell Transcription Directory: $($TransDir)" -ForegroundColor (if ($TransDir) { "Green" } else { "Red" })
+$DirColor = if ($TransDir) { "Green" } else { "Red" }
+Write-Host "    - PowerShell Transcription Directory: $($TransDir)" -ForegroundColor $DirColor
 
 # 5. Audit Transcript Folder Security Permissions
 if ($TransDir) {

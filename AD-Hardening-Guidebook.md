@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 2ff6ae8 | Generated: July 05, 2026</span>
+      <span>Commit: 9392af9 | Generated: July 05, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -15581,7 +15581,8 @@ $TransDir = ""
 if ($TransDirVal) {
     $TransDir = $TransDirVal.OutputDirectory
 }
-Write-Host "    - PowerShell Transcription Directory: $($TransDir)" -ForegroundColor (if ($TransDir) { "Green" } else { "Red" })
+$DirColor = if ($TransDir) { "Green" } else { "Red" }
+Write-Host "    - PowerShell Transcription Directory: $($TransDir)" -ForegroundColor $DirColor
 
 # 5. Audit Transcript Folder Security Permissions
 if ($TransDir) {
