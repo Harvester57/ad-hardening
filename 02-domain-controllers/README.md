@@ -173,3 +173,13 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure and enforce BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.
 * **[REQ-DC-034 - Configure Windows Defender Application Control](configure-wdac.md)**
   Requirement to deploy Windows Defender Application Control (WDAC) on Domain Controllers in Audit Mode to block unauthorized system-level binaries and scripts.
+* **[REQ-DC-136 - Audit Policy: Advanced Audit Policy Overrides](audit-policy/configure-dc-audit-audit-override.md)**
+* **[REQ-DC-137 - Audit Policy: Account Logon Auditing](audit-policy/configure-dc-audit-account-logon.md)**
+* **[REQ-DC-138 - Audit Policy: Account Management Auditing](audit-policy/configure-dc-audit-account-management.md)**
+* **[REQ-DC-139 - Audit Policy: Detailed Tracking Auditing](audit-policy/configure-dc-audit-detailed-tracking.md)**
+* **[REQ-DC-140 - Audit Policy: Directory Service Access Auditing](audit-policy/configure-dc-audit-ds-access.md)**
+* **[REQ-DC-141 - Audit Policy: Logon and Logoff Auditing](audit-policy/configure-dc-audit-logon-logoff.md)**
+* **[REQ-DC-142 - Audit Policy: Object Access Auditing](audit-policy/configure-dc-audit-object-access.md)**
+* **[REQ-DC-143 - Audit Policy: Policy Change Auditing](audit-policy/configure-dc-audit-policy-change.md)**
+* **[REQ-DC-144 - Audit Policy: Privilege Use Auditing](audit-policy/configure-dc-audit-privilege-use.md)**
+* **[REQ-DC-145 - Audit Policy: System Events Auditing](audit-policy/configure-dc-audit-system-events.md)**

@@ -1,4 +1,4 @@
-# [REQ-LOG-001] Configure Advanced Security Audit Policies
+# Configure Advanced Security Audit Policies
 
 ## Target Scope
 * **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Client Workstations.
@@ -8,308 +8,58 @@
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * **Policy Override**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings` (Value: Enabled)
-  * **Advanced Policies**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
-  * **Registry Locations**:
-    * `HKLM\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy` (Value: 1)
-    * `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\LogLevel` (Value: 0 [Disabled debug events])
+* **GPO Path / Registry Location**: Stored under `Advanced Audit Policy Configuration` and Lsa registry overrides.
 
 ---
 
 ## Rationale
-Standard Windows event logging is basic and fails to capture critical event vectors, leading to visibility gaps during compromises. Configuring Advanced Security Audit Policies allows precise logging of Success/Failure states for critical areas without overloading local event log storage.
+Standard Windows event logging is basic and fails to capture critical event vectors, leading to visibility gaps during compromises. Enforcing refined subcategory audit policies ensures detailed Success and Failure logs for logon attempts, privilege use, process creations, and registry modifications without overloading log stores.
 
-Enforcing advanced auditing policies provides the following security coverages:
-1. **Authentication and Credential Security**: Kerberos TGT and TGS ticket requests (Event IDs 4768, 4769, 4770) detect Kerberoasting, Service Ticket abuse, and Silver/Golden ticket operations. Credential Validation (Event ID 4776) identifies NTLM usage and brute-force attempts.
-2. **Account and Privilege Monitoring**: Audit User Account Management (Event IDs 4720, 4722, 4724) tracks creation and password resets. Audit Security Group Management (Event IDs 4728, 4732, 4756) detects unauthorized membership changes in highly privileged groups like Domain Admins.
-3. **Execution and Directory Access**: Process Creation (Event ID 4688) tracks executing binaries. Directory Service Changes (Event ID 5136) and Directory Service Access (Event ID 4662) log Active Directory object modifications and querying to discover reconnaissance activity.
-4. **Logon and Tampering Auditing**: Logon and Special Logon auditing (Event IDs 4624, 4625, 4672) tracks remote access, elevation events, and suspicious logons. Policy Change (Event ID 4719) detects when auditing configurations are disabled or altered by adversaries trying to hide their footprints.
-5. **Kerberos Debug Events Logging (`LogLevel`)**: By default, verbose debug logging for Kerberos protocol operations is disabled. Enforcing `LogLevel` = `0` under the Kerberos Parameters registry path prevents verbose debug events from flooding the System Event log in production. Logging of Kerberos debug events (value `1`) should only be enabled temporarily for troubleshooting purposes. Standard security auditing is handled by advanced subcategories like `Audit Kerberos Authentication Service` instead.
+This module is split into profile-specific advanced audit submodules mapping to each system's security tier.
 
 ---
 
-## Legacy Impact & Compatibility
-* **Event Log Volume**: Enabling these detailed policies will increase log volume. The local Security Event Log size must be sized appropriately (minimum 1GB on Domain Controllers, 512MB on Member Servers and Workstations) to prevent logs from rotating out too quickly.
-* **Override Enforcement**: Forcing advanced policies to override legacy settings ensures that older group policies do not accidentally weaken system visibility. Ensure that this GPO setting is applied across all organizational units.
-* **Kerberos Events Logging**: Disabling verbose Kerberos debug logging ensures system performance and prevents event log exhaustion. It has no negative impact on standard Kerberos ticket generation or authentication operations.
+## Modular Profile Audit Policies
 
----
+### 1. Domain Controller Audit Submodule (Module 2)
+The complete set of advanced audit policies for Domain Controllers:
+* **[REQ-DC-136 - Audit Policy: Advanced Audit Policy Overrides](../02-domain-controllers/audit-policy/configure-dc-audit-audit-override.md)**
+* **[REQ-DC-137 - Audit Policy: Account Logon Auditing](../02-domain-controllers/audit-policy/configure-dc-audit-account-logon.md)**
+* **[REQ-DC-138 - Audit Policy: Account Management Auditing](../02-domain-controllers/audit-policy/configure-dc-audit-account-management.md)**
+* **[REQ-DC-139 - Audit Policy: Detailed Tracking Auditing](../02-domain-controllers/audit-policy/configure-dc-audit-detailed-tracking.md)**
+* **[REQ-DC-140 - Audit Policy: Directory Service Access Auditing](../02-domain-controllers/audit-policy/configure-dc-audit-ds-access.md)**
+* **[REQ-DC-141 - Audit Policy: Logon and Logoff Auditing](../02-domain-controllers/audit-policy/configure-dc-audit-logon-logoff.md)**
+* **[REQ-DC-142 - Audit Policy: Object Access Auditing](../02-domain-controllers/audit-policy/configure-dc-audit-object-access.md)**
+* **[REQ-DC-143 - Audit Policy: Policy Change Auditing](../02-domain-controllers/audit-policy/configure-dc-audit-policy-change.md)**
+* **[REQ-DC-144 - Audit Policy: Privilege Use Auditing](../02-domain-controllers/audit-policy/configure-dc-audit-privilege-use.md)**
+* **[REQ-DC-145 - Audit Policy: System Events Auditing](../02-domain-controllers/audit-policy/configure-dc-audit-system-events.md)**
 
-## Implementation Steps
+### 2. PAW Audit Submodule (Module 7)
+The complete set of advanced audit policies for Privileged Access Workstations:
+* **[REQ-PAW-130 - Audit Policy: Advanced Audit Policy Overrides for PAWs](../07-paws/audit-policy/configure-paw-audit-audit-override.md)**
+* **[REQ-PAW-131 - Audit Policy: Account Logon Auditing for PAWs](../07-paws/audit-policy/configure-paw-audit-account-logon.md)**
+* **[REQ-PAW-132 - Audit Policy: Account Management Auditing for PAWs](../07-paws/audit-policy/configure-paw-audit-account-management.md)**
+* **[REQ-PAW-133 - Audit Policy: Detailed Tracking Auditing for PAWs](../07-paws/audit-policy/configure-paw-audit-detailed-tracking.md)**
+* **[REQ-PAW-134 - Audit Policy: Logon and Logoff Auditing for PAWs](../07-paws/audit-policy/configure-paw-audit-logon-logoff.md)**
+* **[REQ-PAW-135 - Audit Policy: Object Access Auditing for PAWs](../07-paws/audit-policy/configure-paw-audit-object-access.md)**
+* **[REQ-PAW-136 - Audit Policy: Policy Change Auditing for PAWs](../07-paws/audit-policy/configure-paw-audit-policy-change.md)**
+* **[REQ-PAW-137 - Audit Policy: Privilege Use Auditing for PAWs](../07-paws/audit-policy/configure-paw-audit-privilege-use.md)**
+* **[REQ-PAW-138 - Audit Policy: System Events Auditing for PAWs](../07-paws/audit-policy/configure-paw-audit-system-events.md)**
 
-### Option A: Group Policy Object (GPO) Configuration (Preferred)
-
-#### 1. Enforce Advanced Audit Overrides
-1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Create or edit a GPO linked to the target systems (e.g., `GPO_Hardening_Logging_Baseline`).
-3. Navigate to:
-   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-4. Configure the setting:
-   * **Policy**: `Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings`
-   * **Setting**: `Enabled`
-
-#### 2. Configure Advanced Audit Policy Settings
-1. In the same GPO, navigate to:
-   `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
-2. Configure the following subcategory policies:
-
-| Category | Subcategory | Setting |
-| :--- | :--- | :--- |
-| **Account Logon** | `Audit Kerberos Authentication Service` | Success and Failure |
-| **Account Logon** | `Audit Kerberos Service Ticket Operations` | Success and Failure |
-| **Account Logon** | `Audit Credential Validation` | Success and Failure |
-| **Account Management** | `Audit User Account Management` | Success and Failure |
-| **Account Management** | `Audit Security Group Management` | Success and Failure |
-| **Account Management** | `Audit Application Group Management` | Success and Failure |
-| **Account Management** | `Audit Computer Account Management` | Success and Failure |
-| **Account Management** | `Audit Distribution Group Management` | Success |
-| **Account Management** | `Audit Other Account Management Events` | Success and Failure |
-| **Detailed Tracking** | `Audit Process Creation` | Success and Failure |
-| **Detailed Tracking** | `Audit DPAPI Activity` | Success and Failure |
-| **Detailed Tracking** | `Audit PNP Activity` | Success |
-| **DS Access** | `Audit Directory Service Changes` | Success and Failure |
-| **DS Access** | `Audit Directory Service Access` | Success and Failure |
-| **Logon/Logoff** | `Audit Logon` | Success and Failure |
-| **Logon/Logoff** | `Audit Logoff` | Success |
-| **Logon/Logoff** | `Audit Special Logon` | Success and Failure |
-| **Logon/Logoff** | `Audit Account Lockout` | Success and Failure |
-| **Logon/Logoff** | `Audit Other Logon/Logoff Events` | Success and Failure |
-| **Object Access** | `Audit Handle Manipulation` | Success and Failure |
-| **Object Access** | `Audit Registry` | Success and Failure |
-| **Object Access** | `Audit File Share` | Success and Failure |
-| **Object Access** | `Audit Detailed File Share` | Failure |
-| **Object Access** | `Audit Other Object Access Events` | Success and Failure |
-| **Policy Change** | `Audit Policy Change` | Success and Failure |
-| **Policy Change** | `Audit Authentication Policy Change` | Success |
-| **Policy Change** | `Audit Authorization Policy Change` | Success |
-| **Policy Change** | `Audit MPSSVC Rule-Level Policy Change` | Success and Failure |
-| **Policy Change** | `Audit Other Policy Change Events` | Failure |
-| **Privilege Use** | `Audit Sensitive Privilege Use` | Success and Failure |
-| **System** | `Audit IPsec Driver` | Success and Failure |
-| **System** | `Audit Other System Events` | Success and Failure |
-| **System** | `Audit Security State Change` | Success and Failure |
-| **System** | `Audit Security System Extension` | Success and Failure |
-| **System** | `Audit System Integrity` | Success and Failure |
-
-#### 3. Deploy Kerberos LogLevel Registry Settings via GPO Preferences
-To ensure verbose Kerberos debug logging is disabled in production, deploy the setting via Registry GPO Preferences:
-1. Within the logging GPO, navigate to:
-   `Computer Configuration\Preferences\Windows Settings\Registry`
-2. Right-click **Registry**, select **New** -> **Registry Item**.
-3. Configure:
-   * **Action**: `Update`
-   * **Hive**: `HKEY_LOCAL_MACHINE`
-   * **Key Path**: `SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters`
-   * **Value name**: `LogLevel`
-   * **Value type**: `REG_DWORD`
-   * **Value data**: `0` (Decimal)
-
----
-
-### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
-
-Run the following scripts locally to query and enforce Advanced Security Audit Policies.
-
-[Download Script: Set-AdvancedAuditPolicies.ps1](implementation_scripts/Set-AdvancedAuditPolicies.ps1)
-
-```powershell
-# Set-AdvancedAuditPolicies.ps1
-# Configures Advanced Security Audit Policies and registry override values.
-
-Write-Host "--- Applying Advanced Audit Policies Remediation ---" -ForegroundColor Cyan
-
-# 1. Enforce Force Audit Policy Override (SCENoApplyLegacyAuditPolicy = 1)
-Write-Host "[+] Enforcing Advanced Audit Policy Registry Override..." -ForegroundColor Gray
-$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
-if (-not (Test-Path $LsaPath)) {
-    New-Item -Path $LsaPath -Force | Out-Null
-}
-Set-ItemProperty -Path $LsaPath -Name "SCENoApplyLegacyAuditPolicy" -Value 1 -Type DWord
-Write-Host "    Force advanced audit policy override enabled." -ForegroundColor Green
-
-# Enforce Kerberos Debug Logging disabled (LogLevel = 0)
-$KerbPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
-if (-not (Test-Path $KerbPath)) {
-    New-Item -Path $KerbPath -Force | Out-Null
-}
-Set-ItemProperty -Path $KerbPath -Name "LogLevel" -Value 0 -Type DWord -Force
-Write-Host "    Kerberos debug events logging disabled." -ForegroundColor Green
-
-# 2. Configure Advanced Audit Policy subcategories
-$Policies = @(
-    @{ Subcategory = "Kerberos Authentication Service"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Kerberos Service Ticket Operations"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Credential Validation"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "User Account Management"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Security Group Management"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Application Group Management"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Computer Account Management"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Distribution Group Management"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "Other Account Management Events"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Process Creation"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "DPAPI Activity"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "PNP Activity"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "Directory Service Changes"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Directory Service Access"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Logon"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Logoff"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "Special Logon"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Policy Change"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Account Lockout"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Other Logon/Logoff Events"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Handle Manipulation"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Registry"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "File Share"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Detailed File Share"; Success = "disable"; Failure = "enable" },
-    @{ Subcategory = "Other Object Access Events"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Authentication Policy Change"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "Authorization Policy Change"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "MPSSVC Rule-Level Policy Change"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Other Policy Change Events"; Success = "disable"; Failure = "enable" },
-    @{ Subcategory = "Sensitive Privilege Use"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "IPsec Driver"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Other System Events"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Security State Change"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Security System Extension"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "System Integrity"; Success = "enable"; Failure = "enable" }
-)
-
-foreach ($P in $Policies) {
-    $Sub = $P.Subcategory
-    $Succ = $P.Success
-    $Fail = $P.Failure
-    
-    $AuditpolArgs = "/set /subcategory:`"$Sub`" /success:$Succ /failure:$fail"
-    $Process = Start-Process auditpol -ArgumentList $AuditpolArgs -Wait -NoNewWindow -PassThru
-    if ($Process.ExitCode -eq 0) {
-        Write-Host "    Audit policy '$($Sub)' set to Success:$($Succ) / Failure:$($Fail)." -ForegroundColor Green
-    } else {
-        Write-Error "    Failed to set audit policy for '$($Sub)'. Exit Code: $($Process.ExitCode)"
-    }
-}
-
-Write-Host "Advanced Audit Policies applied successfully." -ForegroundColor Cyan
-```
-
-*To verify the settings have been applied:*
-
-[Download Script: Test-AdvancedAuditPolicies.ps1](audit_scripts/Test-AdvancedAuditPolicies.ps1)
-
-```powershell
-# Test-AdvancedAuditPolicies.ps1
-# Audits Advanced Audit Policy settings and the force override configuration.
-
-Write-Host "--- Auditing Advanced Security Audit Policies ---" -ForegroundColor Cyan
-
-# 1. Audit Force Audit Policy Override (SCENoApplyLegacyAuditPolicy)
-$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
-$OverrideVal = Get-ItemProperty -Path $LsaPath -Name "SCENoApplyLegacyAuditPolicy" -ErrorAction SilentlyContinue
-$OverrideSetting = 0
-if ($OverrideVal) {
-    $OverrideSetting = $OverrideVal.SCENoApplyLegacyAuditPolicy
-}
-
-$OverrideColor = "Red"
-if ($OverrideSetting -eq 1) {
-    $OverrideColor = "Green"
-}
-Write-Host "    - Force Advanced Audit Policy Override: $($OverrideSetting) (Required = 1)" -ForegroundColor $OverrideColor
-
-# Audit Kerberos LogLevel
-$KerbPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
-if (Test-Path $KerbPath) {
-    $LogLevelVal = Get-ItemProperty -Path $KerbPath -Name "LogLevel" -ErrorAction SilentlyContinue
-    $LogLevelSetting = if ($LogLevelVal) { $LogLevelVal.LogLevel } else { 0 }
-    $LogLevelColor = if ($LogLevelSetting -eq 0) { "Green" } else { "Red" }
-    Write-Host "    - Kerberos Debug LogLevel: $($LogLevelSetting) (Required = 0)" -ForegroundColor $LogLevelColor
-} else {
-    Write-Host "    - Kerberos Debug LogLevel: Not Configured (Default/Compliant as it inherits disabled)" -ForegroundColor Green
-}
-
-# 2. Audit specific subcategories
-$RequiredPolicies = @(
-    @{ Subcategory = "Kerberos Authentication Service"; Expected = "Success and Failure" },
-    @{ Subcategory = "Kerberos Service Ticket Operations"; Expected = "Success and Failure" },
-    @{ Subcategory = "Credential Validation"; Expected = "Success and Failure" },
-    @{ Subcategory = "User Account Management"; Expected = "Success and Failure" },
-    @{ Subcategory = "Security Group Management"; Expected = "Success and Failure" },
-    @{ Subcategory = "Application Group Management"; Expected = "Success and Failure" },
-    @{ Subcategory = "Computer Account Management"; Expected = "Success and Failure" },
-    @{ Subcategory = "Distribution Group Management"; Expected = "Success" },
-    @{ Subcategory = "Other Account Management Events"; Expected = "Success and Failure" },
-    @{ Subcategory = "Process Creation"; Expected = "Success and Failure" },
-    @{ Subcategory = "DPAPI Activity"; Expected = "Success and Failure" },
-    @{ Subcategory = "PNP Activity"; Expected = "Success" },
-    @{ Subcategory = "Directory Service Changes"; Expected = "Success and Failure" },
-    @{ Subcategory = "Directory Service Access"; Expected = "Success and Failure" },
-    @{ Subcategory = "Logon"; Expected = "Success and Failure" },
-    @{ Subcategory = "Logoff"; Expected = "Success" },
-    @{ Subcategory = "Special Logon"; Expected = "Success and Failure" },
-    @{ Subcategory = "Policy Change"; Expected = "Success and Failure" },
-    @{ Subcategory = "Account Lockout"; Expected = "Success and Failure" },
-    @{ Subcategory = "Other Logon/Logoff Events"; Expected = "Success and Failure" },
-    @{ Subcategory = "Handle Manipulation"; Expected = "Success and Failure" },
-    @{ Subcategory = "Registry"; Expected = "Success and Failure" },
-    @{ Subcategory = "File Share"; Expected = "Success and Failure" },
-    @{ Subcategory = "Detailed File Share"; Expected = "Failure" },
-    @{ Subcategory = "Other Object Access Events"; Expected = "Success and Failure" },
-    @{ Subcategory = "Authentication Policy Change"; Expected = "Success" },
-    @{ Subcategory = "Authorization Policy Change"; Expected = "Success" },
-    @{ Subcategory = "MPSSVC Rule-Level Policy Change"; Expected = "Success and Failure" },
-    @{ Subcategory = "Other Policy Change Events"; Expected = "Failure" },
-    @{ Subcategory = "Sensitive Privilege Use"; Expected = "Success and Failure" },
-    @{ Subcategory = "IPsec Driver"; Expected = "Success and Failure" },
-    @{ Subcategory = "Other System Events"; Expected = "Success and Failure" },
-    @{ Subcategory = "Security State Change"; Expected = "Success and Failure" },
-    @{ Subcategory = "Security System Extension"; Expected = "Success and Failure" },
-    @{ Subcategory = "System Integrity"; Expected = "Success and Failure" }
-)
-
-Write-Host "[+] Querying Advanced Security Audit Policies..." -ForegroundColor Yellow
-
-foreach ($Policy in $RequiredPolicies) {
-    $Sub = $Policy.Subcategory
-    $Exp = $Policy.Expected
-    $RawOutput = auditpol.exe /get /subcategory:$Sub /r
-    
-    # Parse CSV format from auditpol: Machine,Subcategory,GUID,PolicyVal
-    $Lines = $RawOutput -split "`r?`n"
-    $Found = $false
-    foreach ($Line in $Lines) {
-        if ($Line -like "*,$Sub,*") {
-            $Parts = $Line -split ","
-            $Actual = $Parts[3]
-            $Found = $true
-            
-            $IsMatch = $false
-            if ($Exp -eq "Success and Failure") {
-                if ($Actual -match "Success and Failure" -or $Actual -match "Success & Failure") {
-                    $IsMatch = $true
-                }
-            } else {
-                if ($Actual -match $Exp) {
-                    $IsMatch = $true
-                }
-            }
-            
-            $Color = "Red"
-            if ($IsMatch) {
-                $Color = "Green"
-            }
-            Write-Host "    - Subcategory: $($Sub) | Setting: $($Actual) (Expected: $($Exp))" -ForegroundColor $Color
-        }
-    }
-    if (-not $Found) {
-        Write-Host "    - Subcategory: $($Sub) | Status: NOT CONFIGURED" -ForegroundColor Red
-    }
-}
-```
+### 3. Endpoint Audit Submodule (Module 8)
+The complete set of advanced audit policies for Client Workstations:
+* **[REQ-END-141 - Audit Policy: Advanced Audit Policy Overrides for Endpoints](../08-endpoints/audit-policy/configure-end-audit-audit-override.md)**
+* **[REQ-END-142 - Audit Policy: Account Logon Auditing for Endpoints](../08-endpoints/audit-policy/configure-end-audit-account-logon.md)**
+* **[REQ-END-143 - Audit Policy: Account Management Auditing for Endpoints](../08-endpoints/audit-policy/configure-end-audit-account-management.md)**
+* **[REQ-END-144 - Audit Policy: Detailed Tracking Auditing for Endpoints](../08-endpoints/audit-policy/configure-end-audit-detailed-tracking.md)**
+* **[REQ-END-145 - Audit Policy: Logon and Logoff Auditing for Endpoints](../08-endpoints/audit-policy/configure-end-audit-logon-logoff.md)**
+* **[REQ-END-146 - Audit Policy: Object Access Auditing for Endpoints](../08-endpoints/audit-policy/configure-end-audit-object-access.md)**
+* **[REQ-END-147 - Audit Policy: Policy Change Auditing for Endpoints](../08-endpoints/audit-policy/configure-end-audit-policy-change.md)**
+* **[REQ-END-148 - Audit Policy: Privilege Use Auditing for Endpoints](../08-endpoints/audit-policy/configure-end-audit-privilege-use.md)**
+* **[REQ-END-149 - Audit Policy: System Events Auditing for Endpoints](../08-endpoints/audit-policy/configure-end-audit-system-events.md)**
 
 ---
 
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Recommendation R48 (Audit Policy)
-* **CIS Microsoft Windows Server 2016/2019/2022 Benchmark**: Section 9 (Audit Policy)
-* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 17 (Advanced Audit Policy Configuration) including 17.1.1, 17.2.1, 17.2.2, 17.2.4, 17.5.1, 17.5.2, 17.6.2, 17.7.1
-* **Microsoft Security Baseline Focus**: Windows Server and Member Server Audit Policies
+* **ANSSI AD Hardening Guide**: Recommendation R48
+* **CIS Microsoft Windows Benchmarks**: Section 9 and 17

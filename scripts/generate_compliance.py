@@ -410,7 +410,7 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                     script_name = script_match.group(1)
                     module_dir = os.path.dirname(rel_path).replace('\\', '/')
                     parts = module_dir.split('/')
-                    while len(parts) > 1 and parts[-1] in ['services', 'defender', 'asr', 'user-rights', 'user-profile']:
+                    while len(parts) > 1 and parts[-1] in ['services', 'defender', 'asr', 'user-rights', 'user-profile', 'audit-policy']:
                         parts.pop()
                     module_dir = '/'.join(parts)
                     audit_script = f"{module_dir}/audit_scripts/{script_name}"
@@ -422,7 +422,7 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                     impl_name = impl_match.group(1)
                     module_dir = os.path.dirname(rel_path).replace('\\', '/')
                     parts = module_dir.split('/')
-                    while len(parts) > 1 and parts[-1] in ['services', 'defender', 'asr', 'user-rights', 'user-profile']:
+                    while len(parts) > 1 and parts[-1] in ['services', 'defender', 'asr', 'user-rights', 'user-profile', 'audit-policy']:
                         parts.pop()
                     module_dir = '/'.join(parts)
                     impl_script = f"{module_dir}/implementation_scripts/{impl_name}"

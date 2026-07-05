@@ -204,6 +204,15 @@ This directory contains the physical isolation policies and operating system sec
 
 36. **[REQ-PAW-036 - Configure Windows Defender Application Control](configure-wdac.md)**
     Deploys Windows Defender Application Control (WDAC) on PAWs in Audit Mode to block unauthorized system-level binaries and scripts.
+    * **[REQ-PAW-130 - Audit Policy: Advanced Audit Policy Overrides for PAWs](audit-policy/configure-paw-audit-audit-override.md)**
+    * **[REQ-PAW-131 - Audit Policy: Account Logon Auditing for PAWs](audit-policy/configure-paw-audit-account-logon.md)**
+    * **[REQ-PAW-132 - Audit Policy: Account Management Auditing for PAWs](audit-policy/configure-paw-audit-account-management.md)**
+    * **[REQ-PAW-133 - Audit Policy: Detailed Tracking Auditing for PAWs](audit-policy/configure-paw-audit-detailed-tracking.md)**
+    * **[REQ-PAW-134 - Audit Policy: Logon and Logoff Auditing for PAWs](audit-policy/configure-paw-audit-logon-logoff.md)**
+    * **[REQ-PAW-135 - Audit Policy: Object Access Auditing for PAWs](audit-policy/configure-paw-audit-object-access.md)**
+    * **[REQ-PAW-136 - Audit Policy: Policy Change Auditing for PAWs](audit-policy/configure-paw-audit-policy-change.md)**
+    * **[REQ-PAW-137 - Audit Policy: Privilege Use Auditing for PAWs](audit-policy/configure-paw-audit-privilege-use.md)**
+    * **[REQ-PAW-138 - Audit Policy: System Events Auditing for PAWs](audit-policy/configure-paw-audit-system-events.md)**
 
 
 

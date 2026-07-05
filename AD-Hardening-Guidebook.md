@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 20371a2 | Generated: July 05, 2026</span>
+      <span>Commit: 5885ca6 | Generated: July 05, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1740,6 +1740,16 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure and enforce BlackLotus revocation updates and bootloader integrity verification policy variables in system firmware.
 * **[REQ-DC-034 - Configure Windows Defender Application Control](#02-domain-controllers-configure-wdac-md)**
   Requirement to deploy Windows Defender Application Control (WDAC) on Domain Controllers in Audit Mode to block unauthorized system-level binaries and scripts.
+* **[REQ-DC-136 - Audit Policy: Advanced Audit Policy Overrides](#02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md)**
+* **[REQ-DC-137 - Audit Policy: Account Logon Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md)**
+* **[REQ-DC-138 - Audit Policy: Account Management Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-account-management-md)**
+* **[REQ-DC-139 - Audit Policy: Detailed Tracking Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md)**
+* **[REQ-DC-140 - Audit Policy: Directory Service Access Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md)**
+* **[REQ-DC-141 - Audit Policy: Logon and Logoff Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md)**
+* **[REQ-DC-142 - Audit Policy: Object Access Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-object-access-md)**
+* **[REQ-DC-143 - Audit Policy: Policy Change Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md)**
+* **[REQ-DC-144 - Audit Policy: Privilege Use Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md)**
+* **[REQ-DC-145 - Audit Policy: System Events Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-system-events-md)**
 
 
 <div style="page-break-before: always;"></div>
@@ -20697,6 +20707,1392 @@ if ($Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md-req-dc-136-audit-policy-advanced-audit-policy-overrides-on-domain-controllers"></div>
+# [REQ-DC-136] Audit Policy: Advanced Audit Policy Overrides on Domain Controllers
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016 (and above)
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Registry: `HKLM\System\CurrentControlSet\Control\Lsa\ SCENoApplyLegacyAuditPolicy` = `1` (DWord)
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\ LogLevel` = `0` (DWord)
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md-rationale"></div>
+## Rationale
+Enforcing advanced audit policy overrides prevents legacy category settings from overriding refined subcategory policies, and disabling verbose Kerberos logging ensures that event logs are not flooded with diagnostic events.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Verify that the local Security Event Log size is set to a minimum of 1GB on Domain Controllers to prevent rapid log rollover.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Registry: `HKLM\System\CurrentControlSet\Control\Lsa\ SCENoApplyLegacyAuditPolicy` = `1` (DWord)
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\ LogLevel` = `0` (DWord)
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-DcAuditAuditoverride.ps1](../implementation_scripts/Configure-DcAuditAuditoverride.ps1)
+
+```powershell
+# Configure-DcAuditAuditoverride.ps1
+Write-Host "Applying Audit Policy category: audit-override..." -ForegroundColor Cyan
+
+# Set Registry Override: SCENoApplyLegacyAuditPolicy
+if (-not (Test-Path "reg:\HKLM\System\CurrentControlSet\Control\Lsa")) { New-Item -Path "reg:\HKLM\System\CurrentControlSet\Control\Lsa" -Force | Out-Null }
+Set-ItemProperty -Path "reg:\HKLM\System\CurrentControlSet\Control\Lsa" -Name "SCENoApplyLegacyAuditPolicy" -Value 1 -Type DWord -Force
+Write-Host "    Enforced SCENoApplyLegacyAuditPolicy = 1" -ForegroundColor Green
+
+# Set Registry Override: LogLevel
+if (-not (Test-Path "reg:\HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters")) { New-Item -Path "reg:\HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" -Force | Out-Null }
+Set-ItemProperty -Path "reg:\HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" -Name "LogLevel" -Value 0 -Type DWord -Force
+Write-Host "    Enforced LogLevel = 0" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-DcAuditAuditoverrideStatus.ps1](../audit_scripts/Get-DcAuditAuditoverrideStatus.ps1)
+
+```powershell
+# Get-DcAuditAuditoverrideStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry: SCENoApplyLegacyAuditPolicy
+$RegVal = Get-ItemProperty -Path "reg:\HKLM\System\CurrentControlSet\Control\Lsa" -Name "SCENoApplyLegacyAuditPolicy" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.SCENoApplyLegacyAuditPolicy -ne 1) {
+    $script:Vulnerable = $true
+}
+
+# Audit Registry: LogLevel
+$RegVal = Get-ItemProperty -Path "reg:\HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" -Name "LogLevel" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.LogLevel -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-audit-override-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendation R48
+* **CIS Windows Server Benchmark**: Section 9 (Audit Policy)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md-req-dc-137-audit-policy-account-logon-auditing-on-domain-controllers"></div>
+# [REQ-DC-137] Audit Policy: Account Logon Auditing on Domain Controllers
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016 (and above)
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Kerberos Authentication Service` -> `Success and Failure`
+  * Subcategory: `Kerberos Service Ticket Operations` -> `Success and Failure`
+  * Subcategory: `Credential Validation` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md-rationale"></div>
+## Rationale
+Auditing account logon events captures authentication requests processed by the local system or the domain controller, which is critical for identifying Kerberoasting, NTLM relaying, and brute-force attempts.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Verify that the local Security Event Log size is set to a minimum of 1GB on Domain Controllers to prevent rapid log rollover.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Kerberos Authentication Service` -> `Success and Failure`
+  * Subcategory: `Kerberos Service Ticket Operations` -> `Success and Failure`
+  * Subcategory: `Credential Validation` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-DcAuditAccountlogon.ps1](../implementation_scripts/Configure-DcAuditAccountlogon.ps1)
+
+```powershell
+# Configure-DcAuditAccountlogon.ps1
+Write-Host "Applying Audit Policy category: account-logon..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Kerberos Authentication Service
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Kerberos Authentication Service`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Kerberos Authentication Service to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Kerberos Authentication Service. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Kerberos Service Ticket Operations
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Kerberos Service Ticket Operations`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Kerberos Service Ticket Operations to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Kerberos Service Ticket Operations. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Credential Validation
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Credential Validation`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Credential Validation to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Credential Validation. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-DcAuditAccountlogonStatus.ps1](../audit_scripts/Get-DcAuditAccountlogonStatus.ps1)
+
+```powershell
+# Get-DcAuditAccountlogonStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Kerberos Authentication Service
+$RawOutput = auditpol.exe /get /subcategory:"Kerberos Authentication Service" /r
+if ($RawOutput -notmatch ",Kerberos Authentication Service,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Kerberos Service Ticket Operations
+$RawOutput = auditpol.exe /get /subcategory:"Kerberos Service Ticket Operations" /r
+if ($RawOutput -notmatch ",Kerberos Service Ticket Operations,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Credential Validation
+$RawOutput = auditpol.exe /get /subcategory:"Credential Validation" /r
+if ($RawOutput -notmatch ",Credential Validation,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-logon-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendation R48
+* **CIS Windows Server Benchmark**: Section 9 (Audit Policy)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-management-md"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-management-md-req-dc-138-audit-policy-account-management-auditing-on-domain-controllers"></div>
+# [REQ-DC-138] Audit Policy: Account Management Auditing on Domain Controllers
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-management-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016 (and above)
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-management-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `User Account Management` -> `Success and Failure`
+  * Subcategory: `Security Group Management` -> `Success and Failure`
+  * Subcategory: `Application Group Management` -> `Success and Failure`
+  * Subcategory: `Computer Account Management` -> `Success and Failure`
+  * Subcategory: `Distribution Group Management` -> `Success`
+  * Subcategory: `Other Account Management Events` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-management-md-rationale"></div>
+## Rationale
+Auditing account management logs security principal modifications (creations, deletions, password resets, group modifications) to detect privilege escalation attempts on domain or local administrative groups.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-management-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Verify that the local Security Event Log size is set to a minimum of 1GB on Domain Controllers to prevent rapid log rollover.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-management-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-management-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `User Account Management` -> `Success and Failure`
+  * Subcategory: `Security Group Management` -> `Success and Failure`
+  * Subcategory: `Application Group Management` -> `Success and Failure`
+  * Subcategory: `Computer Account Management` -> `Success and Failure`
+  * Subcategory: `Distribution Group Management` -> `Success`
+  * Subcategory: `Other Account Management Events` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-management-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-DcAuditAccountmanagement.ps1](../implementation_scripts/Configure-DcAuditAccountmanagement.ps1)
+
+```powershell
+# Configure-DcAuditAccountmanagement.ps1
+Write-Host "Applying Audit Policy category: account-management..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: User Account Management
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"User Account Management`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory User Account Management to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory User Account Management. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Security Group Management
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Security Group Management`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Security Group Management to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Security Group Management. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Application Group Management
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Application Group Management`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Application Group Management to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Application Group Management. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Computer Account Management
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Computer Account Management`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Computer Account Management to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Computer Account Management. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Distribution Group Management
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Distribution Group Management`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Distribution Group Management to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Distribution Group Management. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other Account Management Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other Account Management Events`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other Account Management Events to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other Account Management Events. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-DcAuditAccountmanagementStatus.ps1](../audit_scripts/Get-DcAuditAccountmanagementStatus.ps1)
+
+```powershell
+# Get-DcAuditAccountmanagementStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: User Account Management
+$RawOutput = auditpol.exe /get /subcategory:"User Account Management" /r
+if ($RawOutput -notmatch ",User Account Management,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Security Group Management
+$RawOutput = auditpol.exe /get /subcategory:"Security Group Management" /r
+if ($RawOutput -notmatch ",Security Group Management,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Application Group Management
+$RawOutput = auditpol.exe /get /subcategory:"Application Group Management" /r
+if ($RawOutput -notmatch ",Application Group Management,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Computer Account Management
+$RawOutput = auditpol.exe /get /subcategory:"Computer Account Management" /r
+if ($RawOutput -notmatch ",Computer Account Management,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Distribution Group Management
+$RawOutput = auditpol.exe /get /subcategory:"Distribution Group Management" /r
+if ($RawOutput -notmatch ",Distribution Group Management,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other Account Management Events
+$RawOutput = auditpol.exe /get /subcategory:"Other Account Management Events" /r
+if ($RawOutput -notmatch ",Other Account Management Events,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-account-management-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendation R48
+* **CIS Windows Server Benchmark**: Section 9 (Audit Policy)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md-req-dc-139-audit-policy-detailed-tracking-auditing-on-domain-controllers"></div>
+# [REQ-DC-139] Audit Policy: Detailed Tracking Auditing on Domain Controllers
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016 (and above)
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Process Creation` -> `Success and Failure`
+  * Subcategory: `DPAPI Activity` -> `Success and Failure`
+  * Subcategory: `PNP Activity` -> `Success`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md-rationale"></div>
+## Rationale
+Detailed tracking records process creations and device arrivals to ensure EDR/SIEM visibility into executable command lines and hardware plug events.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Verify that the local Security Event Log size is set to a minimum of 1GB on Domain Controllers to prevent rapid log rollover.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Process Creation` -> `Success and Failure`
+  * Subcategory: `DPAPI Activity` -> `Success and Failure`
+  * Subcategory: `PNP Activity` -> `Success`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-DcAuditDetailedtracking.ps1](../implementation_scripts/Configure-DcAuditDetailedtracking.ps1)
+
+```powershell
+# Configure-DcAuditDetailedtracking.ps1
+Write-Host "Applying Audit Policy category: detailed-tracking..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Process Creation
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Process Creation`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Process Creation to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Process Creation. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: DPAPI Activity
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"DPAPI Activity`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory DPAPI Activity to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory DPAPI Activity. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: PNP Activity
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"PNP Activity`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory PNP Activity to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory PNP Activity. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-DcAuditDetailedtrackingStatus.ps1](../audit_scripts/Get-DcAuditDetailedtrackingStatus.ps1)
+
+```powershell
+# Get-DcAuditDetailedtrackingStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Process Creation
+$RawOutput = auditpol.exe /get /subcategory:"Process Creation" /r
+if ($RawOutput -notmatch ",Process Creation,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: DPAPI Activity
+$RawOutput = auditpol.exe /get /subcategory:"DPAPI Activity" /r
+if ($RawOutput -notmatch ",DPAPI Activity,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: PNP Activity
+$RawOutput = auditpol.exe /get /subcategory:"PNP Activity" /r
+if ($RawOutput -notmatch ",PNP Activity,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-detailed-tracking-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendation R48
+* **CIS Windows Server Benchmark**: Section 9 (Audit Policy)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md-req-dc-140-audit-policy-directory-service-access-auditing-on-domain-controllers"></div>
+# [REQ-DC-140] Audit Policy: Directory Service Access Auditing on Domain Controllers
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016 (and above)
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Directory Service Changes` -> `Success and Failure`
+  * Subcategory: `Directory Service Access` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md-rationale"></div>
+## Rationale
+Auditing Directory Service changes captures creations, modifications, and deletions of Active Directory objects, providing an essential trail for monitoring structural domain modifications.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Verify that the local Security Event Log size is set to a minimum of 1GB on Domain Controllers to prevent rapid log rollover.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Directory Service Changes` -> `Success and Failure`
+  * Subcategory: `Directory Service Access` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-DcAuditDsaccess.ps1](../implementation_scripts/Configure-DcAuditDsaccess.ps1)
+
+```powershell
+# Configure-DcAuditDsaccess.ps1
+Write-Host "Applying Audit Policy category: ds-access..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Directory Service Changes
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Directory Service Changes`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Directory Service Changes to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Directory Service Changes. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Directory Service Access
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Directory Service Access`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Directory Service Access to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Directory Service Access. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-DcAuditDsaccessStatus.ps1](../audit_scripts/Get-DcAuditDsaccessStatus.ps1)
+
+```powershell
+# Get-DcAuditDsaccessStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Directory Service Changes
+$RawOutput = auditpol.exe /get /subcategory:"Directory Service Changes" /r
+if ($RawOutput -notmatch ",Directory Service Changes,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Directory Service Access
+$RawOutput = auditpol.exe /get /subcategory:"Directory Service Access" /r
+if ($RawOutput -notmatch ",Directory Service Access,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendation R48
+* **CIS Windows Server Benchmark**: Section 9 (Audit Policy)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md-req-dc-141-audit-policy-logon-and-logoff-auditing-on-domain-controllers"></div>
+# [REQ-DC-141] Audit Policy: Logon and Logoff Auditing on Domain Controllers
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016 (and above)
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Logon` -> `Success and Failure`
+  * Subcategory: `Logoff` -> `Success`
+  * Subcategory: `Special Logon` -> `Success and Failure`
+  * Subcategory: `Account Lockout` -> `Success and Failure`
+  * Subcategory: `Other Logon/Logoff Events` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md-rationale"></div>
+## Rationale
+Auditing logon/logoff events monitors administrative session states, special elevations, and failed logon attempts, which is critical for finding unauthorized remote access or lateral movement.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Verify that the local Security Event Log size is set to a minimum of 1GB on Domain Controllers to prevent rapid log rollover.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Logon` -> `Success and Failure`
+  * Subcategory: `Logoff` -> `Success`
+  * Subcategory: `Special Logon` -> `Success and Failure`
+  * Subcategory: `Account Lockout` -> `Success and Failure`
+  * Subcategory: `Other Logon/Logoff Events` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-DcAuditLogonlogoff.ps1](../implementation_scripts/Configure-DcAuditLogonlogoff.ps1)
+
+```powershell
+# Configure-DcAuditLogonlogoff.ps1
+Write-Host "Applying Audit Policy category: logon-logoff..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Logon
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Logon`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Logon to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Logon. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Logoff
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Logoff`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Logoff to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Logoff. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Special Logon
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Special Logon`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Special Logon to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Special Logon. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Account Lockout
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Account Lockout`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Account Lockout to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Account Lockout. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other Logon/Logoff Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other Logon/Logoff Events`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other Logon/Logoff Events to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other Logon/Logoff Events. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-DcAuditLogonlogoffStatus.ps1](../audit_scripts/Get-DcAuditLogonlogoffStatus.ps1)
+
+```powershell
+# Get-DcAuditLogonlogoffStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Logon
+$RawOutput = auditpol.exe /get /subcategory:"Logon" /r
+if ($RawOutput -notmatch ",Logon,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Logoff
+$RawOutput = auditpol.exe /get /subcategory:"Logoff" /r
+if ($RawOutput -notmatch ",Logoff,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Special Logon
+$RawOutput = auditpol.exe /get /subcategory:"Special Logon" /r
+if ($RawOutput -notmatch ",Special Logon,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Account Lockout
+$RawOutput = auditpol.exe /get /subcategory:"Account Lockout" /r
+if ($RawOutput -notmatch ",Account Lockout,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other Logon/Logoff Events
+$RawOutput = auditpol.exe /get /subcategory:"Other Logon/Logoff Events" /r
+if ($RawOutput -notmatch ",Other Logon/Logoff Events,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-logon-logoff-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendation R48
+* **CIS Windows Server Benchmark**: Section 9 (Audit Policy)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-object-access-md"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-object-access-md-req-dc-142-audit-policy-object-access-auditing-on-domain-controllers"></div>
+# [REQ-DC-142] Audit Policy: Object Access Auditing on Domain Controllers
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-object-access-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016 (and above)
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-object-access-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Handle Manipulation` -> `Success and Failure`
+  * Subcategory: `Registry` -> `Success and Failure`
+  * Subcategory: `File Share` -> `Success and Failure`
+  * Subcategory: `Detailed File Share` -> `Failure`
+  * Subcategory: `Other Object Access Events` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-object-access-md-rationale"></div>
+## Rationale
+Auditing object access (files, registry keys, and shares) helps monitor unauthorized modifications to system configuration files and access to restricted shares.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-object-access-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Verify that the local Security Event Log size is set to a minimum of 1GB on Domain Controllers to prevent rapid log rollover.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-object-access-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-object-access-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Handle Manipulation` -> `Success and Failure`
+  * Subcategory: `Registry` -> `Success and Failure`
+  * Subcategory: `File Share` -> `Success and Failure`
+  * Subcategory: `Detailed File Share` -> `Failure`
+  * Subcategory: `Other Object Access Events` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-object-access-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-DcAuditObjectaccess.ps1](../implementation_scripts/Configure-DcAuditObjectaccess.ps1)
+
+```powershell
+# Configure-DcAuditObjectaccess.ps1
+Write-Host "Applying Audit Policy category: object-access..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Handle Manipulation
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Handle Manipulation`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Handle Manipulation to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Handle Manipulation. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Registry
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Registry`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Registry to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Registry. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: File Share
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"File Share`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory File Share to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory File Share. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Detailed File Share
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Detailed File Share`" /success:disable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Detailed File Share to Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Detailed File Share. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other Object Access Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other Object Access Events`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other Object Access Events to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other Object Access Events. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-DcAuditObjectaccessStatus.ps1](../audit_scripts/Get-DcAuditObjectaccessStatus.ps1)
+
+```powershell
+# Get-DcAuditObjectaccessStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Handle Manipulation
+$RawOutput = auditpol.exe /get /subcategory:"Handle Manipulation" /r
+if ($RawOutput -notmatch ",Handle Manipulation,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Registry
+$RawOutput = auditpol.exe /get /subcategory:"Registry" /r
+if ($RawOutput -notmatch ",Registry,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: File Share
+$RawOutput = auditpol.exe /get /subcategory:"File Share" /r
+if ($RawOutput -notmatch ",File Share,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Detailed File Share
+$RawOutput = auditpol.exe /get /subcategory:"Detailed File Share" /r
+if ($RawOutput -notmatch ",Detailed File Share,.*,Failure") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other Object Access Events
+$RawOutput = auditpol.exe /get /subcategory:"Other Object Access Events" /r
+if ($RawOutput -notmatch ",Other Object Access Events,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-object-access-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendation R48
+* **CIS Windows Server Benchmark**: Section 9 (Audit Policy)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md-req-dc-143-audit-policy-policy-change-auditing-on-domain-controllers"></div>
+# [REQ-DC-143] Audit Policy: Policy Change Auditing on Domain Controllers
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016 (and above)
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Policy Change` -> `Success and Failure`
+  * Subcategory: `Authentication Policy Change` -> `Success`
+  * Subcategory: `Authorization Policy Change` -> `Success`
+  * Subcategory: `MPSSVC Rule-Level Policy Change` -> `Success and Failure`
+  * Subcategory: `Other Policy Change Events` -> `Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md-rationale"></div>
+## Rationale
+Auditing policy changes tracks attempts to modify authorization policies, auditing configuration changes, or firewall rule alterations to hide adversarial tracks.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Verify that the local Security Event Log size is set to a minimum of 1GB on Domain Controllers to prevent rapid log rollover.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Policy Change` -> `Success and Failure`
+  * Subcategory: `Authentication Policy Change` -> `Success`
+  * Subcategory: `Authorization Policy Change` -> `Success`
+  * Subcategory: `MPSSVC Rule-Level Policy Change` -> `Success and Failure`
+  * Subcategory: `Other Policy Change Events` -> `Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-DcAuditPolicychange.ps1](../implementation_scripts/Configure-DcAuditPolicychange.ps1)
+
+```powershell
+# Configure-DcAuditPolicychange.ps1
+Write-Host "Applying Audit Policy category: policy-change..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Policy Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Policy Change`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Policy Change to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Policy Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Authentication Policy Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Authentication Policy Change`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Authentication Policy Change to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Authentication Policy Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Authorization Policy Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Authorization Policy Change`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Authorization Policy Change to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Authorization Policy Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: MPSSVC Rule-Level Policy Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"MPSSVC Rule-Level Policy Change`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory MPSSVC Rule-Level Policy Change to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory MPSSVC Rule-Level Policy Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other Policy Change Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other Policy Change Events`" /success:disable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other Policy Change Events to Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other Policy Change Events. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-DcAuditPolicychangeStatus.ps1](../audit_scripts/Get-DcAuditPolicychangeStatus.ps1)
+
+```powershell
+# Get-DcAuditPolicychangeStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Policy Change
+$RawOutput = auditpol.exe /get /subcategory:"Policy Change" /r
+if ($RawOutput -notmatch ",Policy Change,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Authentication Policy Change
+$RawOutput = auditpol.exe /get /subcategory:"Authentication Policy Change" /r
+if ($RawOutput -notmatch ",Authentication Policy Change,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Authorization Policy Change
+$RawOutput = auditpol.exe /get /subcategory:"Authorization Policy Change" /r
+if ($RawOutput -notmatch ",Authorization Policy Change,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: MPSSVC Rule-Level Policy Change
+$RawOutput = auditpol.exe /get /subcategory:"MPSSVC Rule-Level Policy Change" /r
+if ($RawOutput -notmatch ",MPSSVC Rule-Level Policy Change,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other Policy Change Events
+$RawOutput = auditpol.exe /get /subcategory:"Other Policy Change Events" /r
+if ($RawOutput -notmatch ",Other Policy Change Events,.*,Failure") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendation R48
+* **CIS Windows Server Benchmark**: Section 9 (Audit Policy)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md-req-dc-144-audit-policy-privilege-use-auditing-on-domain-controllers"></div>
+# [REQ-DC-144] Audit Policy: Privilege Use Auditing on Domain Controllers
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016 (and above)
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Sensitive Privilege Use` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md-rationale"></div>
+## Rationale
+Auditing sensitive privilege use logs attempts by processes or users to exercise rights like ActAsPartOfTypeOperatingSystem or LoadDrivers, identifying potential privilege escalations.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Verify that the local Security Event Log size is set to a minimum of 1GB on Domain Controllers to prevent rapid log rollover.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Sensitive Privilege Use` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-DcAuditPrivilegeuse.ps1](../implementation_scripts/Configure-DcAuditPrivilegeuse.ps1)
+
+```powershell
+# Configure-DcAuditPrivilegeuse.ps1
+Write-Host "Applying Audit Policy category: privilege-use..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Sensitive Privilege Use
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Sensitive Privilege Use`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Sensitive Privilege Use to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Sensitive Privilege Use. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-DcAuditPrivilegeuseStatus.ps1](../audit_scripts/Get-DcAuditPrivilegeuseStatus.ps1)
+
+```powershell
+# Get-DcAuditPrivilegeuseStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Sensitive Privilege Use
+$RawOutput = auditpol.exe /get /subcategory:"Sensitive Privilege Use" /r
+if ($RawOutput -notmatch ",Sensitive Privilege Use,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendation R48
+* **CIS Windows Server Benchmark**: Section 9 (Audit Policy)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-system-events-md"></div>
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-system-events-md-req-dc-145-audit-policy-system-events-auditing-on-domain-controllers"></div>
+# [REQ-DC-145] Audit Policy: System Events Auditing on Domain Controllers
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-system-events-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016 (and above)
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-system-events-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `IPsec Driver` -> `Success and Failure`
+  * Subcategory: `Other System Events` -> `Success and Failure`
+  * Subcategory: `Security State Change` -> `Success and Failure`
+  * Subcategory: `Security System Extension` -> `Success and Failure`
+  * Subcategory: `System Integrity` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-system-events-md-rationale"></div>
+## Rationale
+Auditing system security extensions, integrity violations, and driver arrivals monitors boot health and tampering of host security services.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-system-events-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Verify that the local Security Event Log size is set to a minimum of 1GB on Domain Controllers to prevent rapid log rollover.
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-system-events-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-system-events-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `IPsec Driver` -> `Success and Failure`
+  * Subcategory: `Other System Events` -> `Success and Failure`
+  * Subcategory: `Security State Change` -> `Success and Failure`
+  * Subcategory: `Security System Extension` -> `Success and Failure`
+  * Subcategory: `System Integrity` -> `Success and Failure`
+
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-system-events-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-DcAuditSystemevents.ps1](../implementation_scripts/Configure-DcAuditSystemevents.ps1)
+
+```powershell
+# Configure-DcAuditSystemevents.ps1
+Write-Host "Applying Audit Policy category: system-events..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: IPsec Driver
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"IPsec Driver`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory IPsec Driver to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory IPsec Driver. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other System Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other System Events`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other System Events to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other System Events. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Security State Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Security State Change`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Security State Change to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Security State Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Security System Extension
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Security System Extension`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Security System Extension to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Security System Extension. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: System Integrity
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"System Integrity`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory System Integrity to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory System Integrity. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-DcAuditSystemeventsStatus.ps1](../audit_scripts/Get-DcAuditSystemeventsStatus.ps1)
+
+```powershell
+# Get-DcAuditSystemeventsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: IPsec Driver
+$RawOutput = auditpol.exe /get /subcategory:"IPsec Driver" /r
+if ($RawOutput -notmatch ",IPsec Driver,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other System Events
+$RawOutput = auditpol.exe /get /subcategory:"Other System Events" /r
+if ($RawOutput -notmatch ",Other System Events,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Security State Change
+$RawOutput = auditpol.exe /get /subcategory:"Security State Change" /r
+if ($RawOutput -notmatch ",Security State Change,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Security System Extension
+$RawOutput = auditpol.exe /get /subcategory:"Security System Extension" /r
+if ($RawOutput -notmatch ",Security System Extension,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: System Integrity
+$RawOutput = auditpol.exe /get /subcategory:"System Integrity" /r
+if ($RawOutput -notmatch ",System Integrity,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-audit-policy-configure-dc-audit-system-events-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Recommendation R48
+* **CIS Windows Server Benchmark**: Section 9 (Audit Policy)
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="03-identities-services-README-md"></div>
 
 <div id="03-identities-services-README-md-module-3-identities-services-hardening"></div>
@@ -27441,8 +28837,8 @@ This directory contains configuration policies for security log auditing, PowerS
 
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md"></div>
 
-<div id="05-logging-monitoring-configure-advanced-audit-policies-md-req-log-001-configure-advanced-security-audit-policies"></div>
-# [REQ-LOG-001] Configure Advanced Security Audit Policies
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-configure-advanced-security-audit-policies"></div>
+# Configure Advanced Security Audit Policies
 
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md-target-scope"></div>
 ## Target Scope
@@ -27454,320 +28850,67 @@ This directory contains configuration policies for security log auditing, PowerS
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md-implementation-details"></div>
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * **Policy Override**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings` (Value: Enabled)
-  * **Advanced Policies**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
-  * **Registry Locations**:
-    * `HKLM\System\CurrentControlSet\Control\Lsa\SCENoApplyLegacyAuditPolicy` (Value: 1)
-    * `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\LogLevel` (Value: 0 [Disabled debug events])
+* **GPO Path / Registry Location**: Stored under `Advanced Audit Policy Configuration` and Lsa registry overrides.
 
 ---
 
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md-rationale"></div>
 ## Rationale
-Standard Windows event logging is basic and fails to capture critical event vectors, leading to visibility gaps during compromises. Configuring Advanced Security Audit Policies allows precise logging of Success/Failure states for critical areas without overloading local event log storage.
+Standard Windows event logging is basic and fails to capture critical event vectors, leading to visibility gaps during compromises. Enforcing refined subcategory audit policies ensures detailed Success and Failure logs for logon attempts, privilege use, process creations, and registry modifications without overloading log stores.
 
-Enforcing advanced auditing policies provides the following security coverages:
-1. **Authentication and Credential Security**: Kerberos TGT and TGS ticket requests (Event IDs 4768, 4769, 4770) detect Kerberoasting, Service Ticket abuse, and Silver/Golden ticket operations. Credential Validation (Event ID 4776) identifies NTLM usage and brute-force attempts.
-2. **Account and Privilege Monitoring**: Audit User Account Management (Event IDs 4720, 4722, 4724) tracks creation and password resets. Audit Security Group Management (Event IDs 4728, 4732, 4756) detects unauthorized membership changes in highly privileged groups like Domain Admins.
-3. **Execution and Directory Access**: Process Creation (Event ID 4688) tracks executing binaries. Directory Service Changes (Event ID 5136) and Directory Service Access (Event ID 4662) log Active Directory object modifications and querying to discover reconnaissance activity.
-4. **Logon and Tampering Auditing**: Logon and Special Logon auditing (Event IDs 4624, 4625, 4672) tracks remote access, elevation events, and suspicious logons. Policy Change (Event ID 4719) detects when auditing configurations are disabled or altered by adversaries trying to hide their footprints.
-5. **Kerberos Debug Events Logging (`LogLevel`)**: By default, verbose debug logging for Kerberos protocol operations is disabled. Enforcing `LogLevel` = `0` under the Kerberos Parameters registry path prevents verbose debug events from flooding the System Event log in production. Logging of Kerberos debug events (value `1`) should only be enabled temporarily for troubleshooting purposes. Standard security auditing is handled by advanced subcategories like `Audit Kerberos Authentication Service` instead.
+This module is split into profile-specific advanced audit submodules mapping to each system's security tier.
 
 ---
 
-<div id="05-logging-monitoring-configure-advanced-audit-policies-md-legacy-impact-compatibility"></div>
-## Legacy Impact & Compatibility
-* **Event Log Volume**: Enabling these detailed policies will increase log volume. The local Security Event Log size must be sized appropriately (minimum 1GB on Domain Controllers, 512MB on Member Servers and Workstations) to prevent logs from rotating out too quickly.
-* **Override Enforcement**: Forcing advanced policies to override legacy settings ensures that older group policies do not accidentally weaken system visibility. Ensure that this GPO setting is applied across all organizational units.
-* **Kerberos Events Logging**: Disabling verbose Kerberos debug logging ensures system performance and prevents event log exhaustion. It has no negative impact on standard Kerberos ticket generation or authentication operations.
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-modular-profile-audit-policies"></div>
+## Modular Profile Audit Policies
 
----
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-1-domain-controller-audit-submodule-module-2"></div>
+### 1. Domain Controller Audit Submodule (Module 2)
+The complete set of advanced audit policies for Domain Controllers:
+* **[REQ-DC-136 - Audit Policy: Advanced Audit Policy Overrides](#05-logging-monitoring-configure-dc-audit-audit-override-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-audit-override.md`)
+* **[REQ-DC-137 - Audit Policy: Account Logon Auditing](#05-logging-monitoring-configure-dc-audit-account-logon-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-account-logon.md`)
+* **[REQ-DC-138 - Audit Policy: Account Management Auditing](#05-logging-monitoring-configure-dc-audit-account-management-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-account-management.md`)
+* **[REQ-DC-139 - Audit Policy: Detailed Tracking Auditing](#05-logging-monitoring-configure-dc-audit-detailed-tracking-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-detailed-tracking.md`)
+* **[REQ-DC-140 - Audit Policy: Directory Service Access Auditing](#05-logging-monitoring-configure-dc-audit-ds-access-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-ds-access.md`)
+* **[REQ-DC-141 - Audit Policy: Logon and Logoff Auditing](#05-logging-monitoring-configure-dc-audit-logon-logoff-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-logon-logoff.md`)
+* **[REQ-DC-142 - Audit Policy: Object Access Auditing](#05-logging-monitoring-configure-dc-audit-object-access-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-object-access.md`)
+* **[REQ-DC-143 - Audit Policy: Policy Change Auditing](#05-logging-monitoring-configure-dc-audit-policy-change-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-policy-change.md`)
+* **[REQ-DC-144 - Audit Policy: Privilege Use Auditing](#05-logging-monitoring-configure-dc-audit-privilege-use-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-privilege-use.md`)
+* **[REQ-DC-145 - Audit Policy: System Events Auditing](#05-logging-monitoring-configure-dc-audit-system-events-md)** (linked from `02-domain-controllers/audit-policy/configure-dc-audit-system-events.md`)
 
-<div id="05-logging-monitoring-configure-advanced-audit-policies-md-implementation-steps"></div>
-## Implementation Steps
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-2-paw-audit-submodule-module-7"></div>
+### 2. PAW Audit Submodule (Module 7)
+The complete set of advanced audit policies for Privileged Access Workstations:
+* **[REQ-PAW-130 - Audit Policy: Advanced Audit Policy Overrides for PAWs](#07-paws-audit-policy-configure-paw-audit-audit-override-md)**
+* **[REQ-PAW-131 - Audit Policy: Account Logon Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-account-logon-md)**
+* **[REQ-PAW-132 - Audit Policy: Account Management Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-account-management-md)**
+* **[REQ-PAW-133 - Audit Policy: Detailed Tracking Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-detailed-tracking-md)**
+* **[REQ-PAW-134 - Audit Policy: Logon and Logoff Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-logon-logoff-md)**
+* **[REQ-PAW-135 - Audit Policy: Object Access Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-object-access-md)**
+* **[REQ-PAW-136 - Audit Policy: Policy Change Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-policy-change-md)**
+* **[REQ-PAW-137 - Audit Policy: Privilege Use Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-privilege-use-md)**
+* **[REQ-PAW-138 - Audit Policy: System Events Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-system-events-md)**
 
-<div id="05-logging-monitoring-configure-advanced-audit-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
-### Option A: Group Policy Object (GPO) Configuration (Preferred)
-
-<div id="05-logging-monitoring-configure-advanced-audit-policies-md-1-enforce-advanced-audit-overrides"></div>
-#### 1. Enforce Advanced Audit Overrides
-1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Create or edit a GPO linked to the target systems (e.g., `GPO_Hardening_Logging_Baseline`).
-3. Navigate to:
-   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-4. Configure the setting:
-   * **Policy**: `Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings`
-   * **Setting**: `Enabled`
-
-<div id="05-logging-monitoring-configure-advanced-audit-policies-md-2-configure-advanced-audit-policy-settings"></div>
-#### 2. Configure Advanced Audit Policy Settings
-1. In the same GPO, navigate to:
-   `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
-2. Configure the following subcategory policies:
-
-| Category | Subcategory | Setting |
-| :--- | :--- | :--- |
-| **Account Logon** | `Audit Kerberos Authentication Service` | Success and Failure |
-| **Account Logon** | `Audit Kerberos Service Ticket Operations` | Success and Failure |
-| **Account Logon** | `Audit Credential Validation` | Success and Failure |
-| **Account Management** | `Audit User Account Management` | Success and Failure |
-| **Account Management** | `Audit Security Group Management` | Success and Failure |
-| **Account Management** | `Audit Application Group Management` | Success and Failure |
-| **Account Management** | `Audit Computer Account Management` | Success and Failure |
-| **Account Management** | `Audit Distribution Group Management` | Success |
-| **Account Management** | `Audit Other Account Management Events` | Success and Failure |
-| **Detailed Tracking** | `Audit Process Creation` | Success and Failure |
-| **Detailed Tracking** | `Audit DPAPI Activity` | Success and Failure |
-| **Detailed Tracking** | `Audit PNP Activity` | Success |
-| **DS Access** | `Audit Directory Service Changes` | Success and Failure |
-| **DS Access** | `Audit Directory Service Access` | Success and Failure |
-| **Logon/Logoff** | `Audit Logon` | Success and Failure |
-| **Logon/Logoff** | `Audit Logoff` | Success |
-| **Logon/Logoff** | `Audit Special Logon` | Success and Failure |
-| **Logon/Logoff** | `Audit Account Lockout` | Success and Failure |
-| **Logon/Logoff** | `Audit Other Logon/Logoff Events` | Success and Failure |
-| **Object Access** | `Audit Handle Manipulation` | Success and Failure |
-| **Object Access** | `Audit Registry` | Success and Failure |
-| **Object Access** | `Audit File Share` | Success and Failure |
-| **Object Access** | `Audit Detailed File Share` | Failure |
-| **Object Access** | `Audit Other Object Access Events` | Success and Failure |
-| **Policy Change** | `Audit Policy Change` | Success and Failure |
-| **Policy Change** | `Audit Authentication Policy Change` | Success |
-| **Policy Change** | `Audit Authorization Policy Change` | Success |
-| **Policy Change** | `Audit MPSSVC Rule-Level Policy Change` | Success and Failure |
-| **Policy Change** | `Audit Other Policy Change Events` | Failure |
-| **Privilege Use** | `Audit Sensitive Privilege Use` | Success and Failure |
-| **System** | `Audit IPsec Driver` | Success and Failure |
-| **System** | `Audit Other System Events` | Success and Failure |
-| **System** | `Audit Security State Change` | Success and Failure |
-| **System** | `Audit Security System Extension` | Success and Failure |
-| **System** | `Audit System Integrity` | Success and Failure |
-
-<div id="05-logging-monitoring-configure-advanced-audit-policies-md-3-deploy-kerberos-loglevel-registry-settings-via-gpo-preferences"></div>
-#### 3. Deploy Kerberos LogLevel Registry Settings via GPO Preferences
-To ensure verbose Kerberos debug logging is disabled in production, deploy the setting via Registry GPO Preferences:
-1. Within the logging GPO, navigate to:
-   `Computer Configuration\Preferences\Windows Settings\Registry`
-2. Right-click **Registry**, select **New** -> **Registry Item**.
-3. Configure:
-   * **Action**: `Update`
-   * **Hive**: `HKEY_LOCAL_MACHINE`
-   * **Key Path**: `SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters`
-   * **Value name**: `LogLevel`
-   * **Value type**: `REG_DWORD`
-   * **Value data**: `0` (Decimal)
-
----
-
-<div id="05-logging-monitoring-configure-advanced-audit-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
-### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
-
-Run the following scripts locally to query and enforce Advanced Security Audit Policies.
-
-[Download Script: Set-AdvancedAuditPolicies.ps1](implementation_scripts/Set-AdvancedAuditPolicies.ps1)
-
-```powershell
-# Set-AdvancedAuditPolicies.ps1
-# Configures Advanced Security Audit Policies and registry override values.
-
-Write-Host "--- Applying Advanced Audit Policies Remediation ---" -ForegroundColor Cyan
-
-# 1. Enforce Force Audit Policy Override (SCENoApplyLegacyAuditPolicy = 1)
-Write-Host "[+] Enforcing Advanced Audit Policy Registry Override..." -ForegroundColor Gray
-$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
-if (-not (Test-Path $LsaPath)) {
-    New-Item -Path $LsaPath -Force | Out-Null
-}
-Set-ItemProperty -Path $LsaPath -Name "SCENoApplyLegacyAuditPolicy" -Value 1 -Type DWord
-Write-Host "    Force advanced audit policy override enabled." -ForegroundColor Green
-
-# Enforce Kerberos Debug Logging disabled (LogLevel = 0)
-$KerbPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
-if (-not (Test-Path $KerbPath)) {
-    New-Item -Path $KerbPath -Force | Out-Null
-}
-Set-ItemProperty -Path $KerbPath -Name "LogLevel" -Value 0 -Type DWord -Force
-Write-Host "    Kerberos debug events logging disabled." -ForegroundColor Green
-
-# 2. Configure Advanced Audit Policy subcategories
-$Policies = @(
-    @{ Subcategory = "Kerberos Authentication Service"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Kerberos Service Ticket Operations"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Credential Validation"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "User Account Management"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Security Group Management"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Application Group Management"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Computer Account Management"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Distribution Group Management"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "Other Account Management Events"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Process Creation"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "DPAPI Activity"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "PNP Activity"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "Directory Service Changes"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Directory Service Access"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Logon"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Logoff"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "Special Logon"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Policy Change"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Account Lockout"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Other Logon/Logoff Events"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Handle Manipulation"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Registry"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "File Share"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Detailed File Share"; Success = "disable"; Failure = "enable" },
-    @{ Subcategory = "Other Object Access Events"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Authentication Policy Change"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "Authorization Policy Change"; Success = "enable"; Failure = "disable" },
-    @{ Subcategory = "MPSSVC Rule-Level Policy Change"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Other Policy Change Events"; Success = "disable"; Failure = "enable" },
-    @{ Subcategory = "Sensitive Privilege Use"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "IPsec Driver"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Other System Events"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Security State Change"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "Security System Extension"; Success = "enable"; Failure = "enable" },
-    @{ Subcategory = "System Integrity"; Success = "enable"; Failure = "enable" }
-)
-
-foreach ($P in $Policies) {
-    $Sub = $P.Subcategory
-    $Succ = $P.Success
-    $Fail = $P.Failure
-    
-    $AuditpolArgs = "/set /subcategory:`"$Sub`" /success:$Succ /failure:$fail"
-    $Process = Start-Process auditpol -ArgumentList $AuditpolArgs -Wait -NoNewWindow -PassThru
-    if ($Process.ExitCode -eq 0) {
-        Write-Host "    Audit policy '$($Sub)' set to Success:$($Succ) / Failure:$($Fail)." -ForegroundColor Green
-    } else {
-        Write-Error "    Failed to set audit policy for '$($Sub)'. Exit Code: $($Process.ExitCode)"
-    }
-}
-
-Write-Host "Advanced Audit Policies applied successfully." -ForegroundColor Cyan
-```
-
-*To verify the settings have been applied:*
-
-[Download Script: Test-AdvancedAuditPolicies.ps1](audit_scripts/Test-AdvancedAuditPolicies.ps1)
-
-```powershell
-# Test-AdvancedAuditPolicies.ps1
-# Audits Advanced Audit Policy settings and the force override configuration.
-
-Write-Host "--- Auditing Advanced Security Audit Policies ---" -ForegroundColor Cyan
-
-# 1. Audit Force Audit Policy Override (SCENoApplyLegacyAuditPolicy)
-$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
-$OverrideVal = Get-ItemProperty -Path $LsaPath -Name "SCENoApplyLegacyAuditPolicy" -ErrorAction SilentlyContinue
-$OverrideSetting = 0
-if ($OverrideVal) {
-    $OverrideSetting = $OverrideVal.SCENoApplyLegacyAuditPolicy
-}
-
-$OverrideColor = "Red"
-if ($OverrideSetting -eq 1) {
-    $OverrideColor = "Green"
-}
-Write-Host "    - Force Advanced Audit Policy Override: $($OverrideSetting) (Required = 1)" -ForegroundColor $OverrideColor
-
-# Audit Kerberos LogLevel
-$KerbPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
-if (Test-Path $KerbPath) {
-    $LogLevelVal = Get-ItemProperty -Path $KerbPath -Name "LogLevel" -ErrorAction SilentlyContinue
-    $LogLevelSetting = if ($LogLevelVal) { $LogLevelVal.LogLevel } else { 0 }
-    $LogLevelColor = if ($LogLevelSetting -eq 0) { "Green" } else { "Red" }
-    Write-Host "    - Kerberos Debug LogLevel: $($LogLevelSetting) (Required = 0)" -ForegroundColor $LogLevelColor
-} else {
-    Write-Host "    - Kerberos Debug LogLevel: Not Configured (Default/Compliant as it inherits disabled)" -ForegroundColor Green
-}
-
-# 2. Audit specific subcategories
-$RequiredPolicies = @(
-    @{ Subcategory = "Kerberos Authentication Service"; Expected = "Success and Failure" },
-    @{ Subcategory = "Kerberos Service Ticket Operations"; Expected = "Success and Failure" },
-    @{ Subcategory = "Credential Validation"; Expected = "Success and Failure" },
-    @{ Subcategory = "User Account Management"; Expected = "Success and Failure" },
-    @{ Subcategory = "Security Group Management"; Expected = "Success and Failure" },
-    @{ Subcategory = "Application Group Management"; Expected = "Success and Failure" },
-    @{ Subcategory = "Computer Account Management"; Expected = "Success and Failure" },
-    @{ Subcategory = "Distribution Group Management"; Expected = "Success" },
-    @{ Subcategory = "Other Account Management Events"; Expected = "Success and Failure" },
-    @{ Subcategory = "Process Creation"; Expected = "Success and Failure" },
-    @{ Subcategory = "DPAPI Activity"; Expected = "Success and Failure" },
-    @{ Subcategory = "PNP Activity"; Expected = "Success" },
-    @{ Subcategory = "Directory Service Changes"; Expected = "Success and Failure" },
-    @{ Subcategory = "Directory Service Access"; Expected = "Success and Failure" },
-    @{ Subcategory = "Logon"; Expected = "Success and Failure" },
-    @{ Subcategory = "Logoff"; Expected = "Success" },
-    @{ Subcategory = "Special Logon"; Expected = "Success and Failure" },
-    @{ Subcategory = "Policy Change"; Expected = "Success and Failure" },
-    @{ Subcategory = "Account Lockout"; Expected = "Success and Failure" },
-    @{ Subcategory = "Other Logon/Logoff Events"; Expected = "Success and Failure" },
-    @{ Subcategory = "Handle Manipulation"; Expected = "Success and Failure" },
-    @{ Subcategory = "Registry"; Expected = "Success and Failure" },
-    @{ Subcategory = "File Share"; Expected = "Success and Failure" },
-    @{ Subcategory = "Detailed File Share"; Expected = "Failure" },
-    @{ Subcategory = "Other Object Access Events"; Expected = "Success and Failure" },
-    @{ Subcategory = "Authentication Policy Change"; Expected = "Success" },
-    @{ Subcategory = "Authorization Policy Change"; Expected = "Success" },
-    @{ Subcategory = "MPSSVC Rule-Level Policy Change"; Expected = "Success and Failure" },
-    @{ Subcategory = "Other Policy Change Events"; Expected = "Failure" },
-    @{ Subcategory = "Sensitive Privilege Use"; Expected = "Success and Failure" },
-    @{ Subcategory = "IPsec Driver"; Expected = "Success and Failure" },
-    @{ Subcategory = "Other System Events"; Expected = "Success and Failure" },
-    @{ Subcategory = "Security State Change"; Expected = "Success and Failure" },
-    @{ Subcategory = "Security System Extension"; Expected = "Success and Failure" },
-    @{ Subcategory = "System Integrity"; Expected = "Success and Failure" }
-)
-
-Write-Host "[+] Querying Advanced Security Audit Policies..." -ForegroundColor Yellow
-
-foreach ($Policy in $RequiredPolicies) {
-    $Sub = $Policy.Subcategory
-    $Exp = $Policy.Expected
-    $RawOutput = auditpol.exe /get /subcategory:$Sub /r
-    
-    # Parse CSV format from auditpol: Machine,Subcategory,GUID,PolicyVal
-    $Lines = $RawOutput -split "`r?`n"
-    $Found = $false
-    foreach ($Line in $Lines) {
-        if ($Line -like "*,$Sub,*") {
-            $Parts = $Line -split ","
-            $Actual = $Parts[3]
-            $Found = $true
-            
-            $IsMatch = $false
-            if ($Exp -eq "Success and Failure") {
-                if ($Actual -match "Success and Failure" -or $Actual -match "Success & Failure") {
-                    $IsMatch = $true
-                }
-            } else {
-                if ($Actual -match $Exp) {
-                    $IsMatch = $true
-                }
-            }
-            
-            $Color = "Red"
-            if ($IsMatch) {
-                $Color = "Green"
-            }
-            Write-Host "    - Subcategory: $($Sub) | Setting: $($Actual) (Expected: $($Exp))" -ForegroundColor $Color
-        }
-    }
-    if (-not $Found) {
-        Write-Host "    - Subcategory: $($Sub) | Status: NOT CONFIGURED" -ForegroundColor Red
-    }
-}
-```
+<div id="05-logging-monitoring-configure-advanced-audit-policies-md-3-endpoint-audit-submodule-module-8"></div>
+### 3. Endpoint Audit Submodule (Module 8)
+The complete set of advanced audit policies for Client Workstations:
+* **[REQ-END-141 - Audit Policy: Advanced Audit Policy Overrides for Endpoints](#08-endpoints-audit-policy-configure-end-audit-audit-override-md)**
+* **[REQ-END-142 - Audit Policy: Account Logon Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-account-logon-md)**
+* **[REQ-END-143 - Audit Policy: Account Management Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-account-management-md)**
+* **[REQ-END-144 - Audit Policy: Detailed Tracking Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md)**
+* **[REQ-END-145 - Audit Policy: Logon and Logoff Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-logon-logoff-md)**
+* **[REQ-END-146 - Audit Policy: Object Access Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-object-access-md)**
+* **[REQ-END-147 - Audit Policy: Policy Change Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-policy-change-md)**
+* **[REQ-END-148 - Audit Policy: Privilege Use Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-privilege-use-md)**
+* **[REQ-END-149 - Audit Policy: System Events Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-system-events-md)**
 
 ---
 
 <div id="05-logging-monitoring-configure-advanced-audit-policies-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Recommendation R48 (Audit Policy)
-* **CIS Microsoft Windows Server 2016/2019/2022 Benchmark**: Section 9 (Audit Policy)
-* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 17 (Advanced Audit Policy Configuration) including 17.1.1, 17.2.1, 17.2.2, 17.2.4, 17.5.1, 17.5.2, 17.6.2, 17.7.1
-* **Microsoft Security Baseline Focus**: Windows Server and Member Server Audit Policies
+* **ANSSI AD Hardening Guide**: Recommendation R48
+* **CIS Microsoft Windows Benchmarks**: Section 9 and 17
 
 
 <div style="page-break-before: always;"></div>
@@ -31889,6 +33032,15 @@ This directory contains the physical isolation policies and operating system sec
 
 36. **[REQ-PAW-036 - Configure Windows Defender Application Control](#07-paws-configure-wdac-md)**
     Deploys Windows Defender Application Control (WDAC) on PAWs in Audit Mode to block unauthorized system-level binaries and scripts.
+    * **[REQ-PAW-130 - Audit Policy: Advanced Audit Policy Overrides for PAWs](#07-paws-audit-policy-configure-paw-audit-audit-override-md)**
+    * **[REQ-PAW-131 - Audit Policy: Account Logon Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-account-logon-md)**
+    * **[REQ-PAW-132 - Audit Policy: Account Management Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-account-management-md)**
+    * **[REQ-PAW-133 - Audit Policy: Detailed Tracking Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-detailed-tracking-md)**
+    * **[REQ-PAW-134 - Audit Policy: Logon and Logoff Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-logon-logoff-md)**
+    * **[REQ-PAW-135 - Audit Policy: Object Access Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-object-access-md)**
+    * **[REQ-PAW-136 - Audit Policy: Policy Change Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-policy-change-md)**
+    * **[REQ-PAW-137 - Audit Policy: Privilege Use Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-privilege-use-md)**
+    * **[REQ-PAW-138 - Audit Policy: System Events Auditing for PAWs](#07-paws-audit-policy-configure-paw-audit-system-events-md)**
 
 
 
@@ -50190,6 +51342,1216 @@ if ($Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="07-paws-audit-policy-configure-paw-audit-audit-override-md"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-audit-override-md-req-paw-130-audit-policy-advanced-audit-policy-overrides-for-paws"></div>
+# [REQ-PAW-130] Audit Policy: Advanced Audit Policy Overrides for PAWs
+
+<div id="07-paws-audit-policy-configure-paw-audit-audit-override-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-audit-override-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Registry: `HKLM\System\CurrentControlSet\Control\Lsa\ SCENoApplyLegacyAuditPolicy` = `1` (DWord)
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\ LogLevel` = `0` (DWord)
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-audit-override-md-rationale"></div>
+## Rationale
+Enforcing advanced audit policy overrides prevents legacy category settings from overriding refined subcategory policies, and disabling verbose Kerberos logging ensures that event logs are not flooded with diagnostic events.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-audit-override-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Ensure the local Security Event Log is sized to at least 512MB to accommodate the audit stream.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-audit-override-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-audit-policy-configure-paw-audit-audit-override-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Registry: `HKLM\System\CurrentControlSet\Control\Lsa\ SCENoApplyLegacyAuditPolicy` = `1` (DWord)
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\ LogLevel` = `0` (DWord)
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-audit-override-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditAuditoverride.ps1](../implementation_scripts/Configure-PawAuditAuditoverride.ps1)
+
+```powershell
+# Configure-PawAuditAuditoverride.ps1
+Write-Host "Applying Audit Policy category: audit-override..." -ForegroundColor Cyan
+
+# Set Registry Override: SCENoApplyLegacyAuditPolicy
+if (-not (Test-Path "reg:\HKLM\System\CurrentControlSet\Control\Lsa")) { New-Item -Path "reg:\HKLM\System\CurrentControlSet\Control\Lsa" -Force | Out-Null }
+Set-ItemProperty -Path "reg:\HKLM\System\CurrentControlSet\Control\Lsa" -Name "SCENoApplyLegacyAuditPolicy" -Value 1 -Type DWord -Force
+Write-Host "    Enforced SCENoApplyLegacyAuditPolicy = 1" -ForegroundColor Green
+
+# Set Registry Override: LogLevel
+if (-not (Test-Path "reg:\HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters")) { New-Item -Path "reg:\HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" -Force | Out-Null }
+Set-ItemProperty -Path "reg:\HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" -Name "LogLevel" -Value 0 -Type DWord -Force
+Write-Host "    Enforced LogLevel = 0" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditAuditoverrideStatus.ps1](../audit_scripts/Get-PawAuditAuditoverrideStatus.ps1)
+
+```powershell
+# Get-PawAuditAuditoverrideStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry: SCENoApplyLegacyAuditPolicy
+$RegVal = Get-ItemProperty -Path "reg:\HKLM\System\CurrentControlSet\Control\Lsa" -Name "SCENoApplyLegacyAuditPolicy" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.SCENoApplyLegacyAuditPolicy -ne 1) {
+    $script:Vulnerable = $true
+}
+
+# Audit Registry: LogLevel
+$RegVal = Get-ItemProperty -Path "reg:\HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" -Name "LogLevel" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.LogLevel -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-audit-override-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-logon-md"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-logon-md-req-paw-131-audit-policy-account-logon-auditing-for-paws"></div>
+# [REQ-PAW-131] Audit Policy: Account Logon Auditing for PAWs
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-logon-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-logon-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Credential Validation` -> `Success and Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-logon-md-rationale"></div>
+## Rationale
+Auditing account logon events captures authentication requests processed by the local system or the workstation, which is critical for identifying Kerberoasting, NTLM relaying, and brute-force attempts.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-logon-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Ensure the local Security Event Log is sized to at least 512MB to accommodate the audit stream.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-logon-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-logon-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Credential Validation` -> `Success and Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-logon-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditAccountlogon.ps1](../implementation_scripts/Configure-PawAuditAccountlogon.ps1)
+
+```powershell
+# Configure-PawAuditAccountlogon.ps1
+Write-Host "Applying Audit Policy category: account-logon..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Credential Validation
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Credential Validation`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Credential Validation to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Credential Validation. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditAccountlogonStatus.ps1](../audit_scripts/Get-PawAuditAccountlogonStatus.ps1)
+
+```powershell
+# Get-PawAuditAccountlogonStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Credential Validation
+$RawOutput = auditpol.exe /get /subcategory:"Credential Validation" /r
+if ($RawOutput -notmatch ",Credential Validation,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-logon-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-management-md"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-management-md-req-paw-132-audit-policy-account-management-auditing-for-paws"></div>
+# [REQ-PAW-132] Audit Policy: Account Management Auditing for PAWs
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-management-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-management-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `User Account Management` -> `Success and Failure`
+  * Subcategory: `Security Group Management` -> `Success and Failure`
+  * Subcategory: `Computer Account Management` -> `Success and Failure`
+  * Subcategory: `Other Account Management Events` -> `Success and Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-management-md-rationale"></div>
+## Rationale
+Auditing account management logs security principal modifications (creations, deletions, password resets, group modifications) to detect privilege escalation attempts on domain or local administrative groups.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-management-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Ensure the local Security Event Log is sized to at least 512MB to accommodate the audit stream.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-management-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-management-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `User Account Management` -> `Success and Failure`
+  * Subcategory: `Security Group Management` -> `Success and Failure`
+  * Subcategory: `Computer Account Management` -> `Success and Failure`
+  * Subcategory: `Other Account Management Events` -> `Success and Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-management-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditAccountmanagement.ps1](../implementation_scripts/Configure-PawAuditAccountmanagement.ps1)
+
+```powershell
+# Configure-PawAuditAccountmanagement.ps1
+Write-Host "Applying Audit Policy category: account-management..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: User Account Management
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"User Account Management`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory User Account Management to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory User Account Management. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Security Group Management
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Security Group Management`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Security Group Management to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Security Group Management. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Computer Account Management
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Computer Account Management`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Computer Account Management to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Computer Account Management. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other Account Management Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other Account Management Events`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other Account Management Events to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other Account Management Events. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditAccountmanagementStatus.ps1](../audit_scripts/Get-PawAuditAccountmanagementStatus.ps1)
+
+```powershell
+# Get-PawAuditAccountmanagementStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: User Account Management
+$RawOutput = auditpol.exe /get /subcategory:"User Account Management" /r
+if ($RawOutput -notmatch ",User Account Management,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Security Group Management
+$RawOutput = auditpol.exe /get /subcategory:"Security Group Management" /r
+if ($RawOutput -notmatch ",Security Group Management,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Computer Account Management
+$RawOutput = auditpol.exe /get /subcategory:"Computer Account Management" /r
+if ($RawOutput -notmatch ",Computer Account Management,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other Account Management Events
+$RawOutput = auditpol.exe /get /subcategory:"Other Account Management Events" /r
+if ($RawOutput -notmatch ",Other Account Management Events,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-account-management-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-detailed-tracking-md"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-detailed-tracking-md-req-paw-133-audit-policy-detailed-tracking-auditing-for-paws"></div>
+# [REQ-PAW-133] Audit Policy: Detailed Tracking Auditing for PAWs
+
+<div id="07-paws-audit-policy-configure-paw-audit-detailed-tracking-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-detailed-tracking-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Process Creation` -> `Success and Failure`
+  * Subcategory: `DPAPI Activity` -> `Success and Failure`
+  * Subcategory: `PNP Activity` -> `Success`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-detailed-tracking-md-rationale"></div>
+## Rationale
+Detailed tracking records process creations and device arrivals to ensure EDR/SIEM visibility into executable command lines and hardware plug events.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-detailed-tracking-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Ensure the local Security Event Log is sized to at least 512MB to accommodate the audit stream.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-detailed-tracking-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-audit-policy-configure-paw-audit-detailed-tracking-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Process Creation` -> `Success and Failure`
+  * Subcategory: `DPAPI Activity` -> `Success and Failure`
+  * Subcategory: `PNP Activity` -> `Success`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-detailed-tracking-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditDetailedtracking.ps1](../implementation_scripts/Configure-PawAuditDetailedtracking.ps1)
+
+```powershell
+# Configure-PawAuditDetailedtracking.ps1
+Write-Host "Applying Audit Policy category: detailed-tracking..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Process Creation
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Process Creation`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Process Creation to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Process Creation. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: DPAPI Activity
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"DPAPI Activity`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory DPAPI Activity to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory DPAPI Activity. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: PNP Activity
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"PNP Activity`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory PNP Activity to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory PNP Activity. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditDetailedtrackingStatus.ps1](../audit_scripts/Get-PawAuditDetailedtrackingStatus.ps1)
+
+```powershell
+# Get-PawAuditDetailedtrackingStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Process Creation
+$RawOutput = auditpol.exe /get /subcategory:"Process Creation" /r
+if ($RawOutput -notmatch ",Process Creation,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: DPAPI Activity
+$RawOutput = auditpol.exe /get /subcategory:"DPAPI Activity" /r
+if ($RawOutput -notmatch ",DPAPI Activity,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: PNP Activity
+$RawOutput = auditpol.exe /get /subcategory:"PNP Activity" /r
+if ($RawOutput -notmatch ",PNP Activity,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-detailed-tracking-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-logon-logoff-md"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-logon-logoff-md-req-paw-135-audit-policy-logon-and-logoff-auditing-for-paws"></div>
+# [REQ-PAW-135] Audit Policy: Logon and Logoff Auditing for PAWs
+
+<div id="07-paws-audit-policy-configure-paw-audit-logon-logoff-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-logon-logoff-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Logon` -> `Success and Failure`
+  * Subcategory: `Logoff` -> `Success`
+  * Subcategory: `Special Logon` -> `Success and Failure`
+  * Subcategory: `Account Lockout` -> `Success and Failure`
+  * Subcategory: `Other Logon/Logoff Events` -> `Success and Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-logon-logoff-md-rationale"></div>
+## Rationale
+Auditing logon/logoff events monitors administrative session states, special elevations, and failed logon attempts, which is critical for finding unauthorized remote access or lateral movement.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-logon-logoff-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Ensure the local Security Event Log is sized to at least 512MB to accommodate the audit stream.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-logon-logoff-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-audit-policy-configure-paw-audit-logon-logoff-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Logon` -> `Success and Failure`
+  * Subcategory: `Logoff` -> `Success`
+  * Subcategory: `Special Logon` -> `Success and Failure`
+  * Subcategory: `Account Lockout` -> `Success and Failure`
+  * Subcategory: `Other Logon/Logoff Events` -> `Success and Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-logon-logoff-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditLogonlogoff.ps1](../implementation_scripts/Configure-PawAuditLogonlogoff.ps1)
+
+```powershell
+# Configure-PawAuditLogonlogoff.ps1
+Write-Host "Applying Audit Policy category: logon-logoff..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Logon
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Logon`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Logon to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Logon. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Logoff
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Logoff`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Logoff to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Logoff. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Special Logon
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Special Logon`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Special Logon to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Special Logon. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Account Lockout
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Account Lockout`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Account Lockout to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Account Lockout. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other Logon/Logoff Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other Logon/Logoff Events`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other Logon/Logoff Events to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other Logon/Logoff Events. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditLogonlogoffStatus.ps1](../audit_scripts/Get-PawAuditLogonlogoffStatus.ps1)
+
+```powershell
+# Get-PawAuditLogonlogoffStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Logon
+$RawOutput = auditpol.exe /get /subcategory:"Logon" /r
+if ($RawOutput -notmatch ",Logon,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Logoff
+$RawOutput = auditpol.exe /get /subcategory:"Logoff" /r
+if ($RawOutput -notmatch ",Logoff,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Special Logon
+$RawOutput = auditpol.exe /get /subcategory:"Special Logon" /r
+if ($RawOutput -notmatch ",Special Logon,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Account Lockout
+$RawOutput = auditpol.exe /get /subcategory:"Account Lockout" /r
+if ($RawOutput -notmatch ",Account Lockout,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other Logon/Logoff Events
+$RawOutput = auditpol.exe /get /subcategory:"Other Logon/Logoff Events" /r
+if ($RawOutput -notmatch ",Other Logon/Logoff Events,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-logon-logoff-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-object-access-md"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-object-access-md-req-paw-136-audit-policy-object-access-auditing-for-paws"></div>
+# [REQ-PAW-136] Audit Policy: Object Access Auditing for PAWs
+
+<div id="07-paws-audit-policy-configure-paw-audit-object-access-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-object-access-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Handle Manipulation` -> `Success and Failure`
+  * Subcategory: `Registry` -> `Success and Failure`
+  * Subcategory: `File Share` -> `Success and Failure`
+  * Subcategory: `Detailed File Share` -> `Failure`
+  * Subcategory: `Other Object Access Events` -> `Success and Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-object-access-md-rationale"></div>
+## Rationale
+Auditing object access (files, registry keys, and shares) helps monitor unauthorized modifications to system configuration files and access to restricted shares.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-object-access-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Ensure the local Security Event Log is sized to at least 512MB to accommodate the audit stream.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-object-access-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-audit-policy-configure-paw-audit-object-access-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Handle Manipulation` -> `Success and Failure`
+  * Subcategory: `Registry` -> `Success and Failure`
+  * Subcategory: `File Share` -> `Success and Failure`
+  * Subcategory: `Detailed File Share` -> `Failure`
+  * Subcategory: `Other Object Access Events` -> `Success and Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-object-access-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditObjectaccess.ps1](../implementation_scripts/Configure-PawAuditObjectaccess.ps1)
+
+```powershell
+# Configure-PawAuditObjectaccess.ps1
+Write-Host "Applying Audit Policy category: object-access..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Handle Manipulation
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Handle Manipulation`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Handle Manipulation to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Handle Manipulation. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Registry
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Registry`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Registry to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Registry. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: File Share
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"File Share`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory File Share to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory File Share. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Detailed File Share
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Detailed File Share`" /success:disable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Detailed File Share to Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Detailed File Share. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other Object Access Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other Object Access Events`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other Object Access Events to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other Object Access Events. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditObjectaccessStatus.ps1](../audit_scripts/Get-PawAuditObjectaccessStatus.ps1)
+
+```powershell
+# Get-PawAuditObjectaccessStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Handle Manipulation
+$RawOutput = auditpol.exe /get /subcategory:"Handle Manipulation" /r
+if ($RawOutput -notmatch ",Handle Manipulation,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Registry
+$RawOutput = auditpol.exe /get /subcategory:"Registry" /r
+if ($RawOutput -notmatch ",Registry,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: File Share
+$RawOutput = auditpol.exe /get /subcategory:"File Share" /r
+if ($RawOutput -notmatch ",File Share,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Detailed File Share
+$RawOutput = auditpol.exe /get /subcategory:"Detailed File Share" /r
+if ($RawOutput -notmatch ",Detailed File Share,.*,Failure") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other Object Access Events
+$RawOutput = auditpol.exe /get /subcategory:"Other Object Access Events" /r
+if ($RawOutput -notmatch ",Other Object Access Events,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-object-access-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-policy-change-md"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-policy-change-md-req-paw-137-audit-policy-policy-change-auditing-for-paws"></div>
+# [REQ-PAW-137] Audit Policy: Policy Change Auditing for PAWs
+
+<div id="07-paws-audit-policy-configure-paw-audit-policy-change-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-policy-change-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Policy Change` -> `Success and Failure`
+  * Subcategory: `Authentication Policy Change` -> `Success`
+  * Subcategory: `Authorization Policy Change` -> `Success`
+  * Subcategory: `MPSSVC Rule-Level Policy Change` -> `Success and Failure`
+  * Subcategory: `Other Policy Change Events` -> `Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-policy-change-md-rationale"></div>
+## Rationale
+Auditing policy changes tracks attempts to modify authorization policies, auditing configuration changes, or firewall rule alterations to hide adversarial tracks.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-policy-change-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Ensure the local Security Event Log is sized to at least 512MB to accommodate the audit stream.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-policy-change-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-audit-policy-configure-paw-audit-policy-change-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Policy Change` -> `Success and Failure`
+  * Subcategory: `Authentication Policy Change` -> `Success`
+  * Subcategory: `Authorization Policy Change` -> `Success`
+  * Subcategory: `MPSSVC Rule-Level Policy Change` -> `Success and Failure`
+  * Subcategory: `Other Policy Change Events` -> `Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-policy-change-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditPolicychange.ps1](../implementation_scripts/Configure-PawAuditPolicychange.ps1)
+
+```powershell
+# Configure-PawAuditPolicychange.ps1
+Write-Host "Applying Audit Policy category: policy-change..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Policy Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Policy Change`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Policy Change to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Policy Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Authentication Policy Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Authentication Policy Change`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Authentication Policy Change to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Authentication Policy Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Authorization Policy Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Authorization Policy Change`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Authorization Policy Change to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Authorization Policy Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: MPSSVC Rule-Level Policy Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"MPSSVC Rule-Level Policy Change`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory MPSSVC Rule-Level Policy Change to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory MPSSVC Rule-Level Policy Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other Policy Change Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other Policy Change Events`" /success:disable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other Policy Change Events to Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other Policy Change Events. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditPolicychangeStatus.ps1](../audit_scripts/Get-PawAuditPolicychangeStatus.ps1)
+
+```powershell
+# Get-PawAuditPolicychangeStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Policy Change
+$RawOutput = auditpol.exe /get /subcategory:"Policy Change" /r
+if ($RawOutput -notmatch ",Policy Change,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Authentication Policy Change
+$RawOutput = auditpol.exe /get /subcategory:"Authentication Policy Change" /r
+if ($RawOutput -notmatch ",Authentication Policy Change,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Authorization Policy Change
+$RawOutput = auditpol.exe /get /subcategory:"Authorization Policy Change" /r
+if ($RawOutput -notmatch ",Authorization Policy Change,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: MPSSVC Rule-Level Policy Change
+$RawOutput = auditpol.exe /get /subcategory:"MPSSVC Rule-Level Policy Change" /r
+if ($RawOutput -notmatch ",MPSSVC Rule-Level Policy Change,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other Policy Change Events
+$RawOutput = auditpol.exe /get /subcategory:"Other Policy Change Events" /r
+if ($RawOutput -notmatch ",Other Policy Change Events,.*,Failure") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-policy-change-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-privilege-use-md"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-privilege-use-md-req-paw-138-audit-policy-privilege-use-auditing-for-paws"></div>
+# [REQ-PAW-138] Audit Policy: Privilege Use Auditing for PAWs
+
+<div id="07-paws-audit-policy-configure-paw-audit-privilege-use-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-privilege-use-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Sensitive Privilege Use` -> `Success and Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-privilege-use-md-rationale"></div>
+## Rationale
+Auditing sensitive privilege use logs attempts by processes or users to exercise rights like ActAsPartOfTypeOperatingSystem or LoadDrivers, identifying potential privilege escalations.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-privilege-use-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Ensure the local Security Event Log is sized to at least 512MB to accommodate the audit stream.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-privilege-use-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-audit-policy-configure-paw-audit-privilege-use-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Sensitive Privilege Use` -> `Success and Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-privilege-use-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditPrivilegeuse.ps1](../implementation_scripts/Configure-PawAuditPrivilegeuse.ps1)
+
+```powershell
+# Configure-PawAuditPrivilegeuse.ps1
+Write-Host "Applying Audit Policy category: privilege-use..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Sensitive Privilege Use
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Sensitive Privilege Use`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Sensitive Privilege Use to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Sensitive Privilege Use. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditPrivilegeuseStatus.ps1](../audit_scripts/Get-PawAuditPrivilegeuseStatus.ps1)
+
+```powershell
+# Get-PawAuditPrivilegeuseStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Sensitive Privilege Use
+$RawOutput = auditpol.exe /get /subcategory:"Sensitive Privilege Use" /r
+if ($RawOutput -notmatch ",Sensitive Privilege Use,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-privilege-use-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-system-events-md"></div>
+
+<div id="07-paws-audit-policy-configure-paw-audit-system-events-md-req-paw-139-audit-policy-system-events-auditing-for-paws"></div>
+# [REQ-PAW-139] Audit Policy: System Events Auditing for PAWs
+
+<div id="07-paws-audit-policy-configure-paw-audit-system-events-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-system-events-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `IPsec Driver` -> `Success and Failure`
+  * Subcategory: `Other System Events` -> `Success and Failure`
+  * Subcategory: `Security State Change` -> `Success and Failure`
+  * Subcategory: `Security System Extension` -> `Success and Failure`
+  * Subcategory: `System Integrity` -> `Success and Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-system-events-md-rationale"></div>
+## Rationale
+Auditing system security extensions, integrity violations, and driver arrivals monitors boot health and tampering of host security services.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-system-events-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Ensure the local Security Event Log is sized to at least 512MB to accommodate the audit stream.
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-system-events-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="07-paws-audit-policy-configure-paw-audit-system-events-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `IPsec Driver` -> `Success and Failure`
+  * Subcategory: `Other System Events` -> `Success and Failure`
+  * Subcategory: `Security State Change` -> `Success and Failure`
+  * Subcategory: `Security System Extension` -> `Success and Failure`
+  * Subcategory: `System Integrity` -> `Success and Failure`
+
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-system-events-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-PawAuditSystemevents.ps1](../implementation_scripts/Configure-PawAuditSystemevents.ps1)
+
+```powershell
+# Configure-PawAuditSystemevents.ps1
+Write-Host "Applying Audit Policy category: system-events..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: IPsec Driver
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"IPsec Driver`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory IPsec Driver to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory IPsec Driver. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other System Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other System Events`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other System Events to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other System Events. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Security State Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Security State Change`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Security State Change to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Security State Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Security System Extension
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Security System Extension`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Security System Extension to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Security System Extension. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: System Integrity
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"System Integrity`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory System Integrity to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory System Integrity. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-PawAuditSystemeventsStatus.ps1](../audit_scripts/Get-PawAuditSystemeventsStatus.ps1)
+
+```powershell
+# Get-PawAuditSystemeventsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: IPsec Driver
+$RawOutput = auditpol.exe /get /subcategory:"IPsec Driver" /r
+if ($RawOutput -notmatch ",IPsec Driver,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other System Events
+$RawOutput = auditpol.exe /get /subcategory:"Other System Events" /r
+if ($RawOutput -notmatch ",Other System Events,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Security State Change
+$RawOutput = auditpol.exe /get /subcategory:"Security State Change" /r
+if ($RawOutput -notmatch ",Security State Change,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Security System Extension
+$RawOutput = auditpol.exe /get /subcategory:"Security System Extension" /r
+if ($RawOutput -notmatch ",Security System Extension,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: System Integrity
+$RawOutput = auditpol.exe /get /subcategory:"System Integrity" /r
+if ($RawOutput -notmatch ",System Integrity,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-audit-policy-configure-paw-audit-system-events-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="08-endpoints-README-md"></div>
 
 <div id="08-endpoints-README-md-module-8-endpoint-hardening"></div>
@@ -50413,6 +52775,15 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 36. **[REQ-END-036 - Enable WDAC Driver Blocklist](#08-endpoints-enable-wdac-driver-blocklist-md)**
     Enforces the Microsoft Vulnerable Driver Blocklist via Windows Defender Application Control (WDAC) to prevent known vulnerable or malicious drivers from loading in kernel space, mitigating Bring Your Own Vulnerable Driver (BYOVD) attacks.
+    * **[REQ-END-141 - Audit Policy: Advanced Audit Policy Overrides for Endpoints](#08-endpoints-audit-policy-configure-end-audit-audit-override-md)**
+    * **[REQ-END-142 - Audit Policy: Account Logon Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-account-logon-md)**
+    * **[REQ-END-143 - Audit Policy: Account Management Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-account-management-md)**
+    * **[REQ-END-144 - Audit Policy: Detailed Tracking Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md)**
+    * **[REQ-END-145 - Audit Policy: Logon and Logoff Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-logon-logoff-md)**
+    * **[REQ-END-146 - Audit Policy: Object Access Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-object-access-md)**
+    * **[REQ-END-147 - Audit Policy: Policy Change Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-policy-change-md)**
+    * **[REQ-END-148 - Audit Policy: Privilege Use Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-privilege-use-md)**
+    * **[REQ-END-149 - Audit Policy: System Events Auditing for Endpoints](#08-endpoints-audit-policy-configure-end-audit-system-events-md)**
 
 
 
@@ -70699,6 +73070,1168 @@ if ($Vulnerable) {
 * **ANSSI Active Directory Hardening Guide**: Recommendations on system component code integrity and driver signature enforcement.
 * **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8.14.3 / 18.9.31.2 (Deploy Windows Defender Application Control / Memory Integrity).
 * **Microsoft Security Guidance**: Microsoft recommended driver block rules documentation.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-audit-override-md"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-audit-override-md-req-end-141-audit-policy-advanced-audit-policy-overrides-for-endpoints"></div>
+# [REQ-END-141] Audit Policy: Advanced Audit Policy Overrides for Endpoints
+
+<div id="08-endpoints-audit-policy-configure-end-audit-audit-override-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-audit-override-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Registry: `HKLM\System\CurrentControlSet\Control\Lsa\ SCENoApplyLegacyAuditPolicy` = `1` (DWord)
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\ LogLevel` = `0` (DWord)
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-audit-override-md-rationale"></div>
+## Rationale
+Enforcing advanced audit policy overrides prevents legacy category settings from overriding refined subcategory policies, and disabling verbose Kerberos logging ensures that event logs are not flooded with diagnostic events.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-audit-override-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Set local Security Event Log size to a minimum of 512MB to prevent premature rollover of security auditing data.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-audit-override-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-audit-policy-configure-end-audit-audit-override-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Registry: `HKLM\System\CurrentControlSet\Control\Lsa\ SCENoApplyLegacyAuditPolicy` = `1` (DWord)
+  * Registry: `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters\ LogLevel` = `0` (DWord)
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-audit-override-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditAuditoverride.ps1](../implementation_scripts/Configure-EndAuditAuditoverride.ps1)
+
+```powershell
+# Configure-EndAuditAuditoverride.ps1
+Write-Host "Applying Audit Policy category: audit-override..." -ForegroundColor Cyan
+
+# Set Registry Override: SCENoApplyLegacyAuditPolicy
+if (-not (Test-Path "reg:\HKLM\System\CurrentControlSet\Control\Lsa")) { New-Item -Path "reg:\HKLM\System\CurrentControlSet\Control\Lsa" -Force | Out-Null }
+Set-ItemProperty -Path "reg:\HKLM\System\CurrentControlSet\Control\Lsa" -Name "SCENoApplyLegacyAuditPolicy" -Value 1 -Type DWord -Force
+Write-Host "    Enforced SCENoApplyLegacyAuditPolicy = 1" -ForegroundColor Green
+
+# Set Registry Override: LogLevel
+if (-not (Test-Path "reg:\HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters")) { New-Item -Path "reg:\HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" -Force | Out-Null }
+Set-ItemProperty -Path "reg:\HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" -Name "LogLevel" -Value 0 -Type DWord -Force
+Write-Host "    Enforced LogLevel = 0" -ForegroundColor Green
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditAuditoverrideStatus.ps1](../audit_scripts/Get-EndAuditAuditoverrideStatus.ps1)
+
+```powershell
+# Get-EndAuditAuditoverrideStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Registry: SCENoApplyLegacyAuditPolicy
+$RegVal = Get-ItemProperty -Path "reg:\HKLM\System\CurrentControlSet\Control\Lsa" -Name "SCENoApplyLegacyAuditPolicy" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.SCENoApplyLegacyAuditPolicy -ne 1) {
+    $script:Vulnerable = $true
+}
+
+# Audit Registry: LogLevel
+$RegVal = Get-ItemProperty -Path "reg:\HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" -Name "LogLevel" -ErrorAction SilentlyContinue
+if (-not $RegVal -or $RegVal.LogLevel -ne 0) {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-audit-override-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-logon-md"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-logon-md-req-end-142-audit-policy-account-logon-auditing-for-endpoints"></div>
+# [REQ-END-142] Audit Policy: Account Logon Auditing for Endpoints
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-logon-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-logon-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Credential Validation` -> `Success and Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-logon-md-rationale"></div>
+## Rationale
+Auditing account logon events captures authentication requests processed by the local system or the domain controller, which is critical for identifying Kerberoasting, NTLM relaying, and brute-force attempts.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-logon-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Set local Security Event Log size to a minimum of 512MB to prevent premature rollover of security auditing data.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-logon-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-logon-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Credential Validation` -> `Success and Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-logon-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditAccountlogon.ps1](../implementation_scripts/Configure-EndAuditAccountlogon.ps1)
+
+```powershell
+# Configure-EndAuditAccountlogon.ps1
+Write-Host "Applying Audit Policy category: account-logon..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Credential Validation
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Credential Validation`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Credential Validation to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Credential Validation. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditAccountlogonStatus.ps1](../audit_scripts/Get-EndAuditAccountlogonStatus.ps1)
+
+```powershell
+# Get-EndAuditAccountlogonStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Credential Validation
+$RawOutput = auditpol.exe /get /subcategory:"Credential Validation" /r
+if ($RawOutput -notmatch ",Credential Validation,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-logon-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-management-md"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-management-md-req-end-143-audit-policy-account-management-auditing-for-endpoints"></div>
+# [REQ-END-143] Audit Policy: Account Management Auditing for Endpoints
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-management-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-management-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `User Account Management` -> `Success and Failure`
+  * Subcategory: `Security Group Management` -> `Success and Failure`
+  * Subcategory: `Other Account Management Events` -> `Success and Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-management-md-rationale"></div>
+## Rationale
+Auditing account management logs security principal modifications (creations, deletions, password resets, group modifications) to detect privilege escalation attempts on domain or local administrative groups.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-management-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Set local Security Event Log size to a minimum of 512MB to prevent premature rollover of security auditing data.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-management-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-management-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `User Account Management` -> `Success and Failure`
+  * Subcategory: `Security Group Management` -> `Success and Failure`
+  * Subcategory: `Other Account Management Events` -> `Success and Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-management-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditAccountmanagement.ps1](../implementation_scripts/Configure-EndAuditAccountmanagement.ps1)
+
+```powershell
+# Configure-EndAuditAccountmanagement.ps1
+Write-Host "Applying Audit Policy category: account-management..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: User Account Management
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"User Account Management`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory User Account Management to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory User Account Management. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Security Group Management
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Security Group Management`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Security Group Management to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Security Group Management. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other Account Management Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other Account Management Events`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other Account Management Events to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other Account Management Events. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditAccountmanagementStatus.ps1](../audit_scripts/Get-EndAuditAccountmanagementStatus.ps1)
+
+```powershell
+# Get-EndAuditAccountmanagementStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: User Account Management
+$RawOutput = auditpol.exe /get /subcategory:"User Account Management" /r
+if ($RawOutput -notmatch ",User Account Management,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Security Group Management
+$RawOutput = auditpol.exe /get /subcategory:"Security Group Management" /r
+if ($RawOutput -notmatch ",Security Group Management,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other Account Management Events
+$RawOutput = auditpol.exe /get /subcategory:"Other Account Management Events" /r
+if ($RawOutput -notmatch ",Other Account Management Events,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-account-management-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md-req-end-144-audit-policy-detailed-tracking-auditing-for-endpoints"></div>
+# [REQ-END-144] Audit Policy: Detailed Tracking Auditing for Endpoints
+
+<div id="08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Process Creation` -> `Success and Failure`
+  * Subcategory: `DPAPI Activity` -> `Success and Failure`
+  * Subcategory: `PNP Activity` -> `Success`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md-rationale"></div>
+## Rationale
+Detailed tracking records process creations and device arrivals to ensure EDR/SIEM visibility into executable command lines and hardware plug events.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Set local Security Event Log size to a minimum of 512MB to prevent premature rollover of security auditing data.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Process Creation` -> `Success and Failure`
+  * Subcategory: `DPAPI Activity` -> `Success and Failure`
+  * Subcategory: `PNP Activity` -> `Success`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditDetailedtracking.ps1](../implementation_scripts/Configure-EndAuditDetailedtracking.ps1)
+
+```powershell
+# Configure-EndAuditDetailedtracking.ps1
+Write-Host "Applying Audit Policy category: detailed-tracking..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Process Creation
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Process Creation`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Process Creation to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Process Creation. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: DPAPI Activity
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"DPAPI Activity`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory DPAPI Activity to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory DPAPI Activity. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: PNP Activity
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"PNP Activity`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory PNP Activity to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory PNP Activity. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditDetailedtrackingStatus.ps1](../audit_scripts/Get-EndAuditDetailedtrackingStatus.ps1)
+
+```powershell
+# Get-EndAuditDetailedtrackingStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Process Creation
+$RawOutput = auditpol.exe /get /subcategory:"Process Creation" /r
+if ($RawOutput -notmatch ",Process Creation,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: DPAPI Activity
+$RawOutput = auditpol.exe /get /subcategory:"DPAPI Activity" /r
+if ($RawOutput -notmatch ",DPAPI Activity,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: PNP Activity
+$RawOutput = auditpol.exe /get /subcategory:"PNP Activity" /r
+if ($RawOutput -notmatch ",PNP Activity,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-detailed-tracking-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-logon-logoff-md"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-logon-logoff-md-req-end-146-audit-policy-logon-and-logoff-auditing-for-endpoints"></div>
+# [REQ-END-146] Audit Policy: Logon and Logoff Auditing for Endpoints
+
+<div id="08-endpoints-audit-policy-configure-end-audit-logon-logoff-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-logon-logoff-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Logon` -> `Success and Failure`
+  * Subcategory: `Logoff` -> `Success`
+  * Subcategory: `Special Logon` -> `Success and Failure`
+  * Subcategory: `Account Lockout` -> `Success and Failure`
+  * Subcategory: `Other Logon/Logoff Events` -> `Success and Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-logon-logoff-md-rationale"></div>
+## Rationale
+Auditing logon/logoff events monitors administrative session states, special elevations, and failed logon attempts, which is critical for finding unauthorized remote access or lateral movement.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-logon-logoff-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Set local Security Event Log size to a minimum of 512MB to prevent premature rollover of security auditing data.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-logon-logoff-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-audit-policy-configure-end-audit-logon-logoff-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Logon` -> `Success and Failure`
+  * Subcategory: `Logoff` -> `Success`
+  * Subcategory: `Special Logon` -> `Success and Failure`
+  * Subcategory: `Account Lockout` -> `Success and Failure`
+  * Subcategory: `Other Logon/Logoff Events` -> `Success and Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-logon-logoff-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditLogonlogoff.ps1](../implementation_scripts/Configure-EndAuditLogonlogoff.ps1)
+
+```powershell
+# Configure-EndAuditLogonlogoff.ps1
+Write-Host "Applying Audit Policy category: logon-logoff..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Logon
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Logon`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Logon to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Logon. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Logoff
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Logoff`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Logoff to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Logoff. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Special Logon
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Special Logon`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Special Logon to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Special Logon. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Account Lockout
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Account Lockout`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Account Lockout to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Account Lockout. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other Logon/Logoff Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other Logon/Logoff Events`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other Logon/Logoff Events to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other Logon/Logoff Events. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditLogonlogoffStatus.ps1](../audit_scripts/Get-EndAuditLogonlogoffStatus.ps1)
+
+```powershell
+# Get-EndAuditLogonlogoffStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Logon
+$RawOutput = auditpol.exe /get /subcategory:"Logon" /r
+if ($RawOutput -notmatch ",Logon,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Logoff
+$RawOutput = auditpol.exe /get /subcategory:"Logoff" /r
+if ($RawOutput -notmatch ",Logoff,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Special Logon
+$RawOutput = auditpol.exe /get /subcategory:"Special Logon" /r
+if ($RawOutput -notmatch ",Special Logon,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Account Lockout
+$RawOutput = auditpol.exe /get /subcategory:"Account Lockout" /r
+if ($RawOutput -notmatch ",Account Lockout,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other Logon/Logoff Events
+$RawOutput = auditpol.exe /get /subcategory:"Other Logon/Logoff Events" /r
+if ($RawOutput -notmatch ",Other Logon/Logoff Events,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-logon-logoff-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-object-access-md"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-object-access-md-req-end-147-audit-policy-object-access-auditing-for-endpoints"></div>
+# [REQ-END-147] Audit Policy: Object Access Auditing for Endpoints
+
+<div id="08-endpoints-audit-policy-configure-end-audit-object-access-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-object-access-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Registry` -> `Failure`
+  * Subcategory: `File Share` -> `Failure`
+  * Subcategory: `Detailed File Share` -> `Failure`
+  * Subcategory: `Handle Manipulation` -> `Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-object-access-md-rationale"></div>
+## Rationale
+Auditing object access (files, registry keys, and shares) helps monitor unauthorized modifications to system configuration files and access to restricted shares.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-object-access-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Set local Security Event Log size to a minimum of 512MB to prevent premature rollover of security auditing data.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-object-access-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-audit-policy-configure-end-audit-object-access-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Registry` -> `Failure`
+  * Subcategory: `File Share` -> `Failure`
+  * Subcategory: `Detailed File Share` -> `Failure`
+  * Subcategory: `Handle Manipulation` -> `Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-object-access-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditObjectaccess.ps1](../implementation_scripts/Configure-EndAuditObjectaccess.ps1)
+
+```powershell
+# Configure-EndAuditObjectaccess.ps1
+Write-Host "Applying Audit Policy category: object-access..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Registry
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Registry`" /success:disable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Registry to Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Registry. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: File Share
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"File Share`" /success:disable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory File Share to Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory File Share. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Detailed File Share
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Detailed File Share`" /success:disable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Detailed File Share to Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Detailed File Share. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Handle Manipulation
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Handle Manipulation`" /success:disable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Handle Manipulation to Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Handle Manipulation. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditObjectaccessStatus.ps1](../audit_scripts/Get-EndAuditObjectaccessStatus.ps1)
+
+```powershell
+# Get-EndAuditObjectaccessStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Registry
+$RawOutput = auditpol.exe /get /subcategory:"Registry" /r
+if ($RawOutput -notmatch ",Registry,.*,Failure") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: File Share
+$RawOutput = auditpol.exe /get /subcategory:"File Share" /r
+if ($RawOutput -notmatch ",File Share,.*,Failure") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Detailed File Share
+$RawOutput = auditpol.exe /get /subcategory:"Detailed File Share" /r
+if ($RawOutput -notmatch ",Detailed File Share,.*,Failure") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Handle Manipulation
+$RawOutput = auditpol.exe /get /subcategory:"Handle Manipulation" /r
+if ($RawOutput -notmatch ",Handle Manipulation,.*,Failure") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-object-access-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-policy-change-md"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-policy-change-md-req-end-148-audit-policy-policy-change-auditing-for-endpoints"></div>
+# [REQ-END-148] Audit Policy: Policy Change Auditing for Endpoints
+
+<div id="08-endpoints-audit-policy-configure-end-audit-policy-change-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-policy-change-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Policy Change` -> `Success and Failure`
+  * Subcategory: `Authentication Policy Change` -> `Success`
+  * Subcategory: `Authorization Policy Change` -> `Success`
+  * Subcategory: `MPSSVC Rule-Level Policy Change` -> `Success and Failure`
+  * Subcategory: `Other Policy Change Events` -> `Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-policy-change-md-rationale"></div>
+## Rationale
+Auditing policy changes tracks attempts to modify authorization policies, auditing configuration changes, or firewall rule alterations to hide adversarial tracks.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-policy-change-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Set local Security Event Log size to a minimum of 512MB to prevent premature rollover of security auditing data.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-policy-change-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-audit-policy-configure-end-audit-policy-change-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Policy Change` -> `Success and Failure`
+  * Subcategory: `Authentication Policy Change` -> `Success`
+  * Subcategory: `Authorization Policy Change` -> `Success`
+  * Subcategory: `MPSSVC Rule-Level Policy Change` -> `Success and Failure`
+  * Subcategory: `Other Policy Change Events` -> `Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-policy-change-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditPolicychange.ps1](../implementation_scripts/Configure-EndAuditPolicychange.ps1)
+
+```powershell
+# Configure-EndAuditPolicychange.ps1
+Write-Host "Applying Audit Policy category: policy-change..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Policy Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Policy Change`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Policy Change to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Policy Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Authentication Policy Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Authentication Policy Change`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Authentication Policy Change to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Authentication Policy Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Authorization Policy Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Authorization Policy Change`" /success:enable /failure:disable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Authorization Policy Change to Success" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Authorization Policy Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: MPSSVC Rule-Level Policy Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"MPSSVC Rule-Level Policy Change`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory MPSSVC Rule-Level Policy Change to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory MPSSVC Rule-Level Policy Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Other Policy Change Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other Policy Change Events`" /success:disable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other Policy Change Events to Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other Policy Change Events. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditPolicychangeStatus.ps1](../audit_scripts/Get-EndAuditPolicychangeStatus.ps1)
+
+```powershell
+# Get-EndAuditPolicychangeStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Policy Change
+$RawOutput = auditpol.exe /get /subcategory:"Policy Change" /r
+if ($RawOutput -notmatch ",Policy Change,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Authentication Policy Change
+$RawOutput = auditpol.exe /get /subcategory:"Authentication Policy Change" /r
+if ($RawOutput -notmatch ",Authentication Policy Change,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Authorization Policy Change
+$RawOutput = auditpol.exe /get /subcategory:"Authorization Policy Change" /r
+if ($RawOutput -notmatch ",Authorization Policy Change,.*,Success") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: MPSSVC Rule-Level Policy Change
+$RawOutput = auditpol.exe /get /subcategory:"MPSSVC Rule-Level Policy Change" /r
+if ($RawOutput -notmatch ",MPSSVC Rule-Level Policy Change,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Other Policy Change Events
+$RawOutput = auditpol.exe /get /subcategory:"Other Policy Change Events" /r
+if ($RawOutput -notmatch ",Other Policy Change Events,.*,Failure") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-policy-change-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-privilege-use-md"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-privilege-use-md-req-end-149-audit-policy-privilege-use-auditing-for-endpoints"></div>
+# [REQ-END-149] Audit Policy: Privilege Use Auditing for Endpoints
+
+<div id="08-endpoints-audit-policy-configure-end-audit-privilege-use-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-privilege-use-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Sensitive Privilege Use` -> `Success and Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-privilege-use-md-rationale"></div>
+## Rationale
+Auditing sensitive privilege use logs attempts by processes or users to exercise rights like ActAsPartOfTypeOperatingSystem or LoadDrivers, identifying potential privilege escalations.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-privilege-use-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Set local Security Event Log size to a minimum of 512MB to prevent premature rollover of security auditing data.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-privilege-use-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-audit-policy-configure-end-audit-privilege-use-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Sensitive Privilege Use` -> `Success and Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-privilege-use-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditPrivilegeuse.ps1](../implementation_scripts/Configure-EndAuditPrivilegeuse.ps1)
+
+```powershell
+# Configure-EndAuditPrivilegeuse.ps1
+Write-Host "Applying Audit Policy category: privilege-use..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Sensitive Privilege Use
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Sensitive Privilege Use`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Sensitive Privilege Use to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Sensitive Privilege Use. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditPrivilegeuseStatus.ps1](../audit_scripts/Get-EndAuditPrivilegeuseStatus.ps1)
+
+```powershell
+# Get-EndAuditPrivilegeuseStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Sensitive Privilege Use
+$RawOutput = auditpol.exe /get /subcategory:"Sensitive Privilege Use" /r
+if ($RawOutput -notmatch ",Sensitive Privilege Use,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-privilege-use-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-system-events-md"></div>
+
+<div id="08-endpoints-audit-policy-configure-end-audit-system-events-md-req-end-150-audit-policy-system-events-auditing-for-endpoints"></div>
+# [REQ-END-150] Audit Policy: System Events Auditing for Endpoints
+
+<div id="08-endpoints-audit-policy-configure-end-audit-system-events-md-target-scope"></div>
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations
+* **Operating Systems**: Windows 10/11 Enterprise/Professional
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-system-events-md-implementation-details"></div>
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**: `Computer Configuration\Policies\Windows Settings\Security Settings\Advanced Audit Policy Configuration\Audit Policies`
+  * Subcategory: `Other System Events` -> `Success and Failure`
+  * Subcategory: `Security State Change` -> `Success and Failure`
+  * Subcategory: `Security System Extension` -> `Success and Failure`
+  * Subcategory: `System Integrity` -> `Success and Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-system-events-md-rationale"></div>
+## Rationale
+Auditing system security extensions, integrity violations, and driver arrivals monitors boot health and tampering of host security services.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-system-events-md-legacy-impact-compatibility"></div>
+## Legacy Impact & Compatibility
+* **Event Log Volume**: Set local Security Event Log size to a minimum of 512MB to prevent premature rollover of security auditing data.
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-system-events-md-implementation-steps"></div>
+## Implementation Steps
+
+<div id="08-endpoints-audit-policy-configure-end-audit-system-events-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
+  * Subcategory: `Other System Events` -> `Success and Failure`
+  * Subcategory: `Security State Change` -> `Success and Failure`
+  * Subcategory: `Security System Extension` -> `Success and Failure`
+  * Subcategory: `System Integrity` -> `Success and Failure`
+
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-system-events-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+[Download Script: Configure-EndAuditSystemevents.ps1](../implementation_scripts/Configure-EndAuditSystemevents.ps1)
+
+```powershell
+# Configure-EndAuditSystemevents.ps1
+Write-Host "Applying Audit Policy category: system-events..." -ForegroundColor Cyan
+
+# Set Audit Subcategory: Other System Events
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Other System Events`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Other System Events to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Other System Events. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Security State Change
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Security State Change`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Security State Change to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Security State Change. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: Security System Extension
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"Security System Extension`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory Security System Extension to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory Security System Extension. Exit Code: $($Process.ExitCode)"
+}
+
+# Set Audit Subcategory: System Integrity
+$Process = Start-Process auditpol -ArgumentList "/set /subcategory:`"System Integrity`" /success:enable /failure:enable" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -eq 0) {
+    Write-Host "    Enforced subcategory System Integrity to Success and Failure" -ForegroundColor Green
+} else {
+    Write-Error "    Failed to configure subcategory System Integrity. Exit Code: $($Process.ExitCode)"
+}
+
+
+```
+
+*To audit the hardening status:*
+[Download Script: Get-EndAuditSystemeventsStatus.ps1](../audit_scripts/Get-EndAuditSystemeventsStatus.ps1)
+
+```powershell
+# Get-EndAuditSystemeventsStatus.ps1
+$script:Vulnerable = $false
+
+# Audit Subcategory: Other System Events
+$RawOutput = auditpol.exe /get /subcategory:"Other System Events" /r
+if ($RawOutput -notmatch ",Other System Events,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Security State Change
+$RawOutput = auditpol.exe /get /subcategory:"Security State Change" /r
+if ($RawOutput -notmatch ",Security State Change,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: Security System Extension
+$RawOutput = auditpol.exe /get /subcategory:"Security System Extension" /r
+if ($RawOutput -notmatch ",Security System Extension,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+# Audit Subcategory: System Integrity
+$RawOutput = auditpol.exe /get /subcategory:"System Integrity" /r
+if ($RawOutput -notmatch ",System Integrity,.*,(Success and Failure|Success & Failure)") {
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-audit-policy-configure-end-audit-system-events-md-sources-compliance-references"></div>
+## Sources & Compliance References
+* **ANSSI Active Directory Hardening Guide**: Client auditing baselines
+* **CIS Windows 10/11 Benchmark**: Section 17 (Advanced Audit Policy Configuration)
 
 
 <div style="page-break-before: always;"></div>
