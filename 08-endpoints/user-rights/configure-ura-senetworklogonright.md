@@ -10,7 +10,7 @@
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Access this computer from the network`
-  * **Registry Location**: Stored inside local security database under privilege `SeNetworkLogonRight` set to `*S-1-5-32-544,*S-1-5-32-555`.
+  * **Registry Location**: Stored inside local security database under privilege `SeNetworkLogonRight` set to `*S-1-5-32-544 (Administrators), *S-1-5-32-555 (Remote Desktop Users)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows users to connect to the computer over the network. Restricting this to Ad
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeNetworkLogonRight` to `*S-1-5-32-544,*S-1-5-32-555` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeNetworkLogonRight` to `*S-1-5-32-544 (Administrators), *S-1-5-32-555 (Remote Desktop Users)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -29,7 +29,7 @@ Allows users to connect to the computer over the network. Restricting this to Ad
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Access this computer from the network`.
-3. Configure the security principal allocation to: `*S-1-5-32-544,*S-1-5-32-555`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-32-555 (Remote Desktop Users)`.
 
 ---
 

@@ -10,7 +10,7 @@
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny log on as a batch job`
-  * **Registry Location**: Stored inside local security database under privilege `SeDenyBatchLogonRight` set to `*S-1-5-32-546`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDenyBatchLogonRight` set to `*S-1-5-32-546 (Guests)`.
 
 ---
 
@@ -20,7 +20,7 @@ Denies Guest account batch execution to block scheduled tasks persistence.
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyBatchLogonRight` to `*S-1-5-32-546` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeDenyBatchLogonRight` to `*S-1-5-32-546 (Guests)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -29,7 +29,7 @@ Denies Guest account batch execution to block scheduled tasks persistence.
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Deny log on as a batch job`.
-3. Configure the security principal allocation to: `*S-1-5-32-546`.
+3. Configure the security principal allocation to: `*S-1-5-32-546 (Guests)`.
 
 ---
 

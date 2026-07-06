@@ -10,7 +10,7 @@
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Replace a process level token`
-  * **Registry Location**: Stored inside local security database under privilege `SeAssignPrimaryTokenPrivilege` set to `*S-1-5-19,*S-1-5-20`.
+  * **Registry Location**: Stored inside local security database under privilege `SeAssignPrimaryTokenPrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows a process to replace the default access token associated with a subproces
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeAssignPrimaryTokenPrivilege` to `*S-1-5-19,*S-1-5-20` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeAssignPrimaryTokenPrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -29,7 +29,7 @@ Allows a process to replace the default access token associated with a subproces
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Replace a process level token`.
-3. Configure the security principal allocation to: `*S-1-5-19,*S-1-5-20`.
+3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)`.
 
 ---
 

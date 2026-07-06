@@ -10,7 +10,7 @@
 * **Priority**: Low
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Change the time zone`
-  * **Registry Location**: Stored inside local security database under privilege `SeTimeZonePrivilege` set to `*S-1-5-32-544,*S-1-5-19,*S-1-5-32-545`.
+  * **Registry Location**: Stored inside local security database under privilege `SeTimeZonePrivilege` set to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService), *S-1-5-32-545 (Users)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows users to change the local time zone. Restricting this prevents users from
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeTimeZonePrivilege` to `*S-1-5-32-544,*S-1-5-19,*S-1-5-32-545` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeTimeZonePrivilege` to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService), *S-1-5-32-545 (Users)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -29,7 +29,7 @@ Allows users to change the local time zone. Restricting this prevents users from
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Change the time zone`.
-3. Configure the security principal allocation to: `*S-1-5-32-544,*S-1-5-19,*S-1-5-32-545`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService), *S-1-5-32-545 (Users)`.
 
 ---
 

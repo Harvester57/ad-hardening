@@ -10,7 +10,7 @@
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Modify firmware environment values`
-  * **Registry Location**: Stored inside local security database under privilege `SeSystemEnvironmentPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeSystemEnvironmentPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows users to configure firmware (UEFI) variables. Restricting this prevents a
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSystemEnvironmentPrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeSystemEnvironmentPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -29,7 +29,7 @@ Allows users to configure firmware (UEFI) variables. Restricting this prevents a
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Modify firmware environment values`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 

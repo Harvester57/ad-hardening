@@ -10,7 +10,7 @@
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny log on as a service`
-  * **Registry Location**: Stored inside local security database under privilege `SeDenyServiceLogonRight` set to `*S-1-5-32-546`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDenyServiceLogonRight` set to `*S-1-5-32-546 (Guests)`.
 
 ---
 
@@ -20,7 +20,7 @@ Prevents Guests from running system services on Domain Controllers.
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyServiceLogonRight` to `*S-1-5-32-546` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeDenyServiceLogonRight` to `*S-1-5-32-546 (Guests)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -29,7 +29,7 @@ Prevents Guests from running system services on Domain Controllers.
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Deny log on as a service`.
-3. Configure the security principal allocation to: `*S-1-5-32-546`.
+3. Configure the security principal allocation to: `*S-1-5-32-546 (Guests)`.
 
 ---
 

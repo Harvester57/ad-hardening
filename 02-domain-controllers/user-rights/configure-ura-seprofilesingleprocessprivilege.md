@@ -10,7 +10,7 @@
 * **Priority**: Low
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Profile single process`
-  * **Registry Location**: Stored inside local security database under privilege `SeProfileSingleProcessPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeProfileSingleProcessPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -20,7 +20,7 @@ Restricting profiling to Administrators prevents profiling sensitive processes o
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -29,7 +29,7 @@ Restricting profiling to Administrators prevents profiling sensitive processes o
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Profile single process`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 

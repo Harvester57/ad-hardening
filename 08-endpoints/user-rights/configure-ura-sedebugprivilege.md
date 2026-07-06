@@ -10,7 +10,7 @@
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Debug programs`
-  * **Registry Location**: Stored inside local security database under privilege `SeDebugPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDebugPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows processes to attach to and debug any system process (including lsass.exe)
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDebugPrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeDebugPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -29,7 +29,7 @@ Allows processes to attach to and debug any system process (including lsass.exe)
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Debug programs`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 

@@ -10,7 +10,7 @@
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Generate security audits`
-  * **Registry Location**: Stored inside local security database under privilege `SeAuditPrivilege` set to `*S-1-5-19,*S-1-5-20`.
+  * **Registry Location**: Stored inside local security database under privilege `SeAuditPrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)`.
 
 ---
 
@@ -20,7 +20,7 @@ Restricting to Local Service and Network Service prevents rogue processes from w
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeAuditPrivilege` to `*S-1-5-19,*S-1-5-20` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeAuditPrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -29,7 +29,7 @@ Restricting to Local Service and Network Service prevents rogue processes from w
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Generate security audits`.
-3. Configure the security principal allocation to: `*S-1-5-19,*S-1-5-20`.
+3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)`.
 
 ---
 

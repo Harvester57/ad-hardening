@@ -10,7 +10,7 @@
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Bypass traverse checking`
-  * **Registry Location**: Stored inside local security database under privilege `SeChangeNotifyPrivilege` set to `*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0`.
+  * **Registry Location**: Stored inside local security database under privilege `SeChangeNotifyPrivilege` set to `*S-1-5-32-554 (Pre-Windows 2000 Compatible Access), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators), *S-1-5-20 (NetworkService), *S-1-5-19 (LocalService), *S-1-1-0 (Everyone)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows users to pass through directories without checking permissions. Restricti
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeChangeNotifyPrivilege` to `*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeChangeNotifyPrivilege` to `*S-1-5-32-554 (Pre-Windows 2000 Compatible Access), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators), *S-1-5-20 (NetworkService), *S-1-5-19 (LocalService), *S-1-1-0 (Everyone)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -29,7 +29,7 @@ Allows users to pass through directories without checking permissions. Restricti
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Bypass traverse checking`.
-3. Configure the security principal allocation to: `*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0`.
+3. Configure the security principal allocation to: `*S-1-5-32-554 (Pre-Windows 2000 Compatible Access), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators), *S-1-5-20 (NetworkService), *S-1-5-19 (LocalService), *S-1-1-0 (Everyone)`.
 
 ---
 

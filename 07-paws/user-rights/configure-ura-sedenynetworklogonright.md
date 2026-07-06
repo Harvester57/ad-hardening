@@ -10,7 +10,7 @@
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny access to this computer from the network`
-  * **Registry Location**: Stored inside local security database under privilege `SeDenyNetworkLogonRight` set to `*S-1-5-113,*S-1-5-114`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDenyNetworkLogonRight` set to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 
@@ -20,7 +20,7 @@ Explicitly blocks network logon for Local Accounts (S-1-5-113) and Local Adminis
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyNetworkLogonRight` to `*S-1-5-113,*S-1-5-114` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeDenyNetworkLogonRight` to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -29,7 +29,7 @@ Explicitly blocks network logon for Local Accounts (S-1-5-113) and Local Adminis
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Deny access to this computer from the network`.
-3. Configure the security principal allocation to: `*S-1-5-113,*S-1-5-114`.
+3. Configure the security principal allocation to: `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 

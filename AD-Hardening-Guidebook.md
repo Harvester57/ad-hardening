@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 22506d0 | Generated: July 06, 2026</span>
+      <span>Commit: 3b65844 | Generated: July 06, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -13692,7 +13692,7 @@ The following individual URA rules must be configured:
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Access this computer from the network`
-  * **Registry Location**: Stored inside local security database under privilege `SeNetworkLogonRight` set to `*S-1-5-9,*S-1-5-11,*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeNetworkLogonRight` set to `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -13704,7 +13704,7 @@ Allows users to connect to the Domain Controller over the network. Restricting t
 
 <div id="02-domain-controllers-user-rights-configure-ura-senetworklogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeNetworkLogonRight` to `*S-1-5-9,*S-1-5-11,*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeNetworkLogonRight` to `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -13715,7 +13715,7 @@ Allows users to connect to the Domain Controller over the network. Restricting t
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Access this computer from the network`.
-3. Configure the security principal allocation to: `*S-1-5-9,*S-1-5-11,*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -13986,7 +13986,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Add workstations to domain`
-  * **Registry Location**: Stored inside local security database under privilege `SeMachineAccountPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeMachineAccountPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -13998,7 +13998,7 @@ Allows users to add computer accounts to the domain. Restricting this to Adminis
 
 <div id="02-domain-controllers-user-rights-configure-ura-semachineaccountprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeMachineAccountPrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeMachineAccountPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -14009,7 +14009,7 @@ Allows users to add computer accounts to the domain. Restricting this to Adminis
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Add workstations to domain`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -14133,7 +14133,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Adjust memory quotas for a process`
-  * **Registry Location**: Stored inside local security database under privilege `SeIncreaseQuotaPrivilege` set to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeIncreaseQuotaPrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -14145,7 +14145,7 @@ Allows a process to adjust memory quotas for other processes. Restricting this t
 
 <div id="02-domain-controllers-user-rights-configure-ura-seincreasequotaprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeIncreaseQuotaPrivilege` to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeIncreaseQuotaPrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -14156,7 +14156,7 @@ Allows a process to adjust memory quotas for other processes. Restricting this t
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Adjust memory quotas for a process`.
-3. Configure the security principal allocation to: `*S-1-5-19,*S-1-5-20,*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -14280,7 +14280,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Allow log on locally`
-  * **Registry Location**: Stored inside local security database under privilege `SeInteractiveLogonRight` set to `*S-1-5-9,*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeInteractiveLogonRight` set to `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -14292,7 +14292,7 @@ Allows users to sign in locally at the Domain Controller console. Restricting th
 
 <div id="02-domain-controllers-user-rights-configure-ura-seinteractivelogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeInteractiveLogonRight` to `*S-1-5-9,*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeInteractiveLogonRight` to `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -14303,7 +14303,7 @@ Allows users to sign in locally at the Domain Controller console. Restricting th
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Allow log on locally`.
-3. Configure the security principal allocation to: `*S-1-5-9,*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -14427,7 +14427,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Allow log on through Remote Desktop Services`
-  * **Registry Location**: Stored inside local security database under privilege `SeRemoteInteractiveLogonRight` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeRemoteInteractiveLogonRight` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -14439,7 +14439,7 @@ Allows RDP access to Domain Controllers. Enforcing restriction to Administrators
 
 <div id="02-domain-controllers-user-rights-configure-ura-seremoteinteractivelogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeRemoteInteractiveLogonRight` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeRemoteInteractiveLogonRight` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -14450,7 +14450,7 @@ Allows RDP access to Domain Controllers. Enforcing restriction to Administrators
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Allow log on through Remote Desktop Services`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -14574,7 +14574,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Back up files and directories`
-  * **Registry Location**: Stored inside local security database under privilege `SeBackupPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeBackupPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -14586,7 +14586,7 @@ Allows users to read all files on Domain Controllers. Restricting this prevents 
 
 <div id="02-domain-controllers-user-rights-configure-ura-sebackupprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeBackupPrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeBackupPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -14597,7 +14597,7 @@ Allows users to read all files on Domain Controllers. Restricting this prevents 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Back up files and directories`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -14721,7 +14721,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Bypass traverse checking`
-  * **Registry Location**: Stored inside local security database under privilege `SeChangeNotifyPrivilege` set to `*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0`.
+  * **Registry Location**: Stored inside local security database under privilege `SeChangeNotifyPrivilege` set to `*S-1-5-32-554 (Pre-Windows 2000 Compatible Access), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators), *S-1-5-20 (NetworkService), *S-1-5-19 (LocalService), *S-1-1-0 (Everyone)`.
 
 ---
 
@@ -14733,7 +14733,7 @@ Allows users to pass through directories without checking permissions. Restricti
 
 <div id="02-domain-controllers-user-rights-configure-ura-sechangenotifyprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeChangeNotifyPrivilege` to `*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeChangeNotifyPrivilege` to `*S-1-5-32-554 (Pre-Windows 2000 Compatible Access), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators), *S-1-5-20 (NetworkService), *S-1-5-19 (LocalService), *S-1-1-0 (Everyone)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -14744,7 +14744,7 @@ Allows users to pass through directories without checking permissions. Restricti
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Bypass traverse checking`.
-3. Configure the security principal allocation to: `*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0`.
+3. Configure the security principal allocation to: `*S-1-5-32-554 (Pre-Windows 2000 Compatible Access), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators), *S-1-5-20 (NetworkService), *S-1-5-19 (LocalService), *S-1-1-0 (Everyone)`.
 
 ---
 
@@ -14868,7 +14868,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Change the system time`
-  * **Registry Location**: Stored inside local security database under privilege `SeSystemtimePrivilege` set to `*S-1-5-32-544,*S-1-5-19`.
+  * **Registry Location**: Stored inside local security database under privilege `SeSystemtimePrivilege` set to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)`.
 
 ---
 
@@ -14880,7 +14880,7 @@ Enforces that only Administrators and Local Service can change the clock on Doma
 
 <div id="02-domain-controllers-user-rights-configure-ura-sesystemtimeprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSystemtimePrivilege` to `*S-1-5-32-544,*S-1-5-19` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeSystemtimePrivilege` to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -14891,7 +14891,7 @@ Enforces that only Administrators and Local Service can change the clock on Doma
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Change the system time`.
-3. Configure the security principal allocation to: `*S-1-5-32-544,*S-1-5-19`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)`.
 
 ---
 
@@ -15015,7 +15015,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Low
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Create a pagefile`
-  * **Registry Location**: Stored inside local security database under privilege `SeCreatePagefilePrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeCreatePagefilePrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -15027,7 +15027,7 @@ Allows creation of system paging files. Restricting to Administrators prevents s
 
 <div id="02-domain-controllers-user-rights-configure-ura-secreatepagefileprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeCreatePagefilePrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeCreatePagefilePrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -15038,7 +15038,7 @@ Allows creation of system paging files. Restricting to Administrators prevents s
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Create a pagefile`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -15456,7 +15456,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Debug programs`
-  * **Registry Location**: Stored inside local security database under privilege `SeDebugPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDebugPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -15468,7 +15468,7 @@ Prevents tools from attaching to lsass.exe to dump AD domain hash tables (ntds.d
 
 <div id="02-domain-controllers-user-rights-configure-ura-sedebugprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDebugPrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeDebugPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -15479,7 +15479,7 @@ Prevents tools from attaching to lsass.exe to dump AD domain hash tables (ntds.d
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Debug programs`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -15603,7 +15603,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny access to this computer from the network`
-  * **Registry Location**: Stored inside local security database under privilege `SeDenyNetworkLogonRight` set to `*S-1-5-32-546`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDenyNetworkLogonRight` set to `*S-1-5-32-546 (Guests)`.
 
 ---
 
@@ -15615,7 +15615,7 @@ Explicitly denies network logon access to Guests group members to block anonymou
 
 <div id="02-domain-controllers-user-rights-configure-ura-sedenynetworklogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyNetworkLogonRight` to `*S-1-5-32-546` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeDenyNetworkLogonRight` to `*S-1-5-32-546 (Guests)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -15626,7 +15626,7 @@ Explicitly denies network logon access to Guests group members to block anonymou
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Deny access to this computer from the network`.
-3. Configure the security principal allocation to: `*S-1-5-32-546`.
+3. Configure the security principal allocation to: `*S-1-5-32-546 (Guests)`.
 
 ---
 
@@ -15750,7 +15750,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny log on as a batch job`
-  * **Registry Location**: Stored inside local security database under privilege `SeDenyBatchLogonRight` set to `*S-1-5-32-546`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDenyBatchLogonRight` set to `*S-1-5-32-546 (Guests)`.
 
 ---
 
@@ -15762,7 +15762,7 @@ Denies Guest account batch execution to block scheduled tasks persistence.
 
 <div id="02-domain-controllers-user-rights-configure-ura-sedenybatchlogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyBatchLogonRight` to `*S-1-5-32-546` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeDenyBatchLogonRight` to `*S-1-5-32-546 (Guests)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -15773,7 +15773,7 @@ Denies Guest account batch execution to block scheduled tasks persistence.
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Deny log on as a batch job`.
-3. Configure the security principal allocation to: `*S-1-5-32-546`.
+3. Configure the security principal allocation to: `*S-1-5-32-546 (Guests)`.
 
 ---
 
@@ -15897,7 +15897,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny log on as a service`
-  * **Registry Location**: Stored inside local security database under privilege `SeDenyServiceLogonRight` set to `*S-1-5-32-546`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDenyServiceLogonRight` set to `*S-1-5-32-546 (Guests)`.
 
 ---
 
@@ -15909,7 +15909,7 @@ Prevents Guests from running system services on Domain Controllers.
 
 <div id="02-domain-controllers-user-rights-configure-ura-sedenyservicelogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyServiceLogonRight` to `*S-1-5-32-546` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeDenyServiceLogonRight` to `*S-1-5-32-546 (Guests)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -15920,7 +15920,7 @@ Prevents Guests from running system services on Domain Controllers.
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Deny log on as a service`.
-3. Configure the security principal allocation to: `*S-1-5-32-546`.
+3. Configure the security principal allocation to: `*S-1-5-32-546 (Guests)`.
 
 ---
 
@@ -16044,7 +16044,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny log on locally`
-  * **Registry Location**: Stored inside local security database under privilege `SeDenyInteractiveLogonRight` set to `*S-1-5-32-546`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDenyInteractiveLogonRight` set to `*S-1-5-32-546 (Guests)`.
 
 ---
 
@@ -16056,7 +16056,7 @@ Denies Guests local interactive logons to Domain Controllers.
 
 <div id="02-domain-controllers-user-rights-configure-ura-sedenyinteractivelogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyInteractiveLogonRight` to `*S-1-5-32-546` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeDenyInteractiveLogonRight` to `*S-1-5-32-546 (Guests)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -16067,7 +16067,7 @@ Denies Guests local interactive logons to Domain Controllers.
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Deny log on locally`.
-3. Configure the security principal allocation to: `*S-1-5-32-546`.
+3. Configure the security principal allocation to: `*S-1-5-32-546 (Guests)`.
 
 ---
 
@@ -16191,7 +16191,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny log on through Remote Desktop Services`
-  * **Registry Location**: Stored inside local security database under privilege `SeDenyRemoteInteractiveLogonRight` set to `*S-1-5-32-546`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDenyRemoteInteractiveLogonRight` set to `*S-1-5-32-546 (Guests)`.
 
 ---
 
@@ -16203,7 +16203,7 @@ Explicitly blocks Remote Desktop logons for Guests on Domain Controllers.
 
 <div id="02-domain-controllers-user-rights-configure-ura-sedenyremoteinteractivelogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyRemoteInteractiveLogonRight` to `*S-1-5-32-546` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeDenyRemoteInteractiveLogonRight` to `*S-1-5-32-546 (Guests)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -16214,7 +16214,7 @@ Explicitly blocks Remote Desktop logons for Guests on Domain Controllers.
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Deny log on through Remote Desktop Services`.
-3. Configure the security principal allocation to: `*S-1-5-32-546`.
+3. Configure the security principal allocation to: `*S-1-5-32-546 (Guests)`.
 
 ---
 
@@ -16338,7 +16338,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Enable computer and user accounts to be trusted for delegation`
-  * **Registry Location**: Stored inside local security database under privilege `SeEnableDelegationPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeEnableDelegationPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -16350,7 +16350,7 @@ Restricting to Administrators prevents unauthorized Kerberos delegation setups o
 
 <div id="02-domain-controllers-user-rights-configure-ura-seenabledelegationprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeEnableDelegationPrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeEnableDelegationPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -16361,7 +16361,7 @@ Restricting to Administrators prevents unauthorized Kerberos delegation setups o
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Enable computer and user accounts to be trusted for delegation`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -16485,7 +16485,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Force shutdown from a remote system`
-  * **Registry Location**: Stored inside local security database under privilege `SeRemoteShutdownPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeRemoteShutdownPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -16497,7 +16497,7 @@ Enforces that remote shutdowns can only be triggered by Administrators on Domain
 
 <div id="02-domain-controllers-user-rights-configure-ura-seremoteshutdownprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeRemoteShutdownPrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeRemoteShutdownPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -16508,7 +16508,7 @@ Enforces that remote shutdowns can only be triggered by Administrators on Domain
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Force shutdown from a remote system`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -16632,7 +16632,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Generate security audits`
-  * **Registry Location**: Stored inside local security database under privilege `SeAuditPrivilege` set to `*S-1-5-19,*S-1-5-20`.
+  * **Registry Location**: Stored inside local security database under privilege `SeAuditPrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)`.
 
 ---
 
@@ -16644,7 +16644,7 @@ Restricting to Local Service and Network Service prevents rogue processes from w
 
 <div id="02-domain-controllers-user-rights-configure-ura-seauditprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeAuditPrivilege` to `*S-1-5-19,*S-1-5-20` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeAuditPrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -16655,7 +16655,7 @@ Restricting to Local Service and Network Service prevents rogue processes from w
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Generate security audits`.
-3. Configure the security principal allocation to: `*S-1-5-19,*S-1-5-20`.
+3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)`.
 
 ---
 
@@ -16779,7 +16779,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Load and unload device drivers`
-  * **Registry Location**: Stored inside local security database under privilege `SeLoadDriverPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeLoadDriverPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -16791,7 +16791,7 @@ Restricting to Administrators blocks unauthorized kernel-mode driver loads (BYOV
 
 <div id="02-domain-controllers-user-rights-configure-ura-seloaddriverprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeLoadDriverPrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeLoadDriverPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -16802,7 +16802,7 @@ Restricting to Administrators blocks unauthorized kernel-mode driver loads (BYOV
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Load and unload device drivers`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -17073,7 +17073,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Log on as a batch job`
-  * **Registry Location**: Stored inside local security database under privilege `SeBatchLogonRight` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeBatchLogonRight` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -17085,7 +17085,7 @@ Restricting batch logons to Administrators prevents unauthorized automated task 
 
 <div id="02-domain-controllers-user-rights-configure-ura-sebatchlogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeBatchLogonRight` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeBatchLogonRight` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -17096,7 +17096,7 @@ Restricting batch logons to Administrators prevents unauthorized automated task 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Log on as a batch job`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -17367,7 +17367,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Manage auditing and security log`
-  * **Registry Location**: Stored inside local security database under privilege `SeSecurityPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeSecurityPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -17379,7 +17379,7 @@ Restricting security log management to Administrators ensures audit trails canno
 
 <div id="02-domain-controllers-user-rights-configure-ura-sesecurityprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSecurityPrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeSecurityPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -17390,7 +17390,7 @@ Restricting security log management to Administrators ensures audit trails canno
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Manage auditing and security log`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -17514,7 +17514,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Modify firmware environment values`
-  * **Registry Location**: Stored inside local security database under privilege `SeSystemEnvironmentPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeSystemEnvironmentPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -17526,7 +17526,7 @@ Restricting firmware variable modification to Administrators protects boot integ
 
 <div id="02-domain-controllers-user-rights-configure-ura-sesystemenvironmentprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSystemEnvironmentPrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeSystemEnvironmentPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -17537,7 +17537,7 @@ Restricting firmware variable modification to Administrators protects boot integ
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Modify firmware environment values`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -17661,7 +17661,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Low
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Profile single process`
-  * **Registry Location**: Stored inside local security database under privilege `SeProfileSingleProcessPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeProfileSingleProcessPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -17673,7 +17673,7 @@ Restricting profiling to Administrators prevents profiling sensitive processes o
 
 <div id="02-domain-controllers-user-rights-configure-ura-seprofilesingleprocessprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -17684,7 +17684,7 @@ Restricting profiling to Administrators prevents profiling sensitive processes o
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Profile single process`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -17808,7 +17808,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Restore files and directories`
-  * **Registry Location**: Stored inside local security database under privilege `SeRestorePrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeRestorePrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -17820,7 +17820,7 @@ Restricting restore bypass privileges to Administrators prevents overwriting dir
 
 <div id="02-domain-controllers-user-rights-configure-ura-serestoreprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeRestorePrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeRestorePrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -17831,7 +17831,7 @@ Restricting restore bypass privileges to Administrators prevents overwriting dir
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Restore files and directories`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -17955,7 +17955,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Shut down the system`
-  * **Registry Location**: Stored inside local security database under privilege `SeShutdownPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeShutdownPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -17967,7 +17967,7 @@ Restricting local shutdown privilege to Administrators prevents denial-of-servic
 
 <div id="02-domain-controllers-user-rights-configure-ura-seshutdownprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeShutdownPrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeShutdownPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -17978,7 +17978,7 @@ Restricting local shutdown privilege to Administrators prevents denial-of-servic
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Shut down the system`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -18249,7 +18249,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Take ownership of files or other objects`
-  * **Registry Location**: Stored inside local security database under privilege `SeTakeOwnershipPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeTakeOwnershipPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -18261,7 +18261,7 @@ Restricting ownership takeover to Administrators protects Domain Controller file
 
 <div id="02-domain-controllers-user-rights-configure-ura-setakeownershipprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeTakeOwnershipPrivilege` to `*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeTakeOwnershipPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -18272,7 +18272,7 @@ Restricting ownership takeover to Administrators protects Domain Controller file
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Take ownership of files or other objects`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -37820,7 +37820,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Access this computer from the network`
-  * **Registry Location**: Stored inside local security database under privilege `SeNetworkLogonRight` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeNetworkLogonRight` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -37832,7 +37832,7 @@ Allows users to connect to the computer over the network. Restricting this to Ad
 
 <div id="07-paws-user-rights-configure-ura-senetworklogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeNetworkLogonRight` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeNetworkLogonRight` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -37843,7 +37843,7 @@ Allows users to connect to the computer over the network. Restricting this to Ad
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Access this computer from the network`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -38114,7 +38114,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Allow log on locally`
-  * **Registry Location**: Stored inside local security database under privilege `SeInteractiveLogonRight` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeInteractiveLogonRight` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -38126,7 +38126,7 @@ Allows users to log on interactively at the computer console. Enforcing restrict
 
 <div id="07-paws-user-rights-configure-ura-seinteractivelogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeInteractiveLogonRight` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeInteractiveLogonRight` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -38137,7 +38137,7 @@ Allows users to log on interactively at the computer console. Enforcing restrict
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Allow log on locally`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -38261,7 +38261,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Back up files and directories`
-  * **Registry Location**: Stored inside local security database under privilege `SeBackupPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeBackupPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -38273,7 +38273,7 @@ Allows users to bypass file permissions to read all files on the system. Restric
 
 <div id="07-paws-user-rights-configure-ura-sebackupprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeBackupPrivilege` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeBackupPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -38284,7 +38284,7 @@ Allows users to bypass file permissions to read all files on the system. Restric
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Back up files and directories`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -38408,7 +38408,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Low
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Create a pagefile`
-  * **Registry Location**: Stored inside local security database under privilege `SeCreatePagefilePrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeCreatePagefilePrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -38420,7 +38420,7 @@ Allows users to create and change the size of page files. Restricting this to Ad
 
 <div id="07-paws-user-rights-configure-ura-secreatepagefileprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeCreatePagefilePrivilege` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeCreatePagefilePrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -38431,7 +38431,7 @@ Allows users to create and change the size of page files. Restricting this to Ad
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Create a pagefile`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -38702,7 +38702,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Create global objects`
-  * **Registry Location**: Stored inside local security database under privilege `SeCreateGlobalPrivilege` set to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6`.
+  * **Registry Location**: Stored inside local security database under privilege `SeCreateGlobalPrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
 
 ---
 
@@ -38714,7 +38714,7 @@ Allows processes to create global objects available to all sessions. Restricting
 
 <div id="07-paws-user-rights-configure-ura-secreateglobalprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeCreateGlobalPrivilege` to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeCreateGlobalPrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -38725,7 +38725,7 @@ Allows processes to create global objects available to all sessions. Restricting
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Create global objects`.
-3. Configure the security principal allocation to: `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6`.
+3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
 
 ---
 
@@ -38996,7 +38996,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Debug programs`
-  * **Registry Location**: Stored inside local security database under privilege `SeDebugPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDebugPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -39008,7 +39008,7 @@ Allows processes to attach to and debug any system process (including lsass.exe)
 
 <div id="07-paws-user-rights-configure-ura-sedebugprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDebugPrivilege` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeDebugPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -39019,7 +39019,7 @@ Allows processes to attach to and debug any system process (including lsass.exe)
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Debug programs`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -39290,7 +39290,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Force shutdown from a remote system`
-  * **Registry Location**: Stored inside local security database under privilege `SeRemoteShutdownPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeRemoteShutdownPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -39302,7 +39302,7 @@ Allows users to shut down computers from a remote network location. Restricting 
 
 <div id="07-paws-user-rights-configure-ura-seremoteshutdownprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeRemoteShutdownPrivilege` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeRemoteShutdownPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -39313,7 +39313,7 @@ Allows users to shut down computers from a remote network location. Restricting 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Force shutdown from a remote system`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -39437,7 +39437,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Impersonate a client after authentication`
-  * **Registry Location**: Stored inside local security database under privilege `SeImpersonatePrivilege` set to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6`.
+  * **Registry Location**: Stored inside local security database under privilege `SeImpersonatePrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
 
 ---
 
@@ -39449,7 +39449,7 @@ Allows programs to impersonate clients. Restricting this to system service accou
 
 <div id="07-paws-user-rights-configure-ura-seimpersonateprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeImpersonatePrivilege` to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeImpersonatePrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -39460,7 +39460,7 @@ Allows programs to impersonate clients. Restricting this to system service accou
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Impersonate a client after authentication`.
-3. Configure the security principal allocation to: `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6`.
+3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
 
 ---
 
@@ -39584,7 +39584,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Load and unload device drivers`
-  * **Registry Location**: Stored inside local security database under privilege `SeLoadDriverPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeLoadDriverPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -39596,7 +39596,7 @@ Allows users to load device drivers in kernel mode. Restricting this prevents at
 
 <div id="07-paws-user-rights-configure-ura-seloaddriverprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeLoadDriverPrivilege` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeLoadDriverPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -39607,7 +39607,7 @@ Allows users to load device drivers in kernel mode. Restricting this prevents at
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Load and unload device drivers`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -39878,7 +39878,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Manage auditing and security log`
-  * **Registry Location**: Stored inside local security database under privilege `SeSecurityPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeSecurityPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -39890,7 +39890,7 @@ Allows users to view, manage, and clear the Windows Security Event Log. Restrict
 
 <div id="07-paws-user-rights-configure-ura-sesecurityprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSecurityPrivilege` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeSecurityPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -39901,7 +39901,7 @@ Allows users to view, manage, and clear the Windows Security Event Log. Restrict
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Manage auditing and security log`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -40025,7 +40025,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Modify firmware environment values`
-  * **Registry Location**: Stored inside local security database under privilege `SeSystemEnvironmentPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeSystemEnvironmentPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -40037,7 +40037,7 @@ Allows users to configure firmware (UEFI) variables. Restricting this prevents a
 
 <div id="07-paws-user-rights-configure-ura-sesystemenvironmentprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSystemEnvironmentPrivilege` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeSystemEnvironmentPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -40048,7 +40048,7 @@ Allows users to configure firmware (UEFI) variables. Restricting this prevents a
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Modify firmware environment values`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -40172,7 +40172,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Perform volume maintenance tasks`
-  * **Registry Location**: Stored inside local security database under privilege `SeManageVolumePrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeManageVolumePrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -40184,7 +40184,7 @@ Allows non-administrative users to run disk utilities. Restricting this to Admin
 
 <div id="07-paws-user-rights-configure-ura-semanagevolumeprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeManageVolumePrivilege` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeManageVolumePrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -40195,7 +40195,7 @@ Allows non-administrative users to run disk utilities. Restricting this to Admin
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Perform volume maintenance tasks`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -40319,7 +40319,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Low
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Profile single process`
-  * **Registry Location**: Stored inside local security database under privilege `SeProfileSingleProcessPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeProfileSingleProcessPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -40331,7 +40331,7 @@ Allows users to profile non-system processes. Restricting this prevents attacker
 
 <div id="07-paws-user-rights-configure-ura-seprofilesingleprocessprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -40342,7 +40342,7 @@ Allows users to profile non-system processes. Restricting this prevents attacker
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Profile single process`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -40466,7 +40466,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Restore files and directories`
-  * **Registry Location**: Stored inside local security database under privilege `SeRestorePrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeRestorePrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -40478,7 +40478,7 @@ Allows users to bypass file permissions when restoring files. Restricting this p
 
 <div id="07-paws-user-rights-configure-ura-serestoreprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeRestorePrivilege` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeRestorePrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -40489,7 +40489,7 @@ Allows users to bypass file permissions when restoring files. Restricting this p
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Restore files and directories`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -40613,7 +40613,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Take ownership of files or other objects`
-  * **Registry Location**: Stored inside local security database under privilege `SeTakeOwnershipPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeTakeOwnershipPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -40625,7 +40625,7 @@ Allows users to take ownership of any system object. Restricting this prevents a
 
 <div id="07-paws-user-rights-configure-ura-setakeownershipprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeTakeOwnershipPrivilege` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeTakeOwnershipPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -40636,7 +40636,7 @@ Allows users to take ownership of any system object. Restricting this prevents a
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Take ownership of files or other objects`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -40760,7 +40760,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny access to this computer from the network`
-  * **Registry Location**: Stored inside local security database under privilege `SeDenyNetworkLogonRight` set to `*S-1-5-113,*S-1-5-114`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDenyNetworkLogonRight` set to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 
@@ -40772,7 +40772,7 @@ Explicitly blocks network logon for Local Accounts (S-1-5-113) and Local Adminis
 
 <div id="07-paws-user-rights-configure-ura-sedenynetworklogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyNetworkLogonRight` to `*S-1-5-113,*S-1-5-114` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeDenyNetworkLogonRight` to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -40783,7 +40783,7 @@ Explicitly blocks network logon for Local Accounts (S-1-5-113) and Local Adminis
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Deny access to this computer from the network`.
-3. Configure the security principal allocation to: `*S-1-5-113,*S-1-5-114`.
+3. Configure the security principal allocation to: `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 
@@ -40907,7 +40907,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny log on through Remote Desktop Services`
-  * **Registry Location**: Stored inside local security database under privilege `SeDenyRemoteInteractiveLogonRight` set to `*S-1-5-113,*S-1-5-114`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDenyRemoteInteractiveLogonRight` set to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 
@@ -40919,7 +40919,7 @@ Explicitly blocks Remote Desktop logons for Local Accounts (S-1-5-113) and Local
 
 <div id="07-paws-user-rights-configure-ura-sedenyremoteinteractivelogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyRemoteInteractiveLogonRight` to `*S-1-5-113,*S-1-5-114` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeDenyRemoteInteractiveLogonRight` to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -40930,7 +40930,7 @@ Explicitly blocks Remote Desktop logons for Local Accounts (S-1-5-113) and Local
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Deny log on through Remote Desktop Services`.
-3. Configure the security principal allocation to: `*S-1-5-113,*S-1-5-114`.
+3. Configure the security principal allocation to: `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 
@@ -60423,7 +60423,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Access this computer from the network`
-  * **Registry Location**: Stored inside local security database under privilege `SeNetworkLogonRight` set to `*S-1-5-32-544,*S-1-5-32-555`.
+  * **Registry Location**: Stored inside local security database under privilege `SeNetworkLogonRight` set to `*S-1-5-32-544 (Administrators), *S-1-5-32-555 (Remote Desktop Users)`.
 
 ---
 
@@ -60435,7 +60435,7 @@ Allows users to connect to the computer over the network. Restricting this to Ad
 
 <div id="08-endpoints-user-rights-configure-ura-senetworklogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeNetworkLogonRight` to `*S-1-5-32-544,*S-1-5-32-555` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeNetworkLogonRight` to `*S-1-5-32-544 (Administrators), *S-1-5-32-555 (Remote Desktop Users)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -60446,7 +60446,7 @@ Allows users to connect to the computer over the network. Restricting this to Ad
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Access this computer from the network`.
-3. Configure the security principal allocation to: `*S-1-5-32-544,*S-1-5-32-555`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-32-555 (Remote Desktop Users)`.
 
 ---
 
@@ -60713,7 +60713,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Allow log on locally`
-  * **Registry Location**: Stored inside local security database under privilege `SeInteractiveLogonRight` set to `*S-1-5-32-544,*S-1-5-32-545`.
+  * **Registry Location**: Stored inside local security database under privilege `SeInteractiveLogonRight` set to `*S-1-5-32-544 (Administrators), *S-1-5-32-545 (Users)`.
 
 ---
 
@@ -60725,7 +60725,7 @@ Allows users to log on interactively at the computer console. Enforcing restrict
 
 <div id="08-endpoints-user-rights-configure-ura-seinteractivelogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeInteractiveLogonRight` to `*S-1-5-32-544,*S-1-5-32-545` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeInteractiveLogonRight` to `*S-1-5-32-544 (Administrators), *S-1-5-32-545 (Users)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -60736,7 +60736,7 @@ Allows users to log on interactively at the computer console. Enforcing restrict
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Allow log on locally`.
-3. Configure the security principal allocation to: `*S-1-5-32-544,*S-1-5-32-545`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-32-545 (Users)`.
 
 ---
 
@@ -60858,7 +60858,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Back up files and directories`
-  * **Registry Location**: Stored inside local security database under privilege `SeBackupPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeBackupPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -60870,7 +60870,7 @@ Allows users to bypass file permissions to read all files on the system. Restric
 
 <div id="08-endpoints-user-rights-configure-ura-sebackupprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeBackupPrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeBackupPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -60881,7 +60881,7 @@ Allows users to bypass file permissions to read all files on the system. Restric
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Back up files and directories`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -61003,7 +61003,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Change the system time`
-  * **Registry Location**: Stored inside local security database under privilege `SeSystemtimePrivilege` set to `*S-1-5-32-544,*S-1-5-19`.
+  * **Registry Location**: Stored inside local security database under privilege `SeSystemtimePrivilege` set to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)`.
 
 ---
 
@@ -61015,7 +61015,7 @@ Allows users to change the internal system clock. Restricting this to Administra
 
 <div id="08-endpoints-user-rights-configure-ura-sesystemtimeprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSystemtimePrivilege` to `*S-1-5-32-544,*S-1-5-19` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeSystemtimePrivilege` to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -61026,7 +61026,7 @@ Allows users to change the internal system clock. Restricting this to Administra
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Change the system time`.
-3. Configure the security principal allocation to: `*S-1-5-32-544,*S-1-5-19`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)`.
 
 ---
 
@@ -61148,7 +61148,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Low
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Change the time zone`
-  * **Registry Location**: Stored inside local security database under privilege `SeTimeZonePrivilege` set to `*S-1-5-32-544,*S-1-5-19,*S-1-5-32-545`.
+  * **Registry Location**: Stored inside local security database under privilege `SeTimeZonePrivilege` set to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService), *S-1-5-32-545 (Users)`.
 
 ---
 
@@ -61160,7 +61160,7 @@ Allows users to change the local time zone. Restricting this prevents users from
 
 <div id="08-endpoints-user-rights-configure-ura-setimezoneprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeTimeZonePrivilege` to `*S-1-5-32-544,*S-1-5-19,*S-1-5-32-545` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeTimeZonePrivilege` to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService), *S-1-5-32-545 (Users)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -61171,7 +61171,7 @@ Allows users to change the local time zone. Restricting this prevents users from
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Change the time zone`.
-3. Configure the security principal allocation to: `*S-1-5-32-544,*S-1-5-19,*S-1-5-32-545`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService), *S-1-5-32-545 (Users)`.
 
 ---
 
@@ -61293,7 +61293,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Low
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Create a pagefile`
-  * **Registry Location**: Stored inside local security database under privilege `SeCreatePagefilePrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeCreatePagefilePrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -61305,7 +61305,7 @@ Allows users to create and change the size of page files. Restricting this to Ad
 
 <div id="08-endpoints-user-rights-configure-ura-secreatepagefileprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeCreatePagefilePrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeCreatePagefilePrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -61316,7 +61316,7 @@ Allows users to create and change the size of page files. Restricting this to Ad
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Create a pagefile`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -61583,7 +61583,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Create global objects`
-  * **Registry Location**: Stored inside local security database under privilege `SeCreateGlobalPrivilege` set to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6`.
+  * **Registry Location**: Stored inside local security database under privilege `SeCreateGlobalPrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
 
 ---
 
@@ -61595,7 +61595,7 @@ Allows processes to create global objects available to all sessions. Restricting
 
 <div id="08-endpoints-user-rights-configure-ura-secreateglobalprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeCreateGlobalPrivilege` to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeCreateGlobalPrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -61606,7 +61606,7 @@ Allows processes to create global objects available to all sessions. Restricting
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Create global objects`.
-3. Configure the security principal allocation to: `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6`.
+3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
 
 ---
 
@@ -61873,7 +61873,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Create symbolic links`
-  * **Registry Location**: Stored inside local security database under privilege `SeCreateSymbolicLinkPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeCreateSymbolicLinkPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -61885,7 +61885,7 @@ Allows users to create symbolic links. Restricting this prevents symbolic link a
 
 <div id="08-endpoints-user-rights-configure-ura-secreatesymboliclinkprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeCreateSymbolicLinkPrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeCreateSymbolicLinkPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -61896,7 +61896,7 @@ Allows users to create symbolic links. Restricting this prevents symbolic link a
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Create symbolic links`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -62018,7 +62018,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Debug programs`
-  * **Registry Location**: Stored inside local security database under privilege `SeDebugPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDebugPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -62030,7 +62030,7 @@ Allows processes to attach to and debug any system process (including lsass.exe)
 
 <div id="08-endpoints-user-rights-configure-ura-sedebugprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDebugPrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeDebugPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -62041,7 +62041,7 @@ Allows processes to attach to and debug any system process (including lsass.exe)
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Debug programs`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -62308,7 +62308,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Force shutdown from a remote system`
-  * **Registry Location**: Stored inside local security database under privilege `SeRemoteShutdownPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeRemoteShutdownPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -62320,7 +62320,7 @@ Allows users to shut down computers from a remote network location. Restricting 
 
 <div id="08-endpoints-user-rights-configure-ura-seremoteshutdownprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeRemoteShutdownPrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeRemoteShutdownPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -62331,7 +62331,7 @@ Allows users to shut down computers from a remote network location. Restricting 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Force shutdown from a remote system`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -62453,7 +62453,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Impersonate a client after authentication`
-  * **Registry Location**: Stored inside local security database under privilege `SeImpersonatePrivilege` set to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6`.
+  * **Registry Location**: Stored inside local security database under privilege `SeImpersonatePrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
 
 ---
 
@@ -62465,7 +62465,7 @@ Allows programs to impersonate clients. Restricting this to system service accou
 
 <div id="08-endpoints-user-rights-configure-ura-seimpersonateprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeImpersonatePrivilege` to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeImpersonatePrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -62476,7 +62476,7 @@ Allows programs to impersonate clients. Restricting this to system service accou
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Impersonate a client after authentication`.
-3. Configure the security principal allocation to: `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6`.
+3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
 
 ---
 
@@ -62598,7 +62598,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Low
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Increase scheduling priority`
-  * **Registry Location**: Stored inside local security database under privilege `SeIncreaseBasePriorityPrivilege` set to `*S-1-5-32-544,*S-1-5-90-0`.
+  * **Registry Location**: Stored inside local security database under privilege `SeIncreaseBasePriorityPrivilege` set to `*S-1-5-32-544 (Administrators), *S-1-5-90-0 (Window Manager Group)`.
 
 ---
 
@@ -62610,7 +62610,7 @@ Allows processes to increase scheduling execution priority. Restricting this pre
 
 <div id="08-endpoints-user-rights-configure-ura-seincreasebasepriorityprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeIncreaseBasePriorityPrivilege` to `*S-1-5-32-544,*S-1-5-90-0` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeIncreaseBasePriorityPrivilege` to `*S-1-5-32-544 (Administrators), *S-1-5-90-0 (Window Manager Group)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -62621,7 +62621,7 @@ Allows processes to increase scheduling execution priority. Restricting this pre
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Increase scheduling priority`.
-3. Configure the security principal allocation to: `*S-1-5-32-544,*S-1-5-90-0`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-90-0 (Window Manager Group)`.
 
 ---
 
@@ -62743,7 +62743,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Load and unload device drivers`
-  * **Registry Location**: Stored inside local security database under privilege `SeLoadDriverPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeLoadDriverPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -62755,7 +62755,7 @@ Allows users to load device drivers in kernel mode. Restricting this prevents at
 
 <div id="08-endpoints-user-rights-configure-ura-seloaddriverprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeLoadDriverPrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeLoadDriverPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -62766,7 +62766,7 @@ Allows users to load device drivers in kernel mode. Restricting this prevents at
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Load and unload device drivers`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -63033,7 +63033,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Manage auditing and security log`
-  * **Registry Location**: Stored inside local security database under privilege `SeSecurityPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeSecurityPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -63045,7 +63045,7 @@ Allows users to view, manage, and clear the Windows Security Event Log. Restrict
 
 <div id="08-endpoints-user-rights-configure-ura-sesecurityprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSecurityPrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeSecurityPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -63056,7 +63056,7 @@ Allows users to view, manage, and clear the Windows Security Event Log. Restrict
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Manage auditing and security log`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -63178,7 +63178,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Modify firmware environment values`
-  * **Registry Location**: Stored inside local security database under privilege `SeSystemEnvironmentPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeSystemEnvironmentPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -63190,7 +63190,7 @@ Allows users to configure firmware (UEFI) variables. Restricting this prevents a
 
 <div id="08-endpoints-user-rights-configure-ura-sesystemenvironmentprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSystemEnvironmentPrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeSystemEnvironmentPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -63201,7 +63201,7 @@ Allows users to configure firmware (UEFI) variables. Restricting this prevents a
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Modify firmware environment values`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -63323,7 +63323,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Perform volume maintenance tasks`
-  * **Registry Location**: Stored inside local security database under privilege `SeManageVolumePrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeManageVolumePrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -63335,7 +63335,7 @@ Allows non-administrative users to run disk utilities. Restricting this to Admin
 
 <div id="08-endpoints-user-rights-configure-ura-semanagevolumeprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeManageVolumePrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeManageVolumePrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -63346,7 +63346,7 @@ Allows non-administrative users to run disk utilities. Restricting this to Admin
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Perform volume maintenance tasks`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -63468,7 +63468,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Low
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Profile single process`
-  * **Registry Location**: Stored inside local security database under privilege `SeProfileSingleProcessPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeProfileSingleProcessPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -63480,7 +63480,7 @@ Allows users to profile non-system processes. Restricting this prevents attacker
 
 <div id="08-endpoints-user-rights-configure-ura-seprofilesingleprocessprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -63491,7 +63491,7 @@ Allows users to profile non-system processes. Restricting this prevents attacker
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Profile single process`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -63613,7 +63613,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Low
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Profile system performance`
-  * **Registry Location**: Stored inside local security database under privilege `SeSystemProfilePrivilege` set to `*S-1-5-32-544,*S-1-5-80-3139157870-2983391045-3678747466-658725712-1809340420`.
+  * **Registry Location**: Stored inside local security database under privilege `SeSystemProfilePrivilege` set to `*S-1-5-32-544 (Administrators), *S-1-5-80-3139157870-2983391045-3678747466-658725712-1809340420 (WdiServiceHost)`.
 
 ---
 
@@ -63625,7 +63625,7 @@ Allows users to profile system performance. Restricting this prevents unauthoriz
 
 <div id="08-endpoints-user-rights-configure-ura-sesystemprofileprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSystemProfilePrivilege` to `*S-1-5-32-544,*S-1-5-80-3139157870-2983391045-3678747466-658725712-1809340420` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeSystemProfilePrivilege` to `*S-1-5-32-544 (Administrators), *S-1-5-80-3139157870-2983391045-3678747466-658725712-1809340420 (WdiServiceHost)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -63636,7 +63636,7 @@ Allows users to profile system performance. Restricting this prevents unauthoriz
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Profile system performance`.
-3. Configure the security principal allocation to: `*S-1-5-32-544,*S-1-5-80-3139157870-2983391045-3678747466-658725712-1809340420`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-80-3139157870-2983391045-3678747466-658725712-1809340420 (WdiServiceHost)`.
 
 ---
 
@@ -63758,7 +63758,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Replace a process level token`
-  * **Registry Location**: Stored inside local security database under privilege `SeAssignPrimaryTokenPrivilege` set to `*S-1-5-19,*S-1-5-20`.
+  * **Registry Location**: Stored inside local security database under privilege `SeAssignPrimaryTokenPrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)`.
 
 ---
 
@@ -63770,7 +63770,7 @@ Allows a process to replace the default access token associated with a subproces
 
 <div id="08-endpoints-user-rights-configure-ura-seassignprimarytokenprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeAssignPrimaryTokenPrivilege` to `*S-1-5-19,*S-1-5-20` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeAssignPrimaryTokenPrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -63781,7 +63781,7 @@ Allows a process to replace the default access token associated with a subproces
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Replace a process level token`.
-3. Configure the security principal allocation to: `*S-1-5-19,*S-1-5-20`.
+3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)`.
 
 ---
 
@@ -63903,7 +63903,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Restore files and directories`
-  * **Registry Location**: Stored inside local security database under privilege `SeRestorePrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeRestorePrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -63915,7 +63915,7 @@ Allows users to bypass file permissions when restoring files. Restricting this p
 
 <div id="08-endpoints-user-rights-configure-ura-serestoreprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeRestorePrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeRestorePrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -63926,7 +63926,7 @@ Allows users to bypass file permissions when restoring files. Restricting this p
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Restore files and directories`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -64048,7 +64048,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Take ownership of files or other objects`
-  * **Registry Location**: Stored inside local security database under privilege `SeTakeOwnershipPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeTakeOwnershipPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -64060,7 +64060,7 @@ Allows users to take ownership of any system object. Restricting this prevents a
 
 <div id="08-endpoints-user-rights-configure-ura-setakeownershipprivilege-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeTakeOwnershipPrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeTakeOwnershipPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -64071,7 +64071,7 @@ Allows users to take ownership of any system object. Restricting this prevents a
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Take ownership of files or other objects`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -64338,7 +64338,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny access to this computer from the network`
-  * **Registry Location**: Stored inside local security database under privilege `SeDenyNetworkLogonRight` set to `*S-1-5-113,*S-1-5-114`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDenyNetworkLogonRight` set to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 
@@ -64350,7 +64350,7 @@ Explicitly blocks network logon for Local Accounts (S-1-5-113) and Local Adminis
 
 <div id="08-endpoints-user-rights-configure-ura-sedenynetworklogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyNetworkLogonRight` to `*S-1-5-113,*S-1-5-114` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeDenyNetworkLogonRight` to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -64361,7 +64361,7 @@ Explicitly blocks network logon for Local Accounts (S-1-5-113) and Local Adminis
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Deny access to this computer from the network`.
-3. Configure the security principal allocation to: `*S-1-5-113,*S-1-5-114`.
+3. Configure the security principal allocation to: `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 
@@ -64483,7 +64483,7 @@ if ($CurrentValue -eq $Expected) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny log on through Remote Desktop Services`
-  * **Registry Location**: Stored inside local security database under privilege `SeDenyRemoteInteractiveLogonRight` set to `*S-1-5-113,*S-1-5-114`.
+  * **Registry Location**: Stored inside local security database under privilege `SeDenyRemoteInteractiveLogonRight` set to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 
@@ -64495,7 +64495,7 @@ Explicitly blocks Remote Desktop logons for Local Accounts (S-1-5-113) and Local
 
 <div id="08-endpoints-user-rights-configure-ura-sedenyremoteinteractivelogonright-md-legacy-impact-compatibility"></div>
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyRemoteInteractiveLogonRight` to `*S-1-5-113,*S-1-5-114` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeDenyRemoteInteractiveLogonRight` to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -64506,7 +64506,7 @@ Explicitly blocks Remote Desktop logons for Local Accounts (S-1-5-113) and Local
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Deny log on through Remote Desktop Services`.
-3. Configure the security principal allocation to: `*S-1-5-113,*S-1-5-114`.
+3. Configure the security principal allocation to: `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 

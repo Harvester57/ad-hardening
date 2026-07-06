@@ -10,7 +10,7 @@
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Create symbolic links`
-  * **Registry Location**: Stored inside local security database under privilege `SeCreateSymbolicLinkPrivilege` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeCreateSymbolicLinkPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows users to create symbolic links. Restricting this prevents symbolic link a
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeCreateSymbolicLinkPrivilege` to `*S-1-5-32-544` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeCreateSymbolicLinkPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -29,7 +29,7 @@ Allows users to create symbolic links. Restricting this prevents symbolic link a
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Create symbolic links`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 

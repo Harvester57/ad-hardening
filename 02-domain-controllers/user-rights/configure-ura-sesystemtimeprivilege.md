@@ -10,7 +10,7 @@
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Change the system time`
-  * **Registry Location**: Stored inside local security database under privilege `SeSystemtimePrivilege` set to `*S-1-5-32-544,*S-1-5-19`.
+  * **Registry Location**: Stored inside local security database under privilege `SeSystemtimePrivilege` set to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)`.
 
 ---
 
@@ -20,7 +20,7 @@ Enforces that only Administrators and Local Service can change the clock on Doma
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSystemtimePrivilege` to `*S-1-5-32-544,*S-1-5-19` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeSystemtimePrivilege` to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -29,7 +29,7 @@ Enforces that only Administrators and Local Service can change the clock on Doma
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Change the system time`.
-3. Configure the security principal allocation to: `*S-1-5-32-544,*S-1-5-19`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)`.
 
 ---
 

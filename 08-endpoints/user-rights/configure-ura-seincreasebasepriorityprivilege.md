@@ -10,7 +10,7 @@
 * **Priority**: Low
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Increase scheduling priority`
-  * **Registry Location**: Stored inside local security database under privilege `SeIncreaseBasePriorityPrivilege` set to `*S-1-5-32-544,*S-1-5-90-0`.
+  * **Registry Location**: Stored inside local security database under privilege `SeIncreaseBasePriorityPrivilege` set to `*S-1-5-32-544 (Administrators), *S-1-5-90-0 (Window Manager Group)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows processes to increase scheduling execution priority. Restricting this pre
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeIncreaseBasePriorityPrivilege` to `*S-1-5-32-544,*S-1-5-90-0` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeIncreaseBasePriorityPrivilege` to `*S-1-5-32-544 (Administrators), *S-1-5-90-0 (Window Manager Group)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -29,7 +29,7 @@ Allows processes to increase scheduling execution priority. Restricting this pre
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Increase scheduling priority`.
-3. Configure the security principal allocation to: `*S-1-5-32-544,*S-1-5-90-0`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-90-0 (Window Manager Group)`.
 
 ---
 

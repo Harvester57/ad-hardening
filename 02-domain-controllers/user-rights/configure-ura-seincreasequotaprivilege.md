@@ -10,7 +10,7 @@
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Adjust memory quotas for a process`
-  * **Registry Location**: Stored inside local security database under privilege `SeIncreaseQuotaPrivilege` set to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeIncreaseQuotaPrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows a process to adjust memory quotas for other processes. Restricting this t
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeIncreaseQuotaPrivilege` to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeIncreaseQuotaPrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -29,7 +29,7 @@ Allows a process to adjust memory quotas for other processes. Restricting this t
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Adjust memory quotas for a process`.
-3. Configure the security principal allocation to: `*S-1-5-19,*S-1-5-20,*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators)`.
 
 ---
 

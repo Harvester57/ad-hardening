@@ -10259,7 +10259,7 @@ Set-ItemProperty -Path $AsrRulesPath -Name "c1db55ab-c21a-4637-bb3f-a12568109d35
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Access this computer from the network</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-9,*S-1-5-11,*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -10615,7 +10615,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Add workstations to domain</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -10793,7 +10793,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Adjust memory quotas for a process</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19,*S-1-5-20,*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -10971,7 +10971,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Allow log on locally</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-9,*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -11149,7 +11149,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Allow log on through Remote Desktop Services</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -11327,7 +11327,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Back up files and directories</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -11505,7 +11505,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Bypass traverse checking</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-554,*S-1-5-11,*S-1-5-32-544,*S-1-5-20,*S-1-5-19,*S-1-1-0</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-554 (Pre-Windows 2000 Compatible Access), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators), *S-1-5-20 (NetworkService), *S-1-5-19 (LocalService), *S-1-1-0 (Everyone)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -11683,7 +11683,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Change the system time</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544,*S-1-5-19</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -11861,7 +11861,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Create a pagefile</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -12395,7 +12395,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Debug programs</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -12573,7 +12573,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Deny access to this computer from the network</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-546</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-546 (Guests)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -12751,7 +12751,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Deny log on as a batch job</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-546</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-546 (Guests)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -12929,7 +12929,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Deny log on as a service</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-546</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-546 (Guests)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -13107,7 +13107,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Deny log on locally</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-546</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-546 (Guests)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -13285,7 +13285,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Deny log on through Remote Desktop Services</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-546</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-546 (Guests)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -13463,7 +13463,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Enable computer and user accounts to be trusted for delegation</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -13641,7 +13641,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Force shutdown from a remote system</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -13819,7 +13819,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Generate security audits</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19,*S-1-5-20</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -13997,7 +13997,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Load and unload device drivers</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -14353,7 +14353,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Log on as a batch job</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -14709,7 +14709,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Manage auditing and security log</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -14887,7 +14887,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Modify firmware environment values</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -15065,7 +15065,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Profile single process</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -15243,7 +15243,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Restore files and directories</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -15421,7 +15421,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Shut down the system</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -15777,7 +15777,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Take ownership of files or other objects</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -46933,7 +46933,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Access this computer from the network</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -47289,7 +47289,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Allow log on locally</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -47467,7 +47467,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Back up files and directories</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -47645,7 +47645,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Create a pagefile</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -48001,7 +48001,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Create global objects</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -48357,7 +48357,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Debug programs</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -48713,7 +48713,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Force shutdown from a remote system</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -48891,7 +48891,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Impersonate a client after authentication</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -49069,7 +49069,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Load and unload device drivers</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -49425,7 +49425,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Manage auditing and security log</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -49603,7 +49603,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Modify firmware environment values</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -49781,7 +49781,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Perform volume maintenance tasks</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -49959,7 +49959,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Profile single process</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -50137,7 +50137,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Restore files and directories</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -50315,7 +50315,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Take ownership of files or other objects</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -50493,7 +50493,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Deny access to this computer from the network</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-113,*S-1-5-114</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -50671,7 +50671,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Deny log on through Remote Desktop Services</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-113,*S-1-5-114</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -70276,7 +70276,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Access this computer from the network</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544,*S-1-5-32-555</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators), *S-1-5-32-555 (Remote Desktop Users)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -70626,7 +70626,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Allow log on locally</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544,*S-1-5-32-545</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators), *S-1-5-32-545 (Users)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -70801,7 +70801,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Back up files and directories</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -70976,7 +70976,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Change the system time</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544,*S-1-5-19</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -71151,7 +71151,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Change the time zone</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544,*S-1-5-19,*S-1-5-32-545</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService), *S-1-5-32-545 (Users)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -71326,7 +71326,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Create a pagefile</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -71676,7 +71676,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Create global objects</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -72026,7 +72026,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Create symbolic links</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -72201,7 +72201,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Debug programs</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -72551,7 +72551,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Force shutdown from a remote system</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -72726,7 +72726,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Impersonate a client after authentication</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -72901,7 +72901,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Increase scheduling priority</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544,*S-1-5-90-0</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators), *S-1-5-90-0 (Window Manager Group)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -73076,7 +73076,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Load and unload device drivers</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -73426,7 +73426,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Manage auditing and security log</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -73601,7 +73601,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Modify firmware environment values</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -73776,7 +73776,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Perform volume maintenance tasks</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -73951,7 +73951,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Profile single process</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -74126,7 +74126,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Profile system performance</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544,*S-1-5-80-3139157870-2983391045-3678747466-658725712-1809340420</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators), *S-1-5-80-3139157870-2983391045-3678747466-658725712-1809340420 (WdiServiceHost)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -74301,7 +74301,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Replace a process level token</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19,*S-1-5-20</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -74476,7 +74476,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Restore files and directories</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -74651,7 +74651,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Take ownership of files or other objects</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-32-544 (Administrators)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -75001,7 +75001,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Deny access to this computer from the network</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-113,*S-1-5-114</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -75176,7 +75176,7 @@ Remove-Item -Path $CfgFile, $DbFile -ErrorAction SilentlyContinue</fix>
             <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment</xhtml:code>
             </xhtml:li>
             <xhtml:li>Open the policy <xhtml:code>Deny log on through Remote Desktop Services</xhtml:code>.</xhtml:li>
-            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-113,*S-1-5-114</xhtml:code>.</xhtml:li>
+            <xhtml:li>Configure the security principal allocation to: <xhtml:code>*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)</xhtml:code>.</xhtml:li>
           </xhtml:ol>
           <xhtml:hr />
           <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>

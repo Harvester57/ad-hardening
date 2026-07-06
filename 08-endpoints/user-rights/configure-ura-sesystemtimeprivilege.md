@@ -10,7 +10,7 @@
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Change the system time`
-  * **Registry Location**: Stored inside local security database under privilege `SeSystemtimePrivilege` set to `*S-1-5-32-544,*S-1-5-19`.
+  * **Registry Location**: Stored inside local security database under privilege `SeSystemtimePrivilege` set to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows users to change the internal system clock. Restricting this to Administra
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSystemtimePrivilege` to `*S-1-5-32-544,*S-1-5-19` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeSystemtimePrivilege` to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -29,7 +29,7 @@ Allows users to change the internal system clock. Restricting this to Administra
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Change the system time`.
-3. Configure the security principal allocation to: `*S-1-5-32-544,*S-1-5-19`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService)`.
 
 ---
 

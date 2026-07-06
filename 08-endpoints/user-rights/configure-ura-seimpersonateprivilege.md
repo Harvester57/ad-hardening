@@ -10,7 +10,7 @@
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Impersonate a client after authentication`
-  * **Registry Location**: Stored inside local security database under privilege `SeImpersonatePrivilege` set to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6`.
+  * **Registry Location**: Stored inside local security database under privilege `SeImpersonatePrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows programs to impersonate clients. Restricting this to system service accou
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeImpersonatePrivilege` to `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeImpersonatePrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
 
 ---
 
@@ -29,7 +29,7 @@ Allows programs to impersonate clients. Restricting this to system service accou
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Impersonate a client after authentication`.
-3. Configure the security principal allocation to: `*S-1-5-19,*S-1-5-20,*S-1-5-32-544,*S-1-5-6`.
+3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
 
 ---
 

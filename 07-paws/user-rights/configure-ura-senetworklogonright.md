@@ -10,7 +10,7 @@
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Access this computer from the network`
-  * **Registry Location**: Stored inside local security database under privilege `SeNetworkLogonRight` set to `*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeNetworkLogonRight` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows users to connect to the computer over the network. Restricting this to Ad
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeNetworkLogonRight` to `*S-1-5-32-544` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeNetworkLogonRight` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
 
 ---
 
@@ -29,7 +29,7 @@ Allows users to connect to the computer over the network. Restricting this to Ad
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Access this computer from the network`.
-3. Configure the security principal allocation to: `*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
 
 ---
 

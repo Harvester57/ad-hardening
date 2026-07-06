@@ -10,7 +10,7 @@
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Allow log on locally`
-  * **Registry Location**: Stored inside local security database under privilege `SeInteractiveLogonRight` set to `*S-1-5-9,*S-1-5-32-544`.
+  * **Registry Location**: Stored inside local security database under privilege `SeInteractiveLogonRight` set to `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-32-544 (Administrators)`.
 
 ---
 
@@ -20,7 +20,7 @@ Allows users to sign in locally at the Domain Controller console. Restricting th
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeInteractiveLogonRight` to `*S-1-5-9,*S-1-5-32-544` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeInteractiveLogonRight` to `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
 
 ---
 
@@ -29,7 +29,7 @@ Allows users to sign in locally at the Domain Controller console. Restricting th
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
 2. Open the policy `Allow log on locally`.
-3. Configure the security principal allocation to: `*S-1-5-9,*S-1-5-32-544`.
+3. Configure the security principal allocation to: `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-32-544 (Administrators)`.
 
 ---
 
