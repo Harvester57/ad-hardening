@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-05T23:06:39Z</oval:timestamp>
+    <oval:timestamp>2026-07-06T09:34:27Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -2798,26 +2798,25 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
 7. **Restrict Net Session Enumeration (NetCease)**: By default, any authenticated domain user can query session information from remote hosts. Attackers utilize session enumeration to locate high-privileged user sessions (e.g., Domain Admins) across the network. Hardening the `SrvsvcSessionInfo` default security descriptor blocks this remote reconnaissance.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" test_ref="oval:org.adhardening:tst:8001001" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" test_ref="oval:org.adhardening:tst:8001002" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NodeType" test_ref="oval:org.adhardening:tst:8001003" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value EnableICMPRedirect" test_ref="oval:org.adhardening:tst:8001004" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value DisableIPSourceRouting" test_ref="oval:org.adhardening:tst:8001005" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters Value DisableIPSourceRouting" test_ref="oval:org.adhardening:tst:8001006" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_ShowSharedAccessUI" test_ref="oval:org.adhardening:tst:8001007" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_AllowNetBridge_NLA" test_ref="oval:org.adhardening:tst:8001008" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_StdUserAllowedToSetNetworkLocation" test_ref="oval:org.adhardening:tst:8001009" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fMinimizeConnections" test_ref="oval:org.adhardening:tst:8001010" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fBlockNonDomain" test_ref="oval:org.adhardening:tst:8001011" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config Value AutoConnectAllowedOEM" test_ref="oval:org.adhardening:tst:8001012" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableWebPnPDownload" test_ref="oval:org.adhardening:tst:8001013" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableHTTPPrinting" test_ref="oval:org.adhardening:tst:8001014" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters Value RestrictNullSessAccess" test_ref="oval:org.adhardening:tst:8001015" />
-        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad Value WpadOverride" test_ref="oval:org.adhardening:tst:8001016" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity Value SrvsvcSessionInfo" test_ref="oval:org.adhardening:tst:8001017" />
-        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnableMulticast" test_ref="oval:org.adhardening:tst:8001018" />
-        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnablemDNS" test_ref="oval:org.adhardening:tst:8001019" />
-        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" test_ref="oval:org.adhardening:tst:8001020" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" test_ref="oval:org.adhardening:tst:8001001" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NodeType" test_ref="oval:org.adhardening:tst:8001002" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value EnableICMPRedirect" test_ref="oval:org.adhardening:tst:8001003" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value DisableIPSourceRouting" test_ref="oval:org.adhardening:tst:8001004" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters Value DisableIPSourceRouting" test_ref="oval:org.adhardening:tst:8001005" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad Value WpadOverride" test_ref="oval:org.adhardening:tst:8001006" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity Value SrvsvcSessionInfo" test_ref="oval:org.adhardening:tst:8001007" />
+        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnableMulticast" test_ref="oval:org.adhardening:tst:8001008" />
+        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnablemDNS" test_ref="oval:org.adhardening:tst:8001009" />
+        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" test_ref="oval:org.adhardening:tst:8001010" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_ShowSharedAccessUI" test_ref="oval:org.adhardening:tst:8001011" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_AllowNetBridge_NLA" test_ref="oval:org.adhardening:tst:8001012" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_StdDomainUserSetLocation" test_ref="oval:org.adhardening:tst:8001013" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fMinimizeConnections" test_ref="oval:org.adhardening:tst:8001014" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fBlockNonDomain" test_ref="oval:org.adhardening:tst:8001015" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config Value AutoConnectAllowedOEM" test_ref="oval:org.adhardening:tst:8001016" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableWebPnPDownload" test_ref="oval:org.adhardening:tst:8001017" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableHTTPPrinting" test_ref="oval:org.adhardening:tst:8001018" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters Value RestrictNullSessAccess" test_ref="oval:org.adhardening:tst:8001019" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8002" version="1" class="compliance">
@@ -7353,26 +7352,25 @@ Deploying Kernel-mode Hardware-enforced Stack Protection on PAWs guarantees that
 7. **Restrict Net Session Enumeration (NetCease)**: By default, any authenticated domain user can query session information from remote hosts. Attackers utilize session enumeration to locate high-privileged user sessions (e.g., Domain Admins) across the network. Hardening the `SrvsvcSessionInfo` default security descriptor blocks this remote reconnaissance.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" test_ref="oval:org.adhardening:tst:7019001" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" test_ref="oval:org.adhardening:tst:7019002" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NodeType" test_ref="oval:org.adhardening:tst:7019003" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value EnableICMPRedirect" test_ref="oval:org.adhardening:tst:7019004" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value DisableIPSourceRouting" test_ref="oval:org.adhardening:tst:7019005" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters Value DisableIPSourceRouting" test_ref="oval:org.adhardening:tst:7019006" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_ShowSharedAccessUI" test_ref="oval:org.adhardening:tst:7019007" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_AllowNetBridge_NLA" test_ref="oval:org.adhardening:tst:7019008" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_StdUserAllowedToSetNetworkLocation" test_ref="oval:org.adhardening:tst:7019009" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fMinimizeConnections" test_ref="oval:org.adhardening:tst:7019010" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fBlockNonDomain" test_ref="oval:org.adhardening:tst:7019011" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config Value AutoConnectAllowedOEM" test_ref="oval:org.adhardening:tst:7019012" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableWebPnPDownload" test_ref="oval:org.adhardening:tst:7019013" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableHTTPPrinting" test_ref="oval:org.adhardening:tst:7019014" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters Value RestrictNullSessAccess" test_ref="oval:org.adhardening:tst:7019015" />
-        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad Value WpadOverride" test_ref="oval:org.adhardening:tst:7019016" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity Value SrvsvcSessionInfo" test_ref="oval:org.adhardening:tst:7019017" />
-        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnableMulticast" test_ref="oval:org.adhardening:tst:7019018" />
-        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnablemDNS" test_ref="oval:org.adhardening:tst:7019019" />
-        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" test_ref="oval:org.adhardening:tst:7019020" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" test_ref="oval:org.adhardening:tst:7019001" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NodeType" test_ref="oval:org.adhardening:tst:7019002" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value EnableICMPRedirect" test_ref="oval:org.adhardening:tst:7019003" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value DisableIPSourceRouting" test_ref="oval:org.adhardening:tst:7019004" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters Value DisableIPSourceRouting" test_ref="oval:org.adhardening:tst:7019005" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad Value WpadOverride" test_ref="oval:org.adhardening:tst:7019006" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity Value SrvsvcSessionInfo" test_ref="oval:org.adhardening:tst:7019007" />
+        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnableMulticast" test_ref="oval:org.adhardening:tst:7019008" />
+        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnablemDNS" test_ref="oval:org.adhardening:tst:7019009" />
+        <criterion comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" test_ref="oval:org.adhardening:tst:7019010" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_ShowSharedAccessUI" test_ref="oval:org.adhardening:tst:7019011" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_AllowNetBridge_NLA" test_ref="oval:org.adhardening:tst:7019012" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_StdDomainUserSetLocation" test_ref="oval:org.adhardening:tst:7019013" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fMinimizeConnections" test_ref="oval:org.adhardening:tst:7019014" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fBlockNonDomain" test_ref="oval:org.adhardening:tst:7019015" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config Value AutoConnectAllowedOEM" test_ref="oval:org.adhardening:tst:7019016" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableWebPnPDownload" test_ref="oval:org.adhardening:tst:7019017" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableHTTPPrinting" test_ref="oval:org.adhardening:tst:7019018" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters Value RestrictNullSessAccess" test_ref="oval:org.adhardening:tst:7019019" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7020" version="1" class="compliance">
@@ -10695,85 +10693,81 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:2145920" />
       <windows:state state_ref="oval:org.adhardening:ste:2145920" />
     </windows:auditeventpolicysubcategories_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001001" />
       <windows:state state_ref="oval:org.adhardening:ste:8001001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NodeType" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001002" />
       <windows:state state_ref="oval:org.adhardening:ste:8001002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001003" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NodeType" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001003" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value EnableICMPRedirect" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001003" />
       <windows:state state_ref="oval:org.adhardening:ste:8001003" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value EnableICMPRedirect" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value DisableIPSourceRouting" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001004" />
       <windows:state state_ref="oval:org.adhardening:ste:8001004" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001005" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value DisableIPSourceRouting" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001005" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters Value DisableIPSourceRouting" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001005" />
       <windows:state state_ref="oval:org.adhardening:ste:8001005" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001006" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters Value DisableIPSourceRouting" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001006" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad Value WpadOverride" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001006" />
       <windows:state state_ref="oval:org.adhardening:ste:8001006" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001007" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_ShowSharedAccessUI" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001007" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity Value SrvsvcSessionInfo" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001007" />
       <windows:state state_ref="oval:org.adhardening:ste:8001007" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001008" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_AllowNetBridge_NLA" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001008" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnableMulticast" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001008" />
       <windows:state state_ref="oval:org.adhardening:ste:8001008" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001009" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_StdUserAllowedToSetNetworkLocation" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001009" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnablemDNS" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001009" />
       <windows:state state_ref="oval:org.adhardening:ste:8001009" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001010" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fMinimizeConnections" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001010" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001010" />
       <windows:state state_ref="oval:org.adhardening:ste:8001010" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001011" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fBlockNonDomain" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001011" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_ShowSharedAccessUI" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001011" />
       <windows:state state_ref="oval:org.adhardening:ste:8001011" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001012" version="1" comment="Check Registry Key SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config Value AutoConnectAllowedOEM" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001012" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_AllowNetBridge_NLA" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001012" />
       <windows:state state_ref="oval:org.adhardening:ste:8001012" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001013" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableWebPnPDownload" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001013" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_StdDomainUserSetLocation" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001013" />
       <windows:state state_ref="oval:org.adhardening:ste:8001013" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001014" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableHTTPPrinting" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001014" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fMinimizeConnections" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001014" />
       <windows:state state_ref="oval:org.adhardening:ste:8001014" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001015" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters Value RestrictNullSessAccess" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001015" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fBlockNonDomain" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001015" />
       <windows:state state_ref="oval:org.adhardening:ste:8001015" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001016" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad Value WpadOverride" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001016" version="1" comment="Check Registry Key SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config Value AutoConnectAllowedOEM" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001016" />
       <windows:state state_ref="oval:org.adhardening:ste:8001016" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001017" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity Value SrvsvcSessionInfo" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001017" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableWebPnPDownload" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001017" />
       <windows:state state_ref="oval:org.adhardening:ste:8001017" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001018" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnableMulticast" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001018" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableHTTPPrinting" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001018" />
       <windows:state state_ref="oval:org.adhardening:ste:8001018" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001019" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnablemDNS" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8001019" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters Value RestrictNullSessAccess" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001019" />
       <windows:state state_ref="oval:org.adhardening:ste:8001019" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8001020" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8001020" />
-      <windows:state state_ref="oval:org.adhardening:ste:8001020" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8002001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value LocalAccountTokenFilterPolicy" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8002001" />
@@ -13022,85 +13016,81 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:7018001" />
       <windows:state state_ref="oval:org.adhardening:ste:7018001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019001" />
       <windows:state state_ref="oval:org.adhardening:ste:7019001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NodeType" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019002" />
       <windows:state state_ref="oval:org.adhardening:ste:7019002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019003" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NodeType" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019003" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value EnableICMPRedirect" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019003" />
       <windows:state state_ref="oval:org.adhardening:ste:7019003" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value EnableICMPRedirect" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value DisableIPSourceRouting" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019004" />
       <windows:state state_ref="oval:org.adhardening:ste:7019004" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019005" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value DisableIPSourceRouting" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019005" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters Value DisableIPSourceRouting" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019005" />
       <windows:state state_ref="oval:org.adhardening:ste:7019005" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019006" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters Value DisableIPSourceRouting" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019006" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad Value WpadOverride" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019006" />
       <windows:state state_ref="oval:org.adhardening:ste:7019006" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019007" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_ShowSharedAccessUI" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019007" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity Value SrvsvcSessionInfo" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019007" />
       <windows:state state_ref="oval:org.adhardening:ste:7019007" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019008" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_AllowNetBridge_NLA" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019008" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnableMulticast" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019008" />
       <windows:state state_ref="oval:org.adhardening:ste:7019008" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019009" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_StdUserAllowedToSetNetworkLocation" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019009" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnablemDNS" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019009" />
       <windows:state state_ref="oval:org.adhardening:ste:7019009" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019010" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fMinimizeConnections" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019010" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019010" />
       <windows:state state_ref="oval:org.adhardening:ste:7019010" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019011" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fBlockNonDomain" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019011" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_ShowSharedAccessUI" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019011" />
       <windows:state state_ref="oval:org.adhardening:ste:7019011" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019012" version="1" comment="Check Registry Key SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config Value AutoConnectAllowedOEM" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019012" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_AllowNetBridge_NLA" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019012" />
       <windows:state state_ref="oval:org.adhardening:ste:7019012" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019013" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableWebPnPDownload" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019013" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Network Connections Value NC_StdDomainUserSetLocation" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019013" />
       <windows:state state_ref="oval:org.adhardening:ste:7019013" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019014" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableHTTPPrinting" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019014" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fMinimizeConnections" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019014" />
       <windows:state state_ref="oval:org.adhardening:ste:7019014" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019015" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters Value RestrictNullSessAccess" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019015" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy Value fBlockNonDomain" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019015" />
       <windows:state state_ref="oval:org.adhardening:ste:7019015" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019016" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad Value WpadOverride" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019016" version="1" comment="Check Registry Key SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config Value AutoConnectAllowedOEM" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019016" />
       <windows:state state_ref="oval:org.adhardening:ste:7019016" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019017" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity Value SrvsvcSessionInfo" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019017" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableWebPnPDownload" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019017" />
       <windows:state state_ref="oval:org.adhardening:ste:7019017" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019018" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnableMulticast" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019018" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\Printers Value DisableHTTPPrinting" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019018" />
       <windows:state state_ref="oval:org.adhardening:ste:7019018" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019019" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value EnablemDNS" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7019019" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters Value RestrictNullSessAccess" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7019019" />
       <windows:state state_ref="oval:org.adhardening:ste:7019019" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7019020" version="1" comment="Check Registry Key Software\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7019020" />
-      <windows:state state_ref="oval:org.adhardening:ste:7019020" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7020001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value LocalAccountTokenFilterPolicy" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7020001" />
@@ -15504,122 +15494,116 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_object id="oval:org.adhardening:obj:8001001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\DNSClient</windows:key>
-      <windows:name>DisableIPv6DefaultDnsServers</windows:name>
+      <windows:key>SYSTEM\CurrentControlSet\Services\Netbt\Parameters</windows:key>
+      <windows:name>NoNameReleaseOnDemand</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8001002" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\Netbt\Parameters</windows:key>
-      <windows:name>NoNameReleaseOnDemand</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001003" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Services\Netbt\Parameters</windows:key>
       <windows:name>NodeType</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001004" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8001003" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip\Parameters</windows:key>
       <windows:name>EnableICMPRedirect</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001005" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8001004" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip\Parameters</windows:key>
       <windows:name>DisableIPSourceRouting</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001006" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8001005" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters</windows:key>
       <windows:name>DisableIPSourceRouting</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001007" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Network Connections</windows:key>
-      <windows:name>NC_ShowSharedAccessUI</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001008" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Network Connections</windows:key>
-      <windows:name>NC_AllowNetBridge_NLA</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001009" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Network Connections</windows:key>
-      <windows:name>NC_StdUserAllowedToSetNetworkLocation</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001010" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy</windows:key>
-      <windows:name>fMinimizeConnections</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001011" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy</windows:key>
-      <windows:name>fBlockNonDomain</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001012" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config</windows:key>
-      <windows:name>AutoConnectAllowedOEM</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001013" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\Printers</windows:key>
-      <windows:name>DisableWebPnPDownload</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001014" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\Printers</windows:key>
-      <windows:name>DisableHTTPPrinting</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001015" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters</windows:key>
-      <windows:name>RestrictNullSessAccess</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001016" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8001006" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
       <windows:key>Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad</windows:key>
       <windows:name>WpadOverride</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001017" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8001007" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity</windows:key>
       <windows:name>SrvsvcSessionInfo</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001018" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8001008" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>Software\Policies\Microsoft\Windows NT\DNSClient</windows:key>
       <windows:name>EnableMulticast</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001019" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8001009" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>Software\Policies\Microsoft\Windows NT\DNSClient</windows:key>
       <windows:name>EnablemDNS</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8001020" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8001010" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>Software\Policies\Microsoft\Windows NT\DNSClient</windows:key>
       <windows:name>DisableIPv6DefaultDnsServers</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8001011" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Network Connections</windows:key>
+      <windows:name>NC_ShowSharedAccessUI</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8001012" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Network Connections</windows:key>
+      <windows:name>NC_AllowNetBridge_NLA</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8001013" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Network Connections</windows:key>
+      <windows:name>NC_StdDomainUserSetLocation</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8001014" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy</windows:key>
+      <windows:name>fMinimizeConnections</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8001015" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy</windows:key>
+      <windows:name>fBlockNonDomain</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8001016" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config</windows:key>
+      <windows:name>AutoConnectAllowedOEM</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8001017" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\Printers</windows:key>
+      <windows:name>DisableWebPnPDownload</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8001018" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\Printers</windows:key>
+      <windows:name>DisableHTTPPrinting</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8001019" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters</windows:key>
+      <windows:name>RestrictNullSessAccess</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8002001" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -18836,122 +18820,116 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_object id="oval:org.adhardening:obj:7019001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\DNSClient</windows:key>
-      <windows:name>DisableIPv6DefaultDnsServers</windows:name>
+      <windows:key>SYSTEM\CurrentControlSet\Services\Netbt\Parameters</windows:key>
+      <windows:name>NoNameReleaseOnDemand</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7019002" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\Netbt\Parameters</windows:key>
-      <windows:name>NoNameReleaseOnDemand</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019003" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Services\Netbt\Parameters</windows:key>
       <windows:name>NodeType</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019004" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7019003" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip\Parameters</windows:key>
       <windows:name>EnableICMPRedirect</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019005" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7019004" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip\Parameters</windows:key>
       <windows:name>DisableIPSourceRouting</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019006" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7019005" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters</windows:key>
       <windows:name>DisableIPSourceRouting</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019007" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Network Connections</windows:key>
-      <windows:name>NC_ShowSharedAccessUI</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019008" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Network Connections</windows:key>
-      <windows:name>NC_AllowNetBridge_NLA</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019009" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Network Connections</windows:key>
-      <windows:name>NC_StdUserAllowedToSetNetworkLocation</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019010" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy</windows:key>
-      <windows:name>fMinimizeConnections</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019011" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy</windows:key>
-      <windows:name>fBlockNonDomain</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019012" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config</windows:key>
-      <windows:name>AutoConnectAllowedOEM</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019013" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\Printers</windows:key>
-      <windows:name>DisableWebPnPDownload</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019014" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\Printers</windows:key>
-      <windows:name>DisableHTTPPrinting</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019015" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters</windows:key>
-      <windows:name>RestrictNullSessAccess</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019016" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7019006" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
       <windows:key>Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad</windows:key>
       <windows:name>WpadOverride</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019017" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7019007" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity</windows:key>
       <windows:name>SrvsvcSessionInfo</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019018" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7019008" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>Software\Policies\Microsoft\Windows NT\DNSClient</windows:key>
       <windows:name>EnableMulticast</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019019" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7019009" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>Software\Policies\Microsoft\Windows NT\DNSClient</windows:key>
       <windows:name>EnablemDNS</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7019020" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7019010" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>Software\Policies\Microsoft\Windows NT\DNSClient</windows:key>
       <windows:name>DisableIPv6DefaultDnsServers</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7019011" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Network Connections</windows:key>
+      <windows:name>NC_ShowSharedAccessUI</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7019012" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Network Connections</windows:key>
+      <windows:name>NC_AllowNetBridge_NLA</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7019013" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Network Connections</windows:key>
+      <windows:name>NC_StdDomainUserSetLocation</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7019014" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy</windows:key>
+      <windows:name>fMinimizeConnections</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7019015" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy</windows:key>
+      <windows:name>fBlockNonDomain</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7019016" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config</windows:key>
+      <windows:name>AutoConnectAllowedOEM</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7019017" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\Printers</windows:key>
+      <windows:name>DisableWebPnPDownload</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7019018" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\Printers</windows:key>
+      <windows:name>DisableHTTPPrinting</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7019019" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters</windows:key>
+      <windows:name>RestrictNullSessAccess</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7020001" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -21364,15 +21342,15 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001002" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+      <windows:value datatype="int">2</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001003" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">2</windows:value>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001004" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
+      <windows:value datatype="int">2</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001005" version="1">
       <windows:type>reg_dword</windows:type>
@@ -21380,11 +21358,11 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001006" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">2</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001007" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
+      <windows:type>reg_binary</windows:type>
+      <windows:value datatype="string">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001008" version="1">
       <windows:type>reg_dword</windows:type>
@@ -21396,11 +21374,11 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001010" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">3</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001011" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001012" version="1">
       <windows:type>reg_dword</windows:type>
@@ -21412,7 +21390,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001014" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+      <windows:value datatype="int">3</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001015" version="1">
       <windows:type>reg_dword</windows:type>
@@ -21420,21 +21398,17 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001016" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001017" version="1">
-      <windows:type>reg_binary</windows:type>
-      <windows:value datatype="string">0</windows:value>
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001018" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001019" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8001020" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
@@ -23645,15 +23619,15 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019002" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+      <windows:value datatype="int">2</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019003" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">2</windows:value>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019004" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
+      <windows:value datatype="int">2</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019005" version="1">
       <windows:type>reg_dword</windows:type>
@@ -23661,11 +23635,11 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019006" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">2</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019007" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
+      <windows:type>reg_binary</windows:type>
+      <windows:value datatype="string">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019008" version="1">
       <windows:type>reg_dword</windows:type>
@@ -23677,11 +23651,11 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019010" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">3</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019011" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019012" version="1">
       <windows:type>reg_dword</windows:type>
@@ -23693,7 +23667,7 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019014" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+      <windows:value datatype="int">3</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019015" version="1">
       <windows:type>reg_dword</windows:type>
@@ -23701,21 +23675,17 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019016" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019017" version="1">
-      <windows:type>reg_binary</windows:type>
-      <windows:value datatype="string">0</windows:value>
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019018" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7019019" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7019020" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>

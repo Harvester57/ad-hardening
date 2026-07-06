@@ -42,7 +42,7 @@ Test-RegistryValue $Tcpip6Path "DisableIPSourceRouting" 2
 $NetConnPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections"
 Test-RegistryValue $NetConnPath "NC_ShowSharedAccessUI" 0
 Test-RegistryValue $NetConnPath "NC_AllowNetBridge_NLA" 0
-Test-RegistryValue $NetConnPath "NC_StdUserAllowedToSetNetworkLocation" 0
+Test-RegistryValue $NetConnPath "NC_StdDomainUserSetLocation" 1
 
 $WcmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy"
 Test-RegistryValue $WcmPath "fMinimizeConnections" 3

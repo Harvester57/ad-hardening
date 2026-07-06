@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: ca3779b | Generated: July 06, 2026</span>
+      <span>Commit: 22506d0 | Generated: July 06, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -42830,7 +42830,7 @@ if ($script:Vulnerable) {
     * HKLM\SOFTWARE\Policies\Microsoft\Windows\Network Connections
       * `NC_ShowSharedAccessUI` = `0` (REG_DWORD)
       * `NC_AllowNetBridge_NLA` = `0` (REG_DWORD, Prohibit Network Bridge)
-      * `NC_StdUserAllowedToSetNetworkLocation` = `0` (REG_DWORD, Require elevation to set network location)
+      * `NC_StdDomainUserSetLocation` = `1` (REG_DWORD, Require elevation to set network location)
     * HKLM\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy
       * `fMinimizeConnections` = `3` (REG_DWORD)
       * `fBlockNonDomain` = `1` (REG_DWORD)
@@ -42875,8 +42875,8 @@ Legacy name resolution protocols and insecure default network configurations are
 <div id="07-paws-harden-network-and-name-resolution-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<div id="07-paws-harden-network-and-name-resolution-md-step-1-turn-off-llmnr-mdns-and-default-ipv6-dns-servers"></div>
-#### Step 1: Turn Off LLMNR, mDNS, and default IPv6 DNS Servers
+<div id="07-paws-harden-network-and-name-resolution-md-step-1-configure-dns-client-settings"></div>
+#### Step 1: Configure DNS Client Settings
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit the PAW GPO (e.g., `GPO_Hardening_PAW`).
 3. Navigate to:
@@ -42886,25 +42886,56 @@ Legacy name resolution protocols and insecure default network configurations are
    * **Policy**: `Configure multicast DNS (mDNS) protocol` -> **Enabled** with option set to **Disabled**
    * **Policy**: `Turn off default IPv6 DNS Servers` -> **Enabled**
 
-<div id="07-paws-harden-network-and-name-resolution-md-step-2-disable-netbios-via-dhcp-scope-options"></div>
-#### Step 2: Disable NetBIOS (via DHCP Scope Options)
-1. Open the **DHCP Management Console** (`dhcpmgmt.msc`).
-2. Under Scope Options, select **Configure Options**.
-3. Add **Option 043 (Vendor Specific Info)** and set the NetBIOS over TCP/IP value to `0x2` (Disable NetBIOS over TCP/IP).
+<div id="07-paws-harden-network-and-name-resolution-md-step-2-configure-network-connections-policies"></div>
+#### Step 2: Configure Network Connections Policies
+1. In the target GPO, navigate to:
+   `Computer Configuration\Administrative Templates\Network\Network Connections`
+2. Configure the settings:
+   * **Policy**: `Prohibit use of Internet Connection Sharing on your DNS domain network` -> **Enabled**
+   * **Policy**: `Prohibit installation and configuration of Network Bridge on your DNS domain network` -> **Enabled**
+   * **Policy**: `Require domain users to elevate when setting a network's location` -> **Enabled**
 
-<div id="07-paws-harden-network-and-name-resolution-md-step-3-configure-registry-network-settings-via-gpo-preferences"></div>
-#### Step 3: Configure Registry network settings via GPO Preferences
+<div id="07-paws-harden-network-and-name-resolution-md-step-3-configure-windows-connection-manager-policies"></div>
+#### Step 3: Configure Windows Connection Manager Policies
+1. In the target GPO, navigate to:
+   `Computer Configuration\Administrative Templates\Network\Windows Connection Manager`
+2. Configure the settings:
+   * **Policy**: `Minimize the number of simultaneous connections to the Internet or a Windows Domain` -> **Enabled** with option set to **3 = Prevent Wi-Fi when on Ethernet**
+   * **Policy**: `Prohibit connection to non-domain networks when connected to domain authenticated network` -> **Enabled**
+
+<div id="07-paws-harden-network-and-name-resolution-md-step-4-configure-wlan-settings-wifi-sense"></div>
+#### Step 4: Configure WLAN Settings (WiFi Sense)
+1. In the target GPO, navigate to:
+   `Computer Configuration\Administrative Templates\Network\WLAN Service\WLAN Settings`
+2. Configure the settings:
+   * **Policy**: `Allow Windows to automatically connect to suggested open hotspots, to networks shared by contacts, and to hotspots offering paid services` -> **Disabled**
+
+<div id="07-paws-harden-network-and-name-resolution-md-step-5-configure-spooler-and-http-printing-policies"></div>
+#### Step 5: Configure Spooler and HTTP Printing Policies
+1. In the target GPO, navigate to:
+   `Computer Configuration\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
+2. Configure the settings:
+   * **Policy**: `Turn off downloading of print drivers over HTTP` -> **Enabled**
+   * **Policy**: `Turn off printing over HTTP` -> **Enabled**
+
+<div id="07-paws-harden-network-and-name-resolution-md-step-6-configure-network-access-security-settings"></div>
+#### Step 6: Configure Network Access Security settings
+1. In the target GPO, navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+2. Configure the settings:
+   * **Policy**: `Network access: Restrict anonymous access to Named Pipes and Shares` -> **Enabled**
+
+<div id="07-paws-harden-network-and-name-resolution-md-step-7-disable-winhttp-wpad-service"></div>
+#### Step 7: Disable WinHTTP WPAD Service
+1. In the target GPO, navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+2. Scroll to **WinHTTP Web Proxy Auto-Discovery Service**, select **Define this service setting**, and set the service startup mode to **Disabled**.
+
+<div id="07-paws-harden-network-and-name-resolution-md-step-8-configure-registry-network-settings-via-gpo-preferences"></div>
+#### Step 8: Configure Registry Network settings via GPO Preferences
 1. Under the target GPO, navigate to:
    `Computer Configuration\Preferences\Windows Settings\Registry`
 2. Right-click **Registry** and select **New -> Registry Item** for each of the following:
-
-   * **Disable Default IPv6 DNS Servers**:
-     * **Action**: `Update`
-     * **Hive**: `HKEY_LOCAL_MACHINE`
-     * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows NT\DNSClient`
-     * **Value Name**: `DisableIPv6DefaultDnsServers`
-     * **Value Type**: `REG_DWORD`
-     * **Value Data**: `1`
 
    * **NetBIOS Name Release Protection**:
      * **Action**: `Update`
@@ -42946,78 +42977,6 @@ Legacy name resolution protocols and insecure default network configurations are
      * **Value Type**: `REG_DWORD`
      * **Value Data**: `2`
 
-    * **Internet Connection Sharing Block**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\Network Connections`
-      * **Value Name**: `NC_ShowSharedAccessUI`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `0`
-
-    * **Prohibit Network Bridge**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\Network Connections`
-      * **Value Name**: `NC_AllowNetBridge_NLA`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `0`
-
-    * **Require elevation to set network location**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\Network Connections`
-      * **Value Name**: `NC_StdUserAllowedToSetNetworkLocation`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `0`
-
-    * **Minimize Connection Count**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy`
-      * **Value Name**: `fMinimizeConnections`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `3`
-
-    * **Block Non-Domain Networks**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy`
-      * **Value Name**: `fBlockNonDomain`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `1`
-
-    * **Disable Hotspot Auto-Connect**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config`
-      * **Value Name**: `AutoConnectAllowedOEM`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `0`
-
-    * **Disable Web print driver downloads**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows NT\Printers`
-      * **Value Name**: `DisableWebPnPDownload`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `1`
-
-    * **Disable HTTP printing**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows NT\Printers`
-      * **Value Name**: `DisableHTTPPrinting`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `1`
-
-    * **Restrict anonymous access to SAM and Named Pipes/Shares**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters`
-      * **Value Name**: `RestrictNullSessAccess`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `1`
-
     * **Disable WPAD Override (User Preference)**:
       * **Action**: `Update`
       * **Hive**: `HKEY_CURRENT_USER`
@@ -43034,10 +42993,11 @@ Legacy name resolution protocols and insecure default network configurations are
       * **Value Type**: `REG_BINARY`
       * **Value Data**: Generate via SDDL `D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)`
 
-<div id="07-paws-harden-network-and-name-resolution-md-step-4-disable-winhttp-wpad-service"></div>
-#### Step 4: Disable WinHTTP WPAD Service
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-2. Scroll to **WinHTTP Web Proxy Auto-Discovery Service** and set to **Disabled**.
+<div id="07-paws-harden-network-and-name-resolution-md-step-9-disable-netbios-via-dhcp-scope-options"></div>
+#### Step 9: Disable NetBIOS (via DHCP Scope Options)
+1. Open the **DHCP Management Console** (`dhcpmgmt.msc`).
+2. Under Scope Options, select **Configure Options**.
+3. Add **Option 043 (Vendor Specific Info)** and set the NetBIOS over TCP/IP value to `0x2` (Disable NetBIOS over TCP/IP).
 
 ---
 
@@ -43111,7 +43071,7 @@ Write-Host "[+] IPv6 TCP/IP parameter source routing disabled." -ForegroundColor
 # 5. Prevent Network Connection Sharing and Dual-Homing Bridging
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_ShowSharedAccessUI" 0
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_AllowNetBridge_NLA" 0
-Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdUserAllowedToSetNetworkLocation" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdDomainUserSetLocation" 1
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fMinimizeConnections" 3
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fBlockNonDomain" 1
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config" "AutoConnectAllowedOEM" 0
@@ -43206,7 +43166,7 @@ Test-RegistryValue $Tcpip6Path "DisableIPSourceRouting" 2
 $NetConnPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections"
 Test-RegistryValue $NetConnPath "NC_ShowSharedAccessUI" 0
 Test-RegistryValue $NetConnPath "NC_AllowNetBridge_NLA" 0
-Test-RegistryValue $NetConnPath "NC_StdUserAllowedToSetNetworkLocation" 0
+Test-RegistryValue $NetConnPath "NC_StdDomainUserSetLocation" 1
 
 $WcmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy"
 Test-RegistryValue $WcmPath "fMinimizeConnections" 3
@@ -43277,7 +43237,7 @@ if ($script:Vulnerable) {
 
 <div id="07-paws-harden-network-and-name-resolution-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 18.6.4.1 (EnablemDNS), Section 18.6.11.2 (NC_AllowNetBridge_NLA), Section 18.6.11.3 (NC_ShowSharedAccessUI), Section 18.6.11.4 (NC_StdUserAllowedToSetNetworkLocation), Section 18.6.21.1 & 18.6.21.2 (fMinimizeConnections & fBlockNonDomain), Section 18.6.23.2.1 (AutoConnectAllowedOEM).
+* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 18.6.4.1 (EnablemDNS), Section 18.6.11.2 (NC_AllowNetBridge_NLA), Section 18.6.11.3 (NC_ShowSharedAccessUI), Section 18.6.11.4 (NC_StdDomainUserSetLocation), Section 18.6.21.1 & 18.6.21.2 (fMinimizeConnections & fBlockNonDomain), Section 18.6.23.2.1 (AutoConnectAllowedOEM).
 * **CIS Microsoft Windows 10/11 Client Benchmark**: Section 9.1 (Disable LLMNR), Section 18.8.44.1 (Configure EnableICMPRedirect), Section 18.8.44.2 (Configure DisableIPSourceRouting).
 * **ANSSI AD Hardening Guide**: Recommendation R19 (LDAP and name resolution security recommendations).
 * **DoD Windows 11 Computer STIG v2r6**: Print driver download limits, HTTP printing blocks, internet connection sharing prohibitions, hotspot connection rules, and null session restrictions.
@@ -54092,7 +54052,7 @@ To prevent initial access and lateral movement, the following unitary technical 
     * HKLM\SOFTWARE\Policies\Microsoft\Windows\Network Connections
       * `NC_ShowSharedAccessUI` = `0` (REG_DWORD)
       * `NC_AllowNetBridge_NLA` = `0` (REG_DWORD, Prohibit Network Bridge)
-      * `NC_StdUserAllowedToSetNetworkLocation` = `0` (REG_DWORD, Require elevation to set network location)
+      * `NC_StdDomainUserSetLocation` = `1` (REG_DWORD, Require elevation to set network location)
     * HKLM\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy
       * `fMinimizeConnections` = `3` (REG_DWORD)
       * `fBlockNonDomain` = `1` (REG_DWORD)
@@ -54137,8 +54097,8 @@ Legacy name resolution protocols and insecure default network configurations are
 <div id="08-endpoints-harden-network-and-name-resolution-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<div id="08-endpoints-harden-network-and-name-resolution-md-step-1-turn-off-llmnr-mdns-and-default-ipv6-dns-servers"></div>
-#### Step 1: Turn Off LLMNR, mDNS, and default IPv6 DNS Servers
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-1-configure-dns-client-settings"></div>
+#### Step 1: Configure DNS Client Settings
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit the target endpoints GPO.
 3. Navigate to:
@@ -54148,25 +54108,56 @@ Legacy name resolution protocols and insecure default network configurations are
    * **Policy**: `Configure multicast DNS (mDNS) protocol` -> **Enabled** with option set to **Disabled**
    * **Policy**: `Turn off default IPv6 DNS Servers` -> **Enabled**
 
-<div id="08-endpoints-harden-network-and-name-resolution-md-step-2-disable-netbios-via-dhcp-scope-options"></div>
-#### Step 2: Disable NetBIOS (via DHCP Scope Options)
-1. Open the **DHCP Management Console** (`dhcpmgmt.msc`).
-2. Under Scope Options, select **Configure Options**.
-3. Add **Option 043 (Vendor Specific Info)** and set the NetBIOS over TCP/IP value to `0x2` (Disable NetBIOS over TCP/IP).
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-2-configure-network-connections-policies"></div>
+#### Step 2: Configure Network Connections Policies
+1. In the target GPO, navigate to:
+   `Computer Configuration\Administrative Templates\Network\Network Connections`
+2. Configure the settings:
+   * **Policy**: `Prohibit use of Internet Connection Sharing on your DNS domain network` -> **Enabled**
+   * **Policy**: `Prohibit installation and configuration of Network Bridge on your DNS domain network` -> **Enabled**
+   * **Policy**: `Require domain users to elevate when setting a network's location` -> **Enabled**
 
-<div id="08-endpoints-harden-network-and-name-resolution-md-step-3-configure-registry-network-settings-via-gpo-preferences"></div>
-#### Step 3: Configure Registry network settings via GPO Preferences
-1. Under the target workstations GPO, navigate to:
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-3-configure-windows-connection-manager-policies"></div>
+#### Step 3: Configure Windows Connection Manager Policies
+1. In the target GPO, navigate to:
+   `Computer Configuration\Administrative Templates\Network\Windows Connection Manager`
+2. Configure the settings:
+   * **Policy**: `Minimize the number of simultaneous connections to the Internet or a Windows Domain` -> **Enabled** with option set to **3 = Prevent Wi-Fi when on Ethernet**
+   * **Policy**: `Prohibit connection to non-domain networks when connected to domain authenticated network` -> **Enabled**
+
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-4-configure-wlan-settings-wifi-sense"></div>
+#### Step 4: Configure WLAN Settings (WiFi Sense)
+1. In the target GPO, navigate to:
+   `Computer Configuration\Administrative Templates\Network\WLAN Service\WLAN Settings`
+2. Configure the settings:
+   * **Policy**: `Allow Windows to automatically connect to suggested open hotspots, to networks shared by contacts, and to hotspots offering paid services` -> **Disabled**
+
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-5-configure-spooler-and-http-printing-policies"></div>
+#### Step 5: Configure Spooler and HTTP Printing Policies
+1. In the target GPO, navigate to:
+   `Computer Configuration\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
+2. Configure the settings:
+   * **Policy**: `Turn off downloading of print drivers over HTTP` -> **Enabled**
+   * **Policy**: `Turn off printing over HTTP` -> **Enabled**
+
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-6-configure-network-access-security-settings"></div>
+#### Step 6: Configure Network Access Security settings
+1. In the target GPO, navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+2. Configure the settings:
+   * **Policy**: `Network access: Restrict anonymous access to Named Pipes and Shares` -> **Enabled**
+
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-7-disable-winhttp-wpad-service"></div>
+#### Step 7: Disable WinHTTP WPAD Service
+1. In the target GPO, navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+2. Scroll to **WinHTTP Web Proxy Auto-Discovery Service**, select **Define this service setting**, and set the service startup mode to **Disabled**.
+
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-8-configure-registry-network-settings-via-gpo-preferences"></div>
+#### Step 8: Configure Registry Network settings via GPO Preferences
+1. Under the target GPO, navigate to:
    `Computer Configuration\Preferences\Windows Settings\Registry`
 2. Right-click **Registry** and select **New -> Registry Item** for each of the following:
-
-   * **Disable Default IPv6 DNS Servers**:
-     * **Action**: `Update`
-     * **Hive**: `HKEY_LOCAL_MACHINE`
-     * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows NT\DNSClient`
-     * **Value Name**: `DisableIPv6DefaultDnsServers`
-     * **Value Type**: `REG_DWORD`
-     * **Value Data**: `1`
 
    * **NetBIOS Name Release Protection**:
      * **Action**: `Update`
@@ -54206,79 +54197,7 @@ Legacy name resolution protocols and insecure default network configurations are
      * **Key Path**: `SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters`
      * **Value Name**: `DisableIPSourceRouting`
      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `2`
-
-    * **Internet Connection Sharing Block**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\Network Connections`
-      * **Value Name**: `NC_ShowSharedAccessUI`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `0`
-
-    * **Prohibit Network Bridge**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\Network Connections`
-      * **Value Name**: `NC_AllowNetBridge_NLA`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `0`
-
-    * **Require elevation to set network location**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\Network Connections`
-      * **Value Name**: `NC_StdUserAllowedToSetNetworkLocation`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `0`
-
-    * **Minimize Connection Count**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy`
-      * **Value Name**: `fMinimizeConnections`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `3`
-
-    * **Block Non-Domain Networks**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy`
-      * **Value Name**: `fBlockNonDomain`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `1`
-
-    * **Disable Hotspot Auto-Connect**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config`
-      * **Value Name**: `AutoConnectAllowedOEM`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `0`
-
-    * **Disable Web print driver downloads**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows NT\Printers`
-      * **Value Name**: `DisableWebPnPDownload`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `1`
-
-    * **Disable HTTP printing**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SOFTWARE\Policies\Microsoft\Windows NT\Printers`
-      * **Value Name**: `DisableHTTPPrinting`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `1`
-
-    * **Restrict anonymous access to SAM and Named Pipes/Shares**:
-      * **Action**: `Update`
-      * **Hive**: `HKEY_LOCAL_MACHINE`
-      * **Key Path**: `SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters`
-      * **Value Name**: `RestrictNullSessAccess`
-      * **Value Type**: `REG_DWORD`
-      * **Value Data**: `1`
+     * **Value Data**: `2`
 
     * **Disable WPAD Override (User Preference)**:
       * **Action**: `Update`
@@ -54296,10 +54215,11 @@ Legacy name resolution protocols and insecure default network configurations are
       * **Value Type**: `REG_BINARY`
       * **Value Data**: Generate via SDDL `D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)`
 
-<div id="08-endpoints-harden-network-and-name-resolution-md-step-4-disable-winhttp-wpad-service"></div>
-#### Step 4: Disable WinHTTP WPAD Service
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-2. Scroll to **WinHTTP Web Proxy Auto-Discovery Service** and set to **Disabled**.
+<div id="08-endpoints-harden-network-and-name-resolution-md-step-9-disable-netbios-via-dhcp-scope-options"></div>
+#### Step 9: Disable NetBIOS (via DHCP Scope Options)
+1. Open the **DHCP Management Console** (`dhcpmgmt.msc`).
+2. Under Scope Options, select **Configure Options**.
+3. Add **Option 043 (Vendor Specific Info)** and set the NetBIOS over TCP/IP value to `0x2` (Disable NetBIOS over TCP/IP).
 
 ---
 
@@ -54372,7 +54292,7 @@ Write-Host "[+] IPv6 TCP/IP parameter source routing disabled." -ForegroundColor
 # 5. Prevent Network Connection Sharing and Dual-Homing Bridging
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_ShowSharedAccessUI" 0
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_AllowNetBridge_NLA" 0
-Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdUserAllowedToSetNetworkLocation" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdDomainUserSetLocation" 1
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fMinimizeConnections" 3
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fBlockNonDomain" 1
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config" "AutoConnectAllowedOEM" 0
@@ -54466,7 +54386,7 @@ Test-RegistryValue $Tcpip6Path "DisableIPSourceRouting" 2
 $NetConnPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections"
 Test-RegistryValue $NetConnPath "NC_ShowSharedAccessUI" 0
 Test-RegistryValue $NetConnPath "NC_AllowNetBridge_NLA" 0
-Test-RegistryValue $NetConnPath "NC_StdUserAllowedToSetNetworkLocation" 0
+Test-RegistryValue $NetConnPath "NC_StdDomainUserSetLocation" 1
 
 $WcmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy"
 Test-RegistryValue $WcmPath "fMinimizeConnections" 3
@@ -54535,7 +54455,7 @@ if ($script:Vulnerable) {
 
 <div id="08-endpoints-harden-network-and-name-resolution-md-sources-compliance-references"></div>
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 18.6.4.1 (EnablemDNS), Section 18.6.11.2 (NC_AllowNetBridge_NLA), Section 18.6.11.3 (NC_ShowSharedAccessUI), Section 18.6.11.4 (NC_StdUserAllowedToSetNetworkLocation), Section 18.6.21.1 & 18.6.21.2 (fMinimizeConnections & fBlockNonDomain), Section 18.6.23.2.1 (AutoConnectAllowedOEM).
+* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 18.6.4.1 (EnablemDNS), Section 18.6.11.2 (NC_AllowNetBridge_NLA), Section 18.6.11.3 (NC_ShowSharedAccessUI), Section 18.6.11.4 (NC_StdDomainUserSetLocation), Section 18.6.21.1 & 18.6.21.2 (fMinimizeConnections & fBlockNonDomain), Section 18.6.23.2.1 (AutoConnectAllowedOEM).
 * **CIS Microsoft Windows 10/11 Client Benchmark**: Section 9.1 (Disable LLMNR), Section 18.8.44.1 (Configure EnableICMPRedirect), Section 18.8.44.2 (Configure DisableIPSourceRouting).
 * **ANSSI AD Hardening Guide**: Recommendation R19 (LDAP and name resolution security recommendations).
 * **DoD Windows 11 Computer STIG v2r6**: Various print driver download limits, HTTP printing blocks, internet connection sharing prohibitions, hotspot connection rules, and null session restrictions.

@@ -75,7 +75,7 @@ foreach ($file in $mdFiles) {
 
 # 3. Verify XML Compliance Manifests
 Write-Host "`nRunning compliance manifests validation..." -ForegroundColor Yellow
-$valProcess = Start-Process python -ArgumentList "scripts/validate_compliance.py" -Wait -NoNewWindow -PassThru
+$valProcess = Start-Process py -ArgumentList "scripts/validate_compliance.py" -Wait -NoNewWindow -PassThru
 if ($valProcess.ExitCode -ne 0) {
     Write-Error "Compliance XML files validation failed!"
     $errorsCount++

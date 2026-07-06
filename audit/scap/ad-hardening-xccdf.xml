@@ -39624,7 +39624,7 @@ Write-Host "[+] Registry setting for PAW Kernel Shadow Stacks enabled. (Reboot r
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
-        <xhtml:h4>Step 1: Turn Off LLMNR, mDNS, and default IPv6 DNS Servers</xhtml:h4>
+        <xhtml:h4>Step 1: Configure DNS Client Settings</xhtml:h4>
         <xhtml:ol>
           <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
           <xhtml:li>Edit the PAW GPO (e.g., <xhtml:code>GPO_Hardening_PAW</xhtml:code>).</xhtml:li>
@@ -39657,13 +39657,120 @@ Write-Host "[+] Registry setting for PAW Kernel Shadow Stacks enabled. (Reboot r
             <xhtml:em />
           </xhtml:li>
         </xhtml:ol>
-        <xhtml:h4>Step 2: Disable NetBIOS (via DHCP Scope Options)</xhtml:h4>
+        <xhtml:h4>Step 2: Configure Network Connections Policies</xhtml:h4>
         <xhtml:ol>
-          <xhtml:li>Open the <xhtml:strong>DHCP Management Console</xhtml:strong> (<xhtml:code>dhcpmgmt.msc</xhtml:code>).</xhtml:li>
-          <xhtml:li>Under Scope Options, select <xhtml:strong>Configure Options</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Add <xhtml:strong>Option 043 (Vendor Specific Info)</xhtml:strong> and set the NetBIOS over TCP/IP value to <xhtml:code>0x2</xhtml:code> (Disable NetBIOS over TCP/IP).</xhtml:li>
+          <xhtml:li>In the target GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Administrative Templates\Network\Network Connections</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the settings:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Prohibit use of Internet Connection Sharing on your DNS domain network` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Prohibit installation and configuration of Network Bridge on your DNS domain network` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Require domain users to elevate when setting a network's location` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
         </xhtml:ol>
-        <xhtml:h4>Step 3: Configure Registry network settings via GPO Preferences</xhtml:h4>
+        <xhtml:h4>Step 3: Configure Windows Connection Manager Policies</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>In the target GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Administrative Templates\Network\Windows Connection Manager</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the settings:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Minimize the number of simultaneous connections to the Internet or a Windows Domain` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em> with option set to </xhtml:em>
+            <xhtml:em>3 = Prevent Wi-Fi when on Ethernet</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Prohibit connection to non-domain networks when connected to domain authenticated network` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 4: Configure WLAN Settings (WiFi Sense)</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>In the target GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Administrative Templates\Network\WLAN Service\WLAN Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the settings:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Allow Windows to automatically connect to suggested open hotspots, to networks shared by contacts, and to hotspots offering paid services` -&gt; </xhtml:em>
+            <xhtml:em>Disabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 5: Configure Spooler and HTTP Printing Policies</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>In the target GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Administrative Templates\System\Internet Communication Management\Internet Communication settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the settings:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Turn off downloading of print drivers over HTTP` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Turn off printing over HTTP` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 6: Configure Network Access Security settings</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>In the target GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the settings:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Network access: Restrict anonymous access to Named Pipes and Shares` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 7: Disable WinHTTP WPAD Service</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>In the target GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\System Services</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Scroll to <xhtml:strong>WinHTTP Web Proxy Auto-Discovery Service</xhtml:strong>, select <xhtml:strong>Define this service setting</xhtml:strong>, and set the service startup mode to <xhtml:strong>Disabled</xhtml:strong>.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 8: Configure Registry Network settings via GPO Preferences</xhtml:h4>
         <xhtml:ol>
           <xhtml:li>Under the target GPO, navigate to:</xhtml:li>
           <xhtml:li>
@@ -39671,28 +39778,6 @@ Write-Host "[+] Registry setting for PAW Kernel Shadow Stacks enabled. (Reboot r
           </xhtml:li>
           <xhtml:li>Right-click <xhtml:strong>Registry</xhtml:strong> and select <xhtml:strong>New -&gt; Registry Item</xhtml:strong> for each of the following:</xhtml:li>
         </xhtml:ol>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Disable Default IPv6 DNS Servers</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows NT\DNSClient</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>DisableIPv6DefaultDnsServers</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>1</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
         <xhtml:ul>
           <xhtml:li>
             <xhtml:strong>NetBIOS Name Release Protection</xhtml:strong>:</xhtml:li>
@@ -39805,204 +39890,6 @@ Write-Host "[+] Registry setting for PAW Kernel Shadow Stacks enabled. (Reboot r
         </xhtml:ul>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Internet Connection Sharing Block</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows\Network Connections</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>NC_ShowSharedAccessUI</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>0</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Prohibit Network Bridge</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows\Network Connections</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>NC_AllowNetBridge_NLA</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>0</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Require elevation to set network location</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows\Network Connections</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>NC_StdUserAllowedToSetNetworkLocation</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>0</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Minimize Connection Count</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>fMinimizeConnections</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>3</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Block Non-Domain Networks</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>fBlockNonDomain</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>1</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Disable Hotspot Auto-Connect</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>AutoConnectAllowedOEM</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>0</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Disable Web print driver downloads</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows NT\Printers</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>DisableWebPnPDownload</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>1</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Disable HTTP printing</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows NT\Printers</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>DisableHTTPPrinting</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>1</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Restrict anonymous access to SAM and Named Pipes/Shares</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>RestrictNullSessAccess</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>1</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
             <xhtml:strong>Disable WPAD Override (User Preference)</xhtml:strong>:</xhtml:li>
           <xhtml:li>
             <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
@@ -40045,11 +39932,11 @@ Write-Host "[+] Registry setting for PAW Kernel Shadow Stacks enabled. (Reboot r
             <xhtml:strong>Value Data</xhtml:strong>: Generate via SDDL <xhtml:code>D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)</xhtml:code>
           </xhtml:li>
         </xhtml:ul>
-        <xhtml:h4>Step 4: Disable WinHTTP WPAD Service</xhtml:h4>
+        <xhtml:h4>Step 9: Disable NetBIOS (via DHCP Scope Options)</xhtml:h4>
         <xhtml:ol>
-          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\System Services</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>Scroll to <xhtml:strong>WinHTTP Web Proxy Auto-Discovery Service</xhtml:strong> and set to <xhtml:strong>Disabled</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Open the <xhtml:strong>DHCP Management Console</xhtml:strong> (<xhtml:code>dhcpmgmt.msc</xhtml:code>).</xhtml:li>
+          <xhtml:li>Under Scope Options, select <xhtml:strong>Configure Options</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Add <xhtml:strong>Option 043 (Vendor Specific Info)</xhtml:strong> and set the NetBIOS over TCP/IP value to <xhtml:code>0x2</xhtml:code> (Disable NetBIOS over TCP/IP).</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -40120,7 +40007,7 @@ Write-Host "[+] IPv6 TCP/IP parameter source routing disabled." -ForegroundColor
 # 5. Prevent Network Connection Sharing and Dual-Homing Bridging
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_ShowSharedAccessUI" 0
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_AllowNetBridge_NLA" 0
-Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdUserAllowedToSetNetworkLocation" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdDomainUserSetLocation" 1
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fMinimizeConnections" 3
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fBlockNonDomain" 1
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config" "AutoConnectAllowedOEM" 0
@@ -40216,7 +40103,7 @@ Test-RegistryValue $Tcpip6Path "DisableIPSourceRouting" 2
 $NetConnPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections"
 Test-RegistryValue $NetConnPath "NC_ShowSharedAccessUI" 0
 Test-RegistryValue $NetConnPath "NC_AllowNetBridge_NLA" 0
-Test-RegistryValue $NetConnPath "NC_StdUserAllowedToSetNetworkLocation" 0
+Test-RegistryValue $NetConnPath "NC_StdDomainUserSetLocation" 1
 
 $WcmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy"
 Test-RegistryValue $WcmPath "fMinimizeConnections" 3
@@ -40346,7 +40233,7 @@ Write-Host "[+] IPv6 TCP/IP parameter source routing disabled." -ForegroundColor
 # 5. Prevent Network Connection Sharing and Dual-Homing Bridging
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_ShowSharedAccessUI" 0
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_AllowNetBridge_NLA" 0
-Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdUserAllowedToSetNetworkLocation" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdDomainUserSetLocation" 1
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fMinimizeConnections" 3
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fBlockNonDomain" 1
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config" "AutoConnectAllowedOEM" 0
@@ -58277,7 +58164,7 @@ if ($Process.ExitCode -eq 0) {
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
-        <xhtml:h4>Step 1: Turn Off LLMNR, mDNS, and default IPv6 DNS Servers</xhtml:h4>
+        <xhtml:h4>Step 1: Configure DNS Client Settings</xhtml:h4>
         <xhtml:ol>
           <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
           <xhtml:li>Edit the target endpoints GPO.</xhtml:li>
@@ -58310,42 +58197,127 @@ if ($Process.ExitCode -eq 0) {
             <xhtml:em />
           </xhtml:li>
         </xhtml:ol>
-        <xhtml:h4>Step 2: Disable NetBIOS (via DHCP Scope Options)</xhtml:h4>
+        <xhtml:h4>Step 2: Configure Network Connections Policies</xhtml:h4>
         <xhtml:ol>
-          <xhtml:li>Open the <xhtml:strong>DHCP Management Console</xhtml:strong> (<xhtml:code>dhcpmgmt.msc</xhtml:code>).</xhtml:li>
-          <xhtml:li>Under Scope Options, select <xhtml:strong>Configure Options</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Add <xhtml:strong>Option 043 (Vendor Specific Info)</xhtml:strong> and set the NetBIOS over TCP/IP value to <xhtml:code>0x2</xhtml:code> (Disable NetBIOS over TCP/IP).</xhtml:li>
+          <xhtml:li>In the target GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Administrative Templates\Network\Network Connections</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the settings:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Prohibit use of Internet Connection Sharing on your DNS domain network` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Prohibit installation and configuration of Network Bridge on your DNS domain network` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Require domain users to elevate when setting a network's location` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
         </xhtml:ol>
-        <xhtml:h4>Step 3: Configure Registry network settings via GPO Preferences</xhtml:h4>
+        <xhtml:h4>Step 3: Configure Windows Connection Manager Policies</xhtml:h4>
         <xhtml:ol>
-          <xhtml:li>Under the target workstations GPO, navigate to:</xhtml:li>
+          <xhtml:li>In the target GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Administrative Templates\Network\Windows Connection Manager</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the settings:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Minimize the number of simultaneous connections to the Internet or a Windows Domain` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em> with option set to </xhtml:em>
+            <xhtml:em>3 = Prevent Wi-Fi when on Ethernet</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Prohibit connection to non-domain networks when connected to domain authenticated network` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 4: Configure WLAN Settings (WiFi Sense)</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>In the target GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Administrative Templates\Network\WLAN Service\WLAN Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the settings:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Allow Windows to automatically connect to suggested open hotspots, to networks shared by contacts, and to hotspots offering paid services` -&gt; </xhtml:em>
+            <xhtml:em>Disabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 5: Configure Spooler and HTTP Printing Policies</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>In the target GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Administrative Templates\System\Internet Communication Management\Internet Communication settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the settings:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Turn off downloading of print drivers over HTTP` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Turn off printing over HTTP` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 6: Configure Network Access Security settings</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>In the target GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the settings:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Network access: Restrict anonymous access to Named Pipes and Shares` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 7: Disable WinHTTP WPAD Service</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>In the target GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\System Services</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Scroll to <xhtml:strong>WinHTTP Web Proxy Auto-Discovery Service</xhtml:strong>, select <xhtml:strong>Define this service setting</xhtml:strong>, and set the service startup mode to <xhtml:strong>Disabled</xhtml:strong>.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 8: Configure Registry Network settings via GPO Preferences</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Under the target GPO, navigate to:</xhtml:li>
           <xhtml:li>
             <xhtml:code>Computer Configuration\Preferences\Windows Settings\Registry</xhtml:code>
           </xhtml:li>
           <xhtml:li>Right-click <xhtml:strong>Registry</xhtml:strong> and select <xhtml:strong>New -&gt; Registry Item</xhtml:strong> for each of the following:</xhtml:li>
         </xhtml:ol>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Disable Default IPv6 DNS Servers</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows NT\DNSClient</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>DisableIPv6DefaultDnsServers</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>1</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
         <xhtml:ul>
           <xhtml:li>
             <xhtml:strong>NetBIOS Name Release Protection</xhtml:strong>:</xhtml:li>
@@ -58458,204 +58430,6 @@ if ($Process.ExitCode -eq 0) {
         </xhtml:ul>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Internet Connection Sharing Block</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows\Network Connections</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>NC_ShowSharedAccessUI</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>0</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Prohibit Network Bridge</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows\Network Connections</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>NC_AllowNetBridge_NLA</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>0</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Require elevation to set network location</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows\Network Connections</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>NC_StdUserAllowedToSetNetworkLocation</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>0</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Minimize Connection Count</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>fMinimizeConnections</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>3</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Block Non-Domain Networks</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>fBlockNonDomain</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>1</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Disable Hotspot Auto-Connect</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>AutoConnectAllowedOEM</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>0</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Disable Web print driver downloads</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows NT\Printers</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>DisableWebPnPDownload</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>1</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Disable HTTP printing</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SOFTWARE\Policies\Microsoft\Windows NT\Printers</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>DisableHTTPPrinting</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>1</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Restrict anonymous access to SAM and Named Pipes/Shares</xhtml:strong>:</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Hive</xhtml:strong>: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Key Path</xhtml:strong>: <xhtml:code>SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Name</xhtml:strong>: <xhtml:code>RestrictNullSessAccess</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Type</xhtml:strong>: <xhtml:code>REG_DWORD</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Value Data</xhtml:strong>: <xhtml:code>1</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ul>
-          <xhtml:li>
             <xhtml:strong>Disable WPAD Override (User Preference)</xhtml:strong>:</xhtml:li>
           <xhtml:li>
             <xhtml:strong>Action</xhtml:strong>: <xhtml:code>Update</xhtml:code>
@@ -58698,11 +58472,11 @@ if ($Process.ExitCode -eq 0) {
             <xhtml:strong>Value Data</xhtml:strong>: Generate via SDDL <xhtml:code>D:(A;;CC;;;BA)(A;;CC;;;SO)(A;;CC;;;PU)</xhtml:code>
           </xhtml:li>
         </xhtml:ul>
-        <xhtml:h4>Step 4: Disable WinHTTP WPAD Service</xhtml:h4>
+        <xhtml:h4>Step 9: Disable NetBIOS (via DHCP Scope Options)</xhtml:h4>
         <xhtml:ol>
-          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\System Services</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>Scroll to <xhtml:strong>WinHTTP Web Proxy Auto-Discovery Service</xhtml:strong> and set to <xhtml:strong>Disabled</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Open the <xhtml:strong>DHCP Management Console</xhtml:strong> (<xhtml:code>dhcpmgmt.msc</xhtml:code>).</xhtml:li>
+          <xhtml:li>Under Scope Options, select <xhtml:strong>Configure Options</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Add <xhtml:strong>Option 043 (Vendor Specific Info)</xhtml:strong> and set the NetBIOS over TCP/IP value to <xhtml:code>0x2</xhtml:code> (Disable NetBIOS over TCP/IP).</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -58772,7 +58546,7 @@ Write-Host "[+] IPv6 TCP/IP parameter source routing disabled." -ForegroundColor
 # 5. Prevent Network Connection Sharing and Dual-Homing Bridging
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_ShowSharedAccessUI" 0
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_AllowNetBridge_NLA" 0
-Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdUserAllowedToSetNetworkLocation" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdDomainUserSetLocation" 1
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fMinimizeConnections" 3
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fBlockNonDomain" 1
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config" "AutoConnectAllowedOEM" 0
@@ -58866,7 +58640,7 @@ Test-RegistryValue $Tcpip6Path "DisableIPSourceRouting" 2
 $NetConnPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections"
 Test-RegistryValue $NetConnPath "NC_ShowSharedAccessUI" 0
 Test-RegistryValue $NetConnPath "NC_AllowNetBridge_NLA" 0
-Test-RegistryValue $NetConnPath "NC_StdUserAllowedToSetNetworkLocation" 0
+Test-RegistryValue $NetConnPath "NC_StdDomainUserSetLocation" 1
 
 $WcmPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy"
 Test-RegistryValue $WcmPath "fMinimizeConnections" 3
@@ -58993,7 +58767,7 @@ Write-Host "[+] IPv6 TCP/IP parameter source routing disabled." -ForegroundColor
 # 5. Prevent Network Connection Sharing and Dual-Homing Bridging
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_ShowSharedAccessUI" 0
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_AllowNetBridge_NLA" 0
-Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdUserAllowedToSetNetworkLocation" 0
+Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Network Connections" "NC_StdDomainUserSetLocation" 1
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fMinimizeConnections" 3
 Set-RegDWord "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy" "fBlockNonDomain" 1
 Set-RegDWord "HKLM:\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager\config" "AutoConnectAllowedOEM" 0
