@@ -1,0 +1,25 @@
+{% extends template.self %}
+
+{% block page %}
+{{ super() }}
+
+<footer class="custom-footer" style="margin-top: 50px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+    <script>
+        var _paq = window._paq = window._paq || [];
+        _paq.push(['trackPageView']);
+        _paq.push(['enableLinkTracking']);
+        (function () {
+            var u = "https://suivi.harvester.fr/";
+            _paq.push(['setTrackerUrl', u + 'm.php']);
+            _paq.push(['setSiteId', '2']);
+            var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+            g.async = true; g.src = u + 'm.js'; s.parentNode.insertBefore(g, s);
+        })();
+    </script>
+
+    <noscript>
+        <p><img referrerpolicy="no-referrer-when-downgrade" src="https://suivi.harvester.fr/m.php?idsite=2&amp;rec=1"
+                style="border:0;" alt="" /></p>
+    </noscript>
+</footer>
+{% endblock %}

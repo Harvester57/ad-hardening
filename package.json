@@ -4,14 +4,15 @@
   "description": "Active Directory Hardening Guidebook",
   "scripts": {
     "gitbook:summary": "python scripts/generate_summary.py",
-    "gitbook:build": "npm run gitbook:summary && honkit build",
-    "gitbook:serve": "npm run gitbook:summary && honkit serve",
+    "gitbook:build": "npm run gitbook:summary && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" honkit build",
+    "gitbook:serve": "npm run gitbook:summary && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" honkit serve",
     "gitbook:stop": "powershell -Command \"Get-NetTCPConnection -LocalPort 4000,35729 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }; exit 0\"",
-    "pdf:build": "python scripts/compile_docs.py && node scripts/generate_pdf.js"
+    "pdf:build": "python scripts/compile_docs.py && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" node scripts/generate_pdf.js"
   },
   "devDependencies": {
-    "gitbook-plugin-flexible-alerts": "^1.0.4",
+    "cross-env": "^10.1.0",
     "gitbook-plugin-collapse-menu": "file:plugins/gitbook-plugin-collapse-menu",
+    "gitbook-plugin-flexible-alerts": "^1.0.4",
     "honkit": "^6.2.2",
     "honkit-plugin-prism": "^2.5.4",
     "honkit-plugin-search-plus": "^1.0.0",
