@@ -124,7 +124,7 @@ def process_file(filepath, repo_root):
                     header_slug = slugify(header_text)
                     # Prepend an HTML anchor for header cross-referencing
                     anchor = f'<div id="{file_id}-{header_slug}"></div>'
-                    new_lines.append(f'{anchor}\n{line}')
+                    new_lines.append(f'{anchor}\n\n{line}')
                 else:
                     new_lines.append(line)
             segment = '\n'.join(new_lines)
