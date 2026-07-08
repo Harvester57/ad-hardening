@@ -22,17 +22,17 @@ jobs:
         with:
           python-version: '3.14'
 
-      - name: Compile Markdown Files
-        run: python scripts/compile_docs.py
-
       - name: Set up Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Generate PDF from Markdown
-        run: |
-          npx md-to-pdf AD-Hardening-Guidebook.md --stylesheet scripts/pdf-style.css --launch-options '{"args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]}'
+        run: npm run pdf:build
 
       - name: Upload PDF Artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

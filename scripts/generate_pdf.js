@@ -71,8 +71,10 @@ async function main() {
 
   try {
     const page = await browser.newPage();
+    // Set timeout to 5 minutes (300,000ms) for loading and compiling the large HTML layout
+    page.setDefaultTimeout(300000);
     console.log("Loading HTML content...");
-    await page.setContent(htmlDocument);
+    await page.setContent(htmlDocument, { timeout: 300000 });
 
     console.log("Generating PDF file (this may take a moment)...");
     await page.pdf({
