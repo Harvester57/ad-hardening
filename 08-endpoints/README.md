@@ -128,6 +128,20 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 18. **[REQ-END-018 - Configure Account and Password Policies](configure-account-policies.md)**
     Enforces local and domain-wide account settings, including account lockout thresholds, lockout observation windows, smart card removal actions, and disabling reversible password encryption.
+    * **[REQ-END-163 - Account Policy: Password Policy for Endpoints](account-policy/configure-end-account-password-policy.md)**
+    * **[REQ-END-164 - Account Policy: Account Lockout Policy for Endpoints](account-policy/configure-end-account-lockout-policy.md)**
+    * **[REQ-END-165 - Account Policy: Kerberos Policy for Endpoints](account-policy/configure-end-account-kerberos-policy.md)**
+    * **[REQ-END-166 - Account Policy: Smart Card Removal Behavior for Endpoints](account-policy/configure-end-account-smart-card-removal.md)**
+    * **[REQ-END-167 - Account Policy: Cached Logons and PBKDF2 Iteration Count for Endpoints](account-policy/configure-end-account-cached-logons.md)**
+    * **[REQ-END-168 - Account Policy: Local Accounts and Blank Password Restrictions for Endpoints](account-policy/configure-end-account-local-blank-passwords.md)**
+    * **[REQ-END-169 - Account Policy: NTLM and LAN Manager Authentication Security for Endpoints](account-policy/configure-end-account-ntlm-security.md)**
+    * **[REQ-END-170 - Account Policy: Disable WDigest Credential Caching for Endpoints](account-policy/configure-end-account-wdigest-credentials.md)**
+    * **[REQ-END-171 - Account Policy: Windows Hello for Business and PIN Complexity for Endpoints](account-policy/configure-end-account-hello-pin.md)**
+    * **[REQ-END-172 - Account Policy: Consumer Microsoft Account Restrictions for Endpoints](account-policy/configure-end-account-block-msa.md)**
+    * **[REQ-END-173 - Account Policy: Domain Member Secure Channel Security for Endpoints](account-policy/configure-end-account-secure-channel.md)**
+    * **[REQ-END-174 - Account Policy: SMB Client and Server Security Options for Endpoints](account-policy/configure-end-account-smb-security.md)**
+    * **[REQ-END-175 - Account Policy: Anonymous Access and Enumeration Restrictions for Endpoints](account-policy/configure-end-account-anonymous-restrictions.md)**
+    * **[REQ-END-176 - Account Policy: Interactive Logon Security Options for Endpoints](account-policy/configure-end-account-interactive-logon.md)**
 
 19. **[REQ-END-019 - Configure User Profile Restrictions](configure-user-profile-restrictions.md)**
     Locks down user profile registry settings (HKCU) to disable toast notifications on the lock screen and block third-party application suggestions.

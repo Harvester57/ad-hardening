@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: e2a0dec | Generated: July 08, 2026</span>
+      <span>Commit: edca3d4 | Generated: August 14, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -39,7 +39,7 @@ pdf_options:
     <li>Tier 2 Client Workstations: Windows 10 and above</li>
   </ul>
   <hr>
-  <p><em>Generated dynamically on: July 08, 2026</em></p>
+  <p><em>Generated dynamically on: August 14, 2026</em></p>
 </div>
 
 <div id="README-md"></div>
@@ -35092,6 +35092,20 @@ This directory contains the physical isolation policies and operating system sec
 
 13. **[REQ-PAW-013 - Configure Account and Password Policies for PAWs](#07-paws-configure-account-policies-md)**
     Configures robust local account lockout, local password complexity, and 20-character minimum length policies, and references Active Directory Fine-Grained Password Policies (FGPP) for Tier 0 Administrators.
+    * **[REQ-PAW-152 - Account Policy: Password Policy for PAWs](#07-paws-account-policy-configure-paw-account-password-policy-md)**
+    * **[REQ-PAW-153 - Account Policy: Account Lockout Policy for PAWs](#07-paws-account-policy-configure-paw-account-lockout-policy-md)**
+    * **[REQ-PAW-154 - Account Policy: Kerberos Policy for PAWs](#07-paws-account-policy-configure-paw-account-kerberos-policy-md)**
+    * **[REQ-PAW-155 - Account Policy: Smart Card Removal Behavior for PAWs](#07-paws-account-policy-configure-paw-account-smart-card-removal-md)**
+    * **[REQ-PAW-156 - Account Policy: Cached Logons and PBKDF2 Iteration Count for PAWs](#07-paws-account-policy-configure-paw-account-cached-logons-md)**
+    * **[REQ-PAW-157 - Account Policy: Local Accounts and Blank Password Restrictions for PAWs](#07-paws-account-policy-configure-paw-account-local-blank-passwords-md)**
+    * **[REQ-PAW-158 - Account Policy: NTLM and LAN Manager Authentication Security for PAWs](#07-paws-account-policy-configure-paw-account-ntlm-security-md)**
+    * **[REQ-PAW-159 - Account Policy: Disable WDigest Credential Caching for PAWs](#07-paws-account-policy-configure-paw-account-wdigest-credentials-md)**
+    * **[REQ-PAW-160 - Account Policy: Windows Hello for Business and PIN Complexity for PAWs](#07-paws-account-policy-configure-paw-account-hello-pin-md)**
+    * **[REQ-PAW-161 - Account Policy: Consumer Microsoft Account Restrictions for PAWs](#07-paws-account-policy-configure-paw-account-block-msa-md)**
+    * **[REQ-PAW-162 - Account Policy: Domain Member Secure Channel Security for PAWs](#07-paws-account-policy-configure-paw-account-secure-channel-md)**
+    * **[REQ-PAW-163 - Account Policy: SMB Client and Server Security Options for PAWs](#07-paws-account-policy-configure-paw-account-smb-security-md)**
+    * **[REQ-PAW-164 - Account Policy: Anonymous Access and Enumeration Restrictions for PAWs](#07-paws-account-policy-configure-paw-account-anonymous-restrictions-md)**
+    * **[REQ-PAW-165 - Account Policy: Interactive Logon Security Options for PAWs](#07-paws-account-policy-configure-paw-account-interactive-logon-md)**
 
 14. **[REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](#07-paws-configure-elam-md)**
     Configures the Early Launch Antimalware (ELAM) driver initialization policy to ensure only signed, trusted boot drivers execute.
@@ -44269,9 +44283,9 @@ if ($Vulnerable) {
 
 <div id="07-paws-configure-account-policies-md"></div>
 
-<div id="07-paws-configure-account-policies-md-req-paw-013-configure-account-and-password-policies-for-paws"></div>
+<div id="07-paws-configure-account-policies-md-configure-account-and-password-policies-for-paws"></div>
 
-# [REQ-PAW-013] Configure Account and Password Policies for PAWs
+# Configure Account and Password Policies for PAWs
 
 <div id="07-paws-configure-account-policies-md-target-scope"></div>
 
@@ -44285,79 +44299,21 @@ if ($Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Paths / Registry Locations**:
-  * **GPO Paths**:
-    * `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Account Lockout Policy`
-    * `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Password Policy`
-    * `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-    * `Computer Configuration\Administrative Templates\System\PIN Complexity`
-    * `Computer Configuration\Administrative Templates\Windows Components\Microsoft Account`
-    * `Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
-  * **Registry Locations**:
-    * Configured via `GptTmpl.inf` (SecEdit System Access settings):
-      * `MinimumPasswordLength` = `20` (20 characters minimum)
-      * `PasswordComplexity` = `1` (Complexity enabled)
-      * `PasswordHistorySize` = `24` (24 passwords remembered)
-      * `MaxPasswordAge` = `0` (Password does not expire / disabled)
-      * `MinPasswordAge` = `1` (1 day minimum)
-      * `ClearTextPassword` = `0` (Reversible encryption disabled)
-      * `LockoutBadCount` = `5` (5 invalid logon attempts allowed)
-      * `ResetLockoutCount` = `30` (30 minutes lockout observation window)
-      * `LockoutDuration` = `30` (30 minutes lockout duration)
-    * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon`
-      * `ScRemoveOption` = `"1"` (REG_SZ, 1 = Lock Workstation)
-      * `CachedLogonsCount` = `0` (REG_DWORD)
-    * `HKLM\SECURITY\Cache`
-      * `NL$IterationCount` = `1954` (REG_DWORD, 1954 = 2,000,896 rounds of PBKDF2-SHA1)
-    * `HKLM\System\CurrentControlSet\Control\Lsa`
-      * `LimitBlankPasswordUse` = `1` (REG_DWORD)
-      * `NoLMHash` = `1` (REG_DWORD)
-      * `LmCompatibilityLevel` = `5` (REG_DWORD, Network security: LAN Manager authentication level - NTLMv2 only)
-    * `HKLM\System\CurrentControlSet\Control\SecurityProviders\WDigest`
-      * `UseLogonCredential` = `0` (REG_DWORD)
-    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
-      * `AllowDomainPINLogon` = `0` (REG_DWORD)
-    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity`
-      * `MinimumPINLength` = `6` (REG_DWORD)
-    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
-      * `MSAOptional` = `1` (REG_DWORD)
-    * `HKLM\SOFTWARE\Policies\Microsoft\MicrosoftAccount`
-      * `DisableUserAuth` = `1` (REG_DWORD)
-    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork`
-      * `RequireSecurityDevice` = `1` (REG_DWORD)
-    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices`
-      * `TPM12` = `0` (REG_DWORD)
-    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters`
-      * `RequireSignOrSeal` = `1` (REG_DWORD)
-      * `SealSecureChannel` = `1` (REG_DWORD)
-      * `SignSecureChannel` = `1` (REG_DWORD)
-      * `DisablePasswordChange` = `0` (REG_DWORD)
-      * `MaximumPasswordAge` = `30` (REG_DWORD)
-      * `RequireStrongKey` = `1` (REG_DWORD)
-    * `HKLM\System\CurrentControlSet\Services\LanmanWorkstation\Parameters`
-      * `EnablePlainTextPassword` = `0` (REG_DWORD)
-    * `HKLM\System\CurrentControlSet\Control\Lsa\MSV1_0`
-      * `allownullsessionfallback` = `0` (REG_DWORD)
-      * `NTLMMinClientSec` = `537395200` (REG_DWORD)
-      * `NTLMMinServerSec` = `537395200` (REG_DWORD)
+* **GPO Path / Registry Location**:
+  * `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies`
+  * `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * `Computer Configuration\Administrative Templates\System\PIN Complexity`
+  * `Computer Configuration\Administrative Templates\Windows Components\Microsoft Account`
+  * `Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
 
 ---
 
 <div id="07-paws-configure-account-policies-md-rationale"></div>
 
 ## Rationale
-Securing authentication parameters and account controls reduces the risk of password attacks and session hijackings on high-value administrative endpoints:
+Privileged Access Workstations (PAWs) represent the highest security boundary on the endpoint layer, serving as isolated systems dedicated solely to Tier 0 directory administration. If a PAW is compromised, the entire AD forest is compromised. Therefore, authentication parameters, local password policies, account lockouts, secure channel settings, and interactive logon behaviors must be hardened to their absolute maximum threshold.
 
-1. **Stricter Lockout Threshold (`LockoutBadCount`)**: For PAWs, the lockout threshold is reduced to 5 attempts (compared to 10 for standard endpoints). This is necessary because PAWs are used exclusively by Tier 0 administrators, who are high-value targets. A stricter threshold prevents brute-force attempts on local fallback accounts.
-2. **Robust Local Password Settings (`MinimumPasswordLength`, `PasswordComplexity`)**: Local accounts on PAWs (such as fallback administrators) must use passwords of at least 20 characters with complexity enabled. This mitigates offline password cracking if database hashes or local SAM registries are dumped.
-3. **No Password Expiration (`MaxPasswordAge = 0`)**: Periodic password expiration is disabled. Setting the password expiration interval to 0 prevents users from cycling to weaker password variants or writing credentials down, as a 20-character complex password is mathematically robust against current brute-forcing capabilities.
-4. **Smart Card Removal Behavior (`ScRemoveOption`)**: In secure environments using Smart Card or token-based authentication, removing the card must automatically lock the desktop session (`1`). If disabled, a user leaving their workstation with the card removed leaves the session exposed.
-5. **Blank Passwords Limit (`LimitBlankPasswordUse`)**: Restricting the use of blank passwords to physical console logons prevents attackers from using empty-password accounts to authenticate remotely over network shares or RDP.
-6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, increasing resistance to offline brute-force and GPU-accelerated cracking attacks.
-7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
-8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
-9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, requiring NTLMv2 and 128-bit encryption, and enforcing client-side NTLMv2-only authentication via `LmCompatibilityLevel = 5` block legacy protocol exploitation and relay vectors.
-10. **Fine-Grained Password Policies (FGPP)**: While local accounts are secured on the machine, the Active Directory user accounts of the Tier 0 Administrators who logon to these PAWs must also be protected by a domain-level Fine-Grained Password Policy (FGPP / PSO) of at least 20 characters, as configured in [REQ-ID-001 - Enforce Fine-Grained Password Policies](#03-identities-services-enforce-fgpp-md).
+This submodule contains individual requirement controls for each specific account policy, lockout setting, authentication restriction, and interactive logon control on PAWs.
 
 ---
 
@@ -44366,80 +44322,871 @@ Securing authentication parameters and account controls reduces the risk of pass
 ## Legacy Impact & Compatibility
 * **Account Lockouts**: Legitimate administrators who forget their passwords may lock themselves out. Standard procedures must exist for administrative reset of locked accounts by another Tier 0 administrator.
 * **Smart Card Removal**: Administrators must be trained to carry their smart cards with them, which automatically locks the session. Re-authenticating requires inserting the card and entering the PIN.
-* **Reversible Encryption**: Disabling reversible encryption may break legacy applications that rely on reading cleartext password equivalents. These applications should not exist in the Tier 0 environment.
-* **Logon Caching (CachedLogonsCount = 0)**: PAWs must have active, real-time connectivity to a Domain Controller to allow users to log on. Off-domain logons (e.g., users traveling or working offline without a pre-boot VPN connection) will fail. Remote users must use pre-boot VPN tunnels or alternate remote access architectures.
-* **No Password Expiration**: Removing periodic password changes minimizes helpdesk tickets and stops administrators from choosing predictable increments. However, the organization must still enforce credential revocation and manual rotation protocols in the event of a suspected credential leak.
+* **Logon Caching (CachedLogonsCount = 0)**: PAWs must have active, real-time connectivity to a Domain Controller to allow users to log on. Off-domain logons without live DC contact will fail.
+* **No Password Expiration**: Removing periodic password changes minimizes helpdesk tickets and stops administrators from choosing predictable increments. Credential revocation and rotation protocols must remain active for suspected leaks.
 
 ---
 
-<div id="07-paws-configure-account-policies-md-implementation-steps"></div>
+<div id="07-paws-configure-account-policies-md-account-policy-hardening-requirements-for-paws"></div>
+
+## Account Policy Hardening Requirements for PAWs
+
+The following individual account and authentication policies must be enforced on PAWs:
+
+1. **[REQ-PAW-152 - Account Policy: Password Policy for PAWs](#07-paws-account-policy-configure-paw-account-password-policy-md)**
+2. **[REQ-PAW-153 - Account Policy: Account Lockout Policy for PAWs](#07-paws-account-policy-configure-paw-account-lockout-policy-md)**
+3. **[REQ-PAW-154 - Account Policy: Kerberos Policy for PAWs](#07-paws-account-policy-configure-paw-account-kerberos-policy-md)**
+4. **[REQ-PAW-155 - Account Policy: Smart Card Removal Behavior for PAWs](#07-paws-account-policy-configure-paw-account-smart-card-removal-md)**
+5. **[REQ-PAW-156 - Account Policy: Cached Logons and PBKDF2 Iteration Count for PAWs](#07-paws-account-policy-configure-paw-account-cached-logons-md)**
+6. **[REQ-PAW-157 - Account Policy: Local Accounts and Blank Password Restrictions for PAWs](#07-paws-account-policy-configure-paw-account-local-blank-passwords-md)**
+7. **[REQ-PAW-158 - Account Policy: NTLM and LAN Manager Authentication Security for PAWs](#07-paws-account-policy-configure-paw-account-ntlm-security-md)**
+8. **[REQ-PAW-159 - Account Policy: Disable WDigest Credential Caching for PAWs](#07-paws-account-policy-configure-paw-account-wdigest-credentials-md)**
+9. **[REQ-PAW-160 - Account Policy: Windows Hello for Business and PIN Complexity for PAWs](#07-paws-account-policy-configure-paw-account-hello-pin-md)**
+10. **[REQ-PAW-161 - Account Policy: Consumer Microsoft Account Restrictions for PAWs](#07-paws-account-policy-configure-paw-account-block-msa-md)**
+11. **[REQ-PAW-162 - Account Policy: Domain Member Secure Channel Security for PAWs](#07-paws-account-policy-configure-paw-account-secure-channel-md)**
+12. **[REQ-PAW-163 - Account Policy: SMB Client and Server Security Options for PAWs](#07-paws-account-policy-configure-paw-account-smb-security-md)**
+13. **[REQ-PAW-164 - Account Policy: Anonymous Access and Enumeration Restrictions for PAWs](#07-paws-account-policy-configure-paw-account-anonymous-restrictions-md)**
+14. **[REQ-PAW-165 - Account Policy: Interactive Logon Security Options for PAWs](#07-paws-account-policy-configure-paw-account-interactive-logon-md)**
+
+---
+
+<div id="07-paws-configure-account-policies-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 2.3 (Security Options), Section 18 (Administrative Templates)
+* **ANSSI AD Hardening Guide**: Recommendations on password complexity, reversible encryption blocks, lockout management, and domain member secure channels
+* **DoD Windows 11 Computer STIG v2r6**: Account policies, PIN complexity, Windows Hello for Business, and Netlogon secure channel parameters
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-password-policy-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-password-policy-md-req-paw-152-account-policy-password-policy-for-paws"></div>
+
+# [REQ-PAW-152] Account Policy: Password Policy for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-password-policy-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-password-policy-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Password Policy`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Location / SecEdit Settings**:
+    * `MinimumPasswordLength` = `20` (20 characters minimum)
+    * `PasswordComplexity` = `1` (Complexity enabled)
+    * `PasswordHistorySize` = `24` (24 passwords remembered)
+    * `MaxPasswordAge` = `0` (Password does not expire / disabled)
+    * `MinPasswordAge` = `1` (1 day minimum)
+    * `ClearTextPassword` = `0` (Reversible encryption disabled)
+    * `RelaxMinPasswordLengthLimits` = `1` (Relax minimum password length limits enabled)
+    * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\PasswordExpiryWarning` = `14` (REG_DWORD, 14 days)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-password-policy-md-rationale"></div>
+
+## Rationale
+Enforcing a robust password baseline is critical on Privileged Access Workstations to prevent brute-force cracking, credential dictionary attacks, and unauthorized local password rotation:
+* **Minimum Length (20 characters)**: Tier 0 administrative workstations require a minimum of 20 characters for local accounts (e.g. fallback local administrators). This length makes brute-force and offline GPU dictionary attacks mathematically unfeasible.
+* **Complexity & Reversible Encryption**: Requiring character diversity while disabling reversible encryption ensures password hashes stored in the SAM or LSASS memory cannot be trivially decrypted.
+* **Password History & Minimum Age**: Storing 24 passwords in history and requiring a 1-day minimum age prevents administrators from immediately cycling back to an old password.
+* **No Expiration (MaxPasswordAge = 0)**: In accordance with NIST SP 800-63B and modern ANSSI guidelines, requiring periodic password changes is disabled for robust 20-character passwords, eliminating weak incremental patterns.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-password-policy-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Password Length**: Any administrative procedure that provisions local accounts must use passwords with at least 20 characters meeting complexity rules.
+* **No Periodic Expiration**: While automatic password expiration is disabled, explicit password revocation and rotation procedures must remain in place for suspected credential leak events.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-password-policy-md-implementation-steps"></div>
 
 ## Implementation Steps
 
-<div id="07-paws-configure-account-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+<div id="07-paws-account-policy-configure-paw-account-password-policy-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<div id="07-paws-configure-account-policies-md-step-1-configure-lockout-and-password-policies-domain-wide-or-paw-gpo"></div>
-
-#### Step 1: Configure Lockout and Password Policies (Domain-wide or PAW GPO)
-These settings must be configured in a dedicated GPO linked to the PAW Organizational Unit (OU) (e.g., `GPO_Hardening_PAWs`):
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit the PAW GPO.
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
 3. Navigate to:
-   `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies`
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Password Policy`
 4. Configure the settings:
-   * **Account Lockout Policy**:
-     * **Account lockout threshold**: `5` invalid logon attempts
-     * **Reset account lockout counter after**: `30` minutes
-     * **Account lockout duration**: `30` minutes
-   * **Password Policy**:
-     * **Enforce password history**: `24` passwords remembered
-     * **Maximum password age**: `0` days (never expire)
-     * **Minimum password age**: `1` day
-     * **Minimum password length**: `20` characters
-     * **Password must meet complexity requirements**: `Enabled`
-     * **Store passwords using reversible encryption**: `Disabled`
+   * **Enforce password history**: `24` passwords remembered
+   * **Maximum password age**: `0` days (never expire)
+   * **Minimum password age**: `1` day
+   * **Minimum password length**: `20` characters
+   * **Password must meet complexity requirements**: `Enabled`
+   * **Store passwords using reversible encryption**: `Disabled`
+   * **Relax minimum password length limits**: `Enabled`
+5. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+   * **Interactive logon: Prompt user to change password before expiration**: `14` days
 
-<div id="07-paws-configure-account-policies-md-step-2-configure-local-security-options"></div>
+---
 
-#### Step 2: Configure Local Security Options
-In the PAW GPO, navigate to:
-`Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-* **Policy**: `Interactive logon: Smart card removal behavior` -> Set to **Lock Workstation** (value 1)
-* **Policy**: `Accounts: Limit local account use of blank passwords to console logon only` -> Set to **Enabled** (value 1)
-* **Policy**: `Network security: Do not store LAN Manager hash value on next password change` -> Set to **Enabled** (value 1)
-* **Policy**: `Interactive logon: Number of previous logons to cache (in case domain controller is not available)` -> Set to **0**
-* **Policy**: `Network security: Minimum session security for NTLM SSP based (including secure RPC) clients` -> Set to **Require NTLMv2 session security, Require 128-bit encryption** (value 537395200)
-* **Policy**: `Network security: Minimum session security for NTLM SSP based (including secure RPC) servers` -> Set to **Require NTLMv2 session security, Require 128-bit encryption** (value 537395200)
-* **Policy**: `Network access: Allow anonymous SID/Name translation` -> Set to **Disabled** (value 0)
-* **Policy**: `Network security: Allow LocalSystem NULL session fallback` -> Set to **Disabled** (value 0)
+<div id="07-paws-account-policy-configure-paw-account-password-policy-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 
-<div id="07-paws-configure-account-policies-md-step-3-configure-hello-for-business-pin-and-microsoft-account-policies"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-#### Step 3: Configure Hello for Business, PIN and Microsoft Account Policies
-Navigate to:
-`Computer Configuration\Administrative Templates\System\PIN Complexity`
-* **Policy**: `Minimum PIN length` -> Set to **Enabled** with value **6**
+[Download Script: Configure-PawAccountPasswordPolicy.ps1](../implementation_scripts/Configure-PawAccountPasswordPolicy.ps1)
 
-Navigate to:
-`Computer Configuration\Administrative Templates\Windows Components\Microsoft Account`
-* **Policy**: `Block all consumer Microsoft account user authentication` -> Set to **Enabled**
+```powershell
+# Configure-PawAccountPasswordPolicy.ps1
+Write-Host "Configuring PAW password policy..." -ForegroundColor Cyan
 
-Navigate to:
-`Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
-* **Policy**: `Use a hardware security device` -> Set to **Enabled**
-* **Policy**: `Use convenience PIN sign-in` -> Set to **Disabled** (value 0)
-* **Policy**: `Allow Microsoft accounts to be optional` -> Set to **Enabled** (value 1)
+# 1. Configure PasswordExpiryWarning via Registry
+$WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
+if (-not (Test-Path $WinlogonPath)) { New-Item -Path $WinlogonPath -Force | Out-Null }
+Set-ItemProperty -Path $WinlogonPath -Name "PasswordExpiryWarning" -Value 14 -Type DWord -Force
 
-<div id="07-paws-configure-account-policies-md-step-4-configure-pbkdf2-iteration-count-via-gpo-preferences"></div>
+# 2. Configure SecEdit System Access password parameters
+$SecTempDir = Join-Path $env:TEMP "PAWPasswordSecTemplate"
+if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
 
-#### Step 4: Configure PBKDF2 Iteration Count via GPO Preferences
-Since the PBKDF2 iteration count setting is not exposed in standard ADMX templates, deploy it via Registry GPO Preferences:
-1. Within the PAW GPO, navigate to:
+$CfgFile = Join-Path $SecTempDir "paw_password.cfg"
+$DbFile = Join-Path $SecTempDir "paw_password.sdb"
+$LogFile = Join-Path $SecTempDir "paw_password.log"
+
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) { Throw "Failed to export current security template." }
+
+$ConfigText = Get-Content -Path $CfgFile -Raw
+if ($ConfigText -notmatch "\[System Access\]") {
+    $ConfigText += "`r`n[System Access]`r`n"
+}
+
+$Lines = $ConfigText -split "`r?`n"
+$NewLines = @()
+$InSystemAccess = $false
+
+$PwdSettings = @{
+    "MinimumPasswordLength"        = 20
+    "PasswordComplexity"           = 1
+    "PasswordHistorySize"          = 24
+    "MaxPasswordAge"               = 0
+    "MinPasswordAge"               = 1
+    "ClearTextPassword"            = 0
+    "RelaxMinPasswordLengthLimits" = 1
+}
+
+foreach ($Line in $Lines) {
+    if ($Line -match "^\[(.*)\]$") {
+        if ($Matches[1] -eq "System Access") { $InSystemAccess = $true } else { $InSystemAccess = $false }
+    }
+    if ($InSystemAccess) {
+        $IsManaged = $false
+        foreach ($Key in $PwdSettings.Keys) {
+            if ($Line -match "^\s*$($Key)\s*=") { $IsManaged = $true; break }
+        }
+        if (-not $IsManaged) { $NewLines += $Line }
+    } else {
+        $NewLines += $Line
+    }
+}
+
+$FinalLines = @()
+foreach ($Line in $NewLines) {
+    $FinalLines += $Line
+    if ($Line -eq "[System Access]") {
+        foreach ($Key in $PwdSettings.Keys) {
+            $Val = $PwdSettings[$Key]
+            $FinalLines += "$($Key) = $($Val)"
+        }
+    }
+}
+
+$FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
+$Proc = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas SECURITYPOLICY /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
+if ($Proc.ExitCode -ne 0) { Throw "Failed to apply SecEdit password policy." }
+
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "PAW password policy applied successfully." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-PawAccountPasswordPolicyStatus.ps1](../audit_scripts/Get-PawAccountPasswordPolicyStatus.ps1)
+
+```powershell
+# Get-PawAccountPasswordPolicyStatus.ps1
+Write-Host "--- Auditing PAW Password Policy ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+# 1. Audit Registry Setting
+$WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
+$WarnVal = (Get-ItemProperty -Path $WinlogonPath -Name "PasswordExpiryWarning" -ErrorAction SilentlyContinue).PasswordExpiryWarning
+if ($WarnVal -lt 5 -or $WarnVal -gt 14) {
+    Write-Host "    [!] VULNERABLE: PasswordExpiryWarning is set to '$WarnVal' (Expected: 5-14)" -ForegroundColor Red
+    $script:Vulnerable = $true
+} else {
+    Write-Host "    [+] PasswordExpiryWarning: $WarnVal" -ForegroundColor Green
+}
+
+# 2. Audit SecEdit Settings
+$SecTempDir = Join-Path $env:TEMP "PAWPasswordAuditTemplate"
+if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+$CfgFile = Join-Path $SecTempDir "paw_password_audit.cfg"
+
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) {
+    Write-Output "Non-Compliant"
+    exit 1
+}
+
+$ConfigContent = Get-Content -Path $CfgFile -Raw
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+
+$ExpectedSettings = @{
+    "MinimumPasswordLength"        = 20
+    "PasswordComplexity"           = 1
+    "PasswordHistorySize"          = 24
+    "MaxPasswordAge"               = 0
+    "MinPasswordAge"               = 1
+    "ClearTextPassword"            = 0
+    "RelaxMinPasswordLengthLimits" = 1
+}
+
+foreach ($Key in $ExpectedSettings.Keys) {
+    $Expected = $ExpectedSettings[$Key]
+    if ($ConfigContent -match "(?m)^\s*$($Key)\s*=\s*(.*)\s*$") {
+        $Actual = $Matches[1].Trim()
+    } else {
+        $Actual = ""
+    }
+    if ($Actual -ne [string]$Expected) {
+        Write-Host "    [!] VULNERABLE: $($Key) = '$Actual' (Expected: '$Expected')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Key): $Actual" -ForegroundColor Green
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-password-policy-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 1.1 (Password Policy), Section 2.3.7.8 (PasswordExpiryWarning)
+* **ANSSI AD Hardening Guide**: Recommendations on local password complexity, length, and reversible encryption
+* **DoD Windows 11 Computer STIG v2r6**: Password length and history rules
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-lockout-policy-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-lockout-policy-md-req-paw-153-account-policy-account-lockout-policy-for-paws"></div>
+
+# [REQ-PAW-153] Account Policy: Account Lockout Policy for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-lockout-policy-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-lockout-policy-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Account Lockout Policy`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Location / SecEdit Settings**:
+    * `LockoutBadCount` = `5` (5 invalid logon attempts allowed)
+    * `ResetLockoutCount` = `30` (30 minutes lockout observation window)
+    * `LockoutDuration` = `30` (30 minutes lockout duration)
+    * `AllowAdministratorLockout` = `1` (Allow Administrator account lockout enabled)
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\MaxDevicePasswordFailedAttempts` = `10` (REG_DWORD)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-lockout-policy-md-rationale"></div>
+
+## Rationale
+Configuring strict account lockout parameters on Tier 0 administrative workstations protects high-privilege credentials from online password spraying and brute-force guessing attacks:
+* **Strict Lockout Threshold (5 attempts)**: On PAWs, the lockout threshold is set to 5 bad attempts (stricter than standard endpoints) because PAWs are high-value targets dedicated exclusively to directory administrators.
+* **Duration & Observation Window (30 minutes)**: Setting lockout duration and reset intervals to 30 minutes prevents automated attacks from repeatedly guessing credentials across short time horizons.
+* **Administrator Lockout**: Enabling Administrator account lockout prevents attackers from evading lockout protection by targeting the built-in Administrator account.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-lockout-policy-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Administrative Lockouts**: Repeatedly mistyping passwords on fallback local administrator accounts will trigger a temporary lockout. Standard procedures must exist for administrative unlocking.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-lockout-policy-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-lockout-policy-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Account Lockout Policy`
+4. Configure the settings:
+   * **Account lockout threshold**: `5` invalid logon attempts
+   * **Reset account lockout counter after**: `30` minutes
+   * **Account lockout duration**: `30` minutes
+   * **Allow Administrator account lockout**: `Enabled`
+5. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+   * **Interactive logon: Machine account lockout threshold**: `10`
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-lockout-policy-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-PawAccountLockoutPolicy.ps1](../implementation_scripts/Configure-PawAccountLockoutPolicy.ps1)
+
+```powershell
+# Configure-PawAccountLockoutPolicy.ps1
+Write-Host "Configuring PAW account lockout policy..." -ForegroundColor Cyan
+
+# 1. Configure MaxDevicePasswordFailedAttempts via Registry
+$SystemPolicyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+if (-not (Test-Path $SystemPolicyPath)) { New-Item -Path $SystemPolicyPath -Force | Out-Null }
+Set-ItemProperty -Path $SystemPolicyPath -Name "MaxDevicePasswordFailedAttempts" -Value 10 -Type DWord -Force
+
+# 2. Configure SecEdit System Access lockout parameters
+$SecTempDir = Join-Path $env:TEMP "PAWLockoutSecTemplate"
+if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+
+$CfgFile = Join-Path $SecTempDir "paw_lockout.cfg"
+$DbFile = Join-Path $SecTempDir "paw_lockout.sdb"
+$LogFile = Join-Path $SecTempDir "paw_lockout.log"
+
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) { Throw "Failed to export current security template." }
+
+$ConfigText = Get-Content -Path $CfgFile -Raw
+if ($ConfigText -notmatch "\[System Access\]") {
+    $ConfigText += "`r`n[System Access]`r`n"
+}
+
+$Lines = $ConfigText -split "`r?`n"
+$NewLines = @()
+$InSystemAccess = $false
+
+$LockoutSettings = @{
+    "LockoutBadCount"           = 5
+    "ResetLockoutCount"         = 30
+    "LockoutDuration"           = 30
+    "AllowAdministratorLockout" = 1
+}
+
+foreach ($Line in $Lines) {
+    if ($Line -match "^\[(.*)\]$") {
+        if ($Matches[1] -eq "System Access") { $InSystemAccess = $true } else { $InSystemAccess = $false }
+    }
+    if ($InSystemAccess) {
+        $IsManaged = $false
+        foreach ($Key in $LockoutSettings.Keys) {
+            if ($Line -match "^\s*$($Key)\s*=") { $IsManaged = $true; break }
+        }
+        if (-not $IsManaged) { $NewLines += $Line }
+    } else {
+        $NewLines += $Line
+    }
+}
+
+$FinalLines = @()
+foreach ($Line in $NewLines) {
+    $FinalLines += $Line
+    if ($Line -eq "[System Access]") {
+        foreach ($Key in $LockoutSettings.Keys) {
+            $Val = $LockoutSettings[$Key]
+            $FinalLines += "$($Key) = $($Val)"
+        }
+    }
+}
+
+$FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
+$Proc = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas SECURITYPOLICY /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
+if ($Proc.ExitCode -ne 0) { Throw "Failed to apply SecEdit lockout policy." }
+
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "PAW lockout policy applied successfully." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-PawAccountLockoutPolicyStatus.ps1](../audit_scripts/Get-PawAccountLockoutPolicyStatus.ps1)
+
+```powershell
+# Get-PawAccountLockoutPolicyStatus.ps1
+Write-Host "--- Auditing PAW Account Lockout Policy ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+# 1. Audit Registry Setting
+$SystemPolicyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$MaxDeviceVal = (Get-ItemProperty -Path $SystemPolicyPath -Name "MaxDevicePasswordFailedAttempts" -ErrorAction SilentlyContinue).MaxDevicePasswordFailedAttempts
+if ($null -eq $MaxDeviceVal -or $MaxDeviceVal -gt 10 -or $MaxDeviceVal -eq 0) {
+    Write-Host "    [!] VULNERABLE: MaxDevicePasswordFailedAttempts is set to '$MaxDeviceVal' (Expected: 10 or fewer, but not 0)" -ForegroundColor Red
+    $script:Vulnerable = $true
+} else {
+    Write-Host "    [+] MaxDevicePasswordFailedAttempts: $MaxDeviceVal" -ForegroundColor Green
+}
+
+# 2. Audit SecEdit Settings
+$SecTempDir = Join-Path $env:TEMP "PAWLockoutAuditTemplate"
+if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+$CfgFile = Join-Path $SecTempDir "paw_lockout_audit.cfg"
+
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) {
+    Write-Output "Non-Compliant"
+    exit 1
+}
+
+$ConfigContent = Get-Content -Path $CfgFile -Raw
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+
+$ExpectedSettings = @{
+    "LockoutBadCount"           = 5
+    "ResetLockoutCount"         = 30
+    "LockoutDuration"           = 30
+    "AllowAdministratorLockout" = 1
+}
+
+foreach ($Key in $ExpectedSettings.Keys) {
+    $Expected = $ExpectedSettings[$Key]
+    if ($ConfigContent -match "(?m)^\s*$($Key)\s*=\s*(.*)\s*$") {
+        $Actual = $Matches[1].Trim()
+    } else {
+        $Actual = ""
+    }
+    if ($Actual -ne [string]$Expected) {
+        Write-Host "    [!] VULNERABLE: $($Key) = '$Actual' (Expected: '$Expected')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Key): $Actual" -ForegroundColor Green
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-lockout-policy-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 1.2 (Account Lockout Policy), Section 1.2.3 (AllowAdministratorLockout), Section 2.3.7.4 (MaxDevicePasswordFailedAttempts)
+* **ANSSI AD Hardening Guide**: Recommendations on account lockout management
+* **DoD Windows 11 Computer STIG v2r6**: Account lockout threshold and observation window rules
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-kerberos-policy-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-kerberos-policy-md-req-paw-154-account-policy-kerberos-policy-for-paws"></div>
+
+# [REQ-PAW-154] Account Policy: Kerberos Policy for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-kerberos-policy-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-kerberos-policy-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Kerberos Policy`
+  * **Registry Location / SecEdit Settings**:
+    * `TicketValidateClient` = `1` (Enforce user logon restrictions enabled)
+    * `MaxServiceTicketAge` = `600` (Maximum lifetime for service ticket = 600 minutes / 10 hours)
+    * `MaxTicketAge` = `10` (Maximum lifetime for user ticket = 10 hours)
+    * `MaxRenewAge` = `7` (Maximum lifetime for user ticket renewal = 7 days)
+    * `MaxClockSkew` = `5` (Maximum tolerance for computer clock synchronization = 5 minutes)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-kerberos-policy-md-rationale"></div>
+
+## Rationale
+Kerberos policy settings define authentication ticket lifetimes and clock tolerance parameters for domain security tokens:
+* **Ticket Lifetimes (10h ticket / 600m service)**: Restricting ticket validity limits the operational window for stolen ticket reuse (Pass-the-Ticket / Golden / Silver ticket abuse).
+* **Ticket Renewal (7 days)**: Limiting renewable lifetimes requires accounts to periodically re-authenticate.
+* **Clock Skew (5 minutes)**: Maintaining tight clock synchronization prevents Kerberos replay attacks.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-kerberos-policy-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Clock Drift**: Workstation system clocks that drift by more than 5 minutes relative to Domain Controllers will fail Kerberos authentication. Time synchronization via NTP/PDC emulator must be maintained.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-kerberos-policy-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-kerberos-policy-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the domain or PAW GPO.
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Kerberos Policy`
+4. Configure the settings:
+   * **Enforce user logon restrictions**: `Enabled`
+   * **Maximum lifetime for service ticket**: `600` minutes
+   * **Maximum lifetime for user ticket**: `10` hours
+   * **Maximum lifetime for user ticket renewal**: `7` days
+   * **Maximum tolerance for computer clock synchronization**: `5` minutes
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-kerberos-policy-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-PawAccountKerberosPolicy.ps1](../implementation_scripts/Configure-PawAccountKerberosPolicy.ps1)
+
+```powershell
+# Configure-PawAccountKerberosPolicy.ps1
+Write-Host "Configuring PAW Kerberos policy..." -ForegroundColor Cyan
+
+$SecTempDir = Join-Path $env:TEMP "PAWKerberosSecTemplate"
+if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+
+$CfgFile = Join-Path $SecTempDir "paw_kerberos.cfg"
+$DbFile = Join-Path $SecTempDir "paw_kerberos.sdb"
+$LogFile = Join-Path $SecTempDir "paw_kerberos.log"
+
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) { Throw "Failed to export current security template." }
+
+$ConfigText = Get-Content -Path $CfgFile -Raw
+if ($ConfigText -notmatch "\[Kerberos Policy\]") {
+    $ConfigText += "`r`n[Kerberos Policy]`r`n"
+}
+
+$Lines = $ConfigText -split "`r?`n"
+$NewLines = @()
+$InKerb = $false
+
+$KerbSettings = @{
+    "MaxServiceTicketAge"  = 600
+    "MaxTicketAge"         = 10
+    "MaxRenewAge"          = 7
+    "MaxClockSkew"         = 5
+    "TicketValidateClient" = 1
+}
+
+foreach ($Line in $Lines) {
+    if ($Line -match "^\[(.*)\]$") {
+        if ($Matches[1] -eq "Kerberos Policy") { $InKerb = $true } else { $InKerb = $false }
+    }
+    if ($InKerb) {
+        $IsManaged = $false
+        foreach ($Key in $KerbSettings.Keys) {
+            if ($Line -match "^\s*$($Key)\s*=") { $IsManaged = $true; break }
+        }
+        if (-not $IsManaged) { $NewLines += $Line }
+    } else {
+        $NewLines += $Line
+    }
+}
+
+$FinalLines = @()
+foreach ($Line in $NewLines) {
+    $FinalLines += $Line
+    if ($Line -eq "[Kerberos Policy]") {
+        foreach ($Key in $KerbSettings.Keys) {
+            $Val = $KerbSettings[$Key]
+            $FinalLines += "$($Key) = $($Val)"
+        }
+    }
+}
+
+$FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
+$Proc = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas SECURITYPOLICY /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
+if ($Proc.ExitCode -ne 0) { Throw "Failed to apply SecEdit Kerberos policy." }
+
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "PAW Kerberos policy applied successfully." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-PawAccountKerberosPolicyStatus.ps1](../audit_scripts/Get-PawAccountKerberosPolicyStatus.ps1)
+
+```powershell
+# Get-PawAccountKerberosPolicyStatus.ps1
+Write-Host "--- Auditing PAW Kerberos Policy ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$SecTempDir = Join-Path $env:TEMP "PAWKerberosAuditTemplate"
+if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+$CfgFile = Join-Path $SecTempDir "paw_kerberos_audit.cfg"
+
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) {
+    Write-Output "Non-Compliant"
+    exit 1
+}
+
+$ConfigContent = Get-Content -Path $CfgFile -Raw
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+
+$ExpectedSettings = @{
+    "MaxServiceTicketAge"  = 600
+    "MaxTicketAge"         = 10
+    "MaxRenewAge"          = 7
+    "MaxClockSkew"         = 5
+    "TicketValidateClient" = 1
+}
+
+foreach ($Key in $ExpectedSettings.Keys) {
+    $Expected = $ExpectedSettings[$Key]
+    if ($ConfigContent -match "(?m)^\s*$($Key)\s*=\s*(.*)\s*$") {
+        $Actual = $Matches[1].Trim()
+    } else {
+        $Actual = ""
+    }
+    if ($Actual -ne [string]$Expected) {
+        Write-Host "    [!] VULNERABLE: $($Key) = '$Actual' (Expected: '$Expected')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Key): $Actual" -ForegroundColor Green
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-kerberos-policy-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows Server / Client Benchmark**: Section 1.3 (Kerberos Policy)
+* **ANSSI AD Hardening Guide**: Recommendations on Kerberos ticket lifetimes and synchronization constraints
+* **DoD Windows Computer STIG**: Kerberos ticket lifetime parameters
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-smart-card-removal-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-smart-card-removal-md-req-paw-155-account-policy-smart-card-removal-behavior-for-paws"></div>
+
+# [REQ-PAW-155] Account Policy: Smart Card Removal Behavior for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-smart-card-removal-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-smart-card-removal-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\Interactive logon: Smart card removal behavior`
+  * **Registry Location**:
+    * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\ScRemoveOption` = `"1"` (REG_SZ, 1 = Lock Workstation)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-smart-card-removal-md-rationale"></div>
+
+## Rationale
+In high-security environments enforcing smart card authentication (such as YubiKeys, PIV tokens, or CAC smart cards), removing the physical hardware token must instantly lock the active desktop session (`ScRemoveOption = "1"`). This prevents unauthorized physical access if an administrator steps away from the console while leaving the device unattended.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-smart-card-removal-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **User Workflow**: Administrators must carry their smart card with them whenever leaving the PAW. Session unlocking requires re-inserting the token and supplying the hardware PIN.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-smart-card-removal-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-smart-card-removal-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Set **Interactive logon: Smart card removal behavior** to **Lock Workstation** (value `1`).
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-smart-card-removal-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-PawAccountSmartCardRemoval.ps1](../implementation_scripts/Configure-PawAccountSmartCardRemoval.ps1)
+
+```powershell
+# Configure-PawAccountSmartCardRemoval.ps1
+Write-Host "Configuring PAW Smart Card removal behavior..." -ForegroundColor Cyan
+
+$WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
+if (-not (Test-Path $WinlogonPath)) { New-Item -Path $WinlogonPath -Force | Out-Null }
+Set-ItemProperty -Path $WinlogonPath -Name "ScRemoveOption" -Value "1" -Type String -Force
+
+Write-Host "Smart card removal behavior set to Lock Workstation." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-PawAccountSmartCardRemovalStatus.ps1](../audit_scripts/Get-PawAccountSmartCardRemovalStatus.ps1)
+
+```powershell
+# Get-PawAccountSmartCardRemovalStatus.ps1
+Write-Host "--- Auditing PAW Smart Card Removal Behavior ---" -ForegroundColor Cyan
+
+$WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
+$Val = (Get-ItemProperty -Path $WinlogonPath -Name "ScRemoveOption" -ErrorAction SilentlyContinue).ScRemoveOption
+
+if ($Val -eq "1") {
+    Write-Host "    [+] ScRemoveOption is set to '$Val' (Lock Workstation)." -ForegroundColor Green
+    Write-Output "Compliant"
+    exit 0
+} else {
+    Write-Host "    [!] VULNERABLE: ScRemoveOption is set to '$Val' (Expected: '1')" -ForegroundColor Red
+    Write-Output "Non-Compliant"
+    exit 1
+}
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-smart-card-removal-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.9.5 (Interactive logon: Smart card removal behavior)
+* **ANSSI AD Hardening Guide**: Physical and console access restrictions on Tier 0 consoles
+* **DoD Windows 11 Computer STIG v2r6**: Smart card removal policy enforcement
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-cached-logons-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-cached-logons-md-req-paw-156-account-policy-cached-logons-and-pbkdf2-iteration-count-for-paws"></div>
+
+# [REQ-PAW-156] Account Policy: Cached Logons and PBKDF2 Iteration Count for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-cached-logons-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-cached-logons-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\Interactive logon: Number of previous logons to cache`
+  * **GPO Path**: `Computer Configuration\Preferences\Windows Settings\Registry` (for `NL$IterationCount`)
+  * **Registry Locations**:
+    * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\CachedLogonsCount` = `0` (REG_DWORD)
+    * `HKLM\SECURITY\Cache\NL$IterationCount` = `1954` (REG_DWORD, 1954 = 2,000,896 rounds of PBKDF2-SHA1)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-cached-logons-md-rationale"></div>
+
+## Rationale
+By default, Windows stores local credential hashes (MSCacheV2 / DCC2) for previous domain logons to permit offline validation.
+* **Cached Logons Count (0)**: Setting `CachedLogonsCount` to `0` prevents local storage of credential hashes on PAWs, forcing all authentication attempts to validate directly against an active Domain Controller. This ensures dumped local SAM/SECURITY registry hives yield zero cached administrative passwords.
+* **PBKDF2 Iteration Count (1954)**: For systems or recovery scenarios where cached credentials might exist, increasing the PBKDF2-SHA1 derivation rounds to 1954 (2,000,896 iterations) raises the computational cost for GPU-accelerated cracking attacks (such as hashcat with RTX 4090 arrays) to prohibitive levels.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-cached-logons-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Offline Logon**: PAWs must have continuous, active network connectivity to a Domain Controller to process user logons. Off-network logons without live DC contact will fail.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-cached-logons-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-cached-logons-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Set **Interactive logon: Number of previous logons to cache (in case domain controller is not available)** to **0**.
+5. Navigate to:
    `Computer Configuration\Preferences\Windows Settings\Registry`
-2. Right-click **Registry**, select **New** -> **Registry Item**.
-3. Configure:
+6. Right-click **Registry**, select **New** -> **Registry Item**:
    * **Action**: `Update`
    * **Hive**: `HKEY_LOCAL_MACHINE`
    * **Key Path**: `SECURITY\Cache`
@@ -44449,350 +45196,1279 @@ Since the PBKDF2 iteration count setting is not exposed in standard ADMX templat
 
 ---
 
-<div id="07-paws-configure-account-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+<div id="07-paws-account-policy-configure-paw-account-cached-logons-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Use this method to apply the settings locally (for testing or standalone PAW systems) or if the control is not manageable via standard GPO GUI interfaces.
-
-[Download Script: Set-PAWAccountPolicies.ps1](implementation_scripts/Set-PAWAccountPolicies.ps1)
+[Download Script: Configure-PawAccountCachedLogons.ps1](../implementation_scripts/Configure-PawAccountCachedLogons.ps1)
 
 ```powershell
-# Set-PAWAccountPolicies.ps1
-# Configures local account lockout, password parameters, smart card removal behavior, blank password blocks, Hello for Business, Microsoft accounts, secure channel options, and NTLM session security options on PAWs.
+# Configure-PawAccountCachedLogons.ps1
+Write-Host "Configuring PAW cached logon restrictions and PBKDF2 iterations..." -ForegroundColor Cyan
 
-Write-Host "Applying PAW account and password policies..." -ForegroundColor Cyan
-
-# 1. Enforce local security options via Registry
+# 1. Disable cached logons count
 $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
-if (-not (Test-Path $WinlogonPath)) {
-    New-Item -Path $WinlogonPath -Force | Out-Null
-}
-Set-ItemProperty -Path $WinlogonPath -Name "ScRemoveOption" -Value "1" -Type String -Force
+if (-not (Test-Path $WinlogonPath)) { New-Item -Path $WinlogonPath -Force | Out-Null }
 Set-ItemProperty -Path $WinlogonPath -Name "CachedLogonsCount" -Value 0 -Type DWord -Force
-Write-Host "[+] Smart card removal behavior and logon caching configured." -ForegroundColor Green
+
+# 2. Configure PBKDF2 Iteration Count
+$CachePath = "HKLM:\SECURITY\Cache"
+if (-not (Test-Path $CachePath)) { New-Item -Path $CachePath -Force | Out-Null }
+Set-ItemProperty -Path $CachePath -Name "NL`$IterationCount" -Value 1954 -Type DWord -Force
+
+Write-Host "Cached logons count disabled and PBKDF2 iteration count configured." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-PawAccountCachedLogonsStatus.ps1](../audit_scripts/Get-PawAccountCachedLogonsStatus.ps1)
+
+```powershell
+# Get-PawAccountCachedLogonsStatus.ps1
+Write-Host "--- Auditing PAW Cached Logons and PBKDF2 Settings ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+# 1. Audit CachedLogonsCount
+$WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
+$CacheCount = (Get-ItemProperty -Path $WinlogonPath -Name "CachedLogonsCount" -ErrorAction SilentlyContinue).CachedLogonsCount
+if ($CacheCount -ne 0) {
+    Write-Host "    [!] VULNERABLE: CachedLogonsCount is '$CacheCount' (Expected: 0)" -ForegroundColor Red
+    $script:Vulnerable = $true
+} else {
+    Write-Host "    [+] CachedLogonsCount: 0" -ForegroundColor Green
+}
+
+# 2. Audit NL$IterationCount
+$CachePath = "HKLM:\SECURITY\Cache"
+$IterCount = (Get-ItemProperty -Path $CachePath -Name "NL`$IterationCount" -ErrorAction SilentlyContinue)."NL`$IterationCount"
+if ($IterCount -ne 1954) {
+    Write-Host "    [!] VULNERABLE: NL`$IterationCount is '$IterCount' (Expected: 1954)" -ForegroundColor Red
+    $script:Vulnerable = $true
+} else {
+    Write-Host "    [+] NL`$IterationCount: 1954" -ForegroundColor Green
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-cached-logons-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.9.4 (Interactive logon: Number of previous logons to cache)
+* **ANSSI AD Hardening Guide**: Recommendations on credential caching and local password protection
+* **DoD Windows 11 Computer STIG v2r6**: Cached domain logon restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-local-blank-passwords-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-local-blank-passwords-md-req-paw-157-account-policy-local-accounts-and-blank-password-restrictions-for-paws"></div>
+
+# [REQ-PAW-157] Account Policy: Local Accounts and Blank Password Restrictions for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-local-blank-passwords-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-local-blank-passwords-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Locations**:
+    * `HKLM\System\CurrentControlSet\Control\Lsa\LimitBlankPasswordUse` = `1` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\NoLMHash` = `1` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\ForceNetworkLogon` = `0` (REG_DWORD, Classic sharing model)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-local-blank-passwords-md-rationale"></div>
+
+## Rationale
+Restricting local accounts and blocking unauthenticated or weakly authenticated interactions mitigates privilege escalation and credential compromise:
+* **Blank Passwords Limit (`LimitBlankPasswordUse`)**: Restricting blank passwords strictly to physical console logons prevents local accounts with empty passwords from authenticating remotely across network shares, WinRM, or RDP.
+* **No LM Hash (`NoLMHash`)**: Disables the generation and storage of legacy, easily crackable LAN Manager password hashes in the SAM and directory databases upon password modifications.
+* **Sharing Model (`ForceNetworkLogon`)**: Enforces the Classic security model where incoming network connections authenticate as the actual local user rather than collapsing into the Guest account.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-local-blank-passwords-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Empty Password Accounts**: Any service or user account without a password cannot connect remotely. Strong passwords must be assigned to all accounts.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-local-blank-passwords-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-local-blank-passwords-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the policies:
+   * **Accounts: Limit local account use of blank passwords to console logon only**: `Enabled`
+   * **Network security: Do not store LAN Manager hash value on next password change**: `Enabled`
+   * **Network access: Sharing and security model for local accounts**: `Classic - local users authenticate as themselves`
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-local-blank-passwords-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-PawAccountLocalBlankPasswords.ps1](../implementation_scripts/Configure-PawAccountLocalBlankPasswords.ps1)
+
+```powershell
+# Configure-PawAccountLocalBlankPasswords.ps1
+Write-Host "Configuring PAW local account and blank password restrictions..." -ForegroundColor Cyan
 
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
-if (-not (Test-Path $LsaPath)) {
-    New-Item -Path $LsaPath -Force | Out-Null
-}
+if (-not (Test-Path $LsaPath)) { New-Item -Path $LsaPath -Force | Out-Null }
+
 Set-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $LsaPath -Name "NoLMHash" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "ForceNetworkLogon" -Value 0 -Type DWord -Force
+
+Write-Host "Local account and blank password restrictions applied." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-PawAccountLocalBlankPasswordsStatus.ps1](../audit_scripts/Get-PawAccountLocalBlankPasswordsStatus.ps1)
+
+```powershell
+# Get-PawAccountLocalBlankPasswordsStatus.ps1
+Write-Host "--- Auditing PAW Local Account and Blank Password Restrictions ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+
+function Test-RegVal ($Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $LsaPath -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name is '$Val' (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+    }
+}
+
+Test-RegVal "LimitBlankPasswordUse" 1
+Test-RegVal "NoLMHash" 1
+Test-RegVal "ForceNetworkLogon" 0
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-local-blank-passwords-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.7.3 (LimitBlankPasswordUse), Section 2.3.11.4 (NoLMHash), Section 2.3.10.12 (ForceNetworkLogon)
+* **ANSSI AD Hardening Guide**: Recommendations on LAN Manager hashes and local account protections
+* **DoD Windows 11 Computer STIG v2r6**: Blank password use restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-ntlm-security-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-ntlm-security-md-req-paw-158-account-policy-ntlm-and-lan-manager-authentication-security-for-paws"></div>
+
+# [REQ-PAW-158] Account Policy: NTLM and LAN Manager Authentication Security for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-ntlm-security-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-ntlm-security-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Locations**:
+    * `HKLM\System\CurrentControlSet\Control\Lsa\LmCompatibilityLevel` = `5` (REG_DWORD, Send NTLMv2 response only. Refuse LM & NTLM)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\MSV1_0\NTLMMinClientSec` = `537395200` (REG_DWORD, Require NTLMv2 session security, Require 128-bit encryption)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\MSV1_0\NTLMMinServerSec` = `537395200` (REG_DWORD, Require NTLMv2 session security, Require 128-bit encryption)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\MSV1_0\allownullsessionfallback` = `0` (REG_DWORD, Allow LocalSystem NULL session fallback disabled)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-ntlm-security-md-rationale"></div>
+
+## Rationale
+Legacy authentication protocols (LM, NTLMv1, unhardened NTLMv2) are susceptible to relay attacks, credential reflection, and offline cryptanalysis:
+* **LAN Manager Compatibility Level (5)**: Restricts outbound LAN Manager authentication exclusively to NTLMv2, rejecting LM and NTLMv1 negotiations.
+* **128-bit Session Security (`NTLMMinClientSec` / `NTLMMinServerSec`)**: Mandates 128-bit encryption and NTLMv2 session security for all NTLM SSP connections, preventing downgrade to weak legacy session keys.
+* **NULL Session Fallback Block (`allownullsessionfallback`)**: Prevents services running as LocalSystem from dropping to unauthenticated anonymous sessions if Kerberos or NTLM fails.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-ntlm-security-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Legacy Protocols**: Any system or appliance unable to authenticate using NTLMv2 with 128-bit session keys will be refused connection. Such systems must not communicate with Tier 0 PAWs.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-ntlm-security-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-ntlm-security-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the policies:
+   * **Network security: LAN Manager authentication level**: `Send NTLMv2 response only. Refuse LM & NTLM` (value `5`)
+   * **Network security: Minimum session security for NTLM SSP based (including secure RPC) clients**: `Require NTLMv2 session security, Require 128-bit encryption` (value `537395200`)
+   * **Network security: Minimum session security for NTLM SSP based (including secure RPC) servers**: `Require NTLMv2 session security, Require 128-bit encryption` (value `537395200`)
+   * **Network security: Allow LocalSystem NULL session fallback**: `Disabled` (value `0`)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-ntlm-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-PawAccountNtlmSecurity.ps1](../implementation_scripts/Configure-PawAccountNtlmSecurity.ps1)
+
+```powershell
+# Configure-PawAccountNtlmSecurity.ps1
+Write-Host "Configuring PAW NTLM and LAN Manager authentication security..." -ForegroundColor Cyan
+
+$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+if (-not (Test-Path $LsaPath)) { New-Item -Path $LsaPath -Force | Out-Null }
 Set-ItemProperty -Path $LsaPath -Name "LmCompatibilityLevel" -Value 5 -Type DWord -Force
-Write-Host "[+] Blank password, NoLMHash, and client NTLMv2-only options enforced." -ForegroundColor Green
 
-# LSASS WDigest caching block
-$WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
-if (-not (Test-Path $WDigestPath)) {
-    New-Item -Path $WDigestPath -Force | Out-Null
+$MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
+if (-not (Test-Path $MsvPath)) { New-Item -Path $MsvPath -Force | Out-Null }
+Set-ItemProperty -Path $MsvPath -Name "NTLMMinClientSec" -Value 537395200 -Type DWord -Force
+Set-ItemProperty -Path $MsvPath -Name "NTLMMinServerSec" -Value 537395200 -Type DWord -Force
+Set-ItemProperty -Path $MsvPath -Name "allownullsessionfallback" -Value 0 -Type DWord -Force
+
+Write-Host "NTLM and LAN Manager authentication security applied." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-PawAccountNtlmSecurityStatus.ps1](../audit_scripts/Get-PawAccountNtlmSecurityStatus.ps1)
+
+```powershell
+# Get-PawAccountNtlmSecurityStatus.ps1
+Write-Host "--- Auditing PAW NTLM and LAN Manager Security ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+$MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
+
+function Test-RegVal ($Path, $Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name under $Path is '$Val' (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+    }
 }
+
+Test-RegVal $LsaPath "LmCompatibilityLevel" 5
+Test-RegVal $MsvPath "NTLMMinClientSec" 537395200
+Test-RegVal $MsvPath "NTLMMinServerSec" 537395200
+Test-RegVal $MsvPath "allownullsessionfallback" 0
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-ntlm-security-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.11.2 (LmCompatibilityLevel), Section 2.3.11.7 (NTLMMinClientSec), Section 2.3.11.8 (NTLMMinServerSec), Section 2.3.11.10 (allownullsessionfallback)
+* **ANSSI AD Hardening Guide**: Recommendations on NTLM deprecation and NTLMv2 enforcement
+* **DoD Windows 11 Computer STIG v2r6**: LAN Manager authentication parameters
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-wdigest-credentials-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-wdigest-credentials-md-req-paw-159-account-policy-disable-wdigest-credential-caching-for-paws"></div>
+
+# [REQ-PAW-159] Account Policy: Disable WDigest Credential Caching for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-wdigest-credentials-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-wdigest-credentials-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Administrative Templates\System\Credentials Delegation` or Registry Preference
+  * **Registry Location**:
+    * `HKLM\System\CurrentControlSet\Control\SecurityProviders\WDigest\UseLogonCredential` = `0` (REG_DWORD)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-wdigest-credentials-md-rationale"></div>
+
+## Rationale
+The WDigest authentication provider in older Windows releases stored plain-text passwords directly in LSASS memory to support HTTP Digest authentication. Disabling `UseLogonCredential` (`0`) ensures that LSASS never retains plaintext password copies in memory, mitigating credential theft via memory dumping tools such as Mimikatz.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-wdigest-credentials-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Digest Authentication**: Applications requiring WDigest HTTP authentication will fail. Modern environments use Kerberos, TLS client certificates, or modern OAuth/OIDC tokens.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-wdigest-credentials-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-wdigest-credentials-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Right-click **Registry**, select **New** -> **Registry Item**:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest`
+   * **Value name**: `UseLogonCredential`
+   * **Value type**: `REG_DWORD`
+   * **Value data**: `0` (Decimal)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-wdigest-credentials-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-PawAccountWdigestCredentials.ps1](../implementation_scripts/Configure-PawAccountWdigestCredentials.ps1)
+
+```powershell
+# Configure-PawAccountWdigestCredentials.ps1
+Write-Host "Disabling WDigest plaintext credential caching on PAWs..." -ForegroundColor Cyan
+
+$WDigestPath = "HKLM:\System\CurrentControlSet\Control\SecurityProviders\WDigest"
+if (-not (Test-Path $WDigestPath)) { New-Item -Path $WDigestPath -Force | Out-Null }
 Set-ItemProperty -Path $WDigestPath -Name "UseLogonCredential" -Value 0 -Type DWord -Force
-Write-Host "[+] LSASS WDigest credential caching disabled." -ForegroundColor Green
 
-# PBKDF2 Iterations for Cached Logons
-$CachePath = "HKLM:\SECURITY\Cache"
-if (-not (Test-Path $CachePath)) {
-    New-Item -Path $CachePath -Force | Out-Null
-}
-Set-ItemProperty -Path $CachePath -Name "NL`$IterationCount" -Value 1954 -Type DWord -Force
-Write-Host "[+] PBKDF2 cached credentials iteration count configured." -ForegroundColor Green
+Write-Host "WDigest credential caching disabled." -ForegroundColor Green
+```
 
-# Hello for Business, PIN and Microsoft Account policies
-$SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-if (-not (Test-Path $SystemPolicyPath)) {
-    New-Item -Path $SystemPolicyPath -Force | Out-Null
-}
-Set-ItemProperty -Path $SystemPolicyPath -Name "AllowDomainPINLogon" -Value 0 -Type DWord -Force
+*To audit the hardening status:*
 
-$PinComplexityPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity"
-if (-not (Test-Path $PinComplexityPath)) {
-    New-Item -Path $PinComplexityPath -Force | Out-Null
-}
-Set-ItemProperty -Path $PinComplexityPath -Name "MinimumPINLength" -Value 6 -Type DWord -Force
+[Download Script: Get-PawAccountWdigestCredentialsStatus.ps1](../audit_scripts/Get-PawAccountWdigestCredentialsStatus.ps1)
 
-$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-if (-not (Test-Path $SystemPath)) {
-    New-Item -Path $SystemPath -Force | Out-Null
+```powershell
+# Get-PawAccountWdigestCredentialsStatus.ps1
+Write-Host "--- Auditing PAW WDigest Credential Caching ---" -ForegroundColor Cyan
+
+$WDigestPath = "HKLM:\System\CurrentControlSet\Control\SecurityProviders\WDigest"
+$Val = (Get-ItemProperty -Path $WDigestPath -Name "UseLogonCredential" -ErrorAction SilentlyContinue).UseLogonCredential
+
+if ($null -ne $Val -and $Val -eq 0) {
+    Write-Host "    [+] UseLogonCredential is set to 0 (Disabled)." -ForegroundColor Green
+    Write-Output "Compliant"
+    exit 0
+} else {
+    Write-Host "    [!] VULNERABLE: UseLogonCredential is '$Val' (Expected: 0)" -ForegroundColor Red
+    Write-Output "Non-Compliant"
+    exit 1
 }
-Set-ItemProperty -Path $SystemPath -Name "MSAOptional" -Value 1 -Type DWord -Force
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-wdigest-credentials-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8 (Credentials Delegation / WDigest)
+* **ANSSI AD Hardening Guide**: Recommendations on LSASS credential protection and WDigest mitigation
+* **DoD Windows 11 Computer STIG v2r6**: Disabling WDigest plain-text credentials in memory
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-hello-pin-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-hello-pin-md-req-paw-160-account-policy-windows-hello-for-business-and-pin-complexity-for-paws"></div>
+
+# [REQ-PAW-160] Account Policy: Windows Hello for Business and PIN Complexity for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-hello-pin-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-hello-pin-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**:
+    * `Computer Configuration\Administrative Templates\System\PIN Complexity`
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
+    * `Computer Configuration\Administrative Templates\System\Logon`
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\AllowDomainPINLogon` = `0` (REG_DWORD, Convenience PIN sign-in disabled)
+    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity\MinimumPINLength` = `6` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork\RequireSecurityDevice` = `1` (REG_DWORD, Use a hardware security device enabled)
+    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices\TPM12` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\MSAOptional` = `1` (REG_DWORD)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-hello-pin-md-rationale"></div>
+
+## Rationale
+Securing Windows Hello for Business (WHfB) and PIN authentication mechanisms ensures that weak fallback PINs cannot compromise Tier 0 administrative endpoints:
+* **Disable Convenience PINs (`AllowDomainPINLogon = 0`)**: Convenience PINs store encrypted credentials locally without hardware TPM backing. Disabling domain PIN logon ensures standard enterprise authentication is enforced.
+* **Hardware Security Device (`RequireSecurityDevice = 1`)**: Requires asymmetric key pairs generated by Windows Hello to reside strictly inside a dedicated Hardware Security Module / TPM 2.0.
+* **PIN Complexity (`MinimumPINLength = 6`)**: Mandates a minimum PIN length of 6 characters to resist physical PIN guessing attacks.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-hello-pin-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **TPM 2.0 Prerequisite**: Hardware security device requirements require a functional TPM 2.0 module.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-hello-pin-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-hello-pin-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Administrative Templates\System\PIN Complexity`
+   * **Minimum PIN length**: `Enabled` with value `6`
+4. Navigate to:
+   `Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
+   * **Use a hardware security device**: `Enabled`
+   * **Use convenience PIN sign-in**: `Disabled` (value `0`)
+   * **Allow Microsoft accounts to be optional**: `Enabled` (value `1`)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-hello-pin-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-PawAccountHelloPin.ps1](../implementation_scripts/Configure-PawAccountHelloPin.ps1)
+
+```powershell
+# Configure-PawAccountHelloPin.ps1
+Write-Host "Configuring PAW Windows Hello for Business and PIN policies..." -ForegroundColor Cyan
+
+# 1. System Logon PIN Policy
+$SysPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+if (-not (Test-Path $SysPath)) { New-Item -Path $SysPath -Force | Out-Null }
+Set-ItemProperty -Path $SysPath -Name "AllowDomainPINLogon" -Value 0 -Type DWord -Force
+
+# 2. PIN Complexity
+$PinPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity"
+if (-not (Test-Path $PinPath)) { New-Item -Path $PinPath -Force | Out-Null }
+Set-ItemProperty -Path $PinPath -Name "MinimumPINLength" -Value 6 -Type DWord -Force
+
+# 3. Hardware Security Device
+$PfwPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork"
+if (-not (Test-Path $PfwPath)) { New-Item -Path $PfwPath -Force | Out-Null }
+Set-ItemProperty -Path $PfwPath -Name "RequireSecurityDevice" -Value 1 -Type DWord -Force
+
+$TpmPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices"
+if (-not (Test-Path $TpmPath)) { New-Item -Path $TpmPath -Force | Out-Null }
+Set-ItemProperty -Path $TpmPath -Name "TPM12" -Value 0 -Type DWord -Force
+
+# 4. MSA Optional
+$SysPolPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+if (-not (Test-Path $SysPolPath)) { New-Item -Path $SysPolPath -Force | Out-Null }
+Set-ItemProperty -Path $SysPolPath -Name "MSAOptional" -Value 1 -Type DWord -Force
+
+Write-Host "Windows Hello and PIN policies applied." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-PawAccountHelloPinStatus.ps1](../audit_scripts/Get-PawAccountHelloPinStatus.ps1)
+
+```powershell
+# Get-PawAccountHelloPinStatus.ps1
+Write-Host "--- Auditing PAW Windows Hello and PIN Policies ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+function Test-RegVal ($Path, $Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name under $Path is '$Val' (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+    }
+}
+
+Test-RegVal "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" "AllowDomainPINLogon" 0
+Test-RegVal "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity" "MinimumPINLength" 6
+Test-RegVal "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork" "RequireSecurityDevice" 1
+Test-RegVal "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices" "TPM12" 0
+Test-RegVal "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "MSAOptional" 1
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-hello-pin-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.9 (Passport / Windows Hello for Business), Section 18.8 (PIN Complexity)
+* **ANSSI AD Hardening Guide**: Recommendations on hardware tokens and multi-factor authentication
+* **DoD Windows 11 Computer STIG v2r6**: Windows Hello for Business PIN and TPM constraints
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-block-msa-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-block-msa-md-req-paw-161-account-policy-consumer-microsoft-account-restrictions-for-paws"></div>
+
+# [REQ-PAW-161] Account Policy: Consumer Microsoft Account Restrictions for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-block-msa-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-block-msa-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Administrative Templates\Windows Components\Microsoft Account\Block all consumer Microsoft account user authentication`
+  * **Registry Location**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\MicrosoftAccount\DisableUserAuth` = `1` (REG_DWORD)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-block-msa-md-rationale"></div>
+
+## Rationale
+Connecting consumer cloud identities (such as personal `@outlook.com` or `@live.com` Microsoft accounts) to administrative endpoints introduces data exfiltration vectors, shadow cloud synchronizations (OneDrive personal, Edge profile sync), and bypasses enterprise identity governance. Disabling consumer user authentication enforces enterprise-only logon pathways.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-block-msa-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Consumer Apps**: Windows Store consumer apps requiring personal Microsoft accounts will be blocked. Consumer apps have no valid operational use case on Tier 0 PAWs.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-block-msa-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-block-msa-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Administrative Templates\Windows Components\Microsoft Account`
+4. Set **Block all consumer Microsoft account user authentication** to **Enabled**.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-block-msa-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-PawAccountBlockMsa.ps1](../implementation_scripts/Configure-PawAccountBlockMsa.ps1)
+
+```powershell
+# Configure-PawAccountBlockMsa.ps1
+Write-Host "Blocking consumer Microsoft account user authentication on PAWs..." -ForegroundColor Cyan
 
 $MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
-if (-not (Test-Path $MsaPath)) {
-    New-Item -Path $MsaPath -Force | Out-Null
-}
+if (-not (Test-Path $MsaPath)) { New-Item -Path $MsaPath -Force | Out-Null }
 Set-ItemProperty -Path $MsaPath -Name "DisableUserAuth" -Value 1 -Type DWord -Force
 
-$PassportPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork"
-if (-not (Test-Path $PassportPath)) {
-    New-Item -Path $PassportPath -Force | Out-Null
-}
-Set-ItemProperty -Path $PassportPath -Name "RequireSecurityDevice" -Value 1 -Type DWord -Force
+Write-Host "Consumer Microsoft account user authentication blocked." -ForegroundColor Green
+```
 
-$ExcludeDevicesPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices"
-if (-not (Test-Path $ExcludeDevicesPath)) {
-    New-Item -Path $ExcludeDevicesPath -Force | Out-Null
-}
-Set-ItemProperty -Path $ExcludeDevicesPath -Name "TPM12" -Value 0 -Type DWord -Force
-Write-Host "[+] Hello for Business, PIN and Microsoft Account options configured." -ForegroundColor Green
+*To audit the hardening status:*
 
-# Domain Member Secure Channel netlogon settings
+[Download Script: Get-PawAccountBlockMsaStatus.ps1](../audit_scripts/Get-PawAccountBlockMsaStatus.ps1)
+
+```powershell
+# Get-PawAccountBlockMsaStatus.ps1
+Write-Host "--- Auditing PAW Consumer Microsoft Account Restrictions ---" -ForegroundColor Cyan
+
+$MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
+$Val = (Get-ItemProperty -Path $MsaPath -Name "DisableUserAuth" -ErrorAction SilentlyContinue).DisableUserAuth
+
+if ($null -ne $Val -and $Val -eq 1) {
+    Write-Host "    [+] DisableUserAuth is set to 1 (Enabled)." -ForegroundColor Green
+    Write-Output "Compliant"
+    exit 0
+} else {
+    Write-Host "    [!] VULNERABLE: DisableUserAuth is '$Val' (Expected: 1)" -ForegroundColor Red
+    Write-Output "Non-Compliant"
+    exit 1
+}
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-block-msa-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.9 (Microsoft Account: Block all consumer Microsoft account user authentication)
+* **ANSSI AD Hardening Guide**: Recommendations on identity isolation on administrative workstations
+* **DoD Windows 11 Computer STIG v2r6**: Microsoft account blocking policy
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-secure-channel-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-secure-channel-md-req-paw-162-account-policy-domain-member-secure-channel-security-for-paws"></div>
+
+# [REQ-PAW-162] Account Policy: Domain Member Secure Channel Security for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-secure-channel-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-secure-channel-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Locations**:
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\RequireSignOrSeal` = `1` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\SealSecureChannel` = `1` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\SignSecureChannel` = `1` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange` = `0` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\MaximumPasswordAge` = `30` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\RequireStrongKey` = `1` (REG_DWORD)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-secure-channel-md-rationale"></div>
+
+## Rationale
+The Netlogon secure channel protects authentication and trust communication between domain-joined workstations and Domain Controllers:
+* **Signing and Sealing (`RequireSignOrSeal`, `SealSecureChannel`, `SignSecureChannel`)**: Mandates encryption and cryptographic signing on all Netlogon RPC traffic, preventing eavesdropping and tampering.
+* **Strong Session Keys (`RequireStrongKey`)**: Enforces 128-bit session keys for secure channel communication, blocking downgrade to DES or weak cipher suites (mitigating ZeroLogon and related vulnerabilities).
+* **Machine Password Rotation (`DisablePasswordChange = 0`, `MaximumPasswordAge = 30`)**: Enforces automatic 30-day machine password rotation, preventing stale machine credentials from being harvested for offline persistence.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-secure-channel-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Third-Party Domain Members**: Modern Windows systems natively support strong session keys and secure channel signing. No impact on supported Windows 10/11 Enterprise PAWs.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-secure-channel-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-secure-channel-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the policies:
+   * **Domain member: Digitally encrypt or sign secure channel data (always)**: `Enabled`
+   * **Domain member: Digitally encrypt secure channel data (when possible)**: `Enabled`
+   * **Domain member: Digitally sign secure channel data (when possible)**: `Enabled`
+   * **Domain member: Disable machine account password changes**: `Disabled`
+   * **Domain member: Maximum machine account password age**: `30` days
+   * **Domain member: Require strong (Windows 2000 or later) session key**: `Enabled`
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-secure-channel-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-PawAccountSecureChannel.ps1](../implementation_scripts/Configure-PawAccountSecureChannel.ps1)
+
+```powershell
+# Configure-PawAccountSecureChannel.ps1
+Write-Host "Configuring PAW Domain Member Secure Channel settings..." -ForegroundColor Cyan
+
 $NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
-if (-not (Test-Path $NetlogonPath)) {
-    New-Item -Path $NetlogonPath -Force | Out-Null
-}
+if (-not (Test-Path $NetlogonPath)) { New-Item -Path $NetlogonPath -Force | Out-Null }
+
 Set-ItemProperty -Path $NetlogonPath -Name "RequireSignOrSeal" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $NetlogonPath -Name "SealSecureChannel" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $NetlogonPath -Name "SignSecureChannel" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $NetlogonPath -Name "DisablePasswordChange" -Value 0 -Type DWord -Force
 Set-ItemProperty -Path $NetlogonPath -Name "MaximumPasswordAge" -Value 30 -Type DWord -Force
 Set-ItemProperty -Path $NetlogonPath -Name "RequireStrongKey" -Value 1 -Type DWord -Force
-Write-Host "[+] Domain Member secure channel configurations applied." -ForegroundColor Green
 
-# LanmanWorkstation plain text passwords block
-$LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
-if (-not (Test-Path $LanmanWorkPath)) {
-    New-Item -Path $LanmanWorkPath -Force | Out-Null
-}
-Set-ItemProperty -Path $LanmanWorkPath -Name "EnablePlainTextPassword" -Value 0 -Type DWord -Force
-
-# NTLM SSP Client & Server security and Null Session Fallback
-$MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
-if (-not (Test-Path $MsvPath)) {
-    New-Item -Path $MsvPath -Force | Out-Null
-}
-Set-ItemProperty -Path $MsvPath -Name "allownullsessionfallback" -Value 0 -Type DWord -Force
-Set-ItemProperty -Path $MsvPath -Name "NTLMMinClientSec" -Value 537395200 -Type DWord -Force
-Set-ItemProperty -Path $MsvPath -Name "NTLMMinServerSec" -Value 537395200 -Type DWord -Force
-Write-Host "[+] Network authentication security and NTLM session settings applied." -ForegroundColor Green
-
-# 2. Enforce Account Lockout and Password Policy via secedit
-$SecTempDir = Join-Path $env:TEMP "PAWAccountSecurityTemplates"
-if (-not (Test-Path $SecTempDir)) {
-    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
-}
-
-$CfgFile = Join-Path $SecTempDir "paw_account_sec.cfg"
-$LogFile = Join-Path $SecTempDir "secedit.log"
-$DbFile = Join-Path $SecTempDir "secedit.sdb"
-
-# Export current db
-$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
-if ($Process.ExitCode -ne 0) {
-    Write-Error "Failed to export current configuration database."
-    return
-}
-
-$ConfigText = Get-Content -Path $CfgFile -Raw
-$HasSystemAccess = $ConfigText -match "\[System Access\]"
-if (-not $HasSystemAccess) {
-    $ConfigText += "`r`n[System Access]`r`n"
-}
-
-# Re-build [System Access] section line-by-line
-$Lines = $ConfigText -split "`r?`n"
-$NewLines = @()
-$InSystemAccess = $false
-
-$AccountSettings = @{
-    "LockoutBadCount"       = 5
-    "ResetLockoutCount"     = 30
-    "LockoutDuration"       = 30
-    "ClearTextPassword"     = 0
-    "MinimumPasswordLength" = 20
-    "PasswordComplexity"    = 1
-    "PasswordHistorySize"   = 24
-    "MaxPasswordAge"        = 0
-    "MinPasswordAge"        = 1
-}
-
-foreach ($Line in $Lines) {
-    if ($Line -match "^\[(.*)\]$") {
-        $SectionName = $Matches[1]
-        if ($SectionName -eq "System Access") {
-            $InSystemAccess = $true
-            $NewLines += $Line
-            continue
-        } else {
-            $InSystemAccess = $false
-        }
-    }
-    
-    if ($InSystemAccess) {
-        $IsManaged = $false
-        foreach ($Key in $AccountSettings.Keys) {
-            if ($Line -match "^\s*$($Key)\s*=") {
-                $IsManaged = $true
-                break
-            }
-        }
-        if (-not $IsManaged) {
-            $NewLines += $Line
-        }
-    } else {
-        $NewLines += $Line
-    }
-}
-
-# Append our settings
-$FinalLines = @()
-foreach ($Line in $NewLines) {
-    $FinalLines += $Line
-    if ($Line -eq "[System Access]") {
-        foreach ($Key in $AccountSettings.Keys) {
-            $Val = $AccountSettings[$Key]
-            $FinalLines += "$($Key) = $($Val)"
-        }
-    }
-}
-
-$FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
-
-# Import
-$Process = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas SECURITYPOLICY /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
-if ($Process.ExitCode -eq 0) {
-    Write-Host "[+] Lockout and password policies applied locally." -ForegroundColor Green
-} else {
-    Write-Error "Failed to apply local account policies. Exit Code: $($Process.ExitCode)"
-}
-
-Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "Domain member secure channel configurations applied." -ForegroundColor Green
 ```
 
-*To verify the settings have been applied:*
+*To audit the hardening status:*
 
-[Download Script: Test-PAWAccountPolicies.ps1](audit_scripts/Test-PAWAccountPolicies.ps1)
+[Download Script: Get-PawAccountSecureChannelStatus.ps1](../audit_scripts/Get-PawAccountSecureChannelStatus.ps1)
 
 ```powershell
-# Test-PAWAccountPolicies.ps1
-# Checks local registry and SecEdit settings for account lockout, password options, smart card removal behavior, PIN parameters, Hello for Business, Microsoft account settings, secure channel properties, and NTLM session configuration on PAWs.
-
-Write-Host "--- Auditing PAW Account and Password Policies ---" -ForegroundColor Cyan
-
+# Get-PawAccountSecureChannelStatus.ps1
+Write-Host "--- Auditing PAW Domain Member Secure Channel Settings ---" -ForegroundColor Cyan
 $script:Vulnerable = $false
 
-# Helper function to audit registry properties
-function Test-RegistryValue ($path, $name, $expectedValue) {
-    $val = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
-    $actual = if ($val) { $val.$name } else { "" }
-    $color = "Red"
-    if ($actual -eq $expectedValue) {
-        $color = "Green"
-    } else {
-        $script:Vulnerable = $true
-    }
-    Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
-}
-
-# 1. Audit Registry Settings
-$WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
-Test-RegistryValue $WinlogonPath "ScRemoveOption" "1"
-Test-RegistryValue $WinlogonPath "CachedLogonsCount" 0
-
-$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
-Test-RegistryValue $LsaPath "LimitBlankPasswordUse" 1
-Test-RegistryValue $LsaPath "NoLMHash" 1
-Test-RegistryValue $LsaPath "LmCompatibilityLevel" 5
-
-$WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
-Test-RegistryValue $WDigestPath "UseLogonCredential" 0
-
-$CachePath = "HKLM:\SECURITY\Cache"
-Test-RegistryValue $CachePath "NL`$IterationCount" 1954
-
-$SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-Test-RegistryValue $SystemPolicyPath "AllowDomainPINLogon" 0
-
-$PinComplexityPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity"
-Test-RegistryValue $PinComplexityPath "MinimumPINLength" 6
-
-$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-Test-RegistryValue $SystemPath "MSAOptional" 1
-
-$MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
-Test-RegistryValue $MsaPath "DisableUserAuth" 1
-
-$PassportPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork"
-Test-RegistryValue $PassportPath "RequireSecurityDevice" 1
-
-$ExcludeDevicesPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices"
-Test-RegistryValue $ExcludeDevicesPath "TPM12" 0
-
 $NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
-Test-RegistryValue $NetlogonPath "RequireSignOrSeal" 1
-Test-RegistryValue $NetlogonPath "SealSecureChannel" 1
-Test-RegistryValue $NetlogonPath "SignSecureChannel" 1
-Test-RegistryValue $NetlogonPath "DisablePasswordChange" 0
-Test-RegistryValue $NetlogonPath "MaximumPasswordAge" 30
-Test-RegistryValue $NetlogonPath "RequireStrongKey" 1
 
-$LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
-Test-RegistryValue $LanmanWorkPath "EnablePlainTextPassword" 0
-
-$MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
-Test-RegistryValue $MsvPath "allownullsessionfallback" 0
-Test-RegistryValue $MsvPath "NTLMMinClientSec" 537395200
-Test-RegistryValue $MsvPath "NTLMMinServerSec" 537395200
-
-# 2. Audit SecEdit Settings
-$SecTempDir = Join-Path $env:TEMP "PAWAccountAuditSecurityTemplates"
-if (-not (Test-Path $SecTempDir)) {
-    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
-}
-
-$CfgFile = Join-Path $SecTempDir "paw_account_audit.cfg"
-$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
-if ($Process.ExitCode -ne 0) {
-    Write-Error "Failed to export current database."
-    return
-}
-
-$ConfigContent = Get-Content -Path $CfgFile -Raw
-$AccountSettings = @{
-    "LockoutBadCount"       = 5
-    "ResetLockoutCount"     = 30
-    "LockoutDuration"       = 30
-    "ClearTextPassword"     = 0
-    "MinimumPasswordLength" = 20
-    "PasswordComplexity"    = 1
-    "PasswordHistorySize"   = 24
-    "MaxPasswordAge"        = 0
-    "MinPasswordAge"        = 1
-}
-
-foreach ($Key in $AccountSettings.Keys) {
-    $Expected = $AccountSettings[$Key]
-    if ($ConfigContent -match "(?m)^\s*$($Key)\s*=\s*(.*)\s*$") {
-        $Actual = $Matches[1].Trim()
-    } else {
-        $Actual = ""
-    }
-    
-    $Color = "Red"
-    if ($Actual -eq [string]$Expected) {
-        $Color = "Green"
-    } else {
+function Test-RegVal ($Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $NetlogonPath -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name is '$Val' (Expected: $Expected)" -ForegroundColor Red
         $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
     }
-    Write-Host "    - System Access Setting: $($Key) | Actual: '$($Actual)' (Expected: '$($Expected)')" -ForegroundColor $Color
 }
 
-Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+Test-RegVal "RequireSignOrSeal" 1
+Test-RegVal "SealSecureChannel" 1
+Test-RegVal "SignSecureChannel" 1
+Test-RegVal "DisablePasswordChange" 0
+Test-RegVal "RequireStrongKey" 1
+
+$MaxAge = (Get-ItemProperty -Path $NetlogonPath -Name "MaximumPasswordAge" -ErrorAction SilentlyContinue).MaximumPasswordAge
+if ($null -eq $MaxAge -or $MaxAge -gt 30 -or $MaxAge -eq 0) {
+    Write-Host "    [!] VULNERABLE: MaximumPasswordAge is '$MaxAge' (Expected: 30 or fewer, but not 0)" -ForegroundColor Red
+    $script:Vulnerable = $true
+} else {
+    Write-Host "    [+] MaximumPasswordAge: $MaxAge" -ForegroundColor Green
+}
 
 if ($script:Vulnerable) {
-    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    Write-Output "Non-Compliant"
+    exit 1
 } else {
-    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    Write-Output "Compliant"
+    exit 0
 }
 ```
 
 ---
 
-<div id="07-paws-configure-account-policies-md-sources-compliance-references"></div>
+<div id="07-paws-account-policy-configure-paw-account-secure-channel-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Recommendations on password complexity, reversible encryption blocks, lockout management, and domain member secure channels.
-* **CIS Microsoft Windows 10/11 Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 2.3.7.3 (Accounts: Limit local account use of blank passwords...), Section 2.3.9.5 (Interactive logon: Smart card removal behavior), Section 2.3.10.2 (Microsoft network client: Send unencrypted password), Section 2.3.11.8 (Network access: Allow anonymous SID/Name translation), Section 2.3.11.10 (Network security: Allow LocalSystem NULL session fallback).
-* **DoD Windows 11 Computer STIG v2r6**: Various account policy, PIN complexity, Windows Hello for Business, Microsoft account restrictions, WDigest disabled, and Netlogon secure channel parameters.
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.6 (Domain member secure channel options)
+* **ANSSI AD Hardening Guide**: Recommendations on secure channels and machine account password rotation
+* **DoD Windows 11 Computer STIG v2r6**: Domain member secure channel cryptography
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-smb-security-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-smb-security-md-req-paw-163-account-policy-smb-client-and-server-security-options-for-paws"></div>
+
+# [REQ-PAW-163] Account Policy: SMB Client and Server Security Options for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-smb-security-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-smb-security-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Locations**:
+    * `HKLM\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\EnablePlainTextPassword` = `0` (REG_DWORD, Send unencrypted password disabled)
+    * `HKLM\System\CurrentControlSet\Services\LanmanServer\Parameters\AutoDisconnect` = `15` (REG_DWORD, Idle disconnect time = 15 minutes)
+    * `HKLM\System\CurrentControlSet\Services\LanmanServer\Parameters\EnableForcedLogoff` = `1` (REG_DWORD, Disconnect clients when logon hours expire)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\ForceLogoffWhenHourExpire` = `1` (REG_DWORD, Force logoff when logon hours expire)
+    * `HKLM\System\CurrentControlSet\Services\LanmanServer\Parameters\NullSessionShares` = `@()` (REG_MULTI_SZ, Anonymous shares = None)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-smb-security-md-rationale"></div>
+
+## Rationale
+Securing SMB workstation and server parameters blocks cleartext credential disclosure and enforces session termination boundaries:
+* **Block Plaintext Passwords (`EnablePlainTextPassword = 0`)**: Prevents the SMB redirector from transmitting unencrypted credentials across the network to rogue or third-party SMB servers.
+* **Auto-Disconnect Idle Sessions (`AutoDisconnect = 15`)**: Automatically suspends dormant SMB sessions after 15 minutes, mitigating session hijacking over open network connections.
+* **Logon Hours Enforcement (`EnableForcedLogoff = 1`, `ForceLogoffWhenHourExpire = 1`)**: Ensures that when defined administrative logon hours expire, active sessions are forcefully terminated.
+* **Null Session Shares (`NullSessionShares = @()`)**: Prevents unauthenticated anonymous users from accessing any local network shares.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-smb-security-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Third-Party SMB**: Older NAS appliances requiring plain text SMB authentication will be blocked. Administrative PAWs must connect only to modern, encrypted SMBv3 shares.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-smb-security-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-smb-security-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the policies:
+   * **Microsoft network client: Send unencrypted password to third-party SMB servers**: `Disabled`
+   * **Microsoft network server: Amount of idle time required before suspending session**: `15` minutes
+   * **Microsoft network server: Disconnect clients when logon hours expire**: `Enabled`
+   * **Network security: Force logoff when logon hours expire**: `Enabled`
+   * **Network access: Shares that can be accessed anonymously**: `None` (empty)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-smb-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-PawAccountSmbSecurity.ps1](../implementation_scripts/Configure-PawAccountSmbSecurity.ps1)
+
+```powershell
+# Configure-PawAccountSmbSecurity.ps1
+Write-Host "Configuring PAW SMB client and server security options..." -ForegroundColor Cyan
+
+# 1. LanmanWorkstation
+$LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
+if (-not (Test-Path $LanmanWorkPath)) { New-Item -Path $LanmanWorkPath -Force | Out-Null }
+Set-ItemProperty -Path $LanmanWorkPath -Name "EnablePlainTextPassword" -Value 0 -Type DWord -Force
+
+# 2. LanmanServer
+$LanmanServerPath = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
+if (-not (Test-Path $LanmanServerPath)) { New-Item -Path $LanmanServerPath -Force | Out-Null }
+Set-ItemProperty -Path $LanmanServerPath -Name "AutoDisconnect" -Value 15 -Type DWord -Force
+Set-ItemProperty -Path $LanmanServerPath -Name "EnableForcedLogoff" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LanmanServerPath -Name "NullSessionShares" -Value @() -Type MultiString -Force
+
+# 3. Netlogon ForceLogoff
+$NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
+if (-not (Test-Path $NetlogonPath)) { New-Item -Path $NetlogonPath -Force | Out-Null }
+Set-ItemProperty -Path $NetlogonPath -Name "ForceLogoffWhenHourExpire" -Value 1 -Type DWord -Force
+
+Write-Host "SMB client and server security options applied." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-PawAccountSmbSecurityStatus.ps1](../audit_scripts/Get-PawAccountSmbSecurityStatus.ps1)
+
+```powershell
+# Get-PawAccountSmbSecurityStatus.ps1
+Write-Host "--- Auditing PAW SMB Client and Server Security Options ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
+$LanmanServerPath = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
+$NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
+
+function Test-RegVal ($Path, $Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name is '$Val' (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+    }
+}
+
+Test-RegVal $LanmanWorkPath "EnablePlainTextPassword" 0
+Test-RegVal $LanmanServerPath "AutoDisconnect" 15
+Test-RegVal $LanmanServerPath "EnableForcedLogoff" 1
+Test-RegVal $NetlogonPath "ForceLogoffWhenHourExpire" 1
+
+$NullShares = (Get-ItemProperty -Path $LanmanServerPath -Name "NullSessionShares" -ErrorAction SilentlyContinue).NullSessionShares
+if ($null -ne $NullShares -and $NullShares.Count -gt 0 -and $NullShares[0] -ne "") {
+    Write-Host "    [!] VULNERABLE: NullSessionShares contains values: $($NullShares -join ', ')" -ForegroundColor Red
+    $script:Vulnerable = $true
+} else {
+    Write-Host "    [+] NullSessionShares: None" -ForegroundColor Green
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-smb-security-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.9.1 (AutoDisconnect), Section 2.3.9.4 (EnableForcedLogoff), Section 2.3.10.2 (EnablePlainTextPassword), Section 2.3.10.11 (NullSessionShares), Section 2.3.11.6 (ForceLogoffWhenHourExpire)
+* **ANSSI AD Hardening Guide**: Recommendations on SMB network protocols and idle session termination
+* **DoD Windows 11 Computer STIG v2r6**: SMB encryption and session timeout controls
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-anonymous-restrictions-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-anonymous-restrictions-md-req-paw-164-account-policy-anonymous-access-and-enumeration-restrictions-for-paws"></div>
+
+# [REQ-PAW-164] Account Policy: Anonymous Access and Enumeration Restrictions for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-anonymous-restrictions-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-anonymous-restrictions-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Locations**:
+    * `HKLM\System\CurrentControlSet\Control\Lsa\RestrictAnonymousSAM` = `1` (REG_DWORD, Do not allow anonymous enumeration of SAM accounts)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\RestrictAnonymous` = `1` (REG_DWORD, Do not allow anonymous enumeration of shares)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters\AllowPKU2U` = `0` (REG_DWORD, Disallow PKU2U authentication requests)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\ObaseCaseInsensitive` = `1` (REG_DWORD, Require case insensitivity for non-Windows subsystems)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-anonymous-restrictions-md-rationale"></div>
+
+## Rationale
+Restricting unauthenticated reconnaissance and non-standard authentication endpoints shields local system objects and user databases:
+* **Anonymous SAM & Share Enumeration (`RestrictAnonymousSAM`, `RestrictAnonymous`)**: Prevents unauthenticated remote attackers from querying local user lists, group memberships, or shared folder names via null sessions.
+* **Disallow PKU2U (`AllowPKU2U`)**: PKU2U allows peer-to-peer authentication using online Microsoft accounts. Disabling PKU2U blocks unauthorized online identity integration and lateral traversal.
+* **Subsystem Case Insensitivity (`ObaseCaseInsensitive`)**: Enforces consistent case insensitivity for non-Windows subsystems, mitigating object namespace collision exploits.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-anonymous-restrictions-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Anonymous Queries**: Legacy monitoring tools attempting anonymous SAM or share queries will receive Access Denied.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-anonymous-restrictions-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-anonymous-restrictions-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the policies:
+   * **Network access: Do not allow anonymous enumeration of SAM accounts and shares**: `Enabled`
+   * **Network access: Allow anonymous SID/Name translation**: `Disabled`
+   * **Network Security: Allow PKU2U authentication requests to this computer to use online identities**: `Disabled`
+   * **System objects: Require case insensitivity for non-Windows subsystems**: `Enabled`
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-anonymous-restrictions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-PawAccountAnonymousRestrictions.ps1](../implementation_scripts/Configure-PawAccountAnonymousRestrictions.ps1)
+
+```powershell
+# Configure-PawAccountAnonymousRestrictions.ps1
+Write-Host "Configuring PAW anonymous access and enumeration restrictions..." -ForegroundColor Cyan
+
+$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+if (-not (Test-Path $LsaPath)) { New-Item -Path $LsaPath -Force | Out-Null }
+Set-ItemProperty -Path $LsaPath -Name "RestrictAnonymousSAM" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "RestrictAnonymous" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "ObaseCaseInsensitive" -Value 1 -Type DWord -Force
+
+$KerbPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+if (-not (Test-Path $KerbPath)) { New-Item -Path $KerbPath -Force | Out-Null }
+Set-ItemProperty -Path $KerbPath -Name "AllowPKU2U" -Value 0 -Type DWord -Force
+
+Write-Host "Anonymous access and enumeration restrictions applied." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-PawAccountAnonymousRestrictionsStatus.ps1](../audit_scripts/Get-PawAccountAnonymousRestrictionsStatus.ps1)
+
+```powershell
+# Get-PawAccountAnonymousRestrictionsStatus.ps1
+Write-Host "--- Auditing PAW Anonymous Access and Enumeration Restrictions ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+$KerbPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+
+function Test-RegVal ($Path, $Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name under $Path is '$Val' (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+    }
+}
+
+Test-RegVal $LsaPath "RestrictAnonymousSAM" 1
+Test-RegVal $LsaPath "RestrictAnonymous" 1
+Test-RegVal $LsaPath "ObaseCaseInsensitive" 1
+Test-RegVal $KerbPath "AllowPKU2U" 0
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-anonymous-restrictions-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.10.3 (RestrictAnonymousSAM), Section 2.3.11.3 (AllowPKU2U), Section 2.3.15.1 (ObaseCaseInsensitive)
+* **ANSSI AD Hardening Guide**: Recommendations on restricting anonymous enumeration and RPC interfaces
+* **DoD Windows 11 Computer STIG v2r6**: Anonymous SAM enumeration restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-interactive-logon-md"></div>
+
+<div id="07-paws-account-policy-configure-paw-account-interactive-logon-md-req-paw-165-account-policy-interactive-logon-security-options-for-paws"></div>
+
+# [REQ-PAW-165] Account Policy: Interactive Logon Security Options for PAWs
+
+<div id="07-paws-account-policy-configure-paw-account-interactive-logon-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
+* **Operating Systems**: Windows 10/11 Enterprise
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-interactive-logon-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableCAD` = `0` (REG_DWORD, Require CTRL+ALT+DEL enabled)
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DontDisplayLastUserName` = `1` (REG_DWORD, Do not display last signed-in enabled)
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\CrashOnAuditFail` = `0` (REG_DWORD, Shut down system if unable to log audits disabled)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-interactive-logon-md-rationale"></div>
+
+## Rationale
+Configuring interactive logon behavior prevents credential harvesting via spoofed login screens and shoulder surfing:
+* **Require CTRL+ALT+DEL (`DisableCAD = 0`)**: The Secure Attention Sequence (SAS / CTRL+ALT+DEL) can only be intercepted by the trusted Windows kernel/winlogon process, preventing malicious userland Trojan login prompts from capturing credentials.
+* **Hide Last Signed-in User (`DontDisplayLastUserName = 1`)**: Prevents shoulder-surfers or unauthorized physical observers from discovering valid Tier 0 administrative usernames.
+* **Do Not Crash on Audit Failure (`CrashOnAuditFail = 0`)**: Prevents immediate denial-of-service crashes caused by filled event log files on administrative workstations.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-interactive-logon-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **User Workflow**: Users must press CTRL+ALT+DEL and manually enter both their administrative username and credential/PIN.
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-interactive-logon-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-account-policy-configure-paw-account-interactive-logon-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAWs`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the policies:
+   * **Interactive logon: Do not require CTRL+ALT+DEL**: `Disabled` (value `0`)
+   * **Interactive logon: Don't display last signed-in**: `Enabled` (value `1`)
+   * **Audit: Shut down system immediately if unable to log security audits**: `Disabled` (value `0`)
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-interactive-logon-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-PawAccountInteractiveLogon.ps1](../implementation_scripts/Configure-PawAccountInteractiveLogon.ps1)
+
+```powershell
+# Configure-PawAccountInteractiveLogon.ps1
+Write-Host "Configuring PAW interactive logon security options..." -ForegroundColor Cyan
+
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+if (-not (Test-Path $SystemPath)) { New-Item -Path $SystemPath -Force | Out-Null }
+
+Set-ItemProperty -Path $SystemPath -Name "DisableCAD" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $SystemPath -Name "DontDisplayLastUserName" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $SystemPath -Name "CrashOnAuditFail" -Value 0 -Type DWord -Force
+
+Write-Host "Interactive logon security options applied." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-PawAccountInteractiveLogonStatus.ps1](../audit_scripts/Get-PawAccountInteractiveLogonStatus.ps1)
+
+```powershell
+# Get-PawAccountInteractiveLogonStatus.ps1
+Write-Host "--- Auditing PAW Interactive Logon Security Options ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+
+function Test-RegVal ($Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $SystemPath -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name is '$Val' (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+    }
+}
+
+Test-RegVal "DisableCAD" 0
+Test-RegVal "DontDisplayLastUserName" 1
+Test-RegVal "CrashOnAuditFail" 0
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-account-policy-configure-paw-account-interactive-logon-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.2.2 (CrashOnAuditFail), Section 2.3.7.1 (DisableCAD), Section 2.3.7.2 (DontDisplayLastUserName)
+* **ANSSI AD Hardening Guide**: Recommendations on secure desktop and interactive logon hardening
+* **DoD Windows 11 Computer STIG v2r6**: SAS CTRL+ALT+DEL and username display restrictions
 
 
 <div style="page-break-before: always;"></div>
@@ -57305,6 +58981,20 @@ To prevent initial access and lateral movement, the following unitary technical 
 
 18. **[REQ-END-018 - Configure Account and Password Policies](#08-endpoints-configure-account-policies-md)**
     Enforces local and domain-wide account settings, including account lockout thresholds, lockout observation windows, smart card removal actions, and disabling reversible password encryption.
+    * **[REQ-END-163 - Account Policy: Password Policy for Endpoints](#08-endpoints-account-policy-configure-end-account-password-policy-md)**
+    * **[REQ-END-164 - Account Policy: Account Lockout Policy for Endpoints](#08-endpoints-account-policy-configure-end-account-lockout-policy-md)**
+    * **[REQ-END-165 - Account Policy: Kerberos Policy for Endpoints](#08-endpoints-account-policy-configure-end-account-kerberos-policy-md)**
+    * **[REQ-END-166 - Account Policy: Smart Card Removal Behavior for Endpoints](#08-endpoints-account-policy-configure-end-account-smart-card-removal-md)**
+    * **[REQ-END-167 - Account Policy: Cached Logons and PBKDF2 Iteration Count for Endpoints](#08-endpoints-account-policy-configure-end-account-cached-logons-md)**
+    * **[REQ-END-168 - Account Policy: Local Accounts and Blank Password Restrictions for Endpoints](#08-endpoints-account-policy-configure-end-account-local-blank-passwords-md)**
+    * **[REQ-END-169 - Account Policy: NTLM and LAN Manager Authentication Security for Endpoints](#08-endpoints-account-policy-configure-end-account-ntlm-security-md)**
+    * **[REQ-END-170 - Account Policy: Disable WDigest Credential Caching for Endpoints](#08-endpoints-account-policy-configure-end-account-wdigest-credentials-md)**
+    * **[REQ-END-171 - Account Policy: Windows Hello for Business and PIN Complexity for Endpoints](#08-endpoints-account-policy-configure-end-account-hello-pin-md)**
+    * **[REQ-END-172 - Account Policy: Consumer Microsoft Account Restrictions for Endpoints](#08-endpoints-account-policy-configure-end-account-block-msa-md)**
+    * **[REQ-END-173 - Account Policy: Domain Member Secure Channel Security for Endpoints](#08-endpoints-account-policy-configure-end-account-secure-channel-md)**
+    * **[REQ-END-174 - Account Policy: SMB Client and Server Security Options for Endpoints](#08-endpoints-account-policy-configure-end-account-smb-security-md)**
+    * **[REQ-END-175 - Account Policy: Anonymous Access and Enumeration Restrictions for Endpoints](#08-endpoints-account-policy-configure-end-account-anonymous-restrictions-md)**
+    * **[REQ-END-176 - Account Policy: Interactive Logon Security Options for Endpoints](#08-endpoints-account-policy-configure-end-account-interactive-logon-md)**
 
 19. **[REQ-END-019 - Configure User Profile Restrictions](#08-endpoints-configure-user-profile-restrictions-md)**
     Locks down user profile registry settings (HKCU) to disable toast notifications on the lock screen and block third-party application suggestions.
@@ -69110,9 +70800,9 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block
 
 <div id="08-endpoints-configure-account-policies-md"></div>
 
-<div id="08-endpoints-configure-account-policies-md-req-end-018-configure-account-and-password-policies"></div>
+<div id="08-endpoints-configure-account-policies-md-configure-account-and-password-policies"></div>
 
-# [REQ-END-018] Configure Account and Password Policies
+# Configure Account and Password Policies
 
 <div id="08-endpoints-configure-account-policies-md-target-scope"></div>
 
@@ -69126,99 +70816,21 @@ Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Paths / Registry Locations**:
-  * **GPO Paths**:
-    * `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Account Lockout Policy`
-    * `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Password Policy`
-    * `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-    * `Computer Configuration\Administrative Templates\System\PIN Complexity`
-    * `Computer Configuration\Administrative Templates\Windows Components\Microsoft Account`
-    * `Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
-  * **Registry Locations**:
-    * Configured via `GptTmpl.inf` (SecEdit System Access settings):
-      * `MinimumPasswordLength` = `14` (14 characters minimum)
-      * `PasswordComplexity` = `1` (Complexity enabled)
-      * `PasswordHistorySize` = `24` (24 passwords remembered)
-      * `MaxPasswordAge` = `0` (Password does not expire / disabled)
-      * `MinPasswordAge` = `1` (1 day minimum)
-      * `ClearTextPassword` = `0` (Reversible encryption disabled)
-      * `RelaxMinPasswordLengthLimits` = `1` (Relax minimum password length limits enabled)
-      * `AllowAdministratorLockout` = `1` (Allow Administrator account lockout enabled)
-    * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon`
-      * `ScRemoveOption` = `"1"` (REG_SZ, 1 = Lock Workstation)
-      * `CachedLogonsCount` = `0` (REG_DWORD)
-      * `PasswordExpiryWarning` = `14` (REG_DWORD, prompt user to change password before expiration)
-    * `HKLM\SECURITY\Cache`
-      * `NL$IterationCount` = `1954` (REG_DWORD, 1954 = 2,000,896 rounds of PBKDF2-SHA1)
-    * `HKLM\System\CurrentControlSet\Control\Lsa`
-      * `LimitBlankPasswordUse` = `1` (REG_DWORD)
-      * `NoLMHash` = `1` (REG_DWORD)
-      * `RestrictAnonymousSAM` = `1` (REG_DWORD, restrict anonymous enumeration of SAM)
-      * `RestrictAnonymous` = `1` (REG_DWORD, restrict anonymous enumeration of shares)
-      * `ForceNetworkLogon` = `0` (REG_DWORD, sharing and security model Classic)
-      * `ObaseCaseInsensitive` = `1` (REG_DWORD, require case insensitivity for non-Windows subsystems)
-      * `LmCompatibilityLevel` = `5` (REG_DWORD, Network security: LAN Manager authentication level - NTLMv2 only)
-    * `HKLM\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters`
-      * `AllowPKU2U` = `0` (REG_DWORD, Allow PKU2U requests disabled)
-    * `HKLM\System\CurrentControlSet\Control\SecurityProviders\WDigest`
-      * `UseLogonCredential` = `0` (REG_DWORD)
-    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
-      * `AllowDomainPINLogon` = `0` (REG_DWORD)
-    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity`
-      * `MinimumPINLength` = `6` (REG_DWORD)
-    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
-      * `MSAOptional` = `1` (REG_DWORD)
-      * `MaxDevicePasswordFailedAttempts` = `10` (REG_DWORD, 10 or fewer invalid logon attempts, but not 0)
-      * `CrashOnAuditFail` = `0` (REG_DWORD, shut down system if unable to log audits disabled)
-      * `DisableCAD` = `0` (REG_DWORD, CTRL+ALT+DEL required)
-      * `DontDisplayLastUserName` = `1` (REG_DWORD, Don't display last signed-in enabled)
-    * `HKLM\SOFTWARE\Policies\Microsoft\MicrosoftAccount`
-      * `DisableUserAuth` = `1` (REG_DWORD)
-    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork`
-      * `RequireSecurityDevice` = `1` (REG_DWORD)
-    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices`
-      * `TPM12` = `0` (REG_DWORD)
-    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters`
-      * `RequireSignOrSeal` = `1` (REG_DWORD)
-      * `SealSecureChannel` = `1` (REG_DWORD)
-      * `SignSecureChannel` = `1` (REG_DWORD)
-      * `DisablePasswordChange` = `0` (REG_DWORD)
-      * `MaximumPasswordAge` = `30` (REG_DWORD)
-      * `RequireStrongKey` = `1` (REG_DWORD)
-      * `ForceLogoffWhenHourExpire` = `1` (REG_DWORD, force logoff when logon hours expire enabled)
-    * `HKLM\System\CurrentControlSet\Services\LanmanWorkstation\Parameters`
-      * `EnablePlainTextPassword` = `0` (REG_DWORD)
-    * `HKLM\System\CurrentControlSet\Services\LanmanServer\Parameters`
-      * `AutoDisconnect` = `15` (REG_DWORD, idle time before suspending session in minutes)
-      * `EnableForcedLogoff` = `1` (REG_DWORD, disconnect clients when logon hours expire enabled)
-      * `NullSessionShares` = `""` (REG_MULTI_SZ, shares that can be accessed anonymously -> none)
-    * `HKLM\System\CurrentControlSet\Control\Lsa\MSV1_0`
-      * `allownullsessionfallback` = `0` (REG_DWORD)
-      * `NTLMMinClientSec` = `537395200` (REG_DWORD)
-      * `NTLMMinServerSec` = `537395200` (REG_DWORD)
+* **GPO Path / Registry Location**:
+  * `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies`
+  * `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * `Computer Configuration\Administrative Templates\System\PIN Complexity`
+  * `Computer Configuration\Administrative Templates\Windows Components\Microsoft Account`
+  * `Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
 
 ---
 
 <div id="08-endpoints-configure-account-policies-md-rationale"></div>
 
 ## Rationale
-Securing authentication parameters and account controls reduces the risk of password attacks and session hijackings:
+Securing authentication parameters, credential caching thresholds, account lockout windows, and interactive logon behaviors establishes a fundamental defense against password spraying, offline cracking, and unauthorized lateral movement.
 
-1. **Account Lockout Threshold (`LockoutBadCount`)**: Brute-force and password-spraying attacks target user accounts to discover credentials. If no lockout threshold is configured, an attacker can make infinite password attempts. Configuring a lockout threshold of 10 bad attempts mitigates online brute-force attacks.
-2. **Account Lockout Reset (`ResetLockoutCount`)**: This policy dictates how long the failed logon counter persists before resetting. Setting this to 15 minutes ensures that password attempts are restricted over time without introducing major helpdesk overhead.
-3. **Reversible Encryption (`ClearTextPassword`)**: Storing passwords using reversible encryption is equivalent to storing cleartext passwords in the directory database. This key option exists only for legacy application support (such as CHAP authentication) and must be disabled to prevent database dumping/credential recovery.
-4. **Local Password Complexity and Minimum Length (`MinimumPasswordLength`, `PasswordComplexity`)**: Setting the minimum password length to 14 characters and enabling complexity makes offline brute-force and dictionary attacks significantly harder. A length of 14 characters is the standard baseline recommended by ANSSI and CIS for general workstations.
-5. **Password History and Age (`PasswordHistorySize`, `MaxPasswordAge`, `MinPasswordAge`)**: Mandating a history of 24 prevents users from cycling between a few similar passwords. Disabling password expiration (`MaxPasswordAge = 0`) aligns with NIST SP 800-63B and modern ANSSI guidelines. Since 14-character complex passwords are sufficiently robust, forcing periodic changes is deprecated as it often leads users to write down passwords or choose predictable variations. A minimum age of 1 day prevents users from immediately bypassing the history requirement by changing their password 24 times in succession.
-4. **Smart Card Removal Behavior (`ScRemoveOption`)**: In secure environments using Smart Card or token-based authentication, removing the card must automatically lock the desktop session (`1`). If disabled, a user leaving their workstation with the card removed leaves the session exposed.
-5. **Blank Passwords Limit (`LimitBlankPasswordUse`)**: Restricting the use of blank passwords to physical console logons prevents attackers from using empty-password accounts to authenticate remotely over network shares or RDP.
-6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, dramatically increasing resistance to offline brute-force and GPU-accelerated cracking attacks (like RTX 4090 models).
-7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
-8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
-9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, requiring NTLMv2 and 128-bit encryption, and enforcing client-side NTLMv2-only authentication via `LmCompatibilityLevel = 5` block legacy protocol exploitation and relay vectors.
-10. **Kerberos Security Policy**: Restricting Kerberos ticket lifetimes (e.g. 10 hours max ticket lifetime, 7 days max renewal, 600 minutes max service ticket lifetime) and clock skew tolerance (5 minutes) limits the window of opportunity for stolen ticket abuse (Pass-the-Ticket) and ensures synchronization integrity.
-11. **GPO Background Refresh Security**: Forcing regular Group Policy background reapplication prevents persistent local configuration changes or drift.
-12. **WMI Class Minimization**: Avoiding WMI queries to `Win32_Product` avoids unintended re-installation checks of all MSI packages during GPO processing, protecting host CPU and disk health.
-13. **GPO Commentary**: Requiring descriptive GPO comments ensures structural accountability and documentation parity.
+This submodule contains individual requirement controls for each specific account policy, lockout setting, authentication restriction, and interactive logon control across enterprise client workstations and member servers.
 
 ---
 
@@ -69227,126 +70839,871 @@ Securing authentication parameters and account controls reduces the risk of pass
 ## Legacy Impact & Compatibility
 * **Account Lockouts**: Legitimate users who forget their passwords may lock themselves out. Standard procedures must exist for administrative reset of locked accounts.
 * **Smart Card Removal**: Users must be trained to carry their smart cards with them, which automatically locks the session. Re-authenticating requires inserting the card and entering the PIN.
-* **Reversible Encryption**: Disabling reversible encryption may break legacy applications that rely on reading cleartext password equivalents. These applications should be modernized to support modern Kerberos or SAML/OIDC federations.
-* **Minimum Password Length (14 characters)**: Users with short passwords will be forced to choose a longer password (at least 14 characters) during their next password change. Systems or service accounts with hardcoded shorter credentials must be updated before enforcing this policy.
+* **Minimum Password Length (14 characters)**: Users with short passwords will be forced to choose a longer password (at least 14 characters) during their next password change.
 * **No Password Expiration (MaxPasswordAge = 0)**: Users will no longer be prompted to periodically change their passwords, reducing helpdesk calls related to expired password lockouts and discouraging the use of weak incremental password schemes.
-* **Logon Caching (CachedLogonsCount = 0)**: Workstations must have active, real-time connectivity to a Domain Controller to allow users to log on. Off-domain logons (e.g., users traveling or working offline without a pre-boot VPN connection) will fail. Remote users must use pre-boot VPN tunnels or alternate remote access architectures.
-* **PBKDF2 Iteration Overhead**: Increasing the iteration count raises the CPU processing time required during logons that use cached credentials. A value of 1954 may introduce a slight delay (typically under 1 second) during interactive logins on older hardware.
+* **Logon Caching (CachedLogonsCount = 0)**: Workstations must have active, real-time connectivity to a Domain Controller to allow users to log on.
 
 ---
 
-<div id="08-endpoints-configure-account-policies-md-implementation-steps"></div>
+<div id="08-endpoints-configure-account-policies-md-account-policy-hardening-requirements"></div>
+
+## Account Policy Hardening Requirements
+
+The following individual account and authentication policies must be enforced:
+
+1. **[REQ-END-163 - Account Policy: Password Policy for Endpoints](#08-endpoints-account-policy-configure-end-account-password-policy-md)**
+2. **[REQ-END-164 - Account Policy: Account Lockout Policy for Endpoints](#08-endpoints-account-policy-configure-end-account-lockout-policy-md)**
+3. **[REQ-END-165 - Account Policy: Kerberos Policy for Endpoints](#08-endpoints-account-policy-configure-end-account-kerberos-policy-md)**
+4. **[REQ-END-166 - Account Policy: Smart Card Removal Behavior for Endpoints](#08-endpoints-account-policy-configure-end-account-smart-card-removal-md)**
+5. **[REQ-END-167 - Account Policy: Cached Logons and PBKDF2 Iteration Count for Endpoints](#08-endpoints-account-policy-configure-end-account-cached-logons-md)**
+6. **[REQ-END-168 - Account Policy: Local Accounts and Blank Password Restrictions for Endpoints](#08-endpoints-account-policy-configure-end-account-local-blank-passwords-md)**
+7. **[REQ-END-169 - Account Policy: NTLM and LAN Manager Authentication Security for Endpoints](#08-endpoints-account-policy-configure-end-account-ntlm-security-md)**
+8. **[REQ-END-170 - Account Policy: Disable WDigest Credential Caching for Endpoints](#08-endpoints-account-policy-configure-end-account-wdigest-credentials-md)**
+9. **[REQ-END-171 - Account Policy: Windows Hello for Business and PIN Complexity for Endpoints](#08-endpoints-account-policy-configure-end-account-hello-pin-md)**
+10. **[REQ-END-172 - Account Policy: Consumer Microsoft Account Restrictions for Endpoints](#08-endpoints-account-policy-configure-end-account-block-msa-md)**
+11. **[REQ-END-173 - Account Policy: Domain Member Secure Channel Security for Endpoints](#08-endpoints-account-policy-configure-end-account-secure-channel-md)**
+12. **[REQ-END-174 - Account Policy: SMB Client and Server Security Options for Endpoints](#08-endpoints-account-policy-configure-end-account-smb-security-md)**
+13. **[REQ-END-175 - Account Policy: Anonymous Access and Enumeration Restrictions for Endpoints](#08-endpoints-account-policy-configure-end-account-anonymous-restrictions-md)**
+14. **[REQ-END-176 - Account Policy: Interactive Logon Security Options for Endpoints](#08-endpoints-account-policy-configure-end-account-interactive-logon-md)**
+
+---
+
+<div id="08-endpoints-configure-account-policies-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 1.3 (Kerberos Policy), Section 2.3 (Security Options), Section 18 (Administrative Templates)
+* **ANSSI AD Hardening Guide**: Recommendations on password complexity, reversible encryption blocks, lockout management, and domain member secure channels
+* **DoD Windows 11 Computer STIG v2r6**: Account policies, PIN complexity, Windows Hello for Business, and Netlogon secure channel parameters
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-password-policy-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-password-policy-md-req-end-163-account-policy-password-policy-for-endpoints"></div>
+
+# [REQ-END-163] Account Policy: Password Policy for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-password-policy-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-password-policy-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Password Policy`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Location / SecEdit Settings**:
+    * `MinimumPasswordLength` = `14` (14 characters minimum)
+    * `PasswordComplexity` = `1` (Complexity enabled)
+    * `PasswordHistorySize` = `24` (24 passwords remembered)
+    * `MaxPasswordAge` = `0` (Password does not expire / disabled)
+    * `MinPasswordAge` = `1` (1 day minimum)
+    * `ClearTextPassword` = `0` (Reversible encryption disabled)
+    * `RelaxMinPasswordLengthLimits` = `1` (Relax minimum password length limits enabled)
+    * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\PasswordExpiryWarning` = `14` (REG_DWORD, 14 days)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-password-policy-md-rationale"></div>
+
+## Rationale
+Enforcing a comprehensive password policy across enterprise endpoints establishes a fundamental defense against password spraying, dictionary attacks, and offline hash cracking:
+* **Minimum Length (14 characters)**: In alignment with ANSSI and CIS benchmarks for standard endpoints, a 14-character minimum length significantly raises entropy and computational resistance against brute-force attacks.
+* **Complexity & Reversible Encryption**: Requiring character variety while disabling reversible encryption ensures password hashes stored in SAM or directory databases cannot be decrypted.
+* **Password History & Minimum Age**: Mandating a 24-password history and 1-day minimum age prevents users from cycling between predictable password variations.
+* **No Expiration (MaxPasswordAge = 0)**: In accordance with NIST SP 800-63B and modern ANSSI guidelines, periodic password changes are disabled for robust 14-character passwords, stopping weak incremental modifications.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-password-policy-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Password Length**: Users with passwords shorter than 14 characters must choose a compliant password during their next update. Service accounts or legacy tools with hardcoded short credentials must be modernized.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-password-policy-md-implementation-steps"></div>
 
 ## Implementation Steps
 
-<div id="08-endpoints-configure-account-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+<div id="08-endpoints-account-policy-configure-end-account-password-policy-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<div id="08-endpoints-configure-account-policies-md-step-1-configure-lockout-password-and-kerberos-policies-domain-wide"></div>
-
-#### Step 1: Configure Lockout, Password and Kerberos Policies (Domain-wide)
-These settings must be configured directly within the **Default Domain Policy** to apply domain-wide:
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit the **Default Domain Policy**.
+2. Edit the Default Domain Policy or Endpoints GPO.
 3. Navigate to:
-   `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies`
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Password Policy`
 4. Configure the settings:
-   * **Account Lockout Policy**:
-      * **Account lockout threshold**: `10` invalid logon attempts
-      * **Reset account lockout counter after**: `15` minutes
-      * **Account lockout duration**: `15` minutes (Must be greater than or equal to reset time)
-      * **Allow Administrator account lockout**: `Enabled`
-   * **Password Policy**:
-     * **Enforce password history**: `24` passwords remembered
-     * **Maximum password age**: `0` days (never expire)
-     * **Minimum password age**: `1` day
-     * **Minimum password length**: `14` characters
-     * **Password must meet complexity requirements**: `Enabled`
-     * **Store passwords using reversible encryption**: `Disabled`
-     * **Relax minimum password length limits**: `Enabled`
-   * **Kerberos Policy**:
-     * **Enforce user logon restrictions**: `Enabled`
-     * **Maximum lifetime for service ticket**: `600` minutes
-     * **Maximum lifetime for user ticket**: `10` hours
-     * **Maximum lifetime for user ticket renewal**: `7` days
-     * **Maximum tolerance for computer clock synchronization**: `5` minutes
+   * **Enforce password history**: `24` passwords remembered
+   * **Maximum password age**: `0` days (never expire)
+   * **Minimum password age**: `1` day
+   * **Minimum password length**: `14` characters
+   * **Password must meet complexity requirements**: `Enabled`
+   * **Store passwords using reversible encryption**: `Disabled`
+   * **Relax minimum password length limits**: `Enabled`
+5. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+   * **Interactive logon: Prompt user to change password before expiration**: `14` days
 
-<div id="08-endpoints-configure-account-policies-md-step-2-configure-gpo-security-filtering-delegation-ms16-072-compliance"></div>
+---
 
-#### Step 2: Configure GPO Security Filtering & Delegation (MS16-072 Compliance)
-Following the MS16-072 security update, user-scoped GPOs require computer accounts to have Read access to process the policy. When using Security Filtering to restrict GPOs to specific user groups:
-1. In GPMC, select your user-targeted GPO.
-2. Under the **Scope** tab, in the **Security Filtering** section, select **Authenticated Users** and click **Remove**.
-3. Click **Add**, select your target user security group, and click **OK**.
-4. Click on the **Delegation** tab.
-5. Click **Add**, search for `Domain Computers` (change Object Types to include Computers), and click **OK**.
-6. Set the permissions to **Read** and click **OK**.
+<div id="08-endpoints-account-policy-configure-end-account-password-policy-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 
-<div id="08-endpoints-configure-account-policies-md-step-3-group-policy-wmi-filtering-best-practices"></div>
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-#### Step 3: Group Policy WMI Filtering Best Practices
-When using WMI filters to target GPOs:
-* **DO NOT** query the `Win32_Product` WMI class. Calling this class triggers Windows Installer to perform a self-repair validation on every installed MSI package on the system, causing severe CPU spikes and delays during startup and logon. Use lightweight queries such as `Win32_OperatingSystem` instead.
+[Download Script: Configure-EndAccountPasswordPolicy.ps1](../implementation_scripts/Configure-EndAccountPasswordPolicy.ps1)
 
-<div id="08-endpoints-configure-account-policies-md-step-4-mandate-gpo-comments-for-accountability"></div>
+```powershell
+# Configure-EndAccountPasswordPolicy.ps1
+Write-Host "Configuring Endpoint password policy..." -ForegroundColor Cyan
 
-#### Step 4: Mandate GPO Comments for Accountability
-For all GPOs created, add a comment in the **Comment** tab of the GPO properties describing the purpose, author, date, and requirement ID.
+# 1. Configure PasswordExpiryWarning via Registry
+$WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
+if (-not (Test-Path $WinlogonPath)) { New-Item -Path $WinlogonPath -Force | Out-Null }
+Set-ItemProperty -Path $WinlogonPath -Name "PasswordExpiryWarning" -Value 14 -Type DWord -Force
 
-<div id="08-endpoints-configure-account-policies-md-step-5-configure-local-security-options"></div>
+# 2. Configure SecEdit System Access password parameters
+$SecTempDir = Join-Path $env:TEMP "EndPasswordSecTemplate"
+if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
 
-#### Step 5: Configure Local Security Options
-In the endpoints GPO (e.g., `GPO_Hardening_Workstations`), navigate to:
-`Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-* **Policy**: `Interactive logon: Smart card removal behavior` -> Set to **Lock Workstation** (value 1)
-* **Policy**: `Accounts: Limit local account use of blank passwords to console logon only` -> Set to **Enabled** (value 1)
-* **Policy**: `Network security: Do not store LAN Manager hash value on next password change` -> Set to **Enabled** (value 1)
-* **Policy**: `Interactive logon: Number of previous logons to cache (in case domain controller is not available)` -> Set to **0**
-* **Policy**: `Network security: Minimum session security for NTLM SSP based (including secure RPC) clients` -> Set to **Require NTLMv2 session security, Require 128-bit encryption** (value 537395200)
-* **Policy**: `Network security: Minimum session security for NTLM SSP based (including secure RPC) servers` -> Set to **Require NTLMv2 session security, Require 128-bit encryption** (value 537395200)
-* **Policy**: `Network access: Allow anonymous SID/Name translation` -> Set to **Disabled** (value 0)
-* **Policy**: `Network security: Allow LocalSystem NULL session fallback` -> Set to **Disabled** (value 0)
-* **Policy**: `Interactive logon: Machine account lockout threshold` -> Set to **10** (or fewer invalid logon attempts, but not 0)
-* **Policy**: `Audit: Shut down system immediately if unable to log security audits` -> Set to **Disabled** (value 0)
-* **Policy**: `Interactive logon: Do not require CTRL+ALT+DEL` -> Set to **Disabled** (value 0)
-* **Policy**: `Interactive logon: Don't display last signed-in` -> Set to **Enabled** (value 1)
-* **Policy**: `Interactive logon: Prompt user to change password before expiration` -> Set to **14** days (or between 5 and 14 days)
-* **Policy**: `Microsoft network client: Send unencrypted password to third-party SMB servers` -> Set to **Disabled** (value 0)
-* **Policy**: `Microsoft network server: Amount of idle time required before suspending session` -> Set to **15** or fewer minutes
-* **Policy**: `Microsoft network server: Disconnect clients when logon hours expire` -> Set to **Enabled** (value 1)
-* **Policy**: `Network access: Do not allow anonymous enumeration of SAM accounts and shares` -> Set to **Enabled** (value 1)
-* **Policy**: `Network access: Shares that can be accessed anonymously` -> Set to **None**
-* **Policy**: `Network access: Sharing and security model for local accounts` -> Set to **Classic - local users authenticate as themselves**
-* **Policy**: `Network Security: Allow PKU2U authentication requests to this computer to use online identities` -> Set to **Disabled** (value 0)
-* **Policy**: `Network security: Force logoff when logon hours expire` -> Set to **Enabled** (value 1)
-* **Policy**: `System objects: Require case insensitivity for non-Windows subsystems` -> Set to **Enabled** (value 1)
+$CfgFile = Join-Path $SecTempDir "end_password.cfg"
+$DbFile = Join-Path $SecTempDir "end_password.sdb"
+$LogFile = Join-Path $SecTempDir "end_password.log"
 
-<div id="08-endpoints-configure-account-policies-md-step-3-configure-hello-for-business-pin-and-microsoft-account-policies"></div>
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) { Throw "Failed to export current security template." }
 
-#### Step 3: Configure Hello for Business, PIN and Microsoft Account Policies
-Navigate to:
-`Computer Configuration\Administrative Templates\System\PIN Complexity`
-* **Policy**: `Minimum PIN length` -> Set to **Enabled** with value **6**
+$ConfigText = Get-Content -Path $CfgFile -Raw
+if ($ConfigText -notmatch "\[System Access\]") {
+    $ConfigText += "`r`n[System Access]`r`n"
+}
 
-Navigate to:
-`Computer Configuration\Administrative Templates\Windows Components\Microsoft Account`
-* **Policy**: `Block all consumer Microsoft account user authentication` -> Set to **Enabled**
+$Lines = $ConfigText -split "`r?`n"
+$NewLines = @()
+$InSystemAccess = $false
 
-Navigate to:
-`Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
-* **Policy**: `Use a hardware security device` -> Set to **Enabled**
-* **Policy**: `Use convenience PIN sign-in` -> Set to **Disabled** (value 0)
-* **Policy**: `Allow Microsoft accounts to be optional` -> Set to **Enabled** (value 1)
+$PwdSettings = @{
+    "MinimumPasswordLength"        = 14
+    "PasswordComplexity"           = 1
+    "PasswordHistorySize"          = 24
+    "MaxPasswordAge"               = 0
+    "MinPasswordAge"               = 1
+    "ClearTextPassword"            = 0
+    "RelaxMinPasswordLengthLimits" = 1
+}
 
-<div id="08-endpoints-configure-account-policies-md-step-4-configure-pbkdf2-iteration-count-via-gpo-preferences"></div>
+foreach ($Line in $Lines) {
+    if ($Line -match "^\[(.*)\]$") {
+        if ($Matches[1] -eq "System Access") { $InSystemAccess = $true } else { $InSystemAccess = $false }
+    }
+    if ($InSystemAccess) {
+        $IsManaged = $false
+        foreach ($Key in $PwdSettings.Keys) {
+            if ($Line -match "^\s*$($Key)\s*=") { $IsManaged = $true; break }
+        }
+        if (-not $IsManaged) { $NewLines += $Line }
+    } else {
+        $NewLines += $Line
+    }
+}
 
-#### Step 4: Configure PBKDF2 Iteration Count via GPO Preferences
-Since the PBKDF2 iteration count setting is not exposed in standard ADMX templates, deploy it via Registry GPO Preferences:
-1. Within the endpoints GPO, navigate to:
+$FinalLines = @()
+foreach ($Line in $NewLines) {
+    $FinalLines += $Line
+    if ($Line -eq "[System Access]") {
+        foreach ($Key in $PwdSettings.Keys) {
+            $Val = $PwdSettings[$Key]
+            $FinalLines += "$($Key) = $($Val)"
+        }
+    }
+}
+
+$FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
+$Proc = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas SECURITYPOLICY /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
+if ($Proc.ExitCode -ne 0) { Throw "Failed to apply SecEdit password policy." }
+
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "Endpoint password policy applied successfully." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-EndAccountPasswordPolicyStatus.ps1](../audit_scripts/Get-EndAccountPasswordPolicyStatus.ps1)
+
+```powershell
+# Get-EndAccountPasswordPolicyStatus.ps1
+Write-Host "--- Auditing Endpoint Password Policy ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+# 1. Audit Registry Setting
+$WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
+$WarnVal = (Get-ItemProperty -Path $WinlogonPath -Name "PasswordExpiryWarning" -ErrorAction SilentlyContinue).PasswordExpiryWarning
+if ($WarnVal -lt 5 -or $WarnVal -gt 14) {
+    Write-Host "    [!] VULNERABLE: PasswordExpiryWarning is set to '$WarnVal' (Expected: 5-14)" -ForegroundColor Red
+    $script:Vulnerable = $true
+} else {
+    Write-Host "    [+] PasswordExpiryWarning: $WarnVal" -ForegroundColor Green
+}
+
+# 2. Audit SecEdit Settings
+$SecTempDir = Join-Path $env:TEMP "EndPasswordAuditTemplate"
+if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+$CfgFile = Join-Path $SecTempDir "end_password_audit.cfg"
+
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) {
+    Write-Output "Non-Compliant"
+    exit 1
+}
+
+$ConfigContent = Get-Content -Path $CfgFile -Raw
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+
+$ExpectedSettings = @{
+    "MinimumPasswordLength"        = 14
+    "PasswordComplexity"           = 1
+    "PasswordHistorySize"          = 24
+    "MaxPasswordAge"               = 0
+    "MinPasswordAge"               = 1
+    "ClearTextPassword"            = 0
+    "RelaxMinPasswordLengthLimits" = 1
+}
+
+foreach ($Key in $ExpectedSettings.Keys) {
+    $Expected = $ExpectedSettings[$Key]
+    if ($ConfigContent -match "(?m)^\s*$($Key)\s*=\s*(.*)\s*$") {
+        $Actual = $Matches[1].Trim()
+    } else {
+        $Actual = ""
+    }
+    if ($Actual -ne [string]$Expected) {
+        Write-Host "    [!] VULNERABLE: $($Key) = '$Actual' (Expected: '$Expected')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Key): $Actual" -ForegroundColor Green
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-password-policy-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 1.1 (Password Policy), Section 1.1.6 (RelaxMinPasswordLengthLimits), Section 2.3.7.8 (PasswordExpiryWarning)
+* **ANSSI AD Hardening Guide**: Recommendations on password length, complexity, and reversible encryption
+* **DoD Windows 11 Computer STIG v2r6**: Password length and history parameters
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-lockout-policy-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-lockout-policy-md-req-end-164-account-policy-account-lockout-policy-for-endpoints"></div>
+
+# [REQ-END-164] Account Policy: Account Lockout Policy for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-lockout-policy-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-lockout-policy-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Account Lockout Policy`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Location / SecEdit Settings**:
+    * `LockoutBadCount` = `10` (10 invalid logon attempts allowed)
+    * `ResetLockoutCount` = `15` (15 minutes lockout observation window)
+    * `LockoutDuration` = `15` (15 minutes lockout duration)
+    * `AllowAdministratorLockout` = `1` (Allow Administrator account lockout enabled)
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\MaxDevicePasswordFailedAttempts` = `10` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-lockout-policy-md-rationale"></div>
+
+## Rationale
+Configuring account lockout parameters mitigates automated brute-force attacks and password spraying attempts against domain and local user accounts:
+* **Lockout Threshold (10 attempts)**: Restricting invalid logon attempts to 10 limits password guessing while avoiding excessive helpdesk lockout tickets for legitimate users who forget their passwords.
+* **Duration & Observation Window (15 minutes)**: Setting lockout duration and reset windows to 15 minutes restricts sustained automated password guessing.
+* **Administrator Lockout**: Enabling Administrator account lockout prevents attackers from evading lockout protection by targeting the built-in Administrator account.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-lockout-policy-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **User Lockouts**: Users mistyping credentials more than 10 times will be temporarily locked out for 15 minutes before the counter resets.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-lockout-policy-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-lockout-policy-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Default Domain Policy or Endpoints GPO.
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Account Lockout Policy`
+4. Configure the settings:
+   * **Account lockout threshold**: `10` invalid logon attempts
+   * **Reset account lockout counter after**: `15` minutes
+   * **Account lockout duration**: `15` minutes
+   * **Allow Administrator account lockout**: `Enabled`
+5. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+   * **Interactive logon: Machine account lockout threshold**: `10`
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-lockout-policy-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-EndAccountLockoutPolicy.ps1](../implementation_scripts/Configure-EndAccountLockoutPolicy.ps1)
+
+```powershell
+# Configure-EndAccountLockoutPolicy.ps1
+Write-Host "Configuring Endpoint account lockout policy..." -ForegroundColor Cyan
+
+# 1. Configure MaxDevicePasswordFailedAttempts via Registry
+$SystemPolicyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+if (-not (Test-Path $SystemPolicyPath)) { New-Item -Path $SystemPolicyPath -Force | Out-Null }
+Set-ItemProperty -Path $SystemPolicyPath -Name "MaxDevicePasswordFailedAttempts" -Value 10 -Type DWord -Force
+
+# 2. Configure SecEdit System Access lockout parameters
+$SecTempDir = Join-Path $env:TEMP "EndLockoutSecTemplate"
+if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+
+$CfgFile = Join-Path $SecTempDir "end_lockout.cfg"
+$DbFile = Join-Path $SecTempDir "end_lockout.sdb"
+$LogFile = Join-Path $SecTempDir "end_lockout.log"
+
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) { Throw "Failed to export current security template." }
+
+$ConfigText = Get-Content -Path $CfgFile -Raw
+if ($ConfigText -notmatch "\[System Access\]") {
+    $ConfigText += "`r`n[System Access]`r`n"
+}
+
+$Lines = $ConfigText -split "`r?`n"
+$NewLines = @()
+$InSystemAccess = $false
+
+$LockoutSettings = @{
+    "LockoutBadCount"           = 10
+    "ResetLockoutCount"         = 15
+    "LockoutDuration"           = 15
+    "AllowAdministratorLockout" = 1
+}
+
+foreach ($Line in $Lines) {
+    if ($Line -match "^\[(.*)\]$") {
+        if ($Matches[1] -eq "System Access") { $InSystemAccess = $true } else { $InSystemAccess = $false }
+    }
+    if ($InSystemAccess) {
+        $IsManaged = $false
+        foreach ($Key in $LockoutSettings.Keys) {
+            if ($Line -match "^\s*$($Key)\s*=") { $IsManaged = $true; break }
+        }
+        if (-not $IsManaged) { $NewLines += $Line }
+    } else {
+        $NewLines += $Line
+    }
+}
+
+$FinalLines = @()
+foreach ($Line in $NewLines) {
+    $FinalLines += $Line
+    if ($Line -eq "[System Access]") {
+        foreach ($Key in $LockoutSettings.Keys) {
+            $Val = $LockoutSettings[$Key]
+            $FinalLines += "$($Key) = $($Val)"
+        }
+    }
+}
+
+$FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
+$Proc = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas SECURITYPOLICY /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
+if ($Proc.ExitCode -ne 0) { Throw "Failed to apply SecEdit lockout policy." }
+
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "Endpoint lockout policy applied successfully." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-EndAccountLockoutPolicyStatus.ps1](../audit_scripts/Get-EndAccountLockoutPolicyStatus.ps1)
+
+```powershell
+# Get-EndAccountLockoutPolicyStatus.ps1
+Write-Host "--- Auditing Endpoint Account Lockout Policy ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+# 1. Audit Registry Setting
+$SystemPolicyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$MaxDeviceVal = (Get-ItemProperty -Path $SystemPolicyPath -Name "MaxDevicePasswordFailedAttempts" -ErrorAction SilentlyContinue).MaxDevicePasswordFailedAttempts
+if ($null -eq $MaxDeviceVal -or $MaxDeviceVal -gt 10 -or $MaxDeviceVal -eq 0) {
+    Write-Host "    [!] VULNERABLE: MaxDevicePasswordFailedAttempts is set to '$MaxDeviceVal' (Expected: 10 or fewer, but not 0)" -ForegroundColor Red
+    $script:Vulnerable = $true
+} else {
+    Write-Host "    [+] MaxDevicePasswordFailedAttempts: $MaxDeviceVal" -ForegroundColor Green
+}
+
+# 2. Audit SecEdit Settings
+$SecTempDir = Join-Path $env:TEMP "EndLockoutAuditTemplate"
+if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+$CfgFile = Join-Path $SecTempDir "end_lockout_audit.cfg"
+
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) {
+    Write-Output "Non-Compliant"
+    exit 1
+}
+
+$ConfigContent = Get-Content -Path $CfgFile -Raw
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+
+$ExpectedSettings = @{
+    "LockoutBadCount"           = 10
+    "ResetLockoutCount"         = 15
+    "LockoutDuration"           = 15
+    "AllowAdministratorLockout" = 1
+}
+
+foreach ($Key in $ExpectedSettings.Keys) {
+    $Expected = $ExpectedSettings[$Key]
+    if ($ConfigContent -match "(?m)^\s*$($Key)\s*=\s*(.*)\s*$") {
+        $Actual = $Matches[1].Trim()
+    } else {
+        $Actual = ""
+    }
+    if ($Actual -ne [string]$Expected) {
+        Write-Host "    [!] VULNERABLE: $($Key) = '$Actual' (Expected: '$Expected')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Key): $Actual" -ForegroundColor Green
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-lockout-policy-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 1.2 (Account Lockout Policy), Section 1.2.3 (AllowAdministratorLockout), Section 2.3.7.4 (MaxDevicePasswordFailedAttempts)
+* **ANSSI AD Hardening Guide**: Recommendations on account lockout management
+* **DoD Windows 11 Computer STIG v2r6**: Account lockout threshold and observation window rules
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-kerberos-policy-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-kerberos-policy-md-req-end-165-account-policy-kerberos-policy-for-endpoints"></div>
+
+# [REQ-END-165] Account Policy: Kerberos Policy for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-kerberos-policy-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-kerberos-policy-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Kerberos Policy`
+  * **Registry Location / SecEdit Settings**:
+    * `TicketValidateClient` = `1` (Enforce user logon restrictions enabled)
+    * `MaxServiceTicketAge` = `600` (Maximum lifetime for service ticket = 600 minutes / 10 hours)
+    * `MaxTicketAge` = `10` (Maximum lifetime for user ticket = 10 hours)
+    * `MaxRenewAge` = `7` (Maximum lifetime for user ticket renewal = 7 days)
+    * `MaxClockSkew` = `5` (Maximum tolerance for computer clock synchronization = 5 minutes)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-kerberos-policy-md-rationale"></div>
+
+## Rationale
+Kerberos policy settings define authentication ticket lifetimes and clock tolerance parameters for domain security tokens:
+* **Ticket Lifetimes (10h ticket / 600m service)**: Restricting ticket validity limits the operational window for stolen ticket reuse (Pass-the-Ticket / Golden / Silver ticket abuse).
+* **Ticket Renewal (7 days)**: Limiting renewable lifetimes requires accounts to periodically re-authenticate.
+* **Clock Skew (5 minutes)**: Maintaining tight clock synchronization prevents Kerberos replay attacks.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-kerberos-policy-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Clock Drift**: Workstation system clocks that drift by more than 5 minutes relative to Domain Controllers will fail Kerberos authentication. Time synchronization via NTP/PDC emulator must be maintained.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-kerberos-policy-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-kerberos-policy-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Default Domain Policy.
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Kerberos Policy`
+4. Configure the settings:
+   * **Enforce user logon restrictions**: `Enabled`
+   * **Maximum lifetime for service ticket**: `600` minutes
+   * **Maximum lifetime for user ticket**: `10` hours
+   * **Maximum lifetime for user ticket renewal**: `7` days
+   * **Maximum tolerance for computer clock synchronization**: `5` minutes
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-kerberos-policy-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-EndAccountKerberosPolicy.ps1](../implementation_scripts/Configure-EndAccountKerberosPolicy.ps1)
+
+```powershell
+# Configure-EndAccountKerberosPolicy.ps1
+Write-Host "Configuring Endpoint Kerberos policy..." -ForegroundColor Cyan
+
+$SecTempDir = Join-Path $env:TEMP "EndKerberosSecTemplate"
+if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+
+$CfgFile = Join-Path $SecTempDir "end_kerberos.cfg"
+$DbFile = Join-Path $SecTempDir "end_kerberos.sdb"
+$LogFile = Join-Path $SecTempDir "end_kerberos.log"
+
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) { Throw "Failed to export current security template." }
+
+$ConfigText = Get-Content -Path $CfgFile -Raw
+if ($ConfigText -notmatch "\[Kerberos Policy\]") {
+    $ConfigText += "`r`n[Kerberos Policy]`r`n"
+}
+
+$Lines = $ConfigText -split "`r?`n"
+$NewLines = @()
+$InKerb = $false
+
+$KerbSettings = @{
+    "MaxServiceTicketAge"  = 600
+    "MaxTicketAge"         = 10
+    "MaxRenewAge"          = 7
+    "MaxClockSkew"         = 5
+    "TicketValidateClient" = 1
+}
+
+foreach ($Line in $Lines) {
+    if ($Line -match "^\[(.*)\]$") {
+        if ($Matches[1] -eq "Kerberos Policy") { $InKerb = $true } else { $InKerb = $false }
+    }
+    if ($InKerb) {
+        $IsManaged = $false
+        foreach ($Key in $KerbSettings.Keys) {
+            if ($Line -match "^\s*$($Key)\s*=") { $IsManaged = $true; break }
+        }
+        if (-not $IsManaged) { $NewLines += $Line }
+    } else {
+        $NewLines += $Line
+    }
+}
+
+$FinalLines = @()
+foreach ($Line in $NewLines) {
+    $FinalLines += $Line
+    if ($Line -eq "[Kerberos Policy]") {
+        foreach ($Key in $KerbSettings.Keys) {
+            $Val = $KerbSettings[$Key]
+            $FinalLines += "$($Key) = $($Val)"
+        }
+    }
+}
+
+$FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
+$Proc = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas SECURITYPOLICY /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
+if ($Proc.ExitCode -ne 0) { Throw "Failed to apply SecEdit Kerberos policy." }
+
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "Endpoint Kerberos policy applied successfully." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-EndAccountKerberosPolicyStatus.ps1](../audit_scripts/Get-EndAccountKerberosPolicyStatus.ps1)
+
+```powershell
+# Get-EndAccountKerberosPolicyStatus.ps1
+Write-Host "--- Auditing Endpoint Kerberos Policy ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$SecTempDir = Join-Path $env:TEMP "EndKerberosAuditTemplate"
+if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+$CfgFile = Join-Path $SecTempDir "end_kerberos_audit.cfg"
+
+$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
+if ($Process.ExitCode -ne 0) {
+    Write-Output "Non-Compliant"
+    exit 1
+}
+
+$ConfigContent = Get-Content -Path $CfgFile -Raw
+Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+
+$ExpectedSettings = @{
+    "MaxServiceTicketAge"  = 600
+    "MaxTicketAge"         = 10
+    "MaxRenewAge"          = 7
+    "MaxClockSkew"         = 5
+    "TicketValidateClient" = 1
+}
+
+foreach ($Key in $ExpectedSettings.Keys) {
+    $Expected = $ExpectedSettings[$Key]
+    if ($ConfigContent -match "(?m)^\s*$($Key)\s*=\s*(.*)\s*$") {
+        $Actual = $Matches[1].Trim()
+    } else {
+        $Actual = ""
+    }
+    if ($Actual -ne [string]$Expected) {
+        Write-Host "    [!] VULNERABLE: $($Key) = '$Actual' (Expected: '$Expected')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Key): $Actual" -ForegroundColor Green
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-kerberos-policy-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows Server / Client Benchmark**: Section 1.3 (Kerberos Policy)
+* **ANSSI AD Hardening Guide**: Recommendations on Kerberos ticket lifetimes and synchronization constraints
+* **DoD Windows Computer STIG**: Kerberos ticket lifetime parameters
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-smart-card-removal-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-smart-card-removal-md-req-end-166-account-policy-smart-card-removal-behavior-for-endpoints"></div>
+
+# [REQ-END-166] Account Policy: Smart Card Removal Behavior for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-smart-card-removal-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-smart-card-removal-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\Interactive logon: Smart card removal behavior`
+  * **Registry Location**:
+    * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\ScRemoveOption` = `"1"` (REG_SZ, 1 = Lock Workstation)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-smart-card-removal-md-rationale"></div>
+
+## Rationale
+In environments using smart card or hardware token authentication, removing the physical token must immediately lock the active user session (`ScRemoveOption = "1"`). This prevents unauthorized physical access to unattended workstations if a user leaves the device without manually locking the console.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-smart-card-removal-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **User Workflow**: Users authenticating via smart cards must carry their token with them, which automatically locks the session. Re-authenticating requires inserting the card and entering the PIN.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-smart-card-removal-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-smart-card-removal-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoints GPO (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Set **Interactive logon: Smart card removal behavior** to **Lock Workstation** (value `1`).
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-smart-card-removal-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-EndAccountSmartCardRemoval.ps1](../implementation_scripts/Configure-EndAccountSmartCardRemoval.ps1)
+
+```powershell
+# Configure-EndAccountSmartCardRemoval.ps1
+Write-Host "Configuring Endpoint Smart Card removal behavior..." -ForegroundColor Cyan
+
+$WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
+if (-not (Test-Path $WinlogonPath)) { New-Item -Path $WinlogonPath -Force | Out-Null }
+Set-ItemProperty -Path $WinlogonPath -Name "ScRemoveOption" -Value "1" -Type String -Force
+
+Write-Host "Smart card removal behavior set to Lock Workstation." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-EndAccountSmartCardRemovalStatus.ps1](../audit_scripts/Get-EndAccountSmartCardRemovalStatus.ps1)
+
+```powershell
+# Get-EndAccountSmartCardRemovalStatus.ps1
+Write-Host "--- Auditing Endpoint Smart Card Removal Behavior ---" -ForegroundColor Cyan
+
+$WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
+$Val = (Get-ItemProperty -Path $WinlogonPath -Name "ScRemoveOption" -ErrorAction SilentlyContinue).ScRemoveOption
+
+if ($Val -eq "1") {
+    Write-Host "    [+] ScRemoveOption is set to '$Val' (Lock Workstation)." -ForegroundColor Green
+    Write-Output "Compliant"
+    exit 0
+} else {
+    Write-Host "    [!] VULNERABLE: ScRemoveOption is set to '$Val' (Expected: '1')" -ForegroundColor Red
+    Write-Output "Non-Compliant"
+    exit 1
+}
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-smart-card-removal-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.9.5 (Interactive logon: Smart card removal behavior)
+* **ANSSI AD Hardening Guide**: Recommendations on session locking and multi-factor hardware tokens
+* **DoD Windows 11 Computer STIG v2r6**: Smart card removal behavior policy
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-cached-logons-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-cached-logons-md-req-end-167-account-policy-cached-logons-and-pbkdf2-iteration-count-for-endpoints"></div>
+
+# [REQ-END-167] Account Policy: Cached Logons and PBKDF2 Iteration Count for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-cached-logons-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-cached-logons-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\Interactive logon: Number of previous logons to cache`
+  * **GPO Path**: `Computer Configuration\Preferences\Windows Settings\Registry` (for `NL$IterationCount`)
+  * **Registry Locations**:
+    * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\CachedLogonsCount` = `0` (REG_DWORD)
+    * `HKLM\SECURITY\Cache\NL$IterationCount` = `1954` (REG_DWORD, 1954 = 2,000,896 rounds of PBKDF2-SHA1)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-cached-logons-md-rationale"></div>
+
+## Rationale
+Windows caches previous domain credentials locally as MSCacheV2 / DCC2 hashes derived via PBKDF2-SHA1 to allow offline validation.
+* **Cached Logons Count (0)**: Setting `CachedLogonsCount` to `0` prevents local storage of credential hashes on standard domain endpoints, forcing logon validation directly against a Domain Controller and ensuring dumped SAM/SECURITY databases yield no cached credentials.
+* **PBKDF2 Iteration Count (1954)**: For portable endpoints (e.g., laptops) where caching must be enabled for offline work, setting `NL$IterationCount` to `1954` increases derivation rounds to 2,000,896 iterations, drastically increasing resistance to offline GPU-accelerated brute-force attacks.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-cached-logons-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Offline Logon**: When cached logons are disabled (`0`), endpoints must have active network connectivity (or pre-boot VPN) to a Domain Controller to process user logins.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-cached-logons-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-cached-logons-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoints GPO (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Set **Interactive logon: Number of previous logons to cache (in case domain controller is not available)** to **0**.
+5. Navigate to:
    `Computer Configuration\Preferences\Windows Settings\Registry`
-2. Right-click **Registry**, select **New** -> **Registry Item**.
-3. Configure:
+6. Right-click **Registry**, select **New** -> **Registry Item**:
    * **Action**: `Update`
    * **Hive**: `HKEY_LOCAL_MACHINE`
    * **Key Path**: `SECURITY\Cache`
@@ -69356,433 +71713,1279 @@ Since the PBKDF2 iteration count setting is not exposed in standard ADMX templat
 
 ---
 
-<div id="08-endpoints-configure-account-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+<div id="08-endpoints-account-policy-configure-end-account-cached-logons-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Enforce the local security settings and SecEdit configuration locally.
-
-[Download Script: Set-AccountPolicies.ps1](implementation_scripts/Set-AccountPolicies.ps1)
+[Download Script: Configure-EndAccountCachedLogons.ps1](../implementation_scripts/Configure-EndAccountCachedLogons.ps1)
 
 ```powershell
-# Set-AccountPolicies.ps1
-# Configures local account lockout, password parameters, smart card removal behavior, blank password blocks, Hello for Business, Microsoft accounts, secure channel options, and NTLM session security options.
+# Configure-EndAccountCachedLogons.ps1
+Write-Host "Configuring Endpoint cached logon restrictions and PBKDF2 iterations..." -ForegroundColor Cyan
 
-Write-Host "Applying account and password policies..." -ForegroundColor Cyan
-
-# 1. Enforce local security options via Registry
+# 1. Disable cached logons count
 $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
-if (-not (Test-Path $WinlogonPath)) {
-    New-Item -Path $WinlogonPath -Force | Out-Null
-}
-Set-ItemProperty -Path $WinlogonPath -Name "ScRemoveOption" -Value "1" -Type String -Force
+if (-not (Test-Path $WinlogonPath)) { New-Item -Path $WinlogonPath -Force | Out-Null }
 Set-ItemProperty -Path $WinlogonPath -Name "CachedLogonsCount" -Value 0 -Type DWord -Force
-Write-Host "[+] Smart card removal behavior and logon caching configured." -ForegroundColor Green
+
+# 2. Configure PBKDF2 Iteration Count
+$CachePath = "HKLM:\SECURITY\Cache"
+if (-not (Test-Path $CachePath)) { New-Item -Path $CachePath -Force | Out-Null }
+Set-ItemProperty -Path $CachePath -Name "NL`$IterationCount" -Value 1954 -Type DWord -Force
+
+Write-Host "Cached logons count disabled and PBKDF2 iteration count configured." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-EndAccountCachedLogonsStatus.ps1](../audit_scripts/Get-EndAccountCachedLogonsStatus.ps1)
+
+```powershell
+# Get-EndAccountCachedLogonsStatus.ps1
+Write-Host "--- Auditing Endpoint Cached Logons and PBKDF2 Settings ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+# 1. Audit CachedLogonsCount
+$WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
+$CacheCount = (Get-ItemProperty -Path $WinlogonPath -Name "CachedLogonsCount" -ErrorAction SilentlyContinue).CachedLogonsCount
+if ($CacheCount -ne 0) {
+    Write-Host "    [!] VULNERABLE: CachedLogonsCount is '$CacheCount' (Expected: 0)" -ForegroundColor Red
+    $script:Vulnerable = $true
+} else {
+    Write-Host "    [+] CachedLogonsCount: 0" -ForegroundColor Green
+}
+
+# 2. Audit NL$IterationCount
+$CachePath = "HKLM:\SECURITY\Cache"
+$IterCount = (Get-ItemProperty -Path $CachePath -Name "NL`$IterationCount" -ErrorAction SilentlyContinue)."NL`$IterationCount"
+if ($IterCount -ne 1954) {
+    Write-Host "    [!] VULNERABLE: NL`$IterationCount is '$IterCount' (Expected: 1954)" -ForegroundColor Red
+    $script:Vulnerable = $true
+} else {
+    Write-Host "    [+] NL`$IterationCount: 1954" -ForegroundColor Green
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-cached-logons-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.9.4 (Interactive logon: Number of previous logons to cache)
+* **ANSSI AD Hardening Guide**: Recommendations on credential caching and local password protection
+* **DoD Windows 11 Computer STIG v2r6**: Cached domain logon restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-local-blank-passwords-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-local-blank-passwords-md-req-end-168-account-policy-local-accounts-and-blank-password-restrictions-for-endpoints"></div>
+
+# [REQ-END-168] Account Policy: Local Accounts and Blank Password Restrictions for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-local-blank-passwords-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-local-blank-passwords-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Locations**:
+    * `HKLM\System\CurrentControlSet\Control\Lsa\LimitBlankPasswordUse` = `1` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\NoLMHash` = `1` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\ForceNetworkLogon` = `0` (REG_DWORD, Classic sharing model)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-local-blank-passwords-md-rationale"></div>
+
+## Rationale
+Restricting local account permissions and blocking weak legacy password hashes limits lateral movement and credential harvesting:
+* **Blank Passwords Limit (`LimitBlankPasswordUse`)**: Restricting accounts with empty passwords to console-only logons prevents remote attackers from authenticating across network shares, RDP, or WinRM using blank credentials.
+* **No LM Hash (`NoLMHash`)**: Disables the generation and caching of weak LAN Manager hashes upon password updates.
+* **Sharing Model (`ForceNetworkLogon`)**: Enforces the Classic security model where network logons authenticate using the caller's actual identity rather than Guest.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-local-blank-passwords-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Empty Password Accounts**: Accounts without passwords cannot be used for remote access or network resource sharing.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-local-blank-passwords-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-local-blank-passwords-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoints GPO (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the policies:
+   * **Accounts: Limit local account use of blank passwords to console logon only**: `Enabled`
+   * **Network security: Do not store LAN Manager hash value on next password change**: `Enabled`
+   * **Network access: Sharing and security model for local accounts**: `Classic - local users authenticate as themselves`
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-local-blank-passwords-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-EndAccountLocalBlankPasswords.ps1](../implementation_scripts/Configure-EndAccountLocalBlankPasswords.ps1)
+
+```powershell
+# Configure-EndAccountLocalBlankPasswords.ps1
+Write-Host "Configuring Endpoint local account and blank password restrictions..." -ForegroundColor Cyan
 
 $LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
-if (-not (Test-Path $LsaPath)) {
-    New-Item -Path $LsaPath -Force | Out-Null
-}
+if (-not (Test-Path $LsaPath)) { New-Item -Path $LsaPath -Force | Out-Null }
+
 Set-ItemProperty -Path $LsaPath -Name "LimitBlankPasswordUse" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $LsaPath -Name "NoLMHash" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "ForceNetworkLogon" -Value 0 -Type DWord -Force
+
+Write-Host "Local account and blank password restrictions applied." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-EndAccountLocalBlankPasswordsStatus.ps1](../audit_scripts/Get-EndAccountLocalBlankPasswordsStatus.ps1)
+
+```powershell
+# Get-EndAccountLocalBlankPasswordsStatus.ps1
+Write-Host "--- Auditing Endpoint Local Account and Blank Password Restrictions ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+
+function Test-RegVal ($Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $LsaPath -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name is '$Val' (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+    }
+}
+
+Test-RegVal "LimitBlankPasswordUse" 1
+Test-RegVal "NoLMHash" 1
+Test-RegVal "ForceNetworkLogon" 0
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-local-blank-passwords-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.7.3 (LimitBlankPasswordUse), Section 2.3.11.4 (NoLMHash), Section 2.3.10.12 (ForceNetworkLogon)
+* **ANSSI AD Hardening Guide**: Recommendations on local account security and LAN Manager hashes
+* **DoD Windows 11 Computer STIG v2r6**: Blank password use restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-ntlm-security-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-ntlm-security-md-req-end-169-account-policy-ntlm-and-lan-manager-authentication-security-for-endpoints"></div>
+
+# [REQ-END-169] Account Policy: NTLM and LAN Manager Authentication Security for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-ntlm-security-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-ntlm-security-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Locations**:
+    * `HKLM\System\CurrentControlSet\Control\Lsa\LmCompatibilityLevel` = `5` (REG_DWORD, Send NTLMv2 response only. Refuse LM & NTLM)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\MSV1_0\NTLMMinClientSec` = `537395200` (REG_DWORD, Require NTLMv2 session security, Require 128-bit encryption)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\MSV1_0\NTLMMinServerSec` = `537395200` (REG_DWORD, Require NTLMv2 session security, Require 128-bit encryption)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\MSV1_0\allownullsessionfallback` = `0` (REG_DWORD, Allow LocalSystem NULL session fallback disabled)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-ntlm-security-md-rationale"></div>
+
+## Rationale
+Enforcing modern NTLM parameters shields endpoints from legacy protocol exploitation and relay vectors:
+* **LAN Manager Compatibility Level (5)**: Restricts outbound LAN Manager authentication exclusively to NTLMv2, rejecting LM and NTLMv1 negotiations.
+* **128-bit Session Security (`NTLMMinClientSec` / `NTLMMinServerSec`)**: Mandates 128-bit encryption and NTLMv2 session security for all NTLM SSP connections, preventing downgrade to weak legacy session keys.
+* **NULL Session Fallback Block (`allownullsessionfallback`)**: Prevents services running as LocalSystem from dropping to unauthenticated anonymous sessions if Kerberos or NTLM fails.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-ntlm-security-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Legacy Devices**: Legacy systems and multi-function printers unable to authenticate using NTLMv2 with 128-bit session security will fail authentication. Such devices should be modernized.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-ntlm-security-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-ntlm-security-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoints GPO (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the policies:
+   * **Network security: LAN Manager authentication level**: `Send NTLMv2 response only. Refuse LM & NTLM` (value `5`)
+   * **Network security: Minimum session security for NTLM SSP based (including secure RPC) clients**: `Require NTLMv2 session security, Require 128-bit encryption` (value `537395200`)
+   * **Network security: Minimum session security for NTLM SSP based (including secure RPC) servers**: `Require NTLMv2 session security, Require 128-bit encryption` (value `537395200`)
+   * **Network security: Allow LocalSystem NULL session fallback**: `Disabled` (value `0`)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-ntlm-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-EndAccountNtlmSecurity.ps1](../implementation_scripts/Configure-EndAccountNtlmSecurity.ps1)
+
+```powershell
+# Configure-EndAccountNtlmSecurity.ps1
+Write-Host "Configuring Endpoint NTLM and LAN Manager authentication security..." -ForegroundColor Cyan
+
+$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+if (-not (Test-Path $LsaPath)) { New-Item -Path $LsaPath -Force | Out-Null }
 Set-ItemProperty -Path $LsaPath -Name "LmCompatibilityLevel" -Value 5 -Type DWord -Force
-Write-Host "[+] Blank password, NoLMHash, and client NTLMv2-only options enforced." -ForegroundColor Green
 
-# LSASS WDigest caching block
-$WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
-if (-not (Test-Path $WDigestPath)) {
-    New-Item -Path $WDigestPath -Force | Out-Null
+$MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
+if (-not (Test-Path $MsvPath)) { New-Item -Path $MsvPath -Force | Out-Null }
+Set-ItemProperty -Path $MsvPath -Name "NTLMMinClientSec" -Value 537395200 -Type DWord -Force
+Set-ItemProperty -Path $MsvPath -Name "NTLMMinServerSec" -Value 537395200 -Type DWord -Force
+Set-ItemProperty -Path $MsvPath -Name "allownullsessionfallback" -Value 0 -Type DWord -Force
+
+Write-Host "NTLM and LAN Manager authentication security applied." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-EndAccountNtlmSecurityStatus.ps1](../audit_scripts/Get-EndAccountNtlmSecurityStatus.ps1)
+
+```powershell
+# Get-EndAccountNtlmSecurityStatus.ps1
+Write-Host "--- Auditing Endpoint NTLM and LAN Manager Security ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+$MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
+
+function Test-RegVal ($Path, $Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name under $Path is '$Val' (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+    }
 }
+
+Test-RegVal $LsaPath "LmCompatibilityLevel" 5
+Test-RegVal $MsvPath "NTLMMinClientSec" 537395200
+Test-RegVal $MsvPath "NTLMMinServerSec" 537395200
+Test-RegVal $MsvPath "allownullsessionfallback" 0
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-ntlm-security-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.11.2 (LmCompatibilityLevel), Section 2.3.11.7 (NTLMMinClientSec), Section 2.3.11.8 (NTLMMinServerSec), Section 2.3.11.10 (allownullsessionfallback)
+* **ANSSI AD Hardening Guide**: Recommendations on NTLM deprecation and NTLMv2 enforcement
+* **DoD Windows 11 Computer STIG v2r6**: LAN Manager authentication parameters
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-wdigest-credentials-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-wdigest-credentials-md-req-end-170-account-policy-disable-wdigest-credential-caching-for-endpoints"></div>
+
+# [REQ-END-170] Account Policy: Disable WDigest Credential Caching for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-wdigest-credentials-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-wdigest-credentials-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Administrative Templates\System\Credentials Delegation` or Registry Preference
+  * **Registry Location**:
+    * `HKLM\System\CurrentControlSet\Control\SecurityProviders\WDigest\UseLogonCredential` = `0` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-wdigest-credentials-md-rationale"></div>
+
+## Rationale
+The WDigest authentication provider in legacy Windows stored cleartext passwords directly in LSASS memory. Disabling `UseLogonCredential` (`0`) ensures LSASS never caches plaintext password copies, neutralizing memory dumping tools such as Mimikatz.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-wdigest-credentials-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Digest Authentication**: Legacy applications relying on HTTP Digest authentication will fail. Modern applications must use Kerberos, OAuth/OIDC, or client certificates.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-wdigest-credentials-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-wdigest-credentials-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoints GPO (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to:
+   `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Right-click **Registry**, select **New** -> **Registry Item**:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest`
+   * **Value name**: `UseLogonCredential`
+   * **Value type**: `REG_DWORD`
+   * **Value data**: `0` (Decimal)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-wdigest-credentials-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-EndAccountWdigestCredentials.ps1](../implementation_scripts/Configure-EndAccountWdigestCredentials.ps1)
+
+```powershell
+# Configure-EndAccountWdigestCredentials.ps1
+Write-Host "Disabling WDigest plaintext credential caching on Endpoints..." -ForegroundColor Cyan
+
+$WDigestPath = "HKLM:\System\CurrentControlSet\Control\SecurityProviders\WDigest"
+if (-not (Test-Path $WDigestPath)) { New-Item -Path $WDigestPath -Force | Out-Null }
 Set-ItemProperty -Path $WDigestPath -Name "UseLogonCredential" -Value 0 -Type DWord -Force
-Write-Host "[+] LSASS WDigest credential caching disabled." -ForegroundColor Green
 
-# PBKDF2 Iterations for Cached Logons
-$CachePath = "HKLM:\SECURITY\Cache"
-if (-not (Test-Path $CachePath)) {
-    New-Item -Path $CachePath -Force | Out-Null
-}
-Set-ItemProperty -Path $CachePath -Name "NL`$IterationCount" -Value 1954 -Type DWord -Force
-Write-Host "[+] PBKDF2 cached credentials iteration count configured." -ForegroundColor Green
+Write-Host "WDigest credential caching disabled." -ForegroundColor Green
+```
 
-# Hello for Business, PIN and Microsoft Account policies
-$SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-if (-not (Test-Path $SystemPolicyPath)) {
-    New-Item -Path $SystemPolicyPath -Force | Out-Null
-}
-Set-ItemProperty -Path $SystemPolicyPath -Name "AllowDomainPINLogon" -Value 0 -Type DWord -Force
+*To audit the hardening status:*
 
-$PinComplexityPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity"
-if (-not (Test-Path $PinComplexityPath)) {
-    New-Item -Path $PinComplexityPath -Force | Out-Null
-}
-Set-ItemProperty -Path $PinComplexityPath -Name "MinimumPINLength" -Value 6 -Type DWord -Force
+[Download Script: Get-EndAccountWdigestCredentialsStatus.ps1](../audit_scripts/Get-EndAccountWdigestCredentialsStatus.ps1)
 
-$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-if (-not (Test-Path $SystemPath)) {
-    New-Item -Path $SystemPath -Force | Out-Null
+```powershell
+# Get-EndAccountWdigestCredentialsStatus.ps1
+Write-Host "--- Auditing Endpoint WDigest Credential Caching ---" -ForegroundColor Cyan
+
+$WDigestPath = "HKLM:\System\CurrentControlSet\Control\SecurityProviders\WDigest"
+$Val = (Get-ItemProperty -Path $WDigestPath -Name "UseLogonCredential" -ErrorAction SilentlyContinue).UseLogonCredential
+
+if ($null -ne $Val -and $Val -eq 0) {
+    Write-Host "    [+] UseLogonCredential is set to 0 (Disabled)." -ForegroundColor Green
+    Write-Output "Compliant"
+    exit 0
+} else {
+    Write-Host "    [!] VULNERABLE: UseLogonCredential is '$Val' (Expected: 0)" -ForegroundColor Red
+    Write-Output "Non-Compliant"
+    exit 1
 }
-Set-ItemProperty -Path $SystemPath -Name "MSAOptional" -Value 1 -Type DWord -Force
-Set-ItemProperty -Path $SystemPath -Name "MaxDevicePasswordFailedAttempts" -Value 10 -Type DWord -Force
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-wdigest-credentials-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8 (Credentials Delegation / WDigest)
+* **ANSSI AD Hardening Guide**: Recommendations on LSASS credential protection and WDigest mitigation
+* **DoD Windows 11 Computer STIG v2r6**: Disabling WDigest plain-text credentials in memory
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-hello-pin-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-hello-pin-md-req-end-171-account-policy-windows-hello-for-business-and-pin-complexity-for-endpoints"></div>
+
+# [REQ-END-171] Account Policy: Windows Hello for Business and PIN Complexity for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-hello-pin-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-hello-pin-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Paths**:
+    * `Computer Configuration\Administrative Templates\System\PIN Complexity`
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
+    * `Computer Configuration\Administrative Templates\System\Logon`
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\AllowDomainPINLogon` = `0` (REG_DWORD, Convenience PIN sign-in disabled)
+    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity\MinimumPINLength` = `6` (REG_DWORD)
+    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork\RequireSecurityDevice` = `1` (REG_DWORD, Use a hardware security device enabled)
+    * `HKLM\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices\TPM12` = `0` (REG_DWORD)
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\MSAOptional` = `1` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-hello-pin-md-rationale"></div>
+
+## Rationale
+Securing Windows Hello for Business (WHfB) and PIN authentication mechanisms ensures that weak fallback PINs cannot compromise client workstations:
+* **Disable Convenience PINs (`AllowDomainPINLogon = 0`)**: Convenience PINs store encrypted credentials locally without hardware TPM backing. Disabling domain PIN logon ensures standard enterprise authentication is enforced.
+* **Hardware Security Device (`RequireSecurityDevice = 1`)**: Requires asymmetric key pairs generated by Windows Hello to reside strictly inside a dedicated Hardware Security Module / TPM 2.0.
+* **PIN Complexity (`MinimumPINLength = 6`)**: Mandates a minimum PIN length of 6 characters to resist physical PIN guessing attacks.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-hello-pin-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **TPM 2.0 Prerequisite**: Hardware security device requirements require a functional TPM 2.0 module.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-hello-pin-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-hello-pin-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoints GPO (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to:
+   `Computer Configuration\Administrative Templates\System\PIN Complexity`
+   * **Minimum PIN length**: `Enabled` with value `6`
+4. Navigate to:
+   `Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
+   * **Use a hardware security device**: `Enabled`
+   * **Use convenience PIN sign-in**: `Disabled` (value `0`)
+   * **Allow Microsoft accounts to be optional**: `Enabled` (value `1`)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-hello-pin-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-EndAccountHelloPin.ps1](../implementation_scripts/Configure-EndAccountHelloPin.ps1)
+
+```powershell
+# Configure-EndAccountHelloPin.ps1
+Write-Host "Configuring Endpoint Windows Hello for Business and PIN policies..." -ForegroundColor Cyan
+
+# 1. System Logon PIN Policy
+$SysPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+if (-not (Test-Path $SysPath)) { New-Item -Path $SysPath -Force | Out-Null }
+Set-ItemProperty -Path $SysPath -Name "AllowDomainPINLogon" -Value 0 -Type DWord -Force
+
+# 2. PIN Complexity
+$PinPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity"
+if (-not (Test-Path $PinPath)) { New-Item -Path $PinPath -Force | Out-Null }
+Set-ItemProperty -Path $PinPath -Name "MinimumPINLength" -Value 6 -Type DWord -Force
+
+# 3. Hardware Security Device
+$PfwPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork"
+if (-not (Test-Path $PfwPath)) { New-Item -Path $PfwPath -Force | Out-Null }
+Set-ItemProperty -Path $PfwPath -Name "RequireSecurityDevice" -Value 1 -Type DWord -Force
+
+$TpmPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices"
+if (-not (Test-Path $TpmPath)) { New-Item -Path $TpmPath -Force | Out-Null }
+Set-ItemProperty -Path $TpmPath -Name "TPM12" -Value 0 -Type DWord -Force
+
+# 4. MSA Optional
+$SysPolPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+if (-not (Test-Path $SysPolPath)) { New-Item -Path $SysPolPath -Force | Out-Null }
+Set-ItemProperty -Path $SysPolPath -Name "MSAOptional" -Value 1 -Type DWord -Force
+
+Write-Host "Windows Hello and PIN policies applied." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-EndAccountHelloPinStatus.ps1](../audit_scripts/Get-EndAccountHelloPinStatus.ps1)
+
+```powershell
+# Get-EndAccountHelloPinStatus.ps1
+Write-Host "--- Auditing Endpoint Windows Hello and PIN Policies ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+function Test-RegVal ($Path, $Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name under $Path is '$Val' (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+    }
+}
+
+Test-RegVal "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" "AllowDomainPINLogon" 0
+Test-RegVal "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity" "MinimumPINLength" 6
+Test-RegVal "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork" "RequireSecurityDevice" 1
+Test-RegVal "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices" "TPM12" 0
+Test-RegVal "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "MSAOptional" 1
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-hello-pin-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.9 (Passport / Windows Hello for Business), Section 18.8 (PIN Complexity)
+* **ANSSI AD Hardening Guide**: Recommendations on hardware tokens and multi-factor authentication
+* **DoD Windows 11 Computer STIG v2r6**: Windows Hello for Business PIN and TPM constraints
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-block-msa-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-block-msa-md-req-end-172-account-policy-consumer-microsoft-account-restrictions-for-endpoints"></div>
+
+# [REQ-END-172] Account Policy: Consumer Microsoft Account Restrictions for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-block-msa-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-block-msa-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Administrative Templates\Windows Components\Microsoft Account\Block all consumer Microsoft account user authentication`
+  * **Registry Location**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\MicrosoftAccount\DisableUserAuth` = `1` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-block-msa-md-rationale"></div>
+
+## Rationale
+Connecting consumer cloud identities (such as personal `@outlook.com` or `@live.com` Microsoft accounts) to domain-joined endpoints creates risk of unauthorized cloud synchronization, data exfiltration via personal OneDrive shares, and unmanaged application downloads. Disabling consumer user authentication ensures that only managed Active Directory and enterprise identities can authenticate.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-block-msa-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Consumer Apps**: Windows Store apps requiring personal Microsoft consumer accounts will be blocked. Enterprise identities and managed domain logins remain unaffected.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-block-msa-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-block-msa-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoints GPO (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to:
+   `Computer Configuration\Administrative Templates\Windows Components\Microsoft Account`
+4. Set **Block all consumer Microsoft account user authentication** to **Enabled**.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-block-msa-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-EndAccountBlockMsa.ps1](../implementation_scripts/Configure-EndAccountBlockMsa.ps1)
+
+```powershell
+# Configure-EndAccountBlockMsa.ps1
+Write-Host "Blocking consumer Microsoft account user authentication on Endpoints..." -ForegroundColor Cyan
 
 $MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
-if (-not (Test-Path $MsaPath)) {
-    New-Item -Path $MsaPath -Force | Out-Null
-}
+if (-not (Test-Path $MsaPath)) { New-Item -Path $MsaPath -Force | Out-Null }
 Set-ItemProperty -Path $MsaPath -Name "DisableUserAuth" -Value 1 -Type DWord -Force
 
-$PassportPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork"
-if (-not (Test-Path $PassportPath)) {
-    New-Item -Path $PassportPath -Force | Out-Null
-}
-Set-ItemProperty -Path $PassportPath -Name "RequireSecurityDevice" -Value 1 -Type DWord -Force
+Write-Host "Consumer Microsoft account user authentication blocked." -ForegroundColor Green
+```
 
-$ExcludeDevicesPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices"
-if (-not (Test-Path $ExcludeDevicesPath)) {
-    New-Item -Path $ExcludeDevicesPath -Force | Out-Null
-}
-Set-ItemProperty -Path $ExcludeDevicesPath -Name "TPM12" -Value 0 -Type DWord -Force
-Write-Host "[+] Hello for Business, PIN and Microsoft Account options configured." -ForegroundColor Green
+*To audit the hardening status:*
 
-# Domain Member Secure Channel netlogon settings
+[Download Script: Get-EndAccountBlockMsaStatus.ps1](../audit_scripts/Get-EndAccountBlockMsaStatus.ps1)
+
+```powershell
+# Get-EndAccountBlockMsaStatus.ps1
+Write-Host "--- Auditing Endpoint Consumer Microsoft Account Restrictions ---" -ForegroundColor Cyan
+
+$MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
+$Val = (Get-ItemProperty -Path $MsaPath -Name "DisableUserAuth" -ErrorAction SilentlyContinue).DisableUserAuth
+
+if ($null -ne $Val -and $Val -eq 1) {
+    Write-Host "    [+] DisableUserAuth is set to 1 (Enabled)." -ForegroundColor Green
+    Write-Output "Compliant"
+    exit 0
+} else {
+    Write-Host "    [!] VULNERABLE: DisableUserAuth is '$Val' (Expected: 1)" -ForegroundColor Red
+    Write-Output "Non-Compliant"
+    exit 1
+}
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-block-msa-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.9 (Microsoft Account: Block all consumer Microsoft account user authentication)
+* **ANSSI AD Hardening Guide**: Recommendations on managed identity controls
+* **DoD Windows 11 Computer STIG v2r6**: Microsoft account blocking policy
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-secure-channel-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-secure-channel-md-req-end-173-account-policy-domain-member-secure-channel-security-for-endpoints"></div>
+
+# [REQ-END-173] Account Policy: Domain Member Secure Channel Security for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-secure-channel-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-secure-channel-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Locations**:
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\RequireSignOrSeal` = `1` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\SealSecureChannel` = `1` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\SignSecureChannel` = `1` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange` = `0` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\MaximumPasswordAge` = `30` (REG_DWORD)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\RequireStrongKey` = `1` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-secure-channel-md-rationale"></div>
+
+## Rationale
+The Netlogon secure channel protects domain communication between member endpoints and Domain Controllers:
+* **Signing and Sealing (`RequireSignOrSeal`, `SealSecureChannel`, `SignSecureChannel`)**: Mandates encryption and cryptographic signing on all Netlogon RPC traffic, preventing man-in-the-middle eavesdropping and tampering.
+* **Strong Session Keys (`RequireStrongKey`)**: Enforces 128-bit session keys for secure channel communication, blocking downgrade to DES or weak ciphers.
+* **Machine Password Rotation (`DisablePasswordChange = 0`, `MaximumPasswordAge = 30`)**: Enforces automatic 30-day computer account password rotation, ensuring dormant machine accounts cannot be compromised for persistence.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-secure-channel-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Third-Party Domain Members**: Modern Windows systems natively support strong session keys and secure channel signing.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-secure-channel-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-secure-channel-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoints GPO (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the policies:
+   * **Domain member: Digitally encrypt or sign secure channel data (always)**: `Enabled`
+   * **Domain member: Digitally encrypt secure channel data (when possible)**: `Enabled`
+   * **Domain member: Digitally sign secure channel data (when possible)**: `Enabled`
+   * **Domain member: Disable machine account password changes**: `Disabled`
+   * **Domain member: Maximum machine account password age**: `30` days
+   * **Domain member: Require strong (Windows 2000 or later) session key**: `Enabled`
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-secure-channel-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-EndAccountSecureChannel.ps1](../implementation_scripts/Configure-EndAccountSecureChannel.ps1)
+
+```powershell
+# Configure-EndAccountSecureChannel.ps1
+Write-Host "Configuring Endpoint Domain Member Secure Channel settings..." -ForegroundColor Cyan
+
 $NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
-if (-not (Test-Path $NetlogonPath)) {
-    New-Item -Path $NetlogonPath -Force | Out-Null
-}
+if (-not (Test-Path $NetlogonPath)) { New-Item -Path $NetlogonPath -Force | Out-Null }
+
 Set-ItemProperty -Path $NetlogonPath -Name "RequireSignOrSeal" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $NetlogonPath -Name "SealSecureChannel" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $NetlogonPath -Name "SignSecureChannel" -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $NetlogonPath -Name "DisablePasswordChange" -Value 0 -Type DWord -Force
 Set-ItemProperty -Path $NetlogonPath -Name "MaximumPasswordAge" -Value 30 -Type DWord -Force
 Set-ItemProperty -Path $NetlogonPath -Name "RequireStrongKey" -Value 1 -Type DWord -Force
-Write-Host "[+] Domain Member secure channel configurations applied." -ForegroundColor Green
 
-# LanmanWorkstation plain text passwords block
-$LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
-if (-not (Test-Path $LanmanWorkPath)) {
-    New-Item -Path $LanmanWorkPath -Force | Out-Null
-}
-Set-ItemProperty -Path $LanmanWorkPath -Name "EnablePlainTextPassword" -Value 0 -Type DWord -Force
-
-# NTLM SSP Client & Server security and Null Session Fallback
-$MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
-if (-not (Test-Path $MsvPath)) {
-    New-Item -Path $MsvPath -Force | Out-Null
-}
-Set-ItemProperty -Path $MsvPath -Name "allownullsessionfallback" -Value 0 -Type DWord -Force
-Set-ItemProperty -Path $MsvPath -Name "NTLMMinClientSec" -Value 537395200 -Type DWord -Force
-Set-ItemProperty -Path $MsvPath -Name "NTLMMinServerSec" -Value 537395200 -Type DWord -Force
-Write-Host "[+] Network authentication security and NTLM session settings applied." -ForegroundColor Green
-
-# Additional local security options for endpoints
-$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-if (-not (Test-Path $SystemPath)) {
-    New-Item -Path $SystemPath -Force | Out-Null
-}
-Set-ItemProperty -Path $SystemPath -Name "CrashOnAuditFail" -Value 0 -Type DWord -Force
-Set-ItemProperty -Path $SystemPath -Name "DisableCAD" -Value 0 -Type DWord -Force
-Set-ItemProperty -Path $SystemPath -Name "DontDisplayLastUserName" -Value 1 -Type DWord -Force
-
-Set-ItemProperty -Path $WinlogonPath -Name "PasswordExpiryWarning" -Value 14 -Type DWord -Force
-
-Set-ItemProperty -Path $LsaPath -Name "RestrictAnonymousSAM" -Value 1 -Type DWord -Force
-Set-ItemProperty -Path $LsaPath -Name "RestrictAnonymous" -Value 1 -Type DWord -Force
-Set-ItemProperty -Path $LsaPath -Name "ForceNetworkLogon" -Value 0 -Type DWord -Force
-Set-ItemProperty -Path $LsaPath -Name "ObaseCaseInsensitive" -Value 1 -Type DWord -Force
-
-$KerbParamsPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
-if (-not (Test-Path $KerbParamsPath)) {
-    New-Item -Path $KerbParamsPath -Force | Out-Null
-}
-Set-ItemProperty -Path $KerbParamsPath -Name "AllowPKU2U" -Value 0 -Type DWord -Force
-
-$LanmanServerPath = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
-if (-not (Test-Path $LanmanServerPath)) {
-    New-Item -Path $LanmanServerPath -Force | Out-Null
-}
-Set-ItemProperty -Path $LanmanServerPath -Name "AutoDisconnect" -Value 15 -Type DWord -Force
-Set-ItemProperty -Path $LanmanServerPath -Name "EnableForcedLogoff" -Value 1 -Type DWord -Force
-Set-ItemProperty -Path $LanmanServerPath -Name "NullSessionShares" -Value @() -Type MultiString -Force
-
-Set-ItemProperty -Path $NetlogonPath -Name "ForceLogoffWhenHourExpire" -Value 1 -Type DWord -Force
-Write-Host "[+] Additional network and interactive security options applied." -ForegroundColor Green
-
-# 2. Enforce Account Lockout and Password Policy via secedit
-$SecTempDir = Join-Path $env:TEMP "AccountSecurityTemplates"
-if (-not (Test-Path $SecTempDir)) {
-    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
-}
-
-$CfgFile = Join-Path $SecTempDir "account_sec.cfg"
-$LogFile = Join-Path $SecTempDir "secedit.log"
-$DbFile = Join-Path $SecTempDir "secedit.sdb"
-
-# Export current db
-$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
-if ($Process.ExitCode -ne 0) {
-    Write-Error "Failed to export current configuration database."
-    return
-}
-
-$ConfigText = Get-Content -Path $CfgFile -Raw
-$HasSystemAccess = $ConfigText -match "\[System Access\]"
-if (-not $HasSystemAccess) {
-    $ConfigText += "`r`n[System Access]`r`n"
-}
-
-# Re-build [System Access] section line-by-line
-$Lines = $ConfigText -split "`r?`n"
-$NewLines = @()
-$InSystemAccess = $false
-
-$AccountSettings = @{
-    "LockoutBadCount"              = 10
-    "ResetLockoutCount"            = 15
-    "LockoutDuration"              = 15
-    "ClearTextPassword"            = 0
-    "MinimumPasswordLength"        = 14
-    "PasswordComplexity"           = 1
-    "PasswordHistorySize"          = 24
-    "MaxPasswordAge"               = 0
-    "MinPasswordAge"               = 1
-    "RelaxMinPasswordLengthLimits" = 1
-    "AllowAdministratorLockout"    = 1
-    "MaxServiceTicketAge"          = 600
-    "MaxTicketAge"                 = 10
-    "MaxRenewAge"                  = 7
-    "MaxClockSkew"                 = 5
-    "TicketValidateClient"         = 1
-}
-
-foreach ($Line in $Lines) {
-    if ($Line -match "^\[(.*)\]$") {
-        $SectionName = $Matches[1]
-        if ($SectionName -eq "System Access") {
-            $InSystemAccess = $true
-            $NewLines += $Line
-            continue
-        } else {
-            $InSystemAccess = $false
-        }
-    }
-    
-    if ($InSystemAccess) {
-        $IsManaged = $false
-        foreach ($Key in $AccountSettings.Keys) {
-            if ($Line -match "^\s*$($Key)\s*=") {
-                $IsManaged = $true
-                break
-            }
-        }
-        if (-not $IsManaged) {
-            $NewLines += $Line
-        }
-    } else {
-        $NewLines += $Line
-    }
-}
-
-# Append our settings
-$FinalLines = @()
-foreach ($Line in $NewLines) {
-    $FinalLines += $Line
-    if ($Line -eq "[System Access]") {
-        foreach ($Key in $AccountSettings.Keys) {
-            $Val = $AccountSettings[$Key]
-            $FinalLines += "$($Key) = $($Val)"
-        }
-    }
-}
-
-$FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
-
-# Import
-$Process = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas SECURITYPOLICY /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
-if ($Process.ExitCode -eq 0) {
-    Write-Host "[+] Lockout and password policies applied locally." -ForegroundColor Green
-} else {
-    Write-Error "Failed to apply local account policies. Exit Code: $($Process.ExitCode)"
-}
-
-Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "Domain member secure channel configurations applied." -ForegroundColor Green
 ```
 
-*To audit local account and password policies:*
-[Download Script: Test-AccountPolicies.ps1](audit_scripts/Test-AccountPolicies.ps1)
+*To audit the hardening status:*
+
+[Download Script: Get-EndAccountSecureChannelStatus.ps1](../audit_scripts/Get-EndAccountSecureChannelStatus.ps1)
 
 ```powershell
-# Test-AccountPolicies.ps1
-# Checks local registry and SecEdit settings for account lockout, password options, smart card removal behavior, PIN parameters, Hello for Business, Microsoft account settings, secure channel properties, and NTLM session configuration.
-
-Write-Host "--- Auditing Account and Password Policies ---" -ForegroundColor Cyan
-
+# Get-EndAccountSecureChannelStatus.ps1
+Write-Host "--- Auditing Endpoint Domain Member Secure Channel Settings ---" -ForegroundColor Cyan
 $script:Vulnerable = $false
 
-# Helper function to audit registry properties
-function Test-RegistryValue ($path, $name, $expectedValue) {
-    $val = Get-ItemProperty -Path $path -Name $name -ErrorAction SilentlyContinue
-    $actual = if ($val) { $val.$name } else { "" }
-    $color = "Red"
-    if ($actual -eq $expectedValue) {
-        $color = "Green"
-    } else {
-        $script:Vulnerable = $true
-    }
-    Write-Host "    - Registry Setting: $name | Actual: '$actual' (Expected: '$expectedValue')" -ForegroundColor $color
-}
-
-# 1. Audit Registry Settings
-$WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
-Test-RegistryValue $WinlogonPath "ScRemoveOption" "1"
-Test-RegistryValue $WinlogonPath "CachedLogonsCount" 0
-
-$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
-Test-RegistryValue $LsaPath "LimitBlankPasswordUse" 1
-Test-RegistryValue $LsaPath "NoLMHash" 1
-
-$WDigestPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
-Test-RegistryValue $WDigestPath "UseLogonCredential" 0
-
-$CachePath = "HKLM:\SECURITY\Cache"
-Test-RegistryValue $CachePath "NL`$IterationCount" 1954
-
-$SystemPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-Test-RegistryValue $SystemPolicyPath "AllowDomainPINLogon" 0
-
-$PinComplexityPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity"
-Test-RegistryValue $PinComplexityPath "MinimumPINLength" 6
-
-$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-Test-RegistryValue $SystemPath "MSAOptional" 1
-Test-RegistryValue $SystemPath "MaxDevicePasswordFailedAttempts" 10
-
-$MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
-Test-RegistryValue $MsaPath "DisableUserAuth" 1
-
-$PassportPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork"
-Test-RegistryValue $PassportPath "RequireSecurityDevice" 1
-
-$ExcludeDevicesPath = "HKLM:\SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices"
-Test-RegistryValue $ExcludeDevicesPath "TPM12" 0
-
 $NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
-Test-RegistryValue $NetlogonPath "RequireSignOrSeal" 1
-Test-RegistryValue $NetlogonPath "SealSecureChannel" 1
-Test-RegistryValue $NetlogonPath "SignSecureChannel" 1
-Test-RegistryValue $NetlogonPath "DisablePasswordChange" 0
-Test-RegistryValue $NetlogonPath "MaximumPasswordAge" 30
-Test-RegistryValue $NetlogonPath "RequireStrongKey" 1
 
-$LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
-Test-RegistryValue $LanmanWorkPath "EnablePlainTextPassword" 0
-
-$MsvPath = "HKLM:\System\CurrentControlSet\Control\Lsa\MSV1_0"
-Test-RegistryValue $MsvPath "allownullsessionfallback" 0
-Test-RegistryValue $MsvPath "NTLMMinClientSec" 537395200
-Test-RegistryValue $MsvPath "NTLMMinServerSec" 537395200
-
-# Audit Additional security options
-$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-Test-RegistryValue $SystemPath "CrashOnAuditFail" 0
-Test-RegistryValue $SystemPath "DisableCAD" 0
-Test-RegistryValue $SystemPath "DontDisplayLastUserName" 1
-
-Test-RegistryValue $WinlogonPath "PasswordExpiryWarning" 14
-
-$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
-Test-RegistryValue $LsaPath "RestrictAnonymousSAM" 1
-Test-RegistryValue $LsaPath "RestrictAnonymous" 1
-Test-RegistryValue $LsaPath "ForceNetworkLogon" 0
-Test-RegistryValue $LsaPath "ObaseCaseInsensitive" 1
-Test-RegistryValue $LsaPath "LmCompatibilityLevel" 5
-
-$KerbParamsPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
-Test-RegistryValue $KerbParamsPath "AllowPKU2U" 0
-
-$LanmanServerPath = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
-Test-RegistryValue $LanmanServerPath "AutoDisconnect" 15
-Test-RegistryValue $LanmanServerPath "EnableForcedLogoff" 1
-
-# Audit NullSessionShares
-$NullSessionVal = Get-ItemProperty -Path $LanmanServerPath -Name "NullSessionShares" -ErrorAction SilentlyContinue
-$NullSessionActual = if ($NullSessionVal) { $NullSessionVal.NullSessionShares } else { "" }
-$NullSessionColor = "Red"
-if ($null -eq $NullSessionActual -or $NullSessionActual -eq "" -or $NullSessionActual.Count -eq 0 -or ($NullSessionActual.Count -eq 1 -and $NullSessionActual[0] -eq "")) {
-    $NullSessionColor = "Green"
-} else {
-    $script:Vulnerable = $true
-}
-Write-Host "    - Registry Setting: NullSessionShares | Actual: '$NullSessionActual' (Expected: empty/None)" -ForegroundColor $NullSessionColor
-
-Test-RegistryValue $NetlogonPath "ForceLogoffWhenHourExpire" 1
-
-# 2. Audit SecEdit Settings
-$SecTempDir = Join-Path $env:TEMP "AccountAuditSecurityTemplates"
-if (-not (Test-Path $SecTempDir)) {
-    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
-}
-
-$CfgFile = Join-Path $SecTempDir "account_audit.cfg"
-$Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
-if ($Process.ExitCode -ne 0) {
-    Write-Error "Failed to export current database."
-    return
-}
-
-$ConfigContent = Get-Content -Path $CfgFile -Raw
-$AccountSettings = @{
-    "LockoutBadCount"              = 10
-    "ResetLockoutCount"            = 15
-    "LockoutDuration"              = 15
-    "ClearTextPassword"            = 0
-    "MinimumPasswordLength"        = 14
-    "PasswordComplexity"           = 1
-    "PasswordHistorySize"          = 24
-    "MaxPasswordAge"               = 0
-    "MinPasswordAge"               = 1
-    "RelaxMinPasswordLengthLimits" = 1
-    "AllowAdministratorLockout"    = 1
-    "MaxServiceTicketAge"          = 600
-    "MaxTicketAge"                 = 10
-    "MaxRenewAge"                  = 7
-    "MaxClockSkew"                 = 5
-    "TicketValidateClient"         = 1
-}
-
-foreach ($Key in $AccountSettings.Keys) {
-    $Expected = $AccountSettings[$Key]
-    if ($ConfigContent -match "(?m)^\s*$($Key)\s*=\s*(.*)\s*$") {
-        $Actual = $Matches[1].Trim()
-    } else {
-        $Actual = ""
-    }
-    
-    $Color = "Red"
-    if ($Actual -eq [string]$Expected) {
-        $Color = "Green"
-    } else {
+function Test-RegVal ($Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $NetlogonPath -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name is '$Val' (Expected: $Expected)" -ForegroundColor Red
         $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
     }
-    Write-Host "    - System Access Setting: $($Key) | Actual: '$($Actual)' (Expected: '$($Expected)')" -ForegroundColor $Color
 }
 
-Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
+Test-RegVal "RequireSignOrSeal" 1
+Test-RegVal "SealSecureChannel" 1
+Test-RegVal "SignSecureChannel" 1
+Test-RegVal "DisablePasswordChange" 0
+Test-RegVal "RequireStrongKey" 1
+
+$MaxAge = (Get-ItemProperty -Path $NetlogonPath -Name "MaximumPasswordAge" -ErrorAction SilentlyContinue).MaximumPasswordAge
+if ($null -eq $MaxAge -or $MaxAge -gt 30 -or $MaxAge -eq 0) {
+    Write-Host "    [!] VULNERABLE: MaximumPasswordAge is '$MaxAge' (Expected: 30 or fewer, but not 0)" -ForegroundColor Red
+    $script:Vulnerable = $true
+} else {
+    Write-Host "    [+] MaximumPasswordAge: $MaxAge" -ForegroundColor Green
+}
 
 if ($script:Vulnerable) {
-    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    Write-Output "Non-Compliant"
+    exit 1
 } else {
-    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    Write-Output "Compliant"
+    exit 0
 }
 ```
 
 ---
 
-<div id="08-endpoints-configure-account-policies-md-sources-compliance-references"></div>
+<div id="08-endpoints-account-policy-configure-end-account-secure-channel-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 2.3.2.2 (CrashOnAuditFail), Section 2.3.7.1 (DisableCAD), Section 2.3.7.2 (DontDisplayLastUserName), Section 2.3.7.3 (blank passwords), Section 2.3.7.8 (PasswordExpiryWarning), Section 2.3.9.1 (AutoDisconnect), Section 2.3.9.4 (EnableForcedLogoff), Section 2.3.9.5 (Smart card behavior), Section 2.3.10.3 (RestrictAnonymousSAM), Section 2.3.10.11 (NullSessionShares), Section 2.3.10.12 (ForceNetworkLogon), Section 2.3.11.3 (AllowPKU2U), Section 2.3.11.6 (ForceLogoffWhenHourExpire), Section 2.3.11.8 (anonymous translation), Section 2.3.11.10 (null session fallback), Section 2.3.15.1 (ObaseCaseInsensitive).
-* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 1.1.6 (RelaxMinPasswordLengthLimits), Section 1.2.3 (AllowAdministratorLockout).
-* **ANSSI AD Hardening Guide**: Recommendations on password complexity, reversible encryption blocks, lockout management, and domain member secure channels.
-* **DoD Windows 11 Computer STIG v2r6**: Various account policy, PIN complexity, Windows Hello for Business, Microsoft account restrictions, WDigest disabled, and Netlogon secure channel parameters.
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.6 (Domain member secure channel options)
+* **ANSSI AD Hardening Guide**: Recommendations on secure channels and machine account password rotation
+* **DoD Windows 11 Computer STIG v2r6**: Domain member secure channel cryptography
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-smb-security-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-smb-security-md-req-end-174-account-policy-smb-client-and-server-security-options-for-endpoints"></div>
+
+# [REQ-END-174] Account Policy: SMB Client and Server Security Options for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-smb-security-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-smb-security-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Locations**:
+    * `HKLM\System\CurrentControlSet\Services\LanmanWorkstation\Parameters\EnablePlainTextPassword` = `0` (REG_DWORD, Send unencrypted password disabled)
+    * `HKLM\System\CurrentControlSet\Services\LanmanServer\Parameters\AutoDisconnect` = `15` (REG_DWORD, Idle disconnect time = 15 minutes)
+    * `HKLM\System\CurrentControlSet\Services\LanmanServer\Parameters\EnableForcedLogoff` = `1` (REG_DWORD, Disconnect clients when logon hours expire)
+    * `HKLM\System\CurrentControlSet\Services\Netlogon\Parameters\ForceLogoffWhenHourExpire` = `1` (REG_DWORD, Force logoff when logon hours expire)
+    * `HKLM\System\CurrentControlSet\Services\LanmanServer\Parameters\NullSessionShares` = `@()` (REG_MULTI_SZ, Anonymous shares = None)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-smb-security-md-rationale"></div>
+
+## Rationale
+Securing SMB workstation and server parameters blocks cleartext credential disclosure and enforces session termination boundaries:
+* **Block Plaintext Passwords (`EnablePlainTextPassword = 0`)**: Prevents the SMB redirector from transmitting unencrypted credentials across the network to rogue or third-party SMB servers.
+* **Auto-Disconnect Idle Sessions (`AutoDisconnect = 15`)**: Automatically suspends dormant SMB sessions after 15 minutes, mitigating session hijacking over open network connections.
+* **Logon Hours Enforcement (`EnableForcedLogoff = 1`, `ForceLogoffWhenHourExpire = 1`)**: Ensures that when defined user logon hours expire, active SMB sessions and network connections are forcefully disconnected.
+* **Null Session Shares (`NullSessionShares = @()`)**: Prevents unauthenticated anonymous users from accessing any local network shares.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-smb-security-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Third-Party SMB**: Older NAS appliances requiring plain text SMB authentication will be blocked. Endpoints must communicate using authenticated, encrypted SMB.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-smb-security-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-smb-security-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoints GPO (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the policies:
+   * **Microsoft network client: Send unencrypted password to third-party SMB servers**: `Disabled`
+   * **Microsoft network server: Amount of idle time required before suspending session**: `15` minutes
+   * **Microsoft network server: Disconnect clients when logon hours expire**: `Enabled`
+   * **Network security: Force logoff when logon hours expire**: `Enabled`
+   * **Network access: Shares that can be accessed anonymously**: `None` (empty)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-smb-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-EndAccountSmbSecurity.ps1](../implementation_scripts/Configure-EndAccountSmbSecurity.ps1)
+
+```powershell
+# Configure-EndAccountSmbSecurity.ps1
+Write-Host "Configuring Endpoint SMB client and server security options..." -ForegroundColor Cyan
+
+# 1. LanmanWorkstation
+$LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
+if (-not (Test-Path $LanmanWorkPath)) { New-Item -Path $LanmanWorkPath -Force | Out-Null }
+Set-ItemProperty -Path $LanmanWorkPath -Name "EnablePlainTextPassword" -Value 0 -Type DWord -Force
+
+# 2. LanmanServer
+$LanmanServerPath = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
+if (-not (Test-Path $LanmanServerPath)) { New-Item -Path $LanmanServerPath -Force | Out-Null }
+Set-ItemProperty -Path $LanmanServerPath -Name "AutoDisconnect" -Value 15 -Type DWord -Force
+Set-ItemProperty -Path $LanmanServerPath -Name "EnableForcedLogoff" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LanmanServerPath -Name "NullSessionShares" -Value @() -Type MultiString -Force
+
+# 3. Netlogon ForceLogoff
+$NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
+if (-not (Test-Path $NetlogonPath)) { New-Item -Path $NetlogonPath -Force | Out-Null }
+Set-ItemProperty -Path $NetlogonPath -Name "ForceLogoffWhenHourExpire" -Value 1 -Type DWord -Force
+
+Write-Host "SMB client and server security options applied." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-EndAccountSmbSecurityStatus.ps1](../audit_scripts/Get-EndAccountSmbSecurityStatus.ps1)
+
+```powershell
+# Get-EndAccountSmbSecurityStatus.ps1
+Write-Host "--- Auditing Endpoint SMB Client and Server Security Options ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$LanmanWorkPath = "HKLM:\System\CurrentControlSet\Services\LanmanWorkstation\Parameters"
+$LanmanServerPath = "HKLM:\System\CurrentControlSet\Services\LanmanServer\Parameters"
+$NetlogonPath = "HKLM:\System\CurrentControlSet\Services\Netlogon\Parameters"
+
+function Test-RegVal ($Path, $Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name is '$Val' (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+    }
+}
+
+Test-RegVal $LanmanWorkPath "EnablePlainTextPassword" 0
+Test-RegVal $LanmanServerPath "AutoDisconnect" 15
+Test-RegVal $LanmanServerPath "EnableForcedLogoff" 1
+Test-RegVal $NetlogonPath "ForceLogoffWhenHourExpire" 1
+
+$NullShares = (Get-ItemProperty -Path $LanmanServerPath -Name "NullSessionShares" -ErrorAction SilentlyContinue).NullSessionShares
+if ($null -ne $NullShares -and $NullShares.Count -gt 0 -and $NullShares[0] -ne "") {
+    Write-Host "    [!] VULNERABLE: NullSessionShares contains values: $($NullShares -join ', ')" -ForegroundColor Red
+    $script:Vulnerable = $true
+} else {
+    Write-Host "    [+] NullSessionShares: None" -ForegroundColor Green
+}
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-smb-security-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.9.1 (AutoDisconnect), Section 2.3.9.4 (EnableForcedLogoff), Section 2.3.10.2 (EnablePlainTextPassword), Section 2.3.10.11 (NullSessionShares), Section 2.3.11.6 (ForceLogoffWhenHourExpire)
+* **ANSSI AD Hardening Guide**: Recommendations on SMB network protocols and idle session termination
+* **DoD Windows 11 Computer STIG v2r6**: SMB encryption and session timeout controls
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-anonymous-restrictions-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-anonymous-restrictions-md-req-end-175-account-policy-anonymous-access-and-enumeration-restrictions-for-endpoints"></div>
+
+# [REQ-END-175] Account Policy: Anonymous Access and Enumeration Restrictions for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-anonymous-restrictions-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-anonymous-restrictions-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Locations**:
+    * `HKLM\System\CurrentControlSet\Control\Lsa\RestrictAnonymousSAM` = `1` (REG_DWORD, Do not allow anonymous enumeration of SAM accounts)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\RestrictAnonymous` = `1` (REG_DWORD, Do not allow anonymous enumeration of shares)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters\AllowPKU2U` = `0` (REG_DWORD, Disallow PKU2U authentication requests)
+    * `HKLM\System\CurrentControlSet\Control\Lsa\ObaseCaseInsensitive` = `1` (REG_DWORD, Require case insensitivity for non-Windows subsystems)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-anonymous-restrictions-md-rationale"></div>
+
+## Rationale
+Restricting unauthenticated reconnaissance and non-standard authentication endpoints shields local system objects and user databases:
+* **Anonymous SAM & Share Enumeration (`RestrictAnonymousSAM`, `RestrictAnonymous`)**: Prevents unauthenticated network callers from querying local user accounts, group memberships, or shared directory paths via null sessions.
+* **Disallow PKU2U (`AllowPKU2U`)**: PKU2U allows peer-to-peer authentication using online Microsoft accounts. Disabling PKU2U blocks peer authentication bypasses across enterprise endpoints.
+* **Subsystem Case Insensitivity (`ObaseCaseInsensitive`)**: Enforces consistent case insensitivity for non-Windows subsystems, mitigating object namespace collision exploits.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-anonymous-restrictions-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Anonymous Queries**: Legacy applications attempting to query SAM or share lists anonymously will receive Access Denied.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-anonymous-restrictions-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-anonymous-restrictions-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoints GPO (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the policies:
+   * **Network access: Do not allow anonymous enumeration of SAM accounts and shares**: `Enabled`
+   * **Network access: Allow anonymous SID/Name translation**: `Disabled`
+   * **Network Security: Allow PKU2U authentication requests to this computer to use online identities**: `Disabled`
+   * **System objects: Require case insensitivity for non-Windows subsystems**: `Enabled`
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-anonymous-restrictions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-EndAccountAnonymousRestrictions.ps1](../implementation_scripts/Configure-EndAccountAnonymousRestrictions.ps1)
+
+```powershell
+# Configure-EndAccountAnonymousRestrictions.ps1
+Write-Host "Configuring Endpoint anonymous access and enumeration restrictions..." -ForegroundColor Cyan
+
+$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+if (-not (Test-Path $LsaPath)) { New-Item -Path $LsaPath -Force | Out-Null }
+Set-ItemProperty -Path $LsaPath -Name "RestrictAnonymousSAM" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "RestrictAnonymous" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $LsaPath -Name "ObaseCaseInsensitive" -Value 1 -Type DWord -Force
+
+$KerbPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+if (-not (Test-Path $KerbPath)) { New-Item -Path $KerbPath -Force | Out-Null }
+Set-ItemProperty -Path $KerbPath -Name "AllowPKU2U" -Value 0 -Type DWord -Force
+
+Write-Host "Anonymous access and enumeration restrictions applied." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-EndAccountAnonymousRestrictionsStatus.ps1](../audit_scripts/Get-EndAccountAnonymousRestrictionsStatus.ps1)
+
+```powershell
+# Get-EndAccountAnonymousRestrictionsStatus.ps1
+Write-Host "--- Auditing Endpoint Anonymous Access and Enumeration Restrictions ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$LsaPath = "HKLM:\System\CurrentControlSet\Control\Lsa"
+$KerbPath = "HKLM:\System\CurrentControlSet\Control\Lsa\Kerberos\Parameters"
+
+function Test-RegVal ($Path, $Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name under $Path is '$Val' (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+    }
+}
+
+Test-RegVal $LsaPath "RestrictAnonymousSAM" 1
+Test-RegVal $LsaPath "RestrictAnonymous" 1
+Test-RegVal $LsaPath "ObaseCaseInsensitive" 1
+Test-RegVal $KerbPath "AllowPKU2U" 0
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-anonymous-restrictions-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.10.3 (RestrictAnonymousSAM), Section 2.3.11.3 (AllowPKU2U), Section 2.3.15.1 (ObaseCaseInsensitive)
+* **ANSSI AD Hardening Guide**: Recommendations on restricting anonymous enumeration and RPC interfaces
+* **DoD Windows 11 Computer STIG v2r6**: Anonymous SAM enumeration restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-interactive-logon-md"></div>
+
+<div id="08-endpoints-account-policy-configure-end-account-interactive-logon-md-req-end-176-account-policy-interactive-logon-security-options-for-endpoints"></div>
+
+# [REQ-END-176] Account Policy: Interactive Logon Security Options for Endpoints
+
+<div id="08-endpoints-account-policy-configure-end-account-interactive-logon-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
+* **Operating Systems**: Windows 10/11 Enterprise/Professional, Windows Server 2016 (and above)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-interactive-logon-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableCAD` = `0` (REG_DWORD, Require CTRL+ALT+DEL enabled)
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DontDisplayLastUserName` = `1` (REG_DWORD, Do not display last signed-in enabled)
+    * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\CrashOnAuditFail` = `0` (REG_DWORD, Shut down system if unable to log audits disabled)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-interactive-logon-md-rationale"></div>
+
+## Rationale
+Configuring interactive logon behavior prevents credential harvesting via spoofed login screens and shoulder surfing:
+* **Require CTRL+ALT+DEL (`DisableCAD = 0`)**: The Secure Attention Sequence (SAS / CTRL+ALT+DEL) can only be intercepted by the trusted Windows kernel/winlogon process, preventing malicious userland login prompts from capturing user credentials.
+* **Hide Last Signed-in User (`DontDisplayLastUserName = 1`)**: Prevents shoulder-surfers or unauthorized observers from discovering valid username structures.
+* **Do Not Crash on Audit Failure (`CrashOnAuditFail = 0`)**: Prevents sudden system shutdowns when the security event log fills, avoiding denial-of-service conditions.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-interactive-logon-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **User Workflow**: Users must press CTRL+ALT+DEL and manually enter both their username and password/PIN during interactive logon.
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-interactive-logon-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-account-policy-configure-end-account-interactive-logon-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoints GPO (e.g., `GPO_Hardening_Workstations`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+4. Configure the policies:
+   * **Interactive logon: Do not require CTRL+ALT+DEL**: `Disabled` (value `0`)
+   * **Interactive logon: Don't display last signed-in**: `Enabled` (value `1`)
+   * **Audit: Shut down system immediately if unable to log security audits**: `Disabled` (value `0`)
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-interactive-logon-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-EndAccountInteractiveLogon.ps1](../implementation_scripts/Configure-EndAccountInteractiveLogon.ps1)
+
+```powershell
+# Configure-EndAccountInteractiveLogon.ps1
+Write-Host "Configuring Endpoint interactive logon security options..." -ForegroundColor Cyan
+
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+if (-not (Test-Path $SystemPath)) { New-Item -Path $SystemPath -Force | Out-Null }
+
+Set-ItemProperty -Path $SystemPath -Name "DisableCAD" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $SystemPath -Name "DontDisplayLastUserName" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $SystemPath -Name "CrashOnAuditFail" -Value 0 -Type DWord -Force
+
+Write-Host "Interactive logon security options applied." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-EndAccountInteractiveLogonStatus.ps1](../audit_scripts/Get-EndAccountInteractiveLogonStatus.ps1)
+
+```powershell
+# Get-EndAccountInteractiveLogonStatus.ps1
+Write-Host "--- Auditing Endpoint Interactive Logon Security Options ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$SystemPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+
+function Test-RegVal ($Name, $Expected) {
+    $Val = (Get-ItemProperty -Path $SystemPath -Name $Name -ErrorAction SilentlyContinue).$Name
+    if ($Val -ne $Expected) {
+        Write-Host "    [!] VULNERABLE: $Name is '$Val' (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+    }
+}
+
+Test-RegVal "DisableCAD" 0
+Test-RegVal "DontDisplayLastUserName" 1
+Test-RegVal "CrashOnAuditFail" 0
+
+if ($script:Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-account-policy-configure-end-account-interactive-logon-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 2.3.2.2 (CrashOnAuditFail), Section 2.3.7.1 (DisableCAD), Section 2.3.7.2 (DontDisplayLastUserName)
+* **ANSSI AD Hardening Guide**: Recommendations on secure desktop and interactive logon hardening
+* **DoD Windows 11 Computer STIG v2r6**: SAS CTRL+ALT+DEL and username display restrictions
 
 
 <div style="page-break-before: always;"></div>

@@ -100,6 +100,20 @@ This directory contains the physical isolation policies and operating system sec
 
 13. **[REQ-PAW-013 - Configure Account and Password Policies for PAWs](configure-account-policies.md)**
     Configures robust local account lockout, local password complexity, and 20-character minimum length policies, and references Active Directory Fine-Grained Password Policies (FGPP) for Tier 0 Administrators.
+    * **[REQ-PAW-152 - Account Policy: Password Policy for PAWs](account-policy/configure-paw-account-password-policy.md)**
+    * **[REQ-PAW-153 - Account Policy: Account Lockout Policy for PAWs](account-policy/configure-paw-account-lockout-policy.md)**
+    * **[REQ-PAW-154 - Account Policy: Kerberos Policy for PAWs](account-policy/configure-paw-account-kerberos-policy.md)**
+    * **[REQ-PAW-155 - Account Policy: Smart Card Removal Behavior for PAWs](account-policy/configure-paw-account-smart-card-removal.md)**
+    * **[REQ-PAW-156 - Account Policy: Cached Logons and PBKDF2 Iteration Count for PAWs](account-policy/configure-paw-account-cached-logons.md)**
+    * **[REQ-PAW-157 - Account Policy: Local Accounts and Blank Password Restrictions for PAWs](account-policy/configure-paw-account-local-blank-passwords.md)**
+    * **[REQ-PAW-158 - Account Policy: NTLM and LAN Manager Authentication Security for PAWs](account-policy/configure-paw-account-ntlm-security.md)**
+    * **[REQ-PAW-159 - Account Policy: Disable WDigest Credential Caching for PAWs](account-policy/configure-paw-account-wdigest-credentials.md)**
+    * **[REQ-PAW-160 - Account Policy: Windows Hello for Business and PIN Complexity for PAWs](account-policy/configure-paw-account-hello-pin.md)**
+    * **[REQ-PAW-161 - Account Policy: Consumer Microsoft Account Restrictions for PAWs](account-policy/configure-paw-account-block-msa.md)**
+    * **[REQ-PAW-162 - Account Policy: Domain Member Secure Channel Security for PAWs](account-policy/configure-paw-account-secure-channel.md)**
+    * **[REQ-PAW-163 - Account Policy: SMB Client and Server Security Options for PAWs](account-policy/configure-paw-account-smb-security.md)**
+    * **[REQ-PAW-164 - Account Policy: Anonymous Access and Enumeration Restrictions for PAWs](account-policy/configure-paw-account-anonymous-restrictions.md)**
+    * **[REQ-PAW-165 - Account Policy: Interactive Logon Security Options for PAWs](account-policy/configure-paw-account-interactive-logon.md)**
 
 14. **[REQ-PAW-014 - Configure Early Launch Antimalware (ELAM) Policy for PAWs](configure-elam.md)**
     Configures the Early Launch Antimalware (ELAM) driver initialization policy to ensure only signed, trusted boot drivers execute.

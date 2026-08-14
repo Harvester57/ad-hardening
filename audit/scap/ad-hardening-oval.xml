@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-07-06T09:46:55Z</oval:timestamp>
+    <oval:timestamp>2026-08-14T10:32:33Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -3212,76 +3212,6 @@ Disabling WPBT execution prevents Windows from parsing the ACPI table and runnin
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" test_ref="oval:org.adhardening:tst:8017013" />
       </criteria>
     </definition>
-    <definition id="oval:org.adhardening:def:8018" version="1" class="compliance">
-      <metadata>
-        <title>[REQ-END-018] Configure Account and Password Policies</title>
-        <affected family="windows">
-          <platform>Microsoft Windows Server 2016</platform>
-          <platform>Microsoft Windows Server 2019</platform>
-          <platform>Microsoft Windows Server 2022</platform>
-          <platform>Microsoft Windows 10</platform>
-          <platform>Microsoft Windows 11</platform>
-        </affected>
-        <description>Securing authentication parameters and account controls reduces the risk of password attacks and session hijackings:
-
-1. **Account Lockout Threshold (`LockoutBadCount`)**: Brute-force and password-spraying attacks target user accounts to discover credentials. If no lockout threshold is configured, an attacker can make infinite password attempts. Configuring a lockout threshold of 10 bad attempts mitigates online brute-force attacks.
-2. **Account Lockout Reset (`ResetLockoutCount`)**: This policy dictates how long the failed logon counter persists before resetting. Setting this to 15 minutes ensures that password attempts are restricted over time without introducing major helpdesk overhead.
-3. **Reversible Encryption (`ClearTextPassword`)**: Storing passwords using reversible encryption is equivalent to storing cleartext passwords in the directory database. This key option exists only for legacy application support (such as CHAP authentication) and must be disabled to prevent database dumping/credential recovery.
-4. **Local Password Complexity and Minimum Length (`MinimumPasswordLength`, `PasswordComplexity`)**: Setting the minimum password length to 14 characters and enabling complexity makes offline brute-force and dictionary attacks significantly harder. A length of 14 characters is the standard baseline recommended by ANSSI and CIS for general workstations.
-5. **Password History and Age (`PasswordHistorySize`, `MaxPasswordAge`, `MinPasswordAge`)**: Mandating a history of 24 prevents users from cycling between a few similar passwords. Disabling password expiration (`MaxPasswordAge = 0`) aligns with NIST SP 800-63B and modern ANSSI guidelines. Since 14-character complex passwords are sufficiently robust, forcing periodic changes is deprecated as it often leads users to write down passwords or choose predictable variations. A minimum age of 1 day prevents users from immediately bypassing the history requirement by changing their password 24 times in succession.
-4. **Smart Card Removal Behavior (`ScRemoveOption`)**: In secure environments using Smart Card or token-based authentication, removing the card must automatically lock the desktop session (`1`). If disabled, a user leaving their workstation with the card removed leaves the session exposed.
-5. **Blank Passwords Limit (`LimitBlankPasswordUse`)**: Restricting the use of blank passwords to physical console logons prevents attackers from using empty-password accounts to authenticate remotely over network shares or RDP.
-6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, dramatically increasing resistance to offline brute-force and GPU-accelerated cracking attacks (like RTX 4090 models).
-7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
-8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
-9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, requiring NTLMv2 and 128-bit encryption, and enforcing client-side NTLMv2-only authentication via `LmCompatibilityLevel = 5` block legacy protocol exploitation and relay vectors.
-10. **Kerberos Security Policy**: Restricting Kerberos ticket lifetimes (e.g. 10 hours max ticket lifetime, 7 days max renewal, 600 minutes max service ticket lifetime) and clock skew tolerance (5 minutes) limits the window of opportunity for stolen ticket abuse (Pass-the-Ticket) and ensures synchronization integrity.
-11. **GPO Background Refresh Security**: Forcing regular Group Policy background reapplication prevents persistent local configuration changes or drift.
-12. **WMI Class Minimization**: Avoiding WMI queries to `Win32_Product` avoids unintended re-installation checks of all MSI packages during GPO processing, protecting host CPU and disk health.
-13. **GPO Commentary**: Requiring descriptive GPO comments ensures structural accountability and documentation parity.</description>
-      </metadata>
-      <criteria operator="AND">
-        <criterion comment="Check Registry Key SECURITY\Cache Value NL$IterationCount" test_ref="oval:org.adhardening:tst:8018001" />
-        <criterion comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Winlogon Value ScRemoveOption" test_ref="oval:org.adhardening:tst:8018002" />
-        <criterion comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Winlogon Value CachedLogonsCount" test_ref="oval:org.adhardening:tst:8018003" />
-        <criterion comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Winlogon Value PasswordExpiryWarning" test_ref="oval:org.adhardening:tst:8018004" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value LimitBlankPasswordUse" test_ref="oval:org.adhardening:tst:8018005" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value NoLMHash" test_ref="oval:org.adhardening:tst:8018006" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value RestrictAnonymousSAM" test_ref="oval:org.adhardening:tst:8018007" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value RestrictAnonymous" test_ref="oval:org.adhardening:tst:8018008" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value ForceNetworkLogon" test_ref="oval:org.adhardening:tst:8018009" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value ObaseCaseInsensitive" test_ref="oval:org.adhardening:tst:8018010" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value LmCompatibilityLevel" test_ref="oval:org.adhardening:tst:8018011" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa\Kerberos\Parameters Value AllowPKU2U" test_ref="oval:org.adhardening:tst:8018012" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\SecurityProviders\WDigest Value UseLogonCredential" test_ref="oval:org.adhardening:tst:8018013" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\System Value AllowDomainPINLogon" test_ref="oval:org.adhardening:tst:8018014" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity Value MinimumPINLength" test_ref="oval:org.adhardening:tst:8018015" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value MSAOptional" test_ref="oval:org.adhardening:tst:8018016" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value MaxDevicePasswordFailedAttempts" test_ref="oval:org.adhardening:tst:8018017" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value CrashOnAuditFail" test_ref="oval:org.adhardening:tst:8018018" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value DisableCAD" test_ref="oval:org.adhardening:tst:8018019" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value DontDisplayLastUserName" test_ref="oval:org.adhardening:tst:8018020" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\MicrosoftAccount Value DisableUserAuth" test_ref="oval:org.adhardening:tst:8018021" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\PassportForWork Value RequireSecurityDevice" test_ref="oval:org.adhardening:tst:8018022" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices Value TPM12" test_ref="oval:org.adhardening:tst:8018023" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value RequireSignOrSeal" test_ref="oval:org.adhardening:tst:8018024" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value SealSecureChannel" test_ref="oval:org.adhardening:tst:8018025" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value SignSecureChannel" test_ref="oval:org.adhardening:tst:8018026" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value DisablePasswordChange" test_ref="oval:org.adhardening:tst:8018027" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value MaximumPasswordAge" test_ref="oval:org.adhardening:tst:8018028" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value RequireStrongKey" test_ref="oval:org.adhardening:tst:8018029" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value ForceLogoffWhenHourExpire" test_ref="oval:org.adhardening:tst:8018030" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\LanmanWorkstation\Parameters Value EnablePlainTextPassword" test_ref="oval:org.adhardening:tst:8018031" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\LanmanServer\Parameters Value AutoDisconnect" test_ref="oval:org.adhardening:tst:8018032" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\LanmanServer\Parameters Value EnableForcedLogoff" test_ref="oval:org.adhardening:tst:8018033" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\LanmanServer\Parameters Value NullSessionShares" test_ref="oval:org.adhardening:tst:8018034" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa\MSV1_0 Value allownullsessionfallback" test_ref="oval:org.adhardening:tst:8018035" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa\MSV1_0 Value NTLMMinClientSec" test_ref="oval:org.adhardening:tst:8018036" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa\MSV1_0 Value NTLMMinServerSec" test_ref="oval:org.adhardening:tst:8018037" />
-        <criterion comment="Check local Password Policy settings" test_ref="oval:org.adhardening:tst:8018900" />
-        <criterion comment="Check local Account Lockout Policy settings" test_ref="oval:org.adhardening:tst:8018910" />
-      </criteria>
-    </definition>
     <definition id="oval:org.adhardening:def:8020" version="1" class="compliance">
       <metadata>
         <title>[REQ-END-020] Configure Exploit Protection Profile</title>
@@ -5757,6 +5687,264 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\WindowsInkWorkspace Value AllowWindowsInkWorkspace" test_ref="oval:org.adhardening:tst:8162001" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:8163" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-163] Account Policy: Password Policy for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Enforcing a comprehensive password policy across enterprise endpoints establishes a fundamental defense against password spraying, dictionary attacks, and offline hash cracking:
+* **Minimum Length (14 characters)**: In alignment with ANSSI and CIS benchmarks for standard endpoints, a 14-character minimum length significantly raises entropy and computational resistance against brute-force attacks.
+* **Complexity &amp; Reversible Encryption**: Requiring character variety while disabling reversible encryption ensures password hashes stored in SAM or directory databases cannot be decrypted.
+* **Password History &amp; Minimum Age**: Mandating a 24-password history and 1-day minimum age prevents users from cycling between predictable password variations.
+* **No Expiration (MaxPasswordAge = 0)**: In accordance with NIST SP 800-63B and modern ANSSI guidelines, periodic password changes are disabled for robust 14-character passwords, stopping weak incremental modifications.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check local Password Policy settings" test_ref="oval:org.adhardening:tst:8163900" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8164" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-164] Account Policy: Account Lockout Policy for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Configuring account lockout parameters mitigates automated brute-force attacks and password spraying attempts against domain and local user accounts:
+* **Lockout Threshold (10 attempts)**: Restricting invalid logon attempts to 10 limits password guessing while avoiding excessive helpdesk lockout tickets for legitimate users who forget their passwords.
+* **Duration &amp; Observation Window (15 minutes)**: Setting lockout duration and reset windows to 15 minutes restricts sustained automated password guessing.
+* **Administrator Lockout**: Enabling Administrator account lockout prevents attackers from evading lockout protection by targeting the built-in Administrator account.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check local Account Lockout Policy settings" test_ref="oval:org.adhardening:tst:8164910" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8165" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-165] Account Policy: Kerberos Policy for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Kerberos policy settings define authentication ticket lifetimes and clock tolerance parameters for domain security tokens:
+* **Ticket Lifetimes (10h ticket / 600m service)**: Restricting ticket validity limits the operational window for stolen ticket reuse (Pass-the-Ticket / Golden / Silver ticket abuse).
+* **Ticket Renewal (7 days)**: Limiting renewable lifetimes requires accounts to periodically re-authenticate.
+* **Clock Skew (5 minutes)**: Maintaining tight clock synchronization prevents Kerberos replay attacks.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-END-165 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8165" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8166" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-166] Account Policy: Smart Card Removal Behavior for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>In environments using smart card or hardware token authentication, removing the physical token must immediately lock the active user session (`ScRemoveOption = "1"`). This prevents unauthorized physical access to unattended workstations if a user leaves the device without manually locking the console.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-END-166 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8166" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8167" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-167] Account Policy: Cached Logons and PBKDF2 Iteration Count for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Windows caches previous domain credentials locally as MSCacheV2 / DCC2 hashes derived via PBKDF2-SHA1 to allow offline validation.
+* **Cached Logons Count (0)**: Setting `CachedLogonsCount` to `0` prevents local storage of credential hashes on standard domain endpoints, forcing logon validation directly against a Domain Controller and ensuring dumped SAM/SECURITY databases yield no cached credentials.
+* **PBKDF2 Iteration Count (1954)**: For portable endpoints (e.g., laptops) where caching must be enabled for offline work, setting `NL$IterationCount` to `1954` increases derivation rounds to 2,000,896 iterations, drastically increasing resistance to offline GPU-accelerated brute-force attacks.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SECURITY\Cache Value NL$IterationCount" test_ref="oval:org.adhardening:tst:8167001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8168" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-168] Account Policy: Local Accounts and Blank Password Restrictions for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Restricting local account permissions and blocking weak legacy password hashes limits lateral movement and credential harvesting:
+* **Blank Passwords Limit (`LimitBlankPasswordUse`)**: Restricting accounts with empty passwords to console-only logons prevents remote attackers from authenticating across network shares, RDP, or WinRM using blank credentials.
+* **No LM Hash (`NoLMHash`)**: Disables the generation and caching of weak LAN Manager hashes upon password updates.
+* **Sharing Model (`ForceNetworkLogon`)**: Enforces the Classic security model where network logons authenticate using the caller's actual identity rather than Guest.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-END-168 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8168" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8169" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-169] Account Policy: NTLM and LAN Manager Authentication Security for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Enforcing modern NTLM parameters shields endpoints from legacy protocol exploitation and relay vectors:
+* **LAN Manager Compatibility Level (5)**: Restricts outbound LAN Manager authentication exclusively to NTLMv2, rejecting LM and NTLMv1 negotiations.
+* **128-bit Session Security (`NTLMMinClientSec` / `NTLMMinServerSec`)**: Mandates 128-bit encryption and NTLMv2 session security for all NTLM SSP connections, preventing downgrade to weak legacy session keys.
+* **NULL Session Fallback Block (`allownullsessionfallback`)**: Prevents services running as LocalSystem from dropping to unauthenticated anonymous sessions if Kerberos or NTLM fails.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-END-169 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8169" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8170" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-170] Account Policy: Disable WDigest Credential Caching for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>The WDigest authentication provider in legacy Windows stored cleartext passwords directly in LSASS memory. Disabling `UseLogonCredential` (`0`) ensures LSASS never caches plaintext password copies, neutralizing memory dumping tools such as Mimikatz.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest Value UseLogonCredential" test_ref="oval:org.adhardening:tst:8170001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8171" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-171] Account Policy: Windows Hello for Business and PIN Complexity for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Securing Windows Hello for Business (WHfB) and PIN authentication mechanisms ensures that weak fallback PINs cannot compromise client workstations:
+* **Disable Convenience PINs (`AllowDomainPINLogon = 0`)**: Convenience PINs store encrypted credentials locally without hardware TPM backing. Disabling domain PIN logon ensures standard enterprise authentication is enforced.
+* **Hardware Security Device (`RequireSecurityDevice = 1`)**: Requires asymmetric key pairs generated by Windows Hello to reside strictly inside a dedicated Hardware Security Module / TPM 2.0.
+* **PIN Complexity (`MinimumPINLength = 6`)**: Mandates a minimum PIN length of 6 characters to resist physical PIN guessing attacks.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-END-171 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8171" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8172" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-172] Account Policy: Consumer Microsoft Account Restrictions for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Connecting consumer cloud identities (such as personal `@outlook.com` or `@live.com` Microsoft accounts) to domain-joined endpoints creates risk of unauthorized cloud synchronization, data exfiltration via personal OneDrive shares, and unmanaged application downloads. Disabling consumer user authentication ensures that only managed Active Directory and enterprise identities can authenticate.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-END-172 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8172" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8173" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-173] Account Policy: Domain Member Secure Channel Security for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>The Netlogon secure channel protects domain communication between member endpoints and Domain Controllers:
+* **Signing and Sealing (`RequireSignOrSeal`, `SealSecureChannel`, `SignSecureChannel`)**: Mandates encryption and cryptographic signing on all Netlogon RPC traffic, preventing man-in-the-middle eavesdropping and tampering.
+* **Strong Session Keys (`RequireStrongKey`)**: Enforces 128-bit session keys for secure channel communication, blocking downgrade to DES or weak ciphers.
+* **Machine Password Rotation (`DisablePasswordChange = 0`, `MaximumPasswordAge = 30`)**: Enforces automatic 30-day computer account password rotation, ensuring dormant machine accounts cannot be compromised for persistence.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-END-173 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8173" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8174" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-174] Account Policy: SMB Client and Server Security Options for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Securing SMB workstation and server parameters blocks cleartext credential disclosure and enforces session termination boundaries:
+* **Block Plaintext Passwords (`EnablePlainTextPassword = 0`)**: Prevents the SMB redirector from transmitting unencrypted credentials across the network to rogue or third-party SMB servers.
+* **Auto-Disconnect Idle Sessions (`AutoDisconnect = 15`)**: Automatically suspends dormant SMB sessions after 15 minutes, mitigating session hijacking over open network connections.
+* **Logon Hours Enforcement (`EnableForcedLogoff = 1`, `ForceLogoffWhenHourExpire = 1`)**: Ensures that when defined user logon hours expire, active SMB sessions and network connections are forcefully disconnected.
+* **Null Session Shares (`NullSessionShares = @()`)**: Prevents unauthenticated anonymous users from accessing any local network shares.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-END-174 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8174" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8175" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-175] Account Policy: Anonymous Access and Enumeration Restrictions for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Restricting unauthenticated reconnaissance and non-standard authentication endpoints shields local system objects and user databases:
+* **Anonymous SAM &amp; Share Enumeration (`RestrictAnonymousSAM`, `RestrictAnonymous`)**: Prevents unauthenticated network callers from querying local user accounts, group memberships, or shared directory paths via null sessions.
+* **Disallow PKU2U (`AllowPKU2U`)**: PKU2U allows peer-to-peer authentication using online Microsoft accounts. Disabling PKU2U blocks peer authentication bypasses across enterprise endpoints.
+* **Subsystem Case Insensitivity (`ObaseCaseInsensitive`)**: Enforces consistent case insensitivity for non-Windows subsystems, mitigating object namespace collision exploits.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-END-175 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8175" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:8176" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-176] Account Policy: Interactive Logon Security Options for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Configuring interactive logon behavior prevents credential harvesting via spoofed login screens and shoulder surfing:
+* **Require CTRL+ALT+DEL (`DisableCAD = 0`)**: The Secure Attention Sequence (SAS / CTRL+ALT+DEL) can only be intercepted by the trusted Windows kernel/winlogon process, preventing malicious userland login prompts from capturing user credentials.
+* **Hide Last Signed-in User (`DontDisplayLastUserName = 1`)**: Prevents shoulder-surfers or unauthorized observers from discovering valid username structures.
+* **Do Not Crash on Audit Failure (`CrashOnAuditFail = 0`)**: Prevents sudden system shutdowns when the security event log fills, avoiding denial-of-service conditions.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-END-176 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8176" />
+      </criteria>
+    </definition>
     <definition id="oval:org.adhardening:def:3001" version="1" class="compliance">
       <metadata>
         <title>[REQ-ID-001] Enforce Fine-Grained Password Policies</title>
@@ -7176,57 +7364,6 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\CI\Config Value VulnerableDriverBlocklistEnable" test_ref="oval:org.adhardening:tst:7012001" />
-      </criteria>
-    </definition>
-    <definition id="oval:org.adhardening:def:7013" version="1" class="compliance">
-      <metadata>
-        <title>[REQ-PAW-013] Configure Account and Password Policies for PAWs</title>
-        <affected family="windows">
-          <platform>Microsoft Windows Server 2016</platform>
-          <platform>Microsoft Windows Server 2019</platform>
-          <platform>Microsoft Windows Server 2022</platform>
-          <platform>Microsoft Windows 10</platform>
-          <platform>Microsoft Windows 11</platform>
-        </affected>
-        <description>Securing authentication parameters and account controls reduces the risk of password attacks and session hijackings on high-value administrative endpoints:
-
-1. **Stricter Lockout Threshold (`LockoutBadCount`)**: For PAWs, the lockout threshold is reduced to 5 attempts (compared to 10 for standard endpoints). This is necessary because PAWs are used exclusively by Tier 0 administrators, who are high-value targets. A stricter threshold prevents brute-force attempts on local fallback accounts.
-2. **Robust Local Password Settings (`MinimumPasswordLength`, `PasswordComplexity`)**: Local accounts on PAWs (such as fallback administrators) must use passwords of at least 20 characters with complexity enabled. This mitigates offline password cracking if database hashes or local SAM registries are dumped.
-3. **No Password Expiration (`MaxPasswordAge = 0`)**: Periodic password expiration is disabled. Setting the password expiration interval to 0 prevents users from cycling to weaker password variants or writing credentials down, as a 20-character complex password is mathematically robust against current brute-forcing capabilities.
-4. **Smart Card Removal Behavior (`ScRemoveOption`)**: In secure environments using Smart Card or token-based authentication, removing the card must automatically lock the desktop session (`1`). If disabled, a user leaving their workstation with the card removed leaves the session exposed.
-5. **Blank Passwords Limit (`LimitBlankPasswordUse`)**: Restricting the use of blank passwords to physical console logons prevents attackers from using empty-password accounts to authenticate remotely over network shares or RDP.
-6. **Logon Caching Restriction (`CachedLogonsCount` = `0`) and Hashing Complexity (`NL$IterationCount` = `1954`)**: By default, Windows caches previous logons locally as MSCacheV2 hashes, derived using PBKDF2-SHA1. Setting `CachedLogonsCount` to `0` prevents the local storage of credentials for offline validation on standard workstations, forcing authentication against a DC. For systems where caching must be enabled (such as isolated member servers or laptops), the iteration count of the hashing algorithm should be increased using `NL$IterationCount`. Setting it to `1954` results in 2,000,896 rounds of PBKDF2-SHA1, increasing resistance to offline brute-force and GPU-accelerated cracking attacks.
-7. **LSASS WDigest protection (`UseLogonCredential` = `0`)**: Disabling WDigest credential caching prevents the LSASS process from storing cleartext passwords in memory.
-8. **Microsoft Account and PIN bans**: Restricting Microsoft consumer account authentication and domain PIN logons ensures that standard enterprise credentials and secure Hello for Business PINs are the only mechanisms used.
-9. **Secure Channel and NTLM session security**: Forcing secure channel signing, disabling plain text passwords, preventing null session fallbacks, requiring NTLMv2 and 128-bit encryption, and enforcing client-side NTLMv2-only authentication via `LmCompatibilityLevel = 5` block legacy protocol exploitation and relay vectors.
-10. **Fine-Grained Password Policies (FGPP)**: While local accounts are secured on the machine, the Active Directory user accounts of the Tier 0 Administrators who logon to these PAWs must also be protected by a domain-level Fine-Grained Password Policy (FGPP / PSO) of at least 20 characters, as configured in [REQ-ID-001 - Enforce Fine-Grained Password Policies](../03-identities-services/enforce-fgpp.md).</description>
-      </metadata>
-      <criteria operator="AND">
-        <criterion comment="Check Registry Key SECURITY\Cache Value NL$IterationCount" test_ref="oval:org.adhardening:tst:7013001" />
-        <criterion comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Winlogon Value ScRemoveOption" test_ref="oval:org.adhardening:tst:7013002" />
-        <criterion comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Winlogon Value CachedLogonsCount" test_ref="oval:org.adhardening:tst:7013003" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value LimitBlankPasswordUse" test_ref="oval:org.adhardening:tst:7013004" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value NoLMHash" test_ref="oval:org.adhardening:tst:7013005" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value LmCompatibilityLevel" test_ref="oval:org.adhardening:tst:7013006" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\SecurityProviders\WDigest Value UseLogonCredential" test_ref="oval:org.adhardening:tst:7013007" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\System Value AllowDomainPINLogon" test_ref="oval:org.adhardening:tst:7013008" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity Value MinimumPINLength" test_ref="oval:org.adhardening:tst:7013009" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value MSAOptional" test_ref="oval:org.adhardening:tst:7013010" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\MicrosoftAccount Value DisableUserAuth" test_ref="oval:org.adhardening:tst:7013011" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\PassportForWork Value RequireSecurityDevice" test_ref="oval:org.adhardening:tst:7013012" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices Value TPM12" test_ref="oval:org.adhardening:tst:7013013" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value RequireSignOrSeal" test_ref="oval:org.adhardening:tst:7013014" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value SealSecureChannel" test_ref="oval:org.adhardening:tst:7013015" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value SignSecureChannel" test_ref="oval:org.adhardening:tst:7013016" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value DisablePasswordChange" test_ref="oval:org.adhardening:tst:7013017" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value MaximumPasswordAge" test_ref="oval:org.adhardening:tst:7013018" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value RequireStrongKey" test_ref="oval:org.adhardening:tst:7013019" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Services\LanmanWorkstation\Parameters Value EnablePlainTextPassword" test_ref="oval:org.adhardening:tst:7013020" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa\MSV1_0 Value allownullsessionfallback" test_ref="oval:org.adhardening:tst:7013021" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa\MSV1_0 Value NTLMMinClientSec" test_ref="oval:org.adhardening:tst:7013022" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Control\Lsa\MSV1_0 Value NTLMMinServerSec" test_ref="oval:org.adhardening:tst:7013023" />
-        <criterion comment="Check local Password Policy settings" test_ref="oval:org.adhardening:tst:7013900" />
-        <criterion comment="Check local Account Lockout Policy settings" test_ref="oval:org.adhardening:tst:7013910" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7014" version="1" class="compliance">
@@ -9667,6 +9804,264 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\WindowsInkWorkspace Value AllowWindowsInkWorkspace" test_ref="oval:org.adhardening:tst:7151001" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:7152" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-152] Account Policy: Password Policy for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Enforcing a robust password baseline is critical on Privileged Access Workstations to prevent brute-force cracking, credential dictionary attacks, and unauthorized local password rotation:
+* **Minimum Length (20 characters)**: Tier 0 administrative workstations require a minimum of 20 characters for local accounts (e.g. fallback local administrators). This length makes brute-force and offline GPU dictionary attacks mathematically unfeasible.
+* **Complexity &amp; Reversible Encryption**: Requiring character diversity while disabling reversible encryption ensures password hashes stored in the SAM or LSASS memory cannot be trivially decrypted.
+* **Password History &amp; Minimum Age**: Storing 24 passwords in history and requiring a 1-day minimum age prevents administrators from immediately cycling back to an old password.
+* **No Expiration (MaxPasswordAge = 0)**: In accordance with NIST SP 800-63B and modern ANSSI guidelines, requiring periodic password changes is disabled for robust 20-character passwords, eliminating weak incremental patterns.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check local Password Policy settings" test_ref="oval:org.adhardening:tst:7152900" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7153" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-153] Account Policy: Account Lockout Policy for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Configuring strict account lockout parameters on Tier 0 administrative workstations protects high-privilege credentials from online password spraying and brute-force guessing attacks:
+* **Strict Lockout Threshold (5 attempts)**: On PAWs, the lockout threshold is set to 5 bad attempts (stricter than standard endpoints) because PAWs are high-value targets dedicated exclusively to directory administrators.
+* **Duration &amp; Observation Window (30 minutes)**: Setting lockout duration and reset intervals to 30 minutes prevents automated attacks from repeatedly guessing credentials across short time horizons.
+* **Administrator Lockout**: Enabling Administrator account lockout prevents attackers from evading lockout protection by targeting the built-in Administrator account.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check local Account Lockout Policy settings" test_ref="oval:org.adhardening:tst:7153910" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7154" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-154] Account Policy: Kerberos Policy for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Kerberos policy settings define authentication ticket lifetimes and clock tolerance parameters for domain security tokens:
+* **Ticket Lifetimes (10h ticket / 600m service)**: Restricting ticket validity limits the operational window for stolen ticket reuse (Pass-the-Ticket / Golden / Silver ticket abuse).
+* **Ticket Renewal (7 days)**: Limiting renewable lifetimes requires accounts to periodically re-authenticate.
+* **Clock Skew (5 minutes)**: Maintaining tight clock synchronization prevents Kerberos replay attacks.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-PAW-154 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7154" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7155" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-155] Account Policy: Smart Card Removal Behavior for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>In high-security environments enforcing smart card authentication (such as YubiKeys, PIV tokens, or CAC smart cards), removing the physical hardware token must instantly lock the active desktop session (`ScRemoveOption = "1"`). This prevents unauthorized physical access if an administrator steps away from the console while leaving the device unattended.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-PAW-155 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7155" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7156" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-156] Account Policy: Cached Logons and PBKDF2 Iteration Count for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>By default, Windows stores local credential hashes (MSCacheV2 / DCC2) for previous domain logons to permit offline validation.
+* **Cached Logons Count (0)**: Setting `CachedLogonsCount` to `0` prevents local storage of credential hashes on PAWs, forcing all authentication attempts to validate directly against an active Domain Controller. This ensures dumped local SAM/SECURITY registry hives yield zero cached administrative passwords.
+* **PBKDF2 Iteration Count (1954)**: For systems or recovery scenarios where cached credentials might exist, increasing the PBKDF2-SHA1 derivation rounds to 1954 (2,000,896 iterations) raises the computational cost for GPU-accelerated cracking attacks (such as hashcat with RTX 4090 arrays) to prohibitive levels.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SECURITY\Cache Value NL$IterationCount" test_ref="oval:org.adhardening:tst:7156001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7157" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-157] Account Policy: Local Accounts and Blank Password Restrictions for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Restricting local accounts and blocking unauthenticated or weakly authenticated interactions mitigates privilege escalation and credential compromise:
+* **Blank Passwords Limit (`LimitBlankPasswordUse`)**: Restricting blank passwords strictly to physical console logons prevents local accounts with empty passwords from authenticating remotely across network shares, WinRM, or RDP.
+* **No LM Hash (`NoLMHash`)**: Disables the generation and storage of legacy, easily crackable LAN Manager password hashes in the SAM and directory databases upon password modifications.
+* **Sharing Model (`ForceNetworkLogon`)**: Enforces the Classic security model where incoming network connections authenticate as the actual local user rather than collapsing into the Guest account.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-PAW-157 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7157" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7158" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-158] Account Policy: NTLM and LAN Manager Authentication Security for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Legacy authentication protocols (LM, NTLMv1, unhardened NTLMv2) are susceptible to relay attacks, credential reflection, and offline cryptanalysis:
+* **LAN Manager Compatibility Level (5)**: Restricts outbound LAN Manager authentication exclusively to NTLMv2, rejecting LM and NTLMv1 negotiations.
+* **128-bit Session Security (`NTLMMinClientSec` / `NTLMMinServerSec`)**: Mandates 128-bit encryption and NTLMv2 session security for all NTLM SSP connections, preventing downgrade to weak legacy session keys.
+* **NULL Session Fallback Block (`allownullsessionfallback`)**: Prevents services running as LocalSystem from dropping to unauthenticated anonymous sessions if Kerberos or NTLM fails.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-PAW-158 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7158" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7159" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-159] Account Policy: Disable WDigest Credential Caching for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>The WDigest authentication provider in older Windows releases stored plain-text passwords directly in LSASS memory to support HTTP Digest authentication. Disabling `UseLogonCredential` (`0`) ensures that LSASS never retains plaintext password copies in memory, mitigating credential theft via memory dumping tools such as Mimikatz.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest Value UseLogonCredential" test_ref="oval:org.adhardening:tst:7159001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7160" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-160] Account Policy: Windows Hello for Business and PIN Complexity for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Securing Windows Hello for Business (WHfB) and PIN authentication mechanisms ensures that weak fallback PINs cannot compromise Tier 0 administrative endpoints:
+* **Disable Convenience PINs (`AllowDomainPINLogon = 0`)**: Convenience PINs store encrypted credentials locally without hardware TPM backing. Disabling domain PIN logon ensures standard enterprise authentication is enforced.
+* **Hardware Security Device (`RequireSecurityDevice = 1`)**: Requires asymmetric key pairs generated by Windows Hello to reside strictly inside a dedicated Hardware Security Module / TPM 2.0.
+* **PIN Complexity (`MinimumPINLength = 6`)**: Mandates a minimum PIN length of 6 characters to resist physical PIN guessing attacks.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-PAW-160 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7160" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7161" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-161] Account Policy: Consumer Microsoft Account Restrictions for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Connecting consumer cloud identities (such as personal `@outlook.com` or `@live.com` Microsoft accounts) to administrative endpoints introduces data exfiltration vectors, shadow cloud synchronizations (OneDrive personal, Edge profile sync), and bypasses enterprise identity governance. Disabling consumer user authentication enforces enterprise-only logon pathways.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-PAW-161 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7161" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7162" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-162] Account Policy: Domain Member Secure Channel Security for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>The Netlogon secure channel protects authentication and trust communication between domain-joined workstations and Domain Controllers:
+* **Signing and Sealing (`RequireSignOrSeal`, `SealSecureChannel`, `SignSecureChannel`)**: Mandates encryption and cryptographic signing on all Netlogon RPC traffic, preventing eavesdropping and tampering.
+* **Strong Session Keys (`RequireStrongKey`)**: Enforces 128-bit session keys for secure channel communication, blocking downgrade to DES or weak cipher suites (mitigating ZeroLogon and related vulnerabilities).
+* **Machine Password Rotation (`DisablePasswordChange = 0`, `MaximumPasswordAge = 30`)**: Enforces automatic 30-day machine password rotation, preventing stale machine credentials from being harvested for offline persistence.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-PAW-162 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7162" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7163" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-163] Account Policy: SMB Client and Server Security Options for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Securing SMB workstation and server parameters blocks cleartext credential disclosure and enforces session termination boundaries:
+* **Block Plaintext Passwords (`EnablePlainTextPassword = 0`)**: Prevents the SMB redirector from transmitting unencrypted credentials across the network to rogue or third-party SMB servers.
+* **Auto-Disconnect Idle Sessions (`AutoDisconnect = 15`)**: Automatically suspends dormant SMB sessions after 15 minutes, mitigating session hijacking over open network connections.
+* **Logon Hours Enforcement (`EnableForcedLogoff = 1`, `ForceLogoffWhenHourExpire = 1`)**: Ensures that when defined administrative logon hours expire, active sessions are forcefully terminated.
+* **Null Session Shares (`NullSessionShares = @()`)**: Prevents unauthenticated anonymous users from accessing any local network shares.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-PAW-163 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7163" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7164" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-164] Account Policy: Anonymous Access and Enumeration Restrictions for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Restricting unauthenticated reconnaissance and non-standard authentication endpoints shields local system objects and user databases:
+* **Anonymous SAM &amp; Share Enumeration (`RestrictAnonymousSAM`, `RestrictAnonymous`)**: Prevents unauthenticated remote attackers from querying local user lists, group memberships, or shared folder names via null sessions.
+* **Disallow PKU2U (`AllowPKU2U`)**: PKU2U allows peer-to-peer authentication using online Microsoft accounts. Disabling PKU2U blocks unauthorized online identity integration and lateral traversal.
+* **Subsystem Case Insensitivity (`ObaseCaseInsensitive`)**: Enforces consistent case insensitivity for non-Windows subsystems, mitigating object namespace collision exploits.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-PAW-164 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7164" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:7165" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-165] Account Policy: Interactive Logon Security Options for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Configuring interactive logon behavior prevents credential harvesting via spoofed login screens and shoulder surfing:
+* **Require CTRL+ALT+DEL (`DisableCAD = 0`)**: The Secure Attention Sequence (SAS / CTRL+ALT+DEL) can only be intercepted by the trusted Windows kernel/winlogon process, preventing malicious userland Trojan login prompts from capturing credentials.
+* **Hide Last Signed-in User (`DontDisplayLastUserName = 1`)**: Prevents shoulder-surfers or unauthorized physical observers from discovering valid Tier 0 administrative usernames.
+* **Do Not Crash on Audit Failure (`CrashOnAuditFail = 0`)**: Prevents immediate denial-of-service crashes caused by filled event log files on administrative workstations.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Placeholder check for REQ-PAW-165 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7165" />
+      </criteria>
+    </definition>
   </definitions>
   <tests>
     <windows:userright_test id="oval:org.adhardening:tst:1001210" version="1" comment="Check User Right Assignment SeDenyInteractiveLogonRight" check="all">
@@ -11157,162 +11552,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:8017013" />
       <windows:state state_ref="oval:org.adhardening:ste:8017013" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018001" version="1" comment="Check Registry Key SECURITY\Cache Value NL$IterationCount" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018001" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018001" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018002" version="1" comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Winlogon Value ScRemoveOption" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018002" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018002" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018003" version="1" comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Winlogon Value CachedLogonsCount" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018003" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018003" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018004" version="1" comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Winlogon Value PasswordExpiryWarning" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018004" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018004" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018005" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value LimitBlankPasswordUse" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018005" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018005" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018006" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value NoLMHash" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018006" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018006" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018007" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value RestrictAnonymousSAM" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018007" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018007" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018008" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value RestrictAnonymous" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018008" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018008" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018009" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value ForceNetworkLogon" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018009" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018009" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018010" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value ObaseCaseInsensitive" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018010" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018010" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018011" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value LmCompatibilityLevel" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018011" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018011" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018012" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa\Kerberos\Parameters Value AllowPKU2U" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018012" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018012" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018013" version="1" comment="Check Registry Key System\CurrentControlSet\Control\SecurityProviders\WDigest Value UseLogonCredential" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018013" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018013" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018014" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\System Value AllowDomainPINLogon" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018014" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018014" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018015" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity Value MinimumPINLength" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018015" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018015" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018016" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value MSAOptional" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018016" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018016" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018017" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value MaxDevicePasswordFailedAttempts" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018017" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018017" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018018" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value CrashOnAuditFail" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018018" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018018" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018019" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value DisableCAD" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018019" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018019" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018020" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value DontDisplayLastUserName" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018020" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018020" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018021" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\MicrosoftAccount Value DisableUserAuth" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018021" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018021" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018022" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\PassportForWork Value RequireSecurityDevice" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018022" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018022" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018023" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices Value TPM12" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018023" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018023" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018024" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value RequireSignOrSeal" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018024" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018024" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018025" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value SealSecureChannel" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018025" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018025" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018026" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value SignSecureChannel" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018026" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018026" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018027" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value DisablePasswordChange" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018027" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018027" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018028" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value MaximumPasswordAge" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018028" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018028" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018029" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value RequireStrongKey" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018029" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018029" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018030" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value ForceLogoffWhenHourExpire" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018030" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018030" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018031" version="1" comment="Check Registry Key System\CurrentControlSet\Services\LanmanWorkstation\Parameters Value EnablePlainTextPassword" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018031" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018031" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018032" version="1" comment="Check Registry Key System\CurrentControlSet\Services\LanmanServer\Parameters Value AutoDisconnect" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018032" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018032" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018033" version="1" comment="Check Registry Key System\CurrentControlSet\Services\LanmanServer\Parameters Value EnableForcedLogoff" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018033" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018033" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018034" version="1" comment="Check Registry Key System\CurrentControlSet\Services\LanmanServer\Parameters Value NullSessionShares" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018034" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018034" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018035" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa\MSV1_0 Value allownullsessionfallback" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018035" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018035" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018036" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa\MSV1_0 Value NTLMMinClientSec" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018036" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018036" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8018037" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa\MSV1_0 Value NTLMMinServerSec" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018037" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018037" />
-    </windows:registry_test>
-    <windows:passwordpolicy_test id="oval:org.adhardening:tst:8018900" version="1" comment="Check local Password Policy settings" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018900" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018900" />
-    </windows:passwordpolicy_test>
-    <windows:lockoutpolicy_test id="oval:org.adhardening:tst:8018910" version="1" comment="Check local Account Lockout Policy settings" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8018910" />
-      <windows:state state_ref="oval:org.adhardening:ste:8018910" />
-    </windows:lockoutpolicy_test>
     <windows:registry_test id="oval:org.adhardening:tst:8020001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection Value ExploitProtectionSettings" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8020001" />
       <windows:state state_ref="oval:org.adhardening:ste:8020001" />
@@ -12329,6 +12568,62 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:8162001" />
       <windows:state state_ref="oval:org.adhardening:ste:8162001" />
     </windows:registry_test>
+    <windows:passwordpolicy_test id="oval:org.adhardening:tst:8163900" version="1" comment="Check local Password Policy settings" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8163900" />
+      <windows:state state_ref="oval:org.adhardening:ste:8163900" />
+    </windows:passwordpolicy_test>
+    <windows:lockoutpolicy_test id="oval:org.adhardening:tst:8164910" version="1" comment="Check local Account Lockout Policy settings" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8164910" />
+      <windows:state state_ref="oval:org.adhardening:ste:8164910" />
+    </windows:lockoutpolicy_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8165" version="1" comment="Placeholder check for REQ-END-165 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8165" />
+      <windows:state state_ref="oval:org.adhardening:ste:8165" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8166" version="1" comment="Placeholder check for REQ-END-166 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8166" />
+      <windows:state state_ref="oval:org.adhardening:ste:8166" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8167001" version="1" comment="Check Registry Key SECURITY\Cache Value NL$IterationCount" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8167001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8167001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8168" version="1" comment="Placeholder check for REQ-END-168 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8168" />
+      <windows:state state_ref="oval:org.adhardening:ste:8168" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8169" version="1" comment="Placeholder check for REQ-END-169 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8169" />
+      <windows:state state_ref="oval:org.adhardening:ste:8169" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8170001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest Value UseLogonCredential" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8170001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8170001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8171" version="1" comment="Placeholder check for REQ-END-171 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8171" />
+      <windows:state state_ref="oval:org.adhardening:ste:8171" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8172" version="1" comment="Placeholder check for REQ-END-172 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8172" />
+      <windows:state state_ref="oval:org.adhardening:ste:8172" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8173" version="1" comment="Placeholder check for REQ-END-173 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8173" />
+      <windows:state state_ref="oval:org.adhardening:ste:8173" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8174" version="1" comment="Placeholder check for REQ-END-174 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8174" />
+      <windows:state state_ref="oval:org.adhardening:ste:8174" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8175" version="1" comment="Placeholder check for REQ-END-175 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8175" />
+      <windows:state state_ref="oval:org.adhardening:ste:8175" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8176" version="1" comment="Placeholder check for REQ-END-176 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8176" />
+      <windows:state state_ref="oval:org.adhardening:ste:8176" />
+    </windows:registry_test>
     <windows:passwordpolicy_test id="oval:org.adhardening:tst:3001900" version="1" comment="Check local Password Policy settings" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:3001900" />
       <windows:state state_ref="oval:org.adhardening:ste:3001900" />
@@ -12892,106 +13187,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:7012001" />
       <windows:state state_ref="oval:org.adhardening:ste:7012001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013001" version="1" comment="Check Registry Key SECURITY\Cache Value NL$IterationCount" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013001" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013001" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013002" version="1" comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Winlogon Value ScRemoveOption" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013002" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013002" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013003" version="1" comment="Check Registry Key Software\Microsoft\Windows NT\CurrentVersion\Winlogon Value CachedLogonsCount" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013003" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013003" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013004" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value LimitBlankPasswordUse" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013004" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013004" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013005" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value NoLMHash" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013005" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013005" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013006" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa Value LmCompatibilityLevel" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013006" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013006" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013007" version="1" comment="Check Registry Key System\CurrentControlSet\Control\SecurityProviders\WDigest Value UseLogonCredential" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013007" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013007" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013008" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\System Value AllowDomainPINLogon" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013008" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013008" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013009" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity Value MinimumPINLength" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013009" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013009" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013010" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value MSAOptional" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013010" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013010" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013011" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\MicrosoftAccount Value DisableUserAuth" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013011" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013011" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013012" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\PassportForWork Value RequireSecurityDevice" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013012" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013012" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013013" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices Value TPM12" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013013" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013013" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013014" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value RequireSignOrSeal" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013014" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013014" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013015" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value SealSecureChannel" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013015" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013015" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013016" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value SignSecureChannel" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013016" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013016" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013017" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value DisablePasswordChange" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013017" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013017" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013018" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value MaximumPasswordAge" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013018" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013018" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013019" version="1" comment="Check Registry Key System\CurrentControlSet\Services\Netlogon\Parameters Value RequireStrongKey" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013019" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013019" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013020" version="1" comment="Check Registry Key System\CurrentControlSet\Services\LanmanWorkstation\Parameters Value EnablePlainTextPassword" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013020" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013020" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013021" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa\MSV1_0 Value allownullsessionfallback" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013021" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013021" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013022" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa\MSV1_0 Value NTLMMinClientSec" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013022" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013022" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7013023" version="1" comment="Check Registry Key System\CurrentControlSet\Control\Lsa\MSV1_0 Value NTLMMinServerSec" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013023" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013023" />
-    </windows:registry_test>
-    <windows:passwordpolicy_test id="oval:org.adhardening:tst:7013900" version="1" comment="Check local Password Policy settings" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013900" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013900" />
-    </windows:passwordpolicy_test>
-    <windows:lockoutpolicy_test id="oval:org.adhardening:tst:7013910" version="1" comment="Check local Account Lockout Policy settings" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7013910" />
-      <windows:state state_ref="oval:org.adhardening:ste:7013910" />
-    </windows:lockoutpolicy_test>
     <windows:registry_test id="oval:org.adhardening:tst:7014001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Policies\EarlyLaunch Value DriverLoadPolicy" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7014001" />
       <windows:state state_ref="oval:org.adhardening:ste:7014001" />
@@ -14107,6 +14302,62 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_test id="oval:org.adhardening:tst:7151001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\WindowsInkWorkspace Value AllowWindowsInkWorkspace" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7151001" />
       <windows:state state_ref="oval:org.adhardening:ste:7151001" />
+    </windows:registry_test>
+    <windows:passwordpolicy_test id="oval:org.adhardening:tst:7152900" version="1" comment="Check local Password Policy settings" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7152900" />
+      <windows:state state_ref="oval:org.adhardening:ste:7152900" />
+    </windows:passwordpolicy_test>
+    <windows:lockoutpolicy_test id="oval:org.adhardening:tst:7153910" version="1" comment="Check local Account Lockout Policy settings" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7153910" />
+      <windows:state state_ref="oval:org.adhardening:ste:7153910" />
+    </windows:lockoutpolicy_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7154" version="1" comment="Placeholder check for REQ-PAW-154 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7154" />
+      <windows:state state_ref="oval:org.adhardening:ste:7154" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7155" version="1" comment="Placeholder check for REQ-PAW-155 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7155" />
+      <windows:state state_ref="oval:org.adhardening:ste:7155" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7156001" version="1" comment="Check Registry Key SECURITY\Cache Value NL$IterationCount" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7156001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7156001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7157" version="1" comment="Placeholder check for REQ-PAW-157 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7157" />
+      <windows:state state_ref="oval:org.adhardening:ste:7157" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7158" version="1" comment="Placeholder check for REQ-PAW-158 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7158" />
+      <windows:state state_ref="oval:org.adhardening:ste:7158" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7159001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest Value UseLogonCredential" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7159001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7159001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7160" version="1" comment="Placeholder check for REQ-PAW-160 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7160" />
+      <windows:state state_ref="oval:org.adhardening:ste:7160" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7161" version="1" comment="Placeholder check for REQ-PAW-161 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7161" />
+      <windows:state state_ref="oval:org.adhardening:ste:7161" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7162" version="1" comment="Placeholder check for REQ-PAW-162 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7162" />
+      <windows:state state_ref="oval:org.adhardening:ste:7162" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7163" version="1" comment="Placeholder check for REQ-PAW-163 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7163" />
+      <windows:state state_ref="oval:org.adhardening:ste:7163" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7164" version="1" comment="Placeholder check for REQ-PAW-164 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7164" />
+      <windows:state state_ref="oval:org.adhardening:ste:7164" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7165" version="1" comment="Placeholder check for REQ-PAW-165 (requires PowerShell audit script)" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7165" />
+      <windows:state state_ref="oval:org.adhardening:ste:7165" />
     </windows:registry_test>
   </tests>
   <objects>
@@ -16193,230 +16444,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection</windows:key>
       <windows:name>DeviceEnumerationPolicy</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018001" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SECURITY\Cache</windows:key>
-      <windows:name>NL$IterationCount</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018002" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>Software\Microsoft\Windows NT\CurrentVersion\Winlogon</windows:key>
-      <windows:name>ScRemoveOption</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018003" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>Software\Microsoft\Windows NT\CurrentVersion\Winlogon</windows:key>
-      <windows:name>CachedLogonsCount</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018004" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>Software\Microsoft\Windows NT\CurrentVersion\Winlogon</windows:key>
-      <windows:name>PasswordExpiryWarning</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018005" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa</windows:key>
-      <windows:name>LimitBlankPasswordUse</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018006" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa</windows:key>
-      <windows:name>NoLMHash</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018007" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa</windows:key>
-      <windows:name>RestrictAnonymousSAM</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018008" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa</windows:key>
-      <windows:name>RestrictAnonymous</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018009" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa</windows:key>
-      <windows:name>ForceNetworkLogon</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018010" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa</windows:key>
-      <windows:name>ObaseCaseInsensitive</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018011" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa</windows:key>
-      <windows:name>LmCompatibilityLevel</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018012" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa\Kerberos\Parameters</windows:key>
-      <windows:name>AllowPKU2U</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018013" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\SecurityProviders\WDigest</windows:key>
-      <windows:name>UseLogonCredential</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018014" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\System</windows:key>
-      <windows:name>AllowDomainPINLogon</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018015" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity</windows:key>
-      <windows:name>MinimumPINLength</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018016" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System</windows:key>
-      <windows:name>MSAOptional</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018017" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System</windows:key>
-      <windows:name>MaxDevicePasswordFailedAttempts</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018018" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System</windows:key>
-      <windows:name>CrashOnAuditFail</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018019" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System</windows:key>
-      <windows:name>DisableCAD</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018020" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System</windows:key>
-      <windows:name>DontDisplayLastUserName</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018021" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\MicrosoftAccount</windows:key>
-      <windows:name>DisableUserAuth</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018022" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\PassportForWork</windows:key>
-      <windows:name>RequireSecurityDevice</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018023" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices</windows:key>
-      <windows:name>TPM12</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018024" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>RequireSignOrSeal</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018025" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>SealSecureChannel</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018026" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>SignSecureChannel</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018027" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>DisablePasswordChange</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018028" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>MaximumPasswordAge</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018029" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>RequireStrongKey</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018030" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>ForceLogoffWhenHourExpire</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018031" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\LanmanWorkstation\Parameters</windows:key>
-      <windows:name>EnablePlainTextPassword</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018032" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\LanmanServer\Parameters</windows:key>
-      <windows:name>AutoDisconnect</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018033" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\LanmanServer\Parameters</windows:key>
-      <windows:name>EnableForcedLogoff</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018034" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\LanmanServer\Parameters</windows:key>
-      <windows:name>NullSessionShares</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018035" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa\MSV1_0</windows:key>
-      <windows:name>allownullsessionfallback</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018036" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa\MSV1_0</windows:key>
-      <windows:name>NTLMMinClientSec</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8018037" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa\MSV1_0</windows:key>
-      <windows:name>NTLMMinServerSec</windows:name>
-    </windows:registry_object>
-    <windows:passwordpolicy_object id="oval:org.adhardening:obj:8018900" version="1" />
-    <windows:lockoutpolicy_object id="oval:org.adhardening:obj:8018910" version="1" />
     <windows:registry_object id="oval:org.adhardening:obj:8020001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -17811,6 +17838,80 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SOFTWARE\Policies\Microsoft\WindowsInkWorkspace</windows:key>
       <windows:name>AllowWindowsInkWorkspace</windows:name>
     </windows:registry_object>
+    <windows:passwordpolicy_object id="oval:org.adhardening:obj:8163900" version="1" />
+    <windows:lockoutpolicy_object id="oval:org.adhardening:obj:8164910" version="1" />
+    <windows:registry_object id="oval:org.adhardening:obj:8165" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8166" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8167001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SECURITY\Cache</windows:key>
+      <windows:name>NL$IterationCount</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8168" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8169" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8170001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest</windows:key>
+      <windows:name>UseLogonCredential</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8171" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8172" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8173" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8174" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8175" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8176" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
     <windows:passwordpolicy_object id="oval:org.adhardening:obj:3001900" version="1" />
     <windows:lockoutpolicy_object id="oval:org.adhardening:obj:3001910" version="1" />
     <windows:registry_object id="oval:org.adhardening:obj:3002001" version="1">
@@ -18641,146 +18742,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SYSTEM\CurrentControlSet\Control\CI\Config</windows:key>
       <windows:name>VulnerableDriverBlocklistEnable</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013001" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SECURITY\Cache</windows:key>
-      <windows:name>NL$IterationCount</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013002" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>Software\Microsoft\Windows NT\CurrentVersion\Winlogon</windows:key>
-      <windows:name>ScRemoveOption</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013003" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>Software\Microsoft\Windows NT\CurrentVersion\Winlogon</windows:key>
-      <windows:name>CachedLogonsCount</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013004" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa</windows:key>
-      <windows:name>LimitBlankPasswordUse</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013005" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa</windows:key>
-      <windows:name>NoLMHash</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013006" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa</windows:key>
-      <windows:name>LmCompatibilityLevel</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013007" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\SecurityProviders\WDigest</windows:key>
-      <windows:name>UseLogonCredential</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013008" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\System</windows:key>
-      <windows:name>AllowDomainPINLogon</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013009" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\PassportForWork\PINComplexity</windows:key>
-      <windows:name>MinimumPINLength</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013010" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System</windows:key>
-      <windows:name>MSAOptional</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013011" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\MicrosoftAccount</windows:key>
-      <windows:name>DisableUserAuth</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013012" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\PassportForWork</windows:key>
-      <windows:name>RequireSecurityDevice</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013013" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\PassportForWork\ExcludeSecurityDevices</windows:key>
-      <windows:name>TPM12</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013014" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>RequireSignOrSeal</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013015" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>SealSecureChannel</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013016" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>SignSecureChannel</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013017" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>DisablePasswordChange</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013018" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>MaximumPasswordAge</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013019" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\Netlogon\Parameters</windows:key>
-      <windows:name>RequireStrongKey</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013020" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Services\LanmanWorkstation\Parameters</windows:key>
-      <windows:name>EnablePlainTextPassword</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013021" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa\MSV1_0</windows:key>
-      <windows:name>allownullsessionfallback</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013022" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa\MSV1_0</windows:key>
-      <windows:name>NTLMMinClientSec</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7013023" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>System\CurrentControlSet\Control\Lsa\MSV1_0</windows:key>
-      <windows:name>NTLMMinServerSec</windows:name>
-    </windows:registry_object>
-    <windows:passwordpolicy_object id="oval:org.adhardening:obj:7013900" version="1" />
-    <windows:lockoutpolicy_object id="oval:org.adhardening:obj:7013910" version="1" />
     <windows:registry_object id="oval:org.adhardening:obj:7014001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -20346,6 +20307,80 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SOFTWARE\Policies\Microsoft\WindowsInkWorkspace</windows:key>
       <windows:name>AllowWindowsInkWorkspace</windows:name>
     </windows:registry_object>
+    <windows:passwordpolicy_object id="oval:org.adhardening:obj:7152900" version="1" />
+    <windows:lockoutpolicy_object id="oval:org.adhardening:obj:7153910" version="1" />
+    <windows:registry_object id="oval:org.adhardening:obj:7154" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7155" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7156001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SECURITY\Cache</windows:key>
+      <windows:name>NL$IterationCount</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7157" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7158" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7159001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest</windows:key>
+      <windows:name>UseLogonCredential</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7160" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7161" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7162" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7163" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7164" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7165" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
+      <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
   </objects>
   <states>
     <windows:userright_state id="oval:org.adhardening:ste:9999" version="1">
@@ -21788,167 +21823,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018001" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1954</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018002" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018003" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018004" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">14</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018005" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018006" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018007" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018008" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018009" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018010" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018011" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">5</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018012" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018013" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018014" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018015" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">6</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018016" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018017" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">10</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018018" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018019" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018020" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018021" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018022" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018023" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018024" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018025" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018026" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018027" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018028" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">30</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018029" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018030" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018031" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018032" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">15</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018033" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018034" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" />
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018035" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018036" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">537395200</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8018037" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">537395200</windows:value>
-    </windows:registry_state>
-    <windows:passwordpolicy_state id="oval:org.adhardening:ste:8018900" version="1">
-      <windows:max_passwd_age datatype="int">4294967295</windows:max_passwd_age>
-      <windows:min_passwd_age datatype="int">86400</windows:min_passwd_age>
-      <windows:min_passwd_len datatype="int">14</windows:min_passwd_len>
-      <windows:password_hist_len datatype="int">24</windows:password_hist_len>
-      <windows:password_complexity datatype="boolean">true</windows:password_complexity>
-      <windows:reversible_encryption datatype="boolean">false</windows:reversible_encryption>
-    </windows:passwordpolicy_state>
-    <windows:lockoutpolicy_state id="oval:org.adhardening:ste:8018910" version="1">
-      <windows:lockout_duration datatype="int">900</windows:lockout_duration>
-      <windows:lockout_observation_window datatype="int">900</windows:lockout_observation_window>
-      <windows:lockout_threshold datatype="int">10</windows:lockout_threshold>
-    </windows:lockoutpolicy_state>
     <windows:registry_state id="oval:org.adhardening:ste:8020001" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string">C:\ProgramData\ExploitProtection\ExploitProtectionSettings.xml</windows:value>
@@ -22922,6 +22796,67 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
+    <windows:passwordpolicy_state id="oval:org.adhardening:ste:8163900" version="1">
+      <windows:max_passwd_age datatype="int">4294967295</windows:max_passwd_age>
+      <windows:min_passwd_age datatype="int">86400</windows:min_passwd_age>
+      <windows:min_passwd_len datatype="int">14</windows:min_passwd_len>
+      <windows:password_hist_len datatype="int">24</windows:password_hist_len>
+      <windows:password_complexity datatype="boolean">true</windows:password_complexity>
+      <windows:reversible_encryption datatype="boolean">false</windows:reversible_encryption>
+    </windows:passwordpolicy_state>
+    <windows:lockoutpolicy_state id="oval:org.adhardening:ste:8164910" version="1">
+      <windows:lockout_duration datatype="int">900</windows:lockout_duration>
+      <windows:lockout_observation_window datatype="int">900</windows:lockout_observation_window>
+      <windows:lockout_threshold datatype="int">10</windows:lockout_threshold>
+    </windows:lockoutpolicy_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8165" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8166" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8167001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1954</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8168" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8169" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8170001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8171" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8172" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8173" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8174" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8175" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8176" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
     <windows:passwordpolicy_state id="oval:org.adhardening:ste:3001900" version="1">
       <windows:min_passwd_len datatype="int">20</windows:min_passwd_len>
       <windows:password_hist_len datatype="int">24</windows:password_hist_len>
@@ -23484,111 +23419,6 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013001" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1954</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013002" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013003" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013004" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013005" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013006" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">5</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013007" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013008" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013009" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">6</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013010" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013011" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013012" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013013" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013014" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013015" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013016" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013017" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013018" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">30</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013019" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013020" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013021" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013022" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">537395200</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7013023" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">537395200</windows:value>
-    </windows:registry_state>
-    <windows:passwordpolicy_state id="oval:org.adhardening:ste:7013900" version="1">
-      <windows:max_passwd_age datatype="int">4294967295</windows:max_passwd_age>
-      <windows:min_passwd_age datatype="int">86400</windows:min_passwd_age>
-      <windows:min_passwd_len datatype="int">20</windows:min_passwd_len>
-      <windows:password_hist_len datatype="int">24</windows:password_hist_len>
-      <windows:password_complexity datatype="boolean">true</windows:password_complexity>
-      <windows:reversible_encryption datatype="boolean">false</windows:reversible_encryption>
-    </windows:passwordpolicy_state>
-    <windows:lockoutpolicy_state id="oval:org.adhardening:ste:7013910" version="1">
-      <windows:lockout_duration datatype="int">1800</windows:lockout_duration>
-      <windows:lockout_observation_window datatype="int">1800</windows:lockout_observation_window>
-      <windows:lockout_threshold datatype="int">5</windows:lockout_threshold>
-    </windows:lockoutpolicy_state>
     <windows:registry_state id="oval:org.adhardening:ste:7014001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">3</windows:value>
@@ -24674,6 +24504,67 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_state id="oval:org.adhardening:ste:7151001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:passwordpolicy_state id="oval:org.adhardening:ste:7152900" version="1">
+      <windows:max_passwd_age datatype="int">4294967295</windows:max_passwd_age>
+      <windows:min_passwd_age datatype="int">86400</windows:min_passwd_age>
+      <windows:min_passwd_len datatype="int">20</windows:min_passwd_len>
+      <windows:password_hist_len datatype="int">24</windows:password_hist_len>
+      <windows:password_complexity datatype="boolean">true</windows:password_complexity>
+      <windows:reversible_encryption datatype="boolean">false</windows:reversible_encryption>
+    </windows:passwordpolicy_state>
+    <windows:lockoutpolicy_state id="oval:org.adhardening:ste:7153910" version="1">
+      <windows:lockout_duration datatype="int">1800</windows:lockout_duration>
+      <windows:lockout_observation_window datatype="int">1800</windows:lockout_observation_window>
+      <windows:lockout_threshold datatype="int">10</windows:lockout_threshold>
+    </windows:lockoutpolicy_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7154" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7155" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7156001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1954</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7157" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7158" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7159001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7160" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7161" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7162" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7163" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7164" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7165" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
   </states>
 </oval_definitions>

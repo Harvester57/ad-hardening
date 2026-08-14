@@ -54,7 +54,7 @@ def main():
                     added_files.add(link_path)
                     # Convert to path relative to repository root
                     rel_path = f"{module}/{link_path}"
-                    if ("services/" in link_path or "defender/" in link_path or "user-rights/" in link_path or "user-profile/" in link_path or "audit-policy/" in link_path) and not link_path.endswith("README.md"):
+                    if ("services/" in link_path or "defender/" in link_path or "user-rights/" in link_path or "user-profile/" in link_path or "audit-policy/" in link_path or "account-policy/" in link_path) and not link_path.endswith("README.md"):
                         summary_lines.append(f"        * [{text}]({rel_path})")
                     else:
                         summary_lines.append(f"    * [{text}]({rel_path})")
