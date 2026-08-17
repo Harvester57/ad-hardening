@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Benchmark xmlns="http://checklists.nist.gov/xccdf/1.2" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xhtml="http://www.w3.org/1999/xhtml" id="xccdf_org.adhardening.benchmarks_benchmark_ad-hardening" resolved="false" xml:lang="en">
-  <status date="2026-08-14">accepted</status>
+  <status date="2026-08-17">accepted</status>
   <title>Active Directory Hardening Guidebook Benchmark</title>
   <description>Automated compliance checklist profiles and rules parsed directly from the Active Directory Hardening Guidebook.</description>
   <version>1.0</version>
   <metadata>
     <dc:publisher>Antigravity Hardening Project</dc:publisher>
     <dc:creator>Antigravity</dc:creator>
-    <dc:date>2026-08-14</dc:date>
+    <dc:date>2026-08-17</dc:date>
   </metadata>
   <Profile id="xccdf_org.adhardening.benchmarks_profile_DomainController">
     <title>Domain Controller Hardening Profile</title>
@@ -62252,7 +62252,7 @@ if ($BiosDetails) {
           <xhtml:li>
             <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 client workstations and member servers.</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 (version 1803 and above) Enterprise/Professional, Windows 11 Enterprise/Professional, Windows Server 2019 (and above).</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -62260,36 +62260,38 @@ if ($BiosDetails) {
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>Operating-system-level security layers such as Virtualization-Based Security (VBS) and Windows Defender Credential Guard are designed to isolate credentials and kernel code integrity in a virtual secure environment. However, these layers rely entirely on the security of the underlying hardware platform and motherboard architecture.</xhtml:p>
-        <xhtml:p>Enabling hardware virtualization and DMA protection ensures: 1. <xhtml:strong>Hypervisor Memory Isolation</xhtml:strong>: Activating CPU Virtualization Extensions (Intel VT-x or AMD-V) in the UEFI allows the Windows hypervisor to separate the host operating system from the secure kernel. 2. <xhtml:strong>Direct Memory Access (DMA) Protection</xhtml:strong>: Enforcing IOMMU (Intel VT-d or AMD-Vi) at the firmware level enables Kernel DMA Protection. This blocks malicious peripherals connected to hot-plug ports (such as Thunderbolt, USB4, or PCIe expansion slots) from executing unauthorized DMA requests to read or modify physical RAM, mitigating physical attacks to extract BitLocker encryption keys or in-memory credential tokens. 3. <xhtml:strong>Hardware Trust Anchoring</xhtml:strong>: Enabling TPM 2.0 provides the physical root of trust needed to verify boot integrity (via PCR measurements) and safely store cryptographic keys, preventing the operating system from booting or unsealing disk encryption if the hardware state has been tampered with.</xhtml:p>
+        <xhtml:p>Direct Memory Access (DMA) allows hardware devices to read and write directly to physical system memory (RAM) over high-speed buses without CPU or operating system arbitration. External expansion ports—such as Thunderbolt 3, Thunderbolt 4, USB4, and hot-plug PCIe slots—expose internal PCI Express lanes directly to external peripherals.</xhtml:p>
+        <xhtml:p>If external DMA interfaces are left unprotected, an attacker with physical access to an unattended, locked, or stolen endpoint can connect malicious hardware tools or implants (such as PCILeech or USB3380 DMA attack adapters) to perform drive-by physical DMA attacks. Through unrestricted DMA access, attackers can extract sensitive secrets directly from RAM—including BitLocker full-volume encryption keys, DPAPI master keys, LSASS authentication tokens, Kerberos tickets, and cached credentials—or write to memory to inject kernel payloads and bypass Windows lock screens.</xhtml:p>
+        <xhtml:p>Configuring Kernel DMA Protection and enforcing strict external device enumeration mitigates this threat vector: 1. <xhtml:strong>IOMMU Memory Isolation</xhtml:strong>: Kernel DMA Protection utilizes the system's Input-Output Memory Management Unit (IOMMU: Intel VT-d or AMD-Vi) and ACPI DMAR tables to create hypervisor-enforced memory sandboxes for peripheral devices. For DMA-remapping-compatible devices, the operating system isolates device DMA transfers exclusively to the specific memory buffers allocated to that device's driver, blocking unauthorized access to adjacent physical RAM. 2. <xhtml:strong>Mitigating Incompatible External Devices</xhtml:strong>: External devices and drivers are classified into two categories: those that support DMA remapping and those that do not. If an incompatible or rogue peripheral without DMA-remapping support is connected, Windows default behavior may permit enumeration or delay it until user login. Setting the enumeration policy to <xhtml:strong>Block All</xhtml:strong> (<xhtml:code>DeviceEnumerationPolicy = 0</xhtml:code>) guarantees that any external device whose drivers do not explicitly support DMA remapping is unconditionally blocked from initializing, loading drivers, or executing DMA transfers. 3. <xhtml:strong>Closing the Physical Hot-Plug Attack Surface</xhtml:strong>: By blocking incompatible external DMA devices, the operating system ensures that only verified, DMA-remapping-compliant peripherals operate under strict hypervisor IOMMU containment, preventing drive-by memory dumping attacks while preserving device functionality for certified hardware.</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
-        <xhtml:p>To enforce Kernel DMA Protection across standard client workstations and member servers, implement the following GPO settings:</xhtml:p>
+        <xhtml:p>To enforce the Kernel DMA Protection external device enumeration policy across standard client workstations and member servers, implement the following GPO settings:</xhtml:p>
         <xhtml:ol>
           <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
-          <xhtml:li>Create or edit a GPO linked to the target workstations and servers OUs (e.g., <xhtml:code>GPO_Hardening_Endpoints</xhtml:code>).</xhtml:li>
+          <xhtml:li>Create or edit a GPO linked to the target workstations and member servers OUs (e.g., <xhtml:code>GPO_Hardening_Endpoints</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to:</xhtml:li>
           <xhtml:li>
             <xhtml:code>Computer Configuration\Administrative Templates\System\Kernel DMA Protection</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Configure the following settings:</xhtml:li>
+          <xhtml:li>Configure the following setting:</xhtml:li>
           <xhtml:li>
             <xhtml:em> </xhtml:em>
-            <xhtml:em>Policy</xhtml:em>
-            <xhtml:em>: `Enable Kernel DMA Protection` -&gt; </xhtml:em>
-            <xhtml:em>Enabled</xhtml:em>
-            <xhtml:em />
+            <xhtml:em>Policy</xhtml:em>*: <xhtml:code>Enumeration policy for external devices incompatible with Kernel DMA Protection</xhtml:code>
           </xhtml:li>
           <xhtml:li>
             <xhtml:em> </xhtml:em>
-            <xhtml:em>Policy</xhtml:em>
-            <xhtml:em>: `Enumeration policy for external devices incompatible with Kernel DMA Protection` -&gt; </xhtml:em>
-            <xhtml:em>Enabled: Block All</xhtml:em>* (value 0)</xhtml:li>
+            <xhtml:em>Setting</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Enumeration policy</xhtml:em>
+            <xhtml:em>: Select </xhtml:em>
+            <xhtml:em>Block All</xhtml:em>* (value <xhtml:code>0</xhtml:code>)</xhtml:li>
           <xhtml:li>Link the GPO to the appropriate OUs.</xhtml:li>
         </xhtml:ol>
         <xhtml:p>
-          <xhtml:em>Note: In addition to the GPO policy, ensure CPU Virtualization (VT-x/AMD-V), IOMMU (VT-d/AMD-Vi), and TPM 2.0 are manually enabled in the UEFI configuration menu of the systems.</xhtml:em>
+          <xhtml:em>Note: For Kernel DMA Protection to operate with maximum security, ensure platform hardware virtualization and IOMMU extensions (Intel VT-d or AMD-Vi) are enabled in the UEFI configuration menu as outlined in [REQ-END-013 - UEFI Firmware Security Hardening](configure-uefi-security.md).</xhtml:em>
         </xhtml:p>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -62301,93 +62303,99 @@ if ($BiosDetails) {
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Configure-KernelDMAProtection.ps1
-# Description: Configures registry keys to enable Kernel DMA Protection.
+# Description: Configures registry keys to enable Kernel DMA Protection and block incompatible external DMA devices.
 
 Write-Host "--- Enforcing Kernel DMA Protection ---" -ForegroundColor Cyan
 
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
-if (-not (Test-Path $RegPath)) {
+if (-not (Test-Path -Path $RegPath)) {
     New-Item -Path $RegPath -Force | Out-Null
 }
 
-# DeviceEnumerationPolicy = 0 (Block all external DMA devices)
+# DeviceEnumerationPolicy = 0 (Block all external DMA devices incompatible with Kernel DMA Protection)
 Set-ItemProperty -Path $RegPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
-Write-Host "Status: Kernel DMA Protection registry configuration applied." -ForegroundColor Green</xhtml:code>
+Write-Host "Status: Kernel DMA Protection registry configuration applied (DeviceEnumerationPolicy = 0 [Block All])." -ForegroundColor Green</xhtml:code>
         </xhtml:pre>
-        <xhtml:h4>2. Local Audit (TPM, Virtualization, and DMA Support)</xhtml:h4>
-        <xhtml:p>Run the following script to audit the status of the required hardware security components:</xhtml:p>
+        <xhtml:h4>2. Local Audit (Kernel DMA Protection, IOMMU, and Hardware Baseline)</xhtml:h4>
+        <xhtml:p>Run the following script to audit the status of Kernel DMA Protection, IOMMU support, and the required hardware security components:</xhtml:p>
         <xhtml:p>
           <xhtml:a href="audit_scripts/Audit-HardwareSecurityFeatures.ps1">Download Script: Audit-HardwareSecurityFeatures.ps1</xhtml:a>
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Audit-HardwareSecurityFeatures.ps1
-# Description: Audits TPM 2.0, CPU Virtualization, and IOMMU/DMA status.
+# Description: Audits Kernel DMA Protection registry policy, hardware IOMMU/DMA status, VBS state, and TPM readiness.
 
-Write-Host "--- Auditing Hardware Security Features ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Kernel DMA Protection and Hardware Security Baseline ---" -ForegroundColor Cyan
 
-# 1. Audit TPM 2.0 Status
-$Tpm = Get-Tpm -ErrorAction SilentlyContinue
-if ($Tpm) {
-    if ($Tpm.TpmPresent -eq $true) {
-        $TpmColor = "Red"
-        if ($Tpm.TpmReady -eq $true) {
-            $TpmColor = "Green"
-        }
-        Write-Host "Status: TPM Present: $($Tpm.TpmPresent) | Ready: $($Tpm.TpmReady)" -ForegroundColor $TpmColor
-    } else {
-        Write-Host "VULNERABLE: TPM 2.0 is not detected on this system." -ForegroundColor Red
-    }
+# 1. Audit Kernel DMA Protection Registry Policy
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
+$EnumPolicy = Get-ItemProperty -Path $RegPath -Name "DeviceEnumerationPolicy" -ErrorAction SilentlyContinue
+
+if ($null -ne $EnumPolicy -and $EnumPolicy.DeviceEnumerationPolicy -eq 0) {
+    Write-Host "Status: Kernel DMA Protection Policy (DeviceEnumerationPolicy): 0 (Block All) [COMPLIANT]" -ForegroundColor Green
 } else {
-    Write-Host "VULNERABLE: TPM verification cmdlet failed." -ForegroundColor Red
+    $CurrentVal = if ($null -ne $EnumPolicy) { $EnumPolicy.DeviceEnumerationPolicy } else { "Not Configured" }
+    Write-Host "VULNERABLE: Kernel DMA Protection Policy is '$($CurrentVal)'. Expected: 0 (Block All)." -ForegroundColor Red
 }
 
-# 2. Audit VBS and DMA Status via Win32_DeviceGuard
+# 2. Audit VBS and Hardware DMA/IOMMU Status via Win32_DeviceGuard
 try {
     $DG = Get-CimInstance -Namespace "Root\Microsoft\Windows\DeviceGuard" -ClassName "Win32_DeviceGuard" -ErrorAction Stop
     
     # VirtualizationBasedSecurityStatus: 2 = Running
     $VbsStatus = $DG.VirtualizationBasedSecurityStatus
-    $VbsColor = "Red"
     if ($VbsStatus -eq 2) {
-        $VbsColor = "Green"
+        Write-Host "Status: Virtualization-Based Security (VBS) Status: 2 (Running) [COMPLIANT]" -ForegroundColor Green
+    } else {
+        Write-Host "VULNERABLE: Virtualization-Based Security (VBS) is not running (Status: $($VbsStatus))." -ForegroundColor Red
     }
-    Write-Host "Status: Virtualization-Based Security Status: $($VbsStatus) (Required = 2 [Running])" -ForegroundColor $VbsColor
     
     # AvailableSecurityProperties: 3 = DMA Protection (IOMMU)
     $DmaSupported = $DG.AvailableSecurityProperties -contains 3
-    $DmaColor = "Red"
     if ($DmaSupported -eq $true) {
-        $DmaColor = "Green"
+        Write-Host "Status: Hardware IOMMU / DMA Remapping Support: True [COMPLIANT]" -ForegroundColor Green
+    } else {
+        Write-Host "VULNERABLE: Hardware IOMMU / DMA Protection is not available on this platform." -ForegroundColor Red
     }
-    Write-Host "Status: Hardware IOMMU/DMA Protection: $($DmaSupported)" -ForegroundColor $DmaColor
     
     # RequiredSecurityProperties: 3 = DMA Protection enforced
     $DmaEnforced = $DG.RequiredSecurityProperties -contains 3
-    $EnforcedColor = "Red"
     if ($DmaEnforced -eq $true) {
-        $EnforcedColor = "Green"
+        Write-Host "Status: DMA Protection Security Policy Enforced: True [COMPLIANT]" -ForegroundColor Green
+    } else {
+        Write-Host "Status: DMA Protection Security Policy Enforced: False [INFO]" -ForegroundColor Yellow
     }
-    Write-Host "Status: DMA Protection Policy Enforced: $($DmaEnforced)" -ForegroundColor $EnforcedColor
-    
 } catch {
-    Write-Host "VULNERABLE: Win32_DeviceGuard WMI class could not be queried. VBS is likely inactive." -ForegroundColor Red
+    Write-Host "VULNERABLE: Win32_DeviceGuard WMI class could not be queried. VBS / Device Guard is inactive." -ForegroundColor Red
+}
+
+# 3. Audit TPM 2.0 Status
+$Tpm = Get-Tpm -ErrorAction SilentlyContinue
+if ($null -ne $Tpm) {
+    if ($Tpm.TpmPresent -eq $true -and $Tpm.TpmReady -eq $true) {
+        Write-Host "Status: TPM 2.0 Present: True | Ready: True [COMPLIANT]" -ForegroundColor Green
+    } else {
+        Write-Host "VULNERABLE: TPM Present: $($Tpm.TpmPresent) | Ready: $($Tpm.TpmReady) (Expected: Present and Ready)." -ForegroundColor Red
+    }
+} else {
+    Write-Host "VULNERABLE: TPM verification cmdlet failed." -ForegroundColor Red
 }</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
       <fix system="urn:xccdf:fix:script:powershell"># Configure-KernelDMAProtection.ps1
-# Description: Configures registry keys to enable Kernel DMA Protection.
+# Description: Configures registry keys to enable Kernel DMA Protection and block incompatible external DMA devices.
 
 Write-Host "--- Enforcing Kernel DMA Protection ---" -ForegroundColor Cyan
 
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
-if (-not (Test-Path $RegPath)) {
+if (-not (Test-Path -Path $RegPath)) {
     New-Item -Path $RegPath -Force | Out-Null
 }
 
-# DeviceEnumerationPolicy = 0 (Block all external DMA devices)
+# DeviceEnumerationPolicy = 0 (Block all external DMA devices incompatible with Kernel DMA Protection)
 Set-ItemProperty -Path $RegPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
-Write-Host "Status: Kernel DMA Protection registry configuration applied." -ForegroundColor Green</fix>
+Write-Host "Status: Kernel DMA Protection registry configuration applied (DeviceEnumerationPolicy = 0 [Block All])." -ForegroundColor Green</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8014" />
       </check>

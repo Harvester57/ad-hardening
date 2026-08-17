@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-08-14T10:32:33Z</oval:timestamp>
+    <oval:timestamp>2026-08-17T10:39:08Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -3143,12 +3143,14 @@ Securing the firmware level ensures:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Operating-system-level security layers such as Virtualization-Based Security (VBS) and Windows Defender Credential Guard are designed to isolate credentials and kernel code integrity in a virtual secure environment. However, these layers rely entirely on the security of the underlying hardware platform and motherboard architecture.
+        <description>Direct Memory Access (DMA) allows hardware devices to read and write directly to physical system memory (RAM) over high-speed buses without CPU or operating system arbitration. External expansion ports—such as Thunderbolt 3, Thunderbolt 4, USB4, and hot-plug PCIe slots—expose internal PCI Express lanes directly to external peripherals.
 
-Enabling hardware virtualization and DMA protection ensures:
-1. **Hypervisor Memory Isolation**: Activating CPU Virtualization Extensions (Intel VT-x or AMD-V) in the UEFI allows the Windows hypervisor to separate the host operating system from the secure kernel.
-2. **Direct Memory Access (DMA) Protection**: Enforcing IOMMU (Intel VT-d or AMD-Vi) at the firmware level enables Kernel DMA Protection. This blocks malicious peripherals connected to hot-plug ports (such as Thunderbolt, USB4, or PCIe expansion slots) from executing unauthorized DMA requests to read or modify physical RAM, mitigating physical attacks to extract BitLocker encryption keys or in-memory credential tokens.
-3. **Hardware Trust Anchoring**: Enabling TPM 2.0 provides the physical root of trust needed to verify boot integrity (via PCR measurements) and safely store cryptographic keys, preventing the operating system from booting or unsealing disk encryption if the hardware state has been tampered with.</description>
+If external DMA interfaces are left unprotected, an attacker with physical access to an unattended, locked, or stolen endpoint can connect malicious hardware tools or implants (such as PCILeech or USB3380 DMA attack adapters) to perform drive-by physical DMA attacks. Through unrestricted DMA access, attackers can extract sensitive secrets directly from RAM—including BitLocker full-volume encryption keys, DPAPI master keys, LSASS authentication tokens, Kerberos tickets, and cached credentials—or write to memory to inject kernel payloads and bypass Windows lock screens.
+
+Configuring Kernel DMA Protection and enforcing strict external device enumeration mitigates this threat vector:
+1. **IOMMU Memory Isolation**: Kernel DMA Protection utilizes the system's Input-Output Memory Management Unit (IOMMU: Intel VT-d or AMD-Vi) and ACPI DMAR tables to create hypervisor-enforced memory sandboxes for peripheral devices. For DMA-remapping-compatible devices, the operating system isolates device DMA transfers exclusively to the specific memory buffers allocated to that device's driver, blocking unauthorized access to adjacent physical RAM.
+2. **Mitigating Incompatible External Devices**: External devices and drivers are classified into two categories: those that support DMA remapping and those that do not. If an incompatible or rogue peripheral without DMA-remapping support is connected, Windows default behavior may permit enumeration or delay it until user login. Setting the enumeration policy to **Block All** (`DeviceEnumerationPolicy = 0`) guarantees that any external device whose drivers do not explicitly support DMA remapping is unconditionally blocked from initializing, loading drivers, or executing DMA transfers.
+3. **Closing the Physical Hot-Plug Attack Surface**: By blocking incompatible external DMA devices, the operating system ensures that only verified, DMA-remapping-compliant peripherals operate under strict hypervisor IOMMU containment, preventing drive-by memory dumping attacks while preserving device functionality for certified hardware.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" test_ref="oval:org.adhardening:tst:8014001" />

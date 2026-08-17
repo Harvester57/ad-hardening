@@ -1,52 +1,58 @@
 # Audit-HardwareSecurityFeatures.ps1
-# Description: Audits TPM 2.0, CPU Virtualization, and IOMMU/DMA status.
+# Description: Audits Kernel DMA Protection registry policy, hardware IOMMU/DMA status, VBS state, and TPM readiness.
 
-Write-Host "--- Auditing Hardware Security Features ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Kernel DMA Protection and Hardware Security Baseline ---" -ForegroundColor Cyan
 
-# 1. Audit TPM 2.0 Status
-$Tpm = Get-Tpm -ErrorAction SilentlyContinue
-if ($Tpm) {
-    if ($Tpm.TpmPresent -eq $true) {
-        $TpmColor = "Red"
-        if ($Tpm.TpmReady -eq $true) {
-            $TpmColor = "Green"
-        }
-        Write-Host "Status: TPM Present: $($Tpm.TpmPresent) | Ready: $($Tpm.TpmReady)" -ForegroundColor $TpmColor
-    } else {
-        Write-Host "VULNERABLE: TPM 2.0 is not detected on this system." -ForegroundColor Red
-    }
+# 1. Audit Kernel DMA Protection Registry Policy
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
+$EnumPolicy = Get-ItemProperty -Path $RegPath -Name "DeviceEnumerationPolicy" -ErrorAction SilentlyContinue
+
+if ($null -ne $EnumPolicy -and $EnumPolicy.DeviceEnumerationPolicy -eq 0) {
+    Write-Host "Status: Kernel DMA Protection Policy (DeviceEnumerationPolicy): 0 (Block All) [COMPLIANT]" -ForegroundColor Green
 } else {
-    Write-Host "VULNERABLE: TPM verification cmdlet failed." -ForegroundColor Red
+    $CurrentVal = if ($null -ne $EnumPolicy) { $EnumPolicy.DeviceEnumerationPolicy } else { "Not Configured" }
+    Write-Host "VULNERABLE: Kernel DMA Protection Policy is '$($CurrentVal)'. Expected: 0 (Block All)." -ForegroundColor Red
 }
 
-# 2. Audit VBS and DMA Status via Win32_DeviceGuard
+# 2. Audit VBS and Hardware DMA/IOMMU Status via Win32_DeviceGuard
 try {
     $DG = Get-CimInstance -Namespace "Root\Microsoft\Windows\DeviceGuard" -ClassName "Win32_DeviceGuard" -ErrorAction Stop
     
     # VirtualizationBasedSecurityStatus: 2 = Running
     $VbsStatus = $DG.VirtualizationBasedSecurityStatus
-    $VbsColor = "Red"
     if ($VbsStatus -eq 2) {
-        $VbsColor = "Green"
+        Write-Host "Status: Virtualization-Based Security (VBS) Status: 2 (Running) [COMPLIANT]" -ForegroundColor Green
+    } else {
+        Write-Host "VULNERABLE: Virtualization-Based Security (VBS) is not running (Status: $($VbsStatus))." -ForegroundColor Red
     }
-    Write-Host "Status: Virtualization-Based Security Status: $($VbsStatus) (Required = 2 [Running])" -ForegroundColor $VbsColor
     
     # AvailableSecurityProperties: 3 = DMA Protection (IOMMU)
     $DmaSupported = $DG.AvailableSecurityProperties -contains 3
-    $DmaColor = "Red"
     if ($DmaSupported -eq $true) {
-        $DmaColor = "Green"
+        Write-Host "Status: Hardware IOMMU / DMA Remapping Support: True [COMPLIANT]" -ForegroundColor Green
+    } else {
+        Write-Host "VULNERABLE: Hardware IOMMU / DMA Protection is not available on this platform." -ForegroundColor Red
     }
-    Write-Host "Status: Hardware IOMMU/DMA Protection: $($DmaSupported)" -ForegroundColor $DmaColor
     
     # RequiredSecurityProperties: 3 = DMA Protection enforced
     $DmaEnforced = $DG.RequiredSecurityProperties -contains 3
-    $EnforcedColor = "Red"
     if ($DmaEnforced -eq $true) {
-        $EnforcedColor = "Green"
+        Write-Host "Status: DMA Protection Security Policy Enforced: True [COMPLIANT]" -ForegroundColor Green
+    } else {
+        Write-Host "Status: DMA Protection Security Policy Enforced: False [INFO]" -ForegroundColor Yellow
     }
-    Write-Host "Status: DMA Protection Policy Enforced: $($DmaEnforced)" -ForegroundColor $EnforcedColor
-    
 } catch {
-    Write-Host "VULNERABLE: Win32_DeviceGuard WMI class could not be queried. VBS is likely inactive." -ForegroundColor Red
+    Write-Host "VULNERABLE: Win32_DeviceGuard WMI class could not be queried. VBS / Device Guard is inactive." -ForegroundColor Red
+}
+
+# 3. Audit TPM 2.0 Status
+$Tpm = Get-Tpm -ErrorAction SilentlyContinue
+if ($null -ne $Tpm) {
+    if ($Tpm.TpmPresent -eq $true -and $Tpm.TpmReady -eq $true) {
+        Write-Host "Status: TPM 2.0 Present: True | Ready: True [COMPLIANT]" -ForegroundColor Green
+    } else {
+        Write-Host "VULNERABLE: TPM Present: $($Tpm.TpmPresent) | Ready: $($Tpm.TpmReady) (Expected: Present and Ready)." -ForegroundColor Red
+    }
+} else {
+    Write-Host "VULNERABLE: TPM verification cmdlet failed." -ForegroundColor Red
 }
