@@ -161,7 +161,22 @@ Write-Host "`nSyntax check summary: $verifiedCount verified, $cachedCount skippe
 
 # 3. Verify XML Compliance Manifests
 Write-Host "`nRunning compliance manifests validation..." -ForegroundColor Yellow
-$valProcess = Start-Process py -ArgumentList "scripts/validate_compliance.py" -Wait -NoNewWindow -PassThru
+$pythonExe = $null
+if (Get-Command "python" -ErrorAction SilentlyContinue) {
+    $pythonExe = "python"
+}
+elseif (Get-Command "python3" -ErrorAction SilentlyContinue) {
+    $pythonExe = "python3"
+}
+elseif (Get-Command "py" -ErrorAction SilentlyContinue) {
+    $pythonExe = "py"
+}
+else {
+    $pythonExe = "python"
+}
+
+$validateScript = Join-Path -Path $repoRoot -ChildPath "scripts/validate_compliance.py"
+$valProcess = Start-Process $pythonExe -ArgumentList "`"$validateScript`"" -Wait -NoNewWindow -PassThru
 if ($valProcess.ExitCode -ne 0) {
     Write-Error "Compliance XML files validation failed!"
     $errorsCount++
