@@ -72,6 +72,8 @@ The following services must be stopped and disabled:
 38. **[REQ-DC-072 - Disable Windows Mobile Hotspot Service (icssvc)](services/disable-icssvc.md)**
 39. **[REQ-DC-073 - Disable Windows Push Notifications System Service (WpnService)](services/disable-wpnservice.md)**
 40. **[REQ-DC-074 - Disable Windows Push Notifications User Service (WpnUserService)](services/disable-wpnuserservice.md)**
+41. **[REQ-DC-146 - Disable WebClient Service (WebClient)](services/disable-webclient.md)**
+
 
 ---
 

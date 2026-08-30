@@ -15,25 +15,29 @@
 ---
 
 ## Rationale
-Active Directory Certificate Services (ADCS) is a built-in Public Key Infrastructure (PKI) solution widely used for issuing certificates for computer and user authentication. However, misconfigured certificate templates and CA web endpoints present severe privilege escalation vectors (collectively referred to as ESC1 through ESC8).
+Active Directory Certificate Services (ADCS) is a built-in Public Key Infrastructure (PKI) solution widely used for issuing certificates for computer and user authentication. However, misconfigured certificate templates, weak mapping policies, and unhardened CA web endpoints present severe privilege escalation vectors (collectively referred to as ESC1 through ESC17).
 
 Key vulnerabilities include:
 1. **ESC1 (Enrollee Supplies Subject / SAN Exploitation)**: If a certificate template allows the client requesting the certificate to supply the subject name (Subject Alternative Name - SAN) in the enrollment request, and that template allows client authentication, any unprivileged domain user can request a certificate in the name of a Domain Administrator or Domain Controller. Upon receiving the certificate, the attacker can authenticate as that administrator, resulting in instant forest compromise.
-2. **ESC8 (IIS Web Enrollment NTLM Relay)**: The default ADCS HTTP Web Enrollment pages (`/certsrv`) do not enforce HTTPS and support NTLM authentication without protection. Attackers can coerce NTLM authentication from a Domain Controller (e.g., using printer spooler coercion) and relay that authentication to the CA web enrollment endpoint to request a DC certificate, taking over the domain.
+2. **ESC4 (Template ACL Misconfiguration)**: If unprivileged or Tier 1 identities possess write permissions (`GenericAll`, `GenericWrite`, or `WriteDacl`) over a certificate template object in the Active Directory Configuration partition, an attacker can modify the template parameters to enable SAN specification and client authentication (converting it to ESC1), enroll for an administrative certificate, and then restore the original configuration.
+3. **ESC8 (IIS Web Enrollment NTLM Relay)**: The default ADCS HTTP Web Enrollment pages (`/certsrv`) do not enforce HTTPS and support NTLM authentication without protection. Attackers can coerce NTLM authentication from a Domain Controller (e.g., using RPC coercion or WebDAV) and relay that authentication to the CA web enrollment endpoint to request a DC certificate, taking over the domain.
+4. **ESC9 / ESC10 (Weak Certificate Mapping & UPN Swaps)**: When weak certificate mapping is permitted (or without strong object SID binding), attackers with write permissions over an account's `userPrincipalName` or `dNSHostName` can compromise targets via certificate mapping mismatches.
+5. **ESC1-CMC (KB5014754 Bypass via CMC `id-cmc-addExtensions`)**: On patched CAs where PKINIT binds certificates using the `szOID_NTDS_CA_SECURITY_EXT` extension, attackers may attempt to embed arbitrary object SIDs into certificate requests via CMC request extensions. Enforcing strict issuance requirements (CA administrator approval) on sensitive authentication templates and keeping CA binaries fully updated neutralizes this bypass.
 
-Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary.
+Hardening ADCS templates, enforcing strong certificate binding, and securing endpoints is critical to protect the Tier 0 boundary.
 
 ---
 
 ## Legacy Impact & Compatibility
 * **Enrollment Disruption**: Disabling template configurations that allow client-specified SANs will block applications (such as third-party firewalls, load balancers, or web servers) that legitimately use this configuration to automatically request certificates with custom SANs. These systems should be migrated to secure enrollment agents or manual enrollment templates with manager approval.
 * **Authentication Failures**: Disabling HTTP Web Enrollment (`/certsrv`) entirely is recommended. If it must remain active, IIS must be configured to enforce HTTPS and Extended Protection for Authentication (EPA), which will block legacy non-channel-bound clients.
+* **Strong Binding Enforcement**: Enforcing `StrongCertificateBindingEnforcement = 2` on Domain Controllers blocks PKINIT authentication for certificates issued without the embedded object SID extension (`szOID_NTDS_CA_SECURITY_EXT`). Ensure all active enterprise user and computer certificates have been re-enrolled or updated to include the SID extension before enforcing Full Enforcement mode.
 
 ---
 
 ## Implementation Steps
 
-### Option A: Certificate Templates Console Configuration
+### Option A: Certificate Templates Console & Registry Configuration
 
 #### 1. Mitigate ESC1 (Disable Enrollee Supplies Subject)
 1. Open the **Certificate Templates Console** (`certtmpl.msc`) on the CA server or a management host.
@@ -43,13 +47,19 @@ Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary
 5. Ensure the option **Build from this Active Directory information** is selected. 
 6. **Do NOT select** the option **Supply in the request**. If a template *must* allow user-supplied subjects (e.g., web server SSL templates), ensure that **Client Authentication** is *not* present in the Extended Key Usage (EKU) list, and enforce manager approval (see below).
 
-#### 2. Enforce Manager Approval on Sensitive Templates
+#### 2. Enforce Manager Approval on Sensitive Templates (Mitigates ESC1-CMC)
 1. In the template properties, select the **Issuance Requirements** tab.
 2. Check the box for **CA administrator approval**.
 3. Under **Require the following for enrollment**, set the authorized signatures to `1` if an enrollment agent is required.
 4. Save the template.
 
-#### 3. Disable or Secure HTTP Web Enrollment (Mitigate ESC8)
+#### 3. Restrict Certificate Template ACLs (Mitigate ESC4)
+1. In the **Certificate Templates Console**, right-click the template and select **Properties**.
+2. Select the **Security** tab.
+3. Verify that only **Domain Admins**, **Enterprise Admins**, and **SYSTEM** hold **Full Control**, **Write**, or **Write Owner/DACL** permissions.
+4. Remove any write permissions assigned to `Authenticated Users`, `Domain Users`, or delegated non-Tier 0 groups.
+
+#### 4. Disable or Secure HTTP Web Enrollment (Mitigate ESC8)
 1. Log on to the CA server hosting the Web Enrollment role.
 2. Open **Internet Information Services (IIS) Manager** (`inetmgr.exe`).
 3. In the left tree view, navigate to:
@@ -59,6 +69,14 @@ Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary
 6. Set **Extended Protection** to **Required** (or **Accept**).
 7. Ensure that the **Default Web Site** binds exclusively to HTTPS (port 443) and redirect all HTTP traffic to HTTPS.
    * *Ideally, if Web Enrollment is not required, uninstall the "Active Directory Certificate Services Web Enrollment" role entirely via Server Manager.*
+
+#### 5. Enforce Strong Certificate Binding on Domain Controllers (Mitigates ESC9/ESC10)
+1. On all Domain Controllers, open the Registry Editor (`regedit.exe`).
+2. Navigate to:
+   `HKLM\SYSTEM\CurrentControlSet\Services\Kdc`
+3. Create or set the DWORD value:
+   * **Value Name**: `StrongCertificateBindingEnforcement`
+   * **Value Data**: `2` (Full Enforcement Mode)
 
 ---
 

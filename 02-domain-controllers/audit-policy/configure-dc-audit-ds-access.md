@@ -19,6 +19,11 @@
 ## Rationale
 Auditing Directory Service changes captures creations, modifications, and deletions of Active Directory objects, providing an essential trail for monitoring structural domain modifications.
 
+Key security telemetry enabled by these subcategories includes:
+1. **Shadow Credentials Detection (Event ID 5136)**: Placing a System Access Control List (SACL) on the `msDS-KeyCredentialLink` attribute across user and computer objects combined with `Directory Service Changes` auditing generates Event ID `5136` whenever an attacker attempts to inject raw X.509 certificate credentials (`pywhisker`, `PKINITtools`) to gain Kerberos PKINIT persistence or account takeover.
+2. **DCSync & Replication Rights Auditing (Event ID 4662)**: Auditing `Directory Service Access` with SACLs placed on the Domain Root container generates Event ID `4662` when an attacker or unauthorized identity attempts DRSUAPI replication calls (`DS-Replication-Get-Changes-All`).
+3. **Privileged Group & ACL Tampering**: Provides immediate visibility into unauthorized modifications to administrative groups (`Domain Admins`, `Enterprise Admins`, `DnsAdmins`) and `adminSDHolder` permission descriptors.
+
 ---
 
 ## Legacy Impact & Compatibility
@@ -29,9 +34,11 @@ Auditing Directory Service changes captures creations, modifications, and deleti
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
-  * Subcategory: `Directory Service Changes` -> `Success and Failure`
-  * Subcategory: `Directory Service Access` -> `Success and Failure`
+1. Configure Advanced Audit Policy subcategory settings matching:
+   * Subcategory: `Directory Service Changes` -> `Success and Failure`
+   * Subcategory: `Directory Service Access` -> `Success and Failure`
+2. Configure Active Directory SACLs on sensitive containers:
+   * To audit Shadow Credentials, open `ADSI Edit` (`adsiedit.msc`), navigate to target organizational units (e.g. `OU=Tier0,DC=corp,DC=local`), right-click -> **Properties** -> **Security** -> **Advanced** -> **Auditing** tab. Add an audit entry for `Everyone` covering `Write msDS-KeyCredentialLink` (Type: `All`).
 
 
 ---

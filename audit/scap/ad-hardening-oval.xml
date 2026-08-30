@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-08-17T10:39:08Z</oval:timestamp>
+    <oval:timestamp>2026-08-30T22:11:36Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -476,11 +476,12 @@ If an attacker gains temporary write permissions on the `adminSDHolder` object, 
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>In Active Directory-integrated DNS zones, DNS server configurations and zone data are stored inside the directory. By default, members of the built-in `DnsAdmins` group have write permissions over the properties of the `CN=MicrosoftDNS,CN=System` container.
+        <description>In Active Directory-integrated DNS zones, DNS server configurations and zone data are stored inside the directory. By default, members of the built-in `DnsAdmins` group have write permissions over the properties of the `CN=MicrosoftDNS,CN=System` container, and standard domain users can register arbitrary DNS records in AD-integrated zones.
 
-This default configuration presents a critical privilege escalation vector:
+This default configuration presents critical attack vectors:
 1. **DLL Hijacking via DNS Service**: An account with write permissions on the DNS container can specify a path to a malicious DLL in the `ServerLevelPluginDll` parameter. The DNS server service (which runs as `SYSTEM` on Domain Controllers) will load this DLL upon restart, executing arbitrary code with system privileges and leading to full Domain Controller takeover.
-2. **Restricts DNS Management Boundary**: Restricting write access on the container properties and auditing the membership of the `DnsAdmins` group prevents lower-tier administrators (such as Tier 1 network administrators) from escalating their privileges to Tier 0.</description>
+2. **ADIDNS Record Spoofing &amp; Kerberos Reflection (Ghost-SPN)**: If standard authenticated users have unrestricted rights to create new DNS records in Active Directory Integrated DNS (ADIDNS) zones, attackers can register arbitrary names—including Unicode homoglyphs (such as `Ⓡ` or `․`). During Kerberos ticket requests, Kerberos linguistic normalization canonicalizes the homoglyph SPN to ASCII (matching a legitimate target computer), while Windows DNS cache preserves the distinction, routing traffic to the attacker's listener and allowing Kerberos AP-REQ reflection attacks (CVE-2025-58726 / Synacktiv research).
+3. **Restricting DNS Management Boundary**: Restricting write access on the container properties, disabling non-secure dynamic updates, and auditing `DnsAdmins` membership prevents non-Tier 0 identities from manipulating directory DNS infrastructure.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\DNS\Parameters Value ServerLevelPluginDll" test_ref="oval:org.adhardening:tst:2017001" />
@@ -2691,7 +2692,12 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Auditing Directory Service changes captures creations, modifications, and deletions of Active Directory objects, providing an essential trail for monitoring structural domain modifications.</description>
+        <description>Auditing Directory Service changes captures creations, modifications, and deletions of Active Directory objects, providing an essential trail for monitoring structural domain modifications.
+
+Key security telemetry enabled by these subcategories includes:
+1. **Shadow Credentials Detection (Event ID 5136)**: Placing a System Access Control List (SACL) on the `msDS-KeyCredentialLink` attribute across user and computer objects combined with `Directory Service Changes` auditing generates Event ID `5136` whenever an attacker attempts to inject raw X.509 certificate credentials (`pywhisker`, `PKINITtools`) to gain Kerberos PKINIT persistence or account takeover.
+2. **DCSync &amp; Replication Rights Auditing (Event ID 4662)**: Auditing `Directory Service Access` with SACLs placed on the Domain Root container generates Event ID `4662` when an attacker or unauthorized identity attempts DRSUAPI replication calls (`DS-Replication-Get-Changes-All`).
+3. **Privileged Group &amp; ACL Tampering**: Provides immediate visibility into unauthorized modifications to administrative groups (`Domain Admins`, `Enterprise Admins`, `DnsAdmins`) and `adminSDHolder` permission descriptors.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:2140920" />
@@ -2775,6 +2781,28 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Advanced Audit Policy configurations" test_ref="oval:org.adhardening:tst:2145920" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:2146" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-146] Disable WebClient Service (WebClient)</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>The WebClient service enables Windows-based programs to create, access, and modify Internet-based files via the Web Distributed Authoring and Versioning (WebDAV) protocol.
+
+In an Active Directory environment, the WebClient service represents a major credential coercion and relay attack surface:
+1. **Bypassing SMB Signing**: WebDAV coercion triggers an outbound HTTP/HTTPS connection using NTLM authentication rather than SMB. Because HTTP authentication does not enforce SMB signing, an attacker can coerce a Domain Controller (e.g., via PetitPotam, DFSCoerce, or ShadowCoerce targeting a WebDAV path like `\\attacker@80\share\test`) and relay the coerced machine account NTLM credentials directly to LDAP/LDAPS, Active Directory Certificate Services (AD CS) Web Enrollment, or other critical directory endpoints.
+2. **Principle of Least Functionality**: Domain Controllers perform core directory and authentication functions and must never operate as WebDAV clients to external or internal web servers.
+
+Stopping and disabling the WebClient service on Domain Controllers completely neutralizes WebDAV-based coercion and cross-protocol relay vectors.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\$($ServiceName) Value Start" test_ref="oval:org.adhardening:tst:2146001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8001" version="1" class="compliance">
@@ -5947,6 +5975,28 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
         <criterion comment="Placeholder check for REQ-END-176 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8176" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:8177" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-177] Disable WebClient Service (WebClient)</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled.
+
+The WebClient service handles Web Distributed Authoring and Versioning (WebDAV) file requests over HTTP/HTTPS. In an Active Directory environment, leaving the WebClient service enabled on endpoints introduces significant risk:
+1. **WebDAV Credential Coercion**: Attackers on the internal network can coerce endpoint authentication via WebDAV UNC paths (e.g., `\\attacker@80\share\path`). The endpoint sends NTLM authentication over HTTP.
+2. **Bypassing SMB Signing**: Because HTTP authentication does not enforce SMB signing, coerced NTLM authentication from the endpoint can be relayed to internal directory services (such as LDAP/LDAPS, AD CS Web Enrollment, or other servers), facilitating lateral movement and privilege escalation.
+
+Disabling the WebClient service on standard endpoints and servers closes this attack vector while minimizing unnecessary background resource consumption.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\$($ServiceName) Value Start" test_ref="oval:org.adhardening:tst:8177001" />
+      </criteria>
+    </definition>
     <definition id="oval:org.adhardening:def:3001" version="1" class="compliance">
       <metadata>
         <title>[REQ-ID-001] Enforce Fine-Grained Password Policies</title>
@@ -6256,13 +6306,16 @@ Therefore:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Active Directory Certificate Services (ADCS) is a built-in Public Key Infrastructure (PKI) solution widely used for issuing certificates for computer and user authentication. However, misconfigured certificate templates and CA web endpoints present severe privilege escalation vectors (collectively referred to as ESC1 through ESC8).
+        <description>Active Directory Certificate Services (ADCS) is a built-in Public Key Infrastructure (PKI) solution widely used for issuing certificates for computer and user authentication. However, misconfigured certificate templates, weak mapping policies, and unhardened CA web endpoints present severe privilege escalation vectors (collectively referred to as ESC1 through ESC17).
 
 Key vulnerabilities include:
 1. **ESC1 (Enrollee Supplies Subject / SAN Exploitation)**: If a certificate template allows the client requesting the certificate to supply the subject name (Subject Alternative Name - SAN) in the enrollment request, and that template allows client authentication, any unprivileged domain user can request a certificate in the name of a Domain Administrator or Domain Controller. Upon receiving the certificate, the attacker can authenticate as that administrator, resulting in instant forest compromise.
-2. **ESC8 (IIS Web Enrollment NTLM Relay)**: The default ADCS HTTP Web Enrollment pages (`/certsrv`) do not enforce HTTPS and support NTLM authentication without protection. Attackers can coerce NTLM authentication from a Domain Controller (e.g., using printer spooler coercion) and relay that authentication to the CA web enrollment endpoint to request a DC certificate, taking over the domain.
+2. **ESC4 (Template ACL Misconfiguration)**: If unprivileged or Tier 1 identities possess write permissions (`GenericAll`, `GenericWrite`, or `WriteDacl`) over a certificate template object in the Active Directory Configuration partition, an attacker can modify the template parameters to enable SAN specification and client authentication (converting it to ESC1), enroll for an administrative certificate, and then restore the original configuration.
+3. **ESC8 (IIS Web Enrollment NTLM Relay)**: The default ADCS HTTP Web Enrollment pages (`/certsrv`) do not enforce HTTPS and support NTLM authentication without protection. Attackers can coerce NTLM authentication from a Domain Controller (e.g., using RPC coercion or WebDAV) and relay that authentication to the CA web enrollment endpoint to request a DC certificate, taking over the domain.
+4. **ESC9 / ESC10 (Weak Certificate Mapping &amp; UPN Swaps)**: When weak certificate mapping is permitted (or without strong object SID binding), attackers with write permissions over an account's `userPrincipalName` or `dNSHostName` can compromise targets via certificate mapping mismatches.
+5. **ESC1-CMC (KB5014754 Bypass via CMC `id-cmc-addExtensions`)**: On patched CAs where PKINIT binds certificates using the `szOID_NTDS_CA_SECURITY_EXT` extension, attackers may attempt to embed arbitrary object SIDs into certificate requests via CMC request extensions. Enforcing strict issuance requirements (CA administrator approval) on sensitive authentication templates and keeping CA binaries fully updated neutralizes this bypass.
 
-Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary.</description>
+Hardening ADCS templates, enforcing strong certificate binding, and securing endpoints is critical to protect the Tier 0 boundary.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-ID-015 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:3015" />
@@ -10064,6 +10117,26 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
         <criterion comment="Placeholder check for REQ-PAW-165 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7165" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:7166" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-166] Disable WebClient Service for PAWs (WebClient)</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>To minimize the attack surface of Privileged Access Workstations (PAWs), all unnecessary background system services must be stopped and disabled.
+
+Disabling the WebClient service on Tier 0 PAWs provides critical security benefits:
+1. **Eliminating WebDAV Credential Coercion**: The WebClient service handles Web Distributed Authoring and Versioning (WebDAV) file requests over HTTP/HTTPS. Attackers can trigger WebDAV coercion methods (e.g., via malicious file explorer shortcuts, UNC links, or RPC coercion) that force the administrative host to transmit NTLM authentication to an attacker-controlled HTTP server. Because HTTP authentication does not enforce SMB signing, these credentials can be relayed to critical Active Directory services.
+2. **Tier 0 Principle of Least Functionality**: PAW workstations are dedicated strictly to directory and infrastructure administration. They must never mount or interact with remote WebDAV shares.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\$($ServiceName) Value Start" test_ref="oval:org.adhardening:tst:7166001" />
+      </criteria>
+    </definition>
   </definitions>
   <tests>
     <windows:userright_test id="oval:org.adhardening:tst:1001210" version="1" comment="Check User Right Assignment SeDenyInteractiveLogonRight" check="all">
@@ -11090,6 +11163,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:2145920" />
       <windows:state state_ref="oval:org.adhardening:ste:2145920" />
     </windows:auditeventpolicysubcategories_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2146001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\$($ServiceName) Value Start" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2146001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2146001" />
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8001001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001001" />
       <windows:state state_ref="oval:org.adhardening:ste:8001001" />
@@ -12625,6 +12702,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_test id="oval:org.adhardening:tst:8176" version="1" comment="Placeholder check for REQ-END-176 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8176" />
       <windows:state state_ref="oval:org.adhardening:ste:8176" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8177001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\$($ServiceName) Value Start" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8177001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8177001" />
     </windows:registry_test>
     <windows:passwordpolicy_test id="oval:org.adhardening:tst:3001900" version="1" comment="Check local Password Policy settings" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:3001900" />
@@ -14361,6 +14442,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:object object_ref="oval:org.adhardening:obj:7165" />
       <windows:state state_ref="oval:org.adhardening:ste:7165" />
     </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7166001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\$($ServiceName) Value Start" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7166001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7166001" />
+    </windows:registry_test>
   </tests>
   <objects>
     <windows:userright_object id="oval:org.adhardening:obj:1001210" version="1">
@@ -15744,6 +15829,12 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:2143920" version="1" />
     <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:2144920" version="1" />
     <windows:auditeventpolicysubcategories_object id="oval:org.adhardening:obj:2145920" version="1" />
+    <windows:registry_object id="oval:org.adhardening:obj:2146001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\$($ServiceName)</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8001001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -17913,6 +18004,12 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8177001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\$($ServiceName)</windows:key>
+      <windows:name>Start</windows:name>
     </windows:registry_object>
     <windows:passwordpolicy_object id="oval:org.adhardening:obj:3001900" version="1" />
     <windows:lockoutpolicy_object id="oval:org.adhardening:obj:3001910" version="1" />
@@ -20383,6 +20480,12 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7166001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\$($ServiceName)</windows:key>
+      <windows:name>Start</windows:name>
+    </windows:registry_object>
   </objects>
   <states>
     <windows:userright_state id="oval:org.adhardening:ste:9999" version="1">
@@ -21373,6 +21476,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
       <windows:security_system_extension>AUDIT_SUCCESS_FAILURE</windows:security_system_extension>
       <windows:system_integrity>AUDIT_SUCCESS_FAILURE</windows:system_integrity>
     </windows:auditeventpolicysubcategories_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2146001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -22858,6 +22965,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_state id="oval:org.adhardening:ste:8176" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8177001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
     </windows:registry_state>
     <windows:passwordpolicy_state id="oval:org.adhardening:ste:3001900" version="1">
       <windows:min_passwd_len datatype="int">20</windows:min_passwd_len>
@@ -24567,6 +24678,10 @@ According to the latest Microsoft guidelines, the recommended trigger value for 
     <windows:registry_state id="oval:org.adhardening:ste:7165" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7166001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">4</windows:value>
     </windows:registry_state>
   </states>
 </oval_definitions>

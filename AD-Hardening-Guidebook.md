@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: bbfa1d2 | Generated: August 17, 2026</span>
+      <span>Commit: 821f856 | Generated: August 31, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -39,7 +39,7 @@ pdf_options:
     <li>Tier 2 Client Workstations: Windows 10 and above</li>
   </ul>
   <hr>
-  <p><em>Generated dynamically on: August 17, 2026</em></p>
+  <p><em>Generated dynamically on: August 31, 2026</em></p>
 </div>
 
 <div id="README-md"></div>
@@ -3594,6 +3594,8 @@ The following services must be stopped and disabled:
 38. **[REQ-DC-072 - Disable Windows Mobile Hotspot Service (icssvc)](#02-domain-controllers-services-disable-icssvc-md)**
 39. **[REQ-DC-073 - Disable Windows Push Notifications System Service (WpnService)](#02-domain-controllers-services-disable-wpnservice-md)**
 40. **[REQ-DC-074 - Disable Windows Push Notifications User Service (WpnUserService)](#02-domain-controllers-services-disable-wpnuserservice-md)**
+41. **[REQ-DC-146 - Disable WebClient Service (WebClient)](#02-domain-controllers-services-disable-webclient-md)**
+
 
 ---
 
@@ -10595,11 +10597,12 @@ foreach ($Rule in $Acl.Access) {
 <div id="02-domain-controllers-harden-dns-container-permissions-md-rationale"></div>
 
 ## Rationale
-In Active Directory-integrated DNS zones, DNS server configurations and zone data are stored inside the directory. By default, members of the built-in `DnsAdmins` group have write permissions over the properties of the `CN=MicrosoftDNS,CN=System` container.
+In Active Directory-integrated DNS zones, DNS server configurations and zone data are stored inside the directory. By default, members of the built-in `DnsAdmins` group have write permissions over the properties of the `CN=MicrosoftDNS,CN=System` container, and standard domain users can register arbitrary DNS records in AD-integrated zones.
 
-This default configuration presents a critical privilege escalation vector:
+This default configuration presents critical attack vectors:
 1. **DLL Hijacking via DNS Service**: An account with write permissions on the DNS container can specify a path to a malicious DLL in the `ServerLevelPluginDll` parameter. The DNS server service (which runs as `SYSTEM` on Domain Controllers) will load this DLL upon restart, executing arbitrary code with system privileges and leading to full Domain Controller takeover.
-2. **Restricts DNS Management Boundary**: Restricting write access on the container properties and auditing the membership of the `DnsAdmins` group prevents lower-tier administrators (such as Tier 1 network administrators) from escalating their privileges to Tier 0.
+2. **ADIDNS Record Spoofing & Kerberos Reflection (Ghost-SPN)**: If standard authenticated users have unrestricted rights to create new DNS records in Active Directory Integrated DNS (ADIDNS) zones, attackers can register arbitrary names—including Unicode homoglyphs (such as `Ⓡ` or `․`). During Kerberos ticket requests, Kerberos linguistic normalization canonicalizes the homoglyph SPN to ASCII (matching a legitimate target computer), while Windows DNS cache preserves the distinction, routing traffic to the attacker's listener and allowing Kerberos AP-REQ reflection attacks (CVE-2025-58726 / Synacktiv research).
+3. **Restricting DNS Management Boundary**: Restricting write access on the container properties, disabling non-secure dynamic updates, and auditing `DnsAdmins` membership prevents non-Tier 0 identities from manipulating directory DNS infrastructure.
 
 ---
 
@@ -10607,6 +10610,7 @@ This default configuration presents a critical privilege escalation vector:
 
 ## Legacy Impact & Compatibility
 * **DNS Administrative Workloads**: Delegated network administrators who are not members of Tier 0 but manage DNS records may fail to perform some zone maintenance if they rely on membership in the default `DnsAdmins` group. They should instead be granted delegated rights over specific DNS zones rather than write access on the main DNS system container.
+* **Dynamic DNS Registrations**: Enforce Secure Dynamic Updates only. Standard domain workstations will continue to register their own computer hostname records dynamically using their machine account credentials, while unprivileged users cannot arbitrarily register arbitrary hostnames or homoglyph records.
 * **Vulnerability Mitigation**: Ensure that Microsoft security update CVE-2021-40469 is installed on all Domain Controllers to harden the DNS plugin loading behavior.
 
 ---
@@ -10615,10 +10619,13 @@ This default configuration presents a critical privilege escalation vector:
 
 ## Implementation Steps
 
-<div id="02-domain-controllers-harden-dns-container-permissions-md-option-a-active-directory-users-and-computers-aduc-console-configuration"></div>
+<div id="02-domain-controllers-harden-dns-container-permissions-md-option-a-active-directory-users-and-computers-aduc-dns-console-configuration"></div>
 
-### Option A: Active Directory Users and Computers (ADUC) Console Configuration
+### Option A: Active Directory Users and Computers (ADUC) & DNS Console Configuration
 
+<div id="02-domain-controllers-harden-dns-container-permissions-md-1-restrict-microsoftdns-container-permissions"></div>
+
+#### 1. Restrict MicrosoftDNS Container Permissions
 1. Open **Active Directory Users and Computers** (`dsa.msc`) on a Domain Controller.
 2. Ensure **View** -> **Advanced Features** is checked.
 3. Navigate to:
@@ -10631,6 +10638,15 @@ This default configuration presents a critical privilege escalation vector:
 9. Click **OK** to apply.
 10. Open **Active Directory Users and Computers** and navigate to the `Builtin` or `Users` container.
 11. Double-click the **DnsAdmins** group and ensure only Tier 0 accounts are members. Remove any non-Tier 0 identities.
+
+<div id="02-domain-controllers-harden-dns-container-permissions-md-2-enforce-secure-dynamic-updates-on-all-ad-integrated-zones"></div>
+
+#### 2. Enforce Secure Dynamic Updates on All AD-Integrated Zones
+1. Open the **DNS Manager** console (`dnsmgmt.msc`).
+2. Expand the Domain Controller node -> **Forward Lookup Zones**.
+3. Right-click the domain DNS zone and select **Properties**.
+4. On the **General** tab, set **Dynamic updates** to **Secure only**.
+5. Click **OK**.
 
 ---
 
@@ -22758,6 +22774,11 @@ if ($script:Vulnerable) {
 ## Rationale
 Auditing Directory Service changes captures creations, modifications, and deletions of Active Directory objects, providing an essential trail for monitoring structural domain modifications.
 
+Key security telemetry enabled by these subcategories includes:
+1. **Shadow Credentials Detection (Event ID 5136)**: Placing a System Access Control List (SACL) on the `msDS-KeyCredentialLink` attribute across user and computer objects combined with `Directory Service Changes` auditing generates Event ID `5136` whenever an attacker attempts to inject raw X.509 certificate credentials (`pywhisker`, `PKINITtools`) to gain Kerberos PKINIT persistence or account takeover.
+2. **DCSync & Replication Rights Auditing (Event ID 4662)**: Auditing `Directory Service Access` with SACLs placed on the Domain Root container generates Event ID `4662` when an attacker or unauthorized identity attempts DRSUAPI replication calls (`DS-Replication-Get-Changes-All`).
+3. **Privileged Group & ACL Tampering**: Provides immediate visibility into unauthorized modifications to administrative groups (`Domain Admins`, `Enterprise Admins`, `DnsAdmins`) and `adminSDHolder` permission descriptors.
+
 ---
 
 <div id="02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md-legacy-impact-compatibility"></div>
@@ -22774,9 +22795,11 @@ Auditing Directory Service changes captures creations, modifications, and deleti
 <div id="02-domain-controllers-audit-policy-configure-dc-audit-ds-access-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Configure Advanced Audit Policy subcategory or registry override preferences matching:
-  * Subcategory: `Directory Service Changes` -> `Success and Failure`
-  * Subcategory: `Directory Service Access` -> `Success and Failure`
+1. Configure Advanced Audit Policy subcategory settings matching:
+   * Subcategory: `Directory Service Changes` -> `Success and Failure`
+   * Subcategory: `Directory Service Access` -> `Success and Failure`
+2. Configure Active Directory SACLs on sensitive containers:
+   * To audit Shadow Credentials, open `ADSI Edit` (`adsiedit.msc`), navigate to target organizational units (e.g. `OU=Tier0,DC=corp,DC=local`), right-click -> **Properties** -> **Security** -> **Advanced** -> **Auditing** tab. Add an audit entry for `Everyone` covering `Write msDS-KeyCredentialLink` (Type: `All`).
 
 
 ---
@@ -26190,13 +26213,16 @@ if ($Accounts) {
 <div id="03-identities-services-harden-adcs-pki-md-rationale"></div>
 
 ## Rationale
-Active Directory Certificate Services (ADCS) is a built-in Public Key Infrastructure (PKI) solution widely used for issuing certificates for computer and user authentication. However, misconfigured certificate templates and CA web endpoints present severe privilege escalation vectors (collectively referred to as ESC1 through ESC8).
+Active Directory Certificate Services (ADCS) is a built-in Public Key Infrastructure (PKI) solution widely used for issuing certificates for computer and user authentication. However, misconfigured certificate templates, weak mapping policies, and unhardened CA web endpoints present severe privilege escalation vectors (collectively referred to as ESC1 through ESC17).
 
 Key vulnerabilities include:
 1. **ESC1 (Enrollee Supplies Subject / SAN Exploitation)**: If a certificate template allows the client requesting the certificate to supply the subject name (Subject Alternative Name - SAN) in the enrollment request, and that template allows client authentication, any unprivileged domain user can request a certificate in the name of a Domain Administrator or Domain Controller. Upon receiving the certificate, the attacker can authenticate as that administrator, resulting in instant forest compromise.
-2. **ESC8 (IIS Web Enrollment NTLM Relay)**: The default ADCS HTTP Web Enrollment pages (`/certsrv`) do not enforce HTTPS and support NTLM authentication without protection. Attackers can coerce NTLM authentication from a Domain Controller (e.g., using printer spooler coercion) and relay that authentication to the CA web enrollment endpoint to request a DC certificate, taking over the domain.
+2. **ESC4 (Template ACL Misconfiguration)**: If unprivileged or Tier 1 identities possess write permissions (`GenericAll`, `GenericWrite`, or `WriteDacl`) over a certificate template object in the Active Directory Configuration partition, an attacker can modify the template parameters to enable SAN specification and client authentication (converting it to ESC1), enroll for an administrative certificate, and then restore the original configuration.
+3. **ESC8 (IIS Web Enrollment NTLM Relay)**: The default ADCS HTTP Web Enrollment pages (`/certsrv`) do not enforce HTTPS and support NTLM authentication without protection. Attackers can coerce NTLM authentication from a Domain Controller (e.g., using RPC coercion or WebDAV) and relay that authentication to the CA web enrollment endpoint to request a DC certificate, taking over the domain.
+4. **ESC9 / ESC10 (Weak Certificate Mapping & UPN Swaps)**: When weak certificate mapping is permitted (or without strong object SID binding), attackers with write permissions over an account's `userPrincipalName` or `dNSHostName` can compromise targets via certificate mapping mismatches.
+5. **ESC1-CMC (KB5014754 Bypass via CMC `id-cmc-addExtensions`)**: On patched CAs where PKINIT binds certificates using the `szOID_NTDS_CA_SECURITY_EXT` extension, attackers may attempt to embed arbitrary object SIDs into certificate requests via CMC request extensions. Enforcing strict issuance requirements (CA administrator approval) on sensitive authentication templates and keeping CA binaries fully updated neutralizes this bypass.
 
-Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary.
+Hardening ADCS templates, enforcing strong certificate binding, and securing endpoints is critical to protect the Tier 0 boundary.
 
 ---
 
@@ -26205,6 +26231,7 @@ Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary
 ## Legacy Impact & Compatibility
 * **Enrollment Disruption**: Disabling template configurations that allow client-specified SANs will block applications (such as third-party firewalls, load balancers, or web servers) that legitimately use this configuration to automatically request certificates with custom SANs. These systems should be migrated to secure enrollment agents or manual enrollment templates with manager approval.
 * **Authentication Failures**: Disabling HTTP Web Enrollment (`/certsrv`) entirely is recommended. If it must remain active, IIS must be configured to enforce HTTPS and Extended Protection for Authentication (EPA), which will block legacy non-channel-bound clients.
+* **Strong Binding Enforcement**: Enforcing `StrongCertificateBindingEnforcement = 2` on Domain Controllers blocks PKINIT authentication for certificates issued without the embedded object SID extension (`szOID_NTDS_CA_SECURITY_EXT`). Ensure all active enterprise user and computer certificates have been re-enrolled or updated to include the SID extension before enforcing Full Enforcement mode.
 
 ---
 
@@ -26212,9 +26239,9 @@ Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary
 
 ## Implementation Steps
 
-<div id="03-identities-services-harden-adcs-pki-md-option-a-certificate-templates-console-configuration"></div>
+<div id="03-identities-services-harden-adcs-pki-md-option-a-certificate-templates-console-registry-configuration"></div>
 
-### Option A: Certificate Templates Console Configuration
+### Option A: Certificate Templates Console & Registry Configuration
 
 <div id="03-identities-services-harden-adcs-pki-md-1-mitigate-esc1-disable-enrollee-supplies-subject"></div>
 
@@ -26226,17 +26253,25 @@ Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary
 5. Ensure the option **Build from this Active Directory information** is selected. 
 6. **Do NOT select** the option **Supply in the request**. If a template *must* allow user-supplied subjects (e.g., web server SSL templates), ensure that **Client Authentication** is *not* present in the Extended Key Usage (EKU) list, and enforce manager approval (see below).
 
-<div id="03-identities-services-harden-adcs-pki-md-2-enforce-manager-approval-on-sensitive-templates"></div>
+<div id="03-identities-services-harden-adcs-pki-md-2-enforce-manager-approval-on-sensitive-templates-mitigates-esc1-cmc"></div>
 
-#### 2. Enforce Manager Approval on Sensitive Templates
+#### 2. Enforce Manager Approval on Sensitive Templates (Mitigates ESC1-CMC)
 1. In the template properties, select the **Issuance Requirements** tab.
 2. Check the box for **CA administrator approval**.
 3. Under **Require the following for enrollment**, set the authorized signatures to `1` if an enrollment agent is required.
 4. Save the template.
 
-<div id="03-identities-services-harden-adcs-pki-md-3-disable-or-secure-http-web-enrollment-mitigate-esc8"></div>
+<div id="03-identities-services-harden-adcs-pki-md-3-restrict-certificate-template-acls-mitigate-esc4"></div>
 
-#### 3. Disable or Secure HTTP Web Enrollment (Mitigate ESC8)
+#### 3. Restrict Certificate Template ACLs (Mitigate ESC4)
+1. In the **Certificate Templates Console**, right-click the template and select **Properties**.
+2. Select the **Security** tab.
+3. Verify that only **Domain Admins**, **Enterprise Admins**, and **SYSTEM** hold **Full Control**, **Write**, or **Write Owner/DACL** permissions.
+4. Remove any write permissions assigned to `Authenticated Users`, `Domain Users`, or delegated non-Tier 0 groups.
+
+<div id="03-identities-services-harden-adcs-pki-md-4-disable-or-secure-http-web-enrollment-mitigate-esc8"></div>
+
+#### 4. Disable or Secure HTTP Web Enrollment (Mitigate ESC8)
 1. Log on to the CA server hosting the Web Enrollment role.
 2. Open **Internet Information Services (IIS) Manager** (`inetmgr.exe`).
 3. In the left tree view, navigate to:
@@ -26246,6 +26281,16 @@ Hardening ADCS templates and endpoints is critical to secure the Tier 0 boundary
 6. Set **Extended Protection** to **Required** (or **Accept**).
 7. Ensure that the **Default Web Site** binds exclusively to HTTPS (port 443) and redirect all HTTP traffic to HTTPS.
    * *Ideally, if Web Enrollment is not required, uninstall the "Active Directory Certificate Services Web Enrollment" role entirely via Server Manager.*
+
+<div id="03-identities-services-harden-adcs-pki-md-5-enforce-strong-certificate-binding-on-domain-controllers-mitigates-esc9esc10"></div>
+
+#### 5. Enforce Strong Certificate Binding on Domain Controllers (Mitigates ESC9/ESC10)
+1. On all Domain Controllers, open the Registry Editor (`regedit.exe`).
+2. Navigate to:
+   `HKLM\SYSTEM\CurrentControlSet\Services\Kdc`
+3. Create or set the DWORD value:
+   * **Value Name**: `StrongCertificateBindingEnforcement`
+   * **Value Data**: `2` (Full Enforcement Mode)
 
 ---
 
@@ -52600,6 +52645,7 @@ The following services must be stopped and disabled:
 18. **[REQ-PAW-054 - Disable Xbox Live Auth Manager Service for PAWs (XblAuthManager)](#07-paws-services-disable-xblauthmanager-md)**
 19. **[REQ-PAW-055 - Disable Xbox Live Game Save Service for PAWs (XblGameSave)](#07-paws-services-disable-xblgamesave-md)**
 20. **[REQ-PAW-056 - Disable Xbox Live Networking Service for PAWs (XboxNetApiSvc)](#07-paws-services-disable-xboxnetapisvc-md)**
+21. **[REQ-PAW-166 - Disable WebClient Service for PAWs (WebClient)](#07-paws-services-disable-webclient-md)**
 
 ---
 
@@ -77400,6 +77446,7 @@ The following services must be stopped and disabled:
 18. **[REQ-END-054 - Disable Xbox Live Auth Manager Service (XblAuthManager)](#08-endpoints-services-disable-xblauthmanager-md)**
 19. **[REQ-END-055 - Disable Xbox Live Game Save Service (XblGameSave)](#08-endpoints-services-disable-xblgamesave-md)**
 20. **[REQ-END-056 - Disable Xbox Live Networking Service (XboxNetApiSvc)](#08-endpoints-services-disable-xboxnetapisvc-md)**
+21. **[REQ-END-177 - Disable WebClient Service (WebClient)](#08-endpoints-services-disable-webclient-md)**
 
 ---
 

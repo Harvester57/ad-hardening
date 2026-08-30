@@ -52,6 +52,7 @@ The following services must be stopped and disabled:
 18. **[REQ-PAW-054 - Disable Xbox Live Auth Manager Service for PAWs (XblAuthManager)](services/disable-xblauthmanager.md)**
 19. **[REQ-PAW-055 - Disable Xbox Live Game Save Service for PAWs (XblGameSave)](services/disable-xblgamesave.md)**
 20. **[REQ-PAW-056 - Disable Xbox Live Networking Service for PAWs (XboxNetApiSvc)](services/disable-xboxnetapisvc.md)**
+21. **[REQ-PAW-166 - Disable WebClient Service for PAWs (WebClient)](services/disable-webclient.md)**
 
 ---
 

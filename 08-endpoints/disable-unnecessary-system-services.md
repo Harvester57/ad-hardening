@@ -52,6 +52,7 @@ The following services must be stopped and disabled:
 18. **[REQ-END-054 - Disable Xbox Live Auth Manager Service (XblAuthManager)](services/disable-xblauthmanager.md)**
 19. **[REQ-END-055 - Disable Xbox Live Game Save Service (XblGameSave)](services/disable-xblgamesave.md)**
 20. **[REQ-END-056 - Disable Xbox Live Networking Service (XboxNetApiSvc)](services/disable-xboxnetapisvc.md)**
+21. **[REQ-END-177 - Disable WebClient Service (WebClient)](services/disable-webclient.md)**
 
 ---
 
