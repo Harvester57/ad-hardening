@@ -1,8 +1,19 @@
 import os
 import re
+import sys
+import json
+import hashlib
+
+def get_file_hash(content):
+    return hashlib.sha256(content.encode('utf-8')).hexdigest()
 
 def main():
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    cache_dir = os.path.join(repo_root, ".cache")
+    cache_file = os.path.join(cache_dir, "extract_manifest.json")
+    
+    force_all = "--all" in sys.argv or "--force" in sys.argv or "-f" in sys.argv
+    
     modules = [
         "01-architecture",
         "02-domain-controllers",
@@ -14,11 +25,25 @@ def main():
         "08-endpoints"
     ]
     
+    # Load cache if available and not forced
+    manifest = {}
+    if not force_all and os.path.exists(cache_file):
+        try:
+            with open(cache_file, "r", encoding="utf-8") as f:
+                manifest = json.load(f)
+        except Exception:
+            manifest = {}
+            
+    files_cache = manifest.get("files", {})
+    new_files_cache = {}
+    
     # Regex to match code blocks of type powershell or ps1
     code_block_pattern = re.compile(r'(```(?:powershell|ps1)\r?\n(.*?)\r?\n```)', re.DOTALL)
     
     total_extracted = 0
     total_linked = 0
+    skipped_files = 0
+    processed_files = 0
     
     for module in modules:
         module_path = os.path.join(repo_root, module)
@@ -36,70 +61,122 @@ def main():
                     continue
                     
                 file_path = os.path.join(root, file)
+                rel_path = os.path.relpath(file_path, repo_root).replace('\\', '/')
+                
+                try:
+                    mtime = os.path.getmtime(file_path)
+                except OSError:
+                    mtime = 0
+                
+                # Check cache for fast skip
+                cached_entry = files_cache.get(rel_path)
+                if not force_all and cached_entry and cached_entry.get("mtime") == mtime:
+                    # Quick verify that output scripts still exist
+                    scripts_exist = True
+                    for script_rel in cached_entry.get("scripts", []):
+                        if not os.path.exists(os.path.join(repo_root, script_rel)):
+                            scripts_exist = False
+                            break
+                    if scripts_exist:
+                        new_files_cache[rel_path] = cached_entry
+                        skipped_files += 1
+                        continue
+                        
                 with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
                     
+                content_hash = get_file_hash(content)
+                if not force_all and cached_entry and cached_entry.get("hash") == content_hash:
+                    scripts_exist = True
+                    for script_rel in cached_entry.get("scripts", []):
+                        if not os.path.exists(os.path.join(repo_root, script_rel)):
+                            scripts_exist = False
+                            break
+                    if scripts_exist:
+                        cached_entry["mtime"] = mtime
+                        new_files_cache[rel_path] = cached_entry
+                        skipped_files += 1
+                        continue
+                
+                processed_files += 1
                 matches = code_block_pattern.findall(content)
-                if not matches:
-                    continue
-                    
-                modified = False
-                for full_block, code_content in matches:
-                    code_lines = code_content.strip().split("\n")
-                    if not code_lines:
-                        continue
-                    first_line = code_lines[0].strip()
-                    
-                    # Match comments like '# Name.ps1'
-                    filename_match = re.match(r'^#\s*([a-zA-Z0-9_-]+\.ps1)', first_line, re.IGNORECASE)
-                    if not filename_match:
-                        continue
+                extracted_for_file = []
+                
+                if matches:
+                    modified = False
+                    for full_block, code_content in matches:
+                        code_lines = code_content.strip().split("\n")
+                        if not code_lines:
+                            continue
+                        first_line = code_lines[0].strip()
                         
-                    filename = filename_match.group(1)
-                    
-                    # Classify implementation vs audit
-                    lower_name = filename.lower()
-                    is_audit = (
-                        lower_name.startswith("audit-") or
-                        lower_name.startswith("test-") or
-                        lower_name.startswith("get-") or
-                        lower_name.startswith("check-")
-                    )
-                    
-                    folder_name = "audit_scripts" if is_audit else "implementation_scripts"
-                    target_dir = audit_dir if is_audit else impl_dir
-                    
-                    # Ensure the target directory exists
-                    os.makedirs(target_dir, exist_ok=True)
-                    
-                    # Write the script content to the target file
-                    script_path = os.path.join(target_dir, filename)
-                    # Normalize line endings to Windows style CRLF (since this repository runs on Windows)
-                    normalized_code = code_content.replace('\r\n', '\n').replace('\n', '\r\n')
-                    with open(script_path, "w", encoding="utf-8", newline="") as sf:
-                        sf.write(normalized_code + "\r\n")
-                    total_extracted += 1
-                    
-                    # Compute relative prefix from markdown file's directory to the module path
-                    if root == module_path:
-                        prefix = ""
-                    else:
-                        prefix = os.path.relpath(module_path, root).replace('\\', '/') + "/"
-                    
-                    # Check if download link is already present in the markdown file
-                    link_text = f"[Download Script: {filename}]({prefix}{folder_name}/{filename})"
-                    if link_text not in content:
-                        # Insert the download link right before the code block
-                        new_block = f"{link_text}\n\n{full_block}"
-                        content = content.replace(full_block, new_block, 1)
-                        modified = True
-                        total_linked += 1
+                        # Match comments like '# Name.ps1'
+                        filename_match = re.match(r'^#\s*([a-zA-Z0-9_-]+\.ps1)', first_line, re.IGNORECASE)
+                        if not filename_match:
+                            continue
+                            
+                        filename = filename_match.group(1)
                         
-                if modified:
-                    with open(file_path, "w", encoding="utf-8") as f:
-                        f.write(content)
+                        # Classify implementation vs audit
+                        lower_name = filename.lower()
+                        is_audit = (
+                            lower_name.startswith("audit-") or
+                            lower_name.startswith("test-") or
+                            lower_name.startswith("get-") or
+                            lower_name.startswith("check-")
+                        )
                         
-    print(f"Extraction complete! Extracted {total_extracted} scripts and added {total_linked} links.")
+                        folder_name = "audit_scripts" if is_audit else "implementation_scripts"
+                        target_dir = audit_dir if is_audit else impl_dir
+                        
+                        # Ensure the target directory exists
+                        os.makedirs(target_dir, exist_ok=True)
+                        
+                        # Write the script content to the target file
+                        script_path = os.path.join(target_dir, filename)
+                        script_rel = os.path.relpath(script_path, repo_root).replace('\\', '/')
+                        extracted_for_file.append(script_rel)
+                        
+                        # Normalize line endings to Windows style CRLF
+                        normalized_code = code_content.replace('\r\n', '\n').replace('\n', '\r\n')
+                        with open(script_path, "w", encoding="utf-8", newline="") as sf:
+                            sf.write(normalized_code + "\r\n")
+                        total_extracted += 1
+                        
+                        # Compute relative prefix from markdown file's directory to the module path
+                        if root == module_path:
+                            prefix = ""
+                        else:
+                            prefix = os.path.relpath(module_path, root).replace('\\', '/') + "/"
+                        
+                        # Check if download link is already present in the markdown file
+                        link_text = f"[Download Script: {filename}]({prefix}{folder_name}/{filename})"
+                        if link_text not in content:
+                            # Insert the download link right before the code block
+                            new_block = f"{link_text}\n\n{full_block}"
+                            content = content.replace(full_block, new_block, 1)
+                            modified = True
+                            total_linked += 1
+                            
+                    if modified:
+                        with open(file_path, "w", encoding="utf-8") as f:
+                            f.write(content)
+                        # Re-read mtime & hash after modification
+                        mtime = os.path.getmtime(file_path)
+                        content_hash = get_file_hash(content)
+                
+                new_files_cache[rel_path] = {
+                    "hash": content_hash,
+                    "mtime": mtime,
+                    "scripts": extracted_for_file
+                }
+    
+    # Save cache
+    os.makedirs(cache_dir, exist_ok=True)
+    with open(cache_file, "w", encoding="utf-8") as f:
+        json.dump({"version": 1, "files": new_files_cache}, f, indent=2)
+        
+    print(f"Extraction complete: {processed_files} processed ({total_extracted} scripts, {total_linked} links added), {skipped_files} skipped (cached).")
 
 if __name__ == "__main__":
     main()

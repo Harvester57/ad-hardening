@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Active Directory Hardening Guidebook",
   "scripts": {
+    "build": "python scripts/build.py",
+    "build:all": "python scripts/build.py --all",
+    "build:pdf": "python scripts/build.py --pdf",
+    "verify": "powershell -File Verify-ADHardeningDocs.ps1 -ChangedOnly",
+    "verify:all": "powershell -File Verify-ADHardeningDocs.ps1",
     "gitbook:summary": "python scripts/generate_summary.py",
     "gitbook:build": "npm run gitbook:summary && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" honkit build",
     "gitbook:serve": "npm run gitbook:summary && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" honkit serve",

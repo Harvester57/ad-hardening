@@ -11,3 +11,6 @@ Thumbs.db
 # DSC build outputs
 dsc/Build/Config/localhost.mof
 
+# Incremental build cache
+.cache/
+

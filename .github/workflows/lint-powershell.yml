@@ -4,9 +4,17 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '**/*.ps1'
+      - 'PSScriptAnalyzerSettings.psd1'
+      - '.github/workflows/lint-powershell.yml'
   pull_request:
     branches:
       - main
+    paths:
+      - '**/*.ps1'
+      - 'PSScriptAnalyzerSettings.psd1'
+      - '.github/workflows/lint-powershell.yml'
   workflow_dispatch:
 
 permissions:
@@ -18,6 +26,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - name: Run PSScriptAnalyzer
         shell: pwsh
@@ -26,20 +36,37 @@ jobs:
               Write-Host "Installing PSScriptAnalyzer..."
               Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
           }
-          
-          $scripts = Get-ChildItem -Path . -Filter *.ps1 -Recurse
-          if (-not $scripts) {
-              Write-Host "No PowerShell scripts found to lint."
+
+          $targetScripts = @()
+          if ('${{ github.event_name }}' -eq 'pull_request') {
+              Write-Host "Pull request event detected: identifying changed PowerShell scripts..."
+              $changedFiles = git diff --name-only origin/${{ github.base_ref }}...HEAD
+              foreach ($file in $changedFiles) {
+                  if ($file -like "*.ps1" -and (Test-Path -Path $file)) {
+                      $targetScripts += (Get-Item -Path $file)
+                  }
+              }
+              Write-Host "Found $($targetScripts.Count) changed script(s) to analyze in PR."
+          } else {
+              $targetScripts = Get-ChildItem -Path . -Filter *.ps1 -Recurse | Where-Object {
+                  $_.FullName -notlike "*\.git*" -and
+                  $_.FullName -notlike "*\_book*" -and
+                  $_.FullName -notlike "*\node_modules*"
+              }
+              Write-Host "Full scan: found $($targetScripts.Count) scripts to analyze."
+          }
+
+          if (-not $targetScripts -or $targetScripts.Count -eq 0) {
+              Write-Host "No PowerShell scripts to lint."
               exit 0
           }
-          
-          Write-Host "Found $($scripts.Count) scripts to analyze."
-          $results = $scripts | Invoke-ScriptAnalyzer -Settings .\PSScriptAnalyzerSettings.psd1 -Severity Error, Warning
+
+          $results = $targetScripts | Invoke-ScriptAnalyzer -Settings .\PSScriptAnalyzerSettings.psd1 -Severity Error, Warning
           
           if ($results) {
               $results | Format-Table -AutoSize
               Write-Error "PSScriptAnalyzer found errors/warnings in scripts. Please fix them."
               exit 1
           } else {
-              Write-Host "PSScriptAnalyzer passed successfully!"
+              Write-Host "PSScriptAnalyzer passed successfully on $($targetScripts.Count) script(s)!"
           }

@@ -1,21 +1,50 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const puppeteer = require('puppeteer');
 const { marked } = require('marked');
 const { execSync } = require('child_process');
+
+function getFileHash(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  const content = fs.readFileSync(filePath);
+  return crypto.createHash('sha256').update(content).digest('hex');
+}
 
 async function main() {
   const repoRoot = path.resolve(__dirname, '..');
   const mdPath = path.join(repoRoot, 'AD-Hardening-Guidebook.md');
   const pdfPath = path.join(repoRoot, 'AD-Hardening-Guidebook.pdf');
   const cssPath = path.join(repoRoot, 'scripts', 'pdf-style.css');
+  const cacheDir = path.join(repoRoot, '.cache');
+  const cacheFile = path.join(cacheDir, 'pdf_manifest.json');
 
-  console.log("Reading guidebook compiled markdown...");
+  const args = process.argv.slice(2);
+  const forceAll = args.includes('--force') || args.includes('-f') || args.includes('--all');
+
+  console.log("Checking guidebook and style freshness...");
   if (!fs.existsSync(mdPath)) {
     console.error(`Error: Compiled markdown file not found at ${mdPath}. Run compile_docs.py first.`);
     process.exit(1);
   }
 
+  const currentMdHash = getFileHash(mdPath);
+  const currentCssHash = getFileHash(cssPath);
+
+  // Check cache manifest for quick skip
+  if (!forceAll && fs.existsSync(pdfPath) && fs.existsSync(cacheFile)) {
+    try {
+      const manifest = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+      if (manifest.mdHash === currentMdHash && manifest.cssHash === currentCssHash) {
+        console.log(`[SKIP] PDF is up to date at ${pdfPath}. Use --force to regenerate.`);
+        return;
+      }
+    } catch (e) {
+      // If manifest is corrupted, continue with build
+    }
+  }
+
+  console.log("Reading guidebook compiled markdown...");
   let mdContent = fs.readFileSync(mdPath, 'utf8');
 
   // Strip front matter
@@ -71,7 +100,6 @@ async function main() {
 
   try {
     const page = await browser.newPage();
-    // Set timeout to 5 minutes (300,000ms) for loading and compiling the large HTML layout
     page.setDefaultTimeout(300000);
     console.log("Loading HTML content...");
     await page.setContent(htmlDocument, { timeout: 300000 });
@@ -99,6 +127,16 @@ async function main() {
         </div>
       `
     });
+
+    // Save manifest cache
+    if (!fs.existsSync(cacheDir)) {
+      fs.mkdirSync(cacheDir, { recursive: true });
+    }
+    fs.writeFileSync(cacheFile, JSON.stringify({
+      mdHash: currentMdHash,
+      cssHash: currentCssHash,
+      generatedAt: new Date().toISOString()
+    }, null, 2));
 
     console.log(`PDF successfully generated at: ${pdfPath}`);
   } catch (err) {

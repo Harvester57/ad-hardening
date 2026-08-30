@@ -1,5 +1,8 @@
 import os
 import re
+import sys
+import json
+import hashlib
 import subprocess
 from datetime import datetime
 
@@ -10,6 +13,8 @@ def get_git_commit(repo_root):
     except Exception:
         return "unknown"
 
+def get_file_hash(content):
+    return hashlib.sha256(content.encode('utf-8')).hexdigest()
 
 def slugify(text):
     # Strip markdown links: [text](url) -> text
@@ -33,18 +38,10 @@ def get_file_id(filepath):
     file_id = re.sub(r'[^a-zA-Z0-9_-]', '-', normalized)
     return file_id.strip('-')
 
-def process_file(filepath, repo_root):
+def process_file_content(content, filepath):
     file_id = get_file_id(filepath)
     file_dir = os.path.dirname(filepath)
-    abs_filepath = os.path.join(repo_root, filepath)
     
-    if not os.path.exists(abs_filepath):
-        print(f"Warning: File {abs_filepath} does not exist.")
-        return ""
-        
-    with open(abs_filepath, "r", encoding="utf-8") as f:
-        content = f.read()
-        
     # Prepend a target anchor for the top of this file
     processed = f'<div id="{file_id}"></div>\n\n'
     
@@ -63,7 +60,6 @@ def process_file(filepath, repo_root):
         target_file_id = get_file_id(resolved_path)
         
         if sub_anchor:
-            # Sub-anchors look like "#implementation-steps", slugify the anchor text
             clean_sub_anchor = slugify(sub_anchor)
             return f'[{text}](#{target_file_id}-{clean_sub_anchor})'
         else:
@@ -102,14 +98,12 @@ def process_file(filepath, repo_root):
         return f'> **{alert_type}:**'
         
     alert_regex = re.compile(r'^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]', re.MULTILINE | re.IGNORECASE)
-    
     header_regex = re.compile(r'^(#+)\s+(.+)$')
     
     # Split content by fenced code blocks to avoid modifying anything inside them
     segments = re.split(r'(```[\s\S]*?```)', content)
     
     for i in range(len(segments)):
-        # If the index is even, it's normal markdown text (not inside a code block)
         if i % 2 == 0:
             segment = segments[i]
             
@@ -122,23 +116,22 @@ def process_file(filepath, repo_root):
                     level = header_match.group(1)
                     header_text = header_match.group(2)
                     header_slug = slugify(header_text)
-                    # Prepend an HTML anchor for header cross-referencing
                     anchor = f'<div id="{file_id}-{header_slug}"></div>'
                     new_lines.append(f'{anchor}\n\n{line}')
                 else:
                     new_lines.append(line)
             segment = '\n'.join(new_lines)
             
-            # 2. Rewrite internal page anchors (e.g. [Step](#step-1)) to make them unique
+            # 2. Rewrite internal page anchors
             segment = internal_link_regex.sub(internal_link_replacer, segment)
             
-            # 3. Rewrite relative markdown links to HTML anchors: [Text](path.md#anchor)
+            # 3. Rewrite relative markdown links
             segment = md_link_regex.sub(link_replacer, segment)
             
-            # 4. Rewrite relative image paths: ![alt](images/pic.png)
+            # 4. Rewrite relative image paths
             segment = img_regex.sub(img_replacer, segment)
             
-            # 5. Convert GitHub alert blockquotes to standard readable strong tags
+            # 5. Convert GitHub alert blockquotes
             segment = alert_regex.sub(alert_replacer, segment)
             
             segments[i] = segment
@@ -147,31 +140,80 @@ def process_file(filepath, repo_root):
     processed += content
     return processed
 
+def get_processed_file(filepath, repo_root, files_cache, new_files_cache, force_all, stats):
+    normalized_path = filepath.replace('\\', '/')
+    abs_filepath = os.path.join(repo_root, filepath)
+    
+    if not os.path.exists(abs_filepath):
+        print(f"Warning: File {abs_filepath} does not exist.")
+        return ""
+        
+    try:
+        mtime = os.path.getmtime(abs_filepath)
+    except OSError:
+        mtime = 0
+        
+    cached_entry = files_cache.get(normalized_path)
+    if not force_all and cached_entry and cached_entry.get("mtime") == mtime and "processed" in cached_entry:
+        new_files_cache[normalized_path] = cached_entry
+        stats["skipped"] += 1
+        return cached_entry["processed"]
+        
+    with open(abs_filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+        
+    content_hash = get_file_hash(content)
+    if not force_all and cached_entry and cached_entry.get("hash") == content_hash and "processed" in cached_entry:
+        cached_entry["mtime"] = mtime
+        new_files_cache[normalized_path] = cached_entry
+        stats["skipped"] += 1
+        return cached_entry["processed"]
+        
+    stats["processed"] += 1
+    processed_content = process_file_content(content, normalized_path)
+    new_files_cache[normalized_path] = {
+        "hash": content_hash,
+        "mtime": mtime,
+        "processed": processed_content
+    }
+    return processed_content
+
 def main():
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    cache_dir = os.path.join(repo_root, ".cache")
+    cache_file = os.path.join(cache_dir, "compile_manifest.json")
+    
+    force_all = "--all" in sys.argv or "--force" in sys.argv or "-f" in sys.argv
+    
+    manifest = {}
+    if not force_all and os.path.exists(cache_file):
+        try:
+            with open(cache_file, "r", encoding="utf-8") as f:
+                manifest = json.load(f)
+        except Exception:
+            manifest = {}
+            
+    files_cache = manifest.get("files", {})
+    new_files_cache = {}
+    stats = {"processed": 0, "skipped": 0}
     
     # Read root README.md to parse module list
     root_readme_path = os.path.join(repo_root, "README.md")
     with open(root_readme_path, "r", encoding="utf-8") as f:
         readme_content = f.read()
         
-    # Parse module directories in order (e.g. 01-architecture, 02-domain-controllers)
     module_matches = re.findall(r'(\d{2}-[a-zA-Z0-9-]+)/README\.md', readme_content)
     modules = []
     for m in module_matches:
         if m not in modules:
             modules.append(m)
             
-    print(f"Discovered {len(modules)} modules in order: {modules}")
-    
-    # Get git commit hash
     commit_sha = get_git_commit(repo_root)
     current_date = datetime.now().strftime("%B %d, %Y")
 
-    # Start building compiled markdown
     compiled_lines = []
     
-    # 0. Add Front Matter for md-to-pdf configuration
+    # 0. Front Matter
     front_matter = f"""---
 launch_options:
   args:
@@ -199,7 +241,7 @@ pdf_options:
 """
     compiled_lines.append(front_matter)
     
-    # 1. Add Cover Page in HTML format to prevent it from interfering with Markdown parsing
+    # 1. Cover Page
     cover_page = f"""<div class="cover-page">
   <h1>Active Directory Hardening Guidebook</h1>
   <h2>Production-Grade Hardening Requirements & Guidelines for Air-Gapped Environments</h2>
@@ -221,85 +263,75 @@ pdf_options:
 """
     compiled_lines.append(cover_page)
     
-    # 2. Add root README.md content (Introduction & Compliance Mapping Matrix)
-    print("Processing root README.md...")
-    processed_readme = process_file("README.md", repo_root)
+    # 2. Root README.md
+    processed_readme = get_processed_file("README.md", repo_root, files_cache, new_files_cache, force_all, stats)
     compiled_lines.append(processed_readme)
     
-    # 3. Add modules and their respective files
+    # 3. Modules
     for module in modules:
-        print(f"Processing module: {module}...")
         module_readme = f"{module}/README.md"
-        
-        # Read module README to find files listed inside it
         module_readme_abs = os.path.join(repo_root, module_readme)
         if os.path.exists(module_readme_abs):
             with open(module_readme_abs, "r", encoding="utf-8") as f:
                 module_readme_content = f.read()
                 
-            # Find all local markdown links in the module README
-            # e.g. [Link](disable-smbv1.md)
             module_files_matches = re.findall(r'\[[^\]]+\]\(([^:\n)]+\.md)\)', module_readme_content)
             module_files = []
             for f_match in module_files_matches:
                 if f_match != "README.md" and f_match not in module_files:
                     module_files.append(f_match)
                     
-            # Page break before each module README
             compiled_lines.append('\n<div style="page-break-before: always;"></div>\n')
-            
-            # Process module README
-            processed_mod_readme = process_file(module_readme, repo_root)
+            processed_mod_readme = get_processed_file(module_readme, repo_root, files_cache, new_files_cache, force_all, stats)
             compiled_lines.append(processed_mod_readme)
             
-            # Process files in the module
             for file_name in module_files:
                 file_rel_path = f"{module}/{file_name}"
-                print(f"  -> File: {file_rel_path}")
-                
-                # Page break before each hardening file
                 compiled_lines.append('\n<div style="page-break-before: always;"></div>\n')
-                
-                processed_file_content = process_file(file_rel_path, repo_root)
+                processed_file_content = get_processed_file(file_rel_path, repo_root, files_cache, new_files_cache, force_all, stats)
                 compiled_lines.append(processed_file_content)
         else:
             print(f"Warning: Module README {module_readme} not found.")
             
-    # 3.5. Add Implementation Roadmap
+    # 3.5. Implementation Roadmap
     roadmap_file = "roadmap/implementation-plan.md"
-    roadmap_file_abs = os.path.join(repo_root, roadmap_file)
-    if os.path.exists(roadmap_file_abs):
-        print(f"Processing roadmap file: {roadmap_file}...")
-        # Page break before implementation roadmap
+    if os.path.exists(os.path.join(repo_root, roadmap_file)):
         compiled_lines.append('\n<div style="page-break-before: always;"></div>\n')
-        processed_roadmap = process_file(roadmap_file, repo_root)
+        processed_roadmap = get_processed_file(roadmap_file, repo_root, files_cache, new_files_cache, force_all, stats)
         compiled_lines.append(processed_roadmap)
-    else:
-        print(f"Warning: Roadmap file {roadmap_file} not found.")
-
-    # 4. Add Compliance Matrices
+        
+    # 4. Compliance Matrices
     compliance_files = [
         "compliance/anssi.md",
         "compliance/cis.md",
         "compliance/microsoft.md"
     ]
     for comp_file in compliance_files:
-        comp_file_abs = os.path.join(repo_root, comp_file)
-        if os.path.exists(comp_file_abs):
-            print(f"Processing compliance file: {comp_file}...")
-            # Page break before each compliance matrix
+        if os.path.exists(os.path.join(repo_root, comp_file)):
             compiled_lines.append('\n<div style="page-break-before: always;"></div>\n')
-            processed_comp = process_file(comp_file, repo_root)
+            processed_comp = get_processed_file(comp_file, repo_root, files_cache, new_files_cache, force_all, stats)
             compiled_lines.append(processed_comp)
-        else:
-            print(f"Warning: Compliance file {comp_file} not found.")
             
-    # Combine everything and write output
-    output_path = os.path.join(repo_root, "AD-Hardening-Guidebook.md")
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write('\n'.join(compiled_lines))
+    # Save cache
+    os.makedirs(cache_dir, exist_ok=True)
+    with open(cache_file, "w", encoding="utf-8") as f:
+        json.dump({"version": 1, "files": new_files_cache}, f)
         
-    print(f"\nCompilation complete! Combined file written to: {output_path}")
+    final_content = '\n'.join(compiled_lines)
+    output_path = os.path.join(repo_root, "AD-Hardening-Guidebook.md")
+    
+    # Check if output is unchanged before overwriting
+    if os.path.exists(output_path):
+        with open(output_path, "r", encoding="utf-8") as f:
+            existing_content = f.read()
+        if existing_content == final_content:
+            print(f"Compilation up-to-date: 0 processed, {stats['skipped']} skipped (cached). Guidebook output unchanged.")
+            return
+            
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(final_content)
+        
+    print(f"Compilation complete: {stats['processed']} processed, {stats['skipped']} skipped. Output written to: {output_path}")
 
 if __name__ == "__main__":
     main()

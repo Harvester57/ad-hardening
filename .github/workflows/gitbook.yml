@@ -4,6 +4,19 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '0*/**/*.md'
+      - 'compliance/**/*.md'
+      - 'roadmap/**/*.md'
+      - 'audit/**/*.md'
+      - 'README.md'
+      - 'SUMMARY.md'
+      - 'TEMPLATE.md'
+      - 'book.json'
+      - 'styles/**'
+      - 'plugins/**'
+      - 'scripts/generate_summary.py'
+      - 'package.json'
   workflow_dispatch:
 
 permissions:

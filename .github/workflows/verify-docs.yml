@@ -1,0 +1,60 @@
+name: Verify Documentation & Compliance
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '0*/**/*.md'
+      - 'compliance/**/*.md'
+      - 'roadmap/**/*.md'
+      - 'audit/**/*.md'
+      - 'README.md'
+      - 'SUMMARY.md'
+      - 'TEMPLATE.md'
+      - 'scripts/validate_compliance.py'
+      - 'Verify-ADHardeningDocs.ps1'
+      - '.github/workflows/verify-docs.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '0*/**/*.md'
+      - 'compliance/**/*.md'
+      - 'roadmap/**/*.md'
+      - 'audit/**/*.md'
+      - 'README.md'
+      - 'SUMMARY.md'
+      - 'TEMPLATE.md'
+      - 'scripts/validate_compliance.py'
+      - 'Verify-ADHardeningDocs.ps1'
+      - '.github/workflows/verify-docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+
+      - name: Run Documentation & Link Verification
+        shell: pwsh
+        run: |
+          if ('${{ github.event_name }}' -eq 'pull_request') {
+              Write-Host "Running changed-only documentation verification for PR..."
+              .\Verify-ADHardeningDocs.ps1 -ChangedOnly
+          } else {
+              Write-Host "Running full documentation verification..."
+              .\Verify-ADHardeningDocs.ps1
+          }

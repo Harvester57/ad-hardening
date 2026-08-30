@@ -1,5 +1,8 @@
 import os
 import re
+import sys
+import json
+import hashlib
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 
@@ -412,12 +415,42 @@ def parse_ps1_for_registry_and_services(script_content):
             
     return registry_checks, service_checks
 
-def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_scripts, endpoint_scripts):
+def get_file_hash(content):
+    return hashlib.sha256(content.encode('utf-8')).hexdigest()
+
+def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_scripts, endpoint_scripts, force_all=False):
     """
     Scans the repository for requirement markdown files and builds metadata list.
     """
+    cache_dir = os.path.join(repo_root, '.cache')
+    cache_file = os.path.join(cache_dir, 'compliance_ir.json')
+    
+    # Calculate dsc hash
+    dsc_path = os.path.join(repo_root, 'audit', 'dsc', 'ADHardeningAudit.ps1')
+    dsc_hash = ""
+    if os.path.exists(dsc_path):
+        try:
+            with open(dsc_path, 'r', encoding='utf-8') as f:
+                dsc_hash = get_file_hash(f.read())
+        except Exception:
+            dsc_hash = ""
+            
+    manifest = {}
+    if not force_all and os.path.exists(cache_file):
+        try:
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                manifest = json.load(f)
+        except Exception:
+            manifest = {}
+            
+    cached_dsc_hash = manifest.get('dsc_hash')
+    files_cache = manifest.get('files', {}) if cached_dsc_hash == dsc_hash else {}
+    new_files_cache = {}
+    
     requirements = []
-    exclude_dirs = {'.git', '.gemini', '_book', 'node_modules', 'compliance', 'styles', 'plugins', 'dsc', 'scripts'}
+    parsed_count = 0
+    cached_count = 0
+    exclude_dirs = {'.git', '.gemini', '_book', 'node_modules', 'compliance', 'styles', 'plugins', 'dsc', 'scripts', '.cache'}
     
     # Group requirements by prefix to establish module names
     prefix_to_module = {
@@ -448,10 +481,30 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
         for file in files:
             if file.endswith('.md') and not file.startswith('README') and not file.lower().startswith('template'):
                 full_path = os.path.join(root, file)
-                rel_path = os.path.relpath(full_path, repo_root)
+                rel_path = os.path.relpath(full_path, repo_root).replace('\\', '/')
                 
+                try:
+                    mtime = os.path.getmtime(full_path)
+                except OSError:
+                    mtime = 0
+                    
+                cached_entry = files_cache.get(rel_path)
+                if not force_all and cached_entry and cached_entry.get('mtime') == mtime and 'req' in cached_entry:
+                    requirements.append(cached_entry['req'])
+                    new_files_cache[rel_path] = cached_entry
+                    cached_count += 1
+                    continue
+                    
                 with open(full_path, 'r', encoding='utf-8') as f:
                     content = f.read()
+                    
+                content_hash = get_file_hash(content)
+                if not force_all and cached_entry and cached_entry.get('hash') == content_hash and 'req' in cached_entry:
+                    cached_entry['mtime'] = mtime
+                    requirements.append(cached_entry['req'])
+                    new_files_cache[rel_path] = cached_entry
+                    cached_count += 1
+                    continue
                 
                 # Check for requirement ID at top of markdown
                 first_line = content.split('\n')[0] if content else ""
@@ -834,7 +887,7 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                         except Exception as e:
                             print(f"Warning: Failed to parse implementation script {impl_path}: {e}")
                             
-                requirements.append({
+                req_obj = {
                     'id': req_id,
                     'prefix': prefix,
                     'numeric_id': numeric_id,
@@ -855,11 +908,23 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                     'module_name': module_name,
                     'profiles': profiles,
                     'assessment_type': assessment_type
-                })
+                }
+                requirements.append(req_obj)
+                new_files_cache[rel_path] = {
+                    'hash': content_hash,
+                    'mtime': mtime,
+                    'req': req_obj
+                }
+                parsed_count += 1
                 
+    # Save cache
+    os.makedirs(cache_dir, exist_ok=True)
+    with open(cache_file, 'w', encoding='utf-8') as f:
+        json.dump({'version': 1, 'dsc_hash': dsc_hash, 'files': new_files_cache}, f)
+        
     # Sort requirements by ID to ensure output stability
     requirements.sort(key=lambda x: x['id'])
-    return requirements
+    return requirements, parsed_count, cached_count
 
 def append_text(parent_el, text):
     if len(parent_el) == 0:
@@ -1741,8 +1806,10 @@ def main():
     dsc_path = os.path.join(repo_root, 'audit', 'dsc', 'ADHardeningAudit.ps1')
     scap_dir = os.path.join(repo_root, 'audit', 'scap')
     
+    force_all = "--all" in sys.argv or "--force" in sys.argv or "-f" in sys.argv
+    
     if not os.path.exists(scap_dir):
-        os.makedirs(scap_dir)
+        os.makedirs(scap_dir, exist_ok=True)
         
     xccdf_output = os.path.join(scap_dir, 'ad-hardening-xccdf.xml')
     oval_output = os.path.join(scap_dir, 'ad-hardening-oval.xml')
@@ -1752,9 +1819,15 @@ def main():
     print(f"DSC parsed: {len(common_scripts)} common scripts, {len(dc_scripts)} DC scripts, {len(paw_scripts)} PAW scripts, {len(endpoint_scripts)} Endpoint scripts.")
     
     print("\nScanning markdown requirements...")
-    requirements = scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_scripts, endpoint_scripts)
-    print(f"Found {len(requirements)} requirement records.")
+    requirements, parsed_count, cached_count = scan_markdown_requirements(
+        repo_root, common_scripts, dc_scripts, paw_scripts, endpoint_scripts, force_all=force_all
+    )
+    print(f"Found {len(requirements)} requirement records ({parsed_count} parsed, {cached_count} cached).")
     
+    if not force_all and parsed_count == 0 and os.path.exists(xccdf_output) and os.path.exists(oval_output):
+        print("Compliance XML manifests are up to date. Rebuild skipped.")
+        return
+        
     print("\nGenerating compliance files...")
     generate_xccdf(requirements, xccdf_output, repo_root)
     generate_oval(requirements, oval_output)
