@@ -34,7 +34,7 @@ jobs:
       - name: Check Cache for Pre-compiled PDF
         if: ${{ !inputs.force_rebuild }}
         id: pdf-cache
-        uses: actions/cache@13aacd865c20de90d75de1680084388d25d060aa # v4.2.2
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: AD-Hardening-Guidebook.pdf
           key: pdf-${{ hashFiles('0*/**/*.md', 'compliance/**/*.md', 'roadmap/**/*.md', 'README.md', 'scripts/pdf-style.css', 'scripts/generate_pdf.js', 'scripts/compile_docs.py') }}
