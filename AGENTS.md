@@ -70,6 +70,14 @@ When adding or modifying a technical control:
 
 ---
 
+## Module Overview and Table of Contents Registration
+
+When adding a new technical hardening requirement:
+1. **Module `README.md` Registration**: You MUST link the new requirement file in the corresponding module's top-level `README.md` (e.g., `02-domain-controllers/README.md`, `07-paws/README.md`, `08-endpoints/README.md`). The GitBook summary generation script (`scripts/generate_summary.py`) parses the module `README.md` files to discover child pages and generate `SUMMARY.md`. If a file is not linked in its module `README.md`, GitBook will omit it from the table of contents and web build.
+2. **Nested Submodule Parent Page Registration**: If the requirement belongs to a nested submodule (e.g., `services/`, `defender/`, `user-rights/`, `user-profile/`, `audit-policy/`, `account-policy/`), you MUST link it BOTH in the module's top-level `README.md` AND in the submodule's parent markdown document (e.g., `disable-unnecessary-services.md`).
+
+---
+
 ## Desired State Configuration (DSC) Policy Integration
 
 When adding, removing, or changing technical controls in this repository, you must update the PowerShell DSC configuration to keep the audit framework synchronized.
@@ -101,11 +109,11 @@ When adding, removing, or changing technical hardening requirements in this repo
 
 1. **Extract PowerShell Scripts**: Extract standalone `.ps1` audit and remediation scripts from markdown blocks and automatically inject download links:
 ```text
-python scripts/extract_scripts.py
+py scripts/extract_scripts.py
 ```
 2. **Rebuild Compliance Benchmarks**: Recompile XCCDF and OVAL XML documents directly from the markdown requirements:
 ```text
-python scripts/generate_compliance.py
+py scripts/generate_compliance.py
 ```
 After recompiling, validate the generated XML documents using OpenSCAP:
 ```powershell
@@ -114,13 +122,13 @@ oscap oval validate audit/scap/ad-hardening-oval.xml
 ```
 3. **Rebuild GitBook Table of Contents**: Re-generate the `SUMMARY.md` navigation file:
 ```text
-python scripts/generate_summary.py
+py scripts/generate_summary.py
 ```
 4. **Compile Consolidated Guidebook**: Re-compile the single consolidated guidebook file `AD-Hardening-Guidebook.md`:
 ```text
-python scripts/compile_docs.py
+py scripts/compile_docs.py
 ```
-5. **Verify and Validate**: Run the unified pipeline check to verify markdown links, code blocks syntax, and compliance schema validity:
+5. **Verify and Validate**: Run the unified pipeline check to verify markdown links, code blocks syntax, SUMMARY.md completeness, and compliance schema validity:
 ```powershell
 .\Verify-ADHardeningDocs.ps1
 ```
@@ -140,6 +148,8 @@ Before marking your work as complete, you **must** run this verification script 
 The script will:
 * Check for broken internal markdown links between modules and templates.
 * Extract all `powershell` or `ps1` code blocks from the markdown documents and run them through a syntax analyzer (`[System.Management.Automation.Language.Parser]`) to ensure compile-time validity without executing the instructions.
+* Verify that all requirement markdown files across all modules are indexed in `SUMMARY.md`.
+* Validate all XML compliance manifests (XCCDF and OVAL) against structural rules.
 
 ### SCAP Validation
 

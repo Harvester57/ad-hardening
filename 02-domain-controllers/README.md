@@ -68,6 +68,7 @@ This directory contains security baselines for Domain Controllers running Window
   * **[REQ-DC-072 - Disable Windows Mobile Hotspot Service (icssvc)](services/disable-icssvc.md)**
   * **[REQ-DC-073 - Disable Windows Push Notifications System Service (WpnService)](services/disable-wpnservice.md)**
   * **[REQ-DC-074 - Disable Windows Push Notifications User Service (WpnUserService)](services/disable-wpnuserservice.md)**
+  * **[REQ-DC-146 - Disable WebClient Service (WebClient)](services/disable-webclient.md)**
 * **[REQ-DC-013 - Enable Kerberos Armoring](enable-kerberos-armoring.md)**
   Requirement to enable Kerberos Armoring (FAST) on Domain Controllers and client endpoints to encrypt pre-authentication exchanges and protect credentials from offline brute-force attacks.
 * **[REQ-DC-014 - Restrict NTLM](restrict-ntlm.md)**

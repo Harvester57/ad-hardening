@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 7099112 | Generated: August 31, 2026</span>
+      <span>Commit: 8685eb3 | Generated: August 31, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1734,6 +1734,7 @@ This directory contains security baselines for Domain Controllers running Window
   * **[REQ-DC-072 - Disable Windows Mobile Hotspot Service (icssvc)](#02-domain-controllers-services-disable-icssvc-md)**
   * **[REQ-DC-073 - Disable Windows Push Notifications System Service (WpnService)](#02-domain-controllers-services-disable-wpnservice-md)**
   * **[REQ-DC-074 - Disable Windows Push Notifications User Service (WpnUserService)](#02-domain-controllers-services-disable-wpnuserservice-md)**
+  * **[REQ-DC-146 - Disable WebClient Service (WebClient)](#02-domain-controllers-services-disable-webclient-md)**
 * **[REQ-DC-013 - Enable Kerberos Armoring](#02-domain-controllers-enable-kerberos-armoring-md)**
   Requirement to enable Kerberos Armoring (FAST) on Domain Controllers and client endpoints to encrypt pre-authentication exchanges and protect credentials from offline brute-force attacks.
 * **[REQ-DC-014 - Restrict NTLM](#02-domain-controllers-restrict-ntlm-md)**
@@ -9805,6 +9806,156 @@ if ($IsVulnerable) {
 * **Microsoft Windows Server Security Guidance**: Guidelines for disabling system services in Windows Server
 * **ANSSI AD Hardening Guide**: Recommendation R4 (Minimization of service execution)
 * **CIS Microsoft Windows Server Benchmark**: Service minimization baselines
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-services-disable-webclient-md"></div>
+
+<div id="02-domain-controllers-services-disable-webclient-md-req-dc-146-disable-webclient-service-webclient"></div>
+
+# [REQ-DC-146] Disable WebClient Service (WebClient)
+
+<div id="02-domain-controllers-services-disable-webclient-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers (DCs) running Windows Server.
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025.
+
+---
+
+<div id="02-domain-controllers-services-disable-webclient-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\WebClient\Start`
+
+---
+
+<div id="02-domain-controllers-services-disable-webclient-md-rationale"></div>
+
+## Rationale
+The WebClient service enables Windows-based programs to create, access, and modify Internet-based files via the Web Distributed Authoring and Versioning (WebDAV) protocol.
+
+In an Active Directory environment, the WebClient service represents a major credential coercion and relay attack surface:
+1. **Bypassing SMB Signing**: WebDAV coercion triggers an outbound HTTP/HTTPS connection using NTLM authentication rather than SMB. Because HTTP authentication does not enforce SMB signing, an attacker can coerce a Domain Controller (e.g., via PetitPotam, DFSCoerce, or ShadowCoerce targeting a WebDAV path like `\\attacker@80\share\test`) and relay the coerced machine account NTLM credentials directly to LDAP/LDAPS, Active Directory Certificate Services (AD CS) Web Enrollment, or other critical directory endpoints.
+2. **Principle of Least Functionality**: Domain Controllers perform core directory and authentication functions and must never operate as WebDAV clients to external or internal web servers.
+
+Stopping and disabling the WebClient service on Domain Controllers completely neutralizes WebDAV-based coercion and cross-protocol relay vectors.
+
+---
+
+<div id="02-domain-controllers-services-disable-webclient-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **No Directory Impact**: Disabling the WebClient service has zero impact on Active Directory Domain Services (AD DS), Kerberos authentication, replication, DNS, or Group Policy processing.
+* **WebDAV Mapping Blocked**: Systems will not be able to map WebDAV shares via the Windows WebClient redirector. Domain Controllers should never mount external or internal WebDAV shares.
+
+---
+
+<div id="02-domain-controllers-services-disable-webclient-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-services-disable-webclient-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Domain Controllers GPO (e.g., `GPO_Hardening_DC`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+4. Locate `WebClient`, double-click to define the policy, and select **Disabled**.
+
+---
+
+<div id="02-domain-controllers-services-disable-webclient-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-DisableWebClient.ps1](../implementation_scripts/Configure-DisableWebClient.ps1)
+
+```powershell
+# Configure-DisableWebClient.ps1
+# Description: Disables the WebClient service on the Domain Controller to eliminate WebDAV coercion and relay attacks.
+
+Write-Host "Applying hardening requirement: Disable WebClient service on Domain Controller..." -ForegroundColor Cyan
+
+$ServiceName = "WebClient"
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\$($ServiceName)"
+
+$Service = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
+if ($null -ne $Service) {
+    if ($Service.StartType -ne "Disabled") {
+        if ($Service.Status -eq "Running") {
+            Stop-Service -Name $ServiceName -Force -ErrorAction SilentlyContinue | Out-Null
+        }
+        Set-Service -Name $ServiceName -StartupType Disabled -ErrorAction SilentlyContinue | Out-Null
+        Write-Host "[+] Service '$($ServiceName)' stopped and disabled." -ForegroundColor Green
+    } else {
+        Write-Host "[~] Service '$($ServiceName)' is already disabled." -ForegroundColor Gray
+    }
+} else {
+    Write-Host "[~] Service '$($ServiceName)' is not installed." -ForegroundColor Gray
+}
+
+if (Test-Path -Path $RegPath) {
+    Set-ItemProperty -Path $RegPath -Name "Start" -Value 4 -Type DWord -ErrorAction SilentlyContinue | Out-Null
+    Write-Host "[+] Registry Start value set to 4 (Disabled) for service '$($ServiceName)'." -ForegroundColor Green
+}
+```
+
+*To verify the startup configuration of the WebClient service on the Domain Controller:*
+
+[Download Script: Get-WebClientStatus.ps1](../audit_scripts/Get-WebClientStatus.ps1)
+
+```powershell
+# Get-WebClientStatus.ps1
+# Description: Audits the startup configuration of the WebClient service on the Domain Controller.
+
+Write-Host "--- Auditing WebClient Service on Domain Controller ---" -ForegroundColor Cyan
+
+$ServiceName = "WebClient"
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\$($ServiceName)"
+$IsVulnerable = $false
+
+if (Test-Path -Path $RegPath) {
+    $StartVal = Get-ItemProperty -Path $RegPath -Name "Start" -ErrorAction SilentlyContinue
+    if ($null -ne $StartVal) {
+        $Start = $StartVal.Start
+        if ($Start -eq 4) {
+            Write-Host "[+] Service '$($ServiceName)' is secure (Disabled)." -ForegroundColor Green
+        } else {
+            Write-Host "[!] VULNERABLE: Service '$($ServiceName)' startup type is not Disabled (Start value is $($Start))." -ForegroundColor Red
+            $IsVulnerable = $true
+        }
+    } else {
+        Write-Host "[!] VULNERABLE: Service '$($ServiceName)' exists but Start registry value is missing." -ForegroundColor Red
+        $IsVulnerable = $true
+    }
+} else {
+    Write-Host "[+] Service '$($ServiceName)' is not installed (Secure)." -ForegroundColor Green
+}
+
+if ($IsVulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-services-disable-webclient-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendations on host service minimization (R4) and coercion mitigation
+* **CIS Microsoft Windows Server Benchmark**: Service minimization guidelines
+* **DoD Windows Server STIG**: Disable unnecessary system services
 
 
 <div style="page-break-before: always;"></div>
@@ -35242,6 +35393,7 @@ This directory contains the physical isolation policies and operating system sec
     * **[REQ-PAW-054 - Disable Xbox Live Auth Manager Service for PAWs (XblAuthManager)](#07-paws-services-disable-xblauthmanager-md)**
     * **[REQ-PAW-055 - Disable Xbox Live Game Save Service for PAWs (XblGameSave)](#07-paws-services-disable-xblgamesave-md)**
     * **[REQ-PAW-056 - Disable Xbox Live Networking Service for PAWs (XboxNetApiSvc)](#07-paws-services-disable-xboxnetapisvc-md)**
+    * **[REQ-PAW-166 - Disable WebClient Service for PAWs (WebClient)](#07-paws-services-disable-webclient-md)**
 
 29. **[REQ-PAW-029 - Configure System Administrative Templates for PAWs](#07-paws-configure-system-administrative-templates-md)**
     Enforces custom administrative template settings including SMBv1 driver blocks and event log size extensions.
@@ -55599,6 +55751,154 @@ if ($IsVulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="07-paws-services-disable-webclient-md"></div>
+
+<div id="07-paws-services-disable-webclient-md-req-paw-166-disable-webclient-service-for-paws-webclient"></div>
+
+# [REQ-PAW-166] Disable WebClient Service for PAWs (WebClient)
+
+<div id="07-paws-services-disable-webclient-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-services-disable-webclient-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\WebClient\Start`
+
+---
+
+<div id="07-paws-services-disable-webclient-md-rationale"></div>
+
+## Rationale
+To minimize the attack surface of Privileged Access Workstations (PAWs), all unnecessary background system services must be stopped and disabled.
+
+Disabling the WebClient service on Tier 0 PAWs provides critical security benefits:
+1. **Eliminating WebDAV Credential Coercion**: The WebClient service handles Web Distributed Authoring and Versioning (WebDAV) file requests over HTTP/HTTPS. Attackers can trigger WebDAV coercion methods (e.g., via malicious file explorer shortcuts, UNC links, or RPC coercion) that force the administrative host to transmit NTLM authentication to an attacker-controlled HTTP server. Because HTTP authentication does not enforce SMB signing, these credentials can be relayed to critical Active Directory services.
+2. **Tier 0 Principle of Least Functionality**: PAW workstations are dedicated strictly to directory and infrastructure administration. They must never mount or interact with remote WebDAV shares.
+
+---
+
+<div id="07-paws-services-disable-webclient-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Normal Operations**: Disabling this service is completely transparent for PAW administrative roles unless third-party administrative tooling specifically relies on WebDAV transport (which is prohibited under Tier 0 standards).
+* **WebDAV Mapping Blocked**: Users will not be able to map WebDAV shares in Windows Explorer.
+
+---
+
+<div id="07-paws-services-disable-webclient-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-services-disable-webclient-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the PAW GPO (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+4. Locate `WebClient`, double-click to define the policy, and select **Disabled**.
+
+---
+
+<div id="07-paws-services-disable-webclient-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-DisablePawWebClient.ps1](../implementation_scripts/Configure-DisablePawWebClient.ps1)
+
+```powershell
+# Configure-DisablePawWebClient.ps1
+# Description: Disables the unnecessary WebClient service on the local PAW system.
+
+Write-Host "Applying hardening requirement: Disable WebClient service on PAW..." -ForegroundColor Cyan
+
+$ServiceName = "WebClient"
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\$($ServiceName)"
+
+$Service = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
+if ($null -ne $Service) {
+    if ($Service.StartType -ne "Disabled") {
+        if ($Service.Status -eq "Running") {
+            Stop-Service -Name $ServiceName -Force -ErrorAction SilentlyContinue | Out-Null
+        }
+        Set-Service -Name $ServiceName -StartupType Disabled -ErrorAction SilentlyContinue | Out-Null
+        Write-Host "[+] Service '$($ServiceName)' stopped and disabled." -ForegroundColor Green
+    } else {
+        Write-Host "[~] Service '$($ServiceName)' is already disabled." -ForegroundColor Gray
+    }
+} else {
+    Write-Host "[~] Service '$($ServiceName)' is not installed." -ForegroundColor Gray
+}
+
+if (Test-Path -Path $RegPath) {
+    Set-ItemProperty -Path $RegPath -Name "Start" -Value 4 -Type DWord -ErrorAction SilentlyContinue | Out-Null
+    Write-Host "[+] Registry Start value set to 4 (Disabled) for service '$($ServiceName)'." -ForegroundColor Green
+}
+```
+
+*To verify the startup configuration of the WebClient service on the PAW:*
+
+[Download Script: Get-PawWebClientStatus.ps1](../audit_scripts/Get-PawWebClientStatus.ps1)
+
+```powershell
+# Get-PawWebClientStatus.ps1
+# Description: Audits the startup configuration of the WebClient service on the local PAW system.
+
+Write-Host "--- Auditing WebClient Service on PAW ---" -ForegroundColor Cyan
+
+$ServiceName = "WebClient"
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\$($ServiceName)"
+$IsVulnerable = $false
+
+if (Test-Path -Path $RegPath) {
+    $StartVal = Get-ItemProperty -Path $RegPath -Name "Start" -ErrorAction SilentlyContinue
+    if ($null -ne $StartVal) {
+        $Start = $StartVal.Start
+        if ($Start -eq 4) {
+            Write-Host "[+] Service '$($ServiceName)' is secure (Disabled)." -ForegroundColor Green
+        } else {
+            Write-Host "[!] VULNERABLE: Service '$($ServiceName)' startup type is not Disabled (Start value is $($Start))." -ForegroundColor Red
+            $IsVulnerable = $true
+        }
+    } else {
+        Write-Host "[!] VULNERABLE: Service '$($ServiceName)' exists but Start registry value is missing." -ForegroundColor Red
+        $IsVulnerable = $true
+    }
+} else {
+    Write-Host "[+] Service '$($ServiceName)' is not installed (Secure)." -ForegroundColor Green
+}
+
+if ($IsVulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-services-disable-webclient-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows Client Benchmark**: System service minimization guidelines
+* **ANSSI Active Directory Hardening Guide**: Recommendations on limiting active background services on administrative systems
+* **DoD Windows 11 Computer STIG**: Unnecessary system services restrictions
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="07-paws-configure-system-administrative-templates-md"></div>
 
 <div id="07-paws-configure-system-administrative-templates-md-req-paw-029-configure-system-administrative-templates-for-paws"></div>
@@ -59105,6 +59405,7 @@ To prevent initial access and lateral movement, the following unitary technical 
     * **[REQ-END-054 - Disable Xbox Live Auth Manager Service (XblAuthManager)](#08-endpoints-services-disable-xblauthmanager-md)**
     * **[REQ-END-055 - Disable Xbox Live Game Save Service (XblGameSave)](#08-endpoints-services-disable-xblgamesave-md)**
     * **[REQ-END-056 - Disable Xbox Live Networking Service (XboxNetApiSvc)](#08-endpoints-services-disable-xboxnetapisvc-md)**
+    * **[REQ-END-177 - Disable WebClient Service (WebClient)](#08-endpoints-services-disable-webclient-md)**
 
 25. **[REQ-END-025 - Configure Secure Printing and Print Spooler Policies](#08-endpoints-configure-printing-and-spooler-md)**
     Configures printing security, RPC over TCP communication, Point and Print restrictions, and Redirection Guard, and disables incoming print spooler connections.
@@ -80396,6 +80697,157 @@ if ($IsVulnerable) {
 * **CIS Microsoft Windows Client Benchmark**: Section 5.47 (XboxNetApiSvc)
 * **ANSSI Active Directory Hardening Guide**: Recommendations on host service minimization
 * **DoD Windows 11 Computer STIG v2r6**: Unnecessary services restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-services-disable-webclient-md"></div>
+
+<div id="08-endpoints-services-disable-webclient-md-req-end-177-disable-webclient-service-webclient"></div>
+
+# [REQ-END-177] Disable WebClient Service (WebClient)
+
+<div id="08-endpoints-services-disable-webclient-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-services-disable-webclient-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\WebClient\Start`
+
+---
+
+<div id="08-endpoints-services-disable-webclient-md-rationale"></div>
+
+## Rationale
+To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled.
+
+The WebClient service handles Web Distributed Authoring and Versioning (WebDAV) file requests over HTTP/HTTPS. In an Active Directory environment, leaving the WebClient service enabled on endpoints introduces significant risk:
+1. **WebDAV Credential Coercion**: Attackers on the internal network can coerce endpoint authentication via WebDAV UNC paths (e.g., `\\attacker@80\share\path`). The endpoint sends NTLM authentication over HTTP.
+2. **Bypassing SMB Signing**: Because HTTP authentication does not enforce SMB signing, coerced NTLM authentication from the endpoint can be relayed to internal directory services (such as LDAP/LDAPS, AD CS Web Enrollment, or other servers), facilitating lateral movement and privilege escalation.
+
+Disabling the WebClient service on standard endpoints and servers closes this attack vector while minimizing unnecessary background resource consumption.
+
+---
+
+<div id="08-endpoints-services-disable-webclient-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **WebDAV Mapping Blocked**: Users will not be able to connect to remote WebDAV web folders directly using Windows Explorer drive mappings.
+* **SharePoint / Modern Cloud Storage**: Modern SharePoint Online and OneDrive sync clients use native REST APIs and do not require the legacy WebClient service.
+* **Engineering Exceptions**: If specific legacy applications require WebDAV connectivity, create a targeted GPO exclusion for those systems while maintaining the baseline across standard workstations.
+
+---
+
+<div id="08-endpoints-services-disable-webclient-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-services-disable-webclient-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Endpoint GPO (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
+4. Locate `WebClient`, double-click to define the policy, and select **Disabled**.
+
+---
+
+<div id="08-endpoints-services-disable-webclient-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+[Download Script: Configure-DisableEndWebClient.ps1](../implementation_scripts/Configure-DisableEndWebClient.ps1)
+
+```powershell
+# Configure-DisableEndWebClient.ps1
+# Description: Disables the unnecessary WebClient service on standard client endpoints and member servers.
+
+Write-Host "Applying hardening requirement: Disable WebClient service on Endpoint..." -ForegroundColor Cyan
+
+$ServiceName = "WebClient"
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\$($ServiceName)"
+
+$Service = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
+if ($null -ne $Service) {
+    if ($Service.StartType -ne "Disabled") {
+        if ($Service.Status -eq "Running") {
+            Stop-Service -Name $ServiceName -Force -ErrorAction SilentlyContinue | Out-Null
+        }
+        Set-Service -Name $ServiceName -StartupType Disabled -ErrorAction SilentlyContinue | Out-Null
+        Write-Host "[+] Service '$($ServiceName)' stopped and disabled." -ForegroundColor Green
+    } else {
+        Write-Host "[~] Service '$($ServiceName)' is already disabled." -ForegroundColor Gray
+    }
+} else {
+    Write-Host "[~] Service '$($ServiceName)' is not installed." -ForegroundColor Gray
+}
+
+if (Test-Path -Path $RegPath) {
+    Set-ItemProperty -Path $RegPath -Name "Start" -Value 4 -Type DWord -ErrorAction SilentlyContinue | Out-Null
+    Write-Host "[+] Registry Start value set to 4 (Disabled) for service '$($ServiceName)'." -ForegroundColor Green
+}
+```
+
+*To verify the startup configuration of the WebClient service on the endpoint:*
+
+[Download Script: Get-EndWebClientStatus.ps1](../audit_scripts/Get-EndWebClientStatus.ps1)
+
+```powershell
+# Get-EndWebClientStatus.ps1
+# Description: Audits the startup configuration of the WebClient service on the local endpoint.
+
+Write-Host "--- Auditing WebClient Service on Endpoint ---" -ForegroundColor Cyan
+
+$ServiceName = "WebClient"
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\$($ServiceName)"
+$IsVulnerable = $false
+
+if (Test-Path -Path $RegPath) {
+    $StartVal = Get-ItemProperty -Path $RegPath -Name "Start" -ErrorAction SilentlyContinue
+    if ($null -ne $StartVal) {
+        $Start = $StartVal.Start
+        if ($Start -eq 4) {
+            Write-Host "[+] Service '$($ServiceName)' is secure (Disabled)." -ForegroundColor Green
+        } else {
+            Write-Host "[!] VULNERABLE: Service '$($ServiceName)' startup type is not Disabled (Start value is $($Start))." -ForegroundColor Red
+            $IsVulnerable = $true
+        }
+    } else {
+        Write-Host "[!] VULNERABLE: Service '$($ServiceName)' exists but Start registry value is missing." -ForegroundColor Red
+        $IsVulnerable = $true
+    }
+} else {
+    Write-Host "[+] Service '$($ServiceName)' is not installed (Secure)." -ForegroundColor Green
+}
+
+if ($IsVulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-services-disable-webclient-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows Client Benchmark**: System services hardening guidelines
+* **ANSSI Active Directory Hardening Guide**: Recommendations on limiting active background services
+* **DoD Windows 11 Computer STIG**: Unnecessary system services restrictions
 
 
 <div style="page-break-before: always;"></div>

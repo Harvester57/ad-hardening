@@ -159,20 +159,69 @@ $cacheObj | ConvertTo-Json -Depth 5 | Set-Content -Path $cacheFile -Encoding UTF
 
 Write-Host "`nSyntax check summary: $verifiedCount verified, $cachedCount skipped (cached)." -ForegroundColor Cyan
 
-# 3. Verify XML Compliance Manifests
-Write-Host "`nRunning compliance manifests validation..." -ForegroundColor Yellow
-$pythonExe = $null
-if (Get-Command "python" -ErrorAction SilentlyContinue) {
-    $pythonExe = "python"
-}
-elseif (Get-Command "python3" -ErrorAction SilentlyContinue) {
-    $pythonExe = "python3"
-}
-elseif (Get-Command "py" -ErrorAction SilentlyContinue) {
-    $pythonExe = "py"
+# 3. Verify Table of Contents (SUMMARY.md) Coverage
+Write-Host "`nVerifying SUMMARY.md completeness..." -ForegroundColor Yellow
+$summaryFile = Join-Path -Path $repoRoot -ChildPath "SUMMARY.md"
+if (Test-Path -Path $summaryFile) {
+    $summaryContent = Get-Content -Path $summaryFile -Raw -Encoding UTF8
+    $summaryMatches = [regex]::Matches($summaryContent, '\]\(([^)#:\s]+\.md)\)')
+    $summarySet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($m in $summaryMatches) {
+        [void]$summarySet.Add($m.Groups[1].Value.Replace('\', '/'))
+    }
+
+    $allRepoMd = Get-ChildItem -Path $repoRoot -Filter *.md -Recurse | Where-Object {
+        $_.FullName -notlike "*\_book*" -and
+        $_.FullName -notlike "*\node_modules*" -and
+        $_.FullName -notlike "*\.git*" -and
+        $_.FullName -notlike "*\.gemini*" -and
+        $_.FullName -notlike "*\scratch*"
+    }
+
+    $ignoredMd = @("README.md", "SUMMARY.md", "TEMPLATE.md", "AGENTS.md", "AD-Hardening-Guidebook.md", "task.md")
+    $missingFromSummary = @()
+
+    foreach ($md in $allRepoMd) {
+        $rel = $md.FullName.Substring($repoRoot.Length).TrimStart('\', '/').Replace('\', '/')
+        $base = $md.Name
+        if ($ignoredMd -contains $base -or $rel -like "*/AGENTS.md") {
+            continue
+        }
+        if (-not $summarySet.Contains($rel)) {
+            $missingFromSummary += $rel
+        }
+    }
+
+    if ($missingFromSummary.Count -gt 0) {
+        foreach ($unindexed in $missingFromSummary) {
+            Write-Error "Unindexed file: '$unindexed' is missing from SUMMARY.md. Ensure it is linked in the corresponding module README.md and run 'py scripts/generate_summary.py'."
+            $errorsCount++
+        }
+    }
+    else {
+        Write-Host "SUMMARY.md coverage check: PASSED (all requirements are indexed)" -ForegroundColor Green
+    }
 }
 else {
-    $pythonExe = "python"
+    Write-Error "SUMMARY.md not found in repository root!"
+    $errorsCount++
+}
+
+# 4. Verify XML Compliance Manifests
+Write-Host "`nRunning compliance manifests validation..." -ForegroundColor Yellow
+$pythonCandidates = @("py", "python3", "python")
+$pythonExe = $null
+foreach ($cand in $pythonCandidates) {
+    if (Get-Command $cand -ErrorAction SilentlyContinue) {
+        $testProcess = Start-Process $cand -ArgumentList "--version" -Wait -NoNewWindow -PassThru -ErrorAction SilentlyContinue
+        if ($testProcess -and $testProcess.ExitCode -eq 0) {
+            $pythonExe = $cand
+            break
+        }
+    }
+}
+if ($null -eq $pythonExe) {
+    $pythonExe = "py"
 }
 
 $validateScript = Join-Path -Path $repoRoot -ChildPath "scripts/validate_compliance.py"

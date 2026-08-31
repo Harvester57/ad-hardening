@@ -205,6 +205,7 @@ This directory contains the physical isolation policies and operating system sec
     * **[REQ-PAW-054 - Disable Xbox Live Auth Manager Service for PAWs (XblAuthManager)](services/disable-xblauthmanager.md)**
     * **[REQ-PAW-055 - Disable Xbox Live Game Save Service for PAWs (XblGameSave)](services/disable-xblgamesave.md)**
     * **[REQ-PAW-056 - Disable Xbox Live Networking Service for PAWs (XboxNetApiSvc)](services/disable-xboxnetapisvc.md)**
+    * **[REQ-PAW-166 - Disable WebClient Service for PAWs (WebClient)](services/disable-webclient.md)**
 
 29. **[REQ-PAW-029 - Configure System Administrative Templates for PAWs](configure-system-administrative-templates.md)**
     Enforces custom administrative template settings including SMBv1 driver blocks and event log size extensions.

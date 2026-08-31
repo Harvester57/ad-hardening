@@ -206,6 +206,7 @@ To prevent initial access and lateral movement, the following unitary technical 
     * **[REQ-END-054 - Disable Xbox Live Auth Manager Service (XblAuthManager)](services/disable-xblauthmanager.md)**
     * **[REQ-END-055 - Disable Xbox Live Game Save Service (XblGameSave)](services/disable-xblgamesave.md)**
     * **[REQ-END-056 - Disable Xbox Live Networking Service (XboxNetApiSvc)](services/disable-xboxnetapisvc.md)**
+    * **[REQ-END-177 - Disable WebClient Service (WebClient)](services/disable-webclient.md)**
 
 25. **[REQ-END-025 - Configure Secure Printing and Print Spooler Policies](configure-printing-and-spooler.md)**
     Configures printing security, RPC over TCP communication, Point and Print restrictions, and Redirection Guard, and disables incoming print spooler connections.
