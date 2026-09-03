@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Benchmark xmlns="http://checklists.nist.gov/xccdf/1.2" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xhtml="http://www.w3.org/1999/xhtml" id="xccdf_org.adhardening.benchmarks_benchmark_ad-hardening" resolved="false" xml:lang="en">
-  <status date="2026-08-31">accepted</status>
+  <status date="2026-09-03">accepted</status>
   <title>Active Directory Hardening Guidebook Benchmark</title>
   <description>Automated compliance checklist profiles and rules parsed directly from the Active Directory Hardening Guidebook.</description>
   <version>1.0</version>
   <metadata>
     <dc:publisher>Antigravity Hardening Project</dc:publisher>
     <dc:creator>Antigravity</dc:creator>
-    <dc:date>2026-08-31</dc:date>
+    <dc:date>2026-09-03</dc:date>
   </metadata>
   <Profile id="xccdf_org.adhardening.benchmarks_profile_DomainController">
     <title>Domain Controller Hardening Profile</title>
@@ -26992,7 +26992,7 @@ Write-Host "[+] Delegation of non-exportable credentials enabled." -ForegroundCo
           <xhtml:li>
             <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers, Domain Environment</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -27000,18 +27000,65 @@ Write-Host "[+] Delegation of non-exportable credentials enabled." -ForegroundCo
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>By default, Active Directory grants all authenticated users the ability to add up to 10 computer objects to the domain. This default configuration (defined by the <xhtml:code>ms-DS-MachineAccountQuota</xhtml:code> attribute on the domain head) poses a severe security risk:</xhtml:p>
+        <xhtml:p>By default, Active Directory sets the domain-level attribute <xhtml:code>ms-DS-MachineAccountQuota</xhtml:code> to <xhtml:strong>10</xhtml:strong> on the domain head (<xhtml:code>DC=domain,DC=com</xhtml:code>) and assigns the <xhtml:code>SeMachineAccountPrivilege</xhtml:code> ("Add workstations to domain") User Right to the <xhtml:code>Authenticated Users</xhtml:code> group. This default configuration allows any standard user, compromised domain identity, or unprivileged service account to introduce up to 10 computer objects into the directory.</xhtml:p>
+        <xhtml:p>Active Directory governs computer creation through two distinct mechanisms: 1. <xhtml:strong>The `ms-DS-MachineAccountQuota` Domain Attribute</xhtml:strong>: Enforced during direct LDAP/LDAPS operations. Even if local or GPO user rights are restricted, an attacker communicating over LDAP can create computer objects as long as <xhtml:code>ms-DS-MachineAccountQuota</xhtml:code> is greater than zero. 2. <xhtml:strong>The `SeMachineAccountPrivilege` User Right Assignment</xhtml:strong>: Evaluated by the Security Account Manager (SAMR) and NetJoinDomain RPC interfaces when workstations join via standard Windows APIs.</xhtml:p>
+        <xhtml:p>Allowing unprivileged users to create machine accounts introduces critical security risks across multiple Active Directory subsystems:</xhtml:p>
         <xhtml:ol>
           <xhtml:li>
-            <xhtml:strong>Privilege Escalation &amp; RBCD</xhtml:strong>: Non-privileged domain users can create rogue computer accounts. An attacker with a compromised domain account can register a computer and use it to exploit Resource-Based Constrained Delegation (RBCD) or Kerberos relayer attacks to escalate privileges to Domain Admin.</xhtml:li>
+            <xhtml:strong>Privilege Escalation via Resource-Based Constrained Delegation (RBCD)</xhtml:strong>:</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Credential Harvesting</xhtml:strong>: Attackers can use rogue computer accounts to request Kerberos tickets, perform Kerberoasting, or execute AS-REP Roasting attacks on accounts mapped to those computer objects.</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>The SPN Prerequisite</xhtml:em>*: Exploiting Resource-Based Constrained Delegation requires an account configured with a Service Principal Name (SPN). Standard user accounts cannot register an SPN without elevated administrative permissions (the <xhtml:code>servicePrincipalName</xhtml:code> attribute write is restricted). In contrast, computer accounts automatically receive default SPNs (e.g., <xhtml:code>HOST/&lt;computername&gt;</xhtml:code>, <xhtml:code>RestrictedKrbHost/&lt;computername&gt;</xhtml:code>) upon creation, and the creating user is designated as the object's creator/owner (<xhtml:code>mS-DS-CreatorSID</xhtml:code>), retaining full DACL control.</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Bypass of Network Controls</xhtml:strong>: Allowing unmanaged, non-compliant, or rogue machines to join the domain increases the overall attack surface and permits unauthorized systems to access internal resources.</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Coercion and Relaying Vector</xhtml:em>*: When an attacker coerces authentication from an unconstrained or privileged server (e.g., via PetitPotam, PrinterBug/SpoolSample, DFSCoerce, or ShadowCoerce) and relays that NTLM authentication to LDAP/LDAPS, or when an attacker has write permissions over a target computer's <xhtml:code>msDS-AllowedToActOnBehalfOfOtherIdentity</xhtml:code> attribute, they configure the victim system to trust the newly created rogue machine account.</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Name Squatting</xhtml:strong>: Unauthorized users can register computer accounts with names matching sensitive or prospective servers, hijacking traffic or interfering with legitimate resource provisioning.</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Kerberos S4U Abuse</xhtml:em>*: Using the credentials of the rogue computer account, the attacker executes Kerberos S4U2self (Service-for-User-to-Self) and S4U2proxy protocol extensions to obtain a valid Kerberos service ticket impersonating ANY domain user (including a Domain Admin or Enterprise Admin) to services (CIFS, HTTP, LDAP, WSMAN) on the target host, achieving full host or domain takeover.</xhtml:li>
         </xhtml:ol>
-        <xhtml:p>Restricting this behavior by setting <xhtml:code>ms-DS-MachineAccountQuota</xhtml:code> to 0 and removing <xhtml:code>Authenticated Users</xhtml:code> from the "Add workstations to domain" user right ensures that only authorized administrators can introduce computer accounts to the directory.</xhtml:p>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Active Directory Certificate Services (ADCS) Exploitation</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Template Enrollment</xhtml:em>*: Many enterprise ADCS certificate templates grant enrollment permissions to <xhtml:code>Domain Computers</xhtml:code> (such as default "Machine" or "Computer" templates, or custom enrollment templates).</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Domain Takeover</xhtml:em>*: If vulnerable certificate templates are present in the environment—such as ESC1 (templates allowing the enrollee to specify a Subject Alternative Name / <xhtml:code>ENROLLEE_SUPPLIES_SUBJECT</xhtml:code>), ESC2/ESC3 (enrollment agent misuse), ESC6 (<xhtml:code>EDITF_ATTRIBUTESUBJECTALTNAME2</xhtml:code> enabled on the CA), or ESC13 (certificate templates linked to issuing policies)—an attacker with a rogue computer account can enroll for a machine certificate, supply the SAN of a Domain Controller or privileged administrative account, and immediately escalate to Domain Admin.</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Credential Relaying</xhtml:em>*: A rogue machine account also supplies the computer identity required to participate in ESC8 attacks (relaying coerced machine NTLM authentication to ADCS HTTP Web Enrollment or CES endpoints).</xhtml:li>
+        </xhtml:ol>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Local Privilege Escalation via Local Kerberos Relaying (KrbRelay / KrbRelayUp)</xhtml:strong>:</xhtml:li>
+          <xhtml:li>* On domain-joined Windows endpoints and servers, attack chains such as KrbRelayUp allow local non-administrative users to elevate directly to <xhtml:code>NT AUTHORITY\SYSTEM</xhtml:code>.</xhtml:li>
+          <xhtml:li>* The exploit leverages <xhtml:code>ms-DS-MachineAccountQuota</xhtml:code> to dynamically provision a computer account in Active Directory, configures RBCD against the local machine, triggers a local RPC connection to coerce machine Kerberos authentication, and relays the ticket locally to execute arbitrary code as SYSTEM.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Active Directory Integrated DNS (ADIDNS) Poisoning &amp; WPAD Hijacking</xhtml:strong>:</xhtml:li>
+          <xhtml:li>* By default, Active Directory-integrated DNS zones allow authenticated machine accounts to register and dynamically update host (<xhtml:code>A</xhtml:code>) and reverse (<xhtml:code>PTR</xhtml:code>) DNS records.</xhtml:li>
+          <xhtml:li>* Attackers can leverage rogue computer accounts to poison DNS zones, hijack hostnames of anticipated servers, or register <xhtml:code>wpad</xhtml:code> (Web Proxy Auto-Discovery) records. This allows the attacker to intercept corporate web traffic, harvest NetNTLM credentials, or conduct adversary-in-the-middle (AitM) attacks.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Network Access Control (NAC) &amp; 802.1X Perimeter Bypass</xhtml:strong>:</xhtml:li>
+          <xhtml:li>* Many corporate 802.1X wired and wireless network architectures authenticate connecting devices via machine credentials (e.g., PEAP-MSCHAPv2) or machine certificates linked to domain computer accounts.</xhtml:li>
+          <xhtml:li>* An attacker connected to an untrusted switch port, guest network, or rogue access point can create a machine account, complete 802.1X machine authentication, and gain unrestricted network placement into internal corporate workstation or server VLANs.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Shadow Credentials (`msDS-KeyCredentialLink`) &amp; Evasive Persistence</xhtml:strong>:</xhtml:li>
+          <xhtml:li>* Because the creator possesses owner permissions on the newly created machine account, an attacker can write to the <xhtml:code>msDS-KeyCredentialLink</xhtml:code> attribute to configure public-key credentials (PKINIT). The attacker can then request Kerberos TGTs at will, maintaining persistent directory access without ever modifying the machine's password or triggering password rotation alarms.</xhtml:li>
+          <xhtml:li>* Machine accounts automatically join the <xhtml:code>Domain Computers</xhtml:code> global group, granting them persistent ambient access to read Active Directory LDAP partitions, SYSVOL and Netlogon shares, Group Policy Objects, and any internal resources open to domain members.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Historical Precedent: sAMAccountName Spoofing (noPac / CVE-2021-42278 &amp; CVE-2021-42287)</xhtml:strong>:</xhtml:li>
+          <xhtml:li>* The noPac exploit demonstrated how unprivileged computer creation is weaponized: attackers created a computer account, stripped the trailing <xhtml:code>$</xhtml:code>, obtained a TGT, renamed the account to match a Domain Controller, and requested a service ticket via S4U2self to impersonate the DC. While specific CVEs are patched, setting <xhtml:code>ms-DS-MachineAccountQuota</xhtml:code> to 0 eliminates the fundamental entry point for any future exploit chain that relies on creating arbitrary machine objects.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:p>Restricting this behavior by setting <xhtml:code>ms-DS-MachineAccountQuota</xhtml:code> to <xhtml:strong>0</xhtml:strong> and removing <xhtml:code>Authenticated Users</xhtml:code> from the <xhtml:code>SeMachineAccountPrivilege</xhtml:code> ("Add workstations to domain") user right ensures that only authorized administrators and dedicated provisioning systems can introduce computer objects into the directory.</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Active Directory Administrative Center &amp; GPMC (Preferred)</xhtml:h3>
