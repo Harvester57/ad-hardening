@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: b877d6a | Generated: September 07, 2026</span>
+      <span>Commit: e1aba22 | Generated: September 07, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1824,6 +1824,15 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure baseline administrative template Security Options, disabling anonymous access to SAM/shares and enforcing credential policies.
 * **[REQ-DC-026 - Configure TCP/IP and Network Parameter Hardening for Domain Controllers](#02-domain-controllers-harden-network-parameters-md)**
   Requirement to configure hardened network configurations, TCP/IP MSS parameters, disabling LLTDIO/RSPNDR drivers, Peer-to-Peer, and Windows Connect Now.
+  * **[REQ-DC-147 - Configure TCP/IP KeepAliveTime on Domain Controllers](#02-domain-controllers-network-configure-tcpip-keepalivetime-md)**
+  * **[REQ-DC-148 - Disable TCP/IP Router Discovery on Domain Controllers](#02-domain-controllers-network-disable-tcpip-router-discovery-md)**
+  * **[REQ-DC-149 - Configure TCP Max Data Retransmissions on Domain Controllers](#02-domain-controllers-network-configure-tcpip-max-data-retransmissions-md)**
+  * **[REQ-DC-150 - Disable Default IPv6 DNS Servers on Domain Controllers](#02-domain-controllers-network-disable-ipv6-default-dns-servers-md)**
+  * **[REQ-DC-151 - Disable Link-Layer Topology Discovery Mapper I/O Driver on Domain Controllers](#02-domain-controllers-network-disable-lltd-mapper-io-driver-md)**
+  * **[REQ-DC-152 - Disable Link-Layer Topology Discovery Responder Driver on Domain Controllers](#02-domain-controllers-network-disable-lltd-responder-driver-md)**
+  * **[REQ-DC-153 - Disable Microsoft Peer-to-Peer Networking Services on Domain Controllers](#02-domain-controllers-network-disable-peernet-md)**
+  * **[REQ-DC-154 - Disable Windows Connect Now Wireless Settings Configuration on Domain Controllers](#02-domain-controllers-network-disable-wcn-wireless-configuration-md)**
+  * **[REQ-DC-155 - Prohibit Access to Windows Connect Now Wizards on Domain Controllers](#02-domain-controllers-network-prohibit-wcn-wizards-md)**
 * **[REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](#02-domain-controllers-configure-telemetry-privacy-md)**
   Requirement to restrict telemetry collection, online diagnostics, advertising IDs, diagnostic tools, and cloud content integration.
 * **[REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](#02-domain-controllers-configure-untrusted-font-blocking-md)**
@@ -20526,9 +20535,9 @@ if ($vulnerable) {
 
 <div id="02-domain-controllers-harden-network-parameters-md"></div>
 
-<div id="02-domain-controllers-harden-network-parameters-md-req-dc-026-configure-tcpip-and-network-parameter-hardening-for-domain-controllers"></div>
+<div id="02-domain-controllers-harden-network-parameters-md-configure-tcpip-and-network-parameter-hardening-for-domain-controllers"></div>
 
-# [REQ-DC-026] Configure TCP/IP and Network Parameter Hardening for Domain Controllers
+# Configure TCP/IP and Network Parameter Hardening for Domain Controllers
 
 <div id="02-domain-controllers-harden-network-parameters-md-target-scope"></div>
 
@@ -20543,299 +20552,50 @@ if ($vulnerable) {
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **TCP/IP Settings (MSS)**:
-    * Path: `Computer Configuration\Preferences\Windows Settings\Registry`
-    * Registry Key: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
-      * `KeepAliveTime` = `300000` (REG_DWORD)
-      * `PerformRouterDiscovery` = `0` (REG_DWORD)
-      * `TcpMaxDataRetransmissions` = `3` (REG_DWORD)
-    * Registry Key: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters`
-      * `TcpMaxDataRetransmissions` = `3` (REG_DWORD)
-  * **IPv6 DNS Settings**:
-    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\DNS Client`
-      * `Turn off default IPv6 DNS Servers` -> Enabled
-    * Registry Key: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient`
-      * `DisableIPv6DefaultDnsServers` = `1` (REG_DWORD)
-  * **Link-Layer Topology Discovery (LLTD)**:
-    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\Link-Layer Topology Discovery`
-      * `Turn on Mapper I/O (LLTDIO) driver` -> Disabled
-      * `Turn on Responder (RSPNDR) driver` -> Disabled
-    * Registry Key: `HKLM\SOFTWARE\Policies\Microsoft\Windows\LLTD`
-      * `AllowLLTDIOOnDomain` = `0` (REG_DWORD)
-      * `AllowLLTDIOOnPublicNet` = `0` (REG_DWORD)
-      * `EnableLLTDIO` = `0` (REG_DWORD)
-      * `ProhibitLLTDIOOnPrivateNet` = `0` (REG_DWORD)
-      * `AllowRspndrOnDomain` = `0` (REG_DWORD)
-      * `AllowRspndrOnPublicNet` = `0` (REG_DWORD)
-      * `EnableRspndr` = `0` (REG_DWORD)
-      * `ProhibitRspndrOnPrivateNet` = `0` (REG_DWORD)
-  * **Peer-to-Peer Networking**:
-    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\Microsoft Peer-to-Peer Networking Services`
-      * `Turn off Microsoft Peer-to-Peer Networking Services` -> Enabled
-    * Registry Key: `HKLM\SOFTWARE\Policies\Microsoft\Peernet`
-      * `Disabled` = `1` (REG_DWORD)
-  * **Windows Connect Now (WCN)**:
-    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\Windows Connect Now`
-      * `Configuration of wireless settings using Windows Connect Now` -> Disabled
-      * `Prohibit access of the Windows Connect Now wizards` -> Enabled
-    * Registry Keys:
-      * Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars`
-        * `EnableRegistrars` = `0` (REG_DWORD)
-        * `DisableUPnPRegistrar` = `1` (REG_DWORD)
-        * `DisableInBand802DOT11Registrar` = `1` (REG_DWORD)
-        * `DisableFlashConfigRegistrar` = `1` (REG_DWORD)
-        * `DisableWPDRegistrar` = `1` (REG_DWORD)
-      * Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\WCN\UI`
-        * `DisableWcnUi` = `1` (REG_DWORD)
+  * `Computer Configuration\Preferences\Windows Settings\Registry` (MSS TCP/IP Parameters)
+  * `Computer Configuration\Policies\Administrative Templates\Network` (DNS Client, LLTD, Peer-to-Peer, WCN)
 
 ---
 
 <div id="02-domain-controllers-harden-network-parameters-md-rationale"></div>
 
 ## Rationale
-Securing low-level TCP/IP parameters and network-layer advertisement protocols on Domain Controllers is essential to block local discovery, routing redirection, and denial of service:
-1. **MSS TCP/IP Tuning**: Restricting TCP data retransmissions (`TcpMaxDataRetransmissions`) limits resources allocated to unacknowledged TCP segments during connection drops, mitigating denial-of-service attempts. Disabling Internet Router Discovery Protocol (IRDP) (`PerformRouterDiscovery`) blocks gateway advertisement redirection or man-in-the-middle attacks where hosts are coerced into routing traffic through a rogue gateway. Adjusting `KeepAliveTime` optimizes connection checks.
-2. **LLTD Mapper and Responder**: Disabling Link-Layer Topology Discovery (LLTD) components (`LLTDIO` and `RSPNDR`) prevents local attackers from mapping Domain Controllers on physical subnetworks or running topological discovery queries.
-3. **Microsoft Peer-to-Peer and Windows Connect Now**: Peer-to-Peer protocols (PNRP) and Windows Connect Now (WCN) wizards introduce unnecessary background communication channels, local discovery broadcasts, and wireless profile exposure vectors. These services must be completely disabled on Tier 0 assets to minimize attack surface.
-4. **Disable Default IPv6 DNS Servers**: Prevents automated fallback to unauthenticated, dynamic local IPv6 DNS servers advertised by third-party routers, mitigating DNS redirection or spoofing vectors.
+Securing low-level TCP/IP stack parameters and network-layer discovery/advertisement protocols on Domain Controllers is essential to block local reconnaissance, rogue routing redirection, denial-of-service, and credential coercion vectors:
+
+1. **MSS TCP/IP Parameter Tuning**: Restricting TCP data retransmissions limits the exhaustion of kernel resources during network interruption or packet floods. Disabling Internet Router Discovery Protocol (IRDP) prevents dynamic default gateway spoofing and routing redirection. Adjusting connection keep-alive timers ensures stale or disconnected sessions are promptly terminated and socket resources reclaimed.
+2. **Link-Layer Topology Discovery (LLTD)**: Disabling LLTD Mapper I/O and Responder drivers prevents rogue local hosts from fingerprinting Domain Controllers, inspecting link capabilities, or generating unauthorized network topology maps.
+3. **Microsoft Peer-to-Peer Networking**: Distributed peer-to-peer protocols (such as PNRP) introduce unmanaged, autonomous communication channels that circumvent centralized directory security controls and have no operational utility on Tier 0 assets.
+4. **Windows Connect Now (WCN)**: Disabling WCN wireless configuration registrars (UPnP, In-Band 802.11) and graphical wizards eliminates Wi-Fi Protected Setup attack surfaces and prevents credential extraction over wireless discovery channels.
+5. **Disable Default IPv6 DNS Servers**: Prevents automated fallback to unauthenticated, dynamic local IPv6 DNS servers advertised by rogue devices (e.g., via `mitm6`), mitigating name resolution redirection and authentication relay coercion.
+
+This parent requirement coordinates the individual unitary hardening controls defined in the dedicated network hardening submodule.
 
 ---
 
 <div id="02-domain-controllers-harden-network-parameters-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Network Discovery**: Disabling LLTD Mapper and Responder will prevent the Domain Controller from appearing in the visual "Network Map" GUI of neighboring systems. This does not affect active directory replication, client authentication, DNS resolution, or administrative connections.
-* **Peer-to-Peer Applications**: Disabling Peernet blocks local administrative tools or collaboration applications that rely on Microsoft Peer-to-Peer services. These are not supported on Tier 0 servers.
-* **WCN Configuration**: Windows Connect Now is designed for wireless device configuration. Since Domain Controllers must run on dedicated, wired server backbones, disabling WCN has zero operational impact.
+* **Network Visibility**: Disabling LLTD Mapper and Responder will prevent the Domain Controller from appearing in graphical network maps on neighboring client workstations. Core Active Directory replication, client authentication, DNS resolution, and administrative management operate unaffected.
+* **Peer-to-Peer Applications**: Disabling Peernet blocks local collaboration software or home networking protocols that rely on PNRP. Such software is unsupported and prohibited on Tier 0 servers.
+* **WCN Configuration**: Windows Connect Now is designed for wireless device provisioning. Because Domain Controllers operate on dedicated wired datacenter backbones, disabling WCN has zero operational impact.
 
 ---
 
-<div id="02-domain-controllers-harden-network-parameters-md-implementation-steps"></div>
+<div id="02-domain-controllers-harden-network-parameters-md-network-parameter-hardening-requirements"></div>
 
-## Implementation Steps
+## Network Parameter Hardening Requirements
 
-<div id="02-domain-controllers-harden-network-parameters-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+The following unitary controls must be enforced on Domain Controllers:
 
-### Option A: Group Policy Object (GPO) Configuration (Preferred)
-
-1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit the GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
-3. Configure GPO templates:
-   * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\DNS Client`
-     * **Policy**: `Turn off default IPv6 DNS Servers` -> **Enabled**
-   * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Link-Layer Topology Discovery`
-     * **Policy**: `Turn on Mapper I/O (LLTDIO) driver` -> **Disabled**
-     * **Policy**: `Turn on Responder (RSPNDR) driver` -> **Disabled**
-   * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Microsoft Peer-to-Peer Networking Services`
-     * **Policy**: `Turn off Microsoft Peer-to-Peer Networking Services` -> **Enabled**
-   * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Windows Connect Now`
-     * **Policy**: `Configuration of wireless settings using Windows Connect Now` -> **Disabled**
-     * **Policy**: `Prohibit access of the Windows Connect Now wizards` -> **Enabled**
-4. Configure TCP/IP Registry Preferences:
-   * Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
-   * Create or update the following Registry Items (Right-click **Registry -> New -> Registry Item**):
-     * Hive: `HKEY_LOCAL_MACHINE` | Key Path: `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters` | Value name: `KeepAliveTime` | Value type: `REG_DWORD` | Value data: `300000`
-     * Hive: `HKEY_LOCAL_MACHINE` | Key Path: `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters` | Value name: `PerformRouterDiscovery` | Value type: `REG_DWORD` | Value data: `0`
-     * Hive: `HKEY_LOCAL_MACHINE` | Key Path: `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters` | Value name: `TcpMaxDataRetransmissions` | Value type: `REG_DWORD` | Value data: `3`
-     * Hive: `HKEY_LOCAL_MACHINE` | Key Path: `SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters` | Value name: `TcpMaxDataRetransmissions` | Value type: `REG_DWORD` | Value data: `3`
-
----
-
-<div id="02-domain-controllers-harden-network-parameters-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
-
-### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
-
-Run the following scripts locally to enforce network parameter hardening.
-
-[Download Script: Configure-DCNetworkHardening.ps1](implementation_scripts/Configure-DCNetworkHardening.ps1)
-
-```powershell
-# Configure-DCNetworkHardening.ps1
-# Description: Configures TCP/IP parameters, LLTD, Peer-to-Peer, and WCN hardening on Domain Controllers.
-
-Write-Host "Applying Network Parameter Hardening..." -ForegroundColor Cyan
-
-# 1. TCP/IP Parameters (MSS)
-$TcpipParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
-if (-not (Test-Path $TcpipParamsPath)) {
-    New-Item -Path $TcpipParamsPath -Force | Out-Null
-}
-Set-ItemProperty -Path $TcpipParamsPath -Name "KeepAliveTime" -Value 300000 -Type DWord -ErrorAction Stop
-Set-ItemProperty -Path $TcpipParamsPath -Name "PerformRouterDiscovery" -Value 0 -Type DWord -ErrorAction Stop
-Set-ItemProperty -Path $TcpipParamsPath -Name "TcpMaxDataRetransmissions" -Value 3 -Type DWord -ErrorAction Stop
-
-$Tcpip6ParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
-if (-not (Test-Path $Tcpip6ParamsPath)) {
-    New-Item -Path $Tcpip6ParamsPath -Force | Out-Null
-}
-Set-ItemProperty -Path $Tcpip6ParamsPath -Name "TcpMaxDataRetransmissions" -Value 3 -Type DWord -ErrorAction Stop
-
-# 2. IPv6 Default DNS Servers
-$DnsClientPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient"
-if (-not (Test-Path $DnsClientPath)) {
-    New-Item -Path $DnsClientPath -Force | Out-Null
-}
-Set-ItemProperty -Path $DnsClientPath -Name "DisableIPv6DefaultDnsServers" -Value 1 -Type DWord -ErrorAction Stop
-
-# 3. LLTD Mapper and Responder
-$LltdPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LLTD"
-if (-not (Test-Path $LltdPath)) {
-    New-Item -Path $LltdPath -Force | Out-Null
-}
-Set-ItemProperty -Path $LltdPath -Name "AllowLLTDIOOnDomain" -Value 0 -Type DWord -ErrorAction Stop
-Set-ItemProperty -Path $LltdPath -Name "AllowLLTDIOOnPublicNet" -Value 0 -Type DWord -ErrorAction Stop
-Set-ItemProperty -Path $LltdPath -Name "EnableLLTDIO" -Value 0 -Type DWord -ErrorAction Stop
-Set-ItemProperty -Path $LltdPath -Name "ProhibitLLTDIOOnPrivateNet" -Value 0 -Type DWord -ErrorAction Stop
-
-Set-ItemProperty -Path $LltdPath -Name "AllowRspndrOnDomain" -Value 0 -Type DWord -ErrorAction Stop
-Set-ItemProperty -Path $LltdPath -Name "AllowRspndrOnPublicNet" -Value 0 -Type DWord -ErrorAction Stop
-Set-ItemProperty -Path $LltdPath -Name "EnableRspndr" -Value 0 -Type DWord -ErrorAction Stop
-Set-ItemProperty -Path $LltdPath -Name "ProhibitRspndrOnPrivateNet" -Value 0 -Type DWord -ErrorAction Stop
-
-# 4. Peer-to-Peer Networking
-$PeernetPath = "HKLM:\SOFTWARE\Policies\Microsoft\Peernet"
-if (-not (Test-Path $PeernetPath)) {
-    New-Item -Path $PeernetPath -Force | Out-Null
-}
-Set-ItemProperty -Path $PeernetPath -Name "Disabled" -Value 1 -Type DWord -ErrorAction Stop
-
-# 5. Windows Connect Now (WCN)
-$WcnRegsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars"
-if (-not (Test-Path $WcnRegsPath)) {
-    New-Item -Path $WcnRegsPath -Force | Out-Null
-}
-Set-ItemProperty -Path $WcnRegsPath -Name "EnableRegistrars" -Value 0 -Type DWord -ErrorAction Stop
-Set-ItemProperty -Path $WcnRegsPath -Name "DisableUPnPRegistrar" -Value 1 -Type DWord -ErrorAction Stop
-Set-ItemProperty -Path $WcnRegsPath -Name "DisableInBand802DOT11Registrar" -Value 1 -Type DWord -ErrorAction Stop
-Set-ItemProperty -Path $WcnRegsPath -Name "DisableFlashConfigRegistrar" -Value 1 -Type DWord -ErrorAction Stop
-Set-ItemProperty -Path $WcnRegsPath -Name "DisableWPDRegistrar" -Value 1 -Type DWord -ErrorAction Stop
-
-$WcnUiPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WCN\UI"
-if (-not (Test-Path $WcnUiPath)) {
-    New-Item -Path $WcnUiPath -Force | Out-Null
-}
-Set-ItemProperty -Path $WcnUiPath -Name "DisableWcnUi" -Value 1 -Type DWord -ErrorAction Stop
-
-Write-Host "Network parameters hardening completed successfully. A system restart is required for changes to take effect." -ForegroundColor Green
-```
-
-*To verify the setting has been applied:*
-
-[Download Script: Get-DCNetworkHardeningStatus.ps1](audit_scripts/Get-DCNetworkHardeningStatus.ps1)
-
-```powershell
-# Get-DCNetworkHardeningStatus.ps1
-# Description: Audits registry configuration of TCP/IP parameters, LLTD, Peer-to-Peer, and WCN on Domain Controllers.
-
-Write-Host "--- Auditing Domain Controller Network Parameter Hardening ---" -ForegroundColor Cyan
-
-# 1. Audit TCP/IP Parameters (MSS)
-$TcpipParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
-$TcpipExpected = @{
-    "KeepAliveTime"             = 300000
-    "PerformRouterDiscovery"    = 0
-    "TcpMaxDataRetransmissions" = 3
-}
-
-if (Test-Path $TcpipParamsPath) {
-    $TcpipReg = Get-ItemProperty -Path $TcpipParamsPath -ErrorAction SilentlyContinue
-    foreach ($K in $TcpipExpected.Keys) {
-        $Val = $TcpipReg.$K
-        $Exp = $TcpipExpected[$K]
-        $Color = if ($Val -eq $Exp) { "Green" } else { "Red" }
-        Write-Host "    - TCP/IP $($K): $($Val) (Expected: $($Exp))" -ForegroundColor $Color
-    }
-} else {
-    Write-Host "    - TCP/IP Parameters Registry Path: NOT FOUND" -ForegroundColor Red
-}
-
-$Tcpip6ParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
-if (Test-Path $Tcpip6ParamsPath) {
-    $Tcpip6Reg = Get-ItemProperty -Path $Tcpip6ParamsPath -ErrorAction SilentlyContinue
-    $Val = $Tcpip6Reg.TcpMaxDataRetransmissions
-    $Color = if ($Val -eq 3) { "Green" } else { "Red" }
-    Write-Host "    - TCP/IP6 TcpMaxDataRetransmissions: $($Val) (Expected: 3)" -ForegroundColor $Color
-} else {
-    Write-Host "    - TCP/IP6 Parameters Registry Path: NOT FOUND" -ForegroundColor Red
-}
-
-# 2. Audit IPv6 Default DNS Servers
-$DnsClientPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient"
-if (Test-Path $DnsClientPath) {
-    $DnsClientReg = Get-ItemProperty -Path $DnsClientPath -ErrorAction SilentlyContinue
-    $Val = $DnsClientReg.DisableIPv6DefaultDnsServers
-    $Color = if ($Val -eq 1) { "Green" } else { "Red" }
-    Write-Host "    - DNS Client DisableIPv6DefaultDnsServers: $($Val) (Expected: 1)" -ForegroundColor $Color
-} else {
-    Write-Host "    - DNS Client Registry Path: NOT FOUND" -ForegroundColor Red
-}
-
-# 3. Audit LLTD
-$LltdPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LLTD"
-$LltdExpected = @{
-    "AllowLLTDIOOnDomain"        = 0
-    "AllowLLTDIOOnPublicNet"     = 0
-    "EnableLLTDIO"               = 0
-    "ProhibitLLTDIOOnPrivateNet" = 0
-    "AllowRspndrOnDomain"        = 0
-    "AllowRspndrOnPublicNet"     = 0
-    "EnableRspndr"               = 0
-    "ProhibitRspndrOnPrivateNet" = 0
-}
-if (Test-Path $LltdPath) {
-    $LltdReg = Get-ItemProperty -Path $LltdPath -ErrorAction SilentlyContinue
-    foreach ($K in $LltdExpected.Keys) {
-        $Val = $LltdReg.$K
-        $Exp = $LltdExpected[$K]
-        $Color = if ($Val -eq $Exp) { "Green" } else { "Red" }
-        Write-Host "    - LLTD $($K): $($Val) (Expected: $($Exp))" -ForegroundColor $Color
-    }
-} else {
-    Write-Host "    - LLTD Registry Path: NOT FOUND" -ForegroundColor Red
-}
-
-# 4. Audit Peer-to-Peer
-$PeernetPath = "HKLM:\SOFTWARE\Policies\Microsoft\Peernet"
-if (Test-Path $PeernetPath) {
-    $PeernetReg = Get-ItemProperty -Path $PeernetPath -ErrorAction SilentlyContinue
-    $Val = $PeernetReg.Disabled
-    $Color = if ($Val -eq 1) { "Green" } else { "Red" }
-    Write-Host "    - Peernet Disabled: $($Val) (Expected: 1)" -ForegroundColor $Color
-} else {
-    Write-Host "    - Peernet Registry Path: NOT FOUND" -ForegroundColor Red
-}
-
-# 5. Audit Windows Connect Now (WCN)
-$WcnRegsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars"
-$WcnRegsExpected = @{
-    "EnableRegistrars"               = 0
-    "DisableUPnPRegistrar"           = 1
-    "DisableInBand802DOT11Registrar" = 1
-    "DisableFlashConfigRegistrar"    = 1
-    "DisableWPDRegistrar"            = 1
-}
-if (Test-Path $WcnRegsPath) {
-    $WcnRegsReg = Get-ItemProperty -Path $WcnRegsPath -ErrorAction SilentlyContinue
-    foreach ($K in $WcnRegsExpected.Keys) {
-        $Val = $WcnRegsReg.$K
-        $Exp = $WcnRegsExpected[$K]
-        $Color = if ($Val -eq $Exp) { "Green" } else { "Red" }
-        Write-Host "    - WCN Registrars $($K): $($Val) (Expected: $($Exp))" -ForegroundColor $Color
-    }
-} else {
-    Write-Host "    - WCN Registrars Registry Path: NOT FOUND" -ForegroundColor Red
-}
-
-$WcnUiPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WCN\UI"
-if (Test-Path $WcnUiPath) {
-    $WcnUiReg = Get-ItemProperty -Path $WcnUiPath -ErrorAction SilentlyContinue
-    $Val = $WcnUiReg.DisableWcnUi
-    $Color = if ($Val -eq 1) { "Green" } else { "Red" }
-    Write-Host "    - WCN UI DisableWcnUi: $($Val) (Expected: 1)" -ForegroundColor $Color
-} else {
-    Write-Host "    - WCN UI Registry Path: NOT FOUND" -ForegroundColor Red
-}
-```
+1. **[REQ-DC-147 - Configure TCP/IP KeepAliveTime on Domain Controllers](#02-domain-controllers-network-configure-tcpip-keepalivetime-md)**
+2. **[REQ-DC-148 - Disable TCP/IP Router Discovery on Domain Controllers](#02-domain-controllers-network-disable-tcpip-router-discovery-md)**
+3. **[REQ-DC-149 - Configure TCP Max Data Retransmissions on Domain Controllers](#02-domain-controllers-network-configure-tcpip-max-data-retransmissions-md)**
+4. **[REQ-DC-150 - Disable Default IPv6 DNS Servers on Domain Controllers](#02-domain-controllers-network-disable-ipv6-default-dns-servers-md)**
+5. **[REQ-DC-151 - Disable Link-Layer Topology Discovery Mapper I/O Driver on Domain Controllers](#02-domain-controllers-network-disable-lltd-mapper-io-driver-md)**
+6. **[REQ-DC-152 - Disable Link-Layer Topology Discovery Responder Driver on Domain Controllers](#02-domain-controllers-network-disable-lltd-responder-driver-md)**
+7. **[REQ-DC-153 - Disable Microsoft Peer-to-Peer Networking Services on Domain Controllers](#02-domain-controllers-network-disable-peernet-md)**
+8. **[REQ-DC-154 - Disable Windows Connect Now Wireless Settings Configuration on Domain Controllers](#02-domain-controllers-network-disable-wcn-wireless-configuration-md)**
+9. **[REQ-DC-155 - Prohibit Access to Windows Connect Now Wizards on Domain Controllers](#02-domain-controllers-network-prohibit-wcn-wizards-md)**
 
 ---
 
@@ -20843,7 +20603,1265 @@ if (Test-Path $WcnUiPath) {
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.5 (MSS Parameters), Section 18.6.4 (DNS Client), Section 18.6.9 (LLTD), Section 18.6.10 (Peer-to-Peer), Section 18.6.20 (WCN)
-* **ANSSI AD Hardening Guide**: Security guidelines to disable unnecessary interfaces and protocols on Domain Controllers.
+* **ANSSI AD Hardening Guide**: Security guidelines to disable unnecessary interfaces, protocols, and discovery mechanisms on Domain Controllers.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-network-configure-tcpip-keepalivetime-md"></div>
+
+<div id="02-domain-controllers-network-configure-tcpip-keepalivetime-md-req-dc-147-configure-tcpip-keepalivetime-on-domain-controllers"></div>
+
+# [REQ-DC-147] Configure TCP/IP KeepAliveTime on Domain Controllers
+
+<div id="02-domain-controllers-network-configure-tcpip-keepalivetime-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-network-configure-tcpip-keepalivetime-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **Path**: `Computer Configuration\Preferences\Windows Settings\Registry`
+  * **Registry Key**: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
+    * `KeepAliveTime` = `300000` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-network-configure-tcpip-keepalivetime-md-rationale"></div>
+
+## Rationale
+The `KeepAliveTime` parameter controls how often TCP attempts to verify that an idle connection is still intact by sending a keep-alive packet. If the remote system is still reachable and functioning, it acknowledges the keep-alive transmission. 
+
+In Active Directory environments, Domain Controllers manage high volumes of concurrent Kerberos, LDAP, SMB, and RPC sessions with member servers and workstations. Configuring `KeepAliveTime` to 300,000 milliseconds (5 minutes) instead of the default 2 hours (7,200,000 ms) ensures orphaned or dead TCP connections from abruptly disconnected clients are detected and reclaimed promptly. This mitigates half-open connection accumulation and denial-of-service risks against server connection pools.
+
+---
+
+<div id="02-domain-controllers-network-configure-tcpip-keepalivetime-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Normal Operations**: Tuning keep-alive time to 5 minutes does not affect active directory replication, client authentication, DNS resolution, or administrative connections.
+* **Network Traversal**: Firewalls and intermediate stateful NAT gateways that drop idle sessions after a short inactivity period benefit from shorter keep-alive intervals, as keep-alive packets prevent unexpected connection teardowns.
+
+---
+
+<div id="02-domain-controllers-network-configure-tcpip-keepalivetime-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-network-configure-tcpip-keepalivetime-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Create or update the following Registry Preference (Right-click **Registry -> New -> Registry Item**):
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
+   * **Value name**: `KeepAliveTime`
+   * **Value type**: `REG_DWORD`
+   * **Value data**: `300000` (Decimal)
+
+---
+
+<div id="02-domain-controllers-network-configure-tcpip-keepalivetime-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure `KeepAliveTime` on the Domain Controller.
+
+[Download Script: Configure-TcpipKeepAliveTime.ps1](../implementation_scripts/Configure-TcpipKeepAliveTime.ps1)
+
+```powershell
+# Configure-TcpipKeepAliveTime.ps1
+# Description: Configures TCP/IP KeepAliveTime parameter to 300000 ms (5 minutes) on Domain Controllers.
+
+Write-Host "Configuring TCP/IP KeepAliveTime..." -ForegroundColor Cyan
+
+$TcpipParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+if (-not (Test-Path -Path $TcpipParamsPath)) {
+    New-Item -Path $TcpipParamsPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $TcpipParamsPath -Name "KeepAliveTime" -Value 300000 -Type DWord -ErrorAction Stop
+
+Write-Host "TCP/IP KeepAliveTime configured successfully (300000 ms)." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-TcpipKeepAliveTimeStatus.ps1](../audit_scripts/Get-TcpipKeepAliveTimeStatus.ps1)
+
+```powershell
+# Get-TcpipKeepAliveTimeStatus.ps1
+# Description: Audits registry configuration of TCP/IP KeepAliveTime on Domain Controllers.
+
+Write-Host "--- Auditing TCP/IP KeepAliveTime ---" -ForegroundColor Cyan
+
+$TcpipParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+$ExpectedValue = 300000
+
+if (Test-Path -Path $TcpipParamsPath) {
+    $Reg = Get-ItemProperty -Path $TcpipParamsPath -ErrorAction SilentlyContinue
+    $CurrentValue = $Reg.KeepAliveTime
+
+    if ($CurrentValue -eq $ExpectedValue) {
+        Write-Host "    [+] KeepAliveTime: $($CurrentValue) (Expected: $($ExpectedValue))" -ForegroundColor Green
+        exit 0
+    } else {
+        Write-Host "    [!] KeepAliveTime: $($CurrentValue) (Expected: $($ExpectedValue))" -ForegroundColor Red
+        exit 1
+    }
+} else {
+    Write-Host "    [!] TCP/IP Parameters Registry Path NOT FOUND" -ForegroundColor Red
+    exit 1
+}
+```
+
+---
+
+<div id="02-domain-controllers-network-configure-tcpip-keepalivetime-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.5.1 (Ensure 'MSS: (KeepAliveTime) How often keep-alive packets are sent in milliseconds' is set to '300,000 or 5 minutes (recommended)')
+* **ANSSI AD Hardening Guide**: Security guidelines to optimize protocol parameters and connection lifecycle management on Domain Controllers.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-network-disable-tcpip-router-discovery-md"></div>
+
+<div id="02-domain-controllers-network-disable-tcpip-router-discovery-md-req-dc-148-disable-tcpip-router-discovery-on-domain-controllers"></div>
+
+# [REQ-DC-148] Disable TCP/IP Router Discovery on Domain Controllers
+
+<div id="02-domain-controllers-network-disable-tcpip-router-discovery-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-network-disable-tcpip-router-discovery-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **Path**: `Computer Configuration\Preferences\Windows Settings\Registry`
+  * **Registry Key**: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
+    * `PerformRouterDiscovery` = `0` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-network-disable-tcpip-router-discovery-md-rationale"></div>
+
+## Rationale
+The Internet Router Discovery Protocol (IRDP, RFC 1256) enables IPv4 hosts to dynamically discover local default routers by listening for ICMP Router Advertisement packets or soliciting them via ICMP Router Solicitation messages.
+
+On Active Directory Domain Controllers, dynamic router discovery presents a severe attack surface:
+1. **Rogue Gateway Redirection**: Attackers positioned on the local network segment can forge unauthenticated ICMP Router Advertisements to advertise a higher-priority default gateway address pointing to an attacker-controlled host.
+2. **Man-in-the-Middle (MitM)**: Coercing the Domain Controller to route outbound network traffic through a rogue router allows attackers to intercept, inspect, or modify sensitive replication, Kerberos, LDAP, and DNS communication.
+
+Domain Controllers must operate exclusively with statically assigned or enterprise DHCP-reserved gateway addresses. Setting `PerformRouterDiscovery` to `0` explicitly disables IRDP processing.
+
+---
+
+<div id="02-domain-controllers-network-disable-tcpip-router-discovery-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Normal Operations**: Disabling router discovery has no impact on systems that use static default gateway configurations, which is the mandatory baseline standard for Domain Controllers.
+* **Compatibility**: Systems will not dynamically reconfigure routing based on ICMP advertisements; all routing relies on statically configured interfaces and local routing tables.
+
+---
+
+<div id="02-domain-controllers-network-disable-tcpip-router-discovery-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-network-disable-tcpip-router-discovery-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Create or update the following Registry Preference (Right-click **Registry -> New -> Registry Item**):
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
+   * **Value name**: `PerformRouterDiscovery`
+   * **Value type**: `REG_DWORD`
+   * **Value data**: `0` (Decimal)
+
+---
+
+<div id="02-domain-controllers-network-disable-tcpip-router-discovery-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to disable router discovery on the Domain Controller.
+
+[Download Script: Configure-DisableTcpipRouterDiscovery.ps1](../implementation_scripts/Configure-DisableTcpipRouterDiscovery.ps1)
+
+```powershell
+# Configure-DisableTcpipRouterDiscovery.ps1
+# Description: Disables IRDP (PerformRouterDiscovery) on Domain Controllers.
+
+Write-Host "Disabling TCP/IP Router Discovery..." -ForegroundColor Cyan
+
+$TcpipParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+if (-not (Test-Path -Path $TcpipParamsPath)) {
+    New-Item -Path $TcpipParamsPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $TcpipParamsPath -Name "PerformRouterDiscovery" -Value 0 -Type DWord -ErrorAction Stop
+
+Write-Host "TCP/IP Router Discovery disabled successfully (PerformRouterDiscovery = 0)." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-TcpipRouterDiscoveryStatus.ps1](../audit_scripts/Get-TcpipRouterDiscoveryStatus.ps1)
+
+```powershell
+# Get-TcpipRouterDiscoveryStatus.ps1
+# Description: Audits registry configuration of PerformRouterDiscovery on Domain Controllers.
+
+Write-Host "--- Auditing TCP/IP Router Discovery Status ---" -ForegroundColor Cyan
+
+$TcpipParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+$ExpectedValue = 0
+
+if (Test-Path -Path $TcpipParamsPath) {
+    $Reg = Get-ItemProperty -Path $TcpipParamsPath -ErrorAction SilentlyContinue
+    $CurrentValue = $Reg.PerformRouterDiscovery
+
+    if ($CurrentValue -eq $ExpectedValue) {
+        Write-Host "    [+] PerformRouterDiscovery: $($CurrentValue) (Expected: $($ExpectedValue))" -ForegroundColor Green
+        exit 0
+    } else {
+        Write-Host "    [!] PerformRouterDiscovery: $($CurrentValue) (Expected: $($ExpectedValue))" -ForegroundColor Red
+        exit 1
+    }
+} else {
+    Write-Host "    [!] TCP/IP Parameters Registry Path NOT FOUND" -ForegroundColor Red
+    exit 1
+}
+```
+
+---
+
+<div id="02-domain-controllers-network-disable-tcpip-router-discovery-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.5.2 (Ensure 'MSS: (PerformRouterDiscovery) Allow IRDP to detect and configure Default Gateway addresses' is set to 'Disabled')
+* **ANSSI AD Hardening Guide**: Security guidelines to prevent dynamic gateway manipulation and network path tampering on Tier 0 assets.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-network-configure-tcpip-max-data-retransmissions-md"></div>
+
+<div id="02-domain-controllers-network-configure-tcpip-max-data-retransmissions-md-req-dc-149-configure-tcp-max-data-retransmissions-on-domain-controllers"></div>
+
+# [REQ-DC-149] Configure TCP Max Data Retransmissions on Domain Controllers
+
+<div id="02-domain-controllers-network-configure-tcpip-max-data-retransmissions-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-network-configure-tcpip-max-data-retransmissions-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **Path**: `Computer Configuration\Preferences\Windows Settings\Registry`
+  * **Registry Keys**:
+    * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
+      * `TcpMaxDataRetransmissions` = `3` (REG_DWORD)
+    * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters`
+      * `TcpMaxDataRetransmissions` = `3` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-network-configure-tcpip-max-data-retransmissions-md-rationale"></div>
+
+## Rationale
+The `TcpMaxDataRetransmissions` parameter determines the number of times TCP will retransmit an individual data segment (non-connect segment) before aborting the connection. The retransmission timeout is doubled with each successive retransmission on a connection, backed off exponentially.
+
+By default, Windows configures `TcpMaxDataRetransmissions` to `5`, which causes the system to wait over 200 seconds before terminating an unresponsive connection. In an Active Directory environment:
+1. **Resource Exhaustion Mitigation**: Restricting retransmissions to `3` causes stalled or unresponsive connections to be severed significantly faster, releasing kernel memory buffers, TCP control blocks (TCBs), and socket handles.
+2. **Denial-of-Service Defense**: In scenarios involving connection drop attacks, network partitions, or resource starvation attempts, limiting TCP data retransmissions for both IPv4 and IPv6 prevents connection pool depletion on Domain Controllers.
+
+---
+
+<div id="02-domain-controllers-network-configure-tcpip-max-data-retransmissions-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Normal Operations**: Configuring TCP data retransmissions to `3` provides ample resilience on enterprise networks with minimal packet loss while cleaning up dead connections much faster.
+* **High-Latency Links**: If Domain Controllers replicate across exceptionally degraded WAN or satellite links with severe packet loss, connections may terminate sooner. Ensure underlying WAN links meet enterprise reliability standards.
+
+---
+
+<div id="02-domain-controllers-network-configure-tcpip-max-data-retransmissions-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-network-configure-tcpip-max-data-retransmissions-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Create or update the following Registry Preferences (Right-click **Registry -> New -> Registry Item**):
+   * **IPv4 TCP Max Data Retransmissions**:
+     * **Action**: `Update`
+     * **Hive**: `HKEY_LOCAL_MACHINE`
+     * **Key Path**: `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
+     * **Value name**: `TcpMaxDataRetransmissions`
+     * **Value type**: `REG_DWORD`
+     * **Value data**: `3` (Decimal)
+   * **IPv6 TCP Max Data Retransmissions**:
+     * **Action**: `Update`
+     * **Hive**: `HKEY_LOCAL_MACHINE`
+     * **Key Path**: `SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters`
+     * **Value name**: `TcpMaxDataRetransmissions`
+     * **Value type**: `REG_DWORD`
+     * **Value data**: `3` (Decimal)
+
+---
+
+<div id="02-domain-controllers-network-configure-tcpip-max-data-retransmissions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure `TcpMaxDataRetransmissions` for IPv4 and IPv6 on the Domain Controller.
+
+[Download Script: Configure-TcpipMaxDataRetransmissions.ps1](../implementation_scripts/Configure-TcpipMaxDataRetransmissions.ps1)
+
+```powershell
+# Configure-TcpipMaxDataRetransmissions.ps1
+# Description: Sets TcpMaxDataRetransmissions to 3 for IPv4 and IPv6 on Domain Controllers.
+
+Write-Host "Configuring TCP Max Data Retransmissions (IPv4 and IPv6)..." -ForegroundColor Cyan
+
+$TcpipParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+if (-not (Test-Path -Path $TcpipParamsPath)) {
+    New-Item -Path $TcpipParamsPath -Force | Out-Null
+}
+Set-ItemProperty -Path $TcpipParamsPath -Name "TcpMaxDataRetransmissions" -Value 3 -Type DWord -ErrorAction Stop
+
+$Tcpip6ParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
+if (-not (Test-Path -Path $Tcpip6ParamsPath)) {
+    New-Item -Path $Tcpip6ParamsPath -Force | Out-Null
+}
+Set-ItemProperty -Path $Tcpip6ParamsPath -Name "TcpMaxDataRetransmissions" -Value 3 -Type DWord -ErrorAction Stop
+
+Write-Host "TCP Max Data Retransmissions configured to 3 for IPv4 and IPv6." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-TcpipMaxDataRetransmissionsStatus.ps1](../audit_scripts/Get-TcpipMaxDataRetransmissionsStatus.ps1)
+
+```powershell
+# Get-TcpipMaxDataRetransmissionsStatus.ps1
+# Description: Audits registry configuration of TcpMaxDataRetransmissions for IPv4 and IPv6 on Domain Controllers.
+
+Write-Host "--- Auditing TCP Max Data Retransmissions Status ---" -ForegroundColor Cyan
+
+$TcpipParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+$Tcpip6ParamsPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
+$IsVulnerable = $false
+
+if (Test-Path -Path $TcpipParamsPath) {
+    $Reg4 = Get-ItemProperty -Path $TcpipParamsPath -ErrorAction SilentlyContinue
+    $Val4 = $Reg4.TcpMaxDataRetransmissions
+    if ($Val4 -eq 3) {
+        Write-Host "    [+] IPv4 TcpMaxDataRetransmissions: $($Val4) (Expected: 3)" -ForegroundColor Green
+    } else {
+        Write-Host "    [!] IPv4 TcpMaxDataRetransmissions: $($Val4) (Expected: 3)" -ForegroundColor Red
+        $IsVulnerable = $true
+    }
+} else {
+    Write-Host "    [!] IPv4 Parameters Registry Path NOT FOUND" -ForegroundColor Red
+    $IsVulnerable = $true
+}
+
+if (Test-Path -Path $Tcpip6ParamsPath) {
+    $Reg6 = Get-ItemProperty -Path $Tcpip6ParamsPath -ErrorAction SilentlyContinue
+    $Val6 = $Reg6.TcpMaxDataRetransmissions
+    if ($Val6 -eq 3) {
+        Write-Host "    [+] IPv6 TcpMaxDataRetransmissions: $($Val6) (Expected: 3)" -ForegroundColor Green
+    } else {
+        Write-Host "    [!] IPv6 TcpMaxDataRetransmissions: $($Val6) (Expected: 3)" -ForegroundColor Red
+        $IsVulnerable = $true
+    }
+} else {
+    Write-Host "    [!] IPv6 Parameters Registry Path NOT FOUND" -ForegroundColor Red
+    $IsVulnerable = $true
+}
+
+if ($IsVulnerable) {
+    exit 1
+} else {
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-network-configure-tcpip-max-data-retransmissions-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.5.3 (Ensure 'MSS: (TcpMaxDataRetransmissions IPv6) How many times unacknowledged data is retransmitted' is set to '3') and Section 18.5.4 (Ensure 'MSS: (TcpMaxDataRetransmissions) How many times unacknowledged data is retransmitted' is set to '3')
+* **ANSSI AD Hardening Guide**: Security guidelines to optimize TCP/IP stack parameters and mitigate connection state exhaustion on Domain Controllers.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-network-disable-ipv6-default-dns-servers-md"></div>
+
+<div id="02-domain-controllers-network-disable-ipv6-default-dns-servers-md-req-dc-150-disable-default-ipv6-dns-servers-on-domain-controllers"></div>
+
+# [REQ-DC-150] Disable Default IPv6 DNS Servers on Domain Controllers
+
+<div id="02-domain-controllers-network-disable-ipv6-default-dns-servers-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-network-disable-ipv6-default-dns-servers-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\Network\DNS Client`
+    * **Policy**: `Turn off default IPv6 DNS Servers` -> **Enabled**
+  * **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient`
+    * `DisableIPv6DefaultDnsServers` = `1` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-network-disable-ipv6-default-dns-servers-md-rationale"></div>
+
+## Rationale
+By default, the Windows DNS client may fall back to well-known default IPv6 DNS addresses (such as site-local or router-advertised dynamic addresses) if statically configured DNS servers fail to respond, or when processing IPv6 router advertisements (RAs) via DHCPv6 / SLAAC.
+
+In an Active Directory environment:
+1. **MitM and Rogue IPv6 DNS Redirection**: Attackers on the local network segment utilize tools like `mitm6` to broadcast rogue IPv6 Router Advertisements and rogue DHCPv6 replies, assigning an attacker-controlled IPv6 DNS server to systems on the subnet.
+2. **Credential Relay & Authentication Coercion**: When a Domain Controller queries DNS through a rogue IPv6 DNS server, the attacker can spoof hostnames (such as internal WPAD, CRL endpoints, or management servers) to coerce LDAP/SMB/HTTP authentication and perform NTLM relay attacks.
+
+Enabling `Turn off default IPv6 DNS Servers` (`DisableIPv6DefaultDnsServers = 1`) ensures that the DNS Client service does not fall back to default or dynamically acquired IPv6 DNS server addresses, confining DNS resolution strictly to administratively approved directory DNS servers.
+
+---
+
+<div id="02-domain-controllers-network-disable-ipv6-default-dns-servers-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Normal Operations**: If the enterprise network uses dual-stack IPv4/IPv6, enterprise IPv6 DNS servers should be explicitly configured on the network adapter properties or via enterprise DHCPv6 options. Disabling default/fallback IPv6 DNS servers prevents unauthenticated fallback without interrupting explicit configurations.
+* **AD Replication & Authentication**: Core AD functionality relies on explicit DNS resolution. As long as domain DNS servers are properly defined in network adapter settings, disabling default IPv6 DNS servers has zero negative operational impact.
+
+---
+
+<div id="02-domain-controllers-network-disable-ipv6-default-dns-servers-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-network-disable-ipv6-default-dns-servers-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\DNS Client`
+4. Configure the policy:
+   * **Setting**: `Turn off default IPv6 DNS Servers`
+   * **State**: **Enabled**
+
+---
+
+<div id="02-domain-controllers-network-disable-ipv6-default-dns-servers-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to disable default IPv6 DNS servers on the Domain Controller.
+
+[Download Script: Configure-DisableIPv6DefaultDnsServers.ps1](../implementation_scripts/Configure-DisableIPv6DefaultDnsServers.ps1)
+
+```powershell
+# Configure-DisableIPv6DefaultDnsServers.ps1
+# Description: Disables default IPv6 DNS servers in DNS Client policy on Domain Controllers.
+
+Write-Host "Disabling default IPv6 DNS servers..." -ForegroundColor Cyan
+
+$DnsClientPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient"
+if (-not (Test-Path -Path $DnsClientPath)) {
+    New-Item -Path $DnsClientPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $DnsClientPath -Name "DisableIPv6DefaultDnsServers" -Value 1 -Type DWord -ErrorAction Stop
+
+Write-Host "Default IPv6 DNS servers disabled successfully (DisableIPv6DefaultDnsServers = 1)." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-DisableIPv6DefaultDnsServersStatus.ps1](../audit_scripts/Get-DisableIPv6DefaultDnsServersStatus.ps1)
+
+```powershell
+# Get-DisableIPv6DefaultDnsServersStatus.ps1
+# Description: Audits registry configuration of DisableIPv6DefaultDnsServers on Domain Controllers.
+
+Write-Host "--- Auditing DisableIPv6DefaultDnsServers Status ---" -ForegroundColor Cyan
+
+$DnsClientPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient"
+$ExpectedValue = 1
+
+if (Test-Path -Path $DnsClientPath) {
+    $Reg = Get-ItemProperty -Path $DnsClientPath -ErrorAction SilentlyContinue
+    $CurrentValue = $Reg.DisableIPv6DefaultDnsServers
+
+    if ($CurrentValue -eq $ExpectedValue) {
+        Write-Host "    [+] DisableIPv6DefaultDnsServers: $($CurrentValue) (Expected: $($ExpectedValue))" -ForegroundColor Green
+        exit 0
+    } else {
+        Write-Host "    [!] DisableIPv6DefaultDnsServers: $($CurrentValue) (Expected: $($ExpectedValue))" -ForegroundColor Red
+        exit 1
+    }
+} else {
+    Write-Host "    [!] DNS Client Registry Path NOT FOUND" -ForegroundColor Red
+    exit 1
+}
+```
+
+---
+
+<div id="02-domain-controllers-network-disable-ipv6-default-dns-servers-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.6.4.1 (Ensure 'Turn off default IPv6 DNS Servers' is set to 'Enabled')
+* **ANSSI AD Hardening Guide**: Protective measures against local name resolution poisoning and rogue IPv6 router advertisement attacks.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-network-disable-lltd-mapper-io-driver-md"></div>
+
+<div id="02-domain-controllers-network-disable-lltd-mapper-io-driver-md-req-dc-151-disable-link-layer-topology-discovery-mapper-io-driver-on-domain-controllers"></div>
+
+# [REQ-DC-151] Disable Link-Layer Topology Discovery Mapper I/O Driver on Domain Controllers
+
+<div id="02-domain-controllers-network-disable-lltd-mapper-io-driver-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-network-disable-lltd-mapper-io-driver-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\Network\Link-Layer Topology Discovery`
+    * **Policy**: `Turn on Mapper I/O (LLTDIO) driver` -> **Disabled**
+  * **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\LLTD`
+    * `AllowLLTDIOOnDomain` = `0` (REG_DWORD)
+    * `AllowLLTDIOOnPublicNet` = `0` (REG_DWORD)
+    * `EnableLLTDIO` = `0` (REG_DWORD)
+    * `ProhibitLLTDIOOnPrivateNet` = `0` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-network-disable-lltd-mapper-io-driver-md-rationale"></div>
+
+## Rationale
+The Link-Layer Topology Discovery (LLTD) Mapper I/O (LLTDIO) network protocol driver queries neighboring network hosts to discover physical network topology, bandwidth capabilities, and device characteristics for Windows network mapping tools.
+
+On Tier 0 Domain Controllers:
+1. **Attack Surface Minimization**: Domain Controllers must not act as network mapping query clients or probe neighboring devices. Running network discovery protocol drivers in kernel space introduces unnecessary attack surface.
+2. **Reconnaissance Suppression**: Prohibiting LLTDIO driver activity ensures that the Domain Controller cannot be utilized to perform unauthorized local link-layer discovery queries across adjoining subnets.
+
+Disabling the Mapper I/O driver (`Turn on Mapper I/O (LLTDIO) driver -> Disabled`) sets the registry flags under `HKLM\SOFTWARE\Policies\Microsoft\Windows\LLTD` to `0`, ensuring the driver is completely disabled across domain, private, and public network profiles.
+
+---
+
+<div id="02-domain-controllers-network-disable-lltd-mapper-io-driver-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Network Mapping**: Disabling the Mapper I/O driver prevents the Domain Controller from generating graphical network maps of neighboring systems in legacy Windows Network and Sharing Center views.
+* **Core Functionality**: Active Directory replication, Kerberos authentication, SMB file shares (SYSVOL/NETLOGON), and administrative management tools (RSAT/WAC) do not rely on LLTDIO and operate unaffected.
+
+---
+
+<div id="02-domain-controllers-network-disable-lltd-mapper-io-driver-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-network-disable-lltd-mapper-io-driver-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Link-Layer Topology Discovery`
+4. Configure the policy:
+   * **Setting**: `Turn on Mapper I/O (LLTDIO) driver`
+   * **State**: **Disabled**
+
+---
+
+<div id="02-domain-controllers-network-disable-lltd-mapper-io-driver-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to disable the LLTD Mapper I/O driver on the Domain Controller.
+
+[Download Script: Configure-DisableLltdMapperIoDriver.ps1](../implementation_scripts/Configure-DisableLltdMapperIoDriver.ps1)
+
+```powershell
+# Configure-DisableLltdMapperIoDriver.ps1
+# Description: Disables the LLTD Mapper I/O (LLTDIO) driver policy on Domain Controllers.
+
+Write-Host "Disabling LLTD Mapper I/O (LLTDIO) Driver..." -ForegroundColor Cyan
+
+$LltdPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LLTD"
+if (-not (Test-Path -Path $LltdPath)) {
+    New-Item -Path $LltdPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $LltdPath -Name "AllowLLTDIOOnDomain" -Value 0 -Type DWord -ErrorAction Stop
+Set-ItemProperty -Path $LltdPath -Name "AllowLLTDIOOnPublicNet" -Value 0 -Type DWord -ErrorAction Stop
+Set-ItemProperty -Path $LltdPath -Name "EnableLLTDIO" -Value 0 -Type DWord -ErrorAction Stop
+Set-ItemProperty -Path $LltdPath -Name "ProhibitLLTDIOOnPrivateNet" -Value 0 -Type DWord -ErrorAction Stop
+
+Write-Host "LLTD Mapper I/O Driver disabled successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-LltdMapperIoDriverStatus.ps1](../audit_scripts/Get-LltdMapperIoDriverStatus.ps1)
+
+```powershell
+# Get-LltdMapperIoDriverStatus.ps1
+# Description: Audits registry configuration of LLTD Mapper I/O (LLTDIO) driver on Domain Controllers.
+
+Write-Host "--- Auditing LLTD Mapper I/O Driver Status ---" -ForegroundColor Cyan
+
+$LltdPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LLTD"
+$Expected = @{
+    "AllowLLTDIOOnDomain"        = 0
+    "AllowLLTDIOOnPublicNet"     = 0
+    "EnableLLTDIO"               = 0
+    "ProhibitLLTDIOOnPrivateNet" = 0
+}
+
+$IsVulnerable = $false
+
+if (Test-Path -Path $LltdPath) {
+    $Reg = Get-ItemProperty -Path $LltdPath -ErrorAction SilentlyContinue
+    foreach ($Key in $Expected.Keys) {
+        $Val = $Reg.$Key
+        $Exp = $Expected[$Key]
+        if ($Val -eq $Exp) {
+            Write-Host "    [+] $($Key): $($Val) (Expected: $($Exp))" -ForegroundColor Green
+        } else {
+            Write-Host "    [!] $($Key): $($Val) (Expected: $($Exp))" -ForegroundColor Red
+            $IsVulnerable = $true
+        }
+    }
+} else {
+    Write-Host "    [!] LLTD Registry Path NOT FOUND" -ForegroundColor Red
+    $IsVulnerable = $true
+}
+
+if ($IsVulnerable) {
+    exit 1
+} else {
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-network-disable-lltd-mapper-io-driver-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.6.9.1 (Ensure 'Turn on Mapper I/O (LLTDIO) driver' is set to 'Disabled')
+* **ANSSI AD Hardening Guide**: Security guidelines to disable unnecessary link-layer discovery protocols and network interface drivers on Domain Controllers.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-network-disable-lltd-responder-driver-md"></div>
+
+<div id="02-domain-controllers-network-disable-lltd-responder-driver-md-req-dc-152-disable-link-layer-topology-discovery-responder-driver-on-domain-controllers"></div>
+
+# [REQ-DC-152] Disable Link-Layer Topology Discovery Responder Driver on Domain Controllers
+
+<div id="02-domain-controllers-network-disable-lltd-responder-driver-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-network-disable-lltd-responder-driver-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\Network\Link-Layer Topology Discovery`
+    * **Policy**: `Turn on Responder (RSPNDR) driver` -> **Disabled**
+  * **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\LLTD`
+    * `AllowRspndrOnDomain` = `0` (REG_DWORD)
+    * `AllowRspndrOnPublicNet` = `0` (REG_DWORD)
+    * `EnableRspndr` = `0` (REG_DWORD)
+    * `ProhibitRspndrOnPrivateNet` = `0` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-network-disable-lltd-responder-driver-md-rationale"></div>
+
+## Rationale
+The Link-Layer Topology Discovery (LLTD) Responder (RSPNDR) network protocol driver listens for topology discovery requests from other computers on the local network and responds with device details, identity information, and link-layer capabilities.
+
+On Tier 0 Domain Controllers:
+1. **Device Fingerprinting Prevention**: Enabling the Responder driver allows any workstation or rogue host on the local physical segment to discover the Domain Controller, map its MAC address, determine link characteristics, and identify its role via LLTD probe packets.
+2. **Network Protocol Stack Reduction**: Running link-layer responders in the kernel networking stack exposes the server to packet-handling vulnerabilities and potential broadcast flooding attacks.
+
+Disabling the Responder driver (`Turn on Responder (RSPNDR) driver -> Disabled`) ensures that the Domain Controller never advertises itself or responds to link-layer topological queries.
+
+---
+
+<div id="02-domain-controllers-network-disable-lltd-responder-driver-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Network Visibility**: Disabling the Responder driver prevents the Domain Controller from showing up on graphical network topology maps rendered by other Windows clients.
+* **No Operational Disruption**: Active Directory authentication, replication, LDAP, DNS, and remote administration tools are completely decoupled from LLTD and remain fully functional.
+
+---
+
+<div id="02-domain-controllers-network-disable-lltd-responder-driver-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-network-disable-lltd-responder-driver-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Link-Layer Topology Discovery`
+4. Configure the policy:
+   * **Setting**: `Turn on Responder (RSPNDR) driver`
+   * **State**: **Disabled**
+
+---
+
+<div id="02-domain-controllers-network-disable-lltd-responder-driver-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to disable the LLTD Responder driver on the Domain Controller.
+
+[Download Script: Configure-DisableLltdResponderDriver.ps1](../implementation_scripts/Configure-DisableLltdResponderDriver.ps1)
+
+```powershell
+# Configure-DisableLltdResponderDriver.ps1
+# Description: Disables the LLTD Responder (RSPNDR) driver policy on Domain Controllers.
+
+Write-Host "Disabling LLTD Responder (RSPNDR) Driver..." -ForegroundColor Cyan
+
+$LltdPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LLTD"
+if (-not (Test-Path -Path $LltdPath)) {
+    New-Item -Path $LltdPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $LltdPath -Name "AllowRspndrOnDomain" -Value 0 -Type DWord -ErrorAction Stop
+Set-ItemProperty -Path $LltdPath -Name "AllowRspndrOnPublicNet" -Value 0 -Type DWord -ErrorAction Stop
+Set-ItemProperty -Path $LltdPath -Name "EnableRspndr" -Value 0 -Type DWord -ErrorAction Stop
+Set-ItemProperty -Path $LltdPath -Name "ProhibitRspndrOnPrivateNet" -Value 0 -Type DWord -ErrorAction Stop
+
+Write-Host "LLTD Responder Driver disabled successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-LltdResponderDriverStatus.ps1](../audit_scripts/Get-LltdResponderDriverStatus.ps1)
+
+```powershell
+# Get-LltdResponderDriverStatus.ps1
+# Description: Audits registry configuration of LLTD Responder (RSPNDR) driver on Domain Controllers.
+
+Write-Host "--- Auditing LLTD Responder Driver Status ---" -ForegroundColor Cyan
+
+$LltdPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LLTD"
+$Expected = @{
+    "AllowRspndrOnDomain"        = 0
+    "AllowRspndrOnPublicNet"     = 0
+    "EnableRspndr"               = 0
+    "ProhibitRspndrOnPrivateNet" = 0
+}
+
+$IsVulnerable = $false
+
+if (Test-Path -Path $LltdPath) {
+    $Reg = Get-ItemProperty -Path $LltdPath -ErrorAction SilentlyContinue
+    foreach ($Key in $Expected.Keys) {
+        $Val = $Reg.$Key
+        $Exp = $Expected[$Key]
+        if ($Val -eq $Exp) {
+            Write-Host "    [+] $($Key): $($Val) (Expected: $($Exp))" -ForegroundColor Green
+        } else {
+            Write-Host "    [!] $($Key): $($Val) (Expected: $($Exp))" -ForegroundColor Red
+            $IsVulnerable = $true
+        }
+    }
+} else {
+    Write-Host "    [!] LLTD Registry Path NOT FOUND" -ForegroundColor Red
+    $IsVulnerable = $true
+}
+
+if ($IsVulnerable) {
+    exit 1
+} else {
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-network-disable-lltd-responder-driver-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.6.9.2 (Ensure 'Turn on Responder (RSPNDR) driver' is set to 'Disabled')
+* **ANSSI AD Hardening Guide**: Security guidelines to prevent server fingerprinting and link-layer discovery on Tier 0 assets.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-network-disable-peernet-md"></div>
+
+<div id="02-domain-controllers-network-disable-peernet-md-req-dc-153-disable-microsoft-peer-to-peer-networking-services-on-domain-controllers"></div>
+
+# [REQ-DC-153] Disable Microsoft Peer-to-Peer Networking Services on Domain Controllers
+
+<div id="02-domain-controllers-network-disable-peernet-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-network-disable-peernet-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\Network\Microsoft Peer-to-Peer Networking Services`
+    * **Policy**: `Turn off Microsoft Peer-to-Peer Networking Services` -> **Enabled**
+  * **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Peernet`
+    * `Disabled` = `1` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-network-disable-peernet-md-rationale"></div>
+
+## Rationale
+Microsoft Peer-to-Peer Networking Services comprise technologies such as the Peer Name Resolution Protocol (PNRP), Peer Graphing, and Grouping. These services allow distributed applications and workstations to locate each other, publish identities in peer clouds, and exchange data directly without centralized servers.
+
+On Active Directory Domain Controllers:
+1. **Inappropriate Technology on Tier 0**: Domain Controllers are centralized identity authorities designed for hierarchical client-server communication. Peer-to-peer mechanisms are completely antithetical to Tier 0 security isolation.
+2. **Untracked Communication Channels**: PNRP and peer networks establish autonomous, unmanaged communication channels that bypass traditional network inspection and create covert data exchange surfaces.
+3. **Attack Surface Reduction**: Disabling Peernet services (`Disabled = 1`) eliminates the PNRP protocol stack and shuts down peer mesh discovery ports on Domain Controllers.
+
+---
+
+<div id="02-domain-controllers-network-disable-peernet-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **No Functional Impact**: Standard Windows Server roles, Active Directory Domain Services, replication, Group Policy, Kerberos, DNS, and administrative consoles (RSAT, PowerShell Remoting, WAC) do not use Peer-to-Peer services.
+* **Applications**: Peer-to-peer collaboration tools (such as HomeGroup or consumer mesh applications) are blocked. Such software must never be installed on Domain Controllers.
+
+---
+
+<div id="02-domain-controllers-network-disable-peernet-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-network-disable-peernet-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Microsoft Peer-to-Peer Networking Services`
+4. Configure the policy:
+   * **Setting**: `Turn off Microsoft Peer-to-Peer Networking Services`
+   * **State**: **Enabled**
+
+---
+
+<div id="02-domain-controllers-network-disable-peernet-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to disable Microsoft Peer-to-Peer Networking Services on the Domain Controller.
+
+[Download Script: Configure-DisablePeernet.ps1](../implementation_scripts/Configure-DisablePeernet.ps1)
+
+```powershell
+# Configure-DisablePeernet.ps1
+# Description: Disables Microsoft Peer-to-Peer Networking Services policy on Domain Controllers.
+
+Write-Host "Disabling Microsoft Peer-to-Peer Networking Services..." -ForegroundColor Cyan
+
+$PeernetPath = "HKLM:\SOFTWARE\Policies\Microsoft\Peernet"
+if (-not (Test-Path -Path $PeernetPath)) {
+    New-Item -Path $PeernetPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $PeernetPath -Name "Disabled" -Value 1 -Type DWord -ErrorAction Stop
+
+Write-Host "Microsoft Peer-to-Peer Networking Services disabled successfully (Disabled = 1)." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-PeernetStatus.ps1](../audit_scripts/Get-PeernetStatus.ps1)
+
+```powershell
+# Get-PeernetStatus.ps1
+# Description: Audits registry configuration of Microsoft Peer-to-Peer Networking Services on Domain Controllers.
+
+Write-Host "--- Auditing Microsoft Peer-to-Peer Networking Services Status ---" -ForegroundColor Cyan
+
+$PeernetPath = "HKLM:\SOFTWARE\Policies\Microsoft\Peernet"
+$ExpectedValue = 1
+
+if (Test-Path -Path $PeernetPath) {
+    $Reg = Get-ItemProperty -Path $PeernetPath -ErrorAction SilentlyContinue
+    $CurrentValue = $Reg.Disabled
+
+    if ($CurrentValue -eq $ExpectedValue) {
+        Write-Host "    [+] Peernet Disabled: $($CurrentValue) (Expected: $($ExpectedValue))" -ForegroundColor Green
+        exit 0
+    } else {
+        Write-Host "    [!] Peernet Disabled: $($CurrentValue) (Expected: $($ExpectedValue))" -ForegroundColor Red
+        exit 1
+    }
+} else {
+    Write-Host "    [!] Peernet Registry Path NOT FOUND" -ForegroundColor Red
+    exit 1
+}
+```
+
+---
+
+<div id="02-domain-controllers-network-disable-peernet-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.6.10.1 (Ensure 'Turn off Microsoft Peer-to-Peer Networking Services' is set to 'Enabled')
+* **ANSSI AD Hardening Guide**: Security recommendations to deactivate unnecessary peer networking protocols and unmanaged discovery services on Domain Controllers.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-network-disable-wcn-wireless-configuration-md"></div>
+
+<div id="02-domain-controllers-network-disable-wcn-wireless-configuration-md-req-dc-154-disable-windows-connect-now-wireless-settings-configuration-on-domain-controllers"></div>
+
+# [REQ-DC-154] Disable Windows Connect Now Wireless Settings Configuration on Domain Controllers
+
+<div id="02-domain-controllers-network-disable-wcn-wireless-configuration-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-network-disable-wcn-wireless-configuration-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\Network\Windows Connect Now`
+    * **Policy**: `Configuration of wireless settings using Windows Connect Now` -> **Disabled**
+  * **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars`
+    * `EnableRegistrars` = `0` (REG_DWORD)
+    * `DisableUPnPRegistrar` = `1` (REG_DWORD)
+    * `DisableInBand802DOT11Registrar` = `1` (REG_DWORD)
+    * `DisableFlashConfigRegistrar` = `1` (REG_DWORD)
+    * `DisableWPDRegistrar` = `1` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-network-disable-wcn-wireless-configuration-md-rationale"></div>
+
+## Rationale
+Windows Connect Now (WCN) provides mechanisms for wireless network configuration using Wi-Fi Protected Setup (WPS) protocols across various discovery media, including UPnP (Universal Plug and Play), In-Band 802.11, USB flash drives (FlashConfig), and Windows Portable Devices (WPD).
+
+On Active Directory Domain Controllers:
+1. **Tier 0 Dedicated Wired Infrastructure**: Domain Controllers must run on dedicated, physical wired server backbones within physically secured datacenter segments. Wireless configuration mechanisms have no legitimate place on these machines.
+2. **UPnP and Wireless Exploitation**: UPnP registrars and in-band 802.11 discovery listening components can introduce local broadcast vulnerabilities, unauthenticated device registration attacks, or credential leakage over broadcast media.
+3. **Attack Surface Elimination**: Setting `Configuration of wireless settings using Windows Connect Now` to `Disabled` ensures that all WCN registrars (UPnP, In-Band 802.11, FlashConfig, WPD) are explicitly turned off.
+
+---
+
+<div id="02-domain-controllers-network-disable-wcn-wireless-configuration-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **No Functional Impact**: Domain Controllers are managed via wired interfaces and do not use WCN wireless provisioning. Disabling WCN has zero impact on Active Directory replication, Kerberos, DNS, or server networking.
+* **Hardware Profile**: Eliminates any automated attempt by Windows to discover or configure wireless access points or WPS-enabled routers.
+
+---
+
+<div id="02-domain-controllers-network-disable-wcn-wireless-configuration-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-network-disable-wcn-wireless-configuration-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Windows Connect Now`
+4. Configure the policy:
+   * **Setting**: `Configuration of wireless settings using Windows Connect Now`
+   * **State**: **Disabled**
+
+---
+
+<div id="02-domain-controllers-network-disable-wcn-wireless-configuration-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to disable WCN wireless settings configuration registrars on the Domain Controller.
+
+[Download Script: Configure-DisableWcnWirelessConfig.ps1](../implementation_scripts/Configure-DisableWcnWirelessConfig.ps1)
+
+```powershell
+# Configure-DisableWcnWirelessConfig.ps1
+# Description: Disables Windows Connect Now wireless settings configuration registrars on Domain Controllers.
+
+Write-Host "Disabling Windows Connect Now Wireless Settings Configuration..." -ForegroundColor Cyan
+
+$WcnRegsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars"
+if (-not (Test-Path -Path $WcnRegsPath)) {
+    New-Item -Path $WcnRegsPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $WcnRegsPath -Name "EnableRegistrars" -Value 0 -Type DWord -ErrorAction Stop
+Set-ItemProperty -Path $WcnRegsPath -Name "DisableUPnPRegistrar" -Value 1 -Type DWord -ErrorAction Stop
+Set-ItemProperty -Path $WcnRegsPath -Name "DisableInBand802DOT11Registrar" -Value 1 -Type DWord -ErrorAction Stop
+Set-ItemProperty -Path $WcnRegsPath -Name "DisableFlashConfigRegistrar" -Value 1 -Type DWord -ErrorAction Stop
+Set-ItemProperty -Path $WcnRegsPath -Name "DisableWPDRegistrar" -Value 1 -Type DWord -ErrorAction Stop
+
+Write-Host "Windows Connect Now Wireless Settings Configuration disabled successfully." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-WcnWirelessConfigStatus.ps1](../audit_scripts/Get-WcnWirelessConfigStatus.ps1)
+
+```powershell
+# Get-WcnWirelessConfigStatus.ps1
+# Description: Audits registry configuration of Windows Connect Now registrars on Domain Controllers.
+
+Write-Host "--- Auditing Windows Connect Now Wireless Settings Configuration Status ---" -ForegroundColor Cyan
+
+$WcnRegsPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars"
+$Expected = @{
+    "EnableRegistrars"               = 0
+    "DisableUPnPRegistrar"           = 1
+    "DisableInBand802DOT11Registrar" = 1
+    "DisableFlashConfigRegistrar"    = 1
+    "DisableWPDRegistrar"            = 1
+}
+
+$IsVulnerable = $false
+
+if (Test-Path -Path $WcnRegsPath) {
+    $Reg = Get-ItemProperty -Path $WcnRegsPath -ErrorAction SilentlyContinue
+    foreach ($Key in $Expected.Keys) {
+        $Val = $Reg.$Key
+        $Exp = $Expected[$Key]
+        if ($Val -eq $Exp) {
+            Write-Host "    [+] $($Key): $($Val) (Expected: $($Exp))" -ForegroundColor Green
+        } else {
+            Write-Host "    [!] $($Key): $($Val) (Expected: $($Exp))" -ForegroundColor Red
+            $IsVulnerable = $true
+        }
+    }
+} else {
+    Write-Host "    [!] WCN Registrars Registry Path NOT FOUND" -ForegroundColor Red
+    $IsVulnerable = $true
+}
+
+if ($IsVulnerable) {
+    exit 1
+} else {
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-network-disable-wcn-wireless-configuration-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.6.20.1 (Ensure 'Configuration of wireless settings using Windows Connect Now' is set to 'Disabled')
+* **ANSSI AD Hardening Guide**: Baseline controls eliminating consumer wireless provisioning and UPnP interfaces on Tier 0 systems.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-network-prohibit-wcn-wizards-md"></div>
+
+<div id="02-domain-controllers-network-prohibit-wcn-wizards-md-req-dc-155-prohibit-access-to-windows-connect-now-wizards-on-domain-controllers"></div>
+
+# [REQ-DC-155] Prohibit Access to Windows Connect Now Wizards on Domain Controllers
+
+<div id="02-domain-controllers-network-prohibit-wcn-wizards-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers.
+* **Operating Systems**: Windows Server 2016 (and above).
+
+---
+
+<div id="02-domain-controllers-network-prohibit-wcn-wizards-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\Network\Windows Connect Now`
+    * **Policy**: `Prohibit access of the Windows Connect Now wizards` -> **Enabled**
+  * **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\WCN\UI`
+    * `DisableWcnUi` = `1` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-network-prohibit-wcn-wizards-md-rationale"></div>
+
+## Rationale
+The Windows Connect Now (WCN) wizards guide users through configuring a wireless router or access point and saving network configuration settings to USB flash memory or broadcasting them via Wi-Fi.
+
+On Tier 0 Domain Controllers:
+1. **Administrative Interface Lockdown**: Interactive administrative sessions on Domain Controllers must never expose consumer wireless or hardware configuration wizards that could be inadvertently or maliciously invoked.
+2. **Prevent Unauthorized Configuration Storage**: WCN wizards allow exporting wireless network keys and connection settings to removable storage or across the network. Prohibiting access to the WCN wizards (`DisableWcnUi = 1`) ensures the GUI wizard interface cannot be launched.
+
+---
+
+<div id="02-domain-controllers-network-prohibit-wcn-wizards-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **No Functional Impact**: Domain Controllers are dedicated servers with no requirement for interactive wireless provisioning wizards.
+* **Administrative Sessions**: Administrators connecting via console or RDP Restricted Admin Mode will not be able to launch WCN wizards, maintaining standard operational baseline compliance.
+
+---
+
+<div id="02-domain-controllers-network-prohibit-wcn-wizards-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-network-prohibit-wcn-wizards-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the GPO linked to the Domain Controllers OU (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Windows Connect Now`
+4. Configure the policy:
+   * **Setting**: `Prohibit access of the Windows Connect Now wizards`
+   * **State**: **Enabled**
+
+---
+
+<div id="02-domain-controllers-network-prohibit-wcn-wizards-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to prohibit access to WCN wizards on the Domain Controller.
+
+[Download Script: Configure-ProhibitWcnWizards.ps1](../implementation_scripts/Configure-ProhibitWcnWizards.ps1)
+
+```powershell
+# Configure-ProhibitWcnWizards.ps1
+# Description: Prohibits access to Windows Connect Now wizards on Domain Controllers.
+
+Write-Host "Prohibiting access to Windows Connect Now wizards..." -ForegroundColor Cyan
+
+$WcnUiPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WCN\UI"
+if (-not (Test-Path -Path $WcnUiPath)) {
+    New-Item -Path $WcnUiPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $WcnUiPath -Name "DisableWcnUi" -Value 1 -Type DWord -ErrorAction Stop
+
+Write-Host "Windows Connect Now wizards prohibited successfully (DisableWcnUi = 1)." -ForegroundColor Green
+```
+
+*To verify the setting has been applied:*
+
+[Download Script: Get-ProhibitWcnWizardsStatus.ps1](../audit_scripts/Get-ProhibitWcnWizardsStatus.ps1)
+
+```powershell
+# Get-ProhibitWcnWizardsStatus.ps1
+# Description: Audits registry configuration of DisableWcnUi on Domain Controllers.
+
+Write-Host "--- Auditing DisableWcnUi Status ---" -ForegroundColor Cyan
+
+$WcnUiPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WCN\UI"
+$ExpectedValue = 1
+
+if (Test-Path -Path $WcnUiPath) {
+    $Reg = Get-ItemProperty -Path $WcnUiPath -ErrorAction SilentlyContinue
+    $CurrentValue = $Reg.DisableWcnUi
+
+    if ($CurrentValue -eq $ExpectedValue) {
+        Write-Host "    [+] DisableWcnUi: $($CurrentValue) (Expected: $($ExpectedValue))" -ForegroundColor Green
+        exit 0
+    } else {
+        Write-Host "    [!] DisableWcnUi: $($CurrentValue) (Expected: $($ExpectedValue))" -ForegroundColor Red
+        exit 1
+    }
+} else {
+    Write-Host "    [!] WCN UI Registry Path NOT FOUND" -ForegroundColor Red
+    exit 1
+}
+```
+
+---
+
+<div id="02-domain-controllers-network-prohibit-wcn-wizards-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section 18.6.20.2 (Ensure 'Prohibit access of the Windows Connect Now wizards' is set to 'Enabled')
+* **ANSSI AD Hardening Guide**: Security recommendations to restrict interactive wizards and unnecessary interfaces on Tier 0 servers.
 
 
 <div style="page-break-before: always;"></div>

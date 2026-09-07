@@ -541,7 +541,7 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                     script_name = script_match.group(1)
                     module_dir = os.path.dirname(rel_path).replace('\\', '/')
                     parts = module_dir.split('/')
-                    while len(parts) > 1 and parts[-1] in ['services', 'defender', 'asr', 'user-rights', 'user-profile', 'audit-policy']:
+                    while len(parts) > 1 and parts[-1] in ['services', 'defender', 'asr', 'user-rights', 'user-profile', 'audit-policy', 'network']:
                         parts.pop()
                     module_dir = '/'.join(parts)
                     audit_script = f"{module_dir}/audit_scripts/{script_name}"
@@ -553,7 +553,7 @@ def scan_markdown_requirements(repo_root, common_scripts, dc_scripts, paw_script
                     impl_name = impl_match.group(1)
                     module_dir = os.path.dirname(rel_path).replace('\\', '/')
                     parts = module_dir.split('/')
-                    while len(parts) > 1 and parts[-1] in ['services', 'defender', 'asr', 'user-rights', 'user-profile', 'audit-policy']:
+                    while len(parts) > 1 and parts[-1] in ['services', 'defender', 'asr', 'user-rights', 'user-profile', 'audit-policy', 'network']:
                         parts.pop()
                     module_dir = '/'.join(parts)
                     impl_script = f"{module_dir}/implementation_scripts/{impl_name}"
@@ -1221,6 +1221,7 @@ def generate_xccdf(requirements, output_path, repo_root):
             'User Profile Restrictions': [],
             'Services Hardening': [],
             'Advanced Security Audit Policies': [],
+            'Network Parameter Hardening': [],
             'Flat': []
         }
         
@@ -1238,6 +1239,8 @@ def generate_xccdf(requirements, output_path, repo_root):
                 subcategories['Services Hardening'].append(req)
             elif '/audit-policy/' in filepath:
                 subcategories['Advanced Security Audit Policies'].append(req)
+            elif '/network/' in filepath:
+                subcategories['Network Parameter Hardening'].append(req)
             else:
                 subcategories['Flat'].append(req)
 
@@ -1252,7 +1255,8 @@ def generate_xccdf(requirements, output_path, repo_root):
             'User Rights Assignments',
             'User Profile Restrictions',
             'Services Hardening',
-            'Advanced Security Audit Policies'
+            'Advanced Security Audit Policies',
+            'Network Parameter Hardening'
         ]:
             sub_reqs = subcategories[sub_title]
             if not sub_reqs:

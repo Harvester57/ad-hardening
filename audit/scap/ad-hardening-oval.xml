@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-09-03T12:53:34Z</oval:timestamp>
+    <oval:timestamp>2026-09-07T12:59:59Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -666,45 +666,6 @@ Specifically, the following settings are configured to protect the Tier 0 admini
         <criterion comment="Check Registry Key System\CurrentControlSet\Services\LanmanServer\Parameters Value NullSessionPipes" test_ref="oval:org.adhardening:tst:2025008" />
         <criterion comment="Check Registry Key System\CurrentControlSet\Control\SecurePipeServers\winreg\AllowedExactPaths Value Machine" test_ref="oval:org.adhardening:tst:2025009" />
         <criterion comment="Check Registry Key System\CurrentControlSet\Control\SecurePipeServers\winreg\AllowedPaths Value Machine" test_ref="oval:org.adhardening:tst:2025010" />
-      </criteria>
-    </definition>
-    <definition id="oval:org.adhardening:def:2026" version="1" class="compliance">
-      <metadata>
-        <title>[REQ-DC-026] Configure TCP/IP and Network Parameter Hardening for Domain Controllers</title>
-        <affected family="windows">
-          <platform>Microsoft Windows Server 2016</platform>
-          <platform>Microsoft Windows Server 2019</platform>
-          <platform>Microsoft Windows Server 2022</platform>
-          <platform>Microsoft Windows 10</platform>
-          <platform>Microsoft Windows 11</platform>
-        </affected>
-        <description>Securing low-level TCP/IP parameters and network-layer advertisement protocols on Domain Controllers is essential to block local discovery, routing redirection, and denial of service:
-1. **MSS TCP/IP Tuning**: Restricting TCP data retransmissions (`TcpMaxDataRetransmissions`) limits resources allocated to unacknowledged TCP segments during connection drops, mitigating denial-of-service attempts. Disabling Internet Router Discovery Protocol (IRDP) (`PerformRouterDiscovery`) blocks gateway advertisement redirection or man-in-the-middle attacks where hosts are coerced into routing traffic through a rogue gateway. Adjusting `KeepAliveTime` optimizes connection checks.
-2. **LLTD Mapper and Responder**: Disabling Link-Layer Topology Discovery (LLTD) components (`LLTDIO` and `RSPNDR`) prevents local attackers from mapping Domain Controllers on physical subnetworks or running topological discovery queries.
-3. **Microsoft Peer-to-Peer and Windows Connect Now**: Peer-to-Peer protocols (PNRP) and Windows Connect Now (WCN) wizards introduce unnecessary background communication channels, local discovery broadcasts, and wireless profile exposure vectors. These services must be completely disabled on Tier 0 assets to minimize attack surface.
-4. **Disable Default IPv6 DNS Servers**: Prevents automated fallback to unauthenticated, dynamic local IPv6 DNS servers advertised by third-party routers, mitigating DNS redirection or spoofing vectors.</description>
-      </metadata>
-      <criteria operator="AND">
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value KeepAliveTime" test_ref="oval:org.adhardening:tst:2026001" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value PerformRouterDiscovery" test_ref="oval:org.adhardening:tst:2026002" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value TcpMaxDataRetransmissions" test_ref="oval:org.adhardening:tst:2026003" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters Value TcpMaxDataRetransmissions" test_ref="oval:org.adhardening:tst:2026004" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" test_ref="oval:org.adhardening:tst:2026005" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowLLTDIOOnDomain" test_ref="oval:org.adhardening:tst:2026006" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowLLTDIOOnPublicNet" test_ref="oval:org.adhardening:tst:2026007" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value EnableLLTDIO" test_ref="oval:org.adhardening:tst:2026008" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value ProhibitLLTDIOOnPrivateNet" test_ref="oval:org.adhardening:tst:2026009" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowRspndrOnDomain" test_ref="oval:org.adhardening:tst:2026010" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowRspndrOnPublicNet" test_ref="oval:org.adhardening:tst:2026011" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value EnableRspndr" test_ref="oval:org.adhardening:tst:2026012" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value ProhibitRspndrOnPrivateNet" test_ref="oval:org.adhardening:tst:2026013" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Peernet Value Disabled" test_ref="oval:org.adhardening:tst:2026014" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value EnableRegistrars" test_ref="oval:org.adhardening:tst:2026015" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableUPnPRegistrar" test_ref="oval:org.adhardening:tst:2026016" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableInBand802DOT11Registrar" test_ref="oval:org.adhardening:tst:2026017" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableFlashConfigRegistrar" test_ref="oval:org.adhardening:tst:2026018" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableWPDRegistrar" test_ref="oval:org.adhardening:tst:2026019" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\UI Value DisableWcnUi" test_ref="oval:org.adhardening:tst:2026020" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:2027" version="1" class="compliance">
@@ -2823,6 +2784,205 @@ Stopping and disabling the WebClient service on Domain Controllers completely ne
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\$($ServiceName) Value Start" test_ref="oval:org.adhardening:tst:2146001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:2147" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-147] Configure TCP/IP KeepAliveTime on Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>The `KeepAliveTime` parameter controls how often TCP attempts to verify that an idle connection is still intact by sending a keep-alive packet. If the remote system is still reachable and functioning, it acknowledges the keep-alive transmission. 
+
+In Active Directory environments, Domain Controllers manage high volumes of concurrent Kerberos, LDAP, SMB, and RPC sessions with member servers and workstations. Configuring `KeepAliveTime` to 300,000 milliseconds (5 minutes) instead of the default 2 hours (7,200,000 ms) ensures orphaned or dead TCP connections from abruptly disconnected clients are detected and reclaimed promptly. This mitigates half-open connection accumulation and denial-of-service risks against server connection pools.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value KeepAliveTime" test_ref="oval:org.adhardening:tst:2147001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:2148" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-148] Disable TCP/IP Router Discovery on Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>The Internet Router Discovery Protocol (IRDP, RFC 1256) enables IPv4 hosts to dynamically discover local default routers by listening for ICMP Router Advertisement packets or soliciting them via ICMP Router Solicitation messages.
+
+On Active Directory Domain Controllers, dynamic router discovery presents a severe attack surface:
+1. **Rogue Gateway Redirection**: Attackers positioned on the local network segment can forge unauthenticated ICMP Router Advertisements to advertise a higher-priority default gateway address pointing to an attacker-controlled host.
+2. **Man-in-the-Middle (MitM)**: Coercing the Domain Controller to route outbound network traffic through a rogue router allows attackers to intercept, inspect, or modify sensitive replication, Kerberos, LDAP, and DNS communication.
+
+Domain Controllers must operate exclusively with statically assigned or enterprise DHCP-reserved gateway addresses. Setting `PerformRouterDiscovery` to `0` explicitly disables IRDP processing.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value PerformRouterDiscovery" test_ref="oval:org.adhardening:tst:2148001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:2149" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-149] Configure TCP Max Data Retransmissions on Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>The `TcpMaxDataRetransmissions` parameter determines the number of times TCP will retransmit an individual data segment (non-connect segment) before aborting the connection. The retransmission timeout is doubled with each successive retransmission on a connection, backed off exponentially.
+
+By default, Windows configures `TcpMaxDataRetransmissions` to `5`, which causes the system to wait over 200 seconds before terminating an unresponsive connection. In an Active Directory environment:
+1. **Resource Exhaustion Mitigation**: Restricting retransmissions to `3` causes stalled or unresponsive connections to be severed significantly faster, releasing kernel memory buffers, TCP control blocks (TCBs), and socket handles.
+2. **Denial-of-Service Defense**: In scenarios involving connection drop attacks, network partitions, or resource starvation attempts, limiting TCP data retransmissions for both IPv4 and IPv6 prevents connection pool depletion on Domain Controllers.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value TcpMaxDataRetransmissions" test_ref="oval:org.adhardening:tst:2149001" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters Value TcpMaxDataRetransmissions" test_ref="oval:org.adhardening:tst:2149002" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:2150" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-150] Disable Default IPv6 DNS Servers on Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>By default, the Windows DNS client may fall back to well-known default IPv6 DNS addresses (such as site-local or router-advertised dynamic addresses) if statically configured DNS servers fail to respond, or when processing IPv6 router advertisements (RAs) via DHCPv6 / SLAAC.
+
+In an Active Directory environment:
+1. **MitM and Rogue IPv6 DNS Redirection**: Attackers on the local network segment utilize tools like `mitm6` to broadcast rogue IPv6 Router Advertisements and rogue DHCPv6 replies, assigning an attacker-controlled IPv6 DNS server to systems on the subnet.
+2. **Credential Relay &amp; Authentication Coercion**: When a Domain Controller queries DNS through a rogue IPv6 DNS server, the attacker can spoof hostnames (such as internal WPAD, CRL endpoints, or management servers) to coerce LDAP/SMB/HTTP authentication and perform NTLM relay attacks.
+
+Enabling `Turn off default IPv6 DNS Servers` (`DisableIPv6DefaultDnsServers = 1`) ensures that the DNS Client service does not fall back to default or dynamically acquired IPv6 DNS server addresses, confining DNS resolution strictly to administratively approved directory DNS servers.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" test_ref="oval:org.adhardening:tst:2150001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:2151" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-151] Disable Link-Layer Topology Discovery Mapper I/O Driver on Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>The Link-Layer Topology Discovery (LLTD) Mapper I/O (LLTDIO) network protocol driver queries neighboring network hosts to discover physical network topology, bandwidth capabilities, and device characteristics for Windows network mapping tools.
+
+On Tier 0 Domain Controllers:
+1. **Attack Surface Minimization**: Domain Controllers must not act as network mapping query clients or probe neighboring devices. Running network discovery protocol drivers in kernel space introduces unnecessary attack surface.
+2. **Reconnaissance Suppression**: Prohibiting LLTDIO driver activity ensures that the Domain Controller cannot be utilized to perform unauthorized local link-layer discovery queries across adjoining subnets.
+
+Disabling the Mapper I/O driver (`Turn on Mapper I/O (LLTDIO) driver -&gt; Disabled`) sets the registry flags under `HKLM\SOFTWARE\Policies\Microsoft\Windows\LLTD` to `0`, ensuring the driver is completely disabled across domain, private, and public network profiles.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowLLTDIOOnDomain" test_ref="oval:org.adhardening:tst:2151001" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowLLTDIOOnPublicNet" test_ref="oval:org.adhardening:tst:2151002" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value EnableLLTDIO" test_ref="oval:org.adhardening:tst:2151003" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value ProhibitLLTDIOOnPrivateNet" test_ref="oval:org.adhardening:tst:2151004" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:2152" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-152] Disable Link-Layer Topology Discovery Responder Driver on Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>The Link-Layer Topology Discovery (LLTD) Responder (RSPNDR) network protocol driver listens for topology discovery requests from other computers on the local network and responds with device details, identity information, and link-layer capabilities.
+
+On Tier 0 Domain Controllers:
+1. **Device Fingerprinting Prevention**: Enabling the Responder driver allows any workstation or rogue host on the local physical segment to discover the Domain Controller, map its MAC address, determine link characteristics, and identify its role via LLTD probe packets.
+2. **Network Protocol Stack Reduction**: Running link-layer responders in the kernel networking stack exposes the server to packet-handling vulnerabilities and potential broadcast flooding attacks.
+
+Disabling the Responder driver (`Turn on Responder (RSPNDR) driver -&gt; Disabled`) ensures that the Domain Controller never advertises itself or responds to link-layer topological queries.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowRspndrOnDomain" test_ref="oval:org.adhardening:tst:2152001" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowRspndrOnPublicNet" test_ref="oval:org.adhardening:tst:2152002" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value EnableRspndr" test_ref="oval:org.adhardening:tst:2152003" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value ProhibitRspndrOnPrivateNet" test_ref="oval:org.adhardening:tst:2152004" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:2153" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-153] Disable Microsoft Peer-to-Peer Networking Services on Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Microsoft Peer-to-Peer Networking Services comprise technologies such as the Peer Name Resolution Protocol (PNRP), Peer Graphing, and Grouping. These services allow distributed applications and workstations to locate each other, publish identities in peer clouds, and exchange data directly without centralized servers.
+
+On Active Directory Domain Controllers:
+1. **Inappropriate Technology on Tier 0**: Domain Controllers are centralized identity authorities designed for hierarchical client-server communication. Peer-to-peer mechanisms are completely antithetical to Tier 0 security isolation.
+2. **Untracked Communication Channels**: PNRP and peer networks establish autonomous, unmanaged communication channels that bypass traditional network inspection and create covert data exchange surfaces.
+3. **Attack Surface Reduction**: Disabling Peernet services (`Disabled = 1`) eliminates the PNRP protocol stack and shuts down peer mesh discovery ports on Domain Controllers.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Peernet Value Disabled" test_ref="oval:org.adhardening:tst:2153001" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:2154" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-154] Disable Windows Connect Now Wireless Settings Configuration on Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Windows Connect Now (WCN) provides mechanisms for wireless network configuration using Wi-Fi Protected Setup (WPS) protocols across various discovery media, including UPnP (Universal Plug and Play), In-Band 802.11, USB flash drives (FlashConfig), and Windows Portable Devices (WPD).
+
+On Active Directory Domain Controllers:
+1. **Tier 0 Dedicated Wired Infrastructure**: Domain Controllers must run on dedicated, physical wired server backbones within physically secured datacenter segments. Wireless configuration mechanisms have no legitimate place on these machines.
+2. **UPnP and Wireless Exploitation**: UPnP registrars and in-band 802.11 discovery listening components can introduce local broadcast vulnerabilities, unauthenticated device registration attacks, or credential leakage over broadcast media.
+3. **Attack Surface Elimination**: Setting `Configuration of wireless settings using Windows Connect Now` to `Disabled` ensures that all WCN registrars (UPnP, In-Band 802.11, FlashConfig, WPD) are explicitly turned off.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value EnableRegistrars" test_ref="oval:org.adhardening:tst:2154001" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableUPnPRegistrar" test_ref="oval:org.adhardening:tst:2154002" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableInBand802DOT11Registrar" test_ref="oval:org.adhardening:tst:2154003" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableFlashConfigRegistrar" test_ref="oval:org.adhardening:tst:2154004" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableWPDRegistrar" test_ref="oval:org.adhardening:tst:2154005" />
+      </criteria>
+    </definition>
+    <definition id="oval:org.adhardening:def:2155" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-155] Prohibit Access to Windows Connect Now Wizards on Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>The Windows Connect Now (WCN) wizards guide users through configuring a wireless router or access point and saving network configuration settings to USB flash memory or broadcasting them via Wi-Fi.
+
+On Tier 0 Domain Controllers:
+1. **Administrative Interface Lockdown**: Interactive administrative sessions on Domain Controllers must never expose consumer wireless or hardware configuration wizards that could be inadvertently or maliciously invoked.
+2. **Prevent Unauthorized Configuration Storage**: WCN wizards allow exporting wireless network keys and connection settings to removable storage or across the network. Prohibiting access to the WCN wizards (`DisableWcnUi = 1`) ensures the GUI wizard interface cannot be launched.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\UI Value DisableWcnUi" test_ref="oval:org.adhardening:tst:2155001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8001" version="1" class="compliance">
@@ -10481,86 +10641,6 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
       <windows:object object_ref="oval:org.adhardening:obj:2025010" />
       <windows:state state_ref="oval:org.adhardening:ste:2025010" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value KeepAliveTime" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026001" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026001" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value PerformRouterDiscovery" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026002" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026002" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026003" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value TcpMaxDataRetransmissions" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026003" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026003" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters Value TcpMaxDataRetransmissions" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026004" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026004" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026005" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026005" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026005" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026006" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowLLTDIOOnDomain" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026006" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026006" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026007" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowLLTDIOOnPublicNet" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026007" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026007" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026008" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value EnableLLTDIO" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026008" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026008" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026009" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value ProhibitLLTDIOOnPrivateNet" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026009" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026009" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026010" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowRspndrOnDomain" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026010" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026010" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026011" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowRspndrOnPublicNet" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026011" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026011" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026012" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value EnableRspndr" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026012" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026012" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026013" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value ProhibitRspndrOnPrivateNet" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026013" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026013" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026014" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Peernet Value Disabled" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026014" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026014" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026015" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value EnableRegistrars" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026015" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026015" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026016" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableUPnPRegistrar" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026016" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026016" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026017" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableInBand802DOT11Registrar" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026017" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026017" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026018" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableFlashConfigRegistrar" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026018" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026018" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026019" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableWPDRegistrar" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026019" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026019" />
-    </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2026020" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\UI Value DisableWcnUi" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:2026020" />
-      <windows:state state_ref="oval:org.adhardening:ste:2026020" />
-    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:2027001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer Value AllowOnlineTips" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2027001" />
       <windows:state state_ref="oval:org.adhardening:ste:2027001" />
@@ -11216,6 +11296,86 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
     <windows:registry_test id="oval:org.adhardening:tst:2146001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\$($ServiceName) Value Start" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2146001" />
       <windows:state state_ref="oval:org.adhardening:ste:2146001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2147001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value KeepAliveTime" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2147001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2147001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2148001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value PerformRouterDiscovery" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2148001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2148001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2149001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip\Parameters Value TcpMaxDataRetransmissions" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2149001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2149001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2149002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters Value TcpMaxDataRetransmissions" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2149002" />
+      <windows:state state_ref="oval:org.adhardening:ste:2149002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2150001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows NT\DNSClient Value DisableIPv6DefaultDnsServers" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2150001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2150001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2151001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowLLTDIOOnDomain" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2151001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2151001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2151002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowLLTDIOOnPublicNet" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2151002" />
+      <windows:state state_ref="oval:org.adhardening:ste:2151002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2151003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value EnableLLTDIO" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2151003" />
+      <windows:state state_ref="oval:org.adhardening:ste:2151003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2151004" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value ProhibitLLTDIOOnPrivateNet" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2151004" />
+      <windows:state state_ref="oval:org.adhardening:ste:2151004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2152001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowRspndrOnDomain" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2152001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2152001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2152002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value AllowRspndrOnPublicNet" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2152002" />
+      <windows:state state_ref="oval:org.adhardening:ste:2152002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2152003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value EnableRspndr" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2152003" />
+      <windows:state state_ref="oval:org.adhardening:ste:2152003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2152004" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\LLTD Value ProhibitRspndrOnPrivateNet" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2152004" />
+      <windows:state state_ref="oval:org.adhardening:ste:2152004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2153001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Peernet Value Disabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2153001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2153001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2154001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value EnableRegistrars" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2154001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2154001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2154002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableUPnPRegistrar" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2154002" />
+      <windows:state state_ref="oval:org.adhardening:ste:2154002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2154003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableInBand802DOT11Registrar" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2154003" />
+      <windows:state state_ref="oval:org.adhardening:ste:2154003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2154004" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableFlashConfigRegistrar" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2154004" />
+      <windows:state state_ref="oval:org.adhardening:ste:2154004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2154005" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars Value DisableWPDRegistrar" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2154005" />
+      <windows:state state_ref="oval:org.adhardening:ste:2154005" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2155001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\WCN\UI Value DisableWcnUi" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2155001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2155001" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8001001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001001" />
@@ -14922,126 +15082,6 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
       <windows:key>System\CurrentControlSet\Control\SecurePipeServers\winreg\AllowedPaths</windows:key>
       <windows:name>Machine</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026001" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip\Parameters</windows:key>
-      <windows:name>KeepAliveTime</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026002" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip\Parameters</windows:key>
-      <windows:name>PerformRouterDiscovery</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026003" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip\Parameters</windows:key>
-      <windows:name>TcpMaxDataRetransmissions</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026004" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters</windows:key>
-      <windows:name>TcpMaxDataRetransmissions</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026005" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\DNSClient</windows:key>
-      <windows:name>DisableIPv6DefaultDnsServers</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026006" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
-      <windows:name>AllowLLTDIOOnDomain</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026007" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
-      <windows:name>AllowLLTDIOOnPublicNet</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026008" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
-      <windows:name>EnableLLTDIO</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026009" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
-      <windows:name>ProhibitLLTDIOOnPrivateNet</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026010" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
-      <windows:name>AllowRspndrOnDomain</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026011" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
-      <windows:name>AllowRspndrOnPublicNet</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026012" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
-      <windows:name>EnableRspndr</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026013" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
-      <windows:name>ProhibitRspndrOnPrivateNet</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026014" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Peernet</windows:key>
-      <windows:name>Disabled</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026015" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars</windows:key>
-      <windows:name>EnableRegistrars</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026016" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars</windows:key>
-      <windows:name>DisableUPnPRegistrar</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026017" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars</windows:key>
-      <windows:name>DisableInBand802DOT11Registrar</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026018" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars</windows:key>
-      <windows:name>DisableFlashConfigRegistrar</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026019" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars</windows:key>
-      <windows:name>DisableWPDRegistrar</windows:name>
-    </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2026020" version="1">
-      <windows:behaviors windows_view="64_bit" />
-      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WCN\UI</windows:key>
-      <windows:name>DisableWcnUi</windows:name>
-    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:2027001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -15884,6 +15924,126 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\$($ServiceName)</windows:key>
       <windows:name>Start</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2147001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip\Parameters</windows:key>
+      <windows:name>KeepAliveTime</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2148001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip\Parameters</windows:key>
+      <windows:name>PerformRouterDiscovery</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2149001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip\Parameters</windows:key>
+      <windows:name>TcpMaxDataRetransmissions</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2149002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters</windows:key>
+      <windows:name>TcpMaxDataRetransmissions</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2150001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows NT\DNSClient</windows:key>
+      <windows:name>DisableIPv6DefaultDnsServers</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2151001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
+      <windows:name>AllowLLTDIOOnDomain</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2151002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
+      <windows:name>AllowLLTDIOOnPublicNet</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2151003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
+      <windows:name>EnableLLTDIO</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2151004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
+      <windows:name>ProhibitLLTDIOOnPrivateNet</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2152001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
+      <windows:name>AllowRspndrOnDomain</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2152002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
+      <windows:name>AllowRspndrOnPublicNet</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2152003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
+      <windows:name>EnableRspndr</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2152004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\LLTD</windows:key>
+      <windows:name>ProhibitRspndrOnPrivateNet</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2153001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Peernet</windows:key>
+      <windows:name>Disabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2154001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars</windows:key>
+      <windows:name>EnableRegistrars</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2154002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars</windows:key>
+      <windows:name>DisableUPnPRegistrar</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2154003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars</windows:key>
+      <windows:name>DisableInBand802DOT11Registrar</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2154004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars</windows:key>
+      <windows:name>DisableFlashConfigRegistrar</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2154005" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WCN\Registrars</windows:key>
+      <windows:name>DisableWPDRegistrar</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2155001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\WCN\UI</windows:key>
+      <windows:name>DisableWcnUi</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8001001" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -20829,86 +20989,6 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string">$AllowedPaths</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026001" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">300000</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026002" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026003" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">3</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026004" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">3</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026005" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026006" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026007" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026008" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026009" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026010" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026011" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026012" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026013" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026014" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026015" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026016" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026017" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026018" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026019" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:2026020" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
-    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:2027001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
@@ -21529,6 +21609,86 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
     <windows:registry_state id="oval:org.adhardening:ste:2146001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2147001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">300000</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2148001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2149001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">3</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2149002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">3</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2150001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2151001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2151002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2151003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2151004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2152001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2152002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2152003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2152004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2153001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2154001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2154002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2154003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2154004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2154005" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2155001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001001" version="1">
       <windows:type>reg_dword</windows:type>

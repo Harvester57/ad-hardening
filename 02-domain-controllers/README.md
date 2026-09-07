@@ -158,6 +158,15 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to configure baseline administrative template Security Options, disabling anonymous access to SAM/shares and enforcing credential policies.
 * **[REQ-DC-026 - Configure TCP/IP and Network Parameter Hardening for Domain Controllers](harden-network-parameters.md)**
   Requirement to configure hardened network configurations, TCP/IP MSS parameters, disabling LLTDIO/RSPNDR drivers, Peer-to-Peer, and Windows Connect Now.
+  * **[REQ-DC-147 - Configure TCP/IP KeepAliveTime on Domain Controllers](network/configure-tcpip-keepalivetime.md)**
+  * **[REQ-DC-148 - Disable TCP/IP Router Discovery on Domain Controllers](network/disable-tcpip-router-discovery.md)**
+  * **[REQ-DC-149 - Configure TCP Max Data Retransmissions on Domain Controllers](network/configure-tcpip-max-data-retransmissions.md)**
+  * **[REQ-DC-150 - Disable Default IPv6 DNS Servers on Domain Controllers](network/disable-ipv6-default-dns-servers.md)**
+  * **[REQ-DC-151 - Disable Link-Layer Topology Discovery Mapper I/O Driver on Domain Controllers](network/disable-lltd-mapper-io-driver.md)**
+  * **[REQ-DC-152 - Disable Link-Layer Topology Discovery Responder Driver on Domain Controllers](network/disable-lltd-responder-driver.md)**
+  * **[REQ-DC-153 - Disable Microsoft Peer-to-Peer Networking Services on Domain Controllers](network/disable-peernet.md)**
+  * **[REQ-DC-154 - Disable Windows Connect Now Wireless Settings Configuration on Domain Controllers](network/disable-wcn-wireless-configuration.md)**
+  * **[REQ-DC-155 - Prohibit Access to Windows Connect Now Wizards on Domain Controllers](network/prohibit-wcn-wizards.md)**
 * **[REQ-DC-027 - Configure Telemetry, Diagnostics and Privacy Options for Domain Controllers](configure-telemetry-privacy.md)**
   Requirement to restrict telemetry collection, online diagnostics, advertising IDs, diagnostic tools, and cloud content integration.
 * **[REQ-DC-028 - Configure Untrusted Font Blocking for Domain Controllers](configure-untrusted-font-blocking.md)**
