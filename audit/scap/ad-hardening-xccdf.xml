@@ -4390,7 +4390,7 @@ if ($AclModified) {
           <xhtml:li>
             <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -4398,47 +4398,115 @@ if ($AclModified) {
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>In Active Directory-integrated DNS zones, DNS server configurations and zone data are stored inside the directory. By default, members of the built-in <xhtml:code>DnsAdmins</xhtml:code> group have write permissions over the properties of the <xhtml:code>CN=MicrosoftDNS,CN=System</xhtml:code> container, and standard domain users can register arbitrary DNS records in AD-integrated zones.</xhtml:p>
-        <xhtml:p>This default configuration presents critical attack vectors: 1. <xhtml:strong>DLL Hijacking via DNS Service</xhtml:strong>: An account with write permissions on the DNS container can specify a path to a malicious DLL in the <xhtml:code>ServerLevelPluginDll</xhtml:code> parameter. The DNS server service (which runs as <xhtml:code>SYSTEM</xhtml:code> on Domain Controllers) will load this DLL upon restart, executing arbitrary code with system privileges and leading to full Domain Controller takeover. 2. <xhtml:strong>ADIDNS Record Spoofing &amp; Kerberos Reflection (Ghost-SPN)</xhtml:strong>: If standard authenticated users have unrestricted rights to create new DNS records in Active Directory Integrated DNS (ADIDNS) zones, attackers can register arbitrary names—including Unicode homoglyphs (such as <xhtml:code>Ⓡ</xhtml:code> or <xhtml:code>․</xhtml:code>). During Kerberos ticket requests, Kerberos linguistic normalization canonicalizes the homoglyph SPN to ASCII (matching a legitimate target computer), while Windows DNS cache preserves the distinction, routing traffic to the attacker's listener and allowing Kerberos AP-REQ reflection attacks (CVE-2025-58726 / Synacktiv research). 3. <xhtml:strong>Restricting DNS Management Boundary</xhtml:strong>: Restricting write access on the container properties, disabling non-secure dynamic updates, and auditing <xhtml:code>DnsAdmins</xhtml:code> membership prevents non-Tier 0 identities from manipulating directory DNS infrastructure.</xhtml:p>
+        <xhtml:p>In Active Directory-integrated DNS environments, DNS configuration settings, zones, and resource records are stored directly within the directory and managed via the Microsoft DNS Server service. By default, the built-in <xhtml:code>DnsAdmins</xhtml:code> group possesses management rights over the DNS service, while standard authenticated domain users possess rights to register new DNS records in AD-integrated zones.</xhtml:p>
+        <xhtml:p>This configuration exposes Domain Controllers and Active Directory to critical attack vectors: 1. <xhtml:strong>DNS Service DLL Hijacking (`ServerLevelPluginDll`)</xhtml:strong>: The Microsoft DNS Server management RPC interface permits members of <xhtml:code>DnsAdmins</xhtml:code> (and accounts with write control over the DNS server configuration) to set the <xhtml:code>ServerLevelPluginDll</xhtml:code> parameter using <xhtml:code>dnscmd.exe /config /serverlevelplugindll \\path\to\malicious.dll</xhtml:code>. Because the DNS Server service runs as <xhtml:code>NT AUTHORITY\SYSTEM</xhtml:code> on Domain Controllers, the service loads this DLL upon restart or server reboot, executing arbitrary code with SYSTEM privileges and granting full Domain Controller compromise (effectively making <xhtml:code>DnsAdmins</xhtml:code> a Tier 0 equivalent group). 2. <xhtml:strong>ADIDNS Record Spoofing &amp; Kerberos Reflection (Ghost-SPN)</xhtml:strong>: In Active Directory Integrated DNS (ADIDNS) zones, the root container DACL grants <xhtml:code>Authenticated Users</xhtml:code> the <xhtml:code>Create all child objects</xhtml:code> right (specifically <xhtml:code>Create dnsNode objects</xhtml:code>) by default. This allows any standard domain user or compromised workstation account to register arbitrary DNS records. Attackers exploit this capability to register Unicode homoglyphs (such as <xhtml:code>․</xhtml:code> U+2024 or <xhtml:code>Ⓡ</xhtml:code> U+00AE) matching high-value servers or Domain Controllers. When clients request Kerberos service tickets (TGS-REQ) for an SPN like <xhtml:code>HOST/target</xhtml:code>, Kerberos linguistic normalization canonicalizes the homoglyph SPN to ASCII (matching the legitimate target), while the Windows DNS client resolves the IP via the attacker's ADIDNS homoglyph record, allowing Kerberos AP-REQ reflection attacks (CVE-2025-58726 / Synacktiv research) and WPAD hijacking. 3. <xhtml:strong>Partition Directory DACL Tampering</xhtml:strong>: Modern AD environments store DNS zones across dedicated Application Directory Partitions (<xhtml:code>DomainDnsZones</xhtml:code> and <xhtml:code>ForestDnsZones</xhtml:code>) as well as the legacy <xhtml:code>CN=System</xhtml:code> container. Write access on these containers allows non-Tier 0 identities to modify zone delegations, poison records, manipulate SOA/NS records, or grant themselves persistent backdoor rights.</xhtml:p>
+        <xhtml:p>Enforcing GPO-based restriction on <xhtml:code>DnsAdmins</xhtml:code>, purging <xhtml:code>ServerLevelPluginDll</xhtml:code>, enforcing Secure Dynamic Updates, and removing arbitrary child record creation rights on ADIDNS zones ensures that the directory DNS infrastructure strictly adheres to the Tier 0 administrative boundary.</xhtml:p>
       </rationale>
       <fixtext>
-        <xhtml:h3>Option A: Active Directory Users and Computers (ADUC) &amp; DNS Console Configuration</xhtml:h3>
-        <xhtml:h4>1. Restrict MicrosoftDNS Container Permissions</xhtml:h4>
+        <xhtml:h3>Option A: Group Policy Object (GPO) &amp; Active Directory Console Configuration</xhtml:h3>
+        <xhtml:h4>1. Enforce DnsAdmins Group Hygiene via GPO Restricted Groups</xhtml:h4>
         <xhtml:ol>
-          <xhtml:li>Open <xhtml:strong>Active Directory Users and Computers</xhtml:strong> (<xhtml:code>dsa.msc</xhtml:code>) on a Domain Controller.</xhtml:li>
-          <xhtml:li>Ensure <xhtml:strong>View</xhtml:strong> -&gt; <xhtml:strong>Advanced Features</xhtml:strong> is checked.</xhtml:li>
+          <xhtml:li>Open <xhtml:strong>Group Policy Management</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
+          <xhtml:li>Edit the baseline GPO applied to the <xhtml:strong>Domain Controllers</xhtml:strong> OU (e.g., <xhtml:code>GPO_Hardening_DomainControllers</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to:</xhtml:li>
           <xhtml:li>
-            <xhtml:code>System\MicrosoftDNS</xhtml:code>
+            <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Restricted Groups</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Right-click <xhtml:strong>MicrosoftDNS</xhtml:strong> and select <xhtml:strong>Properties</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Select the <xhtml:strong>Security</xhtml:strong> tab.</xhtml:li>
-          <xhtml:li>Select the <xhtml:strong>DnsAdmins</xhtml:strong> group or any non-Tier 0 administrative user/group.</xhtml:li>
-          <xhtml:li>Click <xhtml:strong>Advanced</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Ensure they do not possess <xhtml:strong>Write all properties</xhtml:strong> or <xhtml:strong>Full Control</xhtml:strong> over the container.</xhtml:li>
-          <xhtml:li>Click <xhtml:strong>OK</xhtml:strong> to apply.</xhtml:li>
-          <xhtml:li>Open <xhtml:strong>Active Directory Users and Computers</xhtml:strong> and navigate to the <xhtml:code>Builtin</xhtml:code> or <xhtml:code>Users</xhtml:code> container.</xhtml:li>
-          <xhtml:li>Double-click the <xhtml:strong>DnsAdmins</xhtml:strong> group and ensure only Tier 0 accounts are members. Remove any non-Tier 0 identities.</xhtml:li>
-        </xhtml:ol>
-        <xhtml:h4>2. Enforce Secure Dynamic Updates on All AD-Integrated Zones</xhtml:h4>
-        <xhtml:ol>
-          <xhtml:li>Open the <xhtml:strong>DNS Manager</xhtml:strong> console (<xhtml:code>dnsmgmt.msc</xhtml:code>).</xhtml:li>
-          <xhtml:li>Expand the Domain Controller node -&gt; <xhtml:strong>Forward Lookup Zones</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Right-click the domain DNS zone and select <xhtml:strong>Properties</xhtml:strong>.</xhtml:li>
-          <xhtml:li>On the <xhtml:strong>General</xhtml:strong> tab, set <xhtml:strong>Dynamic updates</xhtml:strong> to <xhtml:strong>Secure only</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Right-click <xhtml:strong>Restricted Groups</xhtml:strong> and select <xhtml:strong>Add Group...</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Type <xhtml:code>DnsAdmins</xhtml:code> and click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Under <xhtml:strong>Members of this group</xhtml:strong>, leave the member list <xhtml:strong>empty</xhtml:strong> (or populate it strictly with verified Tier 0 accounts such as <xhtml:code>Domain Admins</xhtml:code>).</xhtml:li>
           <xhtml:li>Click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>2. Prevent DNS DLL Hijacking via GPO Preferences Registry Policy</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>In the same GPO, navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Preferences\Windows Settings\Registry</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Right-click <xhtml:strong>Registry</xhtml:strong> -&gt; <xhtml:strong>New</xhtml:strong> -&gt; <xhtml:strong>Registry Item</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Configure the following properties:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Delete</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SYSTEM\CurrentControlSet\Services\DNS\Parameters</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>ServerLevelPluginDll</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>3. Enforce Secure Dynamic Updates on All AD-Integrated Zones</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Open the <xhtml:strong>DNS Manager</xhtml:strong> console (<xhtml:code>dnsmgmt.msc</xhtml:code>) on a Domain Controller.</xhtml:li>
+          <xhtml:li>Expand the Domain Controller node -&gt; <xhtml:strong>Forward Lookup Zones</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Right-click each AD-integrated zone and select <xhtml:strong>Properties</xhtml:strong>.</xhtml:li>
+          <xhtml:li>On the <xhtml:strong>General</xhtml:strong> tab, set <xhtml:strong>Dynamic updates</xhtml:strong> to <xhtml:strong>Secure only</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Repeat this configuration for all Forward and Reverse Lookup Zones.</xhtml:li>
+          <xhtml:li>Click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>4. Restrict Arbitrary Record Creation &amp; Ghost-SPN on ADIDNS Zones</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>In <xhtml:strong>DNS Manager</xhtml:strong>, right-click the domain DNS zone and select <xhtml:strong>Properties</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Select the <xhtml:strong>Security</xhtml:strong> tab, then click <xhtml:strong>Advanced</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Select the entry for <xhtml:strong>Authenticated Users</xhtml:strong> and click <xhtml:strong>Edit</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Clear the <xhtml:strong>Create all child objects</xhtml:strong> (or <xhtml:strong>Create dnsNode objects</xhtml:strong>) permission to prevent standard domain users from creating arbitrary DNS records or Unicode homoglyphs.</xhtml:li>
+          <xhtml:li>Ensure machine accounts retain permissions to register their own hostname records, or utilize DHCP servers with dedicated service account credentials for dynamic updates.</xhtml:li>
+          <xhtml:li>Click <xhtml:strong>OK</xhtml:strong> to apply.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>5. Audit &amp; Restrict Permissions on MicrosoftDNS Containers</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Open <xhtml:strong>Active Directory Users and Computers</xhtml:strong> (<xhtml:code>dsa.msc</xhtml:code>) with <xhtml:strong>View</xhtml:strong> -&gt; <xhtml:strong>Advanced Features</xhtml:strong> enabled.</xhtml:li>
+          <xhtml:li>Check permissions on <xhtml:code>System\MicrosoftDNS</xhtml:code>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Right-click </xhtml:em>
+            <xhtml:em>MicrosoftDNS</xhtml:em>
+            <xhtml:em> -&gt; </xhtml:em>
+            <xhtml:em>Properties</xhtml:em>
+            <xhtml:em> -&gt; </xhtml:em>
+            <xhtml:em>Security</xhtml:em>*.</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Verify that non-Tier 0 identities and `DnsAdmins` do not hold </xhtml:em>
+            <xhtml:em>Write all properties</xhtml:em>
+            <xhtml:em>, </xhtml:em>
+            <xhtml:em>Modify permissions</xhtml:em>
+            <xhtml:em>, or </xhtml:em>
+            <xhtml:em>Full Control</xhtml:em>*.</xhtml:li>
+          <xhtml:li>To inspect Application Partitions (<xhtml:code>DomainDnsZones</xhtml:code> and <xhtml:code>ForestDnsZones</xhtml:code>):</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Open </xhtml:em>
+            <xhtml:em>ADSI Edit</xhtml:em>* (<xhtml:code>adsiedit.msc</xhtml:code>).</xhtml:li>
+          <xhtml:li>* Connect to Naming Context: <xhtml:code>DC=DomainDnsZones,DC=[Domain]</xhtml:code> and navigate to <xhtml:code>CN=MicrosoftDNS</xhtml:code>.</xhtml:li>
+          <xhtml:li>* Connect to Naming Context: <xhtml:code>DC=ForestDnsZones,DC=[ForestRootDomain]</xhtml:code> and navigate to <xhtml:code>CN=MicrosoftDNS</xhtml:code>.</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Right-click </xhtml:em>
+            <xhtml:em>MicrosoftDNS</xhtml:em>
+            <xhtml:em> -&gt; </xhtml:em>
+            <xhtml:em>Properties</xhtml:em>
+            <xhtml:em> -&gt; </xhtml:em>
+            <xhtml:em>Security</xhtml:em>
+            <xhtml:em> -&gt; </xhtml:em>
+            <xhtml:em>Advanced</xhtml:em>* and verify that only Tier 0 accounts possess write access.</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Run the following script block to audit and remove the <xhtml:code>ServerLevelPluginDll</xhtml:code> registry backdoor on Domain Controllers, and verify DNSAdmins membership.</xhtml:p>
+        <xhtml:p>Run the following script block to remove the <xhtml:code>ServerLevelPluginDll</xhtml:code> backdoor, enforce Secure Dynamic Updates on all AD-integrated zones, and audit <xhtml:code>DnsAdmins</xhtml:code> membership.</xhtml:p>
         <xhtml:p>
           <xhtml:a href="implementation_scripts/Harden-DnsServerConfiguration.ps1">Download Script: Harden-DnsServerConfiguration.ps1</xhtml:a>
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Harden-DnsServerConfiguration.ps1
-# Description: Deletes any ServerLevelPluginDll entry to block DNS DLL hijacking, and checks DnsAdmins group.
+# Description: Hardens Microsoft DNS on Domain Controllers by removing ServerLevelPluginDll backdoors, enforcing Secure Dynamic Updates on AD-integrated zones, and verifying DnsAdmins membership.
 
-Import-Module ActiveDirectory
+Import-Module ActiveDirectory -ErrorAction SilentlyContinue
+Import-Module DnsServer -ErrorAction SilentlyContinue
 
 Write-Host "Applying hardening requirement: Harden Microsoft DNS AD Container..." -ForegroundColor Cyan
 
@@ -4446,9 +4514,9 @@ Write-Host "Applying hardening requirement: Harden Microsoft DNS AD Container...
 $RegPath = "HKLM:\System\CurrentControlSet\Services\DNS\Parameters"
 $ValueName = "ServerLevelPluginDll"
 
-if (Test-Path $RegPath) {
+if (Test-Path -Path $RegPath) {
     $PluginDll = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $PluginDll) {
+    if ($null -ne $PluginDll -and $null -ne $PluginDll.ServerLevelPluginDll -and $PluginDll.ServerLevelPluginDll -ne "") {
         Write-Host "[-] WARNING: Potentially unauthorized DNS plugin detected: $($PluginDll.ServerLevelPluginDll)" -ForegroundColor Yellow
         Remove-ItemProperty -Path $RegPath -Name $ValueName -Force -ErrorAction Stop
         Write-Host "[+] ServerLevelPluginDll registry parameter removed successfully." -ForegroundColor Green
@@ -4457,64 +4525,179 @@ if (Test-Path $RegPath) {
     }
 }
 
-# 2. Audit DnsAdmins Membership
-$DnsAdminsGroup = Get-ADGroup -Filter "Name -eq 'DnsAdmins'" -ErrorAction SilentlyContinue
-
-if ($null -ne $DnsAdminsGroup) {
-    $Members = Get-ADGroupMember -Identity $DnsAdminsGroup
-    if ($Members.Count -gt 0) {
-        Write-Host "[-] WARNING: The DnsAdmins group contains active members. Please verify that all members are Tier 0 identities." -ForegroundColor Yellow
-        foreach ($Member in $Members) {
-            Write-Host "    - Member: $($Member.SamAccountName) ($($Member.objectClass))" -ForegroundColor White
+# 2. Enforce Secure Dynamic Updates on Active Directory-Integrated Zones
+if (Get-Command -Name "Get-DnsServerZone" -ErrorAction SilentlyContinue) {
+    Write-Host "Checking Dynamic Update settings on AD-integrated DNS zones..." -ForegroundColor White
+    $Zones = Get-DnsServerZone -ErrorAction SilentlyContinue | Where-Object { $_.IsDsIntegrated -eq $true -and $_.ZoneType -eq "Primary" }
+    foreach ($Zone in $Zones) {
+        if ($Zone.DynamicUpdate -ne "Secure") {
+            Write-Host "[-] Zone '$($Zone.ZoneName)' has DynamicUpdate set to '$($Zone.DynamicUpdate)'. Enforcing Secure only..." -ForegroundColor Yellow
+            Set-DnsServerPrimaryZone -Name $Zone.ZoneName -DynamicUpdate "Secure" -ErrorAction SilentlyContinue
+            Write-Host "[+] Zone '$($Zone.ZoneName)' DynamicUpdate set to Secure." -ForegroundColor Green
+        } else {
+            Write-Host "[+] Zone '$($Zone.ZoneName)' DynamicUpdate is Secure." -ForegroundColor Green
         }
-    } else {
-        Write-Host "[+] The DnsAdmins group is empty (recommended)." -ForegroundColor Green
+    }
+}
+
+# 3. Audit and Alert on DnsAdmins Membership
+if (Get-Command -Name "Get-ADGroup" -ErrorAction SilentlyContinue) {
+    $DnsAdminsGroup = Get-ADGroup -Filter "Name -eq 'DnsAdmins'" -ErrorAction SilentlyContinue
+
+    if ($null -ne $DnsAdminsGroup) {
+        $Members = Get-ADGroupMember -Identity $DnsAdminsGroup -ErrorAction SilentlyContinue
+        if ($null -ne $Members -and @($Members).Count -gt 0) {
+            Write-Host "[-] WARNING: The DnsAdmins group contains active members. Ensure all members are verified Tier 0 identities:" -ForegroundColor Yellow
+            foreach ($Member in $Members) {
+                Write-Host "    - Member: $($Member.SamAccountName) ($($Member.objectClass))" -ForegroundColor White
+            }
+        } else {
+            Write-Host "[+] The DnsAdmins group is empty (recommended Tier 0 posture)." -ForegroundColor Green
+        }
     }
 }</xhtml:code>
         </xhtml:pre>
         <xhtml:p>
-          <xhtml:em>To verify active DNS parameters and container permissions:</xhtml:em>
+          <xhtml:em>To audit active DNS parameters, AD container permissions, dynamic updates, and homoglyph records:</xhtml:em>
+        </xhtml:p>
+        <xhtml:p>
           <xhtml:a href="audit_scripts/Get-DnsAuditStatus.ps1">Download Script: Get-DnsAuditStatus.ps1</xhtml:a>
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Get-DnsAuditStatus.ps1
-# Description: Queries the DNS registry parameter settings and AD container ACLs.
+# Description: Queries the DNS registry parameter settings, AD container ACLs, dynamic updates, and homoglyph records.
 
-Import-Module ActiveDirectory
+Import-Module ActiveDirectory -ErrorAction SilentlyContinue
+Import-Module DnsServer -ErrorAction SilentlyContinue
 
 Write-Host "--- Auditing DNS Security Parameters ---" -ForegroundColor Cyan
 
-# Check Registry
+$isVulnerable = $false
+
+# 1. Check ServerLevelPluginDll Registry Backdoor
 $RegPath = "HKLM:\System\CurrentControlSet\Services\DNS\Parameters"
 $ValueName = "ServerLevelPluginDll"
 
-if (Test-Path $RegPath) {
+if (Test-Path -Path $RegPath) {
     $Val = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Val) {
-        Write-Host "[!] Danger: ServerLevelPluginDll is configured: $($Val.ServerLevelPluginDll)" -ForegroundColor Red
+    if ($null -ne $Val -and $null -ne $Val.ServerLevelPluginDll -and $Val.ServerLevelPluginDll -ne "") {
+        Write-Host "[!] VULNERABLE: ServerLevelPluginDll is configured: $($Val.ServerLevelPluginDll)" -ForegroundColor Red
+        $isVulnerable = $true
     } else {
         Write-Host "[+] ServerLevelPluginDll: Not configured (Secure)." -ForegroundColor Green
     }
 }
 
-# Check AD Container Write ACLs
-$DomainDN = (Get-ADRootDSE).defaultNamingContext
-$DnsPath = "AD:\CN=MicrosoftDNS,CN=System,$($DomainDN)"
-$Acl = Get-Acl -Path $DnsPath
-
-Write-Host "Reviewing MicrosoftDNS AD container access permissions..." -ForegroundColor White
-foreach ($Rule in $Acl.Access) {
-    if ($Rule.ActiveDirectoryRights -match "WriteProperty|GenericAll|GenericWrite") {
-        Write-Host "    - Trustee: $($Rule.IdentityReference.Value) | Rights: $($Rule.ActiveDirectoryRights)" -ForegroundColor Yellow
+# 2. Check DnsAdmins Membership
+if (Get-Command -Name "Get-ADGroup" -ErrorAction SilentlyContinue) {
+    $DnsAdminsGroup = Get-ADGroup -Filter "Name -eq 'DnsAdmins'" -ErrorAction SilentlyContinue
+    if ($null -ne $DnsAdminsGroup) {
+        $Members = Get-ADGroupMember -Identity $DnsAdminsGroup -ErrorAction SilentlyContinue
+        if ($null -ne $Members -and @($Members).Count -gt 0) {
+            Write-Host "[-] WARNING: DnsAdmins group contains active members (Verify Tier 0 boundary):" -ForegroundColor Yellow
+            foreach ($Member in $Members) {
+                Write-Host "    - Member: $($Member.SamAccountName)" -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host "[+] DnsAdmins group is empty (Secure)." -ForegroundColor Green
+        }
     }
+}
+
+# 3. Check Dynamic Updates on AD-Integrated Zones
+if (Get-Command -Name "Get-DnsServerZone" -ErrorAction SilentlyContinue) {
+    $Zones = Get-DnsServerZone -ErrorAction SilentlyContinue | Where-Object { $_.IsDsIntegrated -eq $true -and $_.ZoneType -eq "Primary" }
+    foreach ($Zone in $Zones) {
+        if ($Zone.DynamicUpdate -ne "Secure") {
+            Write-Host "[!] VULNERABLE: Zone '$($Zone.ZoneName)' DynamicUpdate is set to '$($Zone.DynamicUpdate)' (Expected: Secure)." -ForegroundColor Red
+            $isVulnerable = $true
+        } else {
+            Write-Host "[+] Zone '$($Zone.ZoneName)': DynamicUpdate is Secure." -ForegroundColor Green
+        }
+    }
+}
+
+# 4. Check AD Container Write ACLs (System, DomainDnsZones, ForestDnsZones)
+if (Get-Command -Name "Get-ADRootDSE" -ErrorAction SilentlyContinue) {
+    $RootDSE = Get-ADRootDSE -ErrorAction SilentlyContinue
+    if ($null -ne $RootDSE) {
+        $DomainDN = $RootDSE.defaultNamingContext
+        $RootDomainDN = $RootDSE.rootDomainNamingContext
+
+        $Containers = @(
+            "AD:\CN=MicrosoftDNS,CN=System,$DomainDN",
+            "AD:\CN=MicrosoftDNS,DC=DomainDnsZones,$DomainDN",
+            "AD:\CN=MicrosoftDNS,DC=ForestDnsZones,$RootDomainDN"
+        )
+
+        $AllowedTrustees = @(
+            "NT AUTHORITY\SYSTEM",
+            "BUILTIN\Administrators",
+            "Enterprise Domain Controllers",
+            "Domain Admins",
+            "Enterprise Admins"
+        )
+
+        foreach ($ContainerPath in $Containers) {
+            if (Test-Path -Path $ContainerPath) {
+                Write-Host "Reviewing AD container permissions: $($ContainerPath)..." -ForegroundColor White
+                $Acl = Get-Acl -Path $ContainerPath -ErrorAction SilentlyContinue
+                if ($null -ne $Acl) {
+                    foreach ($Rule in $Acl.Access) {
+                        $Identity = $Rule.IdentityReference.Value
+                        $Rights = $Rule.ActiveDirectoryRights
+
+                        if ($Rights -match "WriteProperty|WriteDacl|WriteOwner|GenericAll|GenericWrite") {
+                            $IsAllowed = $false
+                            foreach ($Allowed in $AllowedTrustees) {
+                                if ($Identity -match [regex]::Escape($Allowed)) {
+                                    $IsAllowed = $true
+                                    break
+                                }
+                            }
+
+                            if (-not $IsAllowed) {
+                                Write-Host "[!] VULNERABLE: Unauthorized write permission on $($ContainerPath) - Trustee: $($Identity) - Rights: $($Rights)" -ForegroundColor Red
+                                $isVulnerable = $true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+# 5. Check for Non-ASCII / Unicode Homoglyph Records (Ghost-SPN / CVE-2025-58726)
+if (Get-Command -Name "Get-DnsServerResourceRecord" -ErrorAction SilentlyContinue) {
+    $Zones = Get-DnsServerZone -ErrorAction SilentlyContinue | Where-Object { $_.IsDsIntegrated -eq $true -and $_.ZoneType -eq "Primary" }
+    foreach ($Zone in $Zones) {
+        $Records = Get-DnsServerResourceRecord -ZoneName $Zone.ZoneName -ErrorAction SilentlyContinue
+        if ($null -ne $Records) {
+            foreach ($Record in $Records) {
+                if ($Record.HostName -match "[^\x20-\x7E]") {
+                    Write-Host "[!] VULNERABLE: Potential Ghost-SPN homoglyph record detected in zone '$($Zone.ZoneName)': $($Record.HostName)" -ForegroundColor Red
+                    $isVulnerable = $true
+                }
+            }
+        }
+    }
+}
+
+# Final Compliance Verdict
+if ($isVulnerable) {
+    Write-Host "[!] Audit Result: VULNERABLE" -ForegroundColor Red
+} else {
+    Write-Host "[+] Audit Result: SECURE" -ForegroundColor Green
 }</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
       <fix system="urn:xccdf:fix:script:powershell"># Harden-DnsServerConfiguration.ps1
-# Description: Deletes any ServerLevelPluginDll entry to block DNS DLL hijacking, and checks DnsAdmins group.
+# Description: Hardens Microsoft DNS on Domain Controllers by removing ServerLevelPluginDll backdoors, enforcing Secure Dynamic Updates on AD-integrated zones, and verifying DnsAdmins membership.
 
-Import-Module ActiveDirectory
+Import-Module ActiveDirectory -ErrorAction SilentlyContinue
+Import-Module DnsServer -ErrorAction SilentlyContinue
 
 Write-Host "Applying hardening requirement: Harden Microsoft DNS AD Container..." -ForegroundColor Cyan
 
@@ -4522,9 +4705,9 @@ Write-Host "Applying hardening requirement: Harden Microsoft DNS AD Container...
 $RegPath = "HKLM:\System\CurrentControlSet\Services\DNS\Parameters"
 $ValueName = "ServerLevelPluginDll"
 
-if (Test-Path $RegPath) {
+if (Test-Path -Path $RegPath) {
     $PluginDll = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $PluginDll) {
+    if ($null -ne $PluginDll -and $null -ne $PluginDll.ServerLevelPluginDll -and $PluginDll.ServerLevelPluginDll -ne "") {
         Write-Host "[-] WARNING: Potentially unauthorized DNS plugin detected: $($PluginDll.ServerLevelPluginDll)" -ForegroundColor Yellow
         Remove-ItemProperty -Path $RegPath -Name $ValueName -Force -ErrorAction Stop
         Write-Host "[+] ServerLevelPluginDll registry parameter removed successfully." -ForegroundColor Green
@@ -4533,18 +4716,35 @@ if (Test-Path $RegPath) {
     }
 }
 
-# 2. Audit DnsAdmins Membership
-$DnsAdminsGroup = Get-ADGroup -Filter "Name -eq 'DnsAdmins'" -ErrorAction SilentlyContinue
-
-if ($null -ne $DnsAdminsGroup) {
-    $Members = Get-ADGroupMember -Identity $DnsAdminsGroup
-    if ($Members.Count -gt 0) {
-        Write-Host "[-] WARNING: The DnsAdmins group contains active members. Please verify that all members are Tier 0 identities." -ForegroundColor Yellow
-        foreach ($Member in $Members) {
-            Write-Host "    - Member: $($Member.SamAccountName) ($($Member.objectClass))" -ForegroundColor White
+# 2. Enforce Secure Dynamic Updates on Active Directory-Integrated Zones
+if (Get-Command -Name "Get-DnsServerZone" -ErrorAction SilentlyContinue) {
+    Write-Host "Checking Dynamic Update settings on AD-integrated DNS zones..." -ForegroundColor White
+    $Zones = Get-DnsServerZone -ErrorAction SilentlyContinue | Where-Object { $_.IsDsIntegrated -eq $true -and $_.ZoneType -eq "Primary" }
+    foreach ($Zone in $Zones) {
+        if ($Zone.DynamicUpdate -ne "Secure") {
+            Write-Host "[-] Zone '$($Zone.ZoneName)' has DynamicUpdate set to '$($Zone.DynamicUpdate)'. Enforcing Secure only..." -ForegroundColor Yellow
+            Set-DnsServerPrimaryZone -Name $Zone.ZoneName -DynamicUpdate "Secure" -ErrorAction SilentlyContinue
+            Write-Host "[+] Zone '$($Zone.ZoneName)' DynamicUpdate set to Secure." -ForegroundColor Green
+        } else {
+            Write-Host "[+] Zone '$($Zone.ZoneName)' DynamicUpdate is Secure." -ForegroundColor Green
         }
-    } else {
-        Write-Host "[+] The DnsAdmins group is empty (recommended)." -ForegroundColor Green
+    }
+}
+
+# 3. Audit and Alert on DnsAdmins Membership
+if (Get-Command -Name "Get-ADGroup" -ErrorAction SilentlyContinue) {
+    $DnsAdminsGroup = Get-ADGroup -Filter "Name -eq 'DnsAdmins'" -ErrorAction SilentlyContinue
+
+    if ($null -ne $DnsAdminsGroup) {
+        $Members = Get-ADGroupMember -Identity $DnsAdminsGroup -ErrorAction SilentlyContinue
+        if ($null -ne $Members -and @($Members).Count -gt 0) {
+            Write-Host "[-] WARNING: The DnsAdmins group contains active members. Ensure all members are verified Tier 0 identities:" -ForegroundColor Yellow
+            foreach ($Member in $Members) {
+                Write-Host "    - Member: $($Member.SamAccountName) ($($Member.objectClass))" -ForegroundColor White
+            }
+        } else {
+            Write-Host "[+] The DnsAdmins group is empty (recommended Tier 0 posture)." -ForegroundColor Green
+        }
     }
 }</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
