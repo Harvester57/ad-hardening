@@ -3336,7 +3336,7 @@ Write-Host "SMB Client signing (always) enabled." -ForegroundColor Green</fix>
           <xhtml:li>
             <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers, Member Servers, Tier 2 Clients</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025, Windows 10, Windows 11</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -3344,9 +3344,47 @@ Write-Host "SMB Client signing (always) enabled." -ForegroundColor Green</fix>
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>Active Directory uses Kerberos as its primary authentication protocol. By default, older cryptographic algorithms such as Data Encryption Standard (DES) and Rivest Cipher 4 (RC4) are supported for compatibility reasons.</xhtml:p>
-        <xhtml:p>RC4-HMAC uses MD4 and MD5 hashing, which are cryptographically broken. When RC4 is enabled, adversaries can perform Kerberoasting attacks (requesting Service Principal Name - SPN - tickets from the domain) and easily crack the resulting tickets offline using GPU arrays. Similarly, DES is vulnerable to brute-force cracking.</xhtml:p>
-        <xhtml:p>Restricting allowed Kerberos encryption types to Advanced Encryption Standard (AES-128 and AES-256) forces the Kerberos Key Distribution Center (KDC) on Domain Controllers and the local systems to negotiate only AES encryption. This significantly increases the cryptographic strength of Kerberos tickets, making offline password extraction (Kerberoasting) or golden ticket forgery highly difficult.</xhtml:p>
+        <xhtml:p>Active Directory uses the Kerberos version 5 protocol as its primary authentication mechanism. By default, Active Directory maintains backward compatibility with legacy cryptographic suites, including Data Encryption Standard (DES) and Rivest Cipher 4 (RC4-HMAC). Allowing these legacy ciphers introduces severe architectural vulnerabilities:</xhtml:p>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Cryptographic Weaknesses of RC4-HMAC (RFC 4757)</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Derivation Flaw</xhtml:em>*: Under the RC4-HMAC Kerberos specification, the long-term secret key used to encrypt tickets is identical to the user's NTLM password hash (<xhtml:code>MD4(UTF-16LE(password))</xhtml:code>). No salt, no iteration count, and no cryptographic key derivation function (KDF) stretching are applied.</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>AES vs. RC4 Cryptography</xhtml:em>*: In contrast, Kerberos AES encryption (RFC 3961 and RFC 3962) utilizes PBKDF2 with HMAC-SHA1, an account-specific salt (<xhtml:code>DOMAINusername</xhtml:code>), and a default work factor of 4,096 iterations. Cracking an AES Kerberos key requires exponentially more computational effort per guess than RC4.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Kerberoasting &amp; Cipher Downgrade Attacks (MITRE ATT&amp;CK T1558.003)</xhtml:strong>:</xhtml:li>
+          <xhtml:li>* Any authenticated domain user can request a Ticket Granting Service (TGS) ticket for any account with a registered Service Principal Name (SPN).</xhtml:li>
+          <xhtml:li>* In a cipher downgrade attack, an attacker crafts a Kerberos <xhtml:code>TGS-REQ</xhtml:code> specifying only <xhtml:code>rc4-hmac</xhtml:code> (encryption type <xhtml:code>23</xhtml:code>) in the requested encryption type list. If RC4 is permitted on the Key Distribution Center (KDC), the KDC issues an RC4-encrypted service ticket—even if the target service account supports AES.</xhtml:li>
+          <xhtml:li>* Because RC4 tickets use the raw NTLM hash, attackers can crack the extracted ticket offline using modern GPU rigs (Hashcat mode <xhtml:code>13100</xhtml:code>) at rates exceeding billions of guesses per second. By restricting KDC encryption types to AES-128 and AES-256, the KDC strictly rejects requests for weak ciphers, neutralizing Kerberoasting downgrade attacks.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>AS-REP Roasting Protection (MITRE ATT&amp;CK T1558.004)</xhtml:strong>:</xhtml:li>
+          <xhtml:li>* For accounts with Kerberos pre-authentication disabled (<xhtml:code>DONT_REQ_PREAUTH</xhtml:code> flag enabled), any domain user can request an AS-REP authentication ticket from the KDC without supplying credentials.</xhtml:li>
+          <xhtml:li>* If RC4 is enabled, the returned AS-REP ticket is encrypted using the target account's RC4/NTLM hash, allowing high-speed offline dictionary attacks (Hashcat mode <xhtml:code>18200</xhtml:code>). Enforcing AES ensures the KDC encrypts the AS-REP using PBKDF2-stretched AES keys.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Mitigating Forged Golden &amp; Silver Tickets (MITRE ATT&amp;CK T1558.001 / T1558.002)</xhtml:strong>:</xhtml:li>
+          <xhtml:li>* When an attacker extracts NTLM password hashes (e.g., via DCSync against <xhtml:code>krbtgt</xhtml:code> or a service account), they can forge arbitrary Kerberos Ticket Granting Tickets (TGTs - Golden Tickets) or Service Tickets (Silver Tickets) using RC4.</xhtml:li>
+          <xhtml:li>* When RC4 is disabled domain-wide, domain members and Domain Controllers reject RC4-encrypted tickets outright. Attackers are forced to obtain the actual AES-128 or AES-256 keys, which are not exposed through simple NTLM hash dumping or relay mechanisms.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>PAC Signature Integrity &amp; CVE-2022-37967 Enforcement</xhtml:strong>:</xhtml:li>
+          <xhtml:li>* The Privilege Attribute Certificate (PAC) contains the user's authorization data, security identifiers (SIDs), and group memberships.</xhtml:li>
+          <xhtml:li>* Security updates for CVE-2022-37967 / KB5020805 require strong HMAC-SHA1 AES algorithms for PAC signatures (<xhtml:code>KERB_CHECKSUM_HMAC_SHA1_96_AES128</xhtml:code> / <xhtml:code>KERB_CHECKSUM_HMAC_SHA1_96_AES256</xhtml:code>). Disabling RC4 guarantees consistent cryptographic security across ticket encryption, session key derivation, and PAC checksum verification.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Overpass-the-Hash / Pass-the-Key Defense</xhtml:strong>:</xhtml:li>
+          <xhtml:li>* In an Overpass-the-Hash attack, an attacker uses an NTLM hash as the Kerberos RC4 key to request a valid TGT. Enforcing AES-only requires authentication to use AES keys, preventing attackers from converting raw NTLM hashes into Kerberos tickets.</xhtml:li>
+        </xhtml:ol>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>

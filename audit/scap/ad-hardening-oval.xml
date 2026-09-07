@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-09-03T12:45:20Z</oval:timestamp>
+    <oval:timestamp>2026-09-03T12:53:34Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -350,11 +350,31 @@ Enforcing SMB signing ensures that all SMB packets are digitally signed using se
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Active Directory uses Kerberos as its primary authentication protocol. By default, older cryptographic algorithms such as Data Encryption Standard (DES) and Rivest Cipher 4 (RC4) are supported for compatibility reasons.
+        <description>Active Directory uses the Kerberos version 5 protocol as its primary authentication mechanism. By default, Active Directory maintains backward compatibility with legacy cryptographic suites, including Data Encryption Standard (DES) and Rivest Cipher 4 (RC4-HMAC). Allowing these legacy ciphers introduces severe architectural vulnerabilities:
 
-RC4-HMAC uses MD4 and MD5 hashing, which are cryptographically broken. When RC4 is enabled, adversaries can perform Kerberoasting attacks (requesting Service Principal Name - SPN - tickets from the domain) and easily crack the resulting tickets offline using GPU arrays. Similarly, DES is vulnerable to brute-force cracking.
+1. **Cryptographic Weaknesses of RC4-HMAC (RFC 4757)**:
+   * **Key Derivation Flaw**: Under the RC4-HMAC Kerberos specification, the long-term secret key used to encrypt tickets is identical to the user's NTLM password hash (`MD4(UTF-16LE(password))`). No salt, no iteration count, and no cryptographic key derivation function (KDF) stretching are applied.
+   * **AES vs. RC4 Cryptography**: In contrast, Kerberos AES encryption (RFC 3961 and RFC 3962) utilizes PBKDF2 with HMAC-SHA1, an account-specific salt (`DOMAINusername`), and a default work factor of 4,096 iterations. Cracking an AES Kerberos key requires exponentially more computational effort per guess than RC4.
 
-Restricting allowed Kerberos encryption types to Advanced Encryption Standard (AES-128 and AES-256) forces the Kerberos Key Distribution Center (KDC) on Domain Controllers and the local systems to negotiate only AES encryption. This significantly increases the cryptographic strength of Kerberos tickets, making offline password extraction (Kerberoasting) or golden ticket forgery highly difficult.</description>
+2. **Kerberoasting &amp; Cipher Downgrade Attacks (MITRE ATT&amp;CK T1558.003)**:
+   * Any authenticated domain user can request a Ticket Granting Service (TGS) ticket for any account with a registered Service Principal Name (SPN).
+   * In a cipher downgrade attack, an attacker crafts a Kerberos `TGS-REQ` specifying only `rc4-hmac` (encryption type `23`) in the requested encryption type list. If RC4 is permitted on the Key Distribution Center (KDC), the KDC issues an RC4-encrypted service ticket—even if the target service account supports AES.
+   * Because RC4 tickets use the raw NTLM hash, attackers can crack the extracted ticket offline using modern GPU rigs (Hashcat mode `13100`) at rates exceeding billions of guesses per second. By restricting KDC encryption types to AES-128 and AES-256, the KDC strictly rejects requests for weak ciphers, neutralizing Kerberoasting downgrade attacks.
+
+3. **AS-REP Roasting Protection (MITRE ATT&amp;CK T1558.004)**:
+   * For accounts with Kerberos pre-authentication disabled (`DONT_REQ_PREAUTH` flag enabled), any domain user can request an AS-REP authentication ticket from the KDC without supplying credentials.
+   * If RC4 is enabled, the returned AS-REP ticket is encrypted using the target account's RC4/NTLM hash, allowing high-speed offline dictionary attacks (Hashcat mode `18200`). Enforcing AES ensures the KDC encrypts the AS-REP using PBKDF2-stretched AES keys.
+
+4. **Mitigating Forged Golden &amp; Silver Tickets (MITRE ATT&amp;CK T1558.001 / T1558.002)**:
+   * When an attacker extracts NTLM password hashes (e.g., via DCSync against `krbtgt` or a service account), they can forge arbitrary Kerberos Ticket Granting Tickets (TGTs - Golden Tickets) or Service Tickets (Silver Tickets) using RC4.
+   * When RC4 is disabled domain-wide, domain members and Domain Controllers reject RC4-encrypted tickets outright. Attackers are forced to obtain the actual AES-128 or AES-256 keys, which are not exposed through simple NTLM hash dumping or relay mechanisms.
+
+5. **PAC Signature Integrity &amp; CVE-2022-37967 Enforcement**:
+   * The Privilege Attribute Certificate (PAC) contains the user's authorization data, security identifiers (SIDs), and group memberships.
+   * Security updates for CVE-2022-37967 / KB5020805 require strong HMAC-SHA1 AES algorithms for PAC signatures (`KERB_CHECKSUM_HMAC_SHA1_96_AES128` / `KERB_CHECKSUM_HMAC_SHA1_96_AES256`). Disabling RC4 guarantees consistent cryptographic security across ticket encryption, session key derivation, and PAC checksum verification.
+
+6. **Overpass-the-Hash / Pass-the-Key Defense**:
+   * In an Overpass-the-Hash attack, an attacker uses an NTLM hash as the Kerberos RC4 key to request a valid TGT. Enforcing AES-only requires authentication to use AES keys, preventing attackers from converting raw NTLM hashes into Kerberos tickets.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value SupportedEncryptionTypes" test_ref="oval:org.adhardening:tst:2010001" />
@@ -20634,8 +20654,8 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:2010001" version="1">
-      <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">2147483640</windows:value>
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">`2147483640` (REG_DWORD, decimal representation of `0x7FFFFFF8` which enables AES128, AES256, and Future encryption types while explicitly disallowing DES and RC4) or `2147483584` (`0x7FFFFFC0` which restricts strictly to AES256 and Future encryption types)</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:2011001" version="1">
       <windows:type>reg_sz</windows:type>
