@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - '0*/**/*.md'
+      - '0*/*.md'
       - 'compliance/**/*.md'
       - 'roadmap/**/*.md'
       - 'README.md'
