@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - '**/*.ps1'
+      - '**/**/*.ps1'
       - 'PSScriptAnalyzerSettings.psd1'
       - '.github/workflows/lint-powershell.yml'
   pull_request:
