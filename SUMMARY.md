@@ -173,6 +173,7 @@
     * [REQ-DC-156 - Configure Early Launch Antimalware (ELAM) Policy on Domain Controllers](02-domain-controllers/configure-elam.md)
     * [REQ-DC-157 - UEFI Firmware Security Hardening on Domain Controllers](02-domain-controllers/configure-uefi-security.md)
     * [REQ-DC-158 - Harden DMA and Physical Security for Domain Controllers](02-domain-controllers/harden-dma-and-physical-security.md)
+    * [REQ-DC-159 - Disable Windows Script Host and Remap Scripting Extensions on Domain Controllers](02-domain-controllers/disable-windows-script-host.md)
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)

@@ -1,7 +1,7 @@
-# Get-PawWshStatus.ps1
-# Description: Audits Windows Script Host registry state across 64-bit and 32-bit hives and script file extension association handlers on PAWs.
+# Get-DcWshStatus.ps1
+# Description: Audits Windows Script Host registry state across 64-bit and 32-bit hives and script file extension association handlers on Domain Controllers.
 
-Write-Host "--- Auditing Windows Script Host Hardening on PAWs ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Windows Script Host Hardening on Domain Controllers ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
@@ -72,7 +72,7 @@ foreach ($Ext in $Extensions) {
 }
 
 if ($script:Vulnerable) {
-    Write-Host "[-] Audit Result: VULNERABLE - Windows Script Host hardening controls on PAW do not meet baseline requirements." -ForegroundColor Red
+    Write-Host "[-] Audit Result: VULNERABLE - Windows Script Host hardening controls on Domain Controller do not meet baseline requirements." -ForegroundColor Red
 } else {
-    Write-Host "[+] Audit Result: SECURE - Windows Script Host hardening controls on PAW are fully compliant." -ForegroundColor Green
+    Write-Host "[+] Audit Result: SECURE - Windows Script Host hardening controls on Domain Controller are fully compliant." -ForegroundColor Green
 }

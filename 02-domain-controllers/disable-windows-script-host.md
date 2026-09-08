@@ -1,8 +1,8 @@
-# [REQ-PAW-034] Disable Windows Script Host and Remap Scripting Extensions
+# [REQ-DC-159] Disable Windows Script Host and Remap Scripting Extensions on Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs - Dedicated Tier 0 Administrative Workstations). *(For Tier 2 Client Workstations, refer to [REQ-END-034](../08-endpoints/disable-windows-script-host.md); for Tier 0 Domain Controllers and Member Servers, refer to [REQ-DC-159](../02-domain-controllers/disable-windows-script-host.md)).*
-* **Operating Systems**: Windows 10 Enterprise (1809+), Windows 11 Enterprise (all supported builds).
+* **Applicable Systems**: Domain Controllers and Member Servers (Tier 0 Identity Infrastructure). *(For Tier 0 Privileged Access Workstations, refer to [REQ-PAW-034](../07-paws/disable-windows-script-host.md); for Tier 2 Client Workstations, refer to [REQ-END-034](../08-endpoints/disable-windows-script-host.md)).*
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025.
 
 ---
 
@@ -28,20 +28,27 @@
 ---
 
 ## Rationale
-Privileged Access Workstations (PAWs) serve as the dedicated management perimeter for Tier 0 Active Directory assets, enterprise PKI, and virtualization hosts. Because PAWs possess access tokens and administrative credentials with domain-wide authority, eliminating untrusted code execution pathways is paramount:
+Domain Controllers host the Active Directory directory database (`NTDS.dit`), Kerberos ticket-granting service keys (`krbtgt`), and credentials for all domain identities. Protecting these Tier 0 identity stores requires aggressive operating system minimization and the systematic neutralization of Living-off-the-Land Binaries (LOLBins / LOLBAS) that adversaries leverage during post-exploitation, lateral movement, and defense evasion:
 
-1. **Elimination of Legacy Scripting Engines**: Windows Script Host (`wscript.exe` and `cscript.exe`) executes legacy VBScript and JScript engines. These hosts are prominent Living-off-the-Land Binaries (LOLBins / LOLBAS) that offer attackers opportunities for defense evasion, memory injection, and unconstrained script execution (MITRE ATT&CK T1059.005, T1059.007, T1218). PAWs have no operational requirement for legacy script execution.
-2. **Defense-in-Depth Beyond Application Control**: Even in environments where Windows Defender Application Control (WDAC) or AppLocker is deployed, disabling WSH at the registry engine layer ensures that `wscript.exe` and `cscript.exe` fail immediately upon invocation, preventing script execution even if policies are in audit mode or rule bypasses are attempted.
-3. **Comprehensive 64-Bit and WOW6432Node Lockdown**: Attackers frequently execute 32-bit binaries (`%SystemRoot%\SysWOW64\wscript.exe`) on 64-bit systems to bypass 64-bit security hooks. Enforcing `Enabled = 0` and `TrustPolicy = 2` across both native 64-bit and WOW6432Node registry paths ensures that 32-bit execution is completely disabled.
-4. **TrustPolicy Hardening**: Configuring `TrustPolicy = 2` ensures that even if WSH were selectively invoked, unsigned and untrusted scripts are disallowed system-wide.
-5. **Fail-Safe File Extension Remapping**: Remapping `.vbs`, `.vbe`, `.js`, `.jse`, `.wsf`, `.wsh`, and `.hta` file associations to `txtfile` (`notepad.exe`) ensures that if an administrator inspects an administrative script or artifact, opening the file in Windows Explorer displays the plain text in Notepad rather than executing the script.
+1. **Mitigation of LOLBin Abuse on Critical Servers**: Windows Script Host binaries (`cscript.exe` and `wscript.exe`) execute legacy VBScript (`vbscript.dll`) and JScript (`jscript.dll`) engines. Threat actors targeting Domain Controllers frequently invoke `cscript.exe` or `mshta.exe` to execute obfuscated staging scripts, query Active Directory via legacy ADSI/WMI interfaces, or execute memory injection routines while attempting to evade standard binary application allowlisting (MITRE ATT&CK T1059.005, T1059.007, T1218).
+2. **Elimination of Untrusted Script Execution**: Disabling WSH system-wide via the `Enabled = 0` registry setting prevents the execution of all `.vbs`, `.vbe`, `.js`, `.jse`, `.wsf`, and `.wsh` files through the primary scripting host, returning an immediate administrative blocking error.
+3. **Comprehensive 64-Bit and 32-Bit WOW6432Node Coverage**: In 64-bit Windows Server environments, threat actors often invoke 32-bit binaries (`%SystemRoot%\SysWOW64\cscript.exe` or `wscript.exe`) to evade 64-bit security monitoring tools and API hooks. Configuring `Enabled = 0` and `TrustPolicy = 2` across both the native 64-bit registry branch (`HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings`) and the 32-bit subsystem branch (`HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`) closes this evasion vector.
+4. **TrustPolicy Hardening**: Setting `TrustPolicy = 2` enforces restrictions that disallow untrusted scripts system-wide, establishing defense-in-depth even if individual registry keys are tampered with.
+5. **Accidental Double-Click Prevention**: Remapping legacy scripting extensions (`.vbs`, `.vbe`, `.js`, `.jse`, `.wsf`, `.wsh`, `.hta`) to `txtfile` (`notepad.exe`) ensures that if an administrator inspects an administrative script or diagnostic file on the DC console, opening the file in Windows Explorer displays plain text in Notepad rather than silently triggering code execution.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Administrative Scripting Dependencies**: PAWs have zero tolerance for legacy VBScript or JScript administrative tooling. All Tier 0 administration must be executed via signed PowerShell 5.1+ scripts running under secure execution policies and Constrained Language Mode.
-* **Explorer Associations**: Double-clicking on a `.vbs` or `.js` file will open Notepad for inspection instead of running the script.
-* **Execution Dialog**: Any attempt to launch `wscript.exe` or `cscript.exe` displays a prompt stating that Windows Script Host is disabled on this machine.
+* **Software Licensing Management Tool (`slmgr.vbs`)**:
+  * The Windows Software Licensing Management Tool (`slmgr.vbs`) is implemented as a VBScript script executed by `cscript.exe`. Disabling Windows Script Host prevents direct execution of `slmgr.vbs` from the command line (e.g., `slmgr.vbs /dli` or `slmgr.vbs /ato` will display an error stating that WSH is disabled).
+  * **Enterprise Recommended Solution - Active Directory-Based Activation (ADBA)**: In enterprise Active Directory environments, Domain Controllers and domain-joined Windows Server instances should utilize **Active Directory-Based Activation (ADBA)**. With ADBA, activation objects are stored directly within the Active Directory forest configuration partition (`CN=Activation Objects,CN=Microsoft Technologies,CN=Services,CN=Configuration,DC=...`). Domain Controllers automatically activate upon promotion and domain membership verification without requiring local `slmgr.vbs` execution.
+  * **Key Management Service (KMS)**: Environments utilizing centralized KMS host activation handle periodic volume license renewals through the background Software Protection Service (`sppsvc.exe`), requiring no manual `slmgr.vbs` interaction.
+  * **Native PowerShell CIM License Verification**: Administrators can query licensing and activation status natively in PowerShell without relying on `slmgr.vbs` by inspecting the `SoftwareLicensingProduct` CIM class: `Get-CimInstance -ClassName SoftwareLicensingProduct -Filter "PartialProductKey IS NOT NULL" | Select-Object Name, ApplicationId, LicenseStatus, Description`.
+  * **Manual Staging Workflow (One-Off MAK Activation)**: If a standalone or non-ADBA Domain Controller requires manual Multiple Activation Key (MAK) entry during initial bare-metal staging, administrators can temporarily enable WSH (`Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings" -Name "Enabled" -Value 1`), perform `cscript.exe C:\Windows\System32\slmgr.vbs /ipk <ProductKey>` and `slmgr.vbs /ato`, and immediately re-lock WSH by restoring `Enabled = 0`.
+* **Active Directory Core Services**:
+  * Core Active Directory Domain Services (NTDS), Kerberos Key Distribution Center (KDC), DNS Server service, LDAP/LDAPS services, DFS Replication (DFSR), and Group Policy processing (`gpsvc.dll`) are compiled native C/C++ services and binaries that have zero dependency on Windows Script Host. Disabling WSH has no impact on directory replication, authentication, or group policy propagation.
+* **SYSVOL Logon Scripts**:
+  * Legacy logon scripts placed in the `SYSVOL` `netlogon` share written in VBScript execute on client workstations (endpoints), not on the Domain Controller itself. However, organizations should systematically modernize legacy `.vbs` logon scripts to PowerShell 5.1+ or native Group Policy Preferences (GPP) to ensure compatibility with hardened endpoint and PAW baselines.
 
 ---
 
@@ -51,7 +58,7 @@ Privileged Access Workstations (PAWs) serve as the dedicated management perimete
 
 #### Step 1: Disable WSH via GPO Computer Preferences
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit the PAW GPO (e.g., `GPO_Hardening_PAW`).
+2. Edit the Domain Controller GPO (e.g., `GPO_Hardening_DomainControllers`).
 3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
 4. Create a new **Registry Item** for the native 64-bit hive:
    * **Action**: `Update`
@@ -114,13 +121,13 @@ Privileged Access Workstations (PAWs) serve as the dedicated management perimete
 
 Configure the local registry settings to disable WSH and remap associations.
 
-[Download Script: Disable-PawWsh.ps1](implementation_scripts/Disable-PawWsh.ps1)
+[Download Script: Disable-DcWsh.ps1](implementation_scripts/Disable-DcWsh.ps1)
 
 ```powershell
-# Disable-PawWsh.ps1
-# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad on PAWs.
+# Disable-DcWsh.ps1
+# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad on Domain Controllers.
 
-Write-Host "Applying Windows Script Host and file association hardening for PAWs..." -ForegroundColor Cyan
+Write-Host "Applying Windows Script Host and file association hardening for Domain Controllers..." -ForegroundColor Cyan
 
 # 1. Disable WSH globally in 64-bit HKLM
 $RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
@@ -164,17 +171,18 @@ foreach ($Ext in $Extensions) {
     Write-Host "    Mapped .$Ext extension to txtfile handler." -ForegroundColor Gray
 }
 Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundColor Green
+Write-Host "[i] Note: Software Licensing Management Tool (slmgr.vbs) requires ADBA or KMS. Use Get-CimInstance SoftwareLicensingProduct for querying status." -ForegroundColor Yellow
 ```
 
 *To verify the WSH configuration state:*
 
-[Download Script: Get-PawWshStatus.ps1](audit_scripts/Get-PawWshStatus.ps1)
+[Download Script: Get-DcWshStatus.ps1](audit_scripts/Get-DcWshStatus.ps1)
 
 ```powershell
-# Get-PawWshStatus.ps1
-# Description: Audits Windows Script Host registry state across 64-bit and 32-bit hives and script file extension association handlers on PAWs.
+# Get-DcWshStatus.ps1
+# Description: Audits Windows Script Host registry state across 64-bit and 32-bit hives and script file extension association handlers on Domain Controllers.
 
-Write-Host "--- Auditing Windows Script Host Hardening on PAWs ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Windows Script Host Hardening on Domain Controllers ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
@@ -245,9 +253,9 @@ foreach ($Ext in $Extensions) {
 }
 
 if ($script:Vulnerable) {
-    Write-Host "[-] Audit Result: VULNERABLE - Windows Script Host hardening controls on PAW do not meet baseline requirements." -ForegroundColor Red
+    Write-Host "[-] Audit Result: VULNERABLE - Windows Script Host hardening controls on Domain Controller do not meet baseline requirements." -ForegroundColor Red
 } else {
-    Write-Host "[+] Audit Result: SECURE - Windows Script Host hardening controls on PAW are fully compliant." -ForegroundColor Green
+    Write-Host "[+] Audit Result: SECURE - Windows Script Host hardening controls on Domain Controller are fully compliant." -ForegroundColor Green
 }
 ```
 
@@ -255,7 +263,7 @@ if ($script:Vulnerable) {
 
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendations Section 3.1.2 (System hardening and OS minimization) / DAT-NT-13 Note Technique.
+* **DoD Windows Server STIG**: Requirements for unauthorized software and script execution control.
 * **DoD Windows 11 Computer STIG v2r6**: Rule `V-219661` (Windows Script Host must be disabled).
-* **DoD Windows 10 Computer STIG**: Rule `V-63825` (Configure Windows Script Host to prevent execution of untrusted scripts).
-* **CIS Microsoft Windows Client Benchmark**: Section 18.9 (Administrative Templates: System - Script Execution Restrictions).
-* **Microsoft Learn**: Windows Script Host Settings and Security Guidelines.
+* **CIS Microsoft Windows Server Benchmark**: Section 18.9 (Administrative Templates: System - Script Execution Restrictions).
+* **Microsoft Learn**: Active Directory-Based Activation Overview and Software Licensing CIM Provider.

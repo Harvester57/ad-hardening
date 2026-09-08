@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-09-08T13:32:17Z</oval:timestamp>
+    <oval:timestamp>2026-09-08T13:39:01Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -3064,6 +3064,34 @@ On Tier 0 Domain Controllers:
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" test_ref="oval:org.adhardening:tst:2158018" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:2159" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-159] Disable Windows Script Host and Remap Scripting Extensions on Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Domain Controllers host the Active Directory directory database (`NTDS.dit`), Kerberos ticket-granting service keys (`krbtgt`), and credentials for all domain identities. Protecting these Tier 0 identity stores requires aggressive operating system minimization and the systematic neutralization of Living-off-the-Land Binaries (LOLBins / LOLBAS) that adversaries leverage during post-exploitation, lateral movement, and defense evasion:
+
+1. **Mitigation of LOLBin Abuse on Critical Servers**: Windows Script Host binaries (`cscript.exe` and `wscript.exe`) execute legacy VBScript (`vbscript.dll`) and JScript (`jscript.dll`) engines. Threat actors targeting Domain Controllers frequently invoke `cscript.exe` or `mshta.exe` to execute obfuscated staging scripts, query Active Directory via legacy ADSI/WMI interfaces, or execute memory injection routines while attempting to evade standard binary application allowlisting (MITRE ATT&amp;CK T1059.005, T1059.007, T1218).
+2. **Elimination of Untrusted Script Execution**: Disabling WSH system-wide via the `Enabled = 0` registry setting prevents the execution of all `.vbs`, `.vbe`, `.js`, `.jse`, `.wsf`, and `.wsh` files through the primary scripting host, returning an immediate administrative blocking error.
+3. **Comprehensive 64-Bit and 32-Bit WOW6432Node Coverage**: In 64-bit Windows Server environments, threat actors often invoke 32-bit binaries (`%SystemRoot%\SysWOW64\cscript.exe` or `wscript.exe`) to evade 64-bit security monitoring tools and API hooks. Configuring `Enabled = 0` and `TrustPolicy = 2` across both the native 64-bit registry branch (`HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings`) and the 32-bit subsystem branch (`HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`) closes this evasion vector.
+4. **TrustPolicy Hardening**: Setting `TrustPolicy = 2` enforces restrictions that disallow untrusted scripts system-wide, establishing defense-in-depth even if individual registry keys are tampered with.
+5. **Accidental Double-Click Prevention**: Remapping legacy scripting extensions (`.vbs`, `.vbe`, `.js`, `.jse`, `.wsf`, `.wsh`, `.hta`) to `txtfile` (`notepad.exe`) ensures that if an administrator inspects an administrative script or diagnostic file on the DC console, opening the file in Windows Explorer displays plain text in Notepad rather than silently triggering code execution.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:2159001" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value TrustPolicy" test_ref="oval:org.adhardening:tst:2159002" />
+        <criterion comment="Check Registry Key SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:2159003" />
+        <criterion comment="Check Registry Key SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings Value TrustPolicy" test_ref="oval:org.adhardening:tst:2159004" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:2159005" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value TrustPolicy" test_ref="oval:org.adhardening:tst:2159006" />
+        <criterion comment="Check Registry Key SOFTWARE\Classes\. Value &lt;ext&gt;" test_ref="oval:org.adhardening:tst:2159007" />
+      </criteria>
+    </definition>
     <definition id="oval:org.adhardening:def:8001" version="1" class="compliance">
       <metadata>
         <title>[REQ-END-001] Harden Network Parameters and Disable Legacy Name Resolution</title>
@@ -3773,15 +3801,22 @@ Hardening these settings ensures:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Windows Script Host (WSH), which executes VBScript and JScript files (`wscript.exe` and `cscript.exe`), is frequently targeted by threat actors in phishing campaigns and initial access vectors. By placing a script file (e.g., `.vbs`, `.js`, `.wsf`, `.hta`) in an email attachment or download path, attackers can execute arbitrary code on the system if a user opens the file.
+        <description>Windows Script Host (WSH), encompassing the `wscript.exe` (graphical) and `cscript.exe` (command-line) host engines, executes legacy scripting languages including VBScript (`vbscript.dll`) and JScript (`jscript.dll`). In client endpoint environments, WSH is one of the most heavily abused Living-off-the-Land Binaries (LOLBins / LOLBAS) leveraged by adversaries for initial access, defense evasion, and payload execution (MITRE ATT&amp;CK T1059.005, T1059.007, T1218):
 
-Enforcing these deactivation controls ensures:
-1. **Attack Surface Reduction**: Disabling WSH globally blocks the execution of JScript and VBScript files via the standard scripting engines on the workstation.
-2. **Defense-in-Depth File Associations**: Remapping the default file handler for typical scripting extensions to `notepad.exe` ensures that if a scripting file is double-clicked by an administrator or user, the file opens as plaintext in Notepad for inspection rather than executing its contents.</description>
+1. **Initial Access via Phishing and Drive-By Downloads**: Threat actors routinely deliver weaponized script files (such as `.vbs`, `.js`, `.wsf`, `.hta`) disguised as business invoices, delivery notifications, or archived attachments inside ZIP/ISO files. When an unsuspecting user double-clicks such a file, Windows Explorer automatically invokes `wscript.exe` or `mshta.exe`, running malicious code directly in the user's security context without prompting.
+2. **Attack Surface Reduction**: Disabling WSH globally via the `Enabled = 0` registry parameter completely blocks `wscript.exe` and `cscript.exe` from executing any VBScript or JScript files system-wide, producing an immediate termination notice if an execution attempt is made.
+3. **64-Bit and 32-Bit WOW6432Node Coverage**: On 64-bit Windows architectures, 32-bit applications and sub-processes invoke the 32-bit scripting host located in `%SystemRoot%\SysWOW64\wscript.exe`. Applying the `Enabled = 0` and `TrustPolicy = 2` registry values to both the native 64-bit hive (`HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings`) and the 32-bit registry hive (`HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`) guarantees that 32-bit sub-processes cannot be weaponized as an evasion tactic.
+4. **TrustPolicy Hardening**: Setting `TrustPolicy = 2` enforces script restriction policies to disallow untrusted or unsigned scripts, providing defense-in-depth even if individual components attempt to execute outside the primary WSH engine.
+5. **Defense-in-Depth File Association Remapping**: Setting default file associations for legacy script extensions (`.vbs`, `.vbe`, `.js`, `.jse`, `.wsf`, `.wsh`, `.hta`) to `txtfile` (`notepad.exe`) ensures that if a script file is double-clicked in Windows Explorer, it opens harmlessly in Notepad for plain-text inspection rather than executing code.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:8034001" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:8034002" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value TrustPolicy" test_ref="oval:org.adhardening:tst:8034002" />
+        <criterion comment="Check Registry Key SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:8034003" />
+        <criterion comment="Check Registry Key SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings Value TrustPolicy" test_ref="oval:org.adhardening:tst:8034004" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:8034005" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value TrustPolicy" test_ref="oval:org.adhardening:tst:8034006" />
+        <criterion comment="Check Registry Key SOFTWARE\Classes\. Value &lt;ext&gt;" test_ref="oval:org.adhardening:tst:8034007" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8035" version="1" class="compliance">
@@ -8551,15 +8586,22 @@ Hardening these settings ensures:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Windows Script Host (WSH), which executes VBScript and JScript files (`wscript.exe` and `cscript.exe`), is frequently targeted by threat actors in phishing campaigns and initial access vectors. By placing a script file (e.g., `.vbs`, `.js`, `.wsf`, `.hta`) in an email attachment or download path, attackers can execute arbitrary code on the system if a user opens the file.
+        <description>Privileged Access Workstations (PAWs) serve as the dedicated management perimeter for Tier 0 Active Directory assets, enterprise PKI, and virtualization hosts. Because PAWs possess access tokens and administrative credentials with domain-wide authority, eliminating untrusted code execution pathways is paramount:
 
-Enforcing these deactivation controls ensures:
-1. **Attack Surface Reduction**: Disabling WSH globally blocks the execution of JScript and VBScript files via the standard scripting engines on the workstation.
-2. **Defense-in-Depth File Associations**: Remapping the default file handler for typical scripting extensions to `notepad.exe` ensures that if a scripting file is double-clicked by an administrator, the file opens as plaintext in Notepad for inspection rather than executing its contents.</description>
+1. **Elimination of Legacy Scripting Engines**: Windows Script Host (`wscript.exe` and `cscript.exe`) executes legacy VBScript and JScript engines. These hosts are prominent Living-off-the-Land Binaries (LOLBins / LOLBAS) that offer attackers opportunities for defense evasion, memory injection, and unconstrained script execution (MITRE ATT&amp;CK T1059.005, T1059.007, T1218). PAWs have no operational requirement for legacy script execution.
+2. **Defense-in-Depth Beyond Application Control**: Even in environments where Windows Defender Application Control (WDAC) or AppLocker is deployed, disabling WSH at the registry engine layer ensures that `wscript.exe` and `cscript.exe` fail immediately upon invocation, preventing script execution even if policies are in audit mode or rule bypasses are attempted.
+3. **Comprehensive 64-Bit and WOW6432Node Lockdown**: Attackers frequently execute 32-bit binaries (`%SystemRoot%\SysWOW64\wscript.exe`) on 64-bit systems to bypass 64-bit security hooks. Enforcing `Enabled = 0` and `TrustPolicy = 2` across both native 64-bit and WOW6432Node registry paths ensures that 32-bit execution is completely disabled.
+4. **TrustPolicy Hardening**: Configuring `TrustPolicy = 2` ensures that even if WSH were selectively invoked, unsigned and untrusted scripts are disallowed system-wide.
+5. **Fail-Safe File Extension Remapping**: Remapping `.vbs`, `.vbe`, `.js`, `.jse`, `.wsf`, `.wsh`, and `.hta` file associations to `txtfile` (`notepad.exe`) ensures that if an administrator inspects an administrative script or artifact, opening the file in Windows Explorer displays the plain text in Notepad rather than executing the script.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:7034001" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:7034002" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value TrustPolicy" test_ref="oval:org.adhardening:tst:7034002" />
+        <criterion comment="Check Registry Key SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:7034003" />
+        <criterion comment="Check Registry Key SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings Value TrustPolicy" test_ref="oval:org.adhardening:tst:7034004" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" test_ref="oval:org.adhardening:tst:7034005" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value TrustPolicy" test_ref="oval:org.adhardening:tst:7034006" />
+        <criterion comment="Check Registry Key SOFTWARE\Classes\. Value &lt;ext&gt;" test_ref="oval:org.adhardening:tst:7034007" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7035" version="1" class="compliance">
@@ -12402,6 +12444,34 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:2158018" />
       <windows:state state_ref="oval:org.adhardening:ste:2158018" />
     </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2159001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2159001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2159001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2159002" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value TrustPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2159002" />
+      <windows:state state_ref="oval:org.adhardening:ste:2159002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2159003" version="1" comment="Check Registry Key SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2159003" />
+      <windows:state state_ref="oval:org.adhardening:ste:2159003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2159004" version="1" comment="Check Registry Key SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings Value TrustPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2159004" />
+      <windows:state state_ref="oval:org.adhardening:ste:2159004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2159005" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2159005" />
+      <windows:state state_ref="oval:org.adhardening:ste:2159005" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2159006" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value TrustPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2159006" />
+      <windows:state state_ref="oval:org.adhardening:ste:2159006" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2159007" version="1" comment="Check Registry Key SOFTWARE\Classes\. Value &lt;ext&gt;" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2159007" />
+      <windows:state state_ref="oval:org.adhardening:ste:2159007" />
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8001001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001001" />
       <windows:state state_ref="oval:org.adhardening:ste:8001001" />
@@ -12974,9 +13044,29 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:8034001" />
       <windows:state state_ref="oval:org.adhardening:ste:8034001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8034002" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8034002" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value TrustPolicy" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8034002" />
       <windows:state state_ref="oval:org.adhardening:ste:8034002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8034003" version="1" comment="Check Registry Key SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8034003" />
+      <windows:state state_ref="oval:org.adhardening:ste:8034003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8034004" version="1" comment="Check Registry Key SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings Value TrustPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8034004" />
+      <windows:state state_ref="oval:org.adhardening:ste:8034004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8034005" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8034005" />
+      <windows:state state_ref="oval:org.adhardening:ste:8034005" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8034006" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value TrustPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8034006" />
+      <windows:state state_ref="oval:org.adhardening:ste:8034006" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8034007" version="1" comment="Check Registry Key SOFTWARE\Classes\. Value &lt;ext&gt;" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8034007" />
+      <windows:state state_ref="oval:org.adhardening:ste:8034007" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8035001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8035001" />
@@ -14613,9 +14703,29 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:7034001" />
       <windows:state state_ref="oval:org.adhardening:ste:7034001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7034002" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7034002" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value TrustPolicy" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7034002" />
       <windows:state state_ref="oval:org.adhardening:ste:7034002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7034003" version="1" comment="Check Registry Key SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7034003" />
+      <windows:state state_ref="oval:org.adhardening:ste:7034003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7034004" version="1" comment="Check Registry Key SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings Value TrustPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7034004" />
+      <windows:state state_ref="oval:org.adhardening:ste:7034004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7034005" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value Enabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7034005" />
+      <windows:state state_ref="oval:org.adhardening:ste:7034005" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7034006" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows Script Host\Settings Value TrustPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7034006" />
+      <windows:state state_ref="oval:org.adhardening:ste:7034006" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7034007" version="1" comment="Check Registry Key SOFTWARE\Classes\. Value &lt;ext&gt;" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7034007" />
+      <windows:state state_ref="oval:org.adhardening:ste:7034007" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7035001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Secureboot Value AvailableUpdates" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7035001" />
@@ -16894,6 +17004,48 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection</windows:key>
       <windows:name>DeviceEnumerationPolicy</windows:name>
     </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2159001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>Enabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2159002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>TrustPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2159003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>Enabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2159004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>TrustPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2159005" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_CURRENT_USER</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>Enabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2159006" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_CURRENT_USER</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>TrustPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2159007" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Classes\.</windows:key>
+      <windows:name>&lt;ext&gt;</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8001001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -17760,9 +17912,39 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8034002" version="1">
       <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>TrustPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8034003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>Enabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8034004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>TrustPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8034005" version="1">
+      <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Windows Script Host\Settings</windows:key>
       <windows:name>Enabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8034006" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_CURRENT_USER</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>TrustPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8034007" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Classes\.</windows:key>
+      <windows:name>&lt;ext&gt;</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8035001" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -20064,9 +20246,39 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7034002" version="1">
       <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>TrustPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7034003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>Enabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7034004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>TrustPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7034005" version="1">
+      <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_CURRENT_USER</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Windows Script Host\Settings</windows:key>
       <windows:name>Enabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7034006" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_CURRENT_USER</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows Script Host\Settings</windows:key>
+      <windows:name>TrustPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7034007" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Classes\.</windows:key>
+      <windows:name>&lt;ext&gt;</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7035001" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -22145,6 +22357,34 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2159001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2159002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2159003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2159004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2159005" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2159006" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2159007" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">`vbs`, `vbe`, `js`, `jse`, `wsf`, `wsh`, `hta`)</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -22707,7 +22947,27 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8034002" version="1">
       <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8034003" version="1">
+      <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8034004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8034005" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8034006" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8034007" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">`vbs`, `vbe`, `js`, `jse`, `wsf`, `wsh`, `hta`)</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8035001" version="1">
       <windows:type>reg_dword</windows:type>
@@ -24307,7 +24567,27 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7034002" version="1">
       <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7034003" version="1">
+      <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7034004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7034005" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7034006" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7034007" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">`vbs`, `vbe`, `js`, `jse`, `wsf`, `wsh`, `hta`)</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7035001" version="1">
       <windows:type>reg_dword</windows:type>

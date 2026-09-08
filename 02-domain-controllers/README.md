@@ -201,3 +201,5 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to enforce hardware-rooted platform integrity, supervisor password protection, native UEFI mode, boot order lockdown, CPU virtualization, TPM 2.0, and out-of-band management interface hardening across physical and virtual Domain Controllers.
 * **[REQ-DC-158 - Harden DMA and Physical Security for Domain Controllers](harden-dma-and-physical-security.md)**
   Requirement to mitigate physical access and direct memory access threat vectors by disabling standby sleep states (S1-S3), enforcing wake passwords, blocking DMA device enumeration under lock, disabling unapproved device classes and hardware IDs, and blocking unencrypted USB write access.
+* **[REQ-DC-159 - Disable Windows Script Host and Remap Scripting Extensions on Domain Controllers](disable-windows-script-host.md)**
+  Requirement to eliminate Living-off-the-Land Binary (LOLBin) attack surfaces by disabling Windows Script Host across 64-bit and WOW6432Node hives, enforcing TrustPolicy, and remapping legacy script file extensions to Notepad.

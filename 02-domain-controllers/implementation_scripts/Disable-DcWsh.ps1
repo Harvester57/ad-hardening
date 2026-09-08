@@ -1,7 +1,7 @@
-# Disable-Wsh.ps1
-# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad.
+# Disable-DcWsh.ps1
+# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad on Domain Controllers.
 
-Write-Host "Applying Windows Script Host and file association hardening..." -ForegroundColor Cyan
+Write-Host "Applying Windows Script Host and file association hardening for Domain Controllers..." -ForegroundColor Cyan
 
 # 1. Disable WSH globally in 64-bit HKLM
 $RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
@@ -45,3 +45,4 @@ foreach ($Ext in $Extensions) {
     Write-Host "    Mapped .$Ext extension to txtfile handler." -ForegroundColor Gray
 }
 Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundColor Green
+Write-Host "[i] Note: Software Licensing Management Tool (slmgr.vbs) requires ADBA or KMS. Use Get-CimInstance SoftwareLicensingProduct for querying status." -ForegroundColor Yellow

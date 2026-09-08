@@ -116,6 +116,7 @@ Configuration ADHardeningAudit {
             "02-domain-controllers\audit_scripts\Get-DcUraSeTcbPrivilegeStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-DcVirtualizationStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-DcElamPolicyStatus.ps1",
+            "02-domain-controllers\audit_scripts\Get-DcWshStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-DefenderAmsiSignatureStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-DefenderAutoExclusionsStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-DefenderBruteForceProtectionStatus.ps1",

@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: c71d5b6 | Generated: September 08, 2026</span>
+      <span>Commit: 7cfa127 | Generated: September 08, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1867,6 +1867,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to enforce hardware-rooted platform integrity, supervisor password protection, native UEFI mode, boot order lockdown, CPU virtualization, TPM 2.0, and out-of-band management interface hardening across physical and virtual Domain Controllers.
 * **[REQ-DC-158 - Harden DMA and Physical Security for Domain Controllers](#02-domain-controllers-harden-dma-and-physical-security-md)**
   Requirement to mitigate physical access and direct memory access threat vectors by disabling standby sleep states (S1-S3), enforcing wake passwords, blocking DMA device enumeration under lock, disabling unapproved device classes and hardware IDs, and blocking unencrypted USB write access.
+* **[REQ-DC-159 - Disable Windows Script Host and Remap Scripting Extensions on Domain Controllers](#02-domain-controllers-disable-windows-script-host-md)**
+  Requirement to eliminate Living-off-the-Land Binary (LOLBin) attack surfaces by disabling Windows Script Host across 64-bit and WOW6432Node hives, enforcing TrustPolicy, and remapping legacy script file extensions to Notepad.
 
 
 <div style="page-break-before: always;"></div>
@@ -26200,6 +26202,305 @@ if ($isCompliant) {
 * **CIS Microsoft Windows Server Benchmark**: Section 18.2.1 (BitLocker Drive Encryption), Section 18.8.19.1 (Kernel DMA Protection), Section 18.8.21.3 (Device Installation Restrictions)
 * **ANSSI AD Hardening Guide**: Recommendations R4 & R58 (Domain Controller host security, storage encryption, and physical peripheral restrictions)
 * **NIST SP 800-207**: Zero Trust Architecture - Physical Host Boundary Integrity
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-disable-windows-script-host-md"></div>
+
+<div id="02-domain-controllers-disable-windows-script-host-md-req-dc-159-disable-windows-script-host-and-remap-scripting-extensions-on-domain-controllers"></div>
+
+# [REQ-DC-159] Disable Windows Script Host and Remap Scripting Extensions on Domain Controllers
+
+<div id="02-domain-controllers-disable-windows-script-host-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers and Member Servers (Tier 0 Identity Infrastructure). *(For Tier 0 Privileged Access Workstations, refer to [REQ-PAW-034](#07-paws-disable-windows-script-host-md); for Tier 2 Client Workstations, refer to [REQ-END-034](#08-endpoints-disable-windows-script-host-md)).*
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025.
+
+---
+
+<div id="02-domain-controllers-disable-windows-script-host-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Paths / Registry Locations**:
+  * **GPO Path (WSH Disable)**: Computer Configuration\Preferences\Windows Settings\Registry
+  * **GPO Path (User Hive)**: User Configuration\Preferences\Windows Settings\Registry
+  * **GPO Path (Associations)**: User Configuration\Preferences\Control Panel Settings\Folder Options
+  * **Registry Locations**:
+    * `HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings`
+      * `Enabled` = `0` (REG_DWORD)
+      * `TrustPolicy` = `2` (REG_DWORD)
+    * `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`
+      * `Enabled` = `0` (REG_DWORD)
+      * `TrustPolicy` = `2` (REG_DWORD)
+    * `HKCU\SOFTWARE\Microsoft\Windows Script Host\Settings`
+      * `Enabled` = `0` (REG_DWORD)
+      * `TrustPolicy` = `2` (REG_DWORD)
+    * `HKLM\SOFTWARE\Classes\.<ext>` (where `<ext>` = `vbs`, `vbe`, `js`, `jse`, `wsf`, `wsh`, `hta`)
+      * `(Default)` = `txtfile` (REG_SZ)
+
+---
+
+<div id="02-domain-controllers-disable-windows-script-host-md-rationale"></div>
+
+## Rationale
+Domain Controllers host the Active Directory directory database (`NTDS.dit`), Kerberos ticket-granting service keys (`krbtgt`), and credentials for all domain identities. Protecting these Tier 0 identity stores requires aggressive operating system minimization and the systematic neutralization of Living-off-the-Land Binaries (LOLBins / LOLBAS) that adversaries leverage during post-exploitation, lateral movement, and defense evasion:
+
+1. **Mitigation of LOLBin Abuse on Critical Servers**: Windows Script Host binaries (`cscript.exe` and `wscript.exe`) execute legacy VBScript (`vbscript.dll`) and JScript (`jscript.dll`) engines. Threat actors targeting Domain Controllers frequently invoke `cscript.exe` or `mshta.exe` to execute obfuscated staging scripts, query Active Directory via legacy ADSI/WMI interfaces, or execute memory injection routines while attempting to evade standard binary application allowlisting (MITRE ATT&CK T1059.005, T1059.007, T1218).
+2. **Elimination of Untrusted Script Execution**: Disabling WSH system-wide via the `Enabled = 0` registry setting prevents the execution of all `.vbs`, `.vbe`, `.js`, `.jse`, `.wsf`, and `.wsh` files through the primary scripting host, returning an immediate administrative blocking error.
+3. **Comprehensive 64-Bit and 32-Bit WOW6432Node Coverage**: In 64-bit Windows Server environments, threat actors often invoke 32-bit binaries (`%SystemRoot%\SysWOW64\cscript.exe` or `wscript.exe`) to evade 64-bit security monitoring tools and API hooks. Configuring `Enabled = 0` and `TrustPolicy = 2` across both the native 64-bit registry branch (`HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings`) and the 32-bit subsystem branch (`HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`) closes this evasion vector.
+4. **TrustPolicy Hardening**: Setting `TrustPolicy = 2` enforces restrictions that disallow untrusted scripts system-wide, establishing defense-in-depth even if individual registry keys are tampered with.
+5. **Accidental Double-Click Prevention**: Remapping legacy scripting extensions (`.vbs`, `.vbe`, `.js`, `.jse`, `.wsf`, `.wsh`, `.hta`) to `txtfile` (`notepad.exe`) ensures that if an administrator inspects an administrative script or diagnostic file on the DC console, opening the file in Windows Explorer displays plain text in Notepad rather than silently triggering code execution.
+
+---
+
+<div id="02-domain-controllers-disable-windows-script-host-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Software Licensing Management Tool (`slmgr.vbs`)**:
+  * The Windows Software Licensing Management Tool (`slmgr.vbs`) is implemented as a VBScript script executed by `cscript.exe`. Disabling Windows Script Host prevents direct execution of `slmgr.vbs` from the command line (e.g., `slmgr.vbs /dli` or `slmgr.vbs /ato` will display an error stating that WSH is disabled).
+  * **Enterprise Recommended Solution - Active Directory-Based Activation (ADBA)**: In enterprise Active Directory environments, Domain Controllers and domain-joined Windows Server instances should utilize **Active Directory-Based Activation (ADBA)**. With ADBA, activation objects are stored directly within the Active Directory forest configuration partition (`CN=Activation Objects,CN=Microsoft Technologies,CN=Services,CN=Configuration,DC=...`). Domain Controllers automatically activate upon promotion and domain membership verification without requiring local `slmgr.vbs` execution.
+  * **Key Management Service (KMS)**: Environments utilizing centralized KMS host activation handle periodic volume license renewals through the background Software Protection Service (`sppsvc.exe`), requiring no manual `slmgr.vbs` interaction.
+  * **Native PowerShell CIM License Verification**: Administrators can query licensing and activation status natively in PowerShell without relying on `slmgr.vbs` by inspecting the `SoftwareLicensingProduct` CIM class: `Get-CimInstance -ClassName SoftwareLicensingProduct -Filter "PartialProductKey IS NOT NULL" | Select-Object Name, ApplicationId, LicenseStatus, Description`.
+  * **Manual Staging Workflow (One-Off MAK Activation)**: If a standalone or non-ADBA Domain Controller requires manual Multiple Activation Key (MAK) entry during initial bare-metal staging, administrators can temporarily enable WSH (`Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings" -Name "Enabled" -Value 1`), perform `cscript.exe C:\Windows\System32\slmgr.vbs /ipk <ProductKey>` and `slmgr.vbs /ato`, and immediately re-lock WSH by restoring `Enabled = 0`.
+* **Active Directory Core Services**:
+  * Core Active Directory Domain Services (NTDS), Kerberos Key Distribution Center (KDC), DNS Server service, LDAP/LDAPS services, DFS Replication (DFSR), and Group Policy processing (`gpsvc.dll`) are compiled native C/C++ services and binaries that have zero dependency on Windows Script Host. Disabling WSH has no impact on directory replication, authentication, or group policy propagation.
+* **SYSVOL Logon Scripts**:
+  * Legacy logon scripts placed in the `SYSVOL` `netlogon` share written in VBScript execute on client workstations (endpoints), not on the Domain Controller itself. However, organizations should systematically modernize legacy `.vbs` logon scripts to PowerShell 5.1+ or native Group Policy Preferences (GPP) to ensure compatibility with hardened endpoint and PAW baselines.
+
+---
+
+<div id="02-domain-controllers-disable-windows-script-host-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-disable-windows-script-host-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+<div id="02-domain-controllers-disable-windows-script-host-md-step-1-disable-wsh-via-gpo-computer-preferences"></div>
+
+#### Step 1: Disable WSH via GPO Computer Preferences
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit the Domain Controller GPO (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+4. Create a new **Registry Item** for the native 64-bit hive:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `Enabled`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `0`
+5. Create a second **Registry Item** for `TrustPolicy`:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `TrustPolicy`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `2`
+6. Create a third **Registry Item** for 32-bit WOW64 disablement:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `Enabled`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `0`
+7. Create a fourth **Registry Item** for 32-bit WOW64 TrustPolicy:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `TrustPolicy`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `2`
+
+<div id="02-domain-controllers-disable-windows-script-host-md-step-2-disable-wsh-in-user-configuration-preferences"></div>
+
+#### Step 2: Disable WSH in User Configuration Preferences
+1. Navigate to: `User Configuration\Preferences\Windows Settings\Registry`
+2. Create a new **Registry Item**:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_CURRENT_USER`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `Enabled`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `0`
+3. Create a second **Registry Item**:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_CURRENT_USER`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `TrustPolicy`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `2`
+
+<div id="02-domain-controllers-disable-windows-script-host-md-step-3-remap-script-file-extensions-to-notepad"></div>
+
+#### Step 3: Remap Script File Extensions to Notepad
+1. Navigate to: `User Configuration\Preferences\Control Panel Settings\Folder Options`
+2. Right-click and select **New -> Open With**:
+   * **File Extension**: `vbs`
+   * **Associated Program**: `%SystemRoot%\System32\notepad.exe`
+   * **Set as default**: Check
+3. Repeat for `vbe`, `js`, `jse`, `wsf`, `wsh`, and `hta`.
+4. Alternatively, configure system-wide registry preferences under `HKLM\SOFTWARE\Classes\.<ext>` setting the default string value to `txtfile`.
+
+---
+
+<div id="02-domain-controllers-disable-windows-script-host-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Configure the local registry settings to disable WSH and remap associations.
+
+[Download Script: Disable-DcWsh.ps1](implementation_scripts/Disable-DcWsh.ps1)
+
+```powershell
+# Disable-DcWsh.ps1
+# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad on Domain Controllers.
+
+Write-Host "Applying Windows Script Host and file association hardening for Domain Controllers..." -ForegroundColor Cyan
+
+# 1. Disable WSH globally in 64-bit HKLM
+$RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (-not (Test-Path $RegistryHklm)) {
+    New-Item -Path $RegistryHklm -Force | Out-Null
+}
+Set-ItemProperty -Path $RegistryHklm -Name "Enabled" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -Value 2 -Type DWord -Force
+Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM." -ForegroundColor Green
+
+# 2. Disable WSH in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (-not (Test-Path $RegistryWow64)) {
+        New-Item -Path $RegistryWow64 -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegistryWow64 -Name "Enabled" -Value 0 -Type DWord -Force
+    Set-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -Value 2 -Type DWord -Force
+    Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM WOW6432Node." -ForegroundColor Green
+}
+
+# 3. Disable WSH in current user HKCU hive
+$RegistryHkcu = "HKCU:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (-not (Test-Path $RegistryHkcu)) {
+    New-Item -Path $RegistryHkcu -Force | Out-Null
+}
+Set-ItemProperty -Path $RegistryHkcu -Name "Enabled" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $RegistryHkcu -Name "TrustPolicy" -Value 2 -Type DWord -Force
+Write-Host "[+] WSH disabled in current user HKCU hive." -ForegroundColor Green
+
+# 4. Remap script file extensions to notepad
+$Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
+foreach ($Ext in $Extensions) {
+    $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
+    
+    # Update Class Association to Notepad
+    if (-not (Test-Path $ProgIdPath)) {
+        New-Item -Path $ProgIdPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $ProgIdPath -Name "" -Value "txtfile" -Type String -Force
+    Write-Host "    Mapped .$Ext extension to txtfile handler." -ForegroundColor Gray
+}
+Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundColor Green
+Write-Host "[i] Note: Software Licensing Management Tool (slmgr.vbs) requires ADBA or KMS. Use Get-CimInstance SoftwareLicensingProduct for querying status." -ForegroundColor Yellow
+```
+
+*To verify the WSH configuration state:*
+
+[Download Script: Get-DcWshStatus.ps1](audit_scripts/Get-DcWshStatus.ps1)
+
+```powershell
+# Get-DcWshStatus.ps1
+# Description: Audits Windows Script Host registry state across 64-bit and 32-bit hives and script file extension association handlers on Domain Controllers.
+
+Write-Host "--- Auditing Windows Script Host Hardening on Domain Controllers ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+# 1. Audit WSH Registry settings in 64-bit HKLM
+$RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (Test-Path $RegistryHklm) {
+    $ValHklm = (Get-ItemProperty -Path $RegistryHklm -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
+    if ($ValHklm -eq 0) {
+        Write-Host "    - HKLM WSH Enabled: 0 (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: HKLM WSH is enabled or not configured (Value: '$($ValHklm)')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+
+    $TrustHklm = (Get-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -ErrorAction SilentlyContinue).TrustPolicy
+    if ($TrustHklm -eq 2) {
+        Write-Host "    - HKLM WSH TrustPolicy: 2 (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: HKLM WSH TrustPolicy is not set to 2 (Value: '$($TrustHklm)')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "    - VULNERABLE: HKLM WSH settings key is missing (Expected: Enabled = 0, TrustPolicy = 2)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 2. Audit WSH Registry settings in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (Test-Path $RegistryWow64) {
+        $ValWow64 = (Get-ItemProperty -Path $RegistryWow64 -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
+        if ($ValWow64 -eq 0) {
+            Write-Host "    - WOW6432Node WSH Enabled: 0 (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: WOW6432Node WSH is enabled or not configured (Value: '$($ValWow64)')" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+
+        $TrustWow64 = (Get-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -ErrorAction SilentlyContinue).TrustPolicy
+        if ($TrustWow64 -eq 2) {
+            Write-Host "    - WOW6432Node WSH TrustPolicy: 2 (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: WOW6432Node WSH TrustPolicy is not set to 2 (Value: '$($TrustWow64)')" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: WOW6432Node WSH settings key is missing (Expected: Enabled = 0, TrustPolicy = 2)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+# 3. Audit file associations
+$Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
+foreach ($Ext in $Extensions) {
+    $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
+    if (Test-Path $ProgIdPath) {
+        $Handler = (Get-ItemProperty -Path $ProgIdPath -Name "" -ErrorAction SilentlyContinue).""
+        if ($Handler -eq "txtfile" -or $Handler -match "notepad") {
+            Write-Host "    - Extension .$Ext Handler: $Handler (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: Extension .$Ext Handler is '$($Handler)' (Expected: txtfile/notepad)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: Extension .$Ext Class Registry key not found." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Host "[-] Audit Result: VULNERABLE - Windows Script Host hardening controls on Domain Controller do not meet baseline requirements." -ForegroundColor Red
+} else {
+    Write-Host "[+] Audit Result: SECURE - Windows Script Host hardening controls on Domain Controller are fully compliant." -ForegroundColor Green
+}
+```
+
+---
+
+<div id="02-domain-controllers-disable-windows-script-host-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **ANSSI AD Hardening Guide**: Recommendations Section 3.1.2 (System hardening and OS minimization) / DAT-NT-13 Note Technique.
+* **DoD Windows Server STIG**: Requirements for unauthorized software and script execution control.
+* **DoD Windows 11 Computer STIG v2r6**: Rule `V-219661` (Windows Script Host must be disabled).
+* **CIS Microsoft Windows Server Benchmark**: Section 18.9 (Administrative Templates: System - Script Execution Restrictions).
+* **Microsoft Learn**: Active Directory-Based Activation Overview and Software Licensing CIM Provider.
 
 
 <div style="page-break-before: always;"></div>
@@ -67180,8 +67481,8 @@ if ($script:Vulnerable) {
 <div id="07-paws-disable-windows-script-host-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
-* **Operating Systems**: Windows 10/11 Enterprise
+* **Applicable Systems**: Privileged Access Workstations (PAWs - Dedicated Tier 0 Administrative Workstations). *(For Tier 2 Client Workstations, refer to [REQ-END-034](#08-endpoints-disable-windows-script-host-md); for Tier 0 Domain Controllers and Member Servers, refer to [REQ-DC-159](#02-domain-controllers-disable-windows-script-host-md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809+), Windows 11 Enterprise (all supported builds).
 
 ---
 
@@ -67189,33 +67490,44 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
+* **GPO Paths / Registry Locations**:
   * **GPO Path (WSH Disable)**: Computer Configuration\Preferences\Windows Settings\Registry
+  * **GPO Path (User Hive)**: User Configuration\Preferences\Windows Settings\Registry
   * **GPO Path (Associations)**: User Configuration\Preferences\Control Panel Settings\Folder Options
-  * **Registry Location**:
+  * **Registry Locations**:
     * `HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings`
       * `Enabled` = `0` (REG_DWORD)
+      * `TrustPolicy` = `2` (REG_DWORD)
+    * `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`
+      * `Enabled` = `0` (REG_DWORD)
+      * `TrustPolicy` = `2` (REG_DWORD)
     * `HKCU\SOFTWARE\Microsoft\Windows Script Host\Settings`
       * `Enabled` = `0` (REG_DWORD)
+      * `TrustPolicy` = `2` (REG_DWORD)
+    * `HKLM\SOFTWARE\Classes\.<ext>` (where `<ext>` = `vbs`, `vbe`, `js`, `jse`, `wsf`, `wsh`, `hta`)
+      * `(Default)` = `txtfile` (REG_SZ)
 
 ---
 
 <div id="07-paws-disable-windows-script-host-md-rationale"></div>
 
 ## Rationale
-Windows Script Host (WSH), which executes VBScript and JScript files (`wscript.exe` and `cscript.exe`), is frequently targeted by threat actors in phishing campaigns and initial access vectors. By placing a script file (e.g., `.vbs`, `.js`, `.wsf`, `.hta`) in an email attachment or download path, attackers can execute arbitrary code on the system if a user opens the file.
+Privileged Access Workstations (PAWs) serve as the dedicated management perimeter for Tier 0 Active Directory assets, enterprise PKI, and virtualization hosts. Because PAWs possess access tokens and administrative credentials with domain-wide authority, eliminating untrusted code execution pathways is paramount:
 
-Enforcing these deactivation controls ensures:
-1. **Attack Surface Reduction**: Disabling WSH globally blocks the execution of JScript and VBScript files via the standard scripting engines on the workstation.
-2. **Defense-in-Depth File Associations**: Remapping the default file handler for typical scripting extensions to `notepad.exe` ensures that if a scripting file is double-clicked by an administrator, the file opens as plaintext in Notepad for inspection rather than executing its contents.
+1. **Elimination of Legacy Scripting Engines**: Windows Script Host (`wscript.exe` and `cscript.exe`) executes legacy VBScript and JScript engines. These hosts are prominent Living-off-the-Land Binaries (LOLBins / LOLBAS) that offer attackers opportunities for defense evasion, memory injection, and unconstrained script execution (MITRE ATT&CK T1059.005, T1059.007, T1218). PAWs have no operational requirement for legacy script execution.
+2. **Defense-in-Depth Beyond Application Control**: Even in environments where Windows Defender Application Control (WDAC) or AppLocker is deployed, disabling WSH at the registry engine layer ensures that `wscript.exe` and `cscript.exe` fail immediately upon invocation, preventing script execution even if policies are in audit mode or rule bypasses are attempted.
+3. **Comprehensive 64-Bit and WOW6432Node Lockdown**: Attackers frequently execute 32-bit binaries (`%SystemRoot%\SysWOW64\wscript.exe`) on 64-bit systems to bypass 64-bit security hooks. Enforcing `Enabled = 0` and `TrustPolicy = 2` across both native 64-bit and WOW6432Node registry paths ensures that 32-bit execution is completely disabled.
+4. **TrustPolicy Hardening**: Configuring `TrustPolicy = 2` ensures that even if WSH were selectively invoked, unsigned and untrusted scripts are disallowed system-wide.
+5. **Fail-Safe File Extension Remapping**: Remapping `.vbs`, `.vbe`, `.js`, `.jse`, `.wsf`, `.wsh`, and `.hta` file associations to `txtfile` (`notepad.exe`) ensures that if an administrator inspects an administrative script or artifact, opening the file in Windows Explorer displays the plain text in Notepad rather than executing the script.
 
 ---
 
 <div id="07-paws-disable-windows-script-host-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Script Dependencies**: Any legacy administrative scripts (such as logon scripts or backup routines) written in VBScript or JScript will fail to run. All internal workstation management scripts must be written in PowerShell 5.1+ and executed under secure execution policies.
-* **Explorer Associations**: Double-clicking on a `.js` or `.vbs` configuration file will open Notepad instead of running the script.
+* **Administrative Scripting Dependencies**: PAWs have zero tolerance for legacy VBScript or JScript administrative tooling. All Tier 0 administration must be executed via signed PowerShell 5.1+ scripts running under secure execution policies and Constrained Language Mode.
+* **Explorer Associations**: Double-clicking on a `.vbs` or `.js` file will open Notepad for inspection instead of running the script.
+* **Execution Dialog**: Any attempt to launch `wscript.exe` or `cscript.exe` displays a prompt stating that Windows Script Host is disabled on this machine.
 
 ---
 
@@ -67227,29 +67539,70 @@ Enforcing these deactivation controls ensures:
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<div id="07-paws-disable-windows-script-host-md-step-1-disable-wsh-via-gpo-registry-preferences"></div>
+<div id="07-paws-disable-windows-script-host-md-step-1-disable-wsh-via-gpo-computer-preferences"></div>
 
-#### Step 1: Disable WSH via GPO Registry Preferences
+#### Step 1: Disable WSH via GPO Computer Preferences
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit the PAW GPO (e.g., `GPO_Hardening_PAW`).
 3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
-4. Create a new **Registry Item**:
+4. Create a new **Registry Item** for the native 64-bit hive:
    * **Action**: `Update`
    * **Hive**: `HKEY_LOCAL_MACHINE`
    * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
    * **Value Name**: `Enabled`
    * **Value Type**: `REG_DWORD`
    * **Value Data**: `0`
+5. Create a second **Registry Item** for `TrustPolicy`:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `TrustPolicy`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `2`
+6. Create a third **Registry Item** for 32-bit WOW64 disablement:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `Enabled`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `0`
+7. Create a fourth **Registry Item** for 32-bit WOW64 TrustPolicy:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `TrustPolicy`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `2`
 
-<div id="07-paws-disable-windows-script-host-md-step-2-configure-script-file-extensions-to-open-in-notepad"></div>
+<div id="07-paws-disable-windows-script-host-md-step-2-disable-wsh-in-user-configuration-preferences"></div>
 
-#### Step 2: Configure Script File Extensions to Open in Notepad
+#### Step 2: Disable WSH in User Configuration Preferences
+1. Navigate to: `User Configuration\Preferences\Windows Settings\Registry`
+2. Create a new **Registry Item**:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_CURRENT_USER`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `Enabled`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `0`
+3. Create a second **Registry Item**:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_CURRENT_USER`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `TrustPolicy`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `2`
+
+<div id="07-paws-disable-windows-script-host-md-step-3-remap-script-file-extensions-to-notepad"></div>
+
+#### Step 3: Remap Script File Extensions to Notepad
 1. Navigate to: `User Configuration\Preferences\Control Panel Settings\Folder Options`
 2. Right-click and select **New -> Open With**:
    * **File Extension**: `vbs`
    * **Associated Program**: `%SystemRoot%\System32\notepad.exe`
    * **Set as default**: Check
-3. Repeat the process for the following extensions: `vbe`, `js`, `jse`, `wsf`, `wsh`, `hta`.
+3. Repeat for `vbe`, `js`, `jse`, `wsf`, `wsh`, and `hta`.
+4. Alternatively, configure system-wide registry preferences under `HKLM\SOFTWARE\Classes\.<ext>` setting the default string value to `txtfile`.
 
 ---
 
@@ -67263,26 +67616,40 @@ Configure the local registry settings to disable WSH and remap associations.
 
 ```powershell
 # Disable-PawWsh.ps1
-# Description: Disables Windows Script Host globally in HKLM and HKCU registry hives, and remaps script file associations to Notepad.
+# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad on PAWs.
 
-Write-Host "Applying Windows Script Host and file association hardening..." -ForegroundColor Cyan
+Write-Host "Applying Windows Script Host and file association hardening for PAWs..." -ForegroundColor Cyan
 
-# 1. Disable WSH globally
+# 1. Disable WSH globally in 64-bit HKLM
 $RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (-not (Test-Path $RegistryHklm)) {
     New-Item -Path $RegistryHklm -Force | Out-Null
 }
 Set-ItemProperty -Path $RegistryHklm -Name "Enabled" -Value 0 -Type DWord -Force
-Write-Host "[+] WSH globally disabled in HKLM." -ForegroundColor Green
+Set-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -Value 2 -Type DWord -Force
+Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM." -ForegroundColor Green
 
+# 2. Disable WSH in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (-not (Test-Path $RegistryWow64)) {
+        New-Item -Path $RegistryWow64 -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegistryWow64 -Name "Enabled" -Value 0 -Type DWord -Force
+    Set-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -Value 2 -Type DWord -Force
+    Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM WOW6432Node." -ForegroundColor Green
+}
+
+# 3. Disable WSH in current user HKCU hive
 $RegistryHkcu = "HKCU:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (-not (Test-Path $RegistryHkcu)) {
     New-Item -Path $RegistryHkcu -Force | Out-Null
 }
 Set-ItemProperty -Path $RegistryHkcu -Name "Enabled" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $RegistryHkcu -Name "TrustPolicy" -Value 2 -Type DWord -Force
 Write-Host "[+] WSH disabled in current user HKCU hive." -ForegroundColor Green
 
-# 2. Remap script file extensions to notepad
+# 4. Remap script file extensions to notepad
 $Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
 foreach ($Ext in $Extensions) {
     $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
@@ -67303,28 +67670,61 @@ Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundCo
 
 ```powershell
 # Get-PawWshStatus.ps1
-# Description: Audits Windows Script Host registry state and script file extension association handlers on PAWs.
+# Description: Audits Windows Script Host registry state across 64-bit and 32-bit hives and script file extension association handlers on PAWs.
 
-Write-Host "--- Auditing Windows Script Host Hardening ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Windows Script Host Hardening on PAWs ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
-# 1. Audit WSH Registry settings
+# 1. Audit WSH Registry settings in 64-bit HKLM
 $RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (Test-Path $RegistryHklm) {
     $ValHklm = (Get-ItemProperty -Path $RegistryHklm -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
     if ($ValHklm -eq 0) {
         Write-Host "    - HKLM WSH Enabled: 0 (Secure)" -ForegroundColor Green
     } else {
-        Write-Host "    - VULNERABLE: HKLM WSH is enabled or not configured (Value: '$ValHklm')" -ForegroundColor Red
+        Write-Host "    - VULNERABLE: HKLM WSH is enabled or not configured (Value: '$($ValHklm)')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+
+    $TrustHklm = (Get-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -ErrorAction SilentlyContinue).TrustPolicy
+    if ($TrustHklm -eq 2) {
+        Write-Host "    - HKLM WSH TrustPolicy: 2 (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: HKLM WSH TrustPolicy is not set to 2 (Value: '$($TrustHklm)')" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
-    Write-Host "    - VULNERABLE: HKLM WSH settings key is missing (Expected: Enabled = 0)" -ForegroundColor Red
+    Write-Host "    - VULNERABLE: HKLM WSH settings key is missing (Expected: Enabled = 0, TrustPolicy = 2)" -ForegroundColor Red
     $script:Vulnerable = $true
 }
 
-# 2. Audit file associations
+# 2. Audit WSH Registry settings in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (Test-Path $RegistryWow64) {
+        $ValWow64 = (Get-ItemProperty -Path $RegistryWow64 -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
+        if ($ValWow64 -eq 0) {
+            Write-Host "    - WOW6432Node WSH Enabled: 0 (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: WOW6432Node WSH is enabled or not configured (Value: '$($ValWow64)')" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+
+        $TrustWow64 = (Get-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -ErrorAction SilentlyContinue).TrustPolicy
+        if ($TrustWow64 -eq 2) {
+            Write-Host "    - WOW6432Node WSH TrustPolicy: 2 (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: WOW6432Node WSH TrustPolicy is not set to 2 (Value: '$($TrustWow64)')" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: WOW6432Node WSH settings key is missing (Expected: Enabled = 0, TrustPolicy = 2)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+# 3. Audit file associations
 $Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
 foreach ($Ext in $Extensions) {
     $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
@@ -67333,7 +67733,7 @@ foreach ($Ext in $Extensions) {
         if ($Handler -eq "txtfile" -or $Handler -match "notepad") {
             Write-Host "    - Extension .$Ext Handler: $Handler (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "    - VULNERABLE: Extension .$Ext Handler is '$Handler' (Expected: txtfile/notepad)" -ForegroundColor Red
+            Write-Host "    - VULNERABLE: Extension .$Ext Handler is '$($Handler)' (Expected: txtfile/notepad)" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
@@ -67343,11 +67743,9 @@ foreach ($Ext in $Extensions) {
 }
 
 if ($script:Vulnerable) {
-    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
-    exit 1
+    Write-Host "[-] Audit Result: VULNERABLE - Windows Script Host hardening controls on PAW do not meet baseline requirements." -ForegroundColor Red
 } else {
-    Write-Host "Audit Result: SECURE" -ForegroundColor Green
-    exit 0
+    Write-Host "[+] Audit Result: SECURE - Windows Script Host hardening controls on PAW are fully compliant." -ForegroundColor Green
 }
 ```
 
@@ -67356,9 +67754,11 @@ if ($script:Vulnerable) {
 <div id="07-paws-disable-windows-script-host-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Recommendations on workstation OS minimization and script execution control.
-* **DoD Windows 11 Computer STIG v2r6**: V-219661 (Windows Script Host disablement and script restriction).
-* **CIS Microsoft Windows Client Benchmark**: Section 18.9 (Administrative templates for script execution safety).
+* **ANSSI AD Hardening Guide**: Recommendations Section 3.1.2 (System hardening and OS minimization) / DAT-NT-13 Note Technique.
+* **DoD Windows 11 Computer STIG v2r6**: Rule `V-219661` (Windows Script Host must be disabled).
+* **DoD Windows 10 Computer STIG**: Rule `V-63825` (Configure Windows Script Host to prevent execution of untrusted scripts).
+* **CIS Microsoft Windows Client Benchmark**: Section 18.9 (Administrative Templates: System - Script Execution Restrictions).
+* **Microsoft Learn**: Windows Script Host Settings and Security Guidelines.
 
 
 <div style="page-break-before: always;"></div>
@@ -98753,8 +99153,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-disable-windows-script-host-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Member Workstations (Endpoints)
-* **Operating Systems**: Windows 10/11 Enterprise
+* **Applicable Systems**: Member Workstations (Endpoints - Tier 2 Client Workstations and Laptops). *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-034](#07-paws-disable-windows-script-host-md); for Tier 0 Domain Controllers and Member Servers, refer to [REQ-DC-159](#02-domain-controllers-disable-windows-script-host-md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809+), Windows 11 Enterprise (all supported builds).
 
 ---
 
@@ -98762,33 +99162,45 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
+* **GPO Paths / Registry Locations**:
   * **GPO Path (WSH Disable)**: Computer Configuration\Preferences\Windows Settings\Registry
+  * **GPO Path (User Hive)**: User Configuration\Preferences\Windows Settings\Registry
   * **GPO Path (Associations)**: User Configuration\Preferences\Control Panel Settings\Folder Options
-  * **Registry Location**:
+  * **Registry Locations**:
     * `HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings`
       * `Enabled` = `0` (REG_DWORD)
+      * `TrustPolicy` = `2` (REG_DWORD)
+    * `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`
+      * `Enabled` = `0` (REG_DWORD)
+      * `TrustPolicy` = `2` (REG_DWORD)
     * `HKCU\SOFTWARE\Microsoft\Windows Script Host\Settings`
       * `Enabled` = `0` (REG_DWORD)
+      * `TrustPolicy` = `2` (REG_DWORD)
+    * `HKLM\SOFTWARE\Classes\.<ext>` (where `<ext>` = `vbs`, `vbe`, `js`, `jse`, `wsf`, `wsh`, `hta`)
+      * `(Default)` = `txtfile` (REG_SZ)
 
 ---
 
 <div id="08-endpoints-disable-windows-script-host-md-rationale"></div>
 
 ## Rationale
-Windows Script Host (WSH), which executes VBScript and JScript files (`wscript.exe` and `cscript.exe`), is frequently targeted by threat actors in phishing campaigns and initial access vectors. By placing a script file (e.g., `.vbs`, `.js`, `.wsf`, `.hta`) in an email attachment or download path, attackers can execute arbitrary code on the system if a user opens the file.
+Windows Script Host (WSH), encompassing the `wscript.exe` (graphical) and `cscript.exe` (command-line) host engines, executes legacy scripting languages including VBScript (`vbscript.dll`) and JScript (`jscript.dll`). In client endpoint environments, WSH is one of the most heavily abused Living-off-the-Land Binaries (LOLBins / LOLBAS) leveraged by adversaries for initial access, defense evasion, and payload execution (MITRE ATT&CK T1059.005, T1059.007, T1218):
 
-Enforcing these deactivation controls ensures:
-1. **Attack Surface Reduction**: Disabling WSH globally blocks the execution of JScript and VBScript files via the standard scripting engines on the workstation.
-2. **Defense-in-Depth File Associations**: Remapping the default file handler for typical scripting extensions to `notepad.exe` ensures that if a scripting file is double-clicked by an administrator or user, the file opens as plaintext in Notepad for inspection rather than executing its contents.
+1. **Initial Access via Phishing and Drive-By Downloads**: Threat actors routinely deliver weaponized script files (such as `.vbs`, `.js`, `.wsf`, `.hta`) disguised as business invoices, delivery notifications, or archived attachments inside ZIP/ISO files. When an unsuspecting user double-clicks such a file, Windows Explorer automatically invokes `wscript.exe` or `mshta.exe`, running malicious code directly in the user's security context without prompting.
+2. **Attack Surface Reduction**: Disabling WSH globally via the `Enabled = 0` registry parameter completely blocks `wscript.exe` and `cscript.exe` from executing any VBScript or JScript files system-wide, producing an immediate termination notice if an execution attempt is made.
+3. **64-Bit and 32-Bit WOW6432Node Coverage**: On 64-bit Windows architectures, 32-bit applications and sub-processes invoke the 32-bit scripting host located in `%SystemRoot%\SysWOW64\wscript.exe`. Applying the `Enabled = 0` and `TrustPolicy = 2` registry values to both the native 64-bit hive (`HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings`) and the 32-bit registry hive (`HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`) guarantees that 32-bit sub-processes cannot be weaponized as an evasion tactic.
+4. **TrustPolicy Hardening**: Setting `TrustPolicy = 2` enforces script restriction policies to disallow untrusted or unsigned scripts, providing defense-in-depth even if individual components attempt to execute outside the primary WSH engine.
+5. **Defense-in-Depth File Association Remapping**: Setting default file associations for legacy script extensions (`.vbs`, `.vbe`, `.js`, `.jse`, `.wsf`, `.wsh`, `.hta`) to `txtfile` (`notepad.exe`) ensures that if a script file is double-clicked in Windows Explorer, it opens harmlessly in Notepad for plain-text inspection rather than executing code.
 
 ---
 
 <div id="08-endpoints-disable-windows-script-host-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Script Dependencies**: Any legacy administrative scripts (such as logon scripts or backup routines) written in VBScript or JScript will fail to run. All internal workstation management scripts must be written in PowerShell 5.1+ and executed under secure execution policies.
-* **Explorer Associations**: Double-clicking on a `.js` or `.vbs` configuration file will open Notepad instead of running the script.
+* **Legacy Logon Scripts**: Any legacy administrative logon or logoff scripts written in VBScript (`.vbs`) or JScript (`.js`) will fail to run. All enterprise workstation management scripts must be modernized to PowerShell 5.1+ running under restricted or RemoteSigned execution policies, or replaced by native Group Policy Preferences (GPP).
+* **Third-Party Software Installers**: Certain legacy commercial software installers or custom internal packages that invoke `cscript.exe` during setup will encounter execution errors. Packaging routines must be updated to native MSI, WiX, or modern PowerShell deployments.
+* **Windows Explorer File Associations**: Double-clicking on any `.vbs`, `.js`, or `.wsf` file will open Notepad displaying the script source text rather than running the script engine.
+* **Windows Script Host Execution Dialog**: If a user or background process attempts to call `wscript.exe` or `cscript.exe`, Windows displays a notification stating: *"Windows Script Host access is disabled on this machine. Contact your administrator for details."*
 
 ---
 
@@ -98800,29 +99212,70 @@ Enforcing these deactivation controls ensures:
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-<div id="08-endpoints-disable-windows-script-host-md-step-1-disable-wsh-via-gpo-registry-preferences"></div>
+<div id="08-endpoints-disable-windows-script-host-md-step-1-disable-wsh-via-gpo-computer-preferences"></div>
 
-#### Step 1: Disable WSH via GPO Registry Preferences
+#### Step 1: Disable WSH via GPO Computer Preferences
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit the Endpoint GPO (e.g., `GPO_Hardening_Endpoints`).
 3. Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
-4. Create a new **Registry Item**:
+4. Create a new **Registry Item** for the native 64-bit hive:
    * **Action**: `Update`
    * **Hive**: `HKEY_LOCAL_MACHINE`
    * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
    * **Value Name**: `Enabled`
    * **Value Type**: `REG_DWORD`
    * **Value Data**: `0`
+5. Create a second **Registry Item** for `TrustPolicy`:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `TrustPolicy`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `2`
+6. Create a third **Registry Item** for 32-bit WOW64 disablement:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `Enabled`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `0`
+7. Create a fourth **Registry Item** for 32-bit WOW64 TrustPolicy:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `TrustPolicy`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `2`
 
-<div id="08-endpoints-disable-windows-script-host-md-step-2-configure-script-file-extensions-to-open-in-notepad"></div>
+<div id="08-endpoints-disable-windows-script-host-md-step-2-disable-wsh-in-user-configuration-preferences"></div>
 
-#### Step 2: Configure Script File Extensions to Open in Notepad
+#### Step 2: Disable WSH in User Configuration Preferences
+1. Navigate to: `User Configuration\Preferences\Windows Settings\Registry`
+2. Create a new **Registry Item**:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_CURRENT_USER`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `Enabled`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `0`
+3. Create a second **Registry Item**:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_CURRENT_USER`
+   * **Key Path**: `SOFTWARE\Microsoft\Windows Script Host\Settings`
+   * **Value Name**: `TrustPolicy`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `2`
+
+<div id="08-endpoints-disable-windows-script-host-md-step-3-remap-script-file-extensions-to-notepad"></div>
+
+#### Step 3: Remap Script File Extensions to Notepad
 1. Navigate to: `User Configuration\Preferences\Control Panel Settings\Folder Options`
 2. Right-click and select **New -> Open With**:
    * **File Extension**: `vbs`
    * **Associated Program**: `%SystemRoot%\System32\notepad.exe`
    * **Set as default**: Check
-3. Repeat the process for the following extensions: `vbe`, `js`, `jse`, `wsf`, `wsh`, `hta`.
+3. Repeat for the remaining extensions: `vbe`, `js`, `jse`, `wsf`, `wsh`, and `hta`.
+4. Alternatively, configure system-wide registry preferences under `HKLM\SOFTWARE\Classes\.<ext>` setting the default string value to `txtfile`.
 
 ---
 
@@ -98836,26 +99289,40 @@ Configure the local registry settings to disable WSH and remap associations.
 
 ```powershell
 # Disable-Wsh.ps1
-# Description: Disables Windows Script Host globally in HKLM and HKCU registry hives, and remaps script file associations to Notepad.
+# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad.
 
 Write-Host "Applying Windows Script Host and file association hardening..." -ForegroundColor Cyan
 
-# 1. Disable WSH globally
+# 1. Disable WSH globally in 64-bit HKLM
 $RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (-not (Test-Path $RegistryHklm)) {
     New-Item -Path $RegistryHklm -Force | Out-Null
 }
 Set-ItemProperty -Path $RegistryHklm -Name "Enabled" -Value 0 -Type DWord -Force
-Write-Host "[+] WSH globally disabled in HKLM." -ForegroundColor Green
+Set-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -Value 2 -Type DWord -Force
+Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM." -ForegroundColor Green
 
+# 2. Disable WSH in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (-not (Test-Path $RegistryWow64)) {
+        New-Item -Path $RegistryWow64 -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegistryWow64 -Name "Enabled" -Value 0 -Type DWord -Force
+    Set-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -Value 2 -Type DWord -Force
+    Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM WOW6432Node." -ForegroundColor Green
+}
+
+# 3. Disable WSH in current user HKCU hive
 $RegistryHkcu = "HKCU:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (-not (Test-Path $RegistryHkcu)) {
     New-Item -Path $RegistryHkcu -Force | Out-Null
 }
 Set-ItemProperty -Path $RegistryHkcu -Name "Enabled" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $RegistryHkcu -Name "TrustPolicy" -Value 2 -Type DWord -Force
 Write-Host "[+] WSH disabled in current user HKCU hive." -ForegroundColor Green
 
-# 2. Remap script file extensions to notepad
+# 4. Remap script file extensions to notepad
 $Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
 foreach ($Ext in $Extensions) {
     $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
@@ -98876,28 +99343,61 @@ Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundCo
 
 ```powershell
 # Get-WshStatus.ps1
-# Description: Audits Windows Script Host registry state and script file extension association handlers.
+# Description: Audits Windows Script Host registry state across 64-bit and 32-bit hives and script file extension association handlers.
 
 Write-Host "--- Auditing Windows Script Host Hardening ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
-# 1. Audit WSH Registry settings
+# 1. Audit WSH Registry settings in 64-bit HKLM
 $RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (Test-Path $RegistryHklm) {
     $ValHklm = (Get-ItemProperty -Path $RegistryHklm -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
     if ($ValHklm -eq 0) {
         Write-Host "    - HKLM WSH Enabled: 0 (Secure)" -ForegroundColor Green
     } else {
-        Write-Host "    - VULNERABLE: HKLM WSH is enabled or not configured (Value: '$ValHklm')" -ForegroundColor Red
+        Write-Host "    - VULNERABLE: HKLM WSH is enabled or not configured (Value: '$($ValHklm)')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+
+    $TrustHklm = (Get-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -ErrorAction SilentlyContinue).TrustPolicy
+    if ($TrustHklm -eq 2) {
+        Write-Host "    - HKLM WSH TrustPolicy: 2 (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: HKLM WSH TrustPolicy is not set to 2 (Value: '$($TrustHklm)')" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
-    Write-Host "    - VULNERABLE: HKLM WSH settings key is missing (Expected: Enabled = 0)" -ForegroundColor Red
+    Write-Host "    - VULNERABLE: HKLM WSH settings key is missing (Expected: Enabled = 0, TrustPolicy = 2)" -ForegroundColor Red
     $script:Vulnerable = $true
 }
 
-# 2. Audit file associations
+# 2. Audit WSH Registry settings in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (Test-Path $RegistryWow64) {
+        $ValWow64 = (Get-ItemProperty -Path $RegistryWow64 -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
+        if ($ValWow64 -eq 0) {
+            Write-Host "    - WOW6432Node WSH Enabled: 0 (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: WOW6432Node WSH is enabled or not configured (Value: '$($ValWow64)')" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+
+        $TrustWow64 = (Get-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -ErrorAction SilentlyContinue).TrustPolicy
+        if ($TrustWow64 -eq 2) {
+            Write-Host "    - WOW6432Node WSH TrustPolicy: 2 (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: WOW6432Node WSH TrustPolicy is not set to 2 (Value: '$($TrustWow64)')" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: WOW6432Node WSH settings key is missing (Expected: Enabled = 0, TrustPolicy = 2)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+# 3. Audit file associations
 $Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
 foreach ($Ext in $Extensions) {
     $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
@@ -98906,7 +99406,7 @@ foreach ($Ext in $Extensions) {
         if ($Handler -eq "txtfile" -or $Handler -match "notepad") {
             Write-Host "    - Extension .$Ext Handler: $Handler (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "    - VULNERABLE: Extension .$Ext Handler is '$Handler' (Expected: txtfile/notepad)" -ForegroundColor Red
+            Write-Host "    - VULNERABLE: Extension .$Ext Handler is '$($Handler)' (Expected: txtfile/notepad)" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
@@ -98916,9 +99416,9 @@ foreach ($Ext in $Extensions) {
 }
 
 if ($script:Vulnerable) {
-    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    Write-Host "[-] Audit Result: VULNERABLE - Windows Script Host hardening controls do not meet baseline requirements." -ForegroundColor Red
 } else {
-    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    Write-Host "[+] Audit Result: SECURE - Windows Script Host hardening controls are fully compliant." -ForegroundColor Green
 }
 ```
 
@@ -98927,9 +99427,11 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-disable-windows-script-host-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Recommendations on workstation OS minimization and script execution control.
-* **DoD Windows 11 Computer STIG v2r6**: V-219661 (Windows Script Host disablement and script restriction).
-* **CIS Microsoft Windows Client Benchmark**: Section 18.9 (Administrative templates for script execution safety).
+* **ANSSI AD Hardening Guide**: Recommendations Section 3.1.2 (System hardening and OS minimization) / DAT-NT-13 Note Technique.
+* **DoD Windows 11 Computer STIG v2r6**: Rule `V-219661` (Windows Script Host must be disabled).
+* **DoD Windows 10 Computer STIG**: Rule `V-63825` (Configure Windows Script Host to prevent execution of untrusted scripts).
+* **CIS Microsoft Windows Client Benchmark**: Section 18.9 (Administrative Templates: System - Script Execution Restrictions).
+* **Microsoft Learn**: Windows Script Host Settings and Security Guidelines.
 
 
 <div style="page-break-before: always;"></div>

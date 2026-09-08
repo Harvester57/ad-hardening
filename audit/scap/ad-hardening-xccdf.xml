@@ -172,6 +172,7 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-156" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-157" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-158" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-159" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-001" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-003" selected="true" />
@@ -9185,6 +9186,418 @@ Write-Host "[+] Kernel DMA Protection DeviceEnumerationPolicy set to 0 (Block al
 Write-Host "Domain Controller DMA and physical security settings applied successfully." -ForegroundColor Green</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2158" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-159" severity="high" weight="10.0" selected="false">
+      <title>[REQ-DC-159] Disable Windows Script Host and Remap Scripting Extensions on Domain Controllers</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers and Member Servers (Tier 0 Identity Infrastructure). <xhtml:em>(For Tier 0 Privileged Access Workstations, refer to [REQ-PAW-034](../07-paws/disable-windows-script-host.md); for Tier 2 Client Workstations, refer to [REQ-END-034](../08-endpoints/disable-windows-script-host.md)).</xhtml:em>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025.</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>02-domain-controllers/disable-windows-script-host.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Domain Controllers host the Active Directory directory database (<xhtml:code>NTDS.dit</xhtml:code>), Kerberos ticket-granting service keys (<xhtml:code>krbtgt</xhtml:code>), and credentials for all domain identities. Protecting these Tier 0 identity stores requires aggressive operating system minimization and the systematic neutralization of Living-off-the-Land Binaries (LOLBins / LOLBAS) that adversaries leverage during post-exploitation, lateral movement, and defense evasion:</xhtml:p>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Mitigation of LOLBin Abuse on Critical Servers</xhtml:strong>: Windows Script Host binaries (<xhtml:code>cscript.exe</xhtml:code> and <xhtml:code>wscript.exe</xhtml:code>) execute legacy VBScript (<xhtml:code>vbscript.dll</xhtml:code>) and JScript (<xhtml:code>jscript.dll</xhtml:code>) engines. Threat actors targeting Domain Controllers frequently invoke <xhtml:code>cscript.exe</xhtml:code> or <xhtml:code>mshta.exe</xhtml:code> to execute obfuscated staging scripts, query Active Directory via legacy ADSI/WMI interfaces, or execute memory injection routines while attempting to evade standard binary application allowlisting (MITRE ATT&amp;CK T1059.005, T1059.007, T1218).</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Elimination of Untrusted Script Execution</xhtml:strong>: Disabling WSH system-wide via the <xhtml:code>Enabled = 0</xhtml:code> registry setting prevents the execution of all <xhtml:code>.vbs</xhtml:code>, <xhtml:code>.vbe</xhtml:code>, <xhtml:code>.js</xhtml:code>, <xhtml:code>.jse</xhtml:code>, <xhtml:code>.wsf</xhtml:code>, and <xhtml:code>.wsh</xhtml:code> files through the primary scripting host, returning an immediate administrative blocking error.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Comprehensive 64-Bit and 32-Bit WOW6432Node Coverage</xhtml:strong>: In 64-bit Windows Server environments, threat actors often invoke 32-bit binaries (<xhtml:code>%SystemRoot%\SysWOW64\cscript.exe</xhtml:code> or <xhtml:code>wscript.exe</xhtml:code>) to evade 64-bit security monitoring tools and API hooks. Configuring <xhtml:code>Enabled = 0</xhtml:code> and <xhtml:code>TrustPolicy = 2</xhtml:code> across both the native 64-bit registry branch (<xhtml:code>HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings</xhtml:code>) and the 32-bit subsystem branch (<xhtml:code>HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</xhtml:code>) closes this evasion vector.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>TrustPolicy Hardening</xhtml:strong>: Setting <xhtml:code>TrustPolicy = 2</xhtml:code> enforces restrictions that disallow untrusted scripts system-wide, establishing defense-in-depth even if individual registry keys are tampered with.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Accidental Double-Click Prevention</xhtml:strong>: Remapping legacy scripting extensions (<xhtml:code>.vbs</xhtml:code>, <xhtml:code>.vbe</xhtml:code>, <xhtml:code>.js</xhtml:code>, <xhtml:code>.jse</xhtml:code>, <xhtml:code>.wsf</xhtml:code>, <xhtml:code>.wsh</xhtml:code>, <xhtml:code>.hta</xhtml:code>) to <xhtml:code>txtfile</xhtml:code> (<xhtml:code>notepad.exe</xhtml:code>) ensures that if an administrator inspects an administrative script or diagnostic file on the DC console, opening the file in Windows Explorer displays plain text in Notepad rather than silently triggering code execution.</xhtml:li>
+        </xhtml:ol>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:h4>Step 1: Disable WSH via GPO Computer Preferences</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
+          <xhtml:li>Edit the Domain Controller GPO (e.g., <xhtml:code>GPO_Hardening_DomainControllers</xhtml:code>).</xhtml:li>
+          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Preferences\Windows Settings\Registry</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a new <xhtml:strong>Registry Item</xhtml:strong> for the native 64-bit hive:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>0</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a second <xhtml:strong>Registry Item</xhtml:strong> for <xhtml:code>TrustPolicy</xhtml:code>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>TrustPolicy</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>2</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a third <xhtml:strong>Registry Item</xhtml:strong> for 32-bit WOW64 disablement:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>0</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a fourth <xhtml:strong>Registry Item</xhtml:strong> for 32-bit WOW64 TrustPolicy:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>TrustPolicy</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>2</xhtml:code>
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 2: Disable WSH in User Configuration Preferences</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Navigate to: <xhtml:code>User Configuration\Preferences\Windows Settings\Registry</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a new <xhtml:strong>Registry Item</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_CURRENT_USER</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>0</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a second <xhtml:strong>Registry Item</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_CURRENT_USER</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>TrustPolicy</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>2</xhtml:code>
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 3: Remap Script File Extensions to Notepad</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Navigate to: <xhtml:code>User Configuration\Preferences\Control Panel Settings\Folder Options</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Right-click and select <xhtml:strong>New -&gt; Open With</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>File Extension</xhtml:em>*: <xhtml:code>vbs</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Associated Program</xhtml:em>*: <xhtml:code>%SystemRoot%\System32\notepad.exe</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Set as default</xhtml:em>*: Check</xhtml:li>
+          <xhtml:li>Repeat for <xhtml:code>vbe</xhtml:code>, <xhtml:code>js</xhtml:code>, <xhtml:code>jse</xhtml:code>, <xhtml:code>wsf</xhtml:code>, <xhtml:code>wsh</xhtml:code>, and <xhtml:code>hta</xhtml:code>.</xhtml:li>
+          <xhtml:li>Alternatively, configure system-wide registry preferences under <xhtml:code>HKLM\SOFTWARE\Classes\.&lt;ext&gt;</xhtml:code> setting the default string value to <xhtml:code>txtfile</xhtml:code>.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>Configure the local registry settings to disable WSH and remap associations.</xhtml:p>
+        <xhtml:p>
+          <xhtml:a href="implementation_scripts/Disable-DcWsh.ps1">Download Script: Disable-DcWsh.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Disable-DcWsh.ps1
+# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad on Domain Controllers.
+
+Write-Host "Applying Windows Script Host and file association hardening for Domain Controllers..." -ForegroundColor Cyan
+
+# 1. Disable WSH globally in 64-bit HKLM
+$RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (-not (Test-Path $RegistryHklm)) {
+    New-Item -Path $RegistryHklm -Force | Out-Null
+}
+Set-ItemProperty -Path $RegistryHklm -Name "Enabled" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -Value 2 -Type DWord -Force
+Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM." -ForegroundColor Green
+
+# 2. Disable WSH in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (-not (Test-Path $RegistryWow64)) {
+        New-Item -Path $RegistryWow64 -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegistryWow64 -Name "Enabled" -Value 0 -Type DWord -Force
+    Set-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -Value 2 -Type DWord -Force
+    Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM WOW6432Node." -ForegroundColor Green
+}
+
+# 3. Disable WSH in current user HKCU hive
+$RegistryHkcu = "HKCU:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (-not (Test-Path $RegistryHkcu)) {
+    New-Item -Path $RegistryHkcu -Force | Out-Null
+}
+Set-ItemProperty -Path $RegistryHkcu -Name "Enabled" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $RegistryHkcu -Name "TrustPolicy" -Value 2 -Type DWord -Force
+Write-Host "[+] WSH disabled in current user HKCU hive." -ForegroundColor Green
+
+# 4. Remap script file extensions to notepad
+$Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
+foreach ($Ext in $Extensions) {
+    $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
+    
+    # Update Class Association to Notepad
+    if (-not (Test-Path $ProgIdPath)) {
+        New-Item -Path $ProgIdPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $ProgIdPath -Name "" -Value "txtfile" -Type String -Force
+    Write-Host "    Mapped .$Ext extension to txtfile handler." -ForegroundColor Gray
+}
+Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundColor Green
+Write-Host "[i] Note: Software Licensing Management Tool (slmgr.vbs) requires ADBA or KMS. Use Get-CimInstance SoftwareLicensingProduct for querying status." -ForegroundColor Yellow</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To verify the WSH configuration state:</xhtml:em>
+        </xhtml:p>
+        <xhtml:p>
+          <xhtml:a href="audit_scripts/Get-DcWshStatus.ps1">Download Script: Get-DcWshStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-DcWshStatus.ps1
+# Description: Audits Windows Script Host registry state across 64-bit and 32-bit hives and script file extension association handlers on Domain Controllers.
+
+Write-Host "--- Auditing Windows Script Host Hardening on Domain Controllers ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+# 1. Audit WSH Registry settings in 64-bit HKLM
+$RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (Test-Path $RegistryHklm) {
+    $ValHklm = (Get-ItemProperty -Path $RegistryHklm -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
+    if ($ValHklm -eq 0) {
+        Write-Host "    - HKLM WSH Enabled: 0 (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: HKLM WSH is enabled or not configured (Value: '$($ValHklm)')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+
+    $TrustHklm = (Get-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -ErrorAction SilentlyContinue).TrustPolicy
+    if ($TrustHklm -eq 2) {
+        Write-Host "    - HKLM WSH TrustPolicy: 2 (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: HKLM WSH TrustPolicy is not set to 2 (Value: '$($TrustHklm)')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "    - VULNERABLE: HKLM WSH settings key is missing (Expected: Enabled = 0, TrustPolicy = 2)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 2. Audit WSH Registry settings in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (Test-Path $RegistryWow64) {
+        $ValWow64 = (Get-ItemProperty -Path $RegistryWow64 -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
+        if ($ValWow64 -eq 0) {
+            Write-Host "    - WOW6432Node WSH Enabled: 0 (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: WOW6432Node WSH is enabled or not configured (Value: '$($ValWow64)')" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+
+        $TrustWow64 = (Get-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -ErrorAction SilentlyContinue).TrustPolicy
+        if ($TrustWow64 -eq 2) {
+            Write-Host "    - WOW6432Node WSH TrustPolicy: 2 (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: WOW6432Node WSH TrustPolicy is not set to 2 (Value: '$($TrustWow64)')" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: WOW6432Node WSH settings key is missing (Expected: Enabled = 0, TrustPolicy = 2)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+# 3. Audit file associations
+$Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
+foreach ($Ext in $Extensions) {
+    $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
+    if (Test-Path $ProgIdPath) {
+        $Handler = (Get-ItemProperty -Path $ProgIdPath -Name "" -ErrorAction SilentlyContinue).""
+        if ($Handler -eq "txtfile" -or $Handler -match "notepad") {
+            Write-Host "    - Extension .$Ext Handler: $Handler (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: Extension .$Ext Handler is '$($Handler)' (Expected: txtfile/notepad)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: Extension .$Ext Class Registry key not found." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Host "[-] Audit Result: VULNERABLE - Windows Script Host hardening controls on Domain Controller do not meet baseline requirements." -ForegroundColor Red
+} else {
+    Write-Host "[+] Audit Result: SECURE - Windows Script Host hardening controls on Domain Controller are fully compliant." -ForegroundColor Green
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Disable-DcWsh.ps1
+# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad on Domain Controllers.
+
+Write-Host "Applying Windows Script Host and file association hardening for Domain Controllers..." -ForegroundColor Cyan
+
+# 1. Disable WSH globally in 64-bit HKLM
+$RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (-not (Test-Path $RegistryHklm)) {
+    New-Item -Path $RegistryHklm -Force | Out-Null
+}
+Set-ItemProperty -Path $RegistryHklm -Name "Enabled" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -Value 2 -Type DWord -Force
+Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM." -ForegroundColor Green
+
+# 2. Disable WSH in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (-not (Test-Path $RegistryWow64)) {
+        New-Item -Path $RegistryWow64 -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegistryWow64 -Name "Enabled" -Value 0 -Type DWord -Force
+    Set-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -Value 2 -Type DWord -Force
+    Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM WOW6432Node." -ForegroundColor Green
+}
+
+# 3. Disable WSH in current user HKCU hive
+$RegistryHkcu = "HKCU:\SOFTWARE\Microsoft\Windows Script Host\Settings"
+if (-not (Test-Path $RegistryHkcu)) {
+    New-Item -Path $RegistryHkcu -Force | Out-Null
+}
+Set-ItemProperty -Path $RegistryHkcu -Name "Enabled" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $RegistryHkcu -Name "TrustPolicy" -Value 2 -Type DWord -Force
+Write-Host "[+] WSH disabled in current user HKCU hive." -ForegroundColor Green
+
+# 4. Remap script file extensions to notepad
+$Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
+foreach ($Ext in $Extensions) {
+    $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
+    
+    # Update Class Association to Notepad
+    if (-not (Test-Path $ProgIdPath)) {
+        New-Item -Path $ProgIdPath -Force | Out-Null
+    }
+    Set-ItemProperty -Path $ProgIdPath -Name "" -Value "txtfile" -Type String -Force
+    Write-Host "    Mapped .$Ext extension to txtfile handler." -ForegroundColor Gray
+}
+Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundColor Green
+Write-Host "[i] Note: Software Licensing Management Tool (slmgr.vbs) requires ADBA or KMS. Use Get-CimInstance SoftwareLicensingProduct for querying status." -ForegroundColor Yellow</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2159" />
       </check>
     </Rule>
     <Group id="xccdf_org.adhardening.benchmarks_group_Module_2__Domain_Controller_Hardening_Defender_Antivirus">
@@ -46363,9 +46776,10 @@ Write-Host "[+] Outlook OLE Package execution blocked." -ForegroundColor Green</
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs) (Tier 0 Workstations)</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs - Dedicated Tier 0 Administrative Workstations). <xhtml:em>(For Tier 2 Client Workstations, refer to [REQ-END-034](../08-endpoints/disable-windows-script-host.md); for Tier 0 Domain Controllers and Member Servers, refer to [REQ-DC-159](../02-domain-controllers/disable-windows-script-host.md)).</xhtml:em>
+          </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 Enterprise (1809+), Windows 11 Enterprise (all supported builds).</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -46373,18 +46787,29 @@ Write-Host "[+] Outlook OLE Package execution blocked." -ForegroundColor Green</
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>Windows Script Host (WSH), which executes VBScript and JScript files (<xhtml:code>wscript.exe</xhtml:code> and <xhtml:code>cscript.exe</xhtml:code>), is frequently targeted by threat actors in phishing campaigns and initial access vectors. By placing a script file (e.g., <xhtml:code>.vbs</xhtml:code>, <xhtml:code>.js</xhtml:code>, <xhtml:code>.wsf</xhtml:code>, <xhtml:code>.hta</xhtml:code>) in an email attachment or download path, attackers can execute arbitrary code on the system if a user opens the file.</xhtml:p>
-        <xhtml:p>Enforcing these deactivation controls ensures: 1. <xhtml:strong>Attack Surface Reduction</xhtml:strong>: Disabling WSH globally blocks the execution of JScript and VBScript files via the standard scripting engines on the workstation. 2. <xhtml:strong>Defense-in-Depth File Associations</xhtml:strong>: Remapping the default file handler for typical scripting extensions to <xhtml:code>notepad.exe</xhtml:code> ensures that if a scripting file is double-clicked by an administrator, the file opens as plaintext in Notepad for inspection rather than executing its contents.</xhtml:p>
+        <xhtml:p>Privileged Access Workstations (PAWs) serve as the dedicated management perimeter for Tier 0 Active Directory assets, enterprise PKI, and virtualization hosts. Because PAWs possess access tokens and administrative credentials with domain-wide authority, eliminating untrusted code execution pathways is paramount:</xhtml:p>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Elimination of Legacy Scripting Engines</xhtml:strong>: Windows Script Host (<xhtml:code>wscript.exe</xhtml:code> and <xhtml:code>cscript.exe</xhtml:code>) executes legacy VBScript and JScript engines. These hosts are prominent Living-off-the-Land Binaries (LOLBins / LOLBAS) that offer attackers opportunities for defense evasion, memory injection, and unconstrained script execution (MITRE ATT&amp;CK T1059.005, T1059.007, T1218). PAWs have no operational requirement for legacy script execution.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Defense-in-Depth Beyond Application Control</xhtml:strong>: Even in environments where Windows Defender Application Control (WDAC) or AppLocker is deployed, disabling WSH at the registry engine layer ensures that <xhtml:code>wscript.exe</xhtml:code> and <xhtml:code>cscript.exe</xhtml:code> fail immediately upon invocation, preventing script execution even if policies are in audit mode or rule bypasses are attempted.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Comprehensive 64-Bit and WOW6432Node Lockdown</xhtml:strong>: Attackers frequently execute 32-bit binaries (<xhtml:code>%SystemRoot%\SysWOW64\wscript.exe</xhtml:code>) on 64-bit systems to bypass 64-bit security hooks. Enforcing <xhtml:code>Enabled = 0</xhtml:code> and <xhtml:code>TrustPolicy = 2</xhtml:code> across both native 64-bit and WOW6432Node registry paths ensures that 32-bit execution is completely disabled.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>TrustPolicy Hardening</xhtml:strong>: Configuring <xhtml:code>TrustPolicy = 2</xhtml:code> ensures that even if WSH were selectively invoked, unsigned and untrusted scripts are disallowed system-wide.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Fail-Safe File Extension Remapping</xhtml:strong>: Remapping <xhtml:code>.vbs</xhtml:code>, <xhtml:code>.vbe</xhtml:code>, <xhtml:code>.js</xhtml:code>, <xhtml:code>.jse</xhtml:code>, <xhtml:code>.wsf</xhtml:code>, <xhtml:code>.wsh</xhtml:code>, and <xhtml:code>.hta</xhtml:code> file associations to <xhtml:code>txtfile</xhtml:code> (<xhtml:code>notepad.exe</xhtml:code>) ensures that if an administrator inspects an administrative script or artifact, opening the file in Windows Explorer displays the plain text in Notepad rather than executing the script.</xhtml:li>
+        </xhtml:ol>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
-        <xhtml:h4>Step 1: Disable WSH via GPO Registry Preferences</xhtml:h4>
+        <xhtml:h4>Step 1: Disable WSH via GPO Computer Preferences</xhtml:h4>
         <xhtml:ol>
           <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
           <xhtml:li>Edit the PAW GPO (e.g., <xhtml:code>GPO_Hardening_PAW</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Preferences\Windows Settings\Registry</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Create a new <xhtml:strong>Registry Item</xhtml:strong>:</xhtml:li>
+          <xhtml:li>Create a new <xhtml:strong>Registry Item</xhtml:strong> for the native 64-bit hive:</xhtml:li>
           <xhtml:li>
             <xhtml:em> </xhtml:em>
             <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
@@ -46409,8 +46834,138 @@ Write-Host "[+] Outlook OLE Package execution blocked." -ForegroundColor Green</
             <xhtml:em> </xhtml:em>
             <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>0</xhtml:code>
           </xhtml:li>
+          <xhtml:li>Create a second <xhtml:strong>Registry Item</xhtml:strong> for <xhtml:code>TrustPolicy</xhtml:code>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>TrustPolicy</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>2</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a third <xhtml:strong>Registry Item</xhtml:strong> for 32-bit WOW64 disablement:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>0</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a fourth <xhtml:strong>Registry Item</xhtml:strong> for 32-bit WOW64 TrustPolicy:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>TrustPolicy</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>2</xhtml:code>
+          </xhtml:li>
         </xhtml:ol>
-        <xhtml:h4>Step 2: Configure Script File Extensions to Open in Notepad</xhtml:h4>
+        <xhtml:h4>Step 2: Disable WSH in User Configuration Preferences</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Navigate to: <xhtml:code>User Configuration\Preferences\Windows Settings\Registry</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a new <xhtml:strong>Registry Item</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_CURRENT_USER</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>0</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a second <xhtml:strong>Registry Item</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_CURRENT_USER</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>TrustPolicy</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>2</xhtml:code>
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 3: Remap Script File Extensions to Notepad</xhtml:h4>
         <xhtml:ol>
           <xhtml:li>Navigate to: <xhtml:code>User Configuration\Preferences\Control Panel Settings\Folder Options</xhtml:code>
           </xhtml:li>
@@ -46426,7 +46981,8 @@ Write-Host "[+] Outlook OLE Package execution blocked." -ForegroundColor Green</
           <xhtml:li>
             <xhtml:em> </xhtml:em>
             <xhtml:em>Set as default</xhtml:em>*: Check</xhtml:li>
-          <xhtml:li>Repeat the process for the following extensions: <xhtml:code>vbe</xhtml:code>, <xhtml:code>js</xhtml:code>, <xhtml:code>jse</xhtml:code>, <xhtml:code>wsf</xhtml:code>, <xhtml:code>wsh</xhtml:code>, <xhtml:code>hta</xhtml:code>.</xhtml:li>
+          <xhtml:li>Repeat for <xhtml:code>vbe</xhtml:code>, <xhtml:code>js</xhtml:code>, <xhtml:code>jse</xhtml:code>, <xhtml:code>wsf</xhtml:code>, <xhtml:code>wsh</xhtml:code>, and <xhtml:code>hta</xhtml:code>.</xhtml:li>
+          <xhtml:li>Alternatively, configure system-wide registry preferences under <xhtml:code>HKLM\SOFTWARE\Classes\.&lt;ext&gt;</xhtml:code> setting the default string value to <xhtml:code>txtfile</xhtml:code>.</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -46436,26 +46992,40 @@ Write-Host "[+] Outlook OLE Package execution blocked." -ForegroundColor Green</
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Disable-PawWsh.ps1
-# Description: Disables Windows Script Host globally in HKLM and HKCU registry hives, and remaps script file associations to Notepad.
+# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad on PAWs.
 
-Write-Host "Applying Windows Script Host and file association hardening..." -ForegroundColor Cyan
+Write-Host "Applying Windows Script Host and file association hardening for PAWs..." -ForegroundColor Cyan
 
-# 1. Disable WSH globally
+# 1. Disable WSH globally in 64-bit HKLM
 $RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (-not (Test-Path $RegistryHklm)) {
     New-Item -Path $RegistryHklm -Force | Out-Null
 }
 Set-ItemProperty -Path $RegistryHklm -Name "Enabled" -Value 0 -Type DWord -Force
-Write-Host "[+] WSH globally disabled in HKLM." -ForegroundColor Green
+Set-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -Value 2 -Type DWord -Force
+Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM." -ForegroundColor Green
 
+# 2. Disable WSH in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (-not (Test-Path $RegistryWow64)) {
+        New-Item -Path $RegistryWow64 -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegistryWow64 -Name "Enabled" -Value 0 -Type DWord -Force
+    Set-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -Value 2 -Type DWord -Force
+    Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM WOW6432Node." -ForegroundColor Green
+}
+
+# 3. Disable WSH in current user HKCU hive
 $RegistryHkcu = "HKCU:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (-not (Test-Path $RegistryHkcu)) {
     New-Item -Path $RegistryHkcu -Force | Out-Null
 }
 Set-ItemProperty -Path $RegistryHkcu -Name "Enabled" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $RegistryHkcu -Name "TrustPolicy" -Value 2 -Type DWord -Force
 Write-Host "[+] WSH disabled in current user HKCU hive." -ForegroundColor Green
 
-# 2. Remap script file extensions to notepad
+# 4. Remap script file extensions to notepad
 $Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
 foreach ($Ext in $Extensions) {
     $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
@@ -46477,28 +47047,61 @@ Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundCo
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Get-PawWshStatus.ps1
-# Description: Audits Windows Script Host registry state and script file extension association handlers on PAWs.
+# Description: Audits Windows Script Host registry state across 64-bit and 32-bit hives and script file extension association handlers on PAWs.
 
-Write-Host "--- Auditing Windows Script Host Hardening ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Windows Script Host Hardening on PAWs ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
-# 1. Audit WSH Registry settings
+# 1. Audit WSH Registry settings in 64-bit HKLM
 $RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (Test-Path $RegistryHklm) {
     $ValHklm = (Get-ItemProperty -Path $RegistryHklm -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
     if ($ValHklm -eq 0) {
         Write-Host "    - HKLM WSH Enabled: 0 (Secure)" -ForegroundColor Green
     } else {
-        Write-Host "    - VULNERABLE: HKLM WSH is enabled or not configured (Value: '$ValHklm')" -ForegroundColor Red
+        Write-Host "    - VULNERABLE: HKLM WSH is enabled or not configured (Value: '$($ValHklm)')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+
+    $TrustHklm = (Get-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -ErrorAction SilentlyContinue).TrustPolicy
+    if ($TrustHklm -eq 2) {
+        Write-Host "    - HKLM WSH TrustPolicy: 2 (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: HKLM WSH TrustPolicy is not set to 2 (Value: '$($TrustHklm)')" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
-    Write-Host "    - VULNERABLE: HKLM WSH settings key is missing (Expected: Enabled = 0)" -ForegroundColor Red
+    Write-Host "    - VULNERABLE: HKLM WSH settings key is missing (Expected: Enabled = 0, TrustPolicy = 2)" -ForegroundColor Red
     $script:Vulnerable = $true
 }
 
-# 2. Audit file associations
+# 2. Audit WSH Registry settings in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (Test-Path $RegistryWow64) {
+        $ValWow64 = (Get-ItemProperty -Path $RegistryWow64 -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
+        if ($ValWow64 -eq 0) {
+            Write-Host "    - WOW6432Node WSH Enabled: 0 (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: WOW6432Node WSH is enabled or not configured (Value: '$($ValWow64)')" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+
+        $TrustWow64 = (Get-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -ErrorAction SilentlyContinue).TrustPolicy
+        if ($TrustWow64 -eq 2) {
+            Write-Host "    - WOW6432Node WSH TrustPolicy: 2 (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: WOW6432Node WSH TrustPolicy is not set to 2 (Value: '$($TrustWow64)')" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: WOW6432Node WSH settings key is missing (Expected: Enabled = 0, TrustPolicy = 2)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+# 3. Audit file associations
 $Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
 foreach ($Ext in $Extensions) {
     $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
@@ -46507,7 +47110,7 @@ foreach ($Ext in $Extensions) {
         if ($Handler -eq "txtfile" -or $Handler -match "notepad") {
             Write-Host "    - Extension .$Ext Handler: $Handler (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "    - VULNERABLE: Extension .$Ext Handler is '$Handler' (Expected: txtfile/notepad)" -ForegroundColor Red
+            Write-Host "    - VULNERABLE: Extension .$Ext Handler is '$($Handler)' (Expected: txtfile/notepad)" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
@@ -46517,36 +47120,48 @@ foreach ($Ext in $Extensions) {
 }
 
 if ($script:Vulnerable) {
-    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
-    exit 1
+    Write-Host "[-] Audit Result: VULNERABLE - Windows Script Host hardening controls on PAW do not meet baseline requirements." -ForegroundColor Red
 } else {
-    Write-Host "Audit Result: SECURE" -ForegroundColor Green
-    exit 0
+    Write-Host "[+] Audit Result: SECURE - Windows Script Host hardening controls on PAW are fully compliant." -ForegroundColor Green
 }</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
       <fix system="urn:xccdf:fix:script:powershell"># Disable-PawWsh.ps1
-# Description: Disables Windows Script Host globally in HKLM and HKCU registry hives, and remaps script file associations to Notepad.
+# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad on PAWs.
 
-Write-Host "Applying Windows Script Host and file association hardening..." -ForegroundColor Cyan
+Write-Host "Applying Windows Script Host and file association hardening for PAWs..." -ForegroundColor Cyan
 
-# 1. Disable WSH globally
+# 1. Disable WSH globally in 64-bit HKLM
 $RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (-not (Test-Path $RegistryHklm)) {
     New-Item -Path $RegistryHklm -Force | Out-Null
 }
 Set-ItemProperty -Path $RegistryHklm -Name "Enabled" -Value 0 -Type DWord -Force
-Write-Host "[+] WSH globally disabled in HKLM." -ForegroundColor Green
+Set-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -Value 2 -Type DWord -Force
+Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM." -ForegroundColor Green
 
+# 2. Disable WSH in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (-not (Test-Path $RegistryWow64)) {
+        New-Item -Path $RegistryWow64 -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegistryWow64 -Name "Enabled" -Value 0 -Type DWord -Force
+    Set-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -Value 2 -Type DWord -Force
+    Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM WOW6432Node." -ForegroundColor Green
+}
+
+# 3. Disable WSH in current user HKCU hive
 $RegistryHkcu = "HKCU:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (-not (Test-Path $RegistryHkcu)) {
     New-Item -Path $RegistryHkcu -Force | Out-Null
 }
 Set-ItemProperty -Path $RegistryHkcu -Name "Enabled" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $RegistryHkcu -Name "TrustPolicy" -Value 2 -Type DWord -Force
 Write-Host "[+] WSH disabled in current user HKCU hive." -ForegroundColor Green
 
-# 2. Remap script file extensions to notepad
+# 4. Remap script file extensions to notepad
 $Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
 foreach ($Ext in $Extensions) {
     $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
@@ -74564,9 +75179,10 @@ Write-Host "[+] Outlook OLE Package execution blocked." -ForegroundColor Green</
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Member Workstations (Endpoints)</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Member Workstations (Endpoints - Tier 2 Client Workstations and Laptops). <xhtml:em>(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-034](../07-paws/disable-windows-script-host.md); for Tier 0 Domain Controllers and Member Servers, refer to [REQ-DC-159](../02-domain-controllers/disable-windows-script-host.md)).</xhtml:em>
+          </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 Enterprise (1809+), Windows 11 Enterprise (all supported builds).</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -74574,18 +75190,29 @@ Write-Host "[+] Outlook OLE Package execution blocked." -ForegroundColor Green</
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>Windows Script Host (WSH), which executes VBScript and JScript files (<xhtml:code>wscript.exe</xhtml:code> and <xhtml:code>cscript.exe</xhtml:code>), is frequently targeted by threat actors in phishing campaigns and initial access vectors. By placing a script file (e.g., <xhtml:code>.vbs</xhtml:code>, <xhtml:code>.js</xhtml:code>, <xhtml:code>.wsf</xhtml:code>, <xhtml:code>.hta</xhtml:code>) in an email attachment or download path, attackers can execute arbitrary code on the system if a user opens the file.</xhtml:p>
-        <xhtml:p>Enforcing these deactivation controls ensures: 1. <xhtml:strong>Attack Surface Reduction</xhtml:strong>: Disabling WSH globally blocks the execution of JScript and VBScript files via the standard scripting engines on the workstation. 2. <xhtml:strong>Defense-in-Depth File Associations</xhtml:strong>: Remapping the default file handler for typical scripting extensions to <xhtml:code>notepad.exe</xhtml:code> ensures that if a scripting file is double-clicked by an administrator or user, the file opens as plaintext in Notepad for inspection rather than executing its contents.</xhtml:p>
+        <xhtml:p>Windows Script Host (WSH), encompassing the <xhtml:code>wscript.exe</xhtml:code> (graphical) and <xhtml:code>cscript.exe</xhtml:code> (command-line) host engines, executes legacy scripting languages including VBScript (<xhtml:code>vbscript.dll</xhtml:code>) and JScript (<xhtml:code>jscript.dll</xhtml:code>). In client endpoint environments, WSH is one of the most heavily abused Living-off-the-Land Binaries (LOLBins / LOLBAS) leveraged by adversaries for initial access, defense evasion, and payload execution (MITRE ATT&amp;CK T1059.005, T1059.007, T1218):</xhtml:p>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Initial Access via Phishing and Drive-By Downloads</xhtml:strong>: Threat actors routinely deliver weaponized script files (such as <xhtml:code>.vbs</xhtml:code>, <xhtml:code>.js</xhtml:code>, <xhtml:code>.wsf</xhtml:code>, <xhtml:code>.hta</xhtml:code>) disguised as business invoices, delivery notifications, or archived attachments inside ZIP/ISO files. When an unsuspecting user double-clicks such a file, Windows Explorer automatically invokes <xhtml:code>wscript.exe</xhtml:code> or <xhtml:code>mshta.exe</xhtml:code>, running malicious code directly in the user's security context without prompting.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Attack Surface Reduction</xhtml:strong>: Disabling WSH globally via the <xhtml:code>Enabled = 0</xhtml:code> registry parameter completely blocks <xhtml:code>wscript.exe</xhtml:code> and <xhtml:code>cscript.exe</xhtml:code> from executing any VBScript or JScript files system-wide, producing an immediate termination notice if an execution attempt is made.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>64-Bit and 32-Bit WOW6432Node Coverage</xhtml:strong>: On 64-bit Windows architectures, 32-bit applications and sub-processes invoke the 32-bit scripting host located in <xhtml:code>%SystemRoot%\SysWOW64\wscript.exe</xhtml:code>. Applying the <xhtml:code>Enabled = 0</xhtml:code> and <xhtml:code>TrustPolicy = 2</xhtml:code> registry values to both the native 64-bit hive (<xhtml:code>HKLM\SOFTWARE\Microsoft\Windows Script Host\Settings</xhtml:code>) and the 32-bit registry hive (<xhtml:code>HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</xhtml:code>) guarantees that 32-bit sub-processes cannot be weaponized as an evasion tactic.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>TrustPolicy Hardening</xhtml:strong>: Setting <xhtml:code>TrustPolicy = 2</xhtml:code> enforces script restriction policies to disallow untrusted or unsigned scripts, providing defense-in-depth even if individual components attempt to execute outside the primary WSH engine.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Defense-in-Depth File Association Remapping</xhtml:strong>: Setting default file associations for legacy script extensions (<xhtml:code>.vbs</xhtml:code>, <xhtml:code>.vbe</xhtml:code>, <xhtml:code>.js</xhtml:code>, <xhtml:code>.jse</xhtml:code>, <xhtml:code>.wsf</xhtml:code>, <xhtml:code>.wsh</xhtml:code>, <xhtml:code>.hta</xhtml:code>) to <xhtml:code>txtfile</xhtml:code> (<xhtml:code>notepad.exe</xhtml:code>) ensures that if a script file is double-clicked in Windows Explorer, it opens harmlessly in Notepad for plain-text inspection rather than executing code.</xhtml:li>
+        </xhtml:ol>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
-        <xhtml:h4>Step 1: Disable WSH via GPO Registry Preferences</xhtml:h4>
+        <xhtml:h4>Step 1: Disable WSH via GPO Computer Preferences</xhtml:h4>
         <xhtml:ol>
           <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
           <xhtml:li>Edit the Endpoint GPO (e.g., <xhtml:code>GPO_Hardening_Endpoints</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Preferences\Windows Settings\Registry</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Create a new <xhtml:strong>Registry Item</xhtml:strong>:</xhtml:li>
+          <xhtml:li>Create a new <xhtml:strong>Registry Item</xhtml:strong> for the native 64-bit hive:</xhtml:li>
           <xhtml:li>
             <xhtml:em> </xhtml:em>
             <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
@@ -74610,8 +75237,138 @@ Write-Host "[+] Outlook OLE Package execution blocked." -ForegroundColor Green</
             <xhtml:em> </xhtml:em>
             <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>0</xhtml:code>
           </xhtml:li>
+          <xhtml:li>Create a second <xhtml:strong>Registry Item</xhtml:strong> for <xhtml:code>TrustPolicy</xhtml:code>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>TrustPolicy</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>2</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a third <xhtml:strong>Registry Item</xhtml:strong> for 32-bit WOW64 disablement:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>0</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a fourth <xhtml:strong>Registry Item</xhtml:strong> for 32-bit WOW64 TrustPolicy:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>TrustPolicy</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>2</xhtml:code>
+          </xhtml:li>
         </xhtml:ol>
-        <xhtml:h4>Step 2: Configure Script File Extensions to Open in Notepad</xhtml:h4>
+        <xhtml:h4>Step 2: Disable WSH in User Configuration Preferences</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Navigate to: <xhtml:code>User Configuration\Preferences\Windows Settings\Registry</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a new <xhtml:strong>Registry Item</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_CURRENT_USER</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>0</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Create a second <xhtml:strong>Registry Item</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Action</xhtml:em>*: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hive</xhtml:em>*: <xhtml:code>HKEY_CURRENT_USER</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key Path</xhtml:em>*: <xhtml:code>SOFTWARE\Microsoft\Windows Script Host\Settings</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Name</xhtml:em>*: <xhtml:code>TrustPolicy</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Type</xhtml:em>*: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Value Data</xhtml:em>*: <xhtml:code>2</xhtml:code>
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>Step 3: Remap Script File Extensions to Notepad</xhtml:h4>
         <xhtml:ol>
           <xhtml:li>Navigate to: <xhtml:code>User Configuration\Preferences\Control Panel Settings\Folder Options</xhtml:code>
           </xhtml:li>
@@ -74627,7 +75384,8 @@ Write-Host "[+] Outlook OLE Package execution blocked." -ForegroundColor Green</
           <xhtml:li>
             <xhtml:em> </xhtml:em>
             <xhtml:em>Set as default</xhtml:em>*: Check</xhtml:li>
-          <xhtml:li>Repeat the process for the following extensions: <xhtml:code>vbe</xhtml:code>, <xhtml:code>js</xhtml:code>, <xhtml:code>jse</xhtml:code>, <xhtml:code>wsf</xhtml:code>, <xhtml:code>wsh</xhtml:code>, <xhtml:code>hta</xhtml:code>.</xhtml:li>
+          <xhtml:li>Repeat for the remaining extensions: <xhtml:code>vbe</xhtml:code>, <xhtml:code>js</xhtml:code>, <xhtml:code>jse</xhtml:code>, <xhtml:code>wsf</xhtml:code>, <xhtml:code>wsh</xhtml:code>, and <xhtml:code>hta</xhtml:code>.</xhtml:li>
+          <xhtml:li>Alternatively, configure system-wide registry preferences under <xhtml:code>HKLM\SOFTWARE\Classes\.&lt;ext&gt;</xhtml:code> setting the default string value to <xhtml:code>txtfile</xhtml:code>.</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -74637,26 +75395,40 @@ Write-Host "[+] Outlook OLE Package execution blocked." -ForegroundColor Green</
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Disable-Wsh.ps1
-# Description: Disables Windows Script Host globally in HKLM and HKCU registry hives, and remaps script file associations to Notepad.
+# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad.
 
 Write-Host "Applying Windows Script Host and file association hardening..." -ForegroundColor Cyan
 
-# 1. Disable WSH globally
+# 1. Disable WSH globally in 64-bit HKLM
 $RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (-not (Test-Path $RegistryHklm)) {
     New-Item -Path $RegistryHklm -Force | Out-Null
 }
 Set-ItemProperty -Path $RegistryHklm -Name "Enabled" -Value 0 -Type DWord -Force
-Write-Host "[+] WSH globally disabled in HKLM." -ForegroundColor Green
+Set-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -Value 2 -Type DWord -Force
+Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM." -ForegroundColor Green
 
+# 2. Disable WSH in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (-not (Test-Path $RegistryWow64)) {
+        New-Item -Path $RegistryWow64 -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegistryWow64 -Name "Enabled" -Value 0 -Type DWord -Force
+    Set-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -Value 2 -Type DWord -Force
+    Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM WOW6432Node." -ForegroundColor Green
+}
+
+# 3. Disable WSH in current user HKCU hive
 $RegistryHkcu = "HKCU:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (-not (Test-Path $RegistryHkcu)) {
     New-Item -Path $RegistryHkcu -Force | Out-Null
 }
 Set-ItemProperty -Path $RegistryHkcu -Name "Enabled" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $RegistryHkcu -Name "TrustPolicy" -Value 2 -Type DWord -Force
 Write-Host "[+] WSH disabled in current user HKCU hive." -ForegroundColor Green
 
-# 2. Remap script file extensions to notepad
+# 4. Remap script file extensions to notepad
 $Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
 foreach ($Ext in $Extensions) {
     $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
@@ -74678,28 +75450,61 @@ Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundCo
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Get-WshStatus.ps1
-# Description: Audits Windows Script Host registry state and script file extension association handlers.
+# Description: Audits Windows Script Host registry state across 64-bit and 32-bit hives and script file extension association handlers.
 
 Write-Host "--- Auditing Windows Script Host Hardening ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
-# 1. Audit WSH Registry settings
+# 1. Audit WSH Registry settings in 64-bit HKLM
 $RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (Test-Path $RegistryHklm) {
     $ValHklm = (Get-ItemProperty -Path $RegistryHklm -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
     if ($ValHklm -eq 0) {
         Write-Host "    - HKLM WSH Enabled: 0 (Secure)" -ForegroundColor Green
     } else {
-        Write-Host "    - VULNERABLE: HKLM WSH is enabled or not configured (Value: '$ValHklm')" -ForegroundColor Red
+        Write-Host "    - VULNERABLE: HKLM WSH is enabled or not configured (Value: '$($ValHklm)')" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+
+    $TrustHklm = (Get-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -ErrorAction SilentlyContinue).TrustPolicy
+    if ($TrustHklm -eq 2) {
+        Write-Host "    - HKLM WSH TrustPolicy: 2 (Secure)" -ForegroundColor Green
+    } else {
+        Write-Host "    - VULNERABLE: HKLM WSH TrustPolicy is not set to 2 (Value: '$($TrustHklm)')" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
-    Write-Host "    - VULNERABLE: HKLM WSH settings key is missing (Expected: Enabled = 0)" -ForegroundColor Red
+    Write-Host "    - VULNERABLE: HKLM WSH settings key is missing (Expected: Enabled = 0, TrustPolicy = 2)" -ForegroundColor Red
     $script:Vulnerable = $true
 }
 
-# 2. Audit file associations
+# 2. Audit WSH Registry settings in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (Test-Path $RegistryWow64) {
+        $ValWow64 = (Get-ItemProperty -Path $RegistryWow64 -Name "Enabled" -ErrorAction SilentlyContinue).Enabled
+        if ($ValWow64 -eq 0) {
+            Write-Host "    - WOW6432Node WSH Enabled: 0 (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: WOW6432Node WSH is enabled or not configured (Value: '$($ValWow64)')" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+
+        $TrustWow64 = (Get-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -ErrorAction SilentlyContinue).TrustPolicy
+        if ($TrustWow64 -eq 2) {
+            Write-Host "    - WOW6432Node WSH TrustPolicy: 2 (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "    - VULNERABLE: WOW6432Node WSH TrustPolicy is not set to 2 (Value: '$($TrustWow64)')" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "    - VULNERABLE: WOW6432Node WSH settings key is missing (Expected: Enabled = 0, TrustPolicy = 2)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+# 3. Audit file associations
 $Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
 foreach ($Ext in $Extensions) {
     $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
@@ -74708,7 +75513,7 @@ foreach ($Ext in $Extensions) {
         if ($Handler -eq "txtfile" -or $Handler -match "notepad") {
             Write-Host "    - Extension .$Ext Handler: $Handler (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "    - VULNERABLE: Extension .$Ext Handler is '$Handler' (Expected: txtfile/notepad)" -ForegroundColor Red
+            Write-Host "    - VULNERABLE: Extension .$Ext Handler is '$($Handler)' (Expected: txtfile/notepad)" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
@@ -74718,34 +75523,48 @@ foreach ($Ext in $Extensions) {
 }
 
 if ($script:Vulnerable) {
-    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    Write-Host "[-] Audit Result: VULNERABLE - Windows Script Host hardening controls do not meet baseline requirements." -ForegroundColor Red
 } else {
-    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    Write-Host "[+] Audit Result: SECURE - Windows Script Host hardening controls are fully compliant." -ForegroundColor Green
 }</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
       <fix system="urn:xccdf:fix:script:powershell"># Disable-Wsh.ps1
-# Description: Disables Windows Script Host globally in HKLM and HKCU registry hives, and remaps script file associations to Notepad.
+# Description: Disables Windows Script Host globally across 64-bit and 32-bit registry hives, enforces TrustPolicy, and remaps script file associations to Notepad.
 
 Write-Host "Applying Windows Script Host and file association hardening..." -ForegroundColor Cyan
 
-# 1. Disable WSH globally
+# 1. Disable WSH globally in 64-bit HKLM
 $RegistryHklm = "HKLM:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (-not (Test-Path $RegistryHklm)) {
     New-Item -Path $RegistryHklm -Force | Out-Null
 }
 Set-ItemProperty -Path $RegistryHklm -Name "Enabled" -Value 0 -Type DWord -Force
-Write-Host "[+] WSH globally disabled in HKLM." -ForegroundColor Green
+Set-ItemProperty -Path $RegistryHklm -Name "TrustPolicy" -Value 2 -Type DWord -Force
+Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM." -ForegroundColor Green
 
+# 2. Disable WSH in WOW6432Node on 64-bit systems
+if ([Environment]::Is64BitOperatingSystem) {
+    $RegistryWow64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows Script Host\Settings"
+    if (-not (Test-Path $RegistryWow64)) {
+        New-Item -Path $RegistryWow64 -Force | Out-Null
+    }
+    Set-ItemProperty -Path $RegistryWow64 -Name "Enabled" -Value 0 -Type DWord -Force
+    Set-ItemProperty -Path $RegistryWow64 -Name "TrustPolicy" -Value 2 -Type DWord -Force
+    Write-Host "[+] WSH globally disabled and TrustPolicy enforced in HKLM WOW6432Node." -ForegroundColor Green
+}
+
+# 3. Disable WSH in current user HKCU hive
 $RegistryHkcu = "HKCU:\SOFTWARE\Microsoft\Windows Script Host\Settings"
 if (-not (Test-Path $RegistryHkcu)) {
     New-Item -Path $RegistryHkcu -Force | Out-Null
 }
 Set-ItemProperty -Path $RegistryHkcu -Name "Enabled" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path $RegistryHkcu -Name "TrustPolicy" -Value 2 -Type DWord -Force
 Write-Host "[+] WSH disabled in current user HKCU hive." -ForegroundColor Green
 
-# 2. Remap script file extensions to notepad
+# 4. Remap script file extensions to notepad
 $Extensions = @("vbs", "vbe", "js", "jse", "wsf", "wsh", "hta")
 foreach ($Ext in $Extensions) {
     $ProgIdPath = "HKLM:\SOFTWARE\Classes\.$Ext"
