@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 6f9e18d | Generated: September 08, 2026</span>
+      <span>Commit: 910af28 | Generated: September 08, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1863,6 +1863,8 @@ This directory contains security baselines for Domain Controllers running Window
   * **[REQ-DC-145 - Audit Policy: System Events Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-system-events-md)**
 * **[REQ-DC-156 - Configure Early Launch Antimalware (ELAM) Policy on Domain Controllers](#02-domain-controllers-configure-elam-md)**
   Requirement to enforce the Early Launch Antimalware (ELAM) boot-start driver initialization policy on Domain Controllers to prevent kernel-level rootkits, BYOVD exploits, and unverified driver loading at startup.
+* **[REQ-DC-157 - UEFI Firmware Security Hardening on Domain Controllers](#02-domain-controllers-configure-uefi-security-md)**
+  Requirement to enforce hardware-rooted platform integrity, supervisor password protection, native UEFI mode, boot order lockdown, CPU virtualization, TPM 2.0, and out-of-band management interface hardening across physical and virtual Domain Controllers.
 
 
 <div style="page-break-before: always;"></div>
@@ -14829,7 +14831,7 @@ Enforcing the **Microsoft Vulnerable Driver Blocklist** via Windows Defender App
 <div id="02-domain-controllers-enable-wdac-driver-blocklist-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-DC-007 - Disable Credential Guard](#02-domain-controllers-disable-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled (while ensuring Credential Guard is kept disabled). Enabling Secure Boot and CPU virtualization features is a strict pre-requisite; refer to [REQ-PAW-005 - UEFI Firmware Security Hardening](#07-paws-configure-uefi-security-md) and [REQ-PAW-006 - Enable Hardware Virtualization and DMA Protection](#07-paws-enable-hardware-virtualization-and-dma-protection-md) for firmware settings.
+* **Pre-requisite (Memory Integrity/HVCI)**: The vulnerable driver blocklist requires Hypervisor-Protected Code Integrity (HVCI) for secure, hypervisor-enforced validation. Refer to [REQ-DC-007 - Disable Credential Guard](#02-domain-controllers-disable-credential-guard-md) to ensure Virtualization-Based Security (VBS) and Memory Integrity (HVCI) are fully enabled (while ensuring Credential Guard is kept disabled). Enabling Secure Boot and CPU virtualization features is a strict pre-requisite; refer to [REQ-DC-157 - UEFI Firmware Security Hardening on Domain Controllers](#02-domain-controllers-configure-uefi-security-md) and [REQ-DC-032 - Enable UEFI Secure Boot](#02-domain-controllers-enable-secure-boot-md) for firmware and hypervisor settings.
 * **Compatibility with Legacy Drivers**: Third-party backup, monitoring, or hardware administration software running deprecated, vulnerable drivers may fail to load. All such software must be updated to use secure, modern drivers.
 * **Deployment Testing**: To prevent system instability, the WDAC blocklist policy should be deployed in **Audit Mode** initially to verify that no critical operational drivers are blocked in production before shifting to enforcement mode.
 
@@ -25472,6 +25474,372 @@ ELAM operational events and driver initialization classifications are logged by 
 * **DoD Windows Server STIG**: Rule `V-205739` (Early Launch Antimalware Boot-Start Driver Initialization Policy)
 * **Microsoft Security Baseline**: Windows Server Security Baseline (Boot-Start Driver Initialization Policy)
 * **ANSSI AD Hardening Guide**: Operational baseline rules for system boot and driver signature verification.
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-configure-uefi-security-md"></div>
+
+<div id="02-domain-controllers-configure-uefi-security-md-req-dc-157-uefi-firmware-security-hardening-on-domain-controllers"></div>
+
+# [REQ-DC-157] UEFI Firmware Security Hardening on Domain Controllers
+
+<div id="02-domain-controllers-configure-uefi-security-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers (both physical bare-metal enterprise servers and hypervisor-hosted virtual machines). *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-005](#07-paws-configure-uefi-security-md); for Tier 2 Client Workstations and Member Servers, refer to [REQ-END-013](#08-endpoints-configure-uefi-security-md)).*
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025.
+
+---
+
+<div id="02-domain-controllers-configure-uefi-security-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * UEFI Firmware Configuration Menu (Hardware Level / Hypervisor Level)
+  * `HKLM\SYSTEM\CurrentControlSet\Control`
+    * `PEFirmwareType` = `2` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State`
+    * `UEFISecureBootEnabled` = `1` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power`
+    * `HiberbootEnabled` = `0` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard`
+    * `RequirePlatformSecurityFeatures` = `1` or `3` (REG_DWORD)
+
+---
+
+<div id="02-domain-controllers-configure-uefi-security-md-rationale"></div>
+
+## Rationale
+Domain Controllers are Tier 0 crown jewels that store the directory database (`NTDS.dit`), Kerberos key distribution services (`KDC`), and enterprise authentication secrets. If the underlying platform firmware or virtual machine boot configuration is compromised, an attacker can subvert all operating system and hypervisor defenses before the Windows kernel loads.
+
+<div id="02-domain-controllers-configure-uefi-security-md-1-threats-to-domain-controller-platform-integrity"></div>
+
+### 1. Threats to Domain Controller Platform Integrity
+* **Firmware Rootkits & Bootkits**: Attackers deploying UEFI bootkits (e.g., BlackLotus, ESPecter) subvert the Windows bootloader (`winload.efi`) and initialize malicious code before LSASS or endpoint protection software starts. This grants adversaries Ring 0 execution privileges capable of bypassing Protected Process Light (PPL), dumping NTDS secrets, or establishing persistent hypervisor implants.
+* **Unauthorized Boot Media Execution**: If external boot devices or network PXE boots are enabled in production, an attacker with physical or out-of-band console access can boot the server into an alternate operating system (e.g., Linux live distribution or forensic environment) to extract `NTDS.dit` and the `SYSTEM` registry hive directly from unencrypted disks.
+* **Direct Memory Access (DMA) & Cold-Boot Exploitation**: High-speed peripheral expansion buses (PCIe, NVMe, Thunderbolt) can be exploited via malicious DMA controllers to read RAM contents. Furthermore, resetting physical server hardware without memory sanitization leaves transient encryption keys in DRAM. Enabling the Memory Overwrite Request (MOR) lock forces firmware to sanitize memory during unexpected power cycles.
+* **Out-of-Band Management Controller (BMC) Attacks**: Enterprise servers rely on Baseboard Management Controllers (Dell iDRAC, HPE iLO, Lenovo XClarity, Cisco CIMC). If BMCs expose legacy protocols (e.g., IPMI over LAN with cipher 0 vulnerabilities), use weak credentials, or permit unauthenticated Virtual Media (vMedia) mounting, attackers can remotely compromise firmware or mount malicious boot ISOs without physical data center access.
+* **Virtualization Boundary Compromise**: In virtualized environments, running Domain Controllers as legacy Generation 1 / BIOS virtual machines exposes the domain to hypervisor-level bootloader replacement, lacks vTPM integration, and prevents the activation of Virtualization-Based Security (VBS) and Credential Guard.
+
+<div id="02-domain-controllers-configure-uefi-security-md-2-domain-controller-firmware-security-baseline"></div>
+
+### 2. Domain Controller Firmware Security Baseline
+
+<div id="02-domain-controllers-configure-uefi-security-md-a-physical-bare-metal-domain-controllers"></div>
+
+#### A. Physical Bare-Metal Domain Controllers
+1. **UEFI Supervisor Password**: Enforce a strong, complex supervisor/administrator password on physical server firmware. Store this password in the enterprise Tier 0 credential repository. The boot override menu (e.g., F11/F12) must require the supervisor password.
+2. **Native UEFI Boot Mode (CSM Disabled)**: Enforce pure Native UEFI boot and disable legacy BIOS / Compatibility Support Module (CSM).
+3. **Disabling Fast Boot**: Force full hardware diagnostics, device memory self-tests, and complete TPM PCR 0-7 measurements on every server boot.
+4. **Boot Order Lockdown**: Lock the primary boot sequence strictly to the internal RAID storage array containing the OS bootloader. Completely disable external USB boot, optical drive boot, and network PXE boot in production (PXE is permitted only during initial server provisioning on an isolated staging VLAN).
+5. **Hardware Virtualization & IOMMU**: Enable Intel VT-x / AMD-V and Intel VT-d / AMD-Vi at the firmware level. This is mandatory for running Hyper-V, Virtualization-Based Security (VBS), and Kernel DMA Protection on Windows Server.
+6. **TPM 2.0 Cryptoprocessor**: Ensure physical server TPM 2.0 is active with the SHA-256 PCR bank enabled.
+7. **Memory Overwrite Request (MOR) Lock**: Enable MOR Lock to mitigate cold-boot memory extraction attacks.
+8. **Secure Boot Enforcement**: Ensure UEFI Secure Boot is active in Deployed Mode with valid signature databases and current DBX revocations applied (refer to [REQ-DC-033](#02-domain-controllers-configure-secure-boot-revocations-md)).
+9. **Firmware Rollback Protection**: Enable BIOS Flash Protection and Firmware Rollback Prevention to block downgrade attacks targeting known firmware vulnerabilities.
+10. **Out-of-Band (BMC) Hardening**:
+    * Isolate BMC management ports on a dedicated, non-routable Tier 0 out-of-band management network.
+    * Disable legacy IPMI over LAN (UDP port 623) to eliminate cipher suite 0 and RAKP password hash extraction vulnerabilities.
+    * Enforce HTTPS with TLS 1.2/1.3 and disable unencrypted HTTP redirection.
+    * Disconnect and disable Virtual Media (vMedia) during normal production operations.
+
+<div id="02-domain-controllers-configure-uefi-security-md-b-virtual-domain-controllers-hyper-v-vmware-vsphere"></div>
+
+#### B. Virtual Domain Controllers (Hyper-V / VMware vSphere)
+1. **Hyper-V Generation 2 VMs**: Deploy virtual Domain Controllers exclusively as Generation 2 VMs with UEFI firmware, Secure Boot enabled (using the "Microsoft Windows" template), and a Virtual TPM (vTPM) 2.0 device added.
+2. **VMware vSphere EFI Firmware**: Configure the VM boot options to use **EFI** firmware with **Secure Boot** enabled and attach a Virtual TPM 2.0 device.
+3. **Virtual Boot Order Lockdown**: Lock the VM boot order to the primary virtual hard disk (VHDX/VMDK). Disable network boot and disconnect virtual DVD/CD-ROM drives in production.
+4. **Virtualization Host Security Boundary**: Ensure virtualization hosts hosting virtual Domain Controllers are hardened in accordance with Tier 0 isolation standards (refer to [REQ-DC-018 - Harden Virtualization Hosts for Domain Controllers](#02-domain-controllers-harden-dc-virtualization-hosts-md)).
+
+---
+
+<div id="02-domain-controllers-configure-uefi-security-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Maintenance Workflow**: Hardware technicians must obtain the supervisor password from the Tier 0 credential vault to alter BIOS settings or perform hardware diagnostics.
+* **Legacy VM Migration**: Domain Controllers deployed as Generation 1 virtual machines (BIOS/MBR) cannot be dynamically converted to Generation 2 without rebuild or offline disk structure migration using `MBR2GPT.exe`. Environments with Generation 1 DC VMs should schedule structured DC promotions onto new Generation 2 VM deployments followed by graceful demotion of legacy instances.
+* **Pre-Boot Deployment (PXE)**: Disabling network PXE boot in production prevents accidental or unauthorized network imaging. Staging and bare-metal OS provisioning must occur within dedicated provisioning networks before locking firmware down.
+
+---
+
+<div id="02-domain-controllers-configure-uefi-security-md-pre-deployment-verification"></div>
+
+## Pre-Deployment Verification
+
+Execute the following PowerShell commands on the Domain Controller to inspect current boot mode, Secure Boot state, and TPM readiness:
+
+```powershell
+# Inspect boot mode, Secure Boot, and TPM status on Domain Controller
+$BootMode = $env:firmware_type
+$SecureBoot = Confirm-SecureBootUEFI -ErrorAction SilentlyContinue
+$Tpm = Get-Tpm -ErrorAction SilentlyContinue
+$SystemModel = (Get-CimInstance -ClassName Win32_ComputerSystem).Model
+
+[PSCustomObject]@{
+    PlatformModel = $SystemModel
+    BootMode      = $BootMode
+    SecureBoot    = $SecureBoot
+    TpmPresent    = $Tpm.TpmPresent
+    TpmReady      = $Tpm.TpmReady
+    Manufacturer  = (Get-CimInstance -ClassName Win32_Bios).Manufacturer
+    BIOSVersion   = (Get-CimInstance -ClassName Win32_Bios).SMBIOSBIOSVersion
+} | Format-List
+```
+
+---
+
+<div id="02-domain-controllers-configure-uefi-security-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-configure-uefi-security-md-option-a-hardware-hypervisor-firmware-configuration-preferred"></div>
+
+### Option A: Hardware & Hypervisor Firmware Configuration (Preferred)
+
+<div id="02-domain-controllers-configure-uefi-security-md-for-physical-servers-dell-poweredge-hpe-proliant-lenovo-thinksystem"></div>
+
+#### For Physical Servers (Dell PowerEdge, HPE ProLiant, Lenovo ThinkSystem):
+1. Restart the server and enter system setup during POST (typically F2 on Dell, F9 on HPE, F1 on Lenovo).
+2. **Security Settings**:
+   * Set a strong **System Password** / **Setup Password** (Administrator/Supervisor). Record it in the Tier 0 credential vault.
+   * Verify **TPM 2.0 Security** is **Enabled** and **Activated** with SHA-256 PCR bank.
+   * Enable **Memory Overwrite Request (MOR)** or Memory Clearing on boot.
+3. **Boot Settings**:
+   * Set **Boot Mode** to **UEFI**.
+   * Disable **Legacy BIOS / CSM**.
+   * Set **Boot Sequence** to primary internal storage (RAID/SAN). Disable USB and Network PXE boot options.
+   * Enable password prompt on Boot Override Menu (F11/F12).
+4. **Processor / Virtualization Settings**:
+   * Enable **Intel Virtualization Technology (VT-x)** or **AMD-V**.
+   * Enable **Intel VT for Directed I/O (VT-d)** or **AMD IOMMU**.
+5. **Secure Boot Settings**:
+   * Enable **Secure Boot**. Ensure Secure Boot Mode is set to **Deployed Mode**.
+6. **Firmware Rollback**:
+   * Enable **BIOS Flash Protection** / **Rollback Prevention**.
+7. **Baseboard Management Controller (BMC / iDRAC / iLO)**:
+   * Navigate to BMC network settings -> Disable **IPMI over LAN** (UDP 623).
+   * Ensure web server enforces **HTTPS (TLS 1.2/1.3)**.
+   * Detach and disable **Virtual Media**.
+
+<div id="02-domain-controllers-configure-uefi-security-md-for-virtual-domain-controllers-hyper-v-gen-2-vmware-esxi"></div>
+
+#### For Virtual Domain Controllers (Hyper-V Gen 2 / VMware ESXi):
+* **Hyper-V**:
+  1. Open **Hyper-V Manager**, select the Domain Controller VM, and open **Settings**.
+  2. Navigate to **Security** -> check **Enable Secure Boot** (Template: **Microsoft Windows**).
+  3. Under **Security Support**, check **Enable Trusted Platform Module** (vTPM).
+  4. Navigate to **Firmware** -> verify boot order has the virtual hard drive (`.vhdx`) at the top, and remove network adapter and virtual DVD drive from the boot list.
+* **VMware vSphere**:
+  1. Open the **vSphere Client**, edit VM settings.
+  2. Under **VM Options** -> **Boot Options** -> set Firmware to **EFI** and check **Enable UEFI Secure Boot**.
+  3. Under **Virtual Hardware** -> click **Add New Device** -> select **Trusted Platform Module** (vTPM).
+  4. Remove or disconnect virtual CD/DVD drives and disable network boot in VM boot options.
+
+---
+
+<div id="02-domain-controllers-configure-uefi-security-md-option-b-powershell-remediation-os-boot-hardening"></div>
+
+### Option B: PowerShell Remediation & OS Boot Hardening
+
+Run the following script to configure OS-level boot parameters (disabling Windows Fast Startup, ensuring Device Guard platform flags), detect whether the Domain Controller is running on physical hardware or a virtual hypervisor, and display appropriate firmware configuration guidance.
+
+[Download Script: Set-DcUefiSecurity.ps1](implementation_scripts/Set-DcUefiSecurity.ps1)
+
+```powershell
+# Set-DcUefiSecurity.ps1
+# Description: Configures OS-level boot parameters and audits platform firmware configuration on Domain Controllers.
+
+Write-Host "--- Configuring Domain Controller UEFI & Boot Security Baseline ---" -ForegroundColor Cyan
+
+# 1. Disable Windows Fast Startup (forces full cold boot and fresh TPM PCR measurements)
+$PowerPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power"
+if (-not (Test-Path $PowerPath)) {
+    New-Item -Path $PowerPath -Force | Out-Null
+}
+
+try {
+    Set-ItemProperty -Path $PowerPath -Name "HiberbootEnabled" -Value 0 -Type DWord -Force -ErrorAction Stop
+    Write-Host "[+] Windows Fast Startup disabled (HiberbootEnabled = 0)." -ForegroundColor Green
+} catch {
+    Write-Host "[!] Failed to configure HiberbootEnabled: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# 2. Configure Device Guard Platform Security Flags
+$DeviceGuardPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard"
+if (-not (Test-Path $DeviceGuardPath)) {
+    New-Item -Path $DeviceGuardPath -Force | Out-Null
+}
+
+try {
+    # 1 = Secure Boot, 3 = Secure Boot and DMA Protection
+    Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 1 -Type DWord -Force -ErrorAction Stop
+    Write-Host "[+] Device Guard required platform security features configured (Value = 1)." -ForegroundColor Green
+} catch {
+    Write-Host "[!] Failed to configure RequirePlatformSecurityFeatures: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# 3. Detect Server Environment (Physical vs Virtual)
+$ComputerSystem = Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction SilentlyContinue
+$Bios = Get-CimInstance -ClassName Win32_Bios -ErrorAction SilentlyContinue
+
+Write-Host "`nPlatform Environment Detection:" -ForegroundColor Cyan
+Write-Host "  Model:        $($ComputerSystem.Model)" -ForegroundColor White
+Write-Host "  Manufacturer: $($Bios.Manufacturer)" -ForegroundColor White
+Write-Host "  BIOS Version: $($Bios.SMBIOSBIOSVersion)" -ForegroundColor White
+
+if ($ComputerSystem.Model -match "Virtual Machine|VMware|KVM|Hyper-V") {
+    Write-Host "  [i] Virtual Domain Controller detected." -ForegroundColor Yellow
+    Write-Host "      Ensure VM is Generation 2 (UEFI) with Secure Boot enabled and a virtual TPM (vTPM 2.0) attached." -ForegroundColor Gray
+    Write-Host "      Hyper-V PowerShell: Set-VMFirmware -VMName '<DC>' -EnableSecureBoot On -SecureBootTemplate MicrosoftWindows" -ForegroundColor Gray
+    Write-Host "      Hyper-V PowerShell: Enable-VMTPM -VMName '<DC>'" -ForegroundColor Gray
+} else {
+    Write-Host "  [i] Physical Bare-Metal Server detected." -ForegroundColor Yellow
+    Write-Host "      Ensure BIOS supervisor password is set, CSM is disabled, boot order is locked to RAID," -ForegroundColor Gray
+    Write-Host "      VT-x/VT-d is enabled, and Out-of-Band BMC (iDRAC/iLO) has IPMI over LAN disabled." -ForegroundColor Gray
+}
+
+Write-Host "`n[+] Remediation script completed." -ForegroundColor Green
+```
+
+---
+
+<div id="02-domain-controllers-configure-uefi-security-md-auditing-verification"></div>
+
+## Auditing & Verification
+
+<div id="02-domain-controllers-configure-uefi-security-md-powershell-audit-script"></div>
+
+### PowerShell Audit Script
+
+Run the following script to verify native UEFI boot mode, Secure Boot status, TPM 2.0 presence, and CPU virtualization extensions on Domain Controllers.
+
+[Download Script: Audit-DcUefiSecurity.ps1](audit_scripts/Audit-DcUefiSecurity.ps1)
+
+```powershell
+# Audit-DcUefiSecurity.ps1
+# Description: Audits local boot environment, Secure Boot, TPM, and virtualization properties on Domain Controllers.
+
+Write-Host "--- Auditing UEFI Security Baseline on Domain Controller ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+# 1. Verify Boot Environment Type (Native UEFI)
+$FirmwareType = $env:firmware_type
+$RegPath = "HKLM:\System\CurrentControlSet\Control"
+$FirmwareProperty = Get-ItemProperty -Path $RegPath -Name "PEFirmwareType" -ErrorAction SilentlyContinue
+
+if ($FirmwareProperty -and $FirmwareProperty.PEFirmwareType -eq 2) {
+    Write-Host "  [+] Boot Mode: Native UEFI active (PEFirmwareType = 2)." -ForegroundColor Green
+} elseif ($FirmwareType -eq "UEFI") {
+    Write-Host "  [+] Boot Mode: Native UEFI active (firmware_type = UEFI)." -ForegroundColor Green
+} else {
+    Write-Host "  [!] VULNERABLE: System booted in Legacy BIOS mode (CSM enabled) or unrecognized firmware type." -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 2. Audit UEFI Secure Boot Status
+try {
+    $SecureBootActive = Confirm-SecureBootUEFI -ErrorAction Stop
+    if ($SecureBootActive -eq $true) {
+        Write-Host "  [+] Secure Boot: Enabled in firmware." -ForegroundColor Green
+    } else {
+        Write-Host "  [!] VULNERABLE: Secure Boot is supported but currently disabled in firmware." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} catch [System.PlatformNotSupportedException] {
+    Write-Host "  [!] VULNERABLE: UEFI Secure Boot is not supported on this platform." -ForegroundColor Red
+    $script:Vulnerable = $true
+} catch {
+    Write-Host "  [!] VULNERABLE: UEFI Secure Boot validation failed: $($_.Exception.Message)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 3. Audit TPM 2.0 Status
+try {
+    $Tpm = Get-Tpm -ErrorAction Stop
+    if ($Tpm.TpmPresent -and $Tpm.TpmReady) {
+        Write-Host "  [+] TPM 2.0: Present and Ready (Enabled: $($Tpm.TpmEnabled), Activated: $($Tpm.TpmActivated))." -ForegroundColor Green
+    } else {
+        Write-Host "  [!] VULNERABLE: TPM is not present, not ready, or disabled in firmware." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} catch {
+    Write-Host "  [!] VULNERABLE: Failed to query TPM status: $($_.Exception.Message)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 4. Audit CPU Virtualization Extensions in Firmware
+$Processor = Get-CimInstance -ClassName Win32_Processor -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($Processor -and $Processor.VirtualizationFirmwareEnabled -eq $true) {
+    Write-Host "  [+] Hardware Virtualization: Enabled in firmware (VT-x / AMD-V)." -ForegroundColor Green
+} else {
+    # If Hyper-V/VBS is already running, VirtualizationFirmwareEnabled may report false inside partition
+    $Vbs = Get-CimInstance -Namespace root\Microsoft\Windows\DeviceGuard -ClassName Win32_DeviceGuard -ErrorAction SilentlyContinue
+    if ($Vbs -and $Vbs.VirtualizationBasedSecurityStatus -ge 1) {
+        Write-Host "  [+] Hardware Virtualization: Verified active via running Virtualization-Based Security." -ForegroundColor Green
+    } else {
+        Write-Host "  [!] VULNERABLE: Hardware CPU virtualization extensions are disabled in firmware." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+# 5. Audit Windows Fast Startup Configuration
+$PowerReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -ErrorAction SilentlyContinue
+if ($PowerReg -and $PowerReg.HiberbootEnabled -eq 0) {
+    Write-Host "  [+] Windows Fast Startup: Disabled (Full cold boot enforced)." -ForegroundColor Green
+} else {
+    Write-Host "  [!] VULNERABLE: Windows Fast Startup is enabled (HiberbootEnabled != 0). Must be disabled for deterministic boot measurements." -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 6. Retrieve Server & BIOS Firmware Specifications
+$ComputerSystem = Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction SilentlyContinue
+$BiosDetails = Get-CimInstance -ClassName Win32_Bios -ErrorAction SilentlyContinue
+
+Write-Host "  Platform Model:        $($ComputerSystem.Model)" -ForegroundColor White
+if ($BiosDetails) {
+    Write-Host "  Firmware Manufacturer: $($BiosDetails.Manufacturer)" -ForegroundColor White
+    Write-Host "  Firmware Version:      $($BiosDetails.SMBIOSBIOSVersion)" -ForegroundColor White
+    Write-Host "  Firmware Release Date: $($BiosDetails.ReleaseDate)" -ForegroundColor White
+} else {
+    Write-Host "  Warning: BIOS details could not be retrieved via WMI." -ForegroundColor Yellow
+}
+
+# Final Verdict
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-configure-uefi-security-md-auditing-detection-telemetry"></div>
+
+## Auditing, Detection & Telemetry
+Firmware and boot configuration telemetry on Domain Controllers is captured across Windows event channels:
+* **Microsoft-Windows-Kernel-Boot**:
+  * **Event ID 20**: Records boot mode type (Native UEFI vs PC-AT legacy BIOS).
+  * **Event ID 32**: Records Secure Boot operational state during bootloader verification.
+* **Microsoft-Windows-DeviceGuard/Operational**:
+  * **Event ID 7000**: Virtualization-Based Security initialization and hardware requirements validation.
+* **System Event Log**:
+  * **Event ID 12 (Kernel-General)**: Operating system startup with system time and boot parameters.
+
+---
+
+<div id="02-domain-controllers-configure-uefi-security-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows Server Benchmark**: Section 18.8 (Virtualization-Based Security and Secure Boot Prerequisites)
+* **ANSSI AD Hardening Guide**: Operational recommendations regarding hardware platform integrity and physical Tier 0 security.
+* **DoD Windows Server STIG**: Rule `V-205710` (Enforce UEFI Secure Boot and Platform Firmware Lockdown)
+* **Microsoft Security Guidelines**: Securing the Platform Hardware Root of Trust for Domain Controllers
 
 
 <div style="page-break-before: always;"></div>
@@ -40127,7 +40495,7 @@ if ($DmaVal -and $DmaVal.DeviceEnumerationPolicy -eq 0) {
 <div id="07-paws-configure-uefi-security-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Domain Controllers, refer to [REQ-DC-157](#02-domain-controllers-configure-uefi-security-md); for Tier 2 Client Workstations and Member Servers, refer to [REQ-END-013](#08-endpoints-configure-uefi-security-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -40137,35 +40505,78 @@ if ($DmaVal -and $DmaVal.DeviceEnumerationPolicy -eq 0) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * UEFI Firmware Configuration Menu
-  * HKLM\SYSTEM\CurrentControlSet\Control
+  * UEFI Firmware Configuration Menu (Hardware Level)
+  * `HKLM\SYSTEM\CurrentControlSet\Control`
     * `PEFirmwareType` = `2` (REG_DWORD)
-  * HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State
+  * `HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State`
     * `UEFISecureBootEnabled` = `1` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power`
+    * `HiberbootEnabled` = `0` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard`
+    * `RequirePlatformSecurityFeatures` = `3` (REG_DWORD)
 
 ---
 
 <div id="07-paws-configure-uefi-security-md-rationale"></div>
 
 ## Rationale
-Privileged Access Workstations (PAWs) form the administrative root of trust for the Active Directory forest. If an attacker gains physical access to a PAW, they can attempt to compromise the operating system offline, bypass disk encryption, or load malicious code prior to the OS boot phase.
+Privileged Access Workstations (PAWs) are dedicated administrative bastions that operate at the pinnacle of the enterprise security architecture (Tier 0). Compromise of a PAW grants adversaries the credentials necessary to commandeer identity infrastructure, cloud tenants, and enterprise directory data.
 
-Securing the firmware level ensures:
-1. **Firmware Lockdown**: Setting a strong UEFI administrator password prevents unauthorized local users or attackers with physical access from disabling hardware security configurations (such as TPM 2.0, Secure Boot, or virtualization extensions).
-2. **Boot Integrity**: Disabling the Compatibility Support Module (CSM) or Legacy BIOS options forces native UEFI mode, which is a hard pre-requisite for UEFI Secure Boot and Virtualization-Based Security (VBS).
-3. **Execution Prevention**: Restricting the boot order to the primary internal OS drive prevents booting from unauthorized external media (USB flash drives, external SSDs, or local network PXE servers) containing diagnostics, password reset tools, or malicious secondary operating systems.
-4. **Downgrade Attack Mitigation**: Restricting firmware rollbacks prevents attackers from flashing older, vulnerable firmware versions that might contain known UEFI security bypasses.
-5. **Virtualization-Based Security Foundation**: Enabling CPU Virtualization Extensions (Intel VT-x / AMD-V) and IOMMU (Intel VT-d / AMD-Vi) at the firmware level establishes the mandatory hardware isolation required by the Windows Hypervisor to run VBS, Credential Guard, and Kernel DMA Protection.
-6. **Platform Measurement Integrity**: Disabling Fast Boot forces the firmware to execute full hardware initialization, device checks, and complete TPM self-tests/PCR measurements at every boot, ensuring platform integrity and correct state validation.
+If an attacker obtains physical access to a PAW, or if malicious code gains low-level administrative control, vulnerabilities in the boot chain or legacy firmware interfaces can be exploited to bypass operating system security boundaries, defeat BitLocker disk encryption, or implant persistent firmware bootkits before the Windows kernel loads.
+
+<div id="07-paws-configure-uefi-security-md-1-threats-to-pre-boot-firmware-integrity"></div>
+
+### 1. Threats to Pre-Boot Firmware Integrity
+* **Firmware Rootkits & Bootkits**: Adversaries deploy firmware-level implants (e.g., BlackLotus, ESPecter, MoonBounce) that execute within the Extensible Firmware Interface (EFI) environment before Windows boot files (`bootmgr.efi`, `winload.efi`) initialize. Once established in Ring -2 (System Management Mode - SMM) or Ring -1 (Hypervisor), an implant can disable Virtualization-Based Security (VBS), patch kernel functions, and blind Endpoint Detection and Response (EDR) agents.
+* **Physical DMA Exploitation**: External peripheral ports (Thunderbolt, USB4, PCIe) with direct memory access allow rogue devices to read and write physical memory before the OS initializes its IOMMU mappings, enabling direct extraction of cryptographic keys and BitLocker volume master keys.
+* **Cold-Boot Memory Extraction**: Resetting or power-cycling a workstation can leave encryption secrets in volatile DRAM. Enabling the Memory Overwrite Request (MOR) lock forces firmware to sanitize memory during unexpected reboots, preventing memory-remanence key harvesting.
+* **Boot Device Hijacking**: If external media boot is permitted, an attacker with physical access can insert a live USB containing password-reset tools, Linux distributions, or forensic memory dumpers to access storage drives offline.
+
+<div id="07-paws-configure-uefi-security-md-2-tightened-paw-firmware-security-baseline"></div>
+
+### 2. Tightened PAW Firmware Security Baseline
+Standard client workstations often maintain flexibility for diverse legacy peripherals, network booting during staging, or third-party operating systems. On dedicated Tier 0 PAWs, this baseline is intentionally **tightened**:
+1. **Firmware Lockdown & Password Protection**: Enforcing a strong, vaulted UEFI supervisor/administrator password prevents unauthorized physical tampering with hardware configurations (such as disabling TPM 2.0, Secure Boot, or virtualization extensions). The boot menu override key (F12/F8) must also be password-protected.
+2. **Native UEFI Boot Mode (CSM Disabled)**: Disabling the Compatibility Support Module (CSM) or Legacy BIOS options forces pure Native UEFI mode, which is an architectural pre-requisite for UEFI Secure Boot, TPM measurements, and Virtualization-Based Security (VBS).
+3. **Strict Boot Order Lockdown**: The firmware boot sequence is restricted exclusively to the primary internal NVMe/SSD OS storage drive. Network PXE boot, USB storage boot, external optical drive boot, and removable media boot are completely disabled in firmware to prevent offline operating system execution.
+4. **Disabling Fast Boot and Windows Fast Startup**: Disabling Fast Boot in firmware and Windows Fast Startup (`HiberbootEnabled = 0`) forces full hardware initialization, device self-tests, memory sanitization, and deterministic TPM PCR 0-7 measurements on every boot. This prevents residual boot state reuse across administrative sessions.
+5. **Virtualization and DMA Protection Foundation**: Enabling CPU Virtualization Extensions (Intel VT-x / AMD-V) and IOMMU (Intel VT-d / AMD-Vi) at the firmware level establishes the mandatory hardware isolation required by the Windows Hypervisor to run VBS, Credential Guard, and Kernel DMA Protection.
+6. **TPM 2.0 and SHA-256 PCR Bank**: Ensuring TPM 2.0 is active with the SHA-256 PCR bank enables hardware-rooted platform attestation and BitLocker sealing.
+7. **Hardened Secure Boot Signature Database (`db`)**: The Secure Boot signature database (`db`) is tightened on PAWs to remove third-party UEFI Certificate Authorities ("Microsoft UEFI CA 2011" and "Microsoft Option ROM UEFI CA 2023"). Dedicated PAWs must boot only Microsoft Windows Production PCA binaries, preventing the execution of third-party bootloaders or vulnerable Linux shims.
+8. **Firmware Rollback Protection**: Enabling BIOS Flash Protection and Firmware Rollback Protection blocks attackers from flashing older, vulnerable BIOS revisions containing known vulnerabilities.
 
 ---
 
 <div id="07-paws-configure-uefi-security-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Administrative Overhead**: Technicians must enter the UEFI administrator password to make hardware changes or perform local diagnostics. This password must be securely generated and stored in a central, encrypted vault.
-* **Legacy OS Incompatibility**: Operating systems or recovery environments that do not support native UEFI boot will fail to start. This is acceptable as PAWs must only run modern, authorized Windows Enterprise installations.
-* **Partition Format**: Converting an existing Legacy BIOS installation to UEFI requires repartitioning the primary storage device from Master Boot Record (MBR) to GUID Partition Table (GPT) using utility tools like MBR2GPT.exe.
+* **Administrative Maintenance**: Technicians must enter the UEFI supervisor password to modify hardware configurations, update firmware, or perform diagnostics. This password must be generated with high entropy and stored securely in the enterprise Tier 0 Privileged Access Management (PAM) vault.
+* **Offline Boot Media Incompatibility**: Disabling USB and PXE boot prevents booting administrative diagnostics or custom recovery media directly from USB keys. Re-imaging or recovery of a PAW requires booting into authorized Windows Recovery Environment (WinRE) or temporarily entering the UEFI supervisor password to re-enable boot media during controlled maintenance.
+* **Partition Style Pre-requisite**: Native UEFI requires the primary OS storage drive to use GUID Partition Table (GPT). Legacy Master Boot Record (MBR) disks must be converted using `MBR2GPT.exe` prior to switching firmware to Native UEFI mode.
+
+---
+
+<div id="07-paws-configure-uefi-security-md-pre-deployment-verification"></div>
+
+## Pre-Deployment Verification
+
+Execute the following PowerShell commands on the PAW to inspect the current boot mode, Secure Boot state, and TPM readiness:
+
+```powershell
+# Verify Native UEFI, Secure Boot, and TPM 2.0 readiness
+$Firmware = $env:firmware_type
+$SecureBoot = Confirm-SecureBootUEFI -ErrorAction SilentlyContinue
+$Tpm = Get-Tpm -ErrorAction SilentlyContinue
+
+[PSCustomObject]@{
+    BootMode       = $Firmware
+    SecureBoot     = $SecureBoot
+    TpmPresent     = $Tpm.TpmPresent
+    TpmReady       = $Tpm.TpmReady
+    Manufacturer   = (Get-CimInstance -ClassName Win32_Bios).Manufacturer
+    SMBIOSVersion  = (Get-CimInstance -ClassName Win32_Bios).SMBIOSBIOSVersion
+} | Format-List
+```
 
 ---
 
@@ -40179,10 +40590,10 @@ Securing the firmware level ensures:
 
 UEFI settings must be configured directly within the hardware platform firmware interface during system startup.
 
-1. Turn on or restart the workstation and access the UEFI utility screen by pressing the vendor-specific key during POST (typically Delete, F2, F10, or F12).
+1. Turn on or restart the workstation and access the UEFI setup utility by pressing the vendor-specific key during POST (typically Delete, F2, F10, or F12).
 2. Navigate to the **Security** or **Authentication** section:
    * Select the option to set the **Administrator Password** (also referred to as the **Supervisor Password**). Do not configure a User Password, as that prompts for authentication on every boot rather than only when entering configuration settings.
-   * Enter a strong, complex password. Record this password in the team's secure credential repository.
+   * Enter a strong, complex password. Record this password in the enterprise Tier 0 credential vault.
 3. Navigate to the **Boot** or **System Configuration** section:
    * Locate the **Boot Mode** setting and set it to **UEFI Only** or **Native UEFI**.
    * Locate **CSM (Compatibility Support Module)** or **Legacy Boot Support** and set it to **Disabled**.
@@ -40207,61 +40618,208 @@ UEFI settings must be configured directly within the hardware platform firmware 
 
 ---
 
-<div id="07-paws-configure-uefi-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+<div id="07-paws-configure-uefi-security-md-option-b-powershell-remediation-os-boot-hardening"></div>
 
-### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+### Option B: PowerShell Remediation & OS Boot Hardening
 
-Since firmware password and boot order configurations are set at the hardware level, they cannot be directly configured from within the Windows operating system. However, the system's UEFI boot environment and BIOS specifications must be programmatically audited.
+Run the following script to configure OS-level boot parameters (disabling Windows Fast Startup, ensuring memory protections), audit OEM firmware capabilities, and guide hardware-level configuration.
 
-Run the following script to verify the native boot mode, Secure Boot support, and retrieve BIOS vendor information:
+[Download Script: Set-PawUEFISecurity.ps1](implementation_scripts/Set-PawUEFISecurity.ps1)
+
+```powershell
+# Set-PawUEFISecurity.ps1
+# Description: Configures OS-level boot parameters and audits OEM firmware configuration for PAWs.
+
+Write-Host "--- Configuring PAW UEFI & Boot Security Baseline ---" -ForegroundColor Cyan
+
+# 1. Disable Windows Fast Startup (forces full cold boot and fresh TPM PCR measurements)
+$PowerPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power"
+if (-not (Test-Path $PowerPath)) {
+    New-Item -Path $PowerPath -Force | Out-Null
+}
+
+try {
+    Set-ItemProperty -Path $PowerPath -Name "HiberbootEnabled" -Value 0 -Type DWord -Force -ErrorAction Stop
+    Write-Host "[+] Windows Fast Startup disabled (HiberbootEnabled = 0)." -ForegroundColor Green
+} catch {
+    Write-Host "[!] Failed to configure HiberbootEnabled: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# 2. Configure Device Guard Platform Security Flags (Requires UEFI and Secure Boot)
+$DeviceGuardPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard"
+if (-not (Test-Path $DeviceGuardPath)) {
+    New-Item -Path $DeviceGuardPath -Force | Out-Null
+}
+
+try {
+    # 1 = Secure Boot, 2 = DMA Protection, 3 = Secure Boot and DMA Protection
+    Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 3 -Type DWord -Force -ErrorAction Stop
+    Write-Host "[+] Device Guard required platform security features set to Secure Boot and DMA Protection (Value = 3)." -ForegroundColor Green
+} catch {
+    Write-Host "[!] Failed to configure RequirePlatformSecurityFeatures: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# 3. Detect Hardware OEM and report vendor tooling commands
+$Bios = Get-CimInstance -ClassName Win32_Bios -ErrorAction SilentlyContinue
+Write-Host "`nOEM Firmware Detection:" -ForegroundColor Cyan
+Write-Host "  Manufacturer: $($Bios.Manufacturer)" -ForegroundColor White
+Write-Host "  BIOS Version: $($Bios.SMBIOSBIOSVersion)" -ForegroundColor White
+
+if ($Bios.Manufacturer -match "Dell") {
+    Write-Host "  [i] Dell Platform detected. To enforce UEFI settings via Dell Command | PowerShell Provider:" -ForegroundColor Yellow
+    Write-Host "      Import-Module DellBIOSProvider" -ForegroundColor Gray
+    Write-Host "      Set-Item -Path DellSmbios:\Security\AdminPassword 'YourStrongPassword'" -ForegroundColor Gray
+    Write-Host "      Set-Item -Path DellSmbios:\Boot\BootMode 'UEFI'" -ForegroundColor Gray
+    Write-Host "      Set-Item -Path DellSmbios:\SecureBoot\SecureBoot 'Enabled'" -ForegroundColor Gray
+    Write-Host "      Set-Item -Path DellSmbios:\VirtualizationSupport\Virtualization 'Enabled'" -ForegroundColor Gray
+    Write-Host "      Set-Item -Path DellSmbios:\VirtualizationSupport\VtForDirectIO 'Enabled'" -ForegroundColor Gray
+    Write-Host "      Set-Item -Path DellSmbios:\PostBehavior\Fastboot 'Thorough'" -ForegroundColor Gray
+} elseif ($Bios.Manufacturer -match "HP") {
+    Write-Host "  [i] HP Platform detected. To enforce UEFI settings via HP Client Management Script Library (HPCMSL):" -ForegroundColor Yellow
+    Write-Host "      Import-Module HPCMSL" -ForegroundColor Gray
+    Write-Host "      Set-HPBIOSSettingValue -Name 'Boot Mode' -Value 'UEFI Native (without CSM)'" -ForegroundColor Gray
+    Write-Host "      Set-HPBIOSSettingValue -Name 'Secure Boot' -Value 'Enable'" -ForegroundColor Gray
+    Write-Host "      Set-HPBIOSSettingValue -Name 'Fast Boot' -Value 'Disable'" -ForegroundColor Gray
+    Write-Host "      Set-HPBIOSSettingValue -Name 'Virtualization Technology' -Value 'Enable'" -ForegroundColor Gray
+    Write-Host "      Set-HPBIOSSettingValue -Name 'Virtualization Technology for Directed I/O' -Value 'Enable'" -ForegroundColor Gray
+} elseif ($Bios.Manufacturer -match "Lenovo") {
+    Write-Host "  [i] Lenovo Platform detected. To enforce UEFI settings via Lenovo BIOS WMI interface:" -ForegroundColor Yellow
+    Write-Host "      (gwmi -class Lenovo_SetBiosSetting -namespace root\wmi).SetBiosSetting('BootMode,UEFI')" -ForegroundColor Gray
+    Write-Host "      (gwmi -class Lenovo_SetBiosSetting -namespace root\wmi).SetBiosSetting('SecureBoot,Enable')" -ForegroundColor Gray
+    Write-Host "      (gwmi -class Lenovo_SetBiosSetting -namespace root\wmi).SetBiosSetting('IntelVirtualizationTechnology,Enable')" -ForegroundColor Gray
+    Write-Host "      (gwmi -class Lenovo_SetBiosSetting -namespace root\wmi).SetBiosSetting('VTd,Enable')" -ForegroundColor Gray
+    Write-Host "      (gwmi -class Lenovo_SaveBiosSettings -namespace root\wmi).SaveBiosSettings()" -ForegroundColor Gray
+}
+
+Write-Host "`n[+] Remediation script completed." -ForegroundColor Green
+```
+
+---
+
+<div id="07-paws-configure-uefi-security-md-auditing-verification"></div>
+
+## Auditing & Verification
+
+<div id="07-paws-configure-uefi-security-md-powershell-audit-script"></div>
+
+### PowerShell Audit Script
+
+Run the following script to verify the native boot mode, Secure Boot status, TPM 2.0 readiness, CPU virtualization, IOMMU protection, and Windows Fast Startup configuration.
 
 [Download Script: Audit-UEFISecurity.ps1](audit_scripts/Audit-UEFISecurity.ps1)
 
 ```powershell
 # Audit-UEFISecurity.ps1
-# Description: Audits local boot environment and BIOS firmware properties.
+# Description: Audits local boot environment, Secure Boot, TPM, virtualization, and BIOS firmware properties for PAWs.
 
-Write-Host "--- Auditing UEFI Security Baseline ---" -ForegroundColor Cyan
+Write-Host "--- Auditing UEFI Security Baseline for PAWs ---" -ForegroundColor Cyan
 
-# 1. Verify boot environment type
+$script:Vulnerable = $false
+
+# 1. Verify Boot Environment Type (Native UEFI)
+$FirmwareType = $env:firmware_type
 $RegPath = "HKLM:\System\CurrentControlSet\Control"
 $FirmwareProperty = Get-ItemProperty -Path $RegPath -Name "PEFirmwareType" -ErrorAction SilentlyContinue
 
-if ($FirmwareProperty) {
-    $FirmwareValue = $FirmwareProperty.PEFirmwareType
-    if ($FirmwareValue -eq 2) {
-        Write-Host "Status: Native UEFI mode is active." -ForegroundColor Green
-    } else {
-        Write-Host "VULNERABLE: System booted in Legacy BIOS mode (CSM enabled). Value: $($FirmwareValue)" -ForegroundColor Red
-    }
+if ($FirmwareProperty -and $FirmwareProperty.PEFirmwareType -eq 2) {
+    Write-Host "  [+] Boot Mode: Native UEFI active (PEFirmwareType = 2)." -ForegroundColor Green
+} elseif ($FirmwareType -eq "UEFI") {
+    Write-Host "  [+] Boot Mode: Native UEFI active (firmware_type = UEFI)." -ForegroundColor Green
 } else {
-    Write-Host "VULNERABLE: Boot environment type could not be read from registry." -ForegroundColor Red
+    Write-Host "  [!] VULNERABLE: System booted in Legacy BIOS mode (CSM enabled) or unrecognized firmware type." -ForegroundColor Red
+    $script:Vulnerable = $true
 }
 
-# 2. Audit Secure Boot status
+# 2. Audit UEFI Secure Boot Status
 try {
     $SecureBootActive = Confirm-SecureBootUEFI -ErrorAction Stop
     if ($SecureBootActive -eq $true) {
-        Write-Host "Status: UEFI Secure Boot is enabled." -ForegroundColor Green
+        Write-Host "  [+] Secure Boot: Enabled in firmware." -ForegroundColor Green
     } else {
-        Write-Host "VULNERABLE: UEFI Secure Boot is supported but disabled in firmware." -ForegroundColor Red
+        Write-Host "  [!] VULNERABLE: Secure Boot is supported but currently disabled in firmware." -ForegroundColor Red
+        $script:Vulnerable = $true
     }
 } catch [System.PlatformNotSupportedException] {
-    Write-Host "VULNERABLE: UEFI Secure Boot is not supported on this platform." -ForegroundColor Red
+    Write-Host "  [!] VULNERABLE: UEFI Secure Boot is not supported on this platform." -ForegroundColor Red
+    $script:Vulnerable = $true
 } catch {
-    Write-Host "VULNERABLE: UEFI Secure Boot validation failed. Error: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "  [!] VULNERABLE: UEFI Secure Boot validation failed: $($_.Exception.Message)" -ForegroundColor Red
+    $script:Vulnerable = $true
 }
 
-# 3. Retrieve BIOS details
+# 3. Audit TPM 2.0 Status
+try {
+    $Tpm = Get-Tpm -ErrorAction Stop
+    if ($Tpm.TpmPresent -and $Tpm.TpmReady) {
+        Write-Host "  [+] TPM 2.0: Present and Ready (Enabled: $($Tpm.TpmEnabled), Activated: $($Tpm.TpmActivated))." -ForegroundColor Green
+    } else {
+        Write-Host "  [!] VULNERABLE: TPM is not present, not ready, or disabled in firmware." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} catch {
+    Write-Host "  [!] VULNERABLE: Failed to query TPM status: $($_.Exception.Message)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 4. Audit CPU Virtualization Extensions in Firmware
+$Processor = Get-CimInstance -ClassName Win32_Processor -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($Processor -and $Processor.VirtualizationFirmwareEnabled -eq $true) {
+    Write-Host "  [+] Hardware Virtualization: Enabled in firmware (VT-x / AMD-V)." -ForegroundColor Green
+} else {
+    # If Hyper-V/VBS is already running, VirtualizationFirmwareEnabled may report false inside partition
+    $Vbs = Get-CimInstance -Namespace root\Microsoft\Windows\DeviceGuard -ClassName Win32_DeviceGuard -ErrorAction SilentlyContinue
+    if ($Vbs -and $Vbs.VirtualizationBasedSecurityStatus -ge 1) {
+        Write-Host "  [+] Hardware Virtualization: Verified active via running Virtualization-Based Security." -ForegroundColor Green
+    } else {
+        Write-Host "  [!] VULNERABLE: Hardware CPU virtualization extensions are disabled in firmware." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+# 5. Audit Windows Fast Startup Configuration (Must be disabled)
+$PowerReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -ErrorAction SilentlyContinue
+if ($PowerReg -and $PowerReg.HiberbootEnabled -eq 0) {
+    Write-Host "  [+] Windows Fast Startup: Disabled (Full cold boot enforced)." -ForegroundColor Green
+} else {
+    Write-Host "  [!] VULNERABLE: Windows Fast Startup is enabled (HiberbootEnabled != 0). Must be disabled on PAWs." -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 6. Retrieve BIOS Firmware Specifications
 $BiosDetails = Get-CimInstance -ClassName Win32_Bios -ErrorAction SilentlyContinue
 if ($BiosDetails) {
-    Write-Host "Firmware Manufacturer: $($BiosDetails.Manufacturer)" -ForegroundColor White
-    Write-Host "Firmware Version: $($BiosDetails.SMBIOSBIOSVersion)" -ForegroundColor White
-    Write-Host "Firmware Release Date: $($BiosDetails.ReleaseDate)" -ForegroundColor White
+    Write-Host "  Firmware Manufacturer: $($BiosDetails.Manufacturer)" -ForegroundColor White
+    Write-Host "  Firmware Version:      $($BiosDetails.SMBIOSBIOSVersion)" -ForegroundColor White
+    Write-Host "  Firmware Release Date: $($BiosDetails.ReleaseDate)" -ForegroundColor White
 } else {
-    Write-Host "Warning: BIOS details could not be retrieved via WMI." -ForegroundColor Yellow
+    Write-Host "  Warning: BIOS details could not be retrieved via WMI." -ForegroundColor Yellow
+}
+
+# Final Verdict
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
 }
 ```
+
+---
+
+<div id="07-paws-configure-uefi-security-md-auditing-detection-telemetry"></div>
+
+## Auditing, Detection & Telemetry
+Firmware and boot security telemetry is recorded in Windows event channels:
+* **Microsoft-Windows-Kernel-Boot**:
+  * **Event ID 20**: Boot mode type (UEFI vs PC-AT legacy).
+  * **Event ID 32**: Secure Boot state recorded at boot transition.
+* **Microsoft-Windows-DeviceGuard/Operational**:
+  * **Event ID 7000**: Virtualization-Based Security initialization and hardware requirements validation.
+* **Microsoft-Windows-TPM-WMI**:
+  * **Event ID 1024**: TPM driver initialization and cryptographic operational status.
+* **System Event Log (EventLog-BitLocker)**:
+  * **Event ID 785**: BitLocker successfully sealed or unsealed volume keys using TPM and PCR measurements.
 
 ---
 
@@ -40269,8 +40827,9 @@ if ($BiosDetails) {
 
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R58 (Use of Privileged Access Workstations)
-* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8 (Device Guard/VBS prerequisites)
-* **Microsoft Security Guidelines**: UEFI Firmware Security and Device Guard Deployment
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8 (Device Guard and Virtualization-Based Security Prerequisites)
+* **DoD Windows 10/11 STIG**: Rule `V-220745` (UEFI Secure Boot and Firmware Lockdown Requirements)
+* **Microsoft Security Guidelines**: Securing Privileged Access Workstations (PAW Hardening Guidance)
 
 
 <div style="page-break-before: always;"></div>
@@ -69735,7 +70294,7 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-configure-uefi-security-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-005](#07-paws-configure-uefi-security-md); for Domain Controllers, refer to [REQ-DC-157](#02-domain-controllers-configure-uefi-security-md)).*
 * **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
 
 ---
@@ -69745,33 +70304,76 @@ if ($script:Vulnerable) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * UEFI Firmware Configuration Menu
-  * HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State
+  * UEFI Firmware Configuration Menu (Hardware Level)
+  * `HKLM\SYSTEM\CurrentControlSet\Control`
+    * `PEFirmwareType` = `2` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State`
     * `UEFISecureBootEnabled` = `1` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power`
+    * `HiberbootEnabled` = `0` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard`
+    * `RequirePlatformSecurityFeatures` = `1` or `3` (REG_DWORD)
 
 ---
 
 <div id="08-endpoints-configure-uefi-security-md-rationale"></div>
 
 ## Rationale
-Standard Tier 2 endpoints (such as employee laptops and workstations) and member servers are frequently exposed to physical theft, loss, and unauthorized local access in branch offices or remote environments. If the firmware on these systems is left unsecured, an attacker can modify boot settings, bypass operating system security controls, or execute physical DMA and offline decryption attacks.
+Standard Tier 2 endpoints (such as corporate laptops and desktop workstations) and member servers are frequently exposed to physical theft, unauthorized local access in branch offices, or untrusted local networks. If system firmware remains unconfigured or relies on legacy BIOS modes, attackers can alter boot settings, subvert operating system security features, bypass disk encryption, or execute physical DMA and bootkit attacks.
 
-Securing the firmware level ensures:
-1. **Firmware Integrity**: Enforcing a UEFI administrator password prevents unauthorized configuration modifications, such as disabling Secure Boot, TPM, or hardware virtualization features.
-2. **Native UEFI Boot**: Disabling the Compatibility Support Module (CSM) or Legacy BIOS options forces native UEFI mode, which is mandatory for activating UEFI Secure Boot and Virtualization-Based Security (VBS).
-3. **Restricted Boot Paths**: Restricting the boot order to the primary internal storage device prevents users or attackers from booting unauthorized operating systems or diagnostic tools from USB media or untrusted local networks.
-4. **BIOS Rollback Prevention**: Enforcing firmware update signature validation and blocking BIOS rollbacks mitigates the risk of downgrade attacks targeting known firmware vulnerabilities.
-5. **Virtualization-Based Security Foundation**: Enabling CPU Virtualization Extensions (Intel VT-x / AMD-V) and IOMMU (Intel VT-d / AMD-Vi) at the firmware level establishes the mandatory hardware isolation required by the Windows Hypervisor to run VBS, Credential Guard, and Kernel DMA Protection.
-6. **Platform Measurement Integrity**: Disabling Fast Boot forces the firmware to execute full hardware initialization, device checks, and complete TPM self-tests/PCR measurements at every boot, ensuring platform integrity and correct state validation.
+<div id="08-endpoints-configure-uefi-security-md-1-threats-to-fleet-firmware-security"></div>
+
+### 1. Threats to Fleet Firmware Security
+* **Bootkit and Pre-Boot Persistence**: Vulnerabilities in older bootloaders or unsigned EFI modules can be exploited by malware to gain persistence below the operating system. Without Secure Boot and native UEFI enforcement, an attacker with physical access or local administrator privileges can compromise the OS loader before security agents initialize.
+* **Firmware Password Absence**: If firmware setup is unprotected, anyone with physical access can enter BIOS setup, disable Secure Boot, disable the TPM chip, enable legacy boot (CSM), and boot unauthorized diagnostic tools or alternative operating systems from USB.
+* **Direct Memory Access (DMA) Attacks**: Modern laptops equipped with high-speed expansion interfaces (Thunderbolt, USB4, PCIe) are vulnerable to DMA attacks where hardware peripherals read volatile RAM. Enabling IOMMU (VT-d / AMD-Vi) at the firmware level provides the hardware foundation for Windows Kernel DMA Protection.
+* **Firmware Downgrade Attacks**: If firmware rollback protection is disabled, an attacker can flash an older, vulnerable BIOS revision that contains known security flaws or bypasses.
+
+<div id="08-endpoints-configure-uefi-security-md-2-standard-endpoint-member-server-firmware-baseline"></div>
+
+### 2. Standard Endpoint & Member Server Firmware Baseline
+Securing firmware across an enterprise fleet requires balancing strict hardware protections with fleet manageability:
+1. **UEFI Administrator Password**: Enforce a strong supervisor/administrator password across all fleet endpoints. Centralized password lifecycle management should be automated using vendor enterprise tools (e.g., Dell Command | PowerShell Provider, HP Client Management Script Library, Lenovo ThinkManagement WMI, or Microsoft Surface Enterprise Management Mode).
+2. **Native UEFI Boot Mode (CSM Disabled)**: Enforce pure Native UEFI boot and disable Legacy BIOS/CSM. Native UEFI is required for UEFI Secure Boot, TPM 2.0 measurements, and Virtualization-Based Security (VBS).
+3. **Boot Order Prioritization**: Prioritize the internal OS drive as the primary boot source. Password-protect the boot override menu (F12/F8) to prevent unauthorized booting from USB or secondary media, while allowing managed network PXE boot in staging environments if required.
+4. **Fast Startup Optimization**: Disabling Windows Fast Startup (`HiberbootEnabled = 0`) ensures full hardware initialization and cold-boot integrity measurements on every startup.
+5. **Hardware Virtualization & DMA Security**: Enable CPU Virtualization (VT-x / AMD-V) and IOMMU (VT-d / AMD-Vi) across all fleet systems to support Windows Hypervisor-Protected Code Integrity (HVCI), Credential Guard, and Kernel DMA Protection.
+6. **TPM 2.0 Cryptoprocessor**: Ensure TPM 2.0 is active and ready, providing hardware storage for BitLocker keys and credential sealing.
+7. **Secure Boot Enforcement**: Ensure UEFI Secure Boot is active in Deployed Mode with valid signature databases.
+8. **Firmware Rollback Protection**: Enable BIOS write protection and block downgrades to older firmware revisions.
 
 ---
 
 <div id="08-endpoints-configure-uefi-security-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Administrative Overhead**: Technicians must enter the UEFI administrator password to make hardware changes or perform local diagnostics. This password must be securely generated and stored in a central, encrypted vault.
-* **Legacy OS Incompatibility**: Operating systems or recovery environments that do not support native UEFI boot will fail to start. This is acceptable as Tier 2 systems must only run modern, authorized Windows 10/11 Enterprise installations.
-* **Partition Format**: Converting an existing Legacy BIOS installation to UEFI requires repartitioning the primary storage device from Master Boot Record (MBR) to GUID Partition Table (GPT) using utility tools like MBR2GPT.exe.
+* **Fleet Management Overhead**: Technicians must provide the supervisor password to enter BIOS settings or perform hardware diagnostics. This is managed via enterprise OEM automation or centralized password vaults.
+* **Legacy MBR Disks**: Converting systems installed under Legacy BIOS (CSM) to UEFI requires repartitioning disks from MBR to GPT using `MBR2GPT.exe`. Operating systems that do not support UEFI cannot start.
+* **Staged Deployment Considerations**: In environments utilizing network PXE boot for automated OS re-imaging (SCCM, MECM, MDT), PXE boot should be secured using 802.1X network authentication and restricted to dedicated imaging subnets.
+
+---
+
+<div id="08-endpoints-configure-uefi-security-md-pre-deployment-verification"></div>
+
+## Pre-Deployment Verification
+
+Execute the following PowerShell commands on the endpoint to inspect current boot mode, Secure Boot state, and TPM readiness:
+
+```powershell
+# Check firmware type, Secure Boot, and TPM status
+$BootMode = $env:firmware_type
+$SecureBoot = Confirm-SecureBootUEFI -ErrorAction SilentlyContinue
+$Tpm = Get-Tpm -ErrorAction SilentlyContinue
+
+[PSCustomObject]@{
+    BootMode      = $BootMode
+    SecureBoot    = $SecureBoot
+    TpmPresent    = $Tpm.TpmPresent
+    TpmReady      = $Tpm.TpmReady
+    Manufacturer  = (Get-CimInstance -ClassName Win32_Bios).Manufacturer
+    BIOSVersion   = (Get-CimInstance -ClassName Win32_Bios).SMBIOSBIOSVersion
+} | Format-List
+```
 
 ---
 
@@ -69788,87 +70390,230 @@ UEFI settings must be configured directly within the hardware platform firmware 
 1. Turn on or restart the workstation and access the UEFI utility screen by pressing the vendor-specific key during POST (typically Delete, F2, F10, or F12).
 2. Navigate to the **Security** or **Authentication** section:
    * Select the option to set the **Administrator Password** (also referred to as the **Supervisor Password**). Do not configure a User Password, as that prompts for authentication on every boot rather than only when entering configuration settings.
-   * Enter a strong, complex password. Record this password in the team's secure credential repository.
+   * Enter a strong, complex password. Record this password in the enterprise credential vault.
 3. Navigate to the **Boot** or **System Configuration** section:
    * Locate the **Boot Mode** setting and set it to **UEFI Only** or **Native UEFI**.
    * Locate **CSM (Compatibility Support Module)** or **Legacy Boot Support** and set it to **Disabled**.
    * Locate **Fast Boot** or **Quick Boot** and set it to **Disabled** (forcing complete POST diagnostics and full TPM initialization on every boot).
    * Locate **Boot Order** (or **Boot Priority**):
      * Set the primary boot option to the internal system storage drive (typically containing the Windows Boot Manager partition).
-     * Disable all other boot options (such as USB, SD Card, Optical Drive, and Network PXE Boot) or set them to disabled in the boot menu.
+     * Disable unauthorized external boot devices (such as optical drives and unauthorized USB boot) or require the administrator password to boot from alternate media.
      * Enable the option to prompt for the UEFI administrator password if a user attempts to access the boot override menu (typically F12 or F8).
 4. Navigate to the **Advanced**, **CPU Configuration**, or **Security Chip** section:
    * Locate **Intel Virtualization Technology (VT-x)** or **AMD-V** and set it to **Enabled**.
    * Locate **Intel VT for Directed I/O (VT-d)** or **AMD IOMMU** and set it to **Enabled** (required for IOMMU/Kernel DMA Protection).
    * Locate **TPM 2.0 Device** (or **Security Chip / Intel PTT / AMD fTPM**) and set it to **Enabled** or **Active** (with SHA-256 PCR bank).
-   * Locate **Memory Overwrite Request Control Lock** (or **MOR Lock**) and set it to **Enabled**.
 5. Navigate to the **Security** or **Secure Boot** section:
    * Ensure **Secure Boot** is **Enabled** and the **Secure Boot Mode** is set to **Deployed** or **User Mode**.
-   * Harden the certificates allowlist:
-     * **Key Exchange Key (KEK)**: Must only contain "Microsoft Corporation KEK CA 2011" and "Microsoft Corporation KEK 2K CA 2023".
-     * **Signature Database (db)**: Must only contain "Microsoft Windows Production PCA 2011" and "Windows UEFI CA 2023". Remove "Microsoft UEFI CA 2011" and "Microsoft Option ROM UEFI CA 2023" unless strictly required by specific physical PCIe expansion hardware.
 6. Navigate to the **Advanced** or **Firmware Update** section:
    * Locate the option for **BIOS Flash Protection** or **Firmware Rollback Protection** and set it to **Enabled** or **Block Downgrades**.
 7. Save the configuration and restart the workstation.
 
 ---
 
-<div id="08-endpoints-configure-uefi-security-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+<div id="08-endpoints-configure-uefi-security-md-option-b-powershell-remediation-os-boot-hardening"></div>
 
-### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+### Option B: PowerShell Remediation & OS Boot Hardening
 
-While hardware firmware settings cannot be directly written via standard Windows registry keys, the current state of the local UEFI boot environment and system BIOS characteristics can be programmatically audited.
+Run the following script to configure OS-level boot parameters (disabling Windows Fast Startup, ensuring Device Guard platform flags), detect the hardware vendor, and provide enterprise OEM automation commands.
 
-Run the following script to verify native UEFI boot, Secure Boot state, and retrieve system BIOS properties:
+[Download Script: Set-UEFISecurity.ps1](implementation_scripts/Set-UEFISecurity.ps1)
+
+```powershell
+# Set-UEFISecurity.ps1
+# Description: Configures OS-level boot parameters and audits OEM firmware configuration for endpoints and member servers.
+
+Write-Host "--- Configuring Endpoint UEFI & Boot Security Baseline ---" -ForegroundColor Cyan
+
+# 1. Disable Windows Fast Startup (forces full cold boot and fresh TPM PCR measurements)
+$PowerPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power"
+if (-not (Test-Path $PowerPath)) {
+    New-Item -Path $PowerPath -Force | Out-Null
+}
+
+try {
+    Set-ItemProperty -Path $PowerPath -Name "HiberbootEnabled" -Value 0 -Type DWord -Force -ErrorAction Stop
+    Write-Host "[+] Windows Fast Startup disabled (HiberbootEnabled = 0)." -ForegroundColor Green
+} catch {
+    Write-Host "[!] Failed to configure HiberbootEnabled: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# 2. Configure Device Guard Platform Security Flags
+$DeviceGuardPath = "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard"
+if (-not (Test-Path $DeviceGuardPath)) {
+    New-Item -Path $DeviceGuardPath -Force | Out-Null
+}
+
+try {
+    # 1 = Secure Boot, 3 = Secure Boot and DMA Protection
+    Set-ItemProperty -Path $DeviceGuardPath -Name "RequirePlatformSecurityFeatures" -Value 1 -Type DWord -Force -ErrorAction Stop
+    Write-Host "[+] Device Guard required platform security features configured (Value = 1)." -ForegroundColor Green
+} catch {
+    Write-Host "[!] Failed to configure RequirePlatformSecurityFeatures: $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# 3. Detect Hardware OEM and report vendor tooling commands
+$Bios = Get-CimInstance -ClassName Win32_Bios -ErrorAction SilentlyContinue
+Write-Host "`nOEM Firmware Detection:" -ForegroundColor Cyan
+Write-Host "  Manufacturer: $($Bios.Manufacturer)" -ForegroundColor White
+Write-Host "  BIOS Version: $($Bios.SMBIOSBIOSVersion)" -ForegroundColor White
+
+if ($Bios.Manufacturer -match "Dell") {
+    Write-Host "  [i] Dell Platform detected. Enterprise configuration via Dell Command | PowerShell Provider:" -ForegroundColor Yellow
+    Write-Host "      Import-Module DellBIOSProvider" -ForegroundColor Gray
+    Write-Host "      Set-Item -Path DellSmbios:\Boot\BootMode 'UEFI'" -ForegroundColor Gray
+    Write-Host "      Set-Item -Path DellSmbios:\SecureBoot\SecureBoot 'Enabled'" -ForegroundColor Gray
+    Write-Host "      Set-Item -Path DellSmbios:\VirtualizationSupport\Virtualization 'Enabled'" -ForegroundColor Gray
+    Write-Host "      Set-Item -Path DellSmbios:\VirtualizationSupport\VtForDirectIO 'Enabled'" -ForegroundColor Gray
+} elseif ($Bios.Manufacturer -match "HP") {
+    Write-Host "  [i] HP Platform detected. Enterprise configuration via HP Client Management Script Library (HPCMSL):" -ForegroundColor Yellow
+    Write-Host "      Import-Module HPCMSL" -ForegroundColor Gray
+    Write-Host "      Set-HPBIOSSettingValue -Name 'Boot Mode' -Value 'UEFI Native (without CSM)'" -ForegroundColor Gray
+    Write-Host "      Set-HPBIOSSettingValue -Name 'Secure Boot' -Value 'Enable'" -ForegroundColor Gray
+    Write-Host "      Set-HPBIOSSettingValue -Name 'Virtualization Technology' -Value 'Enable'" -ForegroundColor Gray
+} elseif ($Bios.Manufacturer -match "Lenovo") {
+    Write-Host "  [i] Lenovo Platform detected. Enterprise configuration via Lenovo BIOS WMI interface:" -ForegroundColor Yellow
+    Write-Host "      (gwmi -class Lenovo_SetBiosSetting -namespace root\wmi).SetBiosSetting('BootMode,UEFI')" -ForegroundColor Gray
+    Write-Host "      (gwmi -class Lenovo_SetBiosSetting -namespace root\wmi).SetBiosSetting('SecureBoot,Enable')" -ForegroundColor Gray
+}
+
+Write-Host "`n[+] Remediation script completed." -ForegroundColor Green
+```
+
+---
+
+<div id="08-endpoints-configure-uefi-security-md-auditing-verification"></div>
+
+## Auditing & Verification
+
+<div id="08-endpoints-configure-uefi-security-md-powershell-audit-script"></div>
+
+### PowerShell Audit Script
+
+Run the following script to verify native UEFI boot mode, Secure Boot status, TPM 2.0 state, CPU virtualization, and Windows Fast Startup configuration across endpoints.
 
 [Download Script: Audit-UEFISecurity.ps1](audit_scripts/Audit-UEFISecurity.ps1)
 
 ```powershell
 # Audit-UEFISecurity.ps1
-# Description: Audits local boot environment and BIOS firmware properties.
+# Description: Audits local boot environment, Secure Boot, TPM, virtualization, and BIOS firmware properties for endpoints.
 
-Write-Host "--- Auditing UEFI Security Baseline ---" -ForegroundColor Cyan
+Write-Host "--- Auditing UEFI Security Baseline for Endpoints ---" -ForegroundColor Cyan
 
-# 1. Verify boot environment type
-if ($env:firmware_type -eq "UEFI") {
-    Write-Host "Status: Native UEFI mode is active." -ForegroundColor Green
+$script:Vulnerable = $false
+
+# 1. Verify Boot Environment Type (Native UEFI)
+$FirmwareType = $env:firmware_type
+$RegPath = "HKLM:\System\CurrentControlSet\Control"
+$FirmwareProperty = Get-ItemProperty -Path $RegPath -Name "PEFirmwareType" -ErrorAction SilentlyContinue
+
+if ($FirmwareProperty -and $FirmwareProperty.PEFirmwareType -eq 2) {
+    Write-Host "  [+] Boot Mode: Native UEFI active (PEFirmwareType = 2)." -ForegroundColor Green
+} elseif ($FirmwareType -eq "UEFI") {
+    Write-Host "  [+] Boot Mode: Native UEFI active (firmware_type = UEFI)." -ForegroundColor Green
 } else {
-    Write-Host "VULNERABLE: System booted in Legacy BIOS mode (CSM enabled) or firmware type is unrecognized." -ForegroundColor Red
+    Write-Host "  [!] VULNERABLE: System booted in Legacy BIOS mode (CSM enabled) or unrecognized firmware type." -ForegroundColor Red
+    $script:Vulnerable = $true
 }
 
-# 2. Audit Secure Boot status
+# 2. Audit UEFI Secure Boot Status
 try {
     $SecureBootActive = Confirm-SecureBootUEFI -ErrorAction Stop
     if ($SecureBootActive -eq $true) {
-        Write-Host "Status: UEFI Secure Boot is enabled." -ForegroundColor Green
+        Write-Host "  [+] Secure Boot: Enabled in firmware." -ForegroundColor Green
     } else {
-        Write-Host "VULNERABLE: UEFI Secure Boot is supported but disabled in firmware." -ForegroundColor Red
+        Write-Host "  [!] VULNERABLE: Secure Boot is supported but currently disabled in firmware." -ForegroundColor Red
+        $script:Vulnerable = $true
     }
 } catch [System.PlatformNotSupportedException] {
-    Write-Host "VULNERABLE: UEFI Secure Boot is not supported on this platform." -ForegroundColor Red
+    Write-Host "  [!] VULNERABLE: UEFI Secure Boot is not supported on this platform." -ForegroundColor Red
+    $script:Vulnerable = $true
 } catch {
-    Write-Host "VULNERABLE: UEFI Secure Boot validation failed. Error: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "  [!] VULNERABLE: UEFI Secure Boot validation failed: $($_.Exception.Message)" -ForegroundColor Red
+    $script:Vulnerable = $true
 }
 
-# 3. Retrieve BIOS details
+# 3. Audit TPM 2.0 Status
+try {
+    $Tpm = Get-Tpm -ErrorAction Stop
+    if ($Tpm.TpmPresent -and $Tpm.TpmReady) {
+        Write-Host "  [+] TPM 2.0: Present and Ready (Enabled: $($Tpm.TpmEnabled), Activated: $($Tpm.TpmActivated))." -ForegroundColor Green
+    } else {
+        Write-Host "  [!] VULNERABLE: TPM is not present, not ready, or disabled in firmware." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} catch {
+    Write-Host "  [!] VULNERABLE: Failed to query TPM status: $($_.Exception.Message)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 4. Audit CPU Virtualization Extensions in Firmware
+$Processor = Get-CimInstance -ClassName Win32_Processor -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($Processor -and $Processor.VirtualizationFirmwareEnabled -eq $true) {
+    Write-Host "  [+] Hardware Virtualization: Enabled in firmware (VT-x / AMD-V)." -ForegroundColor Green
+} else {
+    # If Hyper-V/VBS is already running, VirtualizationFirmwareEnabled may report false inside partition
+    $Vbs = Get-CimInstance -Namespace root\Microsoft\Windows\DeviceGuard -ClassName Win32_DeviceGuard -ErrorAction SilentlyContinue
+    if ($Vbs -and $Vbs.VirtualizationBasedSecurityStatus -ge 1) {
+        Write-Host "  [+] Hardware Virtualization: Verified active via running Virtualization-Based Security." -ForegroundColor Green
+    } else {
+        Write-Host "  [!] VULNERABLE: Hardware CPU virtualization extensions are disabled in firmware." -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+}
+
+# 5. Audit Windows Fast Startup Configuration
+$PowerReg = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -ErrorAction SilentlyContinue
+if ($PowerReg -and $PowerReg.HiberbootEnabled -eq 0) {
+    Write-Host "  [+] Windows Fast Startup: Disabled (Full cold boot enforced)." -ForegroundColor Green
+} else {
+    Write-Host "  [!] VULNERABLE: Windows Fast Startup is enabled (HiberbootEnabled != 0). Must be disabled for deterministic boot measurements." -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 6. Retrieve BIOS Firmware Specifications
 $BiosDetails = Get-CimInstance -ClassName Win32_Bios -ErrorAction SilentlyContinue
 if ($BiosDetails) {
-    Write-Host "Firmware Manufacturer: $($BiosDetails.Manufacturer)" -ForegroundColor White
-    Write-Host "Firmware Version: $($BiosDetails.SMBIOSBIOSVersion)" -ForegroundColor White
-    Write-Host "Firmware Release Date: $($BiosDetails.ReleaseDate)" -ForegroundColor White
+    Write-Host "  Firmware Manufacturer: $($BiosDetails.Manufacturer)" -ForegroundColor White
+    Write-Host "  Firmware Version:      $($BiosDetails.SMBIOSBIOSVersion)" -ForegroundColor White
+    Write-Host "  Firmware Release Date: $($BiosDetails.ReleaseDate)" -ForegroundColor White
 } else {
-    Write-Host "Warning: BIOS details could not be retrieved via WMI." -ForegroundColor Yellow
+    Write-Host "  Warning: BIOS details could not be retrieved via WMI." -ForegroundColor Yellow
+}
+
+# Final Verdict
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
 }
 ```
+
+---
+
+<div id="08-endpoints-configure-uefi-security-md-auditing-detection-telemetry"></div>
+
+## Auditing, Detection & Telemetry
+Firmware and boot configuration events are logged across standard Windows event logs:
+* **Microsoft-Windows-Kernel-Boot**:
+  * **Event ID 20**: Records firmware boot mode (Native UEFI vs Legacy BIOS).
+  * **Event ID 32**: Records Secure Boot operational state during bootloader verification.
+* **Microsoft-Windows-DeviceGuard/Operational**:
+  * **Event ID 7000**: Virtualization-Based Security initialization and hardware requirements validation.
+* **System Event Log (EventLog-BitLocker)**:
+  * **Event ID 785**: BitLocker TPM and PCR measurements validation.
 
 ---
 
 <div id="08-endpoints-configure-uefi-security-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **ANSSI AD Hardening Guide**: Recommendations regarding hardware platform integrity.
-* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8 (Device Guard/VBS prerequisites)
-* **Microsoft Security Guidelines**: UEFI Firmware Security and Device Guard Deployment
+* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.8 (Device Guard/Virtualization-Based Security prerequisites)
+* **ANSSI AD Hardening Guide**: Operational baseline recommendations regarding hardware platform integrity.
+* **DoD Windows 10/11 STIG**: Rule `V-220745` (UEFI Secure Boot and Firmware Configuration)
+* **Microsoft Security Guidelines**: UEFI Firmware Security and Hardware-Rooted Security Deployment
 
 
 <div style="page-break-before: always;"></div>

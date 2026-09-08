@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-09-08T13:07:23Z</oval:timestamp>
+    <oval:timestamp>2026-09-08T13:15:35Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -3004,6 +3004,25 @@ On Tier 0 Domain Controllers:
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Policies\EarlyLaunch Value DriverLoadPolicy" test_ref="oval:org.adhardening:tst:2156001" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:2157" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-157] UEFI Firmware Security Hardening on Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Domain Controllers are Tier 0 crown jewels that store the directory database (`NTDS.dit`), Kerberos key distribution services (`KDC`), and enterprise authentication secrets. If the underlying platform firmware or virtual machine boot configuration is compromised, an attacker can subvert all operating system and hypervisor defenses before the Windows kernel loads.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control Value PEFirmwareType" test_ref="oval:org.adhardening:tst:2157001" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" test_ref="oval:org.adhardening:tst:2157002" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Power Value HiberbootEnabled" test_ref="oval:org.adhardening:tst:2157003" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\DeviceGuard Value RequirePlatformSecurityFeatures" test_ref="oval:org.adhardening:tst:2157004" />
+      </criteria>
+    </definition>
     <definition id="oval:org.adhardening:def:8001" version="1" class="compliance">
       <metadata>
         <title>[REQ-END-001] Harden Network Parameters and Disable Legacy Name Resolution</title>
@@ -3346,18 +3365,13 @@ To maximize security, standard endpoints (Tier 2) should use **BitLocker Network
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Standard Tier 2 endpoints (such as employee laptops and workstations) and member servers are frequently exposed to physical theft, loss, and unauthorized local access in branch offices or remote environments. If the firmware on these systems is left unsecured, an attacker can modify boot settings, bypass operating system security controls, or execute physical DMA and offline decryption attacks.
-
-Securing the firmware level ensures:
-1. **Firmware Integrity**: Enforcing a UEFI administrator password prevents unauthorized configuration modifications, such as disabling Secure Boot, TPM, or hardware virtualization features.
-2. **Native UEFI Boot**: Disabling the Compatibility Support Module (CSM) or Legacy BIOS options forces native UEFI mode, which is mandatory for activating UEFI Secure Boot and Virtualization-Based Security (VBS).
-3. **Restricted Boot Paths**: Restricting the boot order to the primary internal storage device prevents users or attackers from booting unauthorized operating systems or diagnostic tools from USB media or untrusted local networks.
-4. **BIOS Rollback Prevention**: Enforcing firmware update signature validation and blocking BIOS rollbacks mitigates the risk of downgrade attacks targeting known firmware vulnerabilities.
-5. **Virtualization-Based Security Foundation**: Enabling CPU Virtualization Extensions (Intel VT-x / AMD-V) and IOMMU (Intel VT-d / AMD-Vi) at the firmware level establishes the mandatory hardware isolation required by the Windows Hypervisor to run VBS, Credential Guard, and Kernel DMA Protection.
-6. **Platform Measurement Integrity**: Disabling Fast Boot forces the firmware to execute full hardware initialization, device checks, and complete TPM self-tests/PCR measurements at every boot, ensuring platform integrity and correct state validation.</description>
+        <description>Standard Tier 2 endpoints (such as corporate laptops and desktop workstations) and member servers are frequently exposed to physical theft, unauthorized local access in branch offices, or untrusted local networks. If system firmware remains unconfigured or relies on legacy BIOS modes, attackers can alter boot settings, subvert operating system security features, bypass disk encryption, or execute physical DMA and bootkit attacks.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" test_ref="oval:org.adhardening:tst:8013001" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control Value PEFirmwareType" test_ref="oval:org.adhardening:tst:8013001" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" test_ref="oval:org.adhardening:tst:8013002" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Power Value HiberbootEnabled" test_ref="oval:org.adhardening:tst:8013003" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\DeviceGuard Value RequirePlatformSecurityFeatures" test_ref="oval:org.adhardening:tst:8013004" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8014" version="1" class="compliance">
@@ -7550,19 +7564,15 @@ To achieve maximum protection, the PAW BitLocker configuration enforces a signif
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Privileged Access Workstations (PAWs) form the administrative root of trust for the Active Directory forest. If an attacker gains physical access to a PAW, they can attempt to compromise the operating system offline, bypass disk encryption, or load malicious code prior to the OS boot phase.
+        <description>Privileged Access Workstations (PAWs) are dedicated administrative bastions that operate at the pinnacle of the enterprise security architecture (Tier 0). Compromise of a PAW grants adversaries the credentials necessary to commandeer identity infrastructure, cloud tenants, and enterprise directory data.
 
-Securing the firmware level ensures:
-1. **Firmware Lockdown**: Setting a strong UEFI administrator password prevents unauthorized local users or attackers with physical access from disabling hardware security configurations (such as TPM 2.0, Secure Boot, or virtualization extensions).
-2. **Boot Integrity**: Disabling the Compatibility Support Module (CSM) or Legacy BIOS options forces native UEFI mode, which is a hard pre-requisite for UEFI Secure Boot and Virtualization-Based Security (VBS).
-3. **Execution Prevention**: Restricting the boot order to the primary internal OS drive prevents booting from unauthorized external media (USB flash drives, external SSDs, or local network PXE servers) containing diagnostics, password reset tools, or malicious secondary operating systems.
-4. **Downgrade Attack Mitigation**: Restricting firmware rollbacks prevents attackers from flashing older, vulnerable firmware versions that might contain known UEFI security bypasses.
-5. **Virtualization-Based Security Foundation**: Enabling CPU Virtualization Extensions (Intel VT-x / AMD-V) and IOMMU (Intel VT-d / AMD-Vi) at the firmware level establishes the mandatory hardware isolation required by the Windows Hypervisor to run VBS, Credential Guard, and Kernel DMA Protection.
-6. **Platform Measurement Integrity**: Disabling Fast Boot forces the firmware to execute full hardware initialization, device checks, and complete TPM self-tests/PCR measurements at every boot, ensuring platform integrity and correct state validation.</description>
+If an attacker obtains physical access to a PAW, or if malicious code gains low-level administrative control, vulnerabilities in the boot chain or legacy firmware interfaces can be exploited to bypass operating system security boundaries, defeat BitLocker disk encryption, or implant persistent firmware bootkits before the Windows kernel loads.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control Value PEFirmwareType" test_ref="oval:org.adhardening:tst:7005001" />
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" test_ref="oval:org.adhardening:tst:7005002" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Power Value HiberbootEnabled" test_ref="oval:org.adhardening:tst:7005003" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\DeviceGuard Value RequirePlatformSecurityFeatures" test_ref="oval:org.adhardening:tst:7005004" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7006" version="1" class="compliance">
@@ -11472,6 +11482,22 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:2156001" />
       <windows:state state_ref="oval:org.adhardening:ste:2156001" />
     </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2157001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control Value PEFirmwareType" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2157001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2157001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2157002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2157002" />
+      <windows:state state_ref="oval:org.adhardening:ste:2157002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2157003" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Power Value HiberbootEnabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2157003" />
+      <windows:state state_ref="oval:org.adhardening:ste:2157003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2157004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\DeviceGuard Value RequirePlatformSecurityFeatures" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2157004" />
+      <windows:state state_ref="oval:org.adhardening:ste:2157004" />
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8001001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001001" />
       <windows:state state_ref="oval:org.adhardening:ste:8001001" />
@@ -11872,9 +11898,21 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:8012048" />
       <windows:state state_ref="oval:org.adhardening:ste:8012048" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8013001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8013001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control Value PEFirmwareType" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8013001" />
       <windows:state state_ref="oval:org.adhardening:ste:8013001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8013002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8013002" />
+      <windows:state state_ref="oval:org.adhardening:ste:8013002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8013003" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Power Value HiberbootEnabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8013003" />
+      <windows:state state_ref="oval:org.adhardening:ste:8013003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8013004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\DeviceGuard Value RequirePlatformSecurityFeatures" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8013004" />
+      <windows:state state_ref="oval:org.adhardening:ste:8013004" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8014001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8014001" />
@@ -13530,6 +13568,14 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     <windows:registry_test id="oval:org.adhardening:tst:7005002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\SecureBoot\State Value UEFISecureBootEnabled" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7005002" />
       <windows:state state_ref="oval:org.adhardening:ste:7005002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7005003" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\Power Value HiberbootEnabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7005003" />
+      <windows:state state_ref="oval:org.adhardening:ste:7005003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7005004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\DeviceGuard Value RequirePlatformSecurityFeatures" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7005004" />
+      <windows:state state_ref="oval:org.adhardening:ste:7005004" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7006001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7006001" />
@@ -16208,6 +16254,30 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:key>SYSTEM\CurrentControlSet\Policies\EarlyLaunch</windows:key>
       <windows:name>DriverLoadPolicy</windows:name>
     </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2157001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control</windows:key>
+      <windows:name>PEFirmwareType</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2157002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\SecureBoot\State</windows:key>
+      <windows:name>UEFISecureBootEnabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2157003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Power</windows:key>
+      <windows:name>HiberbootEnabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2157004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\DeviceGuard</windows:key>
+      <windows:name>RequirePlatformSecurityFeatures</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8001001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -16817,8 +16887,26 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     <windows:registry_object id="oval:org.adhardening:obj:8013001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control</windows:key>
+      <windows:name>PEFirmwareType</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8013002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Control\SecureBoot\State</windows:key>
       <windows:name>UEFISecureBootEnabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8013003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Power</windows:key>
+      <windows:name>HiberbootEnabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8013004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\DeviceGuard</windows:key>
+      <windows:name>RequirePlatformSecurityFeatures</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8014001" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -19147,6 +19235,18 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Control\SecureBoot\State</windows:key>
       <windows:name>UEFISecureBootEnabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7005003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\Power</windows:key>
+      <windows:name>HiberbootEnabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7005004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Control\DeviceGuard</windows:key>
+      <windows:name>RequirePlatformSecurityFeatures</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7006001" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -21935,6 +22035,22 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">3</windows:value>
     </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2157001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2157002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2157003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2157004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -22324,6 +22440,18 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8013001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8013002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8013003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8013004" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
@@ -23942,6 +24070,14 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     <windows:registry_state id="oval:org.adhardening:ste:7005002" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7005003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7005004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">3</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7006001" version="1">
       <windows:type>reg_dword</windows:type>

@@ -171,6 +171,7 @@
         * [REQ-DC-144 - Audit Policy: Privilege Use Auditing](02-domain-controllers/audit-policy/configure-dc-audit-privilege-use.md)
         * [REQ-DC-145 - Audit Policy: System Events Auditing](02-domain-controllers/audit-policy/configure-dc-audit-system-events.md)
     * [REQ-DC-156 - Configure Early Launch Antimalware (ELAM) Policy on Domain Controllers](02-domain-controllers/configure-elam.md)
+    * [REQ-DC-157 - UEFI Firmware Security Hardening on Domain Controllers](02-domain-controllers/configure-uefi-security.md)
 ## Module 3: Identities & Services Hardening
 * [Module 3: Identities & Services Hardening](03-identities-services/README.md)
     * [REQ-ID-001 - Enforce Fine-Grained Password Policies](03-identities-services/enforce-fgpp.md)

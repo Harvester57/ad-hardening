@@ -54,6 +54,7 @@ Configuration ADHardeningAudit {
             "01-architecture\audit_scripts\Test-LocalLogonRestrictions.ps1",
             "02-domain-controllers\audit_scripts\Audit-DcSecureBoot.ps1",
             "02-domain-controllers\audit_scripts\Audit-DcSecureBootRevocations.ps1",
+            "02-domain-controllers\audit_scripts\Audit-DcUefiSecurity.ps1",
             "02-domain-controllers\audit_scripts\Get-AdminSDHolderAudit.ps1",
             "02-domain-controllers\audit_scripts\Get-AppLockerDCStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-AudioEndpointBuilderStatus.ps1",

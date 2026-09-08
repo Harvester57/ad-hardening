@@ -1,7 +1,7 @@
-# Audit-UEFISecurity.ps1
-# Description: Audits local boot environment, Secure Boot, TPM, virtualization, and BIOS firmware properties for endpoints.
+# Audit-DcUefiSecurity.ps1
+# Description: Audits local boot environment, Secure Boot, TPM, and virtualization properties on Domain Controllers.
 
-Write-Host "--- Auditing UEFI Security Baseline for Endpoints ---" -ForegroundColor Cyan
+Write-Host "--- Auditing UEFI Security Baseline on Domain Controller ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
@@ -74,8 +74,11 @@ if ($PowerReg -and $PowerReg.HiberbootEnabled -eq 0) {
     $script:Vulnerable = $true
 }
 
-# 6. Retrieve BIOS Firmware Specifications
+# 6. Retrieve Server & BIOS Firmware Specifications
+$ComputerSystem = Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction SilentlyContinue
 $BiosDetails = Get-CimInstance -ClassName Win32_Bios -ErrorAction SilentlyContinue
+
+Write-Host "  Platform Model:        $($ComputerSystem.Model)" -ForegroundColor White
 if ($BiosDetails) {
     Write-Host "  Firmware Manufacturer: $($BiosDetails.Manufacturer)" -ForegroundColor White
     Write-Host "  Firmware Version:      $($BiosDetails.SMBIOSBIOSVersion)" -ForegroundColor White
