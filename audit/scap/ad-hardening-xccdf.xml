@@ -31148,6 +31148,12 @@ if ($IsDomainController) {
             <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers, Member Servers, PAWs, Tier 2 Client Workstations.</xhtml:li>
           <xhtml:li>
             <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016 (and above), Windows 10 (and above) Enterprise/Professional.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Baseline Tiering &amp; Sensitivity</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Tier 0 Domain Controllers &amp; PAWs</xhtml:strong>: Must strictly enforce modern cryptographic algorithms (AES-256, SHA-256/384, ECDH Group 19/20) with no legacy fallbacks permitted.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Tier 1 Member Servers &amp; Tier 2 Endpoints</xhtml:strong>: Standard baseline mandates AES-256 and ECDH Group 19/20. Fallback to DH Group 14 (2048-bit MODP) and AES-CBC 256 is permitted solely for systems communicating with legacy appliances or boundary hosts (<xhtml:strong>[REQ-NET-004]</xhtml:strong>).</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -31155,224 +31161,268 @@ if ($IsDomainController) {
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>Default IPsec configurations in older Windows deployments or standard configurations allow weak encryption and integrity algorithms (such as 3DES, DES, MD5, SHA-1, and Diffie-Hellman Groups 1, 2, or 5). These legacy algorithms are vulnerable to key recovery attacks, pre-computation table attacks, and cryptographic collisions.</xhtml:p>
-        <xhtml:p>To maintain secure communications through 2030 and beyond, IPsec configurations must be restricted to modern cryptographic standards. Utilizing Advanced Encryption Standard (AES-256) and Elliptic Curve Diffie-Hellman (ECDH) Group 19 (256-bit) or Group 20 (384-bit) provides strong mathematical protection against decryption and ensures perfect forward secrecy (PFS). Mandating these suites prevents protocol downgrade attacks and secures sensitive domain replication and management traffic.</xhtml:p>
+        <xhtml:p>Internet Protocol Security (IPsec) is the foundational cryptographic framework that underpins domain isolation (<xhtml:strong>[REQ-NET-004]</xhtml:strong>) and line-encryption across Active Directory networks. However, default IPsec settings in legacy Windows environments permit outdated cryptographic primitives, including 3DES, DES, MD5, SHA-1, and Diffie-Hellman Groups 1, 2, and 5. These algorithms are mathematically broken or provide insufficient security margins against modern adversaries.</xhtml:p>
+        <xhtml:p>Hardening IPsec cryptographic parameters mitigates multiple specific threat vectors:</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:h4>1. Open the GPO Editor</xhtml:h4>
         <xhtml:ol>
           <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
-          <xhtml:li>Create a new GPO or edit an existing one (e.g., <xhtml:code>GPO_Hardening_IPsec_Cryptography</xhtml:code>) targeting the appropriate Organizational Units.</xhtml:li>
+          <xhtml:li>Create or edit a GPO targeting the target systems (e.g., <xhtml:code>GPO_Hardening_IPsec_Cryptography</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to:</xhtml:li>
           <xhtml:li>
             <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Windows Defender Firewall with Advanced Security\Windows Defender Firewall with Advanced Security - [LDAP]</xhtml:code>
           </xhtml:li>
           <xhtml:li>Right-click <xhtml:strong>Windows Defender Firewall with Advanced Security - [LDAP]</xhtml:strong> and select <xhtml:strong>Properties</xhtml:strong>.</xhtml:li>
           <xhtml:li>Select the <xhtml:strong>IPsec Settings</xhtml:strong> tab.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>2. Configure Key Exchange (Main Mode) Settings</xhtml:h4>
+        <xhtml:ol>
           <xhtml:li>Under <xhtml:strong>IPsec defaults</xhtml:strong>, click <xhtml:strong>Customize...</xhtml:strong>
           </xhtml:li>
-          <xhtml:li>Under <xhtml:strong>Key exchange (Main Mode)</xhtml:strong>, select <xhtml:strong>Advanced</xhtml:strong> and click <xhtml:strong>Customize...</xhtml:strong>
+          <xhtml:li>Under <xhtml:strong>Key exchange (Main Mode)</xhtml:strong>, select <xhtml:strong>Advanced</xhtml:strong>, then click <xhtml:strong>Customize...</xhtml:strong>
           </xhtml:li>
-          <xhtml:li>Configure the security methods:</xhtml:li>
-          <xhtml:li>* Remove any entries referencing SHA-1, MD5, 3DES, DES, or DH Groups 1, 2, or 5.</xhtml:li>
-          <xhtml:li>* Add or reorder methods so the preferred method is first:</xhtml:li>
+          <xhtml:li>Configure the <xhtml:strong>Security methods</xhtml:strong> list in priority order:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Proposal 1 (Preferred)</xhtml:em>*:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Integrity</xhtml:em>*: <xhtml:code>SHA-256</xhtml:code>
+          </xhtml:li>
           <xhtml:li>
             <xhtml:em> </xhtml:em>
             <xhtml:em>Encryption</xhtml:em>*: <xhtml:code>AES-256</xhtml:code>
           </xhtml:li>
           <xhtml:li>
             <xhtml:em> </xhtml:em>
-            <xhtml:em>Integrity</xhtml:em>*: <xhtml:code>SHA-256</xhtml:code> or <xhtml:code>SHA-384</xhtml:code>
+            <xhtml:em>Key exchange algorithm</xhtml:em>*: <xhtml:code>Elliptic Curve Diffie-Hellman Group 19</xhtml:code> (P-256)</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Proposal 2</xhtml:em>*:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Integrity</xhtml:em>*: <xhtml:code>SHA-384</xhtml:code>
           </xhtml:li>
           <xhtml:li>
             <xhtml:em> </xhtml:em>
-            <xhtml:em>Key exchange algorithm</xhtml:em>*: <xhtml:code>Elliptic Curve Diffie-Hellman Group 19</xhtml:code> (or <xhtml:code>Group 20</xhtml:code>)</xhtml:li>
+            <xhtml:em>Encryption</xhtml:em>*: <xhtml:code>AES-256</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key exchange algorithm</xhtml:em>*: <xhtml:code>Elliptic Curve Diffie-Hellman Group 20</xhtml:code> (P-384)</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Proposal 3 (Compatibility Fallback)</xhtml:em>*:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Integrity</xhtml:em>*: <xhtml:code>SHA-256</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Encryption</xhtml:em>*: <xhtml:code>AES-256</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key exchange algorithm</xhtml:em>*: <xhtml:code>Diffie-Hellman Group 14</xhtml:code> (2048-bit)</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>Remove all entries referencing DES, 3DES, MD5, SHA-1, or DH Groups 1, 2, and 5.*</xhtml:li>
+          <xhtml:li>Under <xhtml:strong>Key lifetimes</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Minutes</xhtml:em>*: Set to <xhtml:code>480</xhtml:code> (8 hours).</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Sessions</xhtml:em>*: Set to <xhtml:code>0</xhtml:code> (unlimited within time window).</xhtml:li>
+          <xhtml:li>Under <xhtml:strong>Diffie-Hellman</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Select </xhtml:em>
+            <xhtml:em>Force Diffie-Hellman</xhtml:em>* (ensures DH recalculation upon rekeying).</xhtml:li>
           <xhtml:li>Click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Under <xhtml:strong>Data protection (Quick Mode)</xhtml:strong>, select <xhtml:strong>Advanced</xhtml:strong> and click <xhtml:strong>Customize...</xhtml:strong>
+        </xhtml:ol>
+        <xhtml:h4>3. Configure Data Protection (Quick Mode) Settings</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Under <xhtml:strong>Data protection (Quick Mode)</xhtml:strong>, select <xhtml:strong>Advanced</xhtml:strong>, then click <xhtml:strong>Customize...</xhtml:strong>
           </xhtml:li>
           <xhtml:li>Check <xhtml:strong>Require encryption for all connection security rules that use these settings</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Configure the data integrity and encryption rules:</xhtml:li>
-          <xhtml:li>* Remove any rules using SHA-1, MD5, 3DES, or DES.</xhtml:li>
-          <xhtml:li>* Add a custom rule:</xhtml:li>
+          <xhtml:li>Configure the <xhtml:strong>Data integrity and encryption</xhtml:strong> rules:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Rule 1 (AEAD Preferred)</xhtml:em>*:</xhtml:li>
           <xhtml:li>
             <xhtml:em> </xhtml:em>
             <xhtml:em>Protocol</xhtml:em>*: <xhtml:code>ESP</xhtml:code>
           </xhtml:li>
           <xhtml:li>
             <xhtml:em> </xhtml:em>
-            <xhtml:em>Encryption</xhtml:em>*: <xhtml:code>AES-256</xhtml:code> (or <xhtml:code>AES-GCM 256</xhtml:code>)</xhtml:li>
+            <xhtml:em>Encryption</xhtml:em>*: <xhtml:code>AES-GCM 256</xhtml:code>
+          </xhtml:li>
           <xhtml:li>
             <xhtml:em> </xhtml:em>
-            <xhtml:em>Integrity</xhtml:em>*: <xhtml:code>SHA-256</xhtml:code> (or <xhtml:code>None</xhtml:code> if utilizing GCM mode)</xhtml:li>
-          <xhtml:li>Click <xhtml:strong>OK</xhtml:strong> on all dialog boxes to save the configurations.</xhtml:li>
+            <xhtml:em>Integrity</xhtml:em>*: <xhtml:code>None</xhtml:code> (GMAC is integrated directly into GCM mode)</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Rule 2 (Standard CBC)</xhtml:em>*:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Protocol</xhtml:em>*: <xhtml:code>ESP</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Encryption</xhtml:em>*: <xhtml:code>AES-256</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Integrity</xhtml:em>*: <xhtml:code>SHA-256</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>Remove any entries referencing DES, 3DES, MD5, or SHA-1.*</xhtml:li>
+          <xhtml:li>Under <xhtml:strong>Key lifetimes</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Data amount</xhtml:em>*: Set to <xhtml:code>100000</xhtml:code> KB (100 MB).</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Time</xhtml:em>*: Set to <xhtml:code>60</xhtml:code> minutes.</xhtml:li>
+          <xhtml:li>Under <xhtml:strong>Perfect Forward Secrecy (PFS)</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Check </xhtml:em>
+            <xhtml:em>Use Diffie-Hellman for data protection (PFS)</xhtml:em>*.</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Key exchange algorithm</xhtml:em>*: Select <xhtml:code>Elliptic Curve Diffie-Hellman Group 19</xhtml:code> (or <xhtml:code>Same as Main Mode</xhtml:code>).</xhtml:li>
+          <xhtml:li>Click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
         </xhtml:ol>
-        <xhtml:hr />
-        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Run the following scripts locally to audit and configure custom cryptographic sets on individual systems.</xhtml:p>
-        <xhtml:h4>Remediation Script:</xhtml:h4>
-        <xhtml:p>
-          <xhtml:a href="implementation_scripts/Set-IPsecCryptography.ps1">Download Script: Set-IPsecCryptography.ps1</xhtml:a>
-        </xhtml:p>
-        <xhtml:pre>
-          <xhtml:code># Set-IPsecCryptography.ps1
-# Description: Configures local IPsec Main Mode and Quick Mode custom cryptographic configurations.
-
-Write-Host "Configuring hardened IPsec cryptographic settings..." -ForegroundColor Cyan
-
-# Phase 1: Define Main Mode cryptographic proposal
-$MMProposal = New-NetIPsecMainModeCryptoProposal -Encryption AES256 -Hash SHA256 -KeyExchange DH19
-
-# Manage Main Mode Crypto Set
-$MMSetName = "Hardened_MM_CryptoSet"
-$ExistingMM = Get-NetIPsecMainModeCryptoSet -DisplayName $MMSetName -ErrorAction SilentlyContinue
-
-if ($null -eq $ExistingMM) {
-    New-NetIPsecMainModeCryptoSet -DisplayName $MMSetName -Proposal $MMProposal | Out-Null
-    Write-Host "Created Main Mode crypto set." -ForegroundColor Green
-} else {
-    Set-NetIPsecMainModeCryptoSet -DisplayName $MMSetName -Proposal $MMProposal | Out-Null
-    Write-Host "Updated Main Mode crypto set." -ForegroundColor Gray
-}
-
-# Phase 2: Define Quick Mode cryptographic proposal
-$QMProposal = New-NetIPsecQuickModeCryptoProposal -Encapsulation ESP -Encryption AES256 -ESPHash SHA256
-
-# Manage Quick Mode Crypto Set
-$QMSetName = "Hardened_QM_CryptoSet"
-$ExistingQM = Get-NetIPsecQuickModeCryptoSet -DisplayName $QMSetName -ErrorAction SilentlyContinue
-
-if ($null -eq $ExistingQM) {
-    New-NetIPsecQuickModeCryptoSet -DisplayName $QMSetName -Proposal $QMProposal | Out-Null
-    Write-Host "Created Quick Mode crypto set." -ForegroundColor Green
-} else {
-    Set-NetIPsecQuickModeCryptoSet -DisplayName $QMSetName -Proposal $QMProposal | Out-Null
-    Write-Host "Updated Quick Mode crypto set." -ForegroundColor Gray
-}
-
-# Associate sets with all local Connection Security Rules and Main Mode Rules
-$Rules = Get-NetIPsecRule -ErrorAction SilentlyContinue
-if ($null -ne $Rules) {
-    foreach ($Rule in $Rules) {
-        Set-NetIPsecRule -DisplayName $Rule.DisplayName -QuickModeCryptoSet $QMSetName -ErrorAction SilentlyContinue | Out-Null
-    }
-}
-
-$MMRules = Get-NetIPsecMainModeRule -ErrorAction SilentlyContinue
-if ($null -ne $MMRules) {
-    foreach ($MMRule in $MMRules) {
-        Set-NetIPsecMainModeRule -DisplayName $MMRule.DisplayName -MainModeCryptoSet $MMSetName -ErrorAction SilentlyContinue | Out-Null
-    }
-}
-
-Write-Host "IPsec cryptography configuration applied." -ForegroundColor Green</xhtml:code>
-        </xhtml:pre>
-        <xhtml:h4>Audit Script:</xhtml:h4>
-        <xhtml:p>
-          <xhtml:a href="audit_scripts/Test-IPsecCryptography.ps1">Download Script: Test-IPsecCryptography.ps1</xhtml:a>
-        </xhtml:p>
-        <xhtml:pre>
-          <xhtml:code># Test-IPsecCryptography.ps1
-# Description: Checks that IPsec rules only utilize strong cryptographic sets.
-
-Write-Host "Auditing IPsec cryptographic configurations..." -ForegroundColor Cyan
-
-$NonCompliantCount = 0
-$Rules = Get-NetIPsecRule -ErrorAction SilentlyContinue
-
-if ($null -eq $Rules -or $Rules.Count -eq 0) {
-    Write-Host "    - No IPsec rules found to audit." -ForegroundColor Gray
-} else {
-    foreach ($Rule in $Rules) {
-        $QMSetName = $Rule.QuickModeCryptoSet
-        if ($null -eq $QMSetName -or $QMSetName -eq "") {
-            Write-Host "    - Rule '$($Rule.DisplayName)' is using default/unconfigured Quick Mode cryptography (Non-Compliant)." -ForegroundColor Red
-            $NonCompliantCount++
-        } else {
-            $QMSet = Get-NetIPsecQuickModeCryptoSet -Name $QMSetName -ErrorAction SilentlyContinue
-            if ($null -eq $QMSet) {
-                Write-Host "    - Rule '$($Rule.DisplayName)' references non-existent crypto set: $($QMSetName) (Non-Compliant)." -ForegroundColor Red
-                $NonCompliantCount++
-            } else {
-                $Compliant = $true
-                foreach ($Proposal in $QMSet.Proposals) {
-                    if ($Proposal.Encryption -ne "AES256" -and $Proposal.Encryption -ne "AESGCM256") {
-                        $Compliant = $false
-                    }
-                    if ($Proposal.ESPHash -ne "SHA256" -and $Proposal.ESPHash -ne "SHA384") {
-                        $Compliant = $false
-                    }
-                }
-                
-                if ($Compliant) {
-                    Write-Host "    - Rule '$($Rule.DisplayName)' matches cryptographic standards (Compliant)." -ForegroundColor Green
-                } else {
-                    Write-Host "    - Rule '$($Rule.DisplayName)' uses weak encryption or hashing methods (Non-Compliant)." -ForegroundColor Red
-                    $NonCompliantCount++
-                }
-            }
-        }
-    }
-}
-
-if ($NonCompliantCount -eq 0) {
-    Write-Host "IPsec Cryptography Audit: Compliant." -ForegroundColor Green
-} else {
-    Write-Host "IPsec Cryptography Audit: Non-Compliant." -ForegroundColor Red
-}</xhtml:code>
-        </xhtml:pre>
+        <xhtml:h4>4. Configure Authentication Method Defaults</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Under <xhtml:strong>Authentication method</xhtml:strong>, select <xhtml:strong>Advanced</xhtml:strong>, then click <xhtml:strong>Customize...</xhtml:strong>
+          </xhtml:li>
+          <xhtml:li>Configure authentication priorities:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>First authentication method</xhtml:em>
+            <xhtml:em>: Select </xhtml:em>
+            <xhtml:em>Computer (Kerberos V5)</xhtml:em>* (Standard for domain-joined hosts).</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Second authentication method / Fallback</xhtml:em>
+            <xhtml:em>: Select </xhtml:em>
+            <xhtml:em>Computer certificate</xhtml:em>*, specify the enterprise Root/Intermediate CA, and configure criteria to match machine certificates (RSA &gt;= 3072 bits or ECDSA P-256).</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>Ensure Pre-Shared Key (PSK) authentication is strictly prohibited in enterprise production environments.*</xhtml:li>
+          <xhtml:li>Click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>5. Configure Global IPsec Exemptions and Certificate Validation</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Under <xhtml:strong>IPsec exemptions</xhtml:strong>:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Exempt ICMP from IPsec</xhtml:em>*: Select <xhtml:code>No</xhtml:code> (dictates that ICMP traffic must be authenticated and encrypted along with standard traffic, closing covert channels).</xhtml:li>
+          <xhtml:li>Click <xhtml:strong>OK</xhtml:strong> to close the IPsec Defaults dialog.</xhtml:li>
+          <xhtml:li>Click <xhtml:strong>Apply</xhtml:strong>, then <xhtml:strong>OK</xhtml:strong> on the Windows Defender Firewall Properties window.</xhtml:li>
+        </xhtml:ol>
         <xhtml:hr />
       </fixtext>
       <fix system="urn:xccdf:fix:script:powershell"># Set-IPsecCryptography.ps1
-# Description: Configures local IPsec Main Mode and Quick Mode custom cryptographic configurations.
+# Description: Configures hardened IPsec Main Mode, Quick Mode, and Global Firewall cryptographic parameters.
+# Target Engine: Windows PowerShell 5.1
+
+[CmdletBinding()]
+param()
 
 Write-Host "Configuring hardened IPsec cryptographic settings..." -ForegroundColor Cyan
 
-# Phase 1: Define Main Mode cryptographic proposal
-$MMProposal = New-NetIPsecMainModeCryptoProposal -Encryption AES256 -Hash SHA256 -KeyExchange DH19
+# Phase 1: Define Main Mode cryptographic proposals
+# Proposals mandate AES-256 encryption, SHA-256/SHA-384 hashing, and ECDH Group 19/20 or DH14 key exchange.
+# Weak suites (DES, 3DES, MD5, SHA-1, DH Groups 1, 2, 5) are strictly excluded.
+$MMProposals = @(
+    (New-NetIPsecMainModeCryptoProposal -Encryption AES256 -Hash SHA256 -KeyExchange DH19),
+    (New-NetIPsecMainModeCryptoProposal -Encryption AES256 -Hash SHA384 -KeyExchange DH20),
+    (New-NetIPsecMainModeCryptoProposal -Encryption AES256 -Hash SHA256 -KeyExchange DH14)
+)
 
 # Manage Main Mode Crypto Set
 $MMSetName = "Hardened_MM_CryptoSet"
 $ExistingMM = Get-NetIPsecMainModeCryptoSet -DisplayName $MMSetName -ErrorAction SilentlyContinue
 
 if ($null -eq $ExistingMM) {
-    New-NetIPsecMainModeCryptoSet -DisplayName $MMSetName -Proposal $MMProposal | Out-Null
-    Write-Host "Created Main Mode crypto set." -ForegroundColor Green
+    New-NetIPsecMainModeCryptoSet -DisplayName $MMSetName `
+        -Proposal $MMProposals `
+        -MaxMinutes 480 `
+        -MaxSessions 0 `
+        -ForceDiffieHellman $true | Out-Null
+    Write-Host "Created Main Mode crypto set '$($MMSetName)'." -ForegroundColor Green
 } else {
-    Set-NetIPsecMainModeCryptoSet -DisplayName $MMSetName -Proposal $MMProposal | Out-Null
-    Write-Host "Updated Main Mode crypto set." -ForegroundColor Gray
+    Set-NetIPsecMainModeCryptoSet -DisplayName $MMSetName `
+        -Proposal $MMProposals `
+        -MaxMinutes 480 `
+        -MaxSessions 0 `
+        -ForceDiffieHellman $true | Out-Null
+    Write-Host "Updated Main Mode crypto set '$($MMSetName)'." -ForegroundColor Gray
 }
 
-# Phase 2: Define Quick Mode cryptographic proposal
-$QMProposal = New-NetIPsecQuickModeCryptoProposal -Encapsulation ESP -Encryption AES256 -ESPHash SHA256
+# Phase 2: Define Quick Mode cryptographic proposals
+# Primary: ESP AES-GCM 256 (Authenticated Encryption with Associated Data - AEAD)
+# Secondary: ESP AES-256 with SHA-256 integrity
+$QMProposals = @(
+    (New-NetIPsecQuickModeCryptoProposal -Encapsulation ESP -Encryption AESGCM256 -ESPHash None -MaxKilobytes 100000 -MaxMinutes 60),
+    (New-NetIPsecQuickModeCryptoProposal -Encapsulation ESP -Encryption AES256 -ESPHash SHA256 -MaxKilobytes 100000 -MaxMinutes 60)
+)
 
-# Manage Quick Mode Crypto Set
+# Manage Quick Mode Crypto Set with Perfect Forward Secrecy (PFS) enforced
 $QMSetName = "Hardened_QM_CryptoSet"
 $ExistingQM = Get-NetIPsecQuickModeCryptoSet -DisplayName $QMSetName -ErrorAction SilentlyContinue
 
 if ($null -eq $ExistingQM) {
-    New-NetIPsecQuickModeCryptoSet -DisplayName $QMSetName -Proposal $QMProposal | Out-Null
-    Write-Host "Created Quick Mode crypto set." -ForegroundColor Green
+    New-NetIPsecQuickModeCryptoSet -DisplayName $QMSetName `
+        -Proposal $QMProposals `
+        -PerfectForwardSecrecyGroup DH19 | Out-Null
+    Write-Host "Created Quick Mode crypto set '$($QMSetName)' with PFS (DH19)." -ForegroundColor Green
 } else {
-    Set-NetIPsecQuickModeCryptoSet -DisplayName $QMSetName -Proposal $QMProposal | Out-Null
-    Write-Host "Updated Quick Mode crypto set." -ForegroundColor Gray
+    Set-NetIPsecQuickModeCryptoSet -DisplayName $QMSetName `
+        -Proposal $QMProposals `
+        -PerfectForwardSecrecyGroup DH19 | Out-Null
+    Write-Host "Updated Quick Mode crypto set '$($QMSetName)' with PFS (DH19)." -ForegroundColor Gray
 }
 
-# Associate sets with all local Connection Security Rules and Main Mode Rules
+# Phase 3: Configure Global IPsec Firewall Settings
+# Enforces CRL revocation checking for computer certificates, bounds idle time, and restricts exemptions.
+try {
+    Set-NetFirewallSetting -CertValidationLevel RequireCrlCheck `
+        -MaxSAIdleTimeSeconds 300 `
+        -Exemptions NeighborDiscovery,Dhcp `
+        -ErrorAction Stop | Out-Null
+    Write-Host "Configured global firewall IPsec settings (RequireCrlCheck, IdleTime: 300s, Exemptions: ND/DHCP)." -ForegroundColor Green
+} catch {
+    Write-Host "Warning: Could not update global firewall settings: $($_.Exception.Message)" -ForegroundColor Yellow
+}
+
+# Phase 4: Associate cryptographic sets with local Connection Security Rules and Main Mode Rules
 $Rules = Get-NetIPsecRule -ErrorAction SilentlyContinue
-if ($null -ne $Rules) {
+if ($null -ne $Rules -and $Rules.Count -gt 0) {
     foreach ($Rule in $Rules) {
-        Set-NetIPsecRule -DisplayName $Rule.DisplayName -QuickModeCryptoSet $QMSetName -ErrorAction SilentlyContinue | Out-Null
+        # Only bind QuickModeCryptoSet if the rule is not an Exemption rule (InboundSecurity -ne None)
+        if ($Rule.InboundSecurity -ne "None" -or $Rule.OutboundSecurity -ne "None") {
+            Set-NetIPsecRule -DisplayName $Rule.DisplayName -QuickModeCryptoSet $QMSetName -ErrorAction SilentlyContinue | Out-Null
+            Write-Host "Associated '$($QMSetName)' with rule '$($Rule.DisplayName)'." -ForegroundColor Gray
+        }
     }
+} else {
+    Write-Host "No active Connection Security Rules found to bind." -ForegroundColor Gray
 }
 
 $MMRules = Get-NetIPsecMainModeRule -ErrorAction SilentlyContinue
-if ($null -ne $MMRules) {
+if ($null -ne $MMRules -and $MMRules.Count -gt 0) {
     foreach ($MMRule in $MMRules) {
         Set-NetIPsecMainModeRule -DisplayName $MMRule.DisplayName -MainModeCryptoSet $MMSetName -ErrorAction SilentlyContinue | Out-Null
+        Write-Host "Associated '$($MMSetName)' with Main Mode rule '$($MMRule.DisplayName)'." -ForegroundColor Gray
     }
+} else {
+    Write-Host "No active Main Mode Rules found to bind." -ForegroundColor Gray
 }
 
-Write-Host "IPsec cryptography configuration applied." -ForegroundColor Green</fix>
+Write-Host "IPsec cryptography hardening applied successfully." -ForegroundColor Green</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:4005" />
       </check>
