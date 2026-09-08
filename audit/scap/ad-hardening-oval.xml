@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-09-08T09:10:36Z</oval:timestamp>
+    <oval:timestamp>2026-09-08T09:20:04Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -6448,15 +6448,28 @@ Enforcing the accidental deletion protection property provides the following sec
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Standard Active Directory group memberships define access permissions but do not prevent highly privileged accounts from authenticating to lower-trust systems. If an administrator accidentally logs on to a compromised Tier 1/2 machine, their credentials can be stolen.
+        <description>Standard Active Directory access control models rely on Discretionary Access Control Lists (DACLs) and security group memberships. While DACLs determine which directory objects or network shares an administrative account can modify, they do not restrict the physical or virtual systems from which that administrator can log on.
 
-Authentication Silos and Policies provide cryptographic containment:
-1. **Enforces Logon Boundaries**: An Authentication Silo bounds a set of user accounts and computer accounts. Silo members are technically blocked from obtaining Kerberos tickets (TGT/TGS) to authenticate to hosts outside the silo.
-2. **Shortens Session Exposure**: Authentication policies can restrict Kerberos Ticket Granting Ticket (TGT) lifetimes for silo members (e.g., down to 120 minutes), minimizing the window of exposure for hijacked sessions.
-3. **Cryptographic Validation**: Uses Kerberos claims and Dynamic Access Control (DAC) to dynamically evaluate and enforce authentication paths at the domain controller level.</description>
+In an active enterprise network, if a Tier 0 administrator (such as a Domain Admin or Enterprise Admin) authenticates from or logs on to a compromised Tier 1 server (e.g., an application host) or a Tier 2 workstation (e.g., a standard user workstation), their authentication material is loaded into the memory of the Local Security Authority Subsystem Service (LSASS). Attackers with local administrative control over that lower-tier system can scrape LSASS memory using credential-harvesting tools (such as Mimikatz) to extract Kerberos Ticket Granting Tickets (TGTs), NTLM password hashes, or plaintext credentials, resulting in total forest compromise via lateral movement and privilege escalation (Pass-the-Hash, Pass-the-Ticket).
+
+Authentication Policies and Authentication Policy Silos (introduced in Windows Server 2012 R2) provide cryptographic containment enforced directly at the Key Distribution Center (KDC) on Domain Controllers:
+
+1. **Cryptographic Boundary Enforcement at KDC**:
+   Unlike host-level software restrictions or traditional group memberships, Authentication Silos are evaluated by the KDC during the Kerberos ticket acquisition phase (AS-REQ and TGS-REQ). When an account assigned to an Authentication Policy Silo requests a Kerberos ticket, the KDC inspects the client host's device claims (`@Device.ad:silo`). If the host is not enrolled in the same silo, the KDC unconditionally rejects ticket issuance with the Kerberos status code `KDC_ERR_POLICY` (`0x12`). Because ticket issuance is denied at the domain controller level, administrative credentials are never exposed, transmitted, or cached on unauthorized workstations.
+
+2. **Dynamic Access Control (DAC) &amp; Compound Authentication**:
+   Authentication Silos leverage Dynamic Access Control (DAC) device claims. When accounts are enrolled in a silo, Active Directory automatically issues the `@Device.ad:silo` claim during Kerberos authentication. Enabled by Kerberos Flexible Authentication Secure Tunneling (FAST / RFC 6113), the KDC evaluates compound authentication, validating both the user identity and the computer identity simultaneously against conditional Security Descriptor Definition Language (SDDL) rules such as `O:SYG:SYD:(XA;;CR;;;WD;(@Device.ad:silo == "T0_Silo"))`.
+
+3. **Restricted Kerberos TGT Lifetimes**:
+   Authentication Policies enforce reduced Kerberos Ticket Granting Ticket (TGT) lifetimes (e.g., 120 minutes / 2 hours) specifically on high-privilege silo accounts, without impacting standard domain users whose default TGT lifetime remains 10 hours. This significantly constrains the window of opportunity for ticket reuse attacks or stolen session ticket exploitation.
+
+4. **Defense-in-Depth Architectural Triad**:
+   Authentication Silos form an inseparable architectural defense triad with the **Protected Users** security group (REQ-ID-005), **Kerberos Armoring (FAST)** (REQ-DC-013, REQ-PAW-013, REQ-END-013), and **Privileged Access Workstations** (PAWs). Together, these controls prevent credential dumping, halt NTLM fallback, and enforce strict Tier 0 cryptographic isolation.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-ID-012 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:3012" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters Value EnableCbacAndArmor" test_ref="oval:org.adhardening:tst:3012001" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters Value CbacAndArmorLevel" test_ref="oval:org.adhardening:tst:3012002" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value EnableCbacAndArmor" test_ref="oval:org.adhardening:tst:3012003" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:3013" version="1" class="compliance">
@@ -13086,9 +13099,17 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:3011" />
       <windows:state state_ref="oval:org.adhardening:ste:3011" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:3012" version="1" comment="Placeholder check for REQ-ID-012 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:3012" />
-      <windows:state state_ref="oval:org.adhardening:ste:3012" />
+    <windows:registry_test id="oval:org.adhardening:tst:3012001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters Value EnableCbacAndArmor" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:3012001" />
+      <windows:state state_ref="oval:org.adhardening:ste:3012001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:3012002" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters Value CbacAndArmorLevel" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:3012002" />
+      <windows:state state_ref="oval:org.adhardening:ste:3012002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:3012003" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value EnableCbacAndArmor" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:3012003" />
+      <windows:state state_ref="oval:org.adhardening:ste:3012003" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:3013" version="1" comment="Placeholder check for REQ-ID-013 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:3013" />
@@ -18478,11 +18499,23 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:3012" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:3012001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
+      <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters</windows:key>
+      <windows:name>EnableCbacAndArmor</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:3012002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters</windows:key>
+      <windows:name>CbacAndArmorLevel</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:3012003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters</windows:key>
+      <windows:name>EnableCbacAndArmor</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:3013" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -23461,9 +23494,17 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:3012" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    <windows:registry_state id="oval:org.adhardening:ste:3012001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:3012002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:3012003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:3013" version="1">
       <windows:type>reg_sz</windows:type>
