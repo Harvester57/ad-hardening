@@ -169,6 +169,7 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-153" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-154" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-155" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-156" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-001" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-003" selected="true" />
@@ -8427,6 +8428,83 @@ if (Test-Path $PolicyXml) { Remove-Item $PolicyXml -Force }
 Write-Host "[+] Local WDAC baseline policy configured. Reboot required." -ForegroundColor Green</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2034" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-156" severity="high" weight="10.0" selected="false">
+      <title>[REQ-DC-156] Configure Early Launch Antimalware (ELAM) Policy on Domain Controllers</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers (Tier 0). <xhtml:em>(For Privileged Access Workstations, refer to [REQ-PAW-014](../07-paws/configure-elam.md); for Tier 2 Client Workstations and Member Servers, refer to [REQ-END-028](../08-endpoints/configure-elam.md)).</xhtml:em>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025.</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>02-domain-controllers/configure-elam.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Active Directory Domain Controllers serve as the root of trust (Tier 0) for the entire enterprise directory. Early-stage boot integrity is critical to prevent kernel-level compromise before security subsystems initialize.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>) with Domain Admin credentials.</xhtml:li>
+          <xhtml:li>Edit the baseline Domain Controller hardening GPO (e.g., <xhtml:code>GPO_Hardening_DomainControllers</xhtml:code>).</xhtml:li>
+          <xhtml:li>Navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>In the right pane, double-click <xhtml:strong>Boot-Start Driver Initialization Policy</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Select <xhtml:strong>Enabled</xhtml:strong>.</xhtml:li>
+          <xhtml:li>In the <xhtml:strong>Choose the boot-start drivers that can be initialized</xhtml:strong> dropdown, select:</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Good, unknown and bad but critical</xhtml:strong>
+          </xhtml:li>
+          <xhtml:li>Click <xhtml:strong>Apply</xhtml:strong>, then <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Link the GPO to the <xhtml:strong>Domain Controllers</xhtml:strong> Organizational Unit (<xhtml:code>OU=Domain Controllers,DC=domain,DC=com</xhtml:code>).</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>Run the following script locally on Domain Controllers to configure the ELAM boot-start driver policy.</xhtml:p>
+        <xhtml:p>
+          <xhtml:a href="implementation_scripts/Configure-DcElamPolicy.ps1">Download Script: Configure-DcElamPolicy.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-DcElamPolicy.ps1
+# Description: Configures the Early Launch Antimalware (ELAM) boot-start driver initialization policy on Domain Controllers.
+
+Write-Host "Applying ELAM Boot-Start driver initialization policy on Domain Controller..." -ForegroundColor Cyan
+
+$ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
+if (-not (Test-Path $ElamPath)) {
+    New-Item -Path $ElamPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to 'Good, unknown and bad but critical' (Value = 3)." -ForegroundColor Green</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-DcElamPolicy.ps1
+# Description: Configures the Early Launch Antimalware (ELAM) boot-start driver initialization policy on Domain Controllers.
+
+Write-Host "Applying ELAM Boot-Start driver initialization policy on Domain Controller..." -ForegroundColor Cyan
+
+$ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
+if (-not (Test-Path $ElamPath)) {
+    New-Item -Path $ElamPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to 'Good, unknown and bad but critical' (Value = 3)." -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2156" />
       </check>
     </Rule>
     <Group id="xccdf_org.adhardening.benchmarks_group_Module_2__Domain_Controller_Hardening_Defender_Antivirus">
@@ -41546,9 +41624,10 @@ Write-Host "[+] Configuration applied successfully. A reboot is required to acti
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations.</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs). <xhtml:em>(For Domain Controllers, refer to [REQ-DC-156](../02-domain-controllers/configure-elam.md); for Tier 2 Client Workstations and Member Servers, refer to [REQ-END-028](../08-endpoints/configure-elam.md)).</xhtml:em>
+          </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise.</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 Enterprise, Windows 11 Enterprise.</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -41556,31 +41635,29 @@ Write-Host "[+] Configuration applied successfully. A reboot is required to acti
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>Privileged Access Workstations (PAWs) require the highest level of boot integrity to prevent compromise of Tier 0 administrative tasks:</xhtml:p>
-        <xhtml:ol>
-          <xhtml:li>
-            <xhtml:strong>Early Boot Rootkits</xhtml:strong>: Malicious boot-start drivers can execute before third-party endpoint protection or security agents initialize. Enforcing the Early Launch Antimalware (ELAM) driver initialization policy ensures that unknown, unsigned, or bad drivers are prevented from loading at boot time.</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Platform Integrity</xhtml:strong>: Securing the boot sequence with ELAM is a critical requirement of Virtualization-Based Security (VBS) and overall hardware-rooted protection.</xhtml:li>
-        </xhtml:ol>
+        <xhtml:p>Privileged Access Workstations (PAWs) are dedicated administrative bastions that operate at the pinnacle of the enterprise security architecture (Tier 0). Compromise of a PAW grants adversaries the credentials necessary to commandeer identity infrastructure, cloud tenants, and enterprise directory data.</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
         <xhtml:ol>
           <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
-          <xhtml:li>Edit the GPO applied to your PAWs (e.g., <xhtml:code>GPO_Hardening_PAWs</xhtml:code>).</xhtml:li>
+          <xhtml:li>Edit the dedicated PAW hardening GPO (e.g., <xhtml:code>GPO_Hardening_PAW</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to:</xhtml:li>
           <xhtml:li>
             <xhtml:code>Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Double-click <xhtml:strong>Boot-Start Driver Initialization Policy</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Set it to <xhtml:strong>Enabled</xhtml:strong>.</xhtml:li>
-          <xhtml:li>In the options dropdown, select <xhtml:strong>Good, unknown and bad but critical</xhtml:strong> (registry value <xhtml:code>3</xhtml:code>).</xhtml:li>
-          <xhtml:li>Click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>In the right pane, double-click <xhtml:strong>Boot-Start Driver Initialization Policy</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Select <xhtml:strong>Enabled</xhtml:strong>.</xhtml:li>
+          <xhtml:li>In the <xhtml:strong>Choose the boot-start drivers that can be initialized</xhtml:strong> dropdown, select:</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Good and unknown</xhtml:strong>
+          </xhtml:li>
+          <xhtml:li>Click <xhtml:strong>Apply</xhtml:strong>, then <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Link the GPO to the dedicated <xhtml:strong>PAW</xhtml:strong> Organizational Unit (<xhtml:code>OU=PAWs,OU=Tier0,DC=domain,DC=com</xhtml:code>).</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Run the following scripts locally to apply the ELAM driver load policy.</xhtml:p>
+        <xhtml:p>Run the following script locally on PAWs to configure the tightened ELAM policy.</xhtml:p>
         <xhtml:p>
           <xhtml:a href="implementation_scripts/Configure-ElamPolicy.ps1">Download Script: Configure-ElamPolicy.ps1</xhtml:a>
         </xhtml:p>
@@ -41588,68 +41665,30 @@ Write-Host "[+] Configuration applied successfully. A reboot is required to acti
           <xhtml:code># Configure-ElamPolicy.ps1
 # Description: Configures the Early Launch Antimalware (ELAM) boot-start driver load policy on the local system.
 
-Write-Host "Applying ELAM Boot-Start driver initialization policy..." -ForegroundColor Cyan
+Write-Host "Applying ELAM Boot-Start driver initialization policy (Tightened for PAWs)..." -ForegroundColor Cyan
 
 $ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
 if (-not (Test-Path $ElamPath)) {
     New-Item -Path $ElamPath -Force | Out-Null
 }
-Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
-Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green</xhtml:code>
-        </xhtml:pre>
-        <xhtml:p>
-          <xhtml:em>To audit the ELAM driver load policy status:</xhtml:em>
-        </xhtml:p>
-        <xhtml:p>
-          <xhtml:a href="audit_scripts/Get-ElamPolicyStatus.ps1">Download Script: Get-ElamPolicyStatus.ps1</xhtml:a>
-        </xhtml:p>
-        <xhtml:pre>
-          <xhtml:code># Get-ElamPolicyStatus.ps1
-# Description: Audits registry configuration of the Early Launch Antimalware (ELAM) policy.
 
-Write-Host "--- Auditing ELAM Boot-Start Policy ---" -ForegroundColor Cyan
-
-$script:Vulnerable = $false
-
-$Path = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
-$Name = "DriverLoadPolicy"
-$Expected = 3
-
-if (Test-Path $Path) {
-    $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
-    $Val = $Reg.$Name
-    if ($Val -eq $Expected) {
-        Write-Host "  [+] Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Green
-    } else {
-        Write-Host "  [!] MISMATCH: Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] NOT FOUND: Path $($Path) (Expected: $Name = $Expected)" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-if ($script:Vulnerable) {
-    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
-    exit 1
-} else {
-    Write-Host "Audit Result: SECURE" -ForegroundColor Green
-    exit 0
-}</xhtml:code>
+Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 1 -Type DWord -ErrorAction Stop
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to 'Good and unknown' (Value = 1)." -ForegroundColor Green</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
       <fix system="urn:xccdf:fix:script:powershell"># Configure-ElamPolicy.ps1
 # Description: Configures the Early Launch Antimalware (ELAM) boot-start driver load policy on the local system.
 
-Write-Host "Applying ELAM Boot-Start driver initialization policy..." -ForegroundColor Cyan
+Write-Host "Applying ELAM Boot-Start driver initialization policy (Tightened for PAWs)..." -ForegroundColor Cyan
 
 $ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
 if (-not (Test-Path $ElamPath)) {
     New-Item -Path $ElamPath -Force | Out-Null
 }
-Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
-Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green</fix>
+
+Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 1 -Type DWord -ErrorAction Stop
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to 'Good and unknown' (Value = 1)." -ForegroundColor Green</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7014" />
       </check>
@@ -69937,9 +69976,10 @@ Write-Host "[+] 16-bit NTVDM compatibility disabled in registry." -ForegroundCol
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 client workstations and member servers.</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 client workstations and domain member servers. <xhtml:em>(For Domain Controllers, refer to [REQ-DC-156](../02-domain-controllers/configure-elam.md); for Privileged Access Workstations, refer to [REQ-PAW-014](../07-paws/configure-elam.md)).</xhtml:em>
+          </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10/11 Enterprise, Windows Server 2016 (and above).</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 Enterprise, Windows 11 Enterprise, Windows Server 2016 (and above).</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -69947,31 +69987,29 @@ Write-Host "[+] 16-bit NTVDM compatibility disabled in registry." -ForegroundCol
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>Boot-level integrity is crucial for endpoints to ensure malware cannot bypass OS-level antimalware defenses by loading malicious kernel-mode drivers early in the boot sequence:</xhtml:p>
-        <xhtml:ol>
-          <xhtml:li>
-            <xhtml:strong>Early Boot Rootkits</xhtml:strong>: Malicious boot-start drivers can execute before third-party endpoint protection or security agents initialize. Enforcing the Early Launch Antimalware (ELAM) driver initialization policy ensures that unknown, unsigned, or bad drivers are prevented from loading at boot time.</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Platform Integrity</xhtml:strong>: Securing the boot sequence with ELAM is a critical requirement of Virtualization-Based Security (VBS) and overall hardware-rooted protection.</xhtml:li>
-        </xhtml:ol>
+        <xhtml:p>Standard enterprise endpoints and domain member servers represent the primary ingress point for adversaries seeking footholds inside an organization. Ensuring boot-level integrity prevents attackers from using persistence mechanisms that bypass user-mode security software.</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
         <xhtml:ol>
           <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
-          <xhtml:li>Edit the GPO applied to your standard endpoints (e.g., <xhtml:code>GPO_Hardening_Endpoints</xhtml:code>).</xhtml:li>
+          <xhtml:li>Edit the GPO applied to your standard endpoints and member servers (e.g., <xhtml:code>GPO_Hardening_Endpoints</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to:</xhtml:li>
           <xhtml:li>
             <xhtml:code>Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Double-click <xhtml:strong>Boot-Start Driver Initialization Policy</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Set it to <xhtml:strong>Enabled</xhtml:strong>.</xhtml:li>
-          <xhtml:li>In the options dropdown, select <xhtml:strong>Good, unknown and bad but critical</xhtml:strong> (registry value <xhtml:code>3</xhtml:code>).</xhtml:li>
-          <xhtml:li>Click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>In the right pane, double-click <xhtml:strong>Boot-Start Driver Initialization Policy</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Select <xhtml:strong>Enabled</xhtml:strong>.</xhtml:li>
+          <xhtml:li>In the <xhtml:strong>Choose the boot-start drivers that can be initialized</xhtml:strong> dropdown, select:</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Good, unknown and bad but critical</xhtml:strong>
+          </xhtml:li>
+          <xhtml:li>Click <xhtml:strong>Apply</xhtml:strong>, then <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Link the GPO to the appropriate <xhtml:strong>Endpoints</xhtml:strong> and <xhtml:strong>Member Servers</xhtml:strong> Organizational Units.</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Run the following scripts locally to apply the ELAM driver load policy.</xhtml:p>
+        <xhtml:p>Run the following script locally to configure the ELAM boot-start driver load policy on endpoints.</xhtml:p>
         <xhtml:p>
           <xhtml:a href="implementation_scripts/Configure-ElamPolicy.ps1">Download Script: Configure-ElamPolicy.ps1</xhtml:a>
         </xhtml:p>
@@ -69985,48 +70023,9 @@ $ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
 if (-not (Test-Path $ElamPath)) {
     New-Item -Path $ElamPath -Force | Out-Null
 }
+
 Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
-Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green</xhtml:code>
-        </xhtml:pre>
-        <xhtml:p>
-          <xhtml:em>To audit the ELAM driver load policy status:</xhtml:em>
-        </xhtml:p>
-        <xhtml:p>
-          <xhtml:a href="audit_scripts/Get-ElamPolicyStatus.ps1">Download Script: Get-ElamPolicyStatus.ps1</xhtml:a>
-        </xhtml:p>
-        <xhtml:pre>
-          <xhtml:code># Get-ElamPolicyStatus.ps1
-# Description: Audits registry configuration of the Early Launch Antimalware (ELAM) policy.
-
-Write-Host "--- Auditing ELAM Boot-Start Policy ---" -ForegroundColor Cyan
-
-$script:Vulnerable = $false
-
-$Path = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
-$Name = "DriverLoadPolicy"
-$Expected = 3
-
-if (Test-Path $Path) {
-    $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
-    $Val = $Reg.$Name
-    if ($Val -eq $Expected) {
-        Write-Host "  [+] Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Green
-    } else {
-        Write-Host "  [!] MISMATCH: Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] NOT FOUND: Path $($Path) (Expected: $Name = $Expected)" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-if ($script:Vulnerable) {
-    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
-    exit 1
-} else {
-    Write-Host "Audit Result: SECURE" -ForegroundColor Green
-    exit 0
-}</xhtml:code>
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to 'Good, unknown and bad but critical' (Value = 3)." -ForegroundColor Green</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
@@ -70039,8 +70038,9 @@ $ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
 if (-not (Test-Path $ElamPath)) {
     New-Item -Path $ElamPath -Force | Out-Null
 }
+
 Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
-Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green</fix>
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to 'Good, unknown and bad but critical' (Value = 3)." -ForegroundColor Green</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8028" />
       </check>

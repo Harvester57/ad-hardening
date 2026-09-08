@@ -195,3 +195,5 @@ This directory contains security baselines for Domain Controllers running Window
   * **[REQ-DC-143 - Audit Policy: Policy Change Auditing](audit-policy/configure-dc-audit-policy-change.md)**
   * **[REQ-DC-144 - Audit Policy: Privilege Use Auditing](audit-policy/configure-dc-audit-privilege-use.md)**
   * **[REQ-DC-145 - Audit Policy: System Events Auditing](audit-policy/configure-dc-audit-system-events.md)**
+* **[REQ-DC-156 - Configure Early Launch Antimalware (ELAM) Policy on Domain Controllers](configure-elam.md)**
+  Requirement to enforce the Early Launch Antimalware (ELAM) boot-start driver initialization policy on Domain Controllers to prevent kernel-level rootkits, BYOVD exploits, and unverified driver loading at startup.

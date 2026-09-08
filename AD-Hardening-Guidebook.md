@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 42defc0 | Generated: September 08, 2026</span>
+      <span>Commit: 6f9e18d | Generated: September 08, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -1861,6 +1861,8 @@ This directory contains security baselines for Domain Controllers running Window
   * **[REQ-DC-143 - Audit Policy: Policy Change Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-policy-change-md)**
   * **[REQ-DC-144 - Audit Policy: Privilege Use Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-privilege-use-md)**
   * **[REQ-DC-145 - Audit Policy: System Events Auditing](#02-domain-controllers-audit-policy-configure-dc-audit-system-events-md)**
+* **[REQ-DC-156 - Configure Early Launch Antimalware (ELAM) Policy on Domain Controllers](#02-domain-controllers-configure-elam-md)**
+  Requirement to enforce the Early Launch Antimalware (ELAM) boot-start driver initialization policy on Domain Controllers to prevent kernel-level rootkits, BYOVD exploits, and unverified driver loading at startup.
 
 
 <div style="page-break-before: always;"></div>
@@ -25244,6 +25246,232 @@ if ($script:Vulnerable) {
 ## Sources & Compliance References
 * **ANSSI Active Directory Hardening Guide**: Recommendation R48
 * **CIS Windows Server Benchmark**: Section 9 (Audit Policy)
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="02-domain-controllers-configure-elam-md"></div>
+
+<div id="02-domain-controllers-configure-elam-md-req-dc-156-configure-early-launch-antimalware-elam-policy-on-domain-controllers"></div>
+
+# [REQ-DC-156] Configure Early Launch Antimalware (ELAM) Policy on Domain Controllers
+
+<div id="02-domain-controllers-configure-elam-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Domain Controllers (Tier 0). *(For Privileged Access Workstations, refer to [REQ-PAW-014](#07-paws-configure-elam-md); for Tier 2 Client Workstations and Member Servers, refer to [REQ-END-028](#08-endpoints-configure-elam-md)).*
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025.
+
+---
+
+<div id="02-domain-controllers-configure-elam-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **ELAM GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware\Boot-Start Driver Initialization Policy` -> Enabled
+  * **Policy Option**: Select **Good, unknown and bad but critical**
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Policies\EarlyLaunch`
+    * **Value Name**: `DriverLoadPolicy`
+    * **Value Type**: `REG_DWORD`
+    * **Value Data**: `3`
+
+---
+
+<div id="02-domain-controllers-configure-elam-md-rationale"></div>
+
+## Rationale
+Active Directory Domain Controllers serve as the root of trust (Tier 0) for the entire enterprise directory. Early-stage boot integrity is critical to prevent kernel-level compromise before security subsystems initialize.
+
+<div id="02-domain-controllers-configure-elam-md-1-the-early-boot-attack-vector-byovd-exploits"></div>
+
+### 1. The Early Boot Attack Vector & BYOVD Exploits
+During system startup, drivers designated as `SERVICE_BOOT_START` (`Start = 0` in registry) load into Ring 0 kernel memory directly from the Windows boot loader (`winload.efi`). These drivers initialize long before:
+* Third-party endpoint detection and response (EDR) sensors.
+* User-mode security subsystems (`lsass.exe`, `services.exe`).
+* Windows Defender real-time protection agents.
+
+Adversaries targeting Domain Controllers leverage Bring Your Own Vulnerable Driver (BYOVD) tactics or rootkit techniques (such as BlackLotus, CosmicStrand, or malicious storage filter drivers) to insert malicious kernel code early in the boot sequence. If a malicious boot-start driver is allowed to load, it can:
+* Directly disable LSA Protection (Protected Process Light / PPL) in kernel memory.
+* Patch kernel security callbacks (AMSI, ETW Threat Intelligence).
+* Intercept raw Active Directory database (`ntds.dit`) read/write operations.
+* Subvert Virtualization-Based Security (VBS) and Credential Guard.
+
+<div id="02-domain-controllers-configure-elam-md-2-early-launch-antimalware-elam-architecture"></div>
+
+### 2. Early Launch Antimalware (ELAM) Architecture
+ELAM is a native Windows security architecture designed to bridge the visibility gap between UEFI Secure Boot and the full initialization of the operating system security stack:
+1. An ELAM-capable antimalware driver (such as Windows Defender's `WdBoot.sys`) initializes immediately after the operating system kernel and HAL, before any third-party boot drivers.
+2. The ELAM driver registers a kernel callback via `IoRegisterBootDriverCallback`.
+3. As `winload.efi` and the kernel enumerate all subsequent boot-start drivers, each binary is submitted to the ELAM driver for inspection.
+4. The ELAM driver examines the digital signature, hash, and certificate chain against a trusted security intelligence database and classifies each driver into one of four categories:
+   * **Good (`0x00000008` / `8`)**: The driver is signed by a trusted certificate and verified clean.
+   * **Unknown (`0x00000001` / `1`)**: The driver has not been attested to by security intelligence definitions.
+   * **Bad, but required for boot (`0x00000004` / `4`)**: The driver matches known malware signatures, but is flagged as essential to continue system boot (e.g., storage or bus driver).
+   * **Bad (`0x00000002` / `2`)**: The driver is identified as known malware.
+
+<div id="02-domain-controllers-configure-elam-md-3-selection-of-good-unknown-and-bad-but-critical-for-domain-controllers"></div>
+
+### 3. Selection of "Good, unknown and bad but critical" for Domain Controllers
+The `DriverLoadPolicy` setting controls how the kernel responds to these classifications:
+* Setting `3` (**Good, unknown and bad but critical**) ensures that all unclassified and good drivers load normally, and non-critical malware drivers are strictly blocked.
+* In enterprise data centers, Domain Controllers typically run on specialized virtualization platforms (VMware ESXi, Hyper-V) or bare-metal servers equipped with hardware RAID controllers, Host Bus Adapters (HBA), or SAN storage drivers.
+* Utilizing setting `3` prevents catastrophic domain-wide outages (boot loops or BSODs on storage controllers) while still neutralizing malicious drivers that attempt to establish rootkit persistence.
+* *(Note: In contrast, Privileged Access Workstations with dedicated, standardized hardware enforce `1` ("Good and unknown") as documented in [REQ-PAW-014](#07-paws-configure-elam-md) to close the "bad but critical" exemption).*
+
+---
+
+<div id="02-domain-controllers-configure-elam-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Driver Digital Signatures**: All boot-start drivers must possess valid digital signatures recognized by Windows Hardware Quality Labs (WHQL) or the trusted enterprise certificate store.
+* **Storage and Virtualization Controllers**: Third-party hypervisor integration components (e.g., legacy virtio, custom storage filter drivers) must be verified prior to enforcement.
+* **Reboot Requirement**: Changes to the ELAM policy take effect during the next system reboot when `winload.efi` initializes the boot driver policy.
+
+<div id="02-domain-controllers-configure-elam-md-pre-deployment-boot-start-driver-audit"></div>
+
+### Pre-Deployment Boot-Start Driver Audit
+Before enforcing the ELAM policy on Domain Controllers, execute the following script to verify the signatures and classifications of all installed boot-start drivers:
+
+```powershell
+# Enumerate all boot-start drivers (Start = 0) and verify Authenticode signatures
+Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\*" |
+    Where-Object { $_.Start -eq 0 -and $_.ImagePath } |
+    ForEach-Object {
+        $rawPath = $_.ImagePath -replace '^\\SystemRoot\\', "$env:SystemRoot\" -replace '^\\\?\?\\', ''
+        $resolvedPath = [System.Environment]::ExpandEnvironmentVariables($rawPath)
+        if (-not [System.IO.Path]::IsPathRooted($resolvedPath)) {
+            $resolvedPath = Join-Path "$env:SystemRoot\System32" $resolvedPath
+        }
+        if (Test-Path $resolvedPath) {
+            $sig = Get-AuthenticodeSignature -FilePath $resolvedPath
+            [PSCustomObject]@{
+                ServiceName = $_.PSChildName
+                ImagePath   = $resolvedPath
+                Status      = $sig.Status
+                Signer      = if ($sig.SignerCertificate) { $sig.SignerCertificate.Subject } else { "Unsigned" }
+            }
+        }
+    } | Format-Table -AutoSize
+```
+
+---
+
+<div id="02-domain-controllers-configure-elam-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-configure-elam-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`) with Domain Admin credentials.
+2. Edit the baseline Domain Controller hardening GPO (e.g., `GPO_Hardening_DomainControllers`).
+3. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware`
+4. In the right pane, double-click **Boot-Start Driver Initialization Policy**.
+5. Select **Enabled**.
+6. In the **Choose the boot-start drivers that can be initialized** dropdown, select:
+   **Good, unknown and bad but critical**
+7. Click **Apply**, then **OK**.
+8. Link the GPO to the **Domain Controllers** Organizational Unit (`OU=Domain Controllers,DC=domain,DC=com`).
+
+---
+
+<div id="02-domain-controllers-configure-elam-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally on Domain Controllers to configure the ELAM boot-start driver policy.
+
+[Download Script: Configure-DcElamPolicy.ps1](implementation_scripts/Configure-DcElamPolicy.ps1)
+
+```powershell
+# Configure-DcElamPolicy.ps1
+# Description: Configures the Early Launch Antimalware (ELAM) boot-start driver initialization policy on Domain Controllers.
+
+Write-Host "Applying ELAM Boot-Start driver initialization policy on Domain Controller..." -ForegroundColor Cyan
+
+$ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
+if (-not (Test-Path $ElamPath)) {
+    New-Item -Path $ElamPath -Force | Out-Null
+}
+
+Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to 'Good, unknown and bad but critical' (Value = 3)." -ForegroundColor Green
+```
+
+---
+
+<div id="02-domain-controllers-configure-elam-md-auditing-verification"></div>
+
+## Auditing & Verification
+
+<div id="02-domain-controllers-configure-elam-md-powershell-audit-script"></div>
+
+### PowerShell Audit Script
+
+Run the following script to verify that the ELAM boot-start driver initialization policy is properly enforced.
+
+[Download Script: Get-DcElamPolicyStatus.ps1](audit_scripts/Get-DcElamPolicyStatus.ps1)
+
+```powershell
+# Get-DcElamPolicyStatus.ps1
+# Description: Audits registry configuration of the Early Launch Antimalware (ELAM) policy on Domain Controllers.
+
+Write-Host "--- Auditing ELAM Boot-Start Policy on Domain Controller ---" -ForegroundColor Cyan
+
+$script:Vulnerable = $false
+
+$Path = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
+$Name = "DriverLoadPolicy"
+$Expected = 3
+
+if (Test-Path $Path) {
+    $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
+    $Val = $Reg.$Name
+    if ($Val -eq $Expected) {
+        Write-Host "  [+] Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Green
+    } else {
+        Write-Host "  [!] MISMATCH: Path $($Path) | $($Name): $Val (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] NOT FOUND: Path $($Path) (Expected: $Name = $Expected)" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-configure-elam-md-auditing-detection-telemetry"></div>
+
+## Auditing, Detection & Telemetry
+ELAM operational events and driver initialization classifications are logged by the kernel and Windows Defender:
+* **Log Name**: `Microsoft-Windows-EarlyLaunchAM/Operational`
+* **Event ID 1**: Driver initialized (Classified as Good).
+* **Event ID 2**: Driver blocked (Classified as Bad / Malicious).
+* **Event ID 3**: Driver initialized (Classified as Unknown).
+* **Event ID 4**: Driver initialized (Classified as Bad, but required for boot).
+* **Windows Defender Antivirus Log**: `Microsoft-Windows-Windows Defender/Operational` -> **Event ID 2000**: Early launch antimalware driver signature loaded or signature update applied.
+
+---
+
+<div id="02-domain-controllers-configure-elam-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section `18.2.2 Ensure 'Boot-Start Driver Initialization Policy' is set to 'Enabled: Good, unknown and bad but critical'`
+* **DoD Windows Server STIG**: Rule `V-205739` (Early Launch Antimalware Boot-Start Driver Initialization Policy)
+* **Microsoft Security Baseline**: Windows Server Security Baseline (Boot-Start Driver Initialization Policy)
+* **ANSSI AD Hardening Guide**: Operational baseline rules for system boot and driver signature verification.
 
 
 <div style="page-break-before: always;"></div>
@@ -50163,8 +50391,8 @@ if ($script:Vulnerable) {
 <div id="07-paws-configure-elam-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations.
-* **Operating Systems**: Windows 10/11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs). *(For Domain Controllers, refer to [REQ-DC-156](#02-domain-controllers-configure-elam-md); for Tier 2 Client Workstations and Member Servers, refer to [REQ-END-028](#08-endpoints-configure-elam-md)).*
+* **Operating Systems**: Windows 10 Enterprise, Windows 11 Enterprise.
 
 ---
 
@@ -50173,25 +50401,86 @@ if ($script:Vulnerable) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * **ELAM GPO**: `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware\Boot-Start Driver Initialization Policy` -> Enabled (Select **Good, unknown and bad but critical** in options)
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Policies\EarlyLaunch` -> `DriverLoadPolicy` = `3` (REG_DWORD)
+  * **ELAM GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware\Boot-Start Driver Initialization Policy` -> Enabled
+  * **Policy Option**: Select **Good and unknown**
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Policies\EarlyLaunch`
+    * **Value Name**: `DriverLoadPolicy`
+    * **Value Type**: `REG_DWORD`
+    * **Value Data**: `1`
 
 ---
 
 <div id="07-paws-configure-elam-md-rationale"></div>
 
 ## Rationale
-Privileged Access Workstations (PAWs) require the highest level of boot integrity to prevent compromise of Tier 0 administrative tasks:
+Privileged Access Workstations (PAWs) are dedicated administrative bastions that operate at the pinnacle of the enterprise security architecture (Tier 0). Compromise of a PAW grants adversaries the credentials necessary to commandeer identity infrastructure, cloud tenants, and enterprise directory data.
 
-1. **Early Boot Rootkits**: Malicious boot-start drivers can execute before third-party endpoint protection or security agents initialize. Enforcing the Early Launch Antimalware (ELAM) driver initialization policy ensures that unknown, unsigned, or bad drivers are prevented from loading at boot time.
-2. **Platform Integrity**: Securing the boot sequence with ELAM is a critical requirement of Virtualization-Based Security (VBS) and overall hardware-rooted protection.
+<div id="07-paws-configure-elam-md-1-early-boot-rootkit-byovd-threat-model"></div>
+
+### 1. Early-Boot Rootkit & BYOVD Threat Model
+Attackers attempting to compromise administrative endpoints frequently employ kernel-mode rootkits or Bring Your Own Vulnerable Driver (BYOVD) techniques. Drivers marked as `SERVICE_BOOT_START` (`Start = 0`) initialize before user-mode security services, EDR endpoint agents, and credential isolation boundaries start. Once loaded into Ring 0, an unauthorized driver can:
+* Directly manipulate kernel memory structures to subvert Protected Process Light (PPL) for `lsass.exe`.
+* Intercept raw keystrokes, smart card PIN entries, and FIDO2 hardware token communications.
+* Disable endpoint telemetry and blinding security monitoring agents.
+* Modify or bypass Virtualization-Based Security (VBS) hypervisor controls.
+
+<div id="07-paws-configure-elam-md-2-early-launch-antimalware-elam-mechanics"></div>
+
+### 2. Early Launch Antimalware (ELAM) Mechanics
+ELAM establishes early boot-level inspection:
+1. An antimalware driver registered as an ELAM boot-start driver (such as Microsoft Defender Antivirus `WdBoot.sys`) is loaded by `winload.efi` before any other boot-start drivers.
+2. The ELAM driver registers a kernel initialization callback via `IoRegisterBootDriverCallback`.
+3. Every subsequent boot-start driver is passed to the ELAM driver for signature, hash, and certificate verification against local and cloud-attested security intelligence.
+4. The ELAM driver returns a classification for each binary:
+   * **Good (`0x00000008` / `8`)**: Digitally signed by a trusted certificate and verified clean.
+   * **Unknown (`0x00000001` / `1`)**: Unclassified by security intelligence (e.g., specialized OEM driver).
+   * **Bad, but required for boot (`0x00000004` / `4`)**: Identified as malware or tampered, but marked boot-critical.
+   * **Bad (`0x00000002` / `2`)**: Identified as confirmed malware.
+
+<div id="07-paws-configure-elam-md-3-tightened-paw-baseline-enforcement-good-and-unknown"></div>
+
+### 3. Tightened PAW Baseline Enforcement ("Good and unknown")
+Standard client workstations and member servers typically configure setting `3` (**Good, unknown and bad but critical**) to avoid blue-screen crashes on diverse legacy hardware where an essential driver might be classified as bad-but-critical.
+
+However, for Privileged Access Workstations, this baseline is intentionally **tightened**:
+* **Closing the "Bad but Critical" Bypass**: Under value `3`, malware that masquerades as a boot-critical storage or bus driver is permitted to load by the kernel. On a Tier 0 PAW, permitting confirmed malware to initialize under any condition is an unacceptable risk.
+* **Enforcing Value `1` ("Good and unknown")**: Value `1` blocks **all** drivers classified as "Bad", including those falsely flagging themselves as boot-critical, while continuing to allow legitimate, unclassified OEM hardware drivers ("Unknown") to load.
+* PAWs utilize standardized, certified hardware platforms (e.g., Microsoft Surface, enterprise-grade business workstations) where driver provenance is strictly controlled, eliminating the compatibility risks present in heterogeneous client fleets.
 
 ---
 
 <div id="07-paws-configure-elam-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Boot-Start Drivers**: If third-party, custom, or legacy hardware monitoring drivers are unsigned, the ELAM policy will block them from loading, potentially resulting in blue screen (BSOD) or hardware failures. Verify all active drivers possess valid digital signatures prior to enforcement.
+* **Third-Party Unsigned Drivers**: Any unsigned driver or driver signed with a revoked certificate will be blocked from loading. If a blocked driver is critical for disk access or display, the system will halt. Ensure all hardware drivers are Authenticode-signed and certified prior to deploying this policy.
+* **Firmware and Driver Updates**: When updating firmware or hardware drivers on PAWs, verify that the vendor updates are properly signed by Microsoft WHQL or an enterprise-trusted certificate.
+
+<div id="07-paws-configure-elam-md-pre-deployment-driver-audit"></div>
+
+### Pre-Deployment Driver Audit
+Execute the following PowerShell command on PAWs to inspect all boot-start drivers and verify their digital signatures:
+
+```powershell
+# Enumerate all boot-start drivers (Start = 0) and verify Authenticode signatures
+Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\*" |
+    Where-Object { $_.Start -eq 0 -and $_.ImagePath } |
+    ForEach-Object {
+        $rawPath = $_.ImagePath -replace '^\\SystemRoot\\', "$env:SystemRoot\" -replace '^\\\?\?\\', ''
+        $resolvedPath = [System.Environment]::ExpandEnvironmentVariables($rawPath)
+        if (-not [System.IO.Path]::IsPathRooted($resolvedPath)) {
+            $resolvedPath = Join-Path "$env:SystemRoot\System32" $resolvedPath
+        }
+        if (Test-Path $resolvedPath) {
+            $sig = Get-AuthenticodeSignature -FilePath $resolvedPath
+            [PSCustomObject]@{
+                ServiceName = $_.PSChildName
+                ImagePath   = $resolvedPath
+                Status      = $sig.Status
+                Signer      = if ($sig.SignerCertificate) { $sig.SignerCertificate.Subject } else { "Unsigned" }
+            }
+        }
+    } | Format-Table -AutoSize
+```
 
 ---
 
@@ -50204,13 +50493,15 @@ Privileged Access Workstations (PAWs) require the highest level of boot integrit
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit the GPO applied to your PAWs (e.g., `GPO_Hardening_PAWs`).
+2. Edit the dedicated PAW hardening GPO (e.g., `GPO_Hardening_PAW`).
 3. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware`
-4. Double-click **Boot-Start Driver Initialization Policy**.
-5. Set it to **Enabled**.
-6. In the options dropdown, select **Good, unknown and bad but critical** (registry value `3`).
-7. Click **OK**.
+4. In the right pane, double-click **Boot-Start Driver Initialization Policy**.
+5. Select **Enabled**.
+6. In the **Choose the boot-start drivers that can be initialized** dropdown, select:
+   **Good and unknown**
+7. Click **Apply**, then **OK**.
+8. Link the GPO to the dedicated **PAW** Organizational Unit (`OU=PAWs,OU=Tier0,DC=domain,DC=com`).
 
 ---
 
@@ -50218,7 +50509,7 @@ Privileged Access Workstations (PAWs) require the highest level of boot integrit
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to apply the ELAM driver load policy.
+Run the following script locally on PAWs to configure the tightened ELAM policy.
 
 [Download Script: Configure-ElamPolicy.ps1](implementation_scripts/Configure-ElamPolicy.ps1)
 
@@ -50226,31 +50517,42 @@ Run the following scripts locally to apply the ELAM driver load policy.
 # Configure-ElamPolicy.ps1
 # Description: Configures the Early Launch Antimalware (ELAM) boot-start driver load policy on the local system.
 
-Write-Host "Applying ELAM Boot-Start driver initialization policy..." -ForegroundColor Cyan
+Write-Host "Applying ELAM Boot-Start driver initialization policy (Tightened for PAWs)..." -ForegroundColor Cyan
 
 $ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
 if (-not (Test-Path $ElamPath)) {
     New-Item -Path $ElamPath -Force | Out-Null
 }
-Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
-Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green
+
+Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 1 -Type DWord -ErrorAction Stop
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to 'Good and unknown' (Value = 1)." -ForegroundColor Green
 ```
 
-*To audit the ELAM driver load policy status:*
+---
+
+<div id="07-paws-configure-elam-md-auditing-verification"></div>
+
+## Auditing & Verification
+
+<div id="07-paws-configure-elam-md-powershell-audit-script"></div>
+
+### PowerShell Audit Script
+
+Run the following script to verify that the tightened ELAM policy (`DriverLoadPolicy = 1`) is properly enforced.
 
 [Download Script: Get-ElamPolicyStatus.ps1](audit_scripts/Get-ElamPolicyStatus.ps1)
 
 ```powershell
 # Get-ElamPolicyStatus.ps1
-# Description: Audits registry configuration of the Early Launch Antimalware (ELAM) policy.
+# Description: Audits registry configuration of the Early Launch Antimalware (ELAM) policy on PAWs.
 
-Write-Host "--- Auditing ELAM Boot-Start Policy ---" -ForegroundColor Cyan
+Write-Host "--- Auditing ELAM Boot-Start Policy on PAW ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
 $Path = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
 $Name = "DriverLoadPolicy"
-$Expected = 3
+$Expected = 1
 
 if (Test-Path $Path) {
     $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
@@ -50277,11 +50579,26 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-configure-elam-md-auditing-detection-telemetry"></div>
+
+## Auditing, Detection & Telemetry
+ELAM operational events and driver initialization classifications are logged by the kernel and Windows Defender:
+* **Log Name**: `Microsoft-Windows-EarlyLaunchAM/Operational`
+* **Event ID 1**: Driver initialized (Classified as Good).
+* **Event ID 2**: Driver blocked (Classified as Bad / Malicious).
+* **Event ID 3**: Driver initialized (Classified as Unknown).
+* **Event ID 4**: Driver initialized (Classified as Bad, but required for boot - blocked under tightened PAW policy).
+* **Windows Defender Antivirus Log**: `Microsoft-Windows-Windows Defender/Operational` -> **Event ID 2000**: Early launch antimalware driver signature loaded or signature update applied.
+
+---
+
 <div id="07-paws-configure-elam-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.2.2 (System Options / ELAM)
-* **ANSSI AD Hardening Guide**: Section addressing system and boot configuration integrity.
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section `18.2.2 Ensure 'Boot-Start Driver Initialization Policy' is set to 'Enabled: Good, unknown and bad but critical' or stricter ('Good and unknown')`
+* **DoD Windows 10/11 STIG**: Rule `V-220743` (Early Launch Antimalware Boot-Start Driver Initialization Policy)
+* **Microsoft Security Guidance**: Securing Privileged Access Workstations (PAW Hardening Guidance)
+* **ANSSI AD Hardening Guide**: Operational baseline rules for system boot and driver signature verification.
 
 
 <div style="page-break-before: always;"></div>
@@ -85960,8 +86277,8 @@ if (Test-Path $NtvdmPath) {
 <div id="08-endpoints-configure-elam-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10/11 Enterprise, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and domain member servers. *(For Domain Controllers, refer to [REQ-DC-156](#02-domain-controllers-configure-elam-md); for Privileged Access Workstations, refer to [REQ-PAW-014](#07-paws-configure-elam-md)).*
+* **Operating Systems**: Windows 10 Enterprise, Windows 11 Enterprise, Windows Server 2016 (and above).
 
 ---
 
@@ -85970,25 +86287,84 @@ if (Test-Path $NtvdmPath) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * **ELAM GPO**: `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware\Boot-Start Driver Initialization Policy` -> Enabled (Select **Good, unknown and bad but critical** in options)
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Policies\EarlyLaunch` -> `DriverLoadPolicy` = `3` (REG_DWORD)
+  * **ELAM GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware\Boot-Start Driver Initialization Policy` -> Enabled
+  * **Policy Option**: Select **Good, unknown and bad but critical**
+  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Policies\EarlyLaunch`
+    * **Value Name**: `DriverLoadPolicy`
+    * **Value Type**: `REG_DWORD`
+    * **Value Data**: `3`
 
 ---
 
 <div id="08-endpoints-configure-elam-md-rationale"></div>
 
 ## Rationale
-Boot-level integrity is crucial for endpoints to ensure malware cannot bypass OS-level antimalware defenses by loading malicious kernel-mode drivers early in the boot sequence:
+Standard enterprise endpoints and domain member servers represent the primary ingress point for adversaries seeking footholds inside an organization. Ensuring boot-level integrity prevents attackers from using persistence mechanisms that bypass user-mode security software.
 
-1. **Early Boot Rootkits**: Malicious boot-start drivers can execute before third-party endpoint protection or security agents initialize. Enforcing the Early Launch Antimalware (ELAM) driver initialization policy ensures that unknown, unsigned, or bad drivers are prevented from loading at boot time.
-2. **Platform Integrity**: Securing the boot sequence with ELAM is a critical requirement of Virtualization-Based Security (VBS) and overall hardware-rooted protection.
+<div id="08-endpoints-configure-elam-md-1-boot-level-attacks-rootkits"></div>
+
+### 1. Boot-Level Attacks & Rootkits
+Malicious software or kernel-level implants that initialize during early boot (using drivers configured with `SERVICE_BOOT_START`) can execute prior to the startup of endpoint detection and response (EDR) sensors, third-party antivirus suites, and user-mode security services (`lsass.exe`, `services.exe`).
+
+By intercepting the early boot chain, an unauthorized driver can:
+* Blind EDR telemetry before logging or detection pipelines initialize.
+* Deploy rootkit functionality to conceal active processes, network connections, and disk artifacts.
+* Exploit Bring Your Own Vulnerable Driver (BYOVD) techniques to disable kernel security mitigations.
+
+<div id="08-endpoints-configure-elam-md-2-early-launch-antimalware-elam-architecture"></div>
+
+### 2. Early Launch Antimalware (ELAM) Architecture
+Early Launch Antimalware (ELAM) is a core Windows platform security capability that establishes a trust handoff from UEFI Secure Boot to the Windows kernel:
+1. `winload.efi` loads the registered ELAM antimalware driver (e.g., Microsoft Defender Antivirus `WdBoot.sys`) before any third-party boot-start drivers.
+2. The ELAM driver registers a system boot driver callback via `IoRegisterBootDriverCallback`.
+3. As the operating system initializes boot-start drivers, each binary is evaluated by the ELAM driver and assigned a classification:
+   * **Good (`0x00000008` / `8`)**: The driver is signed by an Authenticode certificate and verified clean.
+   * **Unknown (`0x00000001` / `1`)**: The driver has not been attested by security intelligence (common for specialized hardware peripherals).
+   * **Bad, but required for boot (`0x00000004` / `4`)**: The driver is flagged as malicious or tampered, but marked boot-critical.
+   * **Bad (`0x00000002` / `2`)**: The driver is identified as confirmed malware.
+
+<div id="08-endpoints-configure-elam-md-3-balanced-policy-for-general-endpoints-and-member-servers"></div>
+
+### 3. Balanced Policy for General Endpoints and Member Servers
+For general client workstations and domain member servers, setting `3` (**Good, unknown and bad but critical**) provides an optimal balance between security enforcement and operational reliability:
+* **Broad Fleet Compatibility**: Heterogeneous workstation fleets possess diverse OEM hardware components, audio controllers, specialized graphics cards, and network adapters. Setting `3` ensures that unclassified ("Unknown") drivers and drivers necessary for booting continue to load without generating blue screen of death (BSOD) stop errors.
+* **Malware Interception**: Drivers identified as confirmed malware that are not boot-critical are unconditionally blocked from loading into kernel memory.
+* *(Note: For dedicated Tier 0 administrative workstations, the policy is tightened to `1` ("Good and unknown") as detailed in [REQ-PAW-014](#07-paws-configure-elam-md)).*
 
 ---
 
 <div id="08-endpoints-configure-elam-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Boot-Start Drivers**: If third-party, custom, or legacy hardware monitoring drivers are unsigned, the ELAM policy will block them from loading, potentially resulting in blue screen (BSOD) or hardware failures. Verify all active drivers possess valid digital signatures prior to enforcement.
+* **Driver Digital Signatures**: All boot-start drivers must be signed by Microsoft WHQL or an enterprise-trusted code-signing authority.
+* **Specialized Peripherals**: Outdated legacy drivers (e.g., legacy disk controllers or specialized lab equipment interfaces) that lack valid digital signatures or are flagged by antimalware definitions may be blocked from loading. Verify driver signatures across endpoint hardware models prior to enterprise deployment.
+
+<div id="08-endpoints-configure-elam-md-pre-deployment-driver-audit"></div>
+
+### Pre-Deployment Driver Audit
+Run the following PowerShell script on representative client workstations and member servers to inspect all installed boot-start drivers and verify their signature status:
+
+```powershell
+# Enumerate all boot-start drivers (Start = 0) and verify Authenticode signatures
+Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\*" |
+    Where-Object { $_.Start -eq 0 -and $_.ImagePath } |
+    ForEach-Object {
+        $rawPath = $_.ImagePath -replace '^\\SystemRoot\\', "$env:SystemRoot\" -replace '^\\\?\?\\', ''
+        $resolvedPath = [System.Environment]::ExpandEnvironmentVariables($rawPath)
+        if (-not [System.IO.Path]::IsPathRooted($resolvedPath)) {
+            $resolvedPath = Join-Path "$env:SystemRoot\System32" $resolvedPath
+        }
+        if (Test-Path $resolvedPath) {
+            $sig = Get-AuthenticodeSignature -FilePath $resolvedPath
+            [PSCustomObject]@{
+                ServiceName = $_.PSChildName
+                ImagePath   = $resolvedPath
+                Status      = $sig.Status
+                Signer      = if ($sig.SignerCertificate) { $sig.SignerCertificate.Subject } else { "Unsigned" }
+            }
+        }
+    } | Format-Table -AutoSize
+```
 
 ---
 
@@ -86001,13 +86377,15 @@ Boot-level integrity is crucial for endpoints to ensure malware cannot bypass OS
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit the GPO applied to your standard endpoints (e.g., `GPO_Hardening_Endpoints`).
+2. Edit the GPO applied to your standard endpoints and member servers (e.g., `GPO_Hardening_Endpoints`).
 3. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Early Launch Antimalware`
-4. Double-click **Boot-Start Driver Initialization Policy**.
-5. Set it to **Enabled**.
-6. In the options dropdown, select **Good, unknown and bad but critical** (registry value `3`).
-7. Click **OK**.
+4. In the right pane, double-click **Boot-Start Driver Initialization Policy**.
+5. Select **Enabled**.
+6. In the **Choose the boot-start drivers that can be initialized** dropdown, select:
+   **Good, unknown and bad but critical**
+7. Click **Apply**, then **OK**.
+8. Link the GPO to the appropriate **Endpoints** and **Member Servers** Organizational Units.
 
 ---
 
@@ -86015,7 +86393,7 @@ Boot-level integrity is crucial for endpoints to ensure malware cannot bypass OS
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally to apply the ELAM driver load policy.
+Run the following script locally to configure the ELAM boot-start driver load policy on endpoints.
 
 [Download Script: Configure-ElamPolicy.ps1](implementation_scripts/Configure-ElamPolicy.ps1)
 
@@ -86029,11 +86407,22 @@ $ElamPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
 if (-not (Test-Path $ElamPath)) {
     New-Item -Path $ElamPath -Force | Out-Null
 }
+
 Set-ItemProperty -Path $ElamPath -Name "DriverLoadPolicy" -Value 3 -Type DWord -ErrorAction Stop
-Write-Host "[+] ELAM Boot-Start driver initialization policy set to Good, unknown and bad but critical." -ForegroundColor Green
+Write-Host "[+] ELAM Boot-Start driver initialization policy set to 'Good, unknown and bad but critical' (Value = 3)." -ForegroundColor Green
 ```
 
-*To audit the ELAM driver load policy status:*
+---
+
+<div id="08-endpoints-configure-elam-md-auditing-verification"></div>
+
+## Auditing & Verification
+
+<div id="08-endpoints-configure-elam-md-powershell-audit-script"></div>
+
+### PowerShell Audit Script
+
+Run the following script to audit the ELAM driver load policy status.
 
 [Download Script: Get-ElamPolicyStatus.ps1](audit_scripts/Get-ElamPolicyStatus.ps1)
 
@@ -86074,11 +86463,27 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-configure-elam-md-auditing-detection-telemetry"></div>
+
+## Auditing, Detection & Telemetry
+ELAM operational events and driver initialization classifications are logged by the kernel and Windows Defender:
+* **Log Name**: `Microsoft-Windows-EarlyLaunchAM/Operational`
+* **Event ID 1**: Driver initialized (Classified as Good).
+* **Event ID 2**: Driver blocked (Classified as Bad / Malicious).
+* **Event ID 3**: Driver initialized (Classified as Unknown).
+* **Event ID 4**: Driver initialized (Classified as Bad, but required for boot).
+* **Windows Defender Antivirus Log**: `Microsoft-Windows-Windows Defender/Operational` -> **Event ID 2000**: Early launch antimalware driver signature loaded or signature update applied.
+
+---
+
 <div id="08-endpoints-configure-elam-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section 18.2.2 (System Options / ELAM)
-* **ANSSI AD Hardening Guide**: Section addressing system and boot configuration integrity.
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark - Section `18.2.2 Ensure 'Boot-Start Driver Initialization Policy' is set to 'Enabled: Good, unknown and bad but critical'`
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark - Section `18.2.2 Ensure 'Boot-Start Driver Initialization Policy' is set to 'Enabled: Good, unknown and bad but critical'`
+* **DoD Windows 10/11 STIG**: Rule `V-220743` (Early Launch Antimalware Boot-Start Driver Initialization Policy)
+* **DoD Windows Server STIG**: Rule `V-205739` (Early Launch Antimalware Boot-Start Driver Initialization Policy)
+* **ANSSI AD Hardening Guide**: Operational baseline rules for system boot and driver signature verification.
 
 
 <div style="page-break-before: always;"></div>

@@ -1,13 +1,13 @@
-# Get-ElamPolicyStatus.ps1
-# Description: Audits registry configuration of the Early Launch Antimalware (ELAM) policy on PAWs.
+# Get-DcElamPolicyStatus.ps1
+# Description: Audits registry configuration of the Early Launch Antimalware (ELAM) policy on Domain Controllers.
 
-Write-Host "--- Auditing ELAM Boot-Start Policy on PAW ---" -ForegroundColor Cyan
+Write-Host "--- Auditing ELAM Boot-Start Policy on Domain Controller ---" -ForegroundColor Cyan
 
 $script:Vulnerable = $false
 
 $Path = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
 $Name = "DriverLoadPolicy"
-$Expected = 1
+$Expected = 3
 
 if (Test-Path $Path) {
     $Reg = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
