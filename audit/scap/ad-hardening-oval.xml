@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-09-08T13:15:35Z</oval:timestamp>
+    <oval:timestamp>2026-09-08T13:19:06Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -3023,6 +3023,47 @@ On Tier 0 Domain Controllers:
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\DeviceGuard Value RequirePlatformSecurityFeatures" test_ref="oval:org.adhardening:tst:2157004" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:2158" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-158] Harden DMA and Physical Security for Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Domain Controllers represent Tier 0 identity stores hosting the directory database (`NTDS.dit`), Kerberos Ticket Granting Service keys (`krbtgt`), and password hashes for all enterprise principals. While enterprise servers reside in datacenters or branch office wiring closets, physical access threats remain a critical attack vector:
+
+1. **Direct Memory Access (DMA) Threat Vectors**: Hot-plug expansion ports and external peripheral interfaces (such as PCIe hot-plug slots, Thunderbolt, USB4, or external storage expansion cards) permit connected hardware to bypass operating system access controls and perform direct read/write operations against physical DRAM. Attackers utilizing physical DMA consoles (e.g., PCILeech or malicious PCIe expansion cards inserted into physical server chassis) can dump LSASS memory and extract volatile Kerberos keys:
+   * **Device Setup Class Lockdown**: Disabling the SBP-2 protocol class (`{d48179be-ec20-11d1-b6b8-00c04fa372a7}`) and IEEE 1394 host controller class (`{6bdd1fc1-810f-11d0-bec7-08002be2092f}`) prevents Windows Server from mounting legacy FireWire storage devices.
+   * **Hardware ID Blocking**: Explicitly blocking hardware IDs `PCI\CC_0C0A` (Thunderbolt), `PCI\CC_0C0010` (FireWire), `PCI\CC_0607` (CardBus), and `PCI\CC_0605` (PCMCIA) prevents the installation of unapproved expansion controllers at the hardware bus layer.
+   * **BitLocker DMA Under Lock**: Enforcing `DisableExternalDMAUnderLock` blocks DMA device enumeration when the server console is locked, mitigating drive-by hardware attacks on unattended consoles.
+   * **Kernel DMA Protection Enforcement**: Enforcing `DeviceEnumerationPolicy = 0` (Block all) guarantees that any peripheral device whose drivers do not explicitly support IOMMU DMA remapping is strictly blocked from executing DMA memory transfers.
+2. **Cold Boot &amp; Standby Attacks**: In standard standby sleep states (S1-S3), system RAM remains powered and unencrypted. If an attacker gains physical access to a server in a standby state, they can execute cold-boot extraction or memory analysis to harvest sensitive directory keys. Domain Controllers must operate continuously in full runtime execution states. Disabling standby sleep states forces servers to remain fully operational or enter clean shutdown, ensuring BitLocker encryption keys are sealed by the TPM 2.0 module. Enforcing wake password verification guarantees that any power-state transition requires re-authentication.
+3. **Physical USB Exfiltration of Directory Databases**: Rogue insiders or unauthorized datacenter personnel with physical console access can insert USB flash drives to exfiltrate `ntds.dit`, Active Directory backups, or system state data. Enforcing `RDVDenyWriteAccess = 1` prevents writing to removable drives unless protected by BitLocker, while `RDVDenyCrossOrg = 0` eliminates unauthorized cross-organization exceptions.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab Value ACSettingIndex" test_ref="oval:org.adhardening:tst:2158001" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab Value DCSettingIndex" test_ref="oval:org.adhardening:tst:2158002" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51 Value ACSettingIndex" test_ref="oval:org.adhardening:tst:2158003" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51 Value DCSettingIndex" test_ref="oval:org.adhardening:tst:2158004" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value DisableExternalDMAUnderLock" test_ref="oval:org.adhardening:tst:2158005" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value RDVDenyCrossOrg" test_ref="oval:org.adhardening:tst:2158006" />
+        <criterion comment="Check Registry Key System\CurrentControlSet\Policies\Microsoft\FVE Value RDVDenyWriteAccess" test_ref="oval:org.adhardening:tst:2158007" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClasses" test_ref="oval:org.adhardening:tst:2158008" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClassesRetroactive" test_ref="oval:org.adhardening:tst:2158009" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDs" test_ref="oval:org.adhardening:tst:2158010" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDsRetroactive" test_ref="oval:org.adhardening:tst:2158011" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 1" test_ref="oval:org.adhardening:tst:2158012" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 2" test_ref="oval:org.adhardening:tst:2158013" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 1" test_ref="oval:org.adhardening:tst:2158014" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 2" test_ref="oval:org.adhardening:tst:2158015" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 3" test_ref="oval:org.adhardening:tst:2158016" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 4" test_ref="oval:org.adhardening:tst:2158017" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" test_ref="oval:org.adhardening:tst:2158018" />
+      </criteria>
+    </definition>
     <definition id="oval:org.adhardening:def:8001" version="1" class="compliance">
       <metadata>
         <title>[REQ-END-001] Harden Network Parameters and Disable Legacy Name Resolution</title>
@@ -3432,27 +3473,30 @@ Disabling WPBT execution prevents Windows from parsing the ACPI table and runnin
         </affected>
         <description>Physical access to an endpoint introduces distinct attack vectors that bypass traditional OS privilege separation:
 
-1. **Direct Memory Access (DMA) Attacks**: Hot-plug buses (like FireWire, Thunderbolt, and USB4) permit devices to read and write directly to system memory without operating system mediation. Attackers connect specialized hardware (e.g., PCILeech) to hot-plug ports to extract BitLocker encryption keys or session tokens directly from RAM.
+1. **Direct Memory Access (DMA) Attacks**: Hot-plug buses (such as FireWire, Thunderbolt, and USB4) permit connected peripherals to read and write directly to system memory without operating system mediation. Attackers connect specialized hardware (e.g., PCILeech) to exposed external ports to extract BitLocker encryption keys, NTLM hashes, or active session tokens directly from RAM:
    * Disabling the Serial Bus Protocol 2 (SBP-2) setup class (`{d48179be-ec20-11d1-b6b8-00c04fa372a7}`) blocks FireWire/IEEE 1394 DMA controllers.
-   * Enforcing `DisableExternalDMAUnderLock` prevents DMA requests when the screen is locked.
-   * `DeviceEnumerationPolicy` restricts external DMA execution (set to Block all).
-2. **Cold Boot Attacks**: When a system enters standby sleep states (S1-S3), the system RAM remains powered. If a laptop is stolen while in standby, an attacker can quickly reboot the machine or cool the RAM chips to dump their contents, extracting credentials or disk encryption keys. Disabling standby forces the system to either remain fully active or enter Hibernation (S4)/Shutdown, where memory contents are encrypted on disk or cleared.
-3. **USB Data Exfiltration**: Blocking write access to removable drives unless they are encrypted with BitLocker (`RDVDenyWriteAccess`) prevents users or malicious agents from copying confidential data to unauthorized USB media.</description>
+   * Blocking hardware device IDs `PCI\CC_0C0A` (Thunderbolt) and `PCI\CC_0C0010` (1394 OHCI FireWire) halts driver initialization for dangerous hot-plug controllers. *(Note: On Tier 0 PAWs, additional legacy controller setup classes and CardBus/PCMCIA bridges are blocked under [REQ-PAW-011](../07-paws/harden-dma-and-physical-security.md)).*
+   * Enforcing `DisableExternalDMAUnderLock` prevents DMA requests while the workstation screen is locked.
+   * `DeviceEnumerationPolicy` set to **Block all** (0) ensures devices lacking DMA-remapping isolation support cannot execute unauthorized memory access transfers.
+2. **Cold Boot Attacks &amp; Sleep Vulnerabilities**: When an endpoint enters standby sleep states (S1-S3), system RAM remains powered and active. If an unattended laptop or desktop is stolen while in standby, an attacker can quickly reboot the machine or chill the DRAM chips to dump memory contents and retrieve BitLocker keys. Disabling standby forces systems to transition to Hibernation (S4)/Shutdown, where RAM contents are flushed to the BitLocker-encrypted disk and sealed by the TPM. Enforcing a password upon wake prevents unauthorized physical resumption.
+3. **USB Data Exfiltration**: Blocking write access to removable drives unless they are encrypted with BitLocker (`RDVDenyWriteAccess`) prevents users or malicious agents from copying confidential organizational data to unauthorized, unencrypted USB media. Setting `RDVDenyCrossOrg = 0` enforces organization-wide BitLocker compliance.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab Value ACSettingIndex" test_ref="oval:org.adhardening:tst:8017001" />
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab Value DCSettingIndex" test_ref="oval:org.adhardening:tst:8017002" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value DisableExternalDMAUnderLock" test_ref="oval:org.adhardening:tst:8017003" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value RDVDenyCrossOrg" test_ref="oval:org.adhardening:tst:8017004" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Policies\Microsoft\FVE Value RDVDenyWriteAccess" test_ref="oval:org.adhardening:tst:8017005" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClasses" test_ref="oval:org.adhardening:tst:8017006" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClassesRetroactive" test_ref="oval:org.adhardening:tst:8017007" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDs" test_ref="oval:org.adhardening:tst:8017008" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDsRetroactive" test_ref="oval:org.adhardening:tst:8017009" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 1" test_ref="oval:org.adhardening:tst:8017010" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 1" test_ref="oval:org.adhardening:tst:8017011" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 2" test_ref="oval:org.adhardening:tst:8017012" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" test_ref="oval:org.adhardening:tst:8017013" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51 Value ACSettingIndex" test_ref="oval:org.adhardening:tst:8017003" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51 Value DCSettingIndex" test_ref="oval:org.adhardening:tst:8017004" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value DisableExternalDMAUnderLock" test_ref="oval:org.adhardening:tst:8017005" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value RDVDenyCrossOrg" test_ref="oval:org.adhardening:tst:8017006" />
+        <criterion comment="Check Registry Key System\CurrentControlSet\Policies\Microsoft\FVE Value RDVDenyWriteAccess" test_ref="oval:org.adhardening:tst:8017007" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClasses" test_ref="oval:org.adhardening:tst:8017008" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClassesRetroactive" test_ref="oval:org.adhardening:tst:8017009" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDs" test_ref="oval:org.adhardening:tst:8017010" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDsRetroactive" test_ref="oval:org.adhardening:tst:8017011" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 1" test_ref="oval:org.adhardening:tst:8017012" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 1" test_ref="oval:org.adhardening:tst:8017013" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 2" test_ref="oval:org.adhardening:tst:8017014" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" test_ref="oval:org.adhardening:tst:8017015" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8020" version="1" class="compliance">
@@ -7657,23 +7701,33 @@ Disabling WPBT execution prevents Windows from parsing the ACPI table and runnin
         </affected>
         <description>Privileged Access Workstations (PAWs) represent Tier 0 boundary systems. Because they handle the highest levels of domain authorization, physical threat vectors must be mitigated to the absolute maximum threshold:
 
-1. **Direct Memory Access (DMA) Defenses**: External interfaces (e.g. Thunderbolt, USB4, PCIe ExpressCard) allow attached devices to bypass the OS and read physical RAM contents directly. Attackers use physical DMA-hacking consoles to dump memory-resident Kerberos keys and NTLM credentials.
-   * Disabling the SBP-2 setup class (`{d48179be-ec20-11d1-b6b8-00c04fa372a7}`) blocks FireWire/IEEE 1394 DMA controllers.
-   * `DisableExternalDMAUnderLock` prevents DMA access when the workstation is locked.
-   * **Stricter Enumeration Policy on PAWs**: Standard workstations permit external DMA after a user logs on (value 1). On PAWs, this must be set to **Block all** (value 0). External DMA-capable expansion cards or devices are permanently blocked from memory access.
-2. **Cold Boot Exploits**: RAM retention properties mean memory remains readable for seconds or minutes after power loss, especially if cooled. If a PAW enters standby states (S1-S3), the RAM remains powered. If stolen in standby, an attacker can extract cryptographic keys. Disabling standby forces the system to either shut down completely or hibernate, locking the BitLocker keys inside the TPM.
-3. **USB Exfiltration Protection**: Restricting write access on removable drives (`RDVDenyWriteAccess`) prevents the data exfiltration of administrative materials or directory backups to local USB flash drives.</description>
+1. **Direct Memory Access (DMA) Defenses**: External interfaces (e.g., Thunderbolt, USB4, PCIe ExpressCard, FireWire) allow attached devices to bypass the OS kernel and read physical RAM contents directly via high-speed buses. Attackers use physical DMA exploitation devices (such as PCILeech) to dump memory-resident Kerberos TGT tickets, NTLM hashes, and LSA secrets:
+   * **Device Setup Class Blocking**: Disabling the SBP-2 setup class (`{d48179be-ec20-11d1-b6b8-00c04fa372a7}`) and the IEEE 1394 host controller class (`{6bdd1fc1-810f-11d0-bec7-08002be2092f}`) prevents Windows from binding drivers to FireWire storage and controllers.
+   * **Hardware ID Blocking**: Explicitly blocking hardware IDs `PCI\CC_0C0A` (Thunderbolt), `PCI\CC_0C0010` (1394 OHCI FireWire), `PCI\CC_0607` (CardBus), and `PCI\CC_0605` (PCMCIA) halts driver installation for unauthorized high-speed expansion buses at the PCI enumeration layer.
+   * **BitLocker DMA Under Lock**: Enforcing `DisableExternalDMAUnderLock` blocks DMA device operations whenever the PAW workstation is locked, closing the physical window for drive-by attacks on unattended stations.
+   * **Tightened Enumeration Policy on PAWs**: While standard enterprise endpoints might permit external DMA after user authentication, PAWs enforce a strict **Block all** policy (`DeviceEnumerationPolicy = 0`). External peripherals whose drivers do not natively support DMA-remapping isolation are permanently prevented from accessing system memory.
+2. **Cold Boot Exploits &amp; RAM Decay**: Dynamic RAM retains memory contents for seconds or minutes following power loss, especially when cooled with aerosol duster or liquid nitrogen. In standard standby states (S1-S3), the RAM chips remain continuously powered and active. If a PAW is stolen or accessed while in standby, BitLocker master keys and volatile credentials can be read directly from memory. Disabling standby states forces the system to either remain active or transition to Hibernation (S4)/Shutdown, where RAM contents are encrypted on the BitLocker volume and protected by the TPM 2.0 PCR baseline. Enforcing a password on resume guarantees re-authentication upon wake.
+3. **USB Exfiltration Protection**: Restricting write access on removable drives (`RDVDenyWriteAccess`) ensures administrative materials, directory backups, or sensitive credentials cannot be copied to unencrypted USB media. Setting `RDVDenyCrossOrg = 0` prevents cross-organization removable storage exemptions.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab Value ACSettingIndex" test_ref="oval:org.adhardening:tst:7011001" />
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab Value DCSettingIndex" test_ref="oval:org.adhardening:tst:7011002" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value DisableExternalDMAUnderLock" test_ref="oval:org.adhardening:tst:7011003" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value RDVDenyCrossOrg" test_ref="oval:org.adhardening:tst:7011004" />
-        <criterion comment="Check Registry Key System\CurrentControlSet\Policies\Microsoft\FVE Value RDVDenyWriteAccess" test_ref="oval:org.adhardening:tst:7011005" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClasses" test_ref="oval:org.adhardening:tst:7011006" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClassesRetroactive" test_ref="oval:org.adhardening:tst:7011007" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 1" test_ref="oval:org.adhardening:tst:7011008" />
-        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" test_ref="oval:org.adhardening:tst:7011009" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51 Value ACSettingIndex" test_ref="oval:org.adhardening:tst:7011003" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51 Value DCSettingIndex" test_ref="oval:org.adhardening:tst:7011004" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value DisableExternalDMAUnderLock" test_ref="oval:org.adhardening:tst:7011005" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value RDVDenyCrossOrg" test_ref="oval:org.adhardening:tst:7011006" />
+        <criterion comment="Check Registry Key System\CurrentControlSet\Policies\Microsoft\FVE Value RDVDenyWriteAccess" test_ref="oval:org.adhardening:tst:7011007" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClasses" test_ref="oval:org.adhardening:tst:7011008" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClassesRetroactive" test_ref="oval:org.adhardening:tst:7011009" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDs" test_ref="oval:org.adhardening:tst:7011010" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDsRetroactive" test_ref="oval:org.adhardening:tst:7011011" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 1" test_ref="oval:org.adhardening:tst:7011012" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 2" test_ref="oval:org.adhardening:tst:7011013" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 1" test_ref="oval:org.adhardening:tst:7011014" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 2" test_ref="oval:org.adhardening:tst:7011015" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 3" test_ref="oval:org.adhardening:tst:7011016" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 4" test_ref="oval:org.adhardening:tst:7011017" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" test_ref="oval:org.adhardening:tst:7011018" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7012" version="1" class="compliance">
@@ -11498,6 +11552,78 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:2157004" />
       <windows:state state_ref="oval:org.adhardening:ste:2157004" />
     </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab Value ACSettingIndex" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab Value DCSettingIndex" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158002" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51 Value ACSettingIndex" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158003" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158004" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51 Value DCSettingIndex" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158004" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158005" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value DisableExternalDMAUnderLock" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158005" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158005" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158006" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value RDVDenyCrossOrg" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158006" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158006" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158007" version="1" comment="Check Registry Key System\CurrentControlSet\Policies\Microsoft\FVE Value RDVDenyWriteAccess" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158007" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158007" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158008" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClasses" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158008" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158008" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158009" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClassesRetroactive" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158009" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158009" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158010" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDs" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158010" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158010" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158011" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDsRetroactive" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158011" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158011" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158012" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 1" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158012" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158012" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158013" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 2" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158013" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158013" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158014" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 1" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158014" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158014" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158015" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 2" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158015" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158015" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158016" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 3" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158016" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158016" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158017" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 4" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158017" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158017" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2158018" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2158018" />
+      <windows:state state_ref="oval:org.adhardening:ste:2158018" />
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8001001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001001" />
       <windows:state state_ref="oval:org.adhardening:ste:8001001" />
@@ -11930,49 +12056,57 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:8017002" />
       <windows:state state_ref="oval:org.adhardening:ste:8017002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8017003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value DisableExternalDMAUnderLock" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8017003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51 Value ACSettingIndex" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8017003" />
       <windows:state state_ref="oval:org.adhardening:ste:8017003" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8017004" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value RDVDenyCrossOrg" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8017004" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51 Value DCSettingIndex" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8017004" />
       <windows:state state_ref="oval:org.adhardening:ste:8017004" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8017005" version="1" comment="Check Registry Key System\CurrentControlSet\Policies\Microsoft\FVE Value RDVDenyWriteAccess" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8017005" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value DisableExternalDMAUnderLock" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8017005" />
       <windows:state state_ref="oval:org.adhardening:ste:8017005" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8017006" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClasses" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8017006" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value RDVDenyCrossOrg" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8017006" />
       <windows:state state_ref="oval:org.adhardening:ste:8017006" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8017007" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClassesRetroactive" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8017007" version="1" comment="Check Registry Key System\CurrentControlSet\Policies\Microsoft\FVE Value RDVDenyWriteAccess" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8017007" />
       <windows:state state_ref="oval:org.adhardening:ste:8017007" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8017008" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDs" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8017008" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClasses" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8017008" />
       <windows:state state_ref="oval:org.adhardening:ste:8017008" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8017009" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDsRetroactive" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8017009" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClassesRetroactive" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8017009" />
       <windows:state state_ref="oval:org.adhardening:ste:8017009" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8017010" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 1" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8017010" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDs" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8017010" />
       <windows:state state_ref="oval:org.adhardening:ste:8017010" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8017011" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 1" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8017011" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDsRetroactive" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8017011" />
       <windows:state state_ref="oval:org.adhardening:ste:8017011" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8017012" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 2" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8017012" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 1" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8017012" />
       <windows:state state_ref="oval:org.adhardening:ste:8017012" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8017013" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8017013" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 1" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8017013" />
       <windows:state state_ref="oval:org.adhardening:ste:8017013" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8017014" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 2" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8017014" />
+      <windows:state state_ref="oval:org.adhardening:ste:8017014" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8017015" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8017015" />
+      <windows:state state_ref="oval:org.adhardening:ste:8017015" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8020001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection Value ExploitProtectionSettings" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8020001" />
@@ -13617,33 +13751,69 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:7011002" />
       <windows:state state_ref="oval:org.adhardening:ste:7011002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7011003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value DisableExternalDMAUnderLock" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7011003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51 Value ACSettingIndex" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7011003" />
       <windows:state state_ref="oval:org.adhardening:ste:7011003" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7011004" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value RDVDenyCrossOrg" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7011004" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51 Value DCSettingIndex" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7011004" />
       <windows:state state_ref="oval:org.adhardening:ste:7011004" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7011005" version="1" comment="Check Registry Key System\CurrentControlSet\Policies\Microsoft\FVE Value RDVDenyWriteAccess" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7011005" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value DisableExternalDMAUnderLock" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7011005" />
       <windows:state state_ref="oval:org.adhardening:ste:7011005" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7011006" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClasses" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7011006" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\FVE Value RDVDenyCrossOrg" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7011006" />
       <windows:state state_ref="oval:org.adhardening:ste:7011006" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7011007" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClassesRetroactive" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7011007" version="1" comment="Check Registry Key System\CurrentControlSet\Policies\Microsoft\FVE Value RDVDenyWriteAccess" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7011007" />
       <windows:state state_ref="oval:org.adhardening:ste:7011007" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7011008" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 1" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7011008" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClasses" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7011008" />
       <windows:state state_ref="oval:org.adhardening:ste:7011008" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7011009" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7011009" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceClassesRetroactive" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7011009" />
       <windows:state state_ref="oval:org.adhardening:ste:7011009" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7011010" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDs" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7011010" />
+      <windows:state state_ref="oval:org.adhardening:ste:7011010" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7011011" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions Value DenyDeviceIDsRetroactive" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7011011" />
+      <windows:state state_ref="oval:org.adhardening:ste:7011011" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7011012" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 1" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7011012" />
+      <windows:state state_ref="oval:org.adhardening:ste:7011012" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7011013" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses Value 2" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7011013" />
+      <windows:state state_ref="oval:org.adhardening:ste:7011013" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7011014" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 1" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7011014" />
+      <windows:state state_ref="oval:org.adhardening:ste:7011014" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7011015" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 2" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7011015" />
+      <windows:state state_ref="oval:org.adhardening:ste:7011015" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7011016" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 3" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7011016" />
+      <windows:state state_ref="oval:org.adhardening:ste:7011016" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7011017" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs Value 4" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7011017" />
+      <windows:state state_ref="oval:org.adhardening:ste:7011017" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7011018" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection Value DeviceEnumerationPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7011018" />
+      <windows:state state_ref="oval:org.adhardening:ste:7011018" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7012001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\CI\Config Value VulnerableDriverBlocklistEnable" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7012001" />
@@ -16278,6 +16448,114 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:key>SYSTEM\CurrentControlSet\Control\DeviceGuard</windows:key>
       <windows:name>RequirePlatformSecurityFeatures</windows:name>
     </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab</windows:key>
+      <windows:name>ACSettingIndex</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab</windows:key>
+      <windows:name>DCSettingIndex</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51</windows:key>
+      <windows:name>ACSettingIndex</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51</windows:key>
+      <windows:name>DCSettingIndex</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158005" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\FVE</windows:key>
+      <windows:name>DisableExternalDMAUnderLock</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158006" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\FVE</windows:key>
+      <windows:name>RDVDenyCrossOrg</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158007" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>System\CurrentControlSet\Policies\Microsoft\FVE</windows:key>
+      <windows:name>RDVDenyWriteAccess</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158008" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions</windows:key>
+      <windows:name>DenyDeviceClasses</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158009" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions</windows:key>
+      <windows:name>DenyDeviceClassesRetroactive</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158010" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions</windows:key>
+      <windows:name>DenyDeviceIDs</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158011" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions</windows:key>
+      <windows:name>DenyDeviceIDsRetroactive</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158012" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses</windows:key>
+      <windows:name>1</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158013" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses</windows:key>
+      <windows:name>2</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158014" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs</windows:key>
+      <windows:name>1</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158015" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs</windows:key>
+      <windows:name>2</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158016" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs</windows:key>
+      <windows:name>3</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158017" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs</windows:key>
+      <windows:name>4</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2158018" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection</windows:key>
+      <windows:name>DeviceEnumerationPolicy</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8001001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -16935,64 +17213,76 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     <windows:registry_object id="oval:org.adhardening:obj:8017003" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51</windows:key>
+      <windows:name>ACSettingIndex</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8017004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51</windows:key>
+      <windows:name>DCSettingIndex</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8017005" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\FVE</windows:key>
       <windows:name>DisableExternalDMAUnderLock</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8017004" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8017006" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\FVE</windows:key>
       <windows:name>RDVDenyCrossOrg</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8017005" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8017007" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>System\CurrentControlSet\Policies\Microsoft\FVE</windows:key>
       <windows:name>RDVDenyWriteAccess</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8017006" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8017008" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions</windows:key>
       <windows:name>DenyDeviceClasses</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8017007" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8017009" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions</windows:key>
       <windows:name>DenyDeviceClassesRetroactive</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8017008" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8017010" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions</windows:key>
       <windows:name>DenyDeviceIDs</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8017009" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8017011" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions</windows:key>
       <windows:name>DenyDeviceIDsRetroactive</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8017010" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8017012" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses</windows:key>
       <windows:name>1</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8017011" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8017013" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs</windows:key>
       <windows:name>1</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8017012" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8017014" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs</windows:key>
       <windows:name>2</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8017013" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8017015" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection</windows:key>
@@ -19311,40 +19601,94 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     <windows:registry_object id="oval:org.adhardening:obj:7011003" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51</windows:key>
+      <windows:name>ACSettingIndex</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7011004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51</windows:key>
+      <windows:name>DCSettingIndex</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7011005" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\FVE</windows:key>
       <windows:name>DisableExternalDMAUnderLock</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7011004" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7011006" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\FVE</windows:key>
       <windows:name>RDVDenyCrossOrg</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7011005" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7011007" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>System\CurrentControlSet\Policies\Microsoft\FVE</windows:key>
       <windows:name>RDVDenyWriteAccess</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7011006" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7011008" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions</windows:key>
       <windows:name>DenyDeviceClasses</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7011007" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7011009" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions</windows:key>
       <windows:name>DenyDeviceClassesRetroactive</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7011008" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7011010" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions</windows:key>
+      <windows:name>DenyDeviceIDs</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7011011" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions</windows:key>
+      <windows:name>DenyDeviceIDsRetroactive</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7011012" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses</windows:key>
       <windows:name>1</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7011009" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7011013" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses</windows:key>
+      <windows:name>2</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7011014" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs</windows:key>
+      <windows:name>1</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7011015" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs</windows:key>
+      <windows:name>2</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7011016" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs</windows:key>
+      <windows:name>3</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7011017" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs</windows:key>
+      <windows:name>4</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7011018" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection</windows:key>
@@ -22051,6 +22395,78 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158005" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158006" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158007" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158008" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158009" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158010" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158011" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158012" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">{d48179be-ec20-11d1-b6b8-00c04fa372a7}</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158013" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">{6bdd1fc1-810f-11d0-bec7-08002be2092f}</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158014" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">PCI\CC_0C0A</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158015" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">PCI\CC_0C0010</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158016" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">PCI\CC_0607</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158017" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">PCI\CC_0605</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2158018" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -22477,7 +22893,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8017004" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8017005" version="1">
       <windows:type>reg_dword</windows:type>
@@ -22485,7 +22901,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8017006" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8017007" version="1">
       <windows:type>reg_dword</windows:type>
@@ -22500,18 +22916,26 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8017010" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string">{d48179be-ec20-11d1-b6b8-00c04fa372a7}</windows:value>
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8017011" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string">PCI\CC_0C0A</windows:value>
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8017012" version="1">
       <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string">PCI\CC_0C0010</windows:value>
+      <windows:value datatype="string">{d48179be-ec20-11d1-b6b8-00c04fa372a7}</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8017013" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">PCI\CC_0C0A</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8017014" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">PCI\CC_0C0010</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8017015" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
@@ -24125,7 +24549,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7011004" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">0</windows:value>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7011005" version="1">
       <windows:type>reg_dword</windows:type>
@@ -24133,17 +24557,53 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7011006" version="1">
       <windows:type>reg_dword</windows:type>
-      <windows:value datatype="int">1</windows:value>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7011007" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7011008" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7011009" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7011010" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7011011" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7011012" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string">{d48179be-ec20-11d1-b6b8-00c04fa372a7}</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7011009" version="1">
+    <windows:registry_state id="oval:org.adhardening:ste:7011013" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">{6bdd1fc1-810f-11d0-bec7-08002be2092f}</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7011014" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">PCI\CC_0C0A</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7011015" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">PCI\CC_0C0010</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7011016" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">PCI\CC_0607</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7011017" version="1">
+      <windows:type>reg_sz</windows:type>
+      <windows:value datatype="string">PCI\CC_0605</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7011018" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>

@@ -206,6 +206,7 @@ Configuration ADHardeningAudit {
             "02-domain-controllers\audit_scripts\Get-WpnUserServiceStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-XblAuthManagerStatus.ps1",
             "02-domain-controllers\audit_scripts\Get-XblGameSaveStatus.ps1",
+            "02-domain-controllers\audit_scripts\Test-DcDMAPhysicalSecurity.ps1",
             "02-domain-controllers\audit_scripts\Test-DCWDACStatus.ps1",
             "03-identities-services\audit_scripts\Audit-KerberosPreAuth.ps1",
             "03-identities-services\audit_scripts\Audit-MachineAccountQuota.ps1",

@@ -1,5 +1,5 @@
 # Set-DMAPhysicalSecurity.ps1
-# Description: Hardens local registry keys to mitigate DMA attacks, disable standby sleep states, and restrict unencrypted USB writing.
+# Description: Hardens local registry keys to mitigate DMA attacks, disable standby sleep states, enforce wake password, and restrict unencrypted USB writing.
 
 Write-Host "Applying DMA and physical security hardening..." -ForegroundColor Cyan
 
@@ -36,7 +36,7 @@ if (-not (Test-Path $FvePolicyPath)) {
 Set-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -Value 1 -Type DWord
 Write-Host "[+] BitLocker DMA under lock and unencrypted USB write blocks configured." -ForegroundColor Green
 
-# 4. Device Installation Restrictions (Block SBP-2 class and PCI\CC_0C0A device ID)
+# 4. Device Installation Restrictions (Block SBP-2 class and PCI device IDs)
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 if (-not (Test-Path $RestrictPath)) {
     New-Item -Path $RestrictPath -Force | Out-Null

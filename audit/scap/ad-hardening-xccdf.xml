@@ -171,6 +171,7 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-155" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-156" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-157" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-158" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-001" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-003" selected="true" />
@@ -8736,6 +8737,394 @@ if ($ComputerSystem.Model -match "Virtual Machine|VMware|KVM|Hyper-V") {
 Write-Host "`n[+] Remediation script completed." -ForegroundColor Green</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2157" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-158" severity="high" weight="10.0" selected="false">
+      <title>[REQ-DC-158] Harden DMA and Physical Security for Domain Controllers</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers (both physical bare-metal enterprise servers and hypervisor-hosted virtual machines). <xhtml:em>(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-011](../07-paws/harden-dma-and-physical-security.md); for Tier 2 Client Workstations and Member Servers, refer to [REQ-END-017](../08-endpoints/harden-dma-and-physical-security.md)).</xhtml:em>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025.</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>02-domain-controllers/harden-dma-and-physical-security.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Domain Controllers represent Tier 0 identity stores hosting the directory database (<xhtml:code>NTDS.dit</xhtml:code>), Kerberos Ticket Granting Service keys (<xhtml:code>krbtgt</xhtml:code>), and password hashes for all enterprise principals. While enterprise servers reside in datacenters or branch office wiring closets, physical access threats remain a critical attack vector:</xhtml:p>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>Direct Memory Access (DMA) Threat Vectors</xhtml:strong>: Hot-plug expansion ports and external peripheral interfaces (such as PCIe hot-plug slots, Thunderbolt, USB4, or external storage expansion cards) permit connected hardware to bypass operating system access controls and perform direct read/write operations against physical DRAM. Attackers utilizing physical DMA consoles (e.g., PCILeech or malicious PCIe expansion cards inserted into physical server chassis) can dump LSASS memory and extract volatile Kerberos keys:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Device Setup Class Lockdown</xhtml:em>*: Disabling the SBP-2 protocol class (<xhtml:code>{d48179be-ec20-11d1-b6b8-00c04fa372a7}</xhtml:code>) and IEEE 1394 host controller class (<xhtml:code>{6bdd1fc1-810f-11d0-bec7-08002be2092f}</xhtml:code>) prevents Windows Server from mounting legacy FireWire storage devices.</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hardware ID Blocking</xhtml:em>*: Explicitly blocking hardware IDs <xhtml:code>PCI\CC_0C0A</xhtml:code> (Thunderbolt), <xhtml:code>PCI\CC_0C0010</xhtml:code> (FireWire), <xhtml:code>PCI\CC_0607</xhtml:code> (CardBus), and <xhtml:code>PCI\CC_0605</xhtml:code> (PCMCIA) prevents the installation of unapproved expansion controllers at the hardware bus layer.</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>BitLocker DMA Under Lock</xhtml:em>*: Enforcing <xhtml:code>DisableExternalDMAUnderLock</xhtml:code> blocks DMA device enumeration when the server console is locked, mitigating drive-by hardware attacks on unattended consoles.</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Kernel DMA Protection Enforcement</xhtml:em>*: Enforcing <xhtml:code>DeviceEnumerationPolicy = 0</xhtml:code> (Block all) guarantees that any peripheral device whose drivers do not explicitly support IOMMU DMA remapping is strictly blocked from executing DMA memory transfers.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Cold Boot &amp; Standby Attacks</xhtml:strong>: In standard standby sleep states (S1-S3), system RAM remains powered and unencrypted. If an attacker gains physical access to a server in a standby state, they can execute cold-boot extraction or memory analysis to harvest sensitive directory keys. Domain Controllers must operate continuously in full runtime execution states. Disabling standby sleep states forces servers to remain fully operational or enter clean shutdown, ensuring BitLocker encryption keys are sealed by the TPM 2.0 module. Enforcing wake password verification guarantees that any power-state transition requires re-authentication.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Physical USB Exfiltration of Directory Databases</xhtml:strong>: Rogue insiders or unauthorized datacenter personnel with physical console access can insert USB flash drives to exfiltrate <xhtml:code>ntds.dit</xhtml:code>, Active Directory backups, or system state data. Enforcing <xhtml:code>RDVDenyWriteAccess = 1</xhtml:code> prevents writing to removable drives unless protected by BitLocker, while <xhtml:code>RDVDenyCrossOrg = 0</xhtml:code> eliminates unauthorized cross-organization exceptions.</xhtml:li>
+        </xhtml:ol>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
+          <xhtml:li>Edit the Domain Controllers GPO (e.g., <xhtml:code>Default Domain Controllers Policy</xhtml:code> or <xhtml:code>GPO_Hardening_DC</xhtml:code>).</xhtml:li>
+          <xhtml:li>Configure the following settings:</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>1. Power Management (Disable Standby &amp; Require Wake Password)</xhtml:h4>
+        <xhtml:p>Navigate to: <xhtml:code>Computer Configuration\Administrative Templates\System\Power Management\Sleep Settings</xhtml:code>
+          <xhtml:em> </xhtml:em>
+          <xhtml:em>Policy</xhtml:em>
+          <xhtml:em>: `Allow standby states (S1-S3) when sleeping (plugged in)` -&gt; </xhtml:em>
+          <xhtml:em>Disabled</xhtml:em>
+          <xhtml:em> </xhtml:em>
+          <xhtml:strong>Policy</xhtml:strong>: <xhtml:code>Allow standby states (S1-S3) when sleeping (on battery)</xhtml:code> -&gt; <xhtml:strong>Disabled</xhtml:strong>
+          <xhtml:em> </xhtml:em>
+          <xhtml:em>Policy</xhtml:em>
+          <xhtml:em>: `Require a password when a computer wakes (plugged in)` -&gt; </xhtml:em>
+          <xhtml:em>Enabled</xhtml:em>
+          <xhtml:em> </xhtml:em>
+          <xhtml:strong>Policy</xhtml:strong>: <xhtml:code>Require a password when a computer wakes (on battery)</xhtml:code> -&gt; <xhtml:strong>Enabled</xhtml:strong>
+        </xhtml:p>
+        <xhtml:h4>2. BitLocker Removable Storage &amp; DMA</xhtml:h4>
+        <xhtml:p>Navigate to: <xhtml:code>Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption</xhtml:code>
+          <xhtml:em> </xhtml:em>
+          <xhtml:em>Policy</xhtml:em>
+          <xhtml:em>: `Disable new DMA devices when this computer is locked` -&gt; </xhtml:em>
+          <xhtml:em>Enabled</xhtml:em>
+          <xhtml:em />
+        </xhtml:p>
+        <xhtml:p>Navigate to: <xhtml:code>Computer Configuration\Administrative Templates\Windows Components\BitLocker Drive Encryption\Removable Data Drives</xhtml:code>
+          <xhtml:em> </xhtml:em>
+          <xhtml:em>Policy</xhtml:em>
+          <xhtml:em>: `Deny write access to removable drives not protected by BitLocker` -&gt; </xhtml:em>
+          <xhtml:em>Enabled</xhtml:em>
+          <xhtml:em> </xhtml:em> Check <xhtml:strong>Do not allow write access to devices configured in another organization</xhtml:strong> -&gt; <xhtml:strong>Disabled</xhtml:strong> (value 0 / False)</xhtml:p>
+        <xhtml:h4>3. Device Installation Restrictions (Block SBP-2, 1394, Thunderbolt, and PCI Bridges)</xhtml:h4>
+        <xhtml:p>Navigate to: <xhtml:code>Computer Configuration\Administrative Templates\System\Device Installation\Device Installation Restrictions</xhtml:code>
+          <xhtml:em> </xhtml:em>
+          <xhtml:em>Policy</xhtml:em>
+          <xhtml:em>: `Prevent installation of devices using drivers that match these device setup classes` -&gt; </xhtml:em>
+          <xhtml:em>Enabled</xhtml:em>
+          <xhtml:em> </xhtml:em> Click <xhtml:strong>Show...</xhtml:strong> and enter: <xhtml:em> `{d48179be-ec20-11d1-b6b8-00c04fa372a7}` </xhtml:em>
+          <xhtml:code>{6bdd1fc1-810f-11d0-bec7-08002be2092f}</xhtml:code>
+          <xhtml:em> Check </xhtml:em>
+          <xhtml:em>Also apply to matching devices that are already installed</xhtml:em>
+          <xhtml:em> -&gt; </xhtml:em>
+          <xhtml:em>Enabled</xhtml:em>
+          <xhtml:em> (value 1 / True) </xhtml:em>
+          <xhtml:strong>Policy</xhtml:strong>: <xhtml:code>Prevent installation of devices that match any of these device IDs</xhtml:code> -&gt; <xhtml:strong>Enabled</xhtml:strong>
+          <xhtml:em> Click </xhtml:em>
+          <xhtml:em>Show...</xhtml:em>
+          <xhtml:em> and enter: </xhtml:em>
+          <xhtml:code>PCI\CC_0C0A</xhtml:code>
+          <xhtml:em> `PCI\CC_0C0010` </xhtml:em>
+          <xhtml:code>PCI\CC_0607</xhtml:code>
+          <xhtml:em> `PCI\CC_0605` </xhtml:em> Check <xhtml:strong>Also apply to matching devices that are already installed</xhtml:strong> -&gt; <xhtml:strong>Enabled</xhtml:strong> (value 1 / True)</xhtml:p>
+        <xhtml:h4>4. Kernel DMA Protection (Block All)</xhtml:h4>
+        <xhtml:p>Navigate to: <xhtml:code>Computer Configuration\Administrative Templates\System\Kernel DMA Protection</xhtml:code>
+          <xhtml:em> </xhtml:em>
+          <xhtml:em>Policy</xhtml:em>
+          <xhtml:em>: `Enable Kernel DMA Protection` -&gt; </xhtml:em>
+          <xhtml:em>Enabled</xhtml:em>
+          <xhtml:em> </xhtml:em>
+          <xhtml:strong>Enumeration policy</xhtml:strong>: Set to <xhtml:strong>Block all</xhtml:strong> (value 0)</xhtml:p>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>Run the following scripts locally on the Domain Controller to apply DMA, Sleep, Device Restriction, and BitLocker USB registry parameters.</xhtml:p>
+        <xhtml:p>
+          <xhtml:a href="implementation_scripts/Configure-DcDMAPhysicalSecurity.ps1">Download Script: Configure-DcDMAPhysicalSecurity.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-DcDMAPhysicalSecurity.ps1
+# Description: Hardens local registry keys on Domain Controllers to mitigate DMA attacks, disable standby sleep states, enforce wake password, restrict device classes/IDs, and block unencrypted USB writing.
+
+Write-Host "Applying Domain Controller DMA and physical security hardening..." -ForegroundColor Cyan
+
+# 1. Disable Standby Sleep States (S1-S3)
+$SleepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab"
+if (-not (Test-Path $SleepPath)) {
+    New-Item -Path $SleepPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SleepPath -Name "ACSettingIndex" -Value 0 -Type DWord
+Set-ItemProperty -Path $SleepPath -Name "DCSettingIndex" -Value 0 -Type DWord
+Write-Host "[+] Standby sleep states (S1-S3) disabled." -ForegroundColor Green
+
+# 2. Configure Wake Password Requirement
+$WakePath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51"
+if (-not (Test-Path $WakePath)) {
+    New-Item -Path $WakePath -Force | Out-Null
+}
+Set-ItemProperty -Path $WakePath -Name "ACSettingIndex" -Value 1 -Type DWord
+Set-ItemProperty -Path $WakePath -Name "DCSettingIndex" -Value 1 -Type DWord
+Write-Host "[+] Wake password requirement enforced." -ForegroundColor Green
+
+# 3. BitLocker DMA and Removable Storage Settings
+$FvePath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
+if (-not (Test-Path $FvePath)) {
+    New-Item -Path $FvePath -Force | Out-Null
+}
+Set-ItemProperty -Path $FvePath -Name "DisableExternalDMAUnderLock" -Value 1 -Type DWord
+Set-ItemProperty -Path $FvePath -Name "RDVDenyCrossOrg" -Value 0 -Type DWord
+
+$FvePolicyPath = "HKLM:\System\CurrentControlSet\Policies\Microsoft\FVE"
+if (-not (Test-Path $FvePolicyPath)) {
+    New-Item -Path $FvePolicyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -Value 1 -Type DWord
+Write-Host "[+] BitLocker DMA under lock and unencrypted USB write blocks configured." -ForegroundColor Green
+
+# 4. Device Installation Restrictions (Classes and Hardware IDs)
+$RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
+if (-not (Test-Path $RestrictPath)) {
+    New-Item -Path $RestrictPath -Force | Out-Null
+}
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceClassesRetroactive" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDs" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDsRetroactive" -Value 1 -Type DWord
+
+$DenyClassPath = Join-Path $RestrictPath "DenyDeviceClasses"
+if (-not (Test-Path $DenyClassPath)) {
+    New-Item -Path $DenyClassPath -Force | Out-Null
+}
+Set-ItemProperty -Path $DenyClassPath -Name "1" -Value "{d48179be-ec20-11d1-b6b8-00c04fa372a7}" -Type String
+Set-ItemProperty -Path $DenyClassPath -Name "2" -Value "{6bdd1fc1-810f-11d0-bec7-08002be2092f}" -Type String
+
+$DenyIdPath = Join-Path $RestrictPath "DenyDeviceIDs"
+if (-not (Test-Path $DenyIdPath)) {
+    New-Item -Path $DenyIdPath -Force | Out-Null
+}
+Set-ItemProperty -Path $DenyIdPath -Name "1" -Value "PCI\CC_0C0A" -Type String
+Set-ItemProperty -Path $DenyIdPath -Name "2" -Value "PCI\CC_0C0010" -Type String
+Set-ItemProperty -Path $DenyIdPath -Name "3" -Value "PCI\CC_0607" -Type String
+Set-ItemProperty -Path $DenyIdPath -Name "4" -Value "PCI\CC_0605" -Type String
+Write-Host "[+] Device installation blocks for SBP-2, 1394 host controllers, Thunderbolt, and PCI bridges enabled." -ForegroundColor Green
+
+# 5. Kernel DMA Protection (Block all external DMA)
+$KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
+if (-not (Test-Path $KDmaPath)) {
+    New-Item -Path $KDmaPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
+Write-Host "[+] Kernel DMA Protection DeviceEnumerationPolicy set to 0 (Block all)." -ForegroundColor Green
+
+Write-Host "Domain Controller DMA and physical security settings applied successfully." -ForegroundColor Green</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To audit local Domain Controller DMA and physical security configuration:</xhtml:em>
+          <xhtml:a href="audit_scripts/Test-DcDMAPhysicalSecurity.ps1">Download Script: Test-DcDMAPhysicalSecurity.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Test-DcDMAPhysicalSecurity.ps1
+# Description: Audits local registry configuration for standby settings, wake password, DMA protection under lock, USB restrictions, and blocked device classes/IDs on Domain Controllers.
+
+Write-Host "--- Auditing Domain Controller DMA and Physical Security ---" -ForegroundColor Cyan
+$isCompliant = $true
+
+# 1. Audit Standby Settings
+$SleepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab"
+$AcSleep = Get-ItemProperty -Path $SleepPath -Name "ACSettingIndex" -ErrorAction SilentlyContinue
+$DcSleep = Get-ItemProperty -Path $SleepPath -Name "DCSettingIndex" -ErrorAction SilentlyContinue
+
+$AcSleepVal = if ($AcSleep) { $AcSleep.ACSettingIndex } else { 1 }
+$DcSleepVal = if ($DcSleep) { $DcSleep.DCSettingIndex } else { 1 }
+
+$AcSleepColor = if ($AcSleepVal -eq 0) { "Green" } else { $isCompliant = $false; "Red" }
+$DcSleepColor = if ($DcSleepVal -eq 0) { "Green" } else { $isCompliant = $false; "Red" }
+
+Write-Host "    - Standby Sleep State (Plugged In) Setting: $($AcSleepVal) (Required = 0 [Disabled])" -ForegroundColor $AcSleepColor
+Write-Host "    - Standby Sleep State (On Battery) Setting: $($DcSleepVal) (Required = 0 [Disabled])" -ForegroundColor $DcSleepColor
+
+# 2. Audit Wake Password Requirement
+$WakePath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51"
+$AcWake = Get-ItemProperty -Path $WakePath -Name "ACSettingIndex" -ErrorAction SilentlyContinue
+$DcWake = Get-ItemProperty -Path $WakePath -Name "DCSettingIndex" -ErrorAction SilentlyContinue
+
+$AcWakeVal = if ($AcWake) { $AcWake.ACSettingIndex } else { 0 }
+$DcWakeVal = if ($DcWake) { $DcWake.DCSettingIndex } else { 0 }
+
+$AcWakeColor = if ($AcWakeVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+$DcWakeColor = if ($DcWakeVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+
+Write-Host "    - Wake Password Required (Plugged In): $($AcWakeVal) (Required = 1 [Enabled])" -ForegroundColor $AcWakeColor
+Write-Host "    - Wake Password Required (On Battery): $($DcWakeVal) (Required = 1 [Enabled])" -ForegroundColor $DcWakeColor
+
+# 3. Audit BitLocker Settings
+$FvePath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
+$DmaLock = Get-ItemProperty -Path $FvePath -Name "DisableExternalDMAUnderLock" -ErrorAction SilentlyContinue
+$DmaLockVal = if ($DmaLock) { $DmaLock.DisableExternalDMAUnderLock } else { 0 }
+$DmaLockColor = if ($DmaLockVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+
+$CrossOrg = Get-ItemProperty -Path $FvePath -Name "RDVDenyCrossOrg" -ErrorAction SilentlyContinue
+$CrossOrgVal = if ($CrossOrg) { $CrossOrg.RDVDenyCrossOrg } else { 1 }
+$CrossOrgColor = if ($CrossOrgVal -eq 0) { "Green" } else { $isCompliant = $false; "Red" }
+
+$FvePolicyPath = "HKLM:\System\CurrentControlSet\Policies\Microsoft\FVE"
+$UsbWrite = Get-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -ErrorAction SilentlyContinue
+$UsbWriteVal = if ($UsbWrite) { $UsbWrite.RDVDenyWriteAccess } else { 0 }
+$UsbWriteColor = if ($UsbWriteVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+
+Write-Host "    - Disable DMA Under Lock: $($DmaLockVal) (Required = 1)" -ForegroundColor $DmaLockColor
+Write-Host "    - USB Deny Cross Org Removable Drives: $($CrossOrgVal) (Required = 0)" -ForegroundColor $CrossOrgColor
+Write-Host "    - USB Unencrypted Write Block: $($UsbWriteVal) (Required = 1)" -ForegroundColor $UsbWriteColor
+
+# 4. Audit Device Restriction Settings
+$RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
+$DenyDev = Get-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -ErrorAction SilentlyContinue
+$DenyDevVal = if ($DenyDev) { $DenyDev.DenyDeviceClasses } else { 0 }
+$DenyDevColor = if ($DenyDevVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+
+$DenyId = Get-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDs" -ErrorAction SilentlyContinue
+$DenyIdVal = if ($DenyId) { $DenyId.DenyDeviceIDs } else { 0 }
+$DenyIdColor = if ($DenyIdVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+
+Write-Host "    - Prevent Device Setup Class Installation: $($DenyDevVal) (Required = 1)" -ForegroundColor $DenyDevColor
+Write-Host "    - Prevent Device ID Installation: $($DenyIdVal) (Required = 1)" -ForegroundColor $DenyIdColor
+
+$DenyClassPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses"
+$Sbp2 = Get-ItemProperty -Path $DenyClassPath -Name "1" -ErrorAction SilentlyContinue
+$Sbp2Val = if ($Sbp2) { $Sbp2."1" } else { "" }
+$Sbp2Color = if ($Sbp2Val -eq "{d48179be-ec20-11d1-b6b8-00c04fa372a7}") { "Green" } else { $isCompliant = $false; "Red" }
+
+$Host1394 = Get-ItemProperty -Path $DenyClassPath -Name "2" -ErrorAction SilentlyContinue
+$Host1394Val = if ($Host1394) { $Host1394."2" } else { "" }
+$Host1394Color = if ($Host1394Val -eq "{6bdd1fc1-810f-11d0-bec7-08002be2092f}") { "Green" } else { $isCompliant = $false; "Red" }
+
+Write-Host "    - Blocked SBP-2 Setup Class: '$($Sbp2Val)' (Required = '{d48179be-ec20-11d1-b6b8-00c04fa372a7}')" -ForegroundColor $Sbp2Color
+Write-Host "    - Blocked 1394 Host Setup Class: '$($Host1394Val)' (Required = '{6bdd1fc1-810f-11d0-bec7-08002be2092f}')" -ForegroundColor $Host1394Color
+
+$DenyIdPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs"
+$DId1 = Get-ItemProperty -Path $DenyIdPath -Name "1" -ErrorAction SilentlyContinue
+$DId1Val = if ($DId1) { $DId1."1" } else { "" }
+$DId1Color = if ($DId1Val -eq "PCI\CC_0C0A") { "Green" } else { $isCompliant = $false; "Red" }
+
+$DId2 = Get-ItemProperty -Path $DenyIdPath -Name "2" -ErrorAction SilentlyContinue
+$DId2Val = if ($DId2) { $DId2."2" } else { "" }
+$DId2Color = if ($DId2Val -eq "PCI\CC_0C0010") { "Green" } else { $isCompliant = $false; "Red" }
+
+$DId3 = Get-ItemProperty -Path $DenyIdPath -Name "3" -ErrorAction SilentlyContinue
+$DId3Val = if ($DId3) { $DId3."3" } else { "" }
+$DId3Color = if ($DId3Val -eq "PCI\CC_0607") { "Green" } else { $isCompliant = $false; "Red" }
+
+$DId4 = Get-ItemProperty -Path $DenyIdPath -Name "4" -ErrorAction SilentlyContinue
+$DId4Val = if ($DId4) { $DId4."4" } else { "" }
+$DId4Color = if ($DId4Val -eq "PCI\CC_0605") { "Green" } else { $isCompliant = $false; "Red" }
+
+Write-Host "    - Blocked Device ID PCI\CC_0C0A: '$($DId1Val)' (Required = 'PCI\CC_0C0A')" -ForegroundColor $DId1Color
+Write-Host "    - Blocked Device ID PCI\CC_0C0010: '$($DId2Val)' (Required = 'PCI\CC_0C0010')" -ForegroundColor $DId2Color
+Write-Host "    - Blocked Device ID PCI\CC_0607: '$($DId3Val)' (Required = 'PCI\CC_0607')" -ForegroundColor $DId3Color
+Write-Host "    - Blocked Device ID PCI\CC_0605: '$($DId4Val)' (Required = 'PCI\CC_0605')" -ForegroundColor $DId4Color
+
+# 5. Audit Kernel DMA Protection Setting
+$KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
+$EnumPol = Get-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -ErrorAction SilentlyContinue
+$EnumPolVal = if ($EnumPol) { $EnumPol.DeviceEnumerationPolicy } else { 2 }
+$EnumPolColor = if ($EnumPolVal -eq 0) { "Green" } else { $isCompliant = $false; "Red" }
+
+Write-Host "    - Kernel DMA Protection Policy: $($EnumPolVal) (Required = 0 [Block all])" -ForegroundColor $EnumPolColor
+
+# 6. Final Compliance Assessment
+if ($isCompliant) {
+    Write-Host "[+] Audit Result: SECURE - Domain Controller DMA and physical security controls are fully compliant." -ForegroundColor Green
+} else {
+    Write-Host "[-] Audit Result: VULNERABLE - One or more Domain Controller DMA or physical security settings do not meet baseline requirements." -ForegroundColor Red
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-DcDMAPhysicalSecurity.ps1
+# Description: Hardens local registry keys on Domain Controllers to mitigate DMA attacks, disable standby sleep states, enforce wake password, restrict device classes/IDs, and block unencrypted USB writing.
+
+Write-Host "Applying Domain Controller DMA and physical security hardening..." -ForegroundColor Cyan
+
+# 1. Disable Standby Sleep States (S1-S3)
+$SleepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab"
+if (-not (Test-Path $SleepPath)) {
+    New-Item -Path $SleepPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SleepPath -Name "ACSettingIndex" -Value 0 -Type DWord
+Set-ItemProperty -Path $SleepPath -Name "DCSettingIndex" -Value 0 -Type DWord
+Write-Host "[+] Standby sleep states (S1-S3) disabled." -ForegroundColor Green
+
+# 2. Configure Wake Password Requirement
+$WakePath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51"
+if (-not (Test-Path $WakePath)) {
+    New-Item -Path $WakePath -Force | Out-Null
+}
+Set-ItemProperty -Path $WakePath -Name "ACSettingIndex" -Value 1 -Type DWord
+Set-ItemProperty -Path $WakePath -Name "DCSettingIndex" -Value 1 -Type DWord
+Write-Host "[+] Wake password requirement enforced." -ForegroundColor Green
+
+# 3. BitLocker DMA and Removable Storage Settings
+$FvePath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
+if (-not (Test-Path $FvePath)) {
+    New-Item -Path $FvePath -Force | Out-Null
+}
+Set-ItemProperty -Path $FvePath -Name "DisableExternalDMAUnderLock" -Value 1 -Type DWord
+Set-ItemProperty -Path $FvePath -Name "RDVDenyCrossOrg" -Value 0 -Type DWord
+
+$FvePolicyPath = "HKLM:\System\CurrentControlSet\Policies\Microsoft\FVE"
+if (-not (Test-Path $FvePolicyPath)) {
+    New-Item -Path $FvePolicyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -Value 1 -Type DWord
+Write-Host "[+] BitLocker DMA under lock and unencrypted USB write blocks configured." -ForegroundColor Green
+
+# 4. Device Installation Restrictions (Classes and Hardware IDs)
+$RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
+if (-not (Test-Path $RestrictPath)) {
+    New-Item -Path $RestrictPath -Force | Out-Null
+}
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceClassesRetroactive" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDs" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDsRetroactive" -Value 1 -Type DWord
+
+$DenyClassPath = Join-Path $RestrictPath "DenyDeviceClasses"
+if (-not (Test-Path $DenyClassPath)) {
+    New-Item -Path $DenyClassPath -Force | Out-Null
+}
+Set-ItemProperty -Path $DenyClassPath -Name "1" -Value "{d48179be-ec20-11d1-b6b8-00c04fa372a7}" -Type String
+Set-ItemProperty -Path $DenyClassPath -Name "2" -Value "{6bdd1fc1-810f-11d0-bec7-08002be2092f}" -Type String
+
+$DenyIdPath = Join-Path $RestrictPath "DenyDeviceIDs"
+if (-not (Test-Path $DenyIdPath)) {
+    New-Item -Path $DenyIdPath -Force | Out-Null
+}
+Set-ItemProperty -Path $DenyIdPath -Name "1" -Value "PCI\CC_0C0A" -Type String
+Set-ItemProperty -Path $DenyIdPath -Name "2" -Value "PCI\CC_0C0010" -Type String
+Set-ItemProperty -Path $DenyIdPath -Name "3" -Value "PCI\CC_0607" -Type String
+Set-ItemProperty -Path $DenyIdPath -Name "4" -Value "PCI\CC_0605" -Type String
+Write-Host "[+] Device installation blocks for SBP-2, 1394 host controllers, Thunderbolt, and PCI bridges enabled." -ForegroundColor Green
+
+# 5. Kernel DMA Protection (Block all external DMA)
+$KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
+if (-not (Test-Path $KDmaPath)) {
+    New-Item -Path $KDmaPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
+Write-Host "[+] Kernel DMA Protection DeviceEnumerationPolicy set to 0 (Block all)." -ForegroundColor Green
+
+Write-Host "Domain Controller DMA and physical security settings applied successfully." -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2158" />
       </check>
     </Rule>
     <Group id="xccdf_org.adhardening.benchmarks_group_Module_2__Domain_Controller_Hardening_Defender_Antivirus">
@@ -41446,7 +41835,8 @@ Write-Host "[+] PAW VBS and Credential Guard registry settings applied. (Reboot 
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. <xhtml:em>(For Domain Controllers, refer to [REQ-DC-158](../02-domain-controllers/harden-dma-and-physical-security.md); for Tier 2 Client Workstations and Member Servers, refer to [REQ-END-017](../08-endpoints/harden-dma-and-physical-security.md)).</xhtml:em>
+          </xhtml:li>
           <xhtml:li>
             <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.</xhtml:li>
         </xhtml:ul>
@@ -41459,18 +41849,25 @@ Write-Host "[+] PAW VBS and Credential Guard registry settings applied. (Reboot 
         <xhtml:p>Privileged Access Workstations (PAWs) represent Tier 0 boundary systems. Because they handle the highest levels of domain authorization, physical threat vectors must be mitigated to the absolute maximum threshold:</xhtml:p>
         <xhtml:ol>
           <xhtml:li>
-            <xhtml:strong>Direct Memory Access (DMA) Defenses</xhtml:strong>: External interfaces (e.g. Thunderbolt, USB4, PCIe ExpressCard) allow attached devices to bypass the OS and read physical RAM contents directly. Attackers use physical DMA-hacking consoles to dump memory-resident Kerberos keys and NTLM credentials.</xhtml:li>
-          <xhtml:li>* Disabling the SBP-2 setup class (<xhtml:code>{d48179be-ec20-11d1-b6b8-00c04fa372a7}</xhtml:code>) blocks FireWire/IEEE 1394 DMA controllers.</xhtml:li>
-          <xhtml:li>* <xhtml:code>DisableExternalDMAUnderLock</xhtml:code> prevents DMA access when the workstation is locked.</xhtml:li>
+            <xhtml:strong>Direct Memory Access (DMA) Defenses</xhtml:strong>: External interfaces (e.g., Thunderbolt, USB4, PCIe ExpressCard, FireWire) allow attached devices to bypass the OS kernel and read physical RAM contents directly via high-speed buses. Attackers use physical DMA exploitation devices (such as PCILeech) to dump memory-resident Kerberos TGT tickets, NTLM hashes, and LSA secrets:</xhtml:li>
           <xhtml:li>
             <xhtml:em> </xhtml:em>
-            <xhtml:em>Stricter Enumeration Policy on PAWs</xhtml:em>
-            <xhtml:em>: Standard workstations permit external DMA after a user logs on (value 1). On PAWs, this must be set to </xhtml:em>
-            <xhtml:em>Block all</xhtml:em>* (value 0). External DMA-capable expansion cards or devices are permanently blocked from memory access.</xhtml:li>
+            <xhtml:em>Device Setup Class Blocking</xhtml:em>*: Disabling the SBP-2 setup class (<xhtml:code>{d48179be-ec20-11d1-b6b8-00c04fa372a7}</xhtml:code>) and the IEEE 1394 host controller class (<xhtml:code>{6bdd1fc1-810f-11d0-bec7-08002be2092f}</xhtml:code>) prevents Windows from binding drivers to FireWire storage and controllers.</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Cold Boot Exploits</xhtml:strong>: RAM retention properties mean memory remains readable for seconds or minutes after power loss, especially if cooled. If a PAW enters standby states (S1-S3), the RAM remains powered. If stolen in standby, an attacker can extract cryptographic keys. Disabling standby forces the system to either shut down completely or hibernate, locking the BitLocker keys inside the TPM.</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Hardware ID Blocking</xhtml:em>*: Explicitly blocking hardware IDs <xhtml:code>PCI\CC_0C0A</xhtml:code> (Thunderbolt), <xhtml:code>PCI\CC_0C0010</xhtml:code> (1394 OHCI FireWire), <xhtml:code>PCI\CC_0607</xhtml:code> (CardBus), and <xhtml:code>PCI\CC_0605</xhtml:code> (PCMCIA) halts driver installation for unauthorized high-speed expansion buses at the PCI enumeration layer.</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>USB Exfiltration Protection</xhtml:strong>: Restricting write access on removable drives (<xhtml:code>RDVDenyWriteAccess</xhtml:code>) prevents the data exfiltration of administrative materials or directory backups to local USB flash drives.</xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>BitLocker DMA Under Lock</xhtml:em>*: Enforcing <xhtml:code>DisableExternalDMAUnderLock</xhtml:code> blocks DMA device operations whenever the PAW workstation is locked, closing the physical window for drive-by attacks on unattended stations.</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Tightened Enumeration Policy on PAWs</xhtml:em>
+            <xhtml:em>: While standard enterprise endpoints might permit external DMA after user authentication, PAWs enforce a strict </xhtml:em>
+            <xhtml:em>Block all</xhtml:em>* policy (<xhtml:code>DeviceEnumerationPolicy = 0</xhtml:code>). External peripherals whose drivers do not natively support DMA-remapping isolation are permanently prevented from accessing system memory.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Cold Boot Exploits &amp; RAM Decay</xhtml:strong>: Dynamic RAM retains memory contents for seconds or minutes following power loss, especially when cooled with aerosol duster or liquid nitrogen. In standard standby states (S1-S3), the RAM chips remain continuously powered and active. If a PAW is stolen or accessed while in standby, BitLocker master keys and volatile credentials can be read directly from memory. Disabling standby states forces the system to either remain active or transition to Hibernation (S4)/Shutdown, where RAM contents are encrypted on the BitLocker volume and protected by the TPM 2.0 PCR baseline. Enforcing a password on resume guarantees re-authentication upon wake.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>USB Exfiltration Protection</xhtml:strong>: Restricting write access on removable drives (<xhtml:code>RDVDenyWriteAccess</xhtml:code>) ensures administrative materials, directory backups, or sensitive credentials cannot be copied to unencrypted USB media. Setting <xhtml:code>RDVDenyCrossOrg = 0</xhtml:code> prevents cross-organization removable storage exemptions.</xhtml:li>
         </xhtml:ol>
       </rationale>
       <fixtext>
@@ -41480,7 +41877,7 @@ Write-Host "[+] PAW VBS and Credential Guard registry settings applied. (Reboot 
           <xhtml:li>Edit the PAW GPO (e.g., <xhtml:code>GPO_Hardening_PAW</xhtml:code>).</xhtml:li>
           <xhtml:li>Configure the following settings:</xhtml:li>
         </xhtml:ol>
-        <xhtml:h4>1. Power Management (Disable Standby)</xhtml:h4>
+        <xhtml:h4>1. Power Management (Disable Standby &amp; Require Wake Password)</xhtml:h4>
         <xhtml:p>Navigate to: <xhtml:code>Computer Configuration\Administrative Templates\System\Power Management\Sleep Settings</xhtml:code>
           <xhtml:em> </xhtml:em>
           <xhtml:em>Policy</xhtml:em>
@@ -41509,17 +41906,27 @@ Write-Host "[+] PAW VBS and Credential Guard registry settings applied. (Reboot 
           <xhtml:em>: `Deny write access to removable drives not protected by BitLocker` -&gt; </xhtml:em>
           <xhtml:em>Enabled</xhtml:em>
           <xhtml:em> </xhtml:em> Check <xhtml:strong>Do not allow write access to devices configured in another organization</xhtml:strong> -&gt; <xhtml:strong>Disabled</xhtml:strong> (value 0 / False)</xhtml:p>
-        <xhtml:h4>3. Device Installation Restrictions (Block SBP-2 Setup Class)</xhtml:h4>
+        <xhtml:h4>3. Device Installation Restrictions (Block SBP-2, 1394, Thunderbolt, and PCI Bridges)</xhtml:h4>
         <xhtml:p>Navigate to: <xhtml:code>Computer Configuration\Administrative Templates\System\Device Installation\Device Installation Restrictions</xhtml:code>
           <xhtml:em> </xhtml:em>
           <xhtml:em>Policy</xhtml:em>
           <xhtml:em>: `Prevent installation of devices using drivers that match these device setup classes` -&gt; </xhtml:em>
           <xhtml:em>Enabled</xhtml:em>
-          <xhtml:em> </xhtml:em> Click <xhtml:strong>Show...</xhtml:strong> and enter: <xhtml:code>{d48179be-ec20-11d1-b6b8-00c04fa372a7}</xhtml:code>
+          <xhtml:em> </xhtml:em> Click <xhtml:strong>Show...</xhtml:strong> and enter: <xhtml:em> `{d48179be-ec20-11d1-b6b8-00c04fa372a7}` </xhtml:em>
+          <xhtml:code>{6bdd1fc1-810f-11d0-bec7-08002be2092f}</xhtml:code>
           <xhtml:em> Check </xhtml:em>
           <xhtml:em>Also apply to matching devices that are already installed</xhtml:em>
           <xhtml:em> -&gt; </xhtml:em>
-          <xhtml:em>Enabled</xhtml:em>* (value 1 / True)</xhtml:p>
+          <xhtml:em>Enabled</xhtml:em>
+          <xhtml:em> (value 1 / True) </xhtml:em>
+          <xhtml:strong>Policy</xhtml:strong>: <xhtml:code>Prevent installation of devices that match any of these device IDs</xhtml:code> -&gt; <xhtml:strong>Enabled</xhtml:strong>
+          <xhtml:em> Click </xhtml:em>
+          <xhtml:em>Show...</xhtml:em>
+          <xhtml:em> and enter: </xhtml:em>
+          <xhtml:code>PCI\CC_0C0A</xhtml:code>
+          <xhtml:em> `PCI\CC_0C0010` </xhtml:em>
+          <xhtml:code>PCI\CC_0607</xhtml:code>
+          <xhtml:em> `PCI\CC_0605` </xhtml:em> Check <xhtml:strong>Also apply to matching devices that are already installed</xhtml:strong> -&gt; <xhtml:strong>Enabled</xhtml:strong> (value 1 / True)</xhtml:p>
         <xhtml:h4>4. Kernel DMA Protection (Block All)</xhtml:h4>
         <xhtml:p>Navigate to: <xhtml:code>Computer Configuration\Administrative Templates\System\Kernel DMA Protection</xhtml:code>
           <xhtml:em> </xhtml:em>
@@ -41530,13 +41937,13 @@ Write-Host "[+] PAW VBS and Credential Guard registry settings applied. (Reboot 
           <xhtml:strong>Enumeration policy</xhtml:strong>: Set to <xhtml:strong>Block all</xhtml:strong> (value 0)</xhtml:p>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Run the following scripts locally on the PAW to apply DMA, Sleep, and BitLocker USB registry parameters.</xhtml:p>
+        <xhtml:p>Run the following scripts locally on the PAW to apply DMA, Sleep, Device Restriction, and BitLocker USB registry parameters.</xhtml:p>
         <xhtml:p>
           <xhtml:a href="implementation_scripts/Set-PawDMAPhysicalSecurity.ps1">Download Script: Set-PawDMAPhysicalSecurity.ps1</xhtml:a>
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Set-PawDMAPhysicalSecurity.ps1
-# Description: Hardens local registry keys on PAWs to mitigate DMA attacks, disable standby sleep states, and restrict unencrypted USB writing.
+# Description: Hardens local registry keys on PAWs to mitigate DMA attacks, disable standby sleep states, enforce wake password, restrict device classes/IDs, and block unencrypted USB writing.
 
 Write-Host "Applying PAW DMA and physical security hardening..." -ForegroundColor Cyan
 
@@ -41573,20 +41980,32 @@ if (-not (Test-Path $FvePolicyPath)) {
 Set-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -Value 1 -Type DWord
 Write-Host "[+] BitLocker DMA under lock and unencrypted USB write blocks configured." -ForegroundColor Green
 
-# 4. Device Installation Restrictions (Block SBP-2 class)
+# 4. Device Installation Restrictions (Classes and Hardware IDs)
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 if (-not (Test-Path $RestrictPath)) {
     New-Item -Path $RestrictPath -Force | Out-Null
 }
 Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -Value 1 -Type DWord
 Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceClassesRetroactive" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDs" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDsRetroactive" -Value 1 -Type DWord
 
 $DenyClassPath = Join-Path $RestrictPath "DenyDeviceClasses"
 if (-not (Test-Path $DenyClassPath)) {
     New-Item -Path $DenyClassPath -Force | Out-Null
 }
 Set-ItemProperty -Path $DenyClassPath -Name "1" -Value "{d48179be-ec20-11d1-b6b8-00c04fa372a7}" -Type String
-Write-Host "[+] Device installation blocks for SBP-2 class enabled." -ForegroundColor Green
+Set-ItemProperty -Path $DenyClassPath -Name "2" -Value "{6bdd1fc1-810f-11d0-bec7-08002be2092f}" -Type String
+
+$DenyIdPath = Join-Path $RestrictPath "DenyDeviceIDs"
+if (-not (Test-Path $DenyIdPath)) {
+    New-Item -Path $DenyIdPath -Force | Out-Null
+}
+Set-ItemProperty -Path $DenyIdPath -Name "1" -Value "PCI\CC_0C0A" -Type String
+Set-ItemProperty -Path $DenyIdPath -Name "2" -Value "PCI\CC_0C0010" -Type String
+Set-ItemProperty -Path $DenyIdPath -Name "3" -Value "PCI\CC_0607" -Type String
+Set-ItemProperty -Path $DenyIdPath -Name "4" -Value "PCI\CC_0605" -Type String
+Write-Host "[+] Device installation blocks for SBP-2, 1394 host controllers, Thunderbolt, and PCI bridges enabled." -ForegroundColor Green
 
 # 5. Kernel DMA Protection (Block all external DMA permanently for PAWs)
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
@@ -41604,9 +42023,10 @@ Write-Host "PAW DMA and physical security settings applied successfully." -Foreg
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Test-PawDMAPhysicalSecurity.ps1
-# Description: Audits local registry configuration for standby settings, DMA protection under lock, USB restrictions, and blocked device setup classes on PAWs.
+# Description: Audits local registry configuration for standby settings, wake password, DMA protection under lock, USB restrictions, and blocked device classes/IDs on PAWs.
 
 Write-Host "--- Auditing PAW DMA and Physical Security ---" -ForegroundColor Cyan
+$isCompliant = $true
 
 # 1. Audit Standby Settings
 $SleepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab"
@@ -41616,53 +42036,111 @@ $DcSleep = Get-ItemProperty -Path $SleepPath -Name "DCSettingIndex" -ErrorAction
 $AcSleepVal = if ($AcSleep) { $AcSleep.ACSettingIndex } else { 1 }
 $DcSleepVal = if ($DcSleep) { $DcSleep.DCSettingIndex } else { 1 }
 
-$AcSleepColor = if ($AcSleepVal -eq 0) { "Green" } else { "Red" }
-$DcSleepColor = if ($DcSleepVal -eq 0) { "Green" } else { "Red" }
+$AcSleepColor = if ($AcSleepVal -eq 0) { "Green" } else { $isCompliant = $false; "Red" }
+$DcSleepColor = if ($DcSleepVal -eq 0) { "Green" } else { $isCompliant = $false; "Red" }
 
-Write-Host "    - Standby Sleep State (Plugged In) Setting: $AcSleepVal (Required = 0 [Disabled])" -ForegroundColor $AcSleepColor
-Write-Host "    - Standby Sleep State (On Battery) Setting: $DcSleepVal (Required = 0 [Disabled])" -ForegroundColor $DcSleepColor
+Write-Host "    - Standby Sleep State (Plugged In) Setting: $($AcSleepVal) (Required = 0 [Disabled])" -ForegroundColor $AcSleepColor
+Write-Host "    - Standby Sleep State (On Battery) Setting: $($DcSleepVal) (Required = 0 [Disabled])" -ForegroundColor $DcSleepColor
 
-# 2. Audit BitLocker Settings
+# 2. Audit Wake Password Requirement
+$WakePath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51"
+$AcWake = Get-ItemProperty -Path $WakePath -Name "ACSettingIndex" -ErrorAction SilentlyContinue
+$DcWake = Get-ItemProperty -Path $WakePath -Name "DCSettingIndex" -ErrorAction SilentlyContinue
+
+$AcWakeVal = if ($AcWake) { $AcWake.ACSettingIndex } else { 0 }
+$DcWakeVal = if ($DcWake) { $DcWake.DCSettingIndex } else { 0 }
+
+$AcWakeColor = if ($AcWakeVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+$DcWakeColor = if ($DcWakeVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+
+Write-Host "    - Wake Password Required (Plugged In): $($AcWakeVal) (Required = 1 [Enabled])" -ForegroundColor $AcWakeColor
+Write-Host "    - Wake Password Required (On Battery): $($DcWakeVal) (Required = 1 [Enabled])" -ForegroundColor $DcWakeColor
+
+# 3. Audit BitLocker Settings
 $FvePath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
 $DmaLock = Get-ItemProperty -Path $FvePath -Name "DisableExternalDMAUnderLock" -ErrorAction SilentlyContinue
 $DmaLockVal = if ($DmaLock) { $DmaLock.DisableExternalDMAUnderLock } else { 0 }
-$DmaLockColor = if ($DmaLockVal -eq 1) { "Green" } else { "Red" }
+$DmaLockColor = if ($DmaLockVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+
+$CrossOrg = Get-ItemProperty -Path $FvePath -Name "RDVDenyCrossOrg" -ErrorAction SilentlyContinue
+$CrossOrgVal = if ($CrossOrg) { $CrossOrg.RDVDenyCrossOrg } else { 1 }
+$CrossOrgColor = if ($CrossOrgVal -eq 0) { "Green" } else { $isCompliant = $false; "Red" }
 
 $FvePolicyPath = "HKLM:\System\CurrentControlSet\Policies\Microsoft\FVE"
 $UsbWrite = Get-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -ErrorAction SilentlyContinue
 $UsbWriteVal = if ($UsbWrite) { $UsbWrite.RDVDenyWriteAccess } else { 0 }
-$UsbWriteColor = if ($UsbWriteVal -eq 1) { "Green" } else { "Red" }
+$UsbWriteColor = if ($UsbWriteVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
 
-Write-Host "    - Disable DMA Under Lock: $DmaLockVal (Required = 1)" -ForegroundColor $DmaLockColor
-Write-Host "    - USB Unencrypted Write Block: $UsbWriteVal (Required = 1)" -ForegroundColor $UsbWriteColor
+Write-Host "    - Disable DMA Under Lock: $($DmaLockVal) (Required = 1)" -ForegroundColor $DmaLockColor
+Write-Host "    - USB Deny Cross Org Removable Drives: $($CrossOrgVal) (Required = 0)" -ForegroundColor $CrossOrgColor
+Write-Host "    - USB Unencrypted Write Block: $($UsbWriteVal) (Required = 1)" -ForegroundColor $UsbWriteColor
 
-# 3. Audit Device Restriction Settings
+# 4. Audit Device Restriction Settings
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 $DenyDev = Get-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -ErrorAction SilentlyContinue
 $DenyDevVal = if ($DenyDev) { $DenyDev.DenyDeviceClasses } else { 0 }
-$DenyDevColor = if ($DenyDevVal -eq 1) { "Green" } else { "Red" }
+$DenyDevColor = if ($DenyDevVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
 
-Write-Host "    - Prevent Device Setup Class Installation: $DenyDevVal (Required = 1)" -ForegroundColor $DenyDevColor
+$DenyId = Get-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDs" -ErrorAction SilentlyContinue
+$DenyIdVal = if ($DenyId) { $DenyId.DenyDeviceIDs } else { 0 }
+$DenyIdColor = if ($DenyIdVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+
+Write-Host "    - Prevent Device Setup Class Installation: $($DenyDevVal) (Required = 1)" -ForegroundColor $DenyDevColor
+Write-Host "    - Prevent Device ID Installation: $($DenyIdVal) (Required = 1)" -ForegroundColor $DenyIdColor
 
 $DenyClassPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses"
 $Sbp2 = Get-ItemProperty -Path $DenyClassPath -Name "1" -ErrorAction SilentlyContinue
 $Sbp2Val = if ($Sbp2) { $Sbp2."1" } else { "" }
-$Sbp2Color = if ($Sbp2Val -eq "{d48179be-ec20-11d1-b6b8-00c04fa372a7}") { "Green" } else { "Red" }
+$Sbp2Color = if ($Sbp2Val -eq "{d48179be-ec20-11d1-b6b8-00c04fa372a7}") { "Green" } else { $isCompliant = $false; "Red" }
 
-Write-Host "    - Blocked SBP-2 Setup Class: '$Sbp2Val' (Required = '{d48179be-ec20-11d1-b6b8-00c04fa372a7}')" -ForegroundColor $Sbp2Color
+$Host1394 = Get-ItemProperty -Path $DenyClassPath -Name "2" -ErrorAction SilentlyContinue
+$Host1394Val = if ($Host1394) { $Host1394."2" } else { "" }
+$Host1394Color = if ($Host1394Val -eq "{6bdd1fc1-810f-11d0-bec7-08002be2092f}") { "Green" } else { $isCompliant = $false; "Red" }
 
-# 4. Audit Kernel DMA Protection Setting (Stricter for PAWs)
+Write-Host "    - Blocked SBP-2 Setup Class: '$($Sbp2Val)' (Required = '{d48179be-ec20-11d1-b6b8-00c04fa372a7}')" -ForegroundColor $Sbp2Color
+Write-Host "    - Blocked 1394 Host Setup Class: '$($Host1394Val)' (Required = '{6bdd1fc1-810f-11d0-bec7-08002be2092f}')" -ForegroundColor $Host1394Color
+
+$DenyIdPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs"
+$DId1 = Get-ItemProperty -Path $DenyIdPath -Name "1" -ErrorAction SilentlyContinue
+$DId1Val = if ($DId1) { $DId1."1" } else { "" }
+$DId1Color = if ($DId1Val -eq "PCI\CC_0C0A") { "Green" } else { $isCompliant = $false; "Red" }
+
+$DId2 = Get-ItemProperty -Path $DenyIdPath -Name "2" -ErrorAction SilentlyContinue
+$DId2Val = if ($DId2) { $DId2."2" } else { "" }
+$DId2Color = if ($DId2Val -eq "PCI\CC_0C0010") { "Green" } else { $isCompliant = $false; "Red" }
+
+$DId3 = Get-ItemProperty -Path $DenyIdPath -Name "3" -ErrorAction SilentlyContinue
+$DId3Val = if ($DId3) { $DId3."3" } else { "" }
+$DId3Color = if ($DId3Val -eq "PCI\CC_0607") { "Green" } else { $isCompliant = $false; "Red" }
+
+$DId4 = Get-ItemProperty -Path $DenyIdPath -Name "4" -ErrorAction SilentlyContinue
+$DId4Val = if ($DId4) { $DId4."4" } else { "" }
+$DId4Color = if ($DId4Val -eq "PCI\CC_0605") { "Green" } else { $isCompliant = $false; "Red" }
+
+Write-Host "    - Blocked Device ID PCI\CC_0C0A: '$($DId1Val)' (Required = 'PCI\CC_0C0A')" -ForegroundColor $DId1Color
+Write-Host "    - Blocked Device ID PCI\CC_0C0010: '$($DId2Val)' (Required = 'PCI\CC_0C0010')" -ForegroundColor $DId2Color
+Write-Host "    - Blocked Device ID PCI\CC_0607: '$($DId3Val)' (Required = 'PCI\CC_0607')" -ForegroundColor $DId3Color
+Write-Host "    - Blocked Device ID PCI\CC_0605: '$($DId4Val)' (Required = 'PCI\CC_0605')" -ForegroundColor $DId4Color
+
+# 5. Audit Kernel DMA Protection Setting (Stricter for PAWs)
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 $EnumPol = Get-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -ErrorAction SilentlyContinue
 $EnumPolVal = if ($EnumPol) { $EnumPol.DeviceEnumerationPolicy } else { 2 }
-$EnumPolColor = if ($EnumPolVal -eq 0) { "Green" } else { "Red" }
+$EnumPolColor = if ($EnumPolVal -eq 0) { "Green" } else { $isCompliant = $false; "Red" }
 
-Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block all])" -ForegroundColor $EnumPolColor</xhtml:code>
+Write-Host "    - Kernel DMA Protection Policy: $($EnumPolVal) (Required = 0 [Block all])" -ForegroundColor $EnumPolColor
+
+# 6. Final Compliance Assessment
+if ($isCompliant) {
+    Write-Host "[+] Audit Result: SECURE - PAW DMA and physical security controls are fully compliant." -ForegroundColor Green
+} else {
+    Write-Host "[-] Audit Result: VULNERABLE - One or more PAW DMA or physical security settings do not meet baseline requirements." -ForegroundColor Red
+}</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
       <fix system="urn:xccdf:fix:script:powershell"># Set-PawDMAPhysicalSecurity.ps1
-# Description: Hardens local registry keys on PAWs to mitigate DMA attacks, disable standby sleep states, and restrict unencrypted USB writing.
+# Description: Hardens local registry keys on PAWs to mitigate DMA attacks, disable standby sleep states, enforce wake password, restrict device classes/IDs, and block unencrypted USB writing.
 
 Write-Host "Applying PAW DMA and physical security hardening..." -ForegroundColor Cyan
 
@@ -41699,20 +42177,32 @@ if (-not (Test-Path $FvePolicyPath)) {
 Set-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -Value 1 -Type DWord
 Write-Host "[+] BitLocker DMA under lock and unencrypted USB write blocks configured." -ForegroundColor Green
 
-# 4. Device Installation Restrictions (Block SBP-2 class)
+# 4. Device Installation Restrictions (Classes and Hardware IDs)
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 if (-not (Test-Path $RestrictPath)) {
     New-Item -Path $RestrictPath -Force | Out-Null
 }
 Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -Value 1 -Type DWord
 Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceClassesRetroactive" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDs" -Value 1 -Type DWord
+Set-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDsRetroactive" -Value 1 -Type DWord
 
 $DenyClassPath = Join-Path $RestrictPath "DenyDeviceClasses"
 if (-not (Test-Path $DenyClassPath)) {
     New-Item -Path $DenyClassPath -Force | Out-Null
 }
 Set-ItemProperty -Path $DenyClassPath -Name "1" -Value "{d48179be-ec20-11d1-b6b8-00c04fa372a7}" -Type String
-Write-Host "[+] Device installation blocks for SBP-2 class enabled." -ForegroundColor Green
+Set-ItemProperty -Path $DenyClassPath -Name "2" -Value "{6bdd1fc1-810f-11d0-bec7-08002be2092f}" -Type String
+
+$DenyIdPath = Join-Path $RestrictPath "DenyDeviceIDs"
+if (-not (Test-Path $DenyIdPath)) {
+    New-Item -Path $DenyIdPath -Force | Out-Null
+}
+Set-ItemProperty -Path $DenyIdPath -Name "1" -Value "PCI\CC_0C0A" -Type String
+Set-ItemProperty -Path $DenyIdPath -Name "2" -Value "PCI\CC_0C0010" -Type String
+Set-ItemProperty -Path $DenyIdPath -Name "3" -Value "PCI\CC_0607" -Type String
+Set-ItemProperty -Path $DenyIdPath -Name "4" -Value "PCI\CC_0605" -Type String
+Write-Host "[+] Device installation blocks for SBP-2, 1394 host controllers, Thunderbolt, and PCI bridges enabled." -ForegroundColor Green
 
 # 5. Kernel DMA Protection (Block all external DMA permanently for PAWs)
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
@@ -66565,9 +67055,10 @@ Write-Host "Registry setting DisableWpbtExecution configured to 1." -ForegroundC
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Member Servers, Tier 2 Clients (Workstations / Laptops)</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Member Servers, Tier 2 Clients (Workstations / Laptops). <xhtml:em>(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-011](../07-paws/harden-dma-and-physical-security.md); for Domain Controllers, refer to [REQ-DC-158](../02-domain-controllers/harden-dma-and-physical-security.md)).</xhtml:em>
+          </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above)</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -66578,14 +67069,18 @@ Write-Host "Registry setting DisableWpbtExecution configured to 1." -ForegroundC
         <xhtml:p>Physical access to an endpoint introduces distinct attack vectors that bypass traditional OS privilege separation:</xhtml:p>
         <xhtml:ol>
           <xhtml:li>
-            <xhtml:strong>Direct Memory Access (DMA) Attacks</xhtml:strong>: Hot-plug buses (like FireWire, Thunderbolt, and USB4) permit devices to read and write directly to system memory without operating system mediation. Attackers connect specialized hardware (e.g., PCILeech) to hot-plug ports to extract BitLocker encryption keys or session tokens directly from RAM.</xhtml:li>
+            <xhtml:strong>Direct Memory Access (DMA) Attacks</xhtml:strong>: Hot-plug buses (such as FireWire, Thunderbolt, and USB4) permit connected peripherals to read and write directly to system memory without operating system mediation. Attackers connect specialized hardware (e.g., PCILeech) to exposed external ports to extract BitLocker encryption keys, NTLM hashes, or active session tokens directly from RAM:</xhtml:li>
           <xhtml:li>* Disabling the Serial Bus Protocol 2 (SBP-2) setup class (<xhtml:code>{d48179be-ec20-11d1-b6b8-00c04fa372a7}</xhtml:code>) blocks FireWire/IEEE 1394 DMA controllers.</xhtml:li>
-          <xhtml:li>* Enforcing <xhtml:code>DisableExternalDMAUnderLock</xhtml:code> prevents DMA requests when the screen is locked.</xhtml:li>
-          <xhtml:li>* <xhtml:code>DeviceEnumerationPolicy</xhtml:code> restricts external DMA execution (set to Block all).</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Cold Boot Attacks</xhtml:strong>: When a system enters standby sleep states (S1-S3), the system RAM remains powered. If a laptop is stolen while in standby, an attacker can quickly reboot the machine or cool the RAM chips to dump their contents, extracting credentials or disk encryption keys. Disabling standby forces the system to either remain fully active or enter Hibernation (S4)/Shutdown, where memory contents are encrypted on disk or cleared.</xhtml:li>
+            <xhtml:em> Blocking hardware device IDs `PCI\CC_0C0A` (Thunderbolt) and `PCI\CC_0C0010` (1394 OHCI FireWire) halts driver initialization for dangerous hot-plug controllers. </xhtml:em>(Note: On Tier 0 PAWs, additional legacy controller setup classes and CardBus/PCMCIA bridges are blocked under <xhtml:a href="../07-paws/harden-dma-and-physical-security.md">REQ-PAW-011</xhtml:a>).*</xhtml:li>
+          <xhtml:li>* Enforcing <xhtml:code>DisableExternalDMAUnderLock</xhtml:code> prevents DMA requests while the workstation screen is locked.</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>USB Data Exfiltration</xhtml:strong>: Blocking write access to removable drives unless they are encrypted with BitLocker (<xhtml:code>RDVDenyWriteAccess</xhtml:code>) prevents users or malicious agents from copying confidential data to unauthorized USB media.</xhtml:li>
+            <xhtml:em> `DeviceEnumerationPolicy` set to </xhtml:em>
+            <xhtml:em>Block all</xhtml:em>* (0) ensures devices lacking DMA-remapping isolation support cannot execute unauthorized memory access transfers.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Cold Boot Attacks &amp; Sleep Vulnerabilities</xhtml:strong>: When an endpoint enters standby sleep states (S1-S3), system RAM remains powered and active. If an unattended laptop or desktop is stolen while in standby, an attacker can quickly reboot the machine or chill the DRAM chips to dump memory contents and retrieve BitLocker keys. Disabling standby forces systems to transition to Hibernation (S4)/Shutdown, where RAM contents are flushed to the BitLocker-encrypted disk and sealed by the TPM. Enforcing a password upon wake prevents unauthorized physical resumption.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>USB Data Exfiltration</xhtml:strong>: Blocking write access to removable drives unless they are encrypted with BitLocker (<xhtml:code>RDVDenyWriteAccess</xhtml:code>) prevents users or malicious agents from copying confidential organizational data to unauthorized, unencrypted USB media. Setting <xhtml:code>RDVDenyCrossOrg = 0</xhtml:code> enforces organization-wide BitLocker compliance.</xhtml:li>
         </xhtml:ol>
       </rationale>
       <fixtext>
@@ -66595,7 +67090,7 @@ Write-Host "Registry setting DisableWpbtExecution configured to 1." -ForegroundC
           <xhtml:li>Create or edit a GPO targeting endpoints (e.g., <xhtml:code>GPO_Hardening_DMA_Physical</xhtml:code>).</xhtml:li>
           <xhtml:li>Configure the following settings:</xhtml:li>
         </xhtml:ol>
-        <xhtml:h4>1. Power Management (Disable Standby)</xhtml:h4>
+        <xhtml:h4>1. Power Management (Disable Standby &amp; Require Wake Password)</xhtml:h4>
         <xhtml:p>Navigate to: <xhtml:code>Computer Configuration\Administrative Templates\System\Power Management\Sleep Settings</xhtml:code>
           <xhtml:em> </xhtml:em>
           <xhtml:em>Policy</xhtml:em>
@@ -66639,8 +67134,10 @@ Write-Host "Registry setting DisableWpbtExecution configured to 1." -ForegroundC
           <xhtml:strong>Policy</xhtml:strong>: <xhtml:code>Prevent installation of devices that match any of these device IDs</xhtml:code> -&gt; <xhtml:strong>Enabled</xhtml:strong>
           <xhtml:em> Click </xhtml:em>
           <xhtml:em>Show...</xhtml:em>
-          <xhtml:em> and enter: `PCI\CC_0C0A` and `PCI\CC_0C0010` </xhtml:em> Check <xhtml:strong>Also apply to matching devices that are already installed</xhtml:strong> -&gt; <xhtml:strong>Enabled</xhtml:strong> (value 1 / True)</xhtml:p>
-        <xhtml:h4>4. Kernel DMA Protection</xhtml:h4>
+          <xhtml:em> and enter: </xhtml:em>
+          <xhtml:code>PCI\CC_0C0A</xhtml:code>
+          <xhtml:em> `PCI\CC_0C0010` </xhtml:em> Check <xhtml:strong>Also apply to matching devices that are already installed</xhtml:strong> -&gt; <xhtml:strong>Enabled</xhtml:strong> (value 1 / True)</xhtml:p>
+        <xhtml:h4>4. Kernel DMA Protection (Block All)</xhtml:h4>
         <xhtml:p>Navigate to: <xhtml:code>Computer Configuration\Administrative Templates\System\Kernel DMA Protection</xhtml:code>
           <xhtml:em> </xhtml:em>
           <xhtml:em>Policy</xhtml:em>
@@ -66650,13 +67147,13 @@ Write-Host "Registry setting DisableWpbtExecution configured to 1." -ForegroundC
           <xhtml:strong>Enumeration policy</xhtml:strong>: Set to <xhtml:strong>Block all</xhtml:strong> (value 0)</xhtml:p>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Run the following scripts locally to apply DMA, Sleep, and BitLocker USB registry parameters.</xhtml:p>
+        <xhtml:p>Run the following scripts locally to apply DMA, Sleep, Device Restriction, and BitLocker USB registry parameters.</xhtml:p>
         <xhtml:p>
           <xhtml:a href="implementation_scripts/Set-DMAPhysicalSecurity.ps1">Download Script: Set-DMAPhysicalSecurity.ps1</xhtml:a>
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Set-DMAPhysicalSecurity.ps1
-# Description: Hardens local registry keys to mitigate DMA attacks, disable standby sleep states, and restrict unencrypted USB writing.
+# Description: Hardens local registry keys to mitigate DMA attacks, disable standby sleep states, enforce wake password, and restrict unencrypted USB writing.
 
 Write-Host "Applying DMA and physical security hardening..." -ForegroundColor Cyan
 
@@ -66693,7 +67190,7 @@ if (-not (Test-Path $FvePolicyPath)) {
 Set-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -Value 1 -Type DWord
 Write-Host "[+] BitLocker DMA under lock and unencrypted USB write blocks configured." -ForegroundColor Green
 
-# 4. Device Installation Restrictions (Block SBP-2 class and PCI\CC_0C0A device ID)
+# 4. Device Installation Restrictions (Block SBP-2 class and PCI device IDs)
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 if (-not (Test-Path $RestrictPath)) {
     New-Item -Path $RestrictPath -Force | Out-Null
@@ -66733,9 +67230,10 @@ Write-Host "DMA and physical security settings applied successfully." -Foregroun
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Test-DMAPhysicalSecurity.ps1
-# Description: Audits local registry configuration for standby settings, DMA protection under lock, USB restrictions, and blocked device setup classes.
+# Description: Audits local registry configuration for standby settings, wake password, DMA protection under lock, USB restrictions, and blocked device setup classes/IDs.
 
 Write-Host "--- Auditing DMA and Physical Security ---" -ForegroundColor Cyan
+$isCompliant = $true
 
 # 1. Audit Standby Settings
 $SleepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab"
@@ -66745,70 +67243,96 @@ $DcSleep = Get-ItemProperty -Path $SleepPath -Name "DCSettingIndex" -ErrorAction
 $AcSleepVal = if ($AcSleep) { $AcSleep.ACSettingIndex } else { 1 }
 $DcSleepVal = if ($DcSleep) { $DcSleep.DCSettingIndex } else { 1 }
 
-$AcSleepColor = if ($AcSleepVal -eq 0) { "Green" } else { "Red" }
-$DcSleepColor = if ($DcSleepVal -eq 0) { "Green" } else { "Red" }
+$AcSleepColor = if ($AcSleepVal -eq 0) { "Green" } else { $isCompliant = $false; "Red" }
+$DcSleepColor = if ($DcSleepVal -eq 0) { "Green" } else { $isCompliant = $false; "Red" }
 
-Write-Host "    - Standby Sleep State (Plugged In) Setting: $AcSleepVal (Required = 0 [Disabled])" -ForegroundColor $AcSleepColor
-Write-Host "    - Standby Sleep State (On Battery) Setting: $DcSleepVal (Required = 0 [Disabled])" -ForegroundColor $DcSleepColor
+Write-Host "    - Standby Sleep State (Plugged In) Setting: $($AcSleepVal) (Required = 0 [Disabled])" -ForegroundColor $AcSleepColor
+Write-Host "    - Standby Sleep State (On Battery) Setting: $($DcSleepVal) (Required = 0 [Disabled])" -ForegroundColor $DcSleepColor
 
-# 2. Audit BitLocker Settings
+# 2. Audit Wake Password Requirement
+$WakePath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\0e796bdb-100d-47d6-a2d5-f7d2daa51f51"
+$AcWake = Get-ItemProperty -Path $WakePath -Name "ACSettingIndex" -ErrorAction SilentlyContinue
+$DcWake = Get-ItemProperty -Path $WakePath -Name "DCSettingIndex" -ErrorAction SilentlyContinue
+
+$AcWakeVal = if ($AcWake) { $AcWake.ACSettingIndex } else { 0 }
+$DcWakeVal = if ($DcWake) { $DcWake.DCSettingIndex } else { 0 }
+
+$AcWakeColor = if ($AcWakeVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+$DcWakeColor = if ($DcWakeVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+
+Write-Host "    - Wake Password Required (Plugged In): $($AcWakeVal) (Required = 1 [Enabled])" -ForegroundColor $AcWakeColor
+Write-Host "    - Wake Password Required (On Battery): $($DcWakeVal) (Required = 1 [Enabled])" -ForegroundColor $DcWakeColor
+
+# 3. Audit BitLocker Settings
 $FvePath = "HKLM:\SOFTWARE\Policies\Microsoft\FVE"
 $DmaLock = Get-ItemProperty -Path $FvePath -Name "DisableExternalDMAUnderLock" -ErrorAction SilentlyContinue
 $DmaLockVal = if ($DmaLock) { $DmaLock.DisableExternalDMAUnderLock } else { 0 }
-$DmaLockColor = if ($DmaLockVal -eq 1) { "Green" } else { "Red" }
+$DmaLockColor = if ($DmaLockVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
+
+$CrossOrg = Get-ItemProperty -Path $FvePath -Name "RDVDenyCrossOrg" -ErrorAction SilentlyContinue
+$CrossOrgVal = if ($CrossOrg) { $CrossOrg.RDVDenyCrossOrg } else { 1 }
+$CrossOrgColor = if ($CrossOrgVal -eq 0) { "Green" } else { $isCompliant = $false; "Red" }
 
 $FvePolicyPath = "HKLM:\System\CurrentControlSet\Policies\Microsoft\FVE"
 $UsbWrite = Get-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -ErrorAction SilentlyContinue
 $UsbWriteVal = if ($UsbWrite) { $UsbWrite.RDVDenyWriteAccess } else { 0 }
-$UsbWriteColor = if ($UsbWriteVal -eq 1) { "Green" } else { "Red" }
+$UsbWriteColor = if ($UsbWriteVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
 
-Write-Host "    - Disable DMA Under Lock: $DmaLockVal (Required = 1)" -ForegroundColor $DmaLockColor
-Write-Host "    - USB Unencrypted Write Block: $UsbWriteVal (Required = 1)" -ForegroundColor $UsbWriteColor
+Write-Host "    - Disable DMA Under Lock: $($DmaLockVal) (Required = 1)" -ForegroundColor $DmaLockColor
+Write-Host "    - USB Deny Cross Org Removable Drives: $($CrossOrgVal) (Required = 0)" -ForegroundColor $CrossOrgColor
+Write-Host "    - USB Unencrypted Write Block: $($UsbWriteVal) (Required = 1)" -ForegroundColor $UsbWriteColor
 
-# 3. Audit Device Restriction Settings
+# 4. Audit Device Restriction Settings
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 $DenyDev = Get-ItemProperty -Path $RestrictPath -Name "DenyDeviceClasses" -ErrorAction SilentlyContinue
 $DenyDevVal = if ($DenyDev) { $DenyDev.DenyDeviceClasses } else { 0 }
-$DenyDevColor = if ($DenyDevVal -eq 1) { "Green" } else { "Red" }
+$DenyDevColor = if ($DenyDevVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
 
 $DenyID = Get-ItemProperty -Path $RestrictPath -Name "DenyDeviceIDs" -ErrorAction SilentlyContinue
 $DenyIDVal = if ($DenyID) { $DenyID.DenyDeviceIDs } else { 0 }
-$DenyIDColor = if ($DenyIDVal -eq 1) { "Green" } else { "Red" }
+$DenyIDColor = if ($DenyIDVal -eq 1) { "Green" } else { $isCompliant = $false; "Red" }
 
-Write-Host "    - Prevent Device Setup Class Installation: $DenyDevVal (Required = 1)" -ForegroundColor $DenyDevColor
-Write-Host "    - Prevent Device ID Installation: $DenyIDVal (Required = 1)" -ForegroundColor $DenyIDColor
+Write-Host "    - Prevent Device Setup Class Installation: $($DenyDevVal) (Required = 1)" -ForegroundColor $DenyDevColor
+Write-Host "    - Prevent Device ID Installation: $($DenyIDVal) (Required = 1)" -ForegroundColor $DenyIDColor
 
 $DenyClassPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceClasses"
 $Sbp2 = Get-ItemProperty -Path $DenyClassPath -Name "1" -ErrorAction SilentlyContinue
 $Sbp2Val = if ($Sbp2) { $Sbp2."1" } else { "" }
-$Sbp2Color = if ($Sbp2Val -eq "{d48179be-ec20-11d1-b6b8-00c04fa372a7}") { "Green" } else { "Red" }
+$Sbp2Color = if ($Sbp2Val -eq "{d48179be-ec20-11d1-b6b8-00c04fa372a7}") { "Green" } else { $isCompliant = $false; "Red" }
 
-Write-Host "    - Blocked SBP-2 Setup Class: '$Sbp2Val' (Required = '{d48179be-ec20-11d1-b6b8-00c04fa372a7}')" -ForegroundColor $Sbp2Color
+Write-Host "    - Blocked SBP-2 Setup Class: '$($Sbp2Val)' (Required = '{d48179be-ec20-11d1-b6b8-00c04fa372a7}')" -ForegroundColor $Sbp2Color
 
 $DenyIDPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions\DenyDeviceIDs"
 $DId1 = Get-ItemProperty -Path $DenyIDPath -Name "1" -ErrorAction SilentlyContinue
 $DId1Val = if ($DId1) { $DId1."1" } else { "" }
-$DId1Color = if ($DId1Val -eq "PCI\CC_0C0A") { "Green" } else { "Red" }
+$DId1Color = if ($DId1Val -eq "PCI\CC_0C0A") { "Green" } else { $isCompliant = $false; "Red" }
 
 $DId2 = Get-ItemProperty -Path $DenyIDPath -Name "2" -ErrorAction SilentlyContinue
 $DId2Val = if ($DId2) { $DId2."2" } else { "" }
-$DId2Color = if ($DId2Val -eq "PCI\CC_0C0010") { "Green" } else { "Red" }
+$DId2Color = if ($DId2Val -eq "PCI\CC_0C0010") { "Green" } else { $isCompliant = $false; "Red" }
 
-Write-Host "    - Blocked Device ID PCI\CC_0C0A: '$DId1Val' (Required = 'PCI\CC_0C0A')" -ForegroundColor $DId1Color
-Write-Host "    - Blocked Device ID PCI\CC_0C0010: '$DId2Val' (Required = 'PCI\CC_0C0010')" -ForegroundColor $DId2Color
+Write-Host "    - Blocked Device ID PCI\CC_0C0A: '$($DId1Val)' (Required = 'PCI\CC_0C0A')" -ForegroundColor $DId1Color
+Write-Host "    - Blocked Device ID PCI\CC_0C0010: '$($DId2Val)' (Required = 'PCI\CC_0C0010')" -ForegroundColor $DId2Color
 
-# 4. Audit Kernel DMA Protection Setting
+# 5. Audit Kernel DMA Protection Setting
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 $EnumPol = Get-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -ErrorAction SilentlyContinue
 $EnumPolVal = if ($EnumPol) { $EnumPol.DeviceEnumerationPolicy } else { 2 }
-$EnumPolColor = if ($EnumPolVal -eq 0) { "Green" } else { "Red" }
+$EnumPolColor = if ($EnumPolVal -eq 0) { "Green" } else { $isCompliant = $false; "Red" }
 
-Write-Host "    - Kernel DMA Protection Policy: $EnumPolVal (Required = 0 [Block all])" -ForegroundColor $EnumPolColor</xhtml:code>
+Write-Host "    - Kernel DMA Protection Policy: $($EnumPolVal) (Required = 0 [Block all])" -ForegroundColor $EnumPolColor
+
+# 6. Final Compliance Assessment
+if ($isCompliant) {
+    Write-Host "[+] Audit Result: SECURE - Endpoint DMA and physical security controls are fully compliant." -ForegroundColor Green
+} else {
+    Write-Host "[-] Audit Result: VULNERABLE - One or more endpoint DMA or physical security settings do not meet baseline requirements." -ForegroundColor Red
+}</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
       <fix system="urn:xccdf:fix:script:powershell"># Set-DMAPhysicalSecurity.ps1
-# Description: Hardens local registry keys to mitigate DMA attacks, disable standby sleep states, and restrict unencrypted USB writing.
+# Description: Hardens local registry keys to mitigate DMA attacks, disable standby sleep states, enforce wake password, and restrict unencrypted USB writing.
 
 Write-Host "Applying DMA and physical security hardening..." -ForegroundColor Cyan
 
@@ -66845,7 +67369,7 @@ if (-not (Test-Path $FvePolicyPath)) {
 Set-ItemProperty -Path $FvePolicyPath -Name "RDVDenyWriteAccess" -Value 1 -Type DWord
 Write-Host "[+] BitLocker DMA under lock and unencrypted USB write blocks configured." -ForegroundColor Green
 
-# 4. Device Installation Restrictions (Block SBP-2 class and PCI\CC_0C0A device ID)
+# 4. Device Installation Restrictions (Block SBP-2 class and PCI device IDs)
 $RestrictPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeviceInstall\Restrictions"
 if (-not (Test-Path $RestrictPath)) {
     New-Item -Path $RestrictPath -Force | Out-Null

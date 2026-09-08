@@ -1,7 +1,7 @@
-# Set-PawDMAPhysicalSecurity.ps1
-# Description: Hardens local registry keys on PAWs to mitigate DMA attacks, disable standby sleep states, enforce wake password, restrict device classes/IDs, and block unencrypted USB writing.
+# Configure-DcDMAPhysicalSecurity.ps1
+# Description: Hardens local registry keys on Domain Controllers to mitigate DMA attacks, disable standby sleep states, enforce wake password, restrict device classes/IDs, and block unencrypted USB writing.
 
-Write-Host "Applying PAW DMA and physical security hardening..." -ForegroundColor Cyan
+Write-Host "Applying Domain Controller DMA and physical security hardening..." -ForegroundColor Cyan
 
 # 1. Disable Standby Sleep States (S1-S3)
 $SleepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab"
@@ -63,7 +63,7 @@ Set-ItemProperty -Path $DenyIdPath -Name "3" -Value "PCI\CC_0607" -Type String
 Set-ItemProperty -Path $DenyIdPath -Name "4" -Value "PCI\CC_0605" -Type String
 Write-Host "[+] Device installation blocks for SBP-2, 1394 host controllers, Thunderbolt, and PCI bridges enabled." -ForegroundColor Green
 
-# 5. Kernel DMA Protection (Block all external DMA permanently for PAWs)
+# 5. Kernel DMA Protection (Block all external DMA)
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 if (-not (Test-Path $KDmaPath)) {
     New-Item -Path $KDmaPath -Force | Out-Null
@@ -71,4 +71,4 @@ if (-not (Test-Path $KDmaPath)) {
 Set-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
 Write-Host "[+] Kernel DMA Protection DeviceEnumerationPolicy set to 0 (Block all)." -ForegroundColor Green
 
-Write-Host "PAW DMA and physical security settings applied successfully." -ForegroundColor Green
+Write-Host "Domain Controller DMA and physical security settings applied successfully." -ForegroundColor Green

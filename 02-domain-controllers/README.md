@@ -199,3 +199,5 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to enforce the Early Launch Antimalware (ELAM) boot-start driver initialization policy on Domain Controllers to prevent kernel-level rootkits, BYOVD exploits, and unverified driver loading at startup.
 * **[REQ-DC-157 - UEFI Firmware Security Hardening on Domain Controllers](configure-uefi-security.md)**
   Requirement to enforce hardware-rooted platform integrity, supervisor password protection, native UEFI mode, boot order lockdown, CPU virtualization, TPM 2.0, and out-of-band management interface hardening across physical and virtual Domain Controllers.
+* **[REQ-DC-158 - Harden DMA and Physical Security for Domain Controllers](harden-dma-and-physical-security.md)**
+  Requirement to mitigate physical access and direct memory access threat vectors by disabling standby sleep states (S1-S3), enforcing wake passwords, blocking DMA device enumeration under lock, disabling unapproved device classes and hardware IDs, and blocking unencrypted USB write access.

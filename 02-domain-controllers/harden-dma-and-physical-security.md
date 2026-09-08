@@ -1,8 +1,8 @@
-# [REQ-PAW-011] Harden DMA and Physical Security for PAWs
+# [REQ-DC-158] Harden DMA and Physical Security for Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Domain Controllers, refer to [REQ-DC-158](../02-domain-controllers/harden-dma-and-physical-security.md); for Tier 2 Client Workstations and Member Servers, refer to [REQ-END-017](../08-endpoints/harden-dma-and-physical-security.md)).*
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Domain Controllers (both physical bare-metal enterprise servers and hypervisor-hosted virtual machines). *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-011](../07-paws/harden-dma-and-physical-security.md); for Tier 2 Client Workstations and Member Servers, refer to [REQ-END-017](../08-endpoints/harden-dma-and-physical-security.md)).*
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025.
 
 ---
 
@@ -46,22 +46,22 @@
 ---
 
 ## Rationale
-Privileged Access Workstations (PAWs) represent Tier 0 boundary systems. Because they handle the highest levels of domain authorization, physical threat vectors must be mitigated to the absolute maximum threshold:
+Domain Controllers represent Tier 0 identity stores hosting the directory database (`NTDS.dit`), Kerberos Ticket Granting Service keys (`krbtgt`), and password hashes for all enterprise principals. While enterprise servers reside in datacenters or branch office wiring closets, physical access threats remain a critical attack vector:
 
-1. **Direct Memory Access (DMA) Defenses**: External interfaces (e.g., Thunderbolt, USB4, PCIe ExpressCard, FireWire) allow attached devices to bypass the OS kernel and read physical RAM contents directly via high-speed buses. Attackers use physical DMA exploitation devices (such as PCILeech) to dump memory-resident Kerberos TGT tickets, NTLM hashes, and LSA secrets:
-   * **Device Setup Class Blocking**: Disabling the SBP-2 setup class (`{d48179be-ec20-11d1-b6b8-00c04fa372a7}`) and the IEEE 1394 host controller class (`{6bdd1fc1-810f-11d0-bec7-08002be2092f}`) prevents Windows from binding drivers to FireWire storage and controllers.
-   * **Hardware ID Blocking**: Explicitly blocking hardware IDs `PCI\CC_0C0A` (Thunderbolt), `PCI\CC_0C0010` (1394 OHCI FireWire), `PCI\CC_0607` (CardBus), and `PCI\CC_0605` (PCMCIA) halts driver installation for unauthorized high-speed expansion buses at the PCI enumeration layer.
-   * **BitLocker DMA Under Lock**: Enforcing `DisableExternalDMAUnderLock` blocks DMA device operations whenever the PAW workstation is locked, closing the physical window for drive-by attacks on unattended stations.
-   * **Tightened Enumeration Policy on PAWs**: While standard enterprise endpoints might permit external DMA after user authentication, PAWs enforce a strict **Block all** policy (`DeviceEnumerationPolicy = 0`). External peripherals whose drivers do not natively support DMA-remapping isolation are permanently prevented from accessing system memory.
-2. **Cold Boot Exploits & RAM Decay**: Dynamic RAM retains memory contents for seconds or minutes following power loss, especially when cooled with aerosol duster or liquid nitrogen. In standard standby states (S1-S3), the RAM chips remain continuously powered and active. If a PAW is stolen or accessed while in standby, BitLocker master keys and volatile credentials can be read directly from memory. Disabling standby states forces the system to either remain active or transition to Hibernation (S4)/Shutdown, where RAM contents are encrypted on the BitLocker volume and protected by the TPM 2.0 PCR baseline. Enforcing a password on resume guarantees re-authentication upon wake.
-3. **USB Exfiltration Protection**: Restricting write access on removable drives (`RDVDenyWriteAccess`) ensures administrative materials, directory backups, or sensitive credentials cannot be copied to unencrypted USB media. Setting `RDVDenyCrossOrg = 0` prevents cross-organization removable storage exemptions.
+1. **Direct Memory Access (DMA) Threat Vectors**: Hot-plug expansion ports and external peripheral interfaces (such as PCIe hot-plug slots, Thunderbolt, USB4, or external storage expansion cards) permit connected hardware to bypass operating system access controls and perform direct read/write operations against physical DRAM. Attackers utilizing physical DMA consoles (e.g., PCILeech or malicious PCIe expansion cards inserted into physical server chassis) can dump LSASS memory and extract volatile Kerberos keys:
+   * **Device Setup Class Lockdown**: Disabling the SBP-2 protocol class (`{d48179be-ec20-11d1-b6b8-00c04fa372a7}`) and IEEE 1394 host controller class (`{6bdd1fc1-810f-11d0-bec7-08002be2092f}`) prevents Windows Server from mounting legacy FireWire storage devices.
+   * **Hardware ID Blocking**: Explicitly blocking hardware IDs `PCI\CC_0C0A` (Thunderbolt), `PCI\CC_0C0010` (FireWire), `PCI\CC_0607` (CardBus), and `PCI\CC_0605` (PCMCIA) prevents the installation of unapproved expansion controllers at the hardware bus layer.
+   * **BitLocker DMA Under Lock**: Enforcing `DisableExternalDMAUnderLock` blocks DMA device enumeration when the server console is locked, mitigating drive-by hardware attacks on unattended consoles.
+   * **Kernel DMA Protection Enforcement**: Enforcing `DeviceEnumerationPolicy = 0` (Block all) guarantees that any peripheral device whose drivers do not explicitly support IOMMU DMA remapping is strictly blocked from executing DMA memory transfers.
+2. **Cold Boot & Standby Attacks**: In standard standby sleep states (S1-S3), system RAM remains powered and unencrypted. If an attacker gains physical access to a server in a standby state, they can execute cold-boot extraction or memory analysis to harvest sensitive directory keys. Domain Controllers must operate continuously in full runtime execution states. Disabling standby sleep states forces servers to remain fully operational or enter clean shutdown, ensuring BitLocker encryption keys are sealed by the TPM 2.0 module. Enforcing wake password verification guarantees that any power-state transition requires re-authentication.
+3. **Physical USB Exfiltration of Directory Databases**: Rogue insiders or unauthorized datacenter personnel with physical console access can insert USB flash drives to exfiltrate `ntds.dit`, Active Directory backups, or system state data. Enforcing `RDVDenyWriteAccess = 1` prevents writing to removable drives unless protected by BitLocker, while `RDVDenyCrossOrg = 0` eliminates unauthorized cross-organization exceptions.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Standby and Resume**: Standby states (S1-S3) are disabled. PAWs will hibernate when closed or idle. Resuming from hibernation requires a full TPM validation, Secure Boot check, and pre-boot PIN verification, which adds a few seconds during startup.
-* **External Device Blocking**: External expansion devices requiring direct DMA (such as external GPUs, specialized expansion chassis, legacy docks, or FireWire adapters) are blocked. Administrators must connect certified peripherals that support IOMMU DMA remapping or use native motherboard connections.
-* **Removable Storage Restrictions**: Administrative files cannot be written to unencrypted USB flash drives. File distribution must proceed through authorized internal administrative shares or dedicated deployment infrastructure.
+* **Continuous Server Operation**: Domain Controllers are designed for continuous 24/7 service. Disabling standby states (S1-S3) prevents power management misconfigurations or UPS battery events from placing the DC into an unmonitored sleep state, maintaining directory availability.
+* **Peripheral Compatibility**: External expansion chassis or non-certified peripherals requiring direct DMA without IOMMU remapping support will be blocked. Enterprise rack-mounted hardware utilizing certified internal PCIe backplanes is fully compatible.
+* **Storage Operations**: Local write access to unencrypted USB flash drives is blocked at the console. Backup operations must proceed via automated enterprise backup solutions, dedicated network shares, or BitLocker To Go encrypted drives.
 
 ---
 
@@ -70,7 +70,7 @@ Privileged Access Workstations (PAWs) represent Tier 0 boundary systems. Because
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit the PAW GPO (e.g., `GPO_Hardening_PAW`).
+2. Edit the Domain Controllers GPO (e.g., `Default Domain Controllers Policy` or `GPO_Hardening_DC`).
 3. Configure the following settings:
 
 #### 1. Power Management (Disable Standby & Require Wake Password)
@@ -117,15 +117,15 @@ Navigate to:
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following scripts locally on the PAW to apply DMA, Sleep, Device Restriction, and BitLocker USB registry parameters.
+Run the following scripts locally on the Domain Controller to apply DMA, Sleep, Device Restriction, and BitLocker USB registry parameters.
 
-[Download Script: Set-PawDMAPhysicalSecurity.ps1](implementation_scripts/Set-PawDMAPhysicalSecurity.ps1)
+[Download Script: Configure-DcDMAPhysicalSecurity.ps1](implementation_scripts/Configure-DcDMAPhysicalSecurity.ps1)
 
 ```powershell
-# Set-PawDMAPhysicalSecurity.ps1
-# Description: Hardens local registry keys on PAWs to mitigate DMA attacks, disable standby sleep states, enforce wake password, restrict device classes/IDs, and block unencrypted USB writing.
+# Configure-DcDMAPhysicalSecurity.ps1
+# Description: Hardens local registry keys on Domain Controllers to mitigate DMA attacks, disable standby sleep states, enforce wake password, restrict device classes/IDs, and block unencrypted USB writing.
 
-Write-Host "Applying PAW DMA and physical security hardening..." -ForegroundColor Cyan
+Write-Host "Applying Domain Controller DMA and physical security hardening..." -ForegroundColor Cyan
 
 # 1. Disable Standby Sleep States (S1-S3)
 $SleepPath = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\abfc2519-3608-4c2a-94ea-171b0ed546ab"
@@ -187,7 +187,7 @@ Set-ItemProperty -Path $DenyIdPath -Name "3" -Value "PCI\CC_0607" -Type String
 Set-ItemProperty -Path $DenyIdPath -Name "4" -Value "PCI\CC_0605" -Type String
 Write-Host "[+] Device installation blocks for SBP-2, 1394 host controllers, Thunderbolt, and PCI bridges enabled." -ForegroundColor Green
 
-# 5. Kernel DMA Protection (Block all external DMA permanently for PAWs)
+# 5. Kernel DMA Protection (Block all external DMA)
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 if (-not (Test-Path $KDmaPath)) {
     New-Item -Path $KDmaPath -Force | Out-Null
@@ -195,17 +195,17 @@ if (-not (Test-Path $KDmaPath)) {
 Set-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -Value 0 -Type DWord
 Write-Host "[+] Kernel DMA Protection DeviceEnumerationPolicy set to 0 (Block all)." -ForegroundColor Green
 
-Write-Host "PAW DMA and physical security settings applied successfully." -ForegroundColor Green
+Write-Host "Domain Controller DMA and physical security settings applied successfully." -ForegroundColor Green
 ```
 
-*To audit local PAW DMA and physical security configuration:*
-[Download Script: Test-PawDMAPhysicalSecurity.ps1](audit_scripts/Test-PawDMAPhysicalSecurity.ps1)
+*To audit local Domain Controller DMA and physical security configuration:*
+[Download Script: Test-DcDMAPhysicalSecurity.ps1](audit_scripts/Test-DcDMAPhysicalSecurity.ps1)
 
 ```powershell
-# Test-PawDMAPhysicalSecurity.ps1
-# Description: Audits local registry configuration for standby settings, wake password, DMA protection under lock, USB restrictions, and blocked device classes/IDs on PAWs.
+# Test-DcDMAPhysicalSecurity.ps1
+# Description: Audits local registry configuration for standby settings, wake password, DMA protection under lock, USB restrictions, and blocked device classes/IDs on Domain Controllers.
 
-Write-Host "--- Auditing PAW DMA and Physical Security ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Domain Controller DMA and Physical Security ---" -ForegroundColor Cyan
 $isCompliant = $true
 
 # 1. Audit Standby Settings
@@ -302,7 +302,7 @@ Write-Host "    - Blocked Device ID PCI\CC_0C0010: '$($DId2Val)' (Required = 'PC
 Write-Host "    - Blocked Device ID PCI\CC_0607: '$($DId3Val)' (Required = 'PCI\CC_0607')" -ForegroundColor $DId3Color
 Write-Host "    - Blocked Device ID PCI\CC_0605: '$($DId4Val)' (Required = 'PCI\CC_0605')" -ForegroundColor $DId4Color
 
-# 5. Audit Kernel DMA Protection Setting (Stricter for PAWs)
+# 5. Audit Kernel DMA Protection Setting
 $KDmaPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\KernelDMAProtection"
 $EnumPol = Get-ItemProperty -Path $KDmaPath -Name "DeviceEnumerationPolicy" -ErrorAction SilentlyContinue
 $EnumPolVal = if ($EnumPol) { $EnumPol.DeviceEnumerationPolicy } else { 2 }
@@ -312,15 +312,15 @@ Write-Host "    - Kernel DMA Protection Policy: $($EnumPolVal) (Required = 0 [Bl
 
 # 6. Final Compliance Assessment
 if ($isCompliant) {
-    Write-Host "[+] Audit Result: SECURE - PAW DMA and physical security controls are fully compliant." -ForegroundColor Green
+    Write-Host "[+] Audit Result: SECURE - Domain Controller DMA and physical security controls are fully compliant." -ForegroundColor Green
 } else {
-    Write-Host "[-] Audit Result: VULNERABLE - One or more PAW DMA or physical security settings do not meet baseline requirements." -ForegroundColor Red
+    Write-Host "[-] Audit Result: VULNERABLE - One or more Domain Controller DMA or physical security settings do not meet baseline requirements." -ForegroundColor Red
 }
 ```
 
 ---
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10/11 Benchmark**: Section 18.2.1 (BitLocker Drive Encryption), Section 18.8.19.1 (Kernel DMA Protection), Section 18.8.21.3 (Device Installation Restrictions)
-* **ANSSI AD Hardening Guide**: Recommendation R3 & R58 (Privileged Access Workstations hardware interface security and storage encryption)
+* **CIS Microsoft Windows Server Benchmark**: Section 18.2.1 (BitLocker Drive Encryption), Section 18.8.19.1 (Kernel DMA Protection), Section 18.8.21.3 (Device Installation Restrictions)
+* **ANSSI AD Hardening Guide**: Recommendations R4 & R58 (Domain Controller host security, storage encryption, and physical peripheral restrictions)
 * **NIST SP 800-207**: Zero Trust Architecture - Physical Host Boundary Integrity
