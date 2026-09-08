@@ -212,7 +212,38 @@ To prevent initial access and lateral movement, the following unitary technical 
     Configures printing security, RPC over TCP communication, Point and Print restrictions, and Redirection Guard, and disables incoming print spooler connections.
 
 26. **[REQ-END-026 - Configure System Administrative Templates](configure-system-administrative-templates.md)**
-    Enforces 91 administrative template settings including SMBv1 driver blocks, event log size extensions, and Windows Update scheduling.
+    Coordinates system-wide administrative template policies across network protocols, session security, diagnostic data collection, application deployment, event log capacities, and update schedules.
+    * **[REQ-END-179 - Administrative Templates: Disable SMBv1 Protocol Components](admin-templates/configure-end-at-smbv1.md)**
+    * **[REQ-END-180 - Administrative Templates: Configure NetBT Node Type and Name Release](admin-templates/configure-end-at-netbt-nodetype.md)**
+    * **[REQ-END-181 - Administrative Templates: MSS IP Source Routing and ICMP Redirects](admin-templates/configure-end-at-mss-ip-source-routing.md)**
+    * **[REQ-END-182 - Administrative Templates: MSS System and Session Security Protections](admin-templates/configure-end-at-mss-system-protections.md)**
+    * **[REQ-END-183 - Administrative Templates: Prevent Device Metadata Retrieval from Network](admin-templates/configure-end-at-device-metadata.md)**
+    * **[REQ-END-184 - Administrative Templates: Enforce Group Policy Background Processing](admin-templates/configure-end-at-gp-processing.md)**
+    * **[REQ-END-185 - Administrative Templates: Disable Cross-Device Experiences](admin-templates/configure-end-at-cross-device-experiences.md)**
+    * **[REQ-END-186 - Administrative Templates: Restrict Internet Communication and Web Downloads](admin-templates/configure-end-at-internet-communication.md)**
+    * **[REQ-END-187 - Administrative Templates: Block Custom SSPs and APs from Loading into LSASS](admin-templates/configure-end-at-lsa-custom-ssps.md)**
+    * **[REQ-END-188 - Administrative Templates: Logon Display and Credential Restrictions](admin-templates/configure-end-at-logon-display-options.md)**
+    * **[REQ-END-189 - Administrative Templates: Disable Connected Standby Network Connectivity](admin-templates/configure-end-at-power-connected-standby.md)**
+    * **[REQ-END-190 - Administrative Templates: Disable Remote Assistance](admin-templates/configure-end-at-remote-assistance.md)**
+    * **[REQ-END-191 - Administrative Templates: Enable RPC Endpoint Mapper Client Authentication](admin-templates/configure-end-at-rpc-endpoint-mapper-auth.md)**
+    * **[REQ-END-192 - Administrative Templates: Configure Windows Time Service NTP Client and Server](admin-templates/configure-end-at-w32time-ntp-client.md)**
+    * **[REQ-END-193 - Administrative Templates: App Package Deployment Restrictions](admin-templates/configure-end-at-appx-deployment-restrictions.md)**
+    * **[REQ-END-194 - Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing](admin-templates/configure-end-at-biometrics-anti-spoofing.md)**
+    * **[REQ-END-195 - Administrative Templates: Disable Cloud Consumer Account State Content](admin-templates/configure-end-at-cloud-consumer-content.md)**
+    * **[REQ-END-196 - Administrative Templates: Require PIN for Connect Wireless Pairing](admin-templates/configure-end-at-connect-pin-pairing.md)**
+    * **[REQ-END-197 - Administrative Templates: Credential User Interface Security Protections](admin-templates/configure-end-at-credui-protections.md)**
+    * **[REQ-END-198 - Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions](admin-templates/configure-end-at-data-collection-preview-builds.md)**
+    * **[REQ-END-199 - Administrative Templates: App Installer Protocol and Execution Controls](admin-templates/configure-end-at-app-installer-controls.md)**
+    * **[REQ-END-200 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies](admin-templates/configure-end-at-event-log-sizes.md)**
+    * **[REQ-END-201 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security](admin-templates/configure-end-at-file-explorer-motw.md)**
+    * **[REQ-END-202 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls](admin-templates/configure-end-at-internet-explorer-retirement.md)**
+    * **[REQ-END-203 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides](admin-templates/configure-end-at-defender-protection-options.md)**
+    * **[REQ-END-204 - Administrative Templates: Windows Search and Cortana Privacy Restrictions](admin-templates/configure-end-at-search-cortana-restrictions.md)**
+    * **[REQ-END-205 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions](admin-templates/configure-end-at-windows-store-restrictions.md)**
+    * **[REQ-END-206 - Administrative Templates: Disable Windows Widgets and News Feed](admin-templates/configure-end-at-windows-widgets-dsh.md)**
+    * **[REQ-END-207 - Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO)](admin-templates/configure-end-at-automatic-restart-signon.md)**
+    * **[REQ-END-208 - Administrative Templates: Windows Sandbox Clipboard and Network Isolation](admin-templates/configure-end-at-windows-sandbox-isolation.md)**
+    * **[REQ-END-209 - Administrative Templates: Windows Update Deferral and Automatic Installation Policies](admin-templates/configure-end-at-windows-update-policies.md)**
 
 27. **[REQ-END-027 - Configure AppLocker Policies](configure-applocker-policies.md)**
     Deploys AppLocker application control policies to restrict unauthorized software and script execution, and prevents default AppLocker bypasses.

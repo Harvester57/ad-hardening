@@ -208,7 +208,38 @@ This directory contains the physical isolation policies and operating system sec
     * **[REQ-PAW-166 - Disable WebClient Service for PAWs (WebClient)](services/disable-webclient.md)**
 
 29. **[REQ-PAW-029 - Configure System Administrative Templates for PAWs](configure-system-administrative-templates.md)**
-    Enforces custom administrative template settings including SMBv1 driver blocks and event log size extensions.
+    Coordinates system-wide administrative template policies across network protocols, session security, diagnostic data collection, application deployment, event log capacities, and update schedules for Tier 0 PAWs.
+    * **[REQ-PAW-168 - Administrative Templates: Disable SMBv1 Protocol Components for PAWs](admin-templates/configure-paw-at-smbv1.md)**
+    * **[REQ-PAW-169 - Administrative Templates: Configure NetBT Node Type and Name Release for PAWs](admin-templates/configure-paw-at-netbt-nodetype.md)**
+    * **[REQ-PAW-170 - Administrative Templates: MSS IP Source Routing and ICMP Redirects for PAWs](admin-templates/configure-paw-at-mss-ip-source-routing.md)**
+    * **[REQ-PAW-171 - Administrative Templates: MSS System and Session Security Protections for PAWs](admin-templates/configure-paw-at-mss-system-protections.md)**
+    * **[REQ-PAW-172 - Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs](admin-templates/configure-paw-at-device-metadata.md)**
+    * **[REQ-PAW-173 - Administrative Templates: Enforce Group Policy Background Processing for PAWs](admin-templates/configure-paw-at-gp-processing.md)**
+    * **[REQ-PAW-174 - Administrative Templates: Disable Cross-Device Experiences for PAWs](admin-templates/configure-paw-at-cross-device-experiences.md)**
+    * **[REQ-PAW-175 - Administrative Templates: Restrict Internet Communication and Web Downloads for PAWs](admin-templates/configure-paw-at-internet-communication.md)**
+    * **[REQ-PAW-176 - Administrative Templates: Block Custom SSPs and APs from Loading into LSASS for PAWs](admin-templates/configure-paw-at-lsa-custom-ssps.md)**
+    * **[REQ-PAW-177 - Administrative Templates: Logon Display and Credential Restrictions for PAWs](admin-templates/configure-paw-at-logon-display-options.md)**
+    * **[REQ-PAW-178 - Administrative Templates: Disable Connected Standby Network Connectivity for PAWs](admin-templates/configure-paw-at-power-connected-standby.md)**
+    * **[REQ-PAW-179 - Administrative Templates: Disable Remote Assistance for PAWs](admin-templates/configure-paw-at-remote-assistance.md)**
+    * **[REQ-PAW-180 - Administrative Templates: Enable RPC Endpoint Mapper Client Authentication for PAWs](admin-templates/configure-paw-at-rpc-endpoint-mapper-auth.md)**
+    * **[REQ-PAW-181 - Administrative Templates: Configure Windows Time Service NTP Client and Server for PAWs](admin-templates/configure-paw-at-w32time-ntp-client.md)**
+    * **[REQ-PAW-182 - Administrative Templates: App Package Deployment Restrictions for PAWs](admin-templates/configure-paw-at-appx-deployment-restrictions.md)**
+    * **[REQ-PAW-183 - Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing for PAWs](admin-templates/configure-paw-at-biometrics-anti-spoofing.md)**
+    * **[REQ-PAW-184 - Administrative Templates: Disable Cloud Consumer Account State Content for PAWs](admin-templates/configure-paw-at-cloud-consumer-content.md)**
+    * **[REQ-PAW-185 - Administrative Templates: Require PIN for Connect Wireless Pairing for PAWs](admin-templates/configure-paw-at-connect-pin-pairing.md)**
+    * **[REQ-PAW-186 - Administrative Templates: Credential User Interface Security Protections for PAWs](admin-templates/configure-paw-at-credui-protections.md)**
+    * **[REQ-PAW-187 - Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions for PAWs](admin-templates/configure-paw-at-data-collection-preview-builds.md)**
+    * **[REQ-PAW-188 - Administrative Templates: App Installer Protocol and Execution Controls for PAWs](admin-templates/configure-paw-at-app-installer-controls.md)**
+    * **[REQ-PAW-189 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs](admin-templates/configure-paw-at-event-log-sizes.md)**
+    * **[REQ-PAW-190 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs](admin-templates/configure-paw-at-file-explorer-motw.md)**
+    * **[REQ-PAW-191 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs](admin-templates/configure-paw-at-internet-explorer-retirement.md)**
+    * **[REQ-PAW-192 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs](admin-templates/configure-paw-at-defender-protection-options.md)**
+    * **[REQ-PAW-193 - Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs](admin-templates/configure-paw-at-search-cortana-restrictions.md)**
+    * **[REQ-PAW-194 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs](admin-templates/configure-paw-at-windows-store-restrictions.md)**
+    * **[REQ-PAW-195 - Administrative Templates: Disable Windows Widgets and News Feed for PAWs](admin-templates/configure-paw-at-windows-widgets-dsh.md)**
+    * **[REQ-PAW-196 - Administrative Templates: Disable Windows Automatic Restart Sign-On for PAWs](admin-templates/configure-paw-at-automatic-restart-signon.md)**
+    * **[REQ-PAW-197 - Administrative Templates: Windows Sandbox Clipboard and Network Isolation for PAWs](admin-templates/configure-paw-at-windows-sandbox-isolation.md)**
+    * **[REQ-PAW-198 - Administrative Templates: Windows Update Deferral and Automatic Installation Policies for PAWs](admin-templates/configure-paw-at-windows-update-policies.md)**
 
 30. **[REQ-PAW-030 - Enable UEFI Secure Boot for PAWs](enable-secure-boot.md)**
     Mandates hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on the operating system for PAWs.

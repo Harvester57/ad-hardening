@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 8058d0b | Generated: September 08, 2026</span>
+      <span>Commit: c71d5b6 | Generated: September 08, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -39837,7 +39837,38 @@ This directory contains the physical isolation policies and operating system sec
     * **[REQ-PAW-166 - Disable WebClient Service for PAWs (WebClient)](#07-paws-services-disable-webclient-md)**
 
 29. **[REQ-PAW-029 - Configure System Administrative Templates for PAWs](#07-paws-configure-system-administrative-templates-md)**
-    Enforces custom administrative template settings including SMBv1 driver blocks and event log size extensions.
+    Coordinates system-wide administrative template policies across network protocols, session security, diagnostic data collection, application deployment, event log capacities, and update schedules for Tier 0 PAWs.
+    * **[REQ-PAW-168 - Administrative Templates: Disable SMBv1 Protocol Components for PAWs](#07-paws-admin-templates-configure-paw-at-smbv1-md)**
+    * **[REQ-PAW-169 - Administrative Templates: Configure NetBT Node Type and Name Release for PAWs](#07-paws-admin-templates-configure-paw-at-netbt-nodetype-md)**
+    * **[REQ-PAW-170 - Administrative Templates: MSS IP Source Routing and ICMP Redirects for PAWs](#07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md)**
+    * **[REQ-PAW-171 - Administrative Templates: MSS System and Session Security Protections for PAWs](#07-paws-admin-templates-configure-paw-at-mss-system-protections-md)**
+    * **[REQ-PAW-172 - Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs](#07-paws-admin-templates-configure-paw-at-device-metadata-md)**
+    * **[REQ-PAW-173 - Administrative Templates: Enforce Group Policy Background Processing for PAWs](#07-paws-admin-templates-configure-paw-at-gp-processing-md)**
+    * **[REQ-PAW-174 - Administrative Templates: Disable Cross-Device Experiences for PAWs](#07-paws-admin-templates-configure-paw-at-cross-device-experiences-md)**
+    * **[REQ-PAW-175 - Administrative Templates: Restrict Internet Communication and Web Downloads for PAWs](#07-paws-admin-templates-configure-paw-at-internet-communication-md)**
+    * **[REQ-PAW-176 - Administrative Templates: Block Custom SSPs and APs from Loading into LSASS for PAWs](#07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md)**
+    * **[REQ-PAW-177 - Administrative Templates: Logon Display and Credential Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-logon-display-options-md)**
+    * **[REQ-PAW-178 - Administrative Templates: Disable Connected Standby Network Connectivity for PAWs](#07-paws-admin-templates-configure-paw-at-power-connected-standby-md)**
+    * **[REQ-PAW-179 - Administrative Templates: Disable Remote Assistance for PAWs](#07-paws-admin-templates-configure-paw-at-remote-assistance-md)**
+    * **[REQ-PAW-180 - Administrative Templates: Enable RPC Endpoint Mapper Client Authentication for PAWs](#07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md)**
+    * **[REQ-PAW-181 - Administrative Templates: Configure Windows Time Service NTP Client and Server for PAWs](#07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md)**
+    * **[REQ-PAW-182 - Administrative Templates: App Package Deployment Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md)**
+    * **[REQ-PAW-183 - Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing for PAWs](#07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md)**
+    * **[REQ-PAW-184 - Administrative Templates: Disable Cloud Consumer Account State Content for PAWs](#07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md)**
+    * **[REQ-PAW-185 - Administrative Templates: Require PIN for Connect Wireless Pairing for PAWs](#07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md)**
+    * **[REQ-PAW-186 - Administrative Templates: Credential User Interface Security Protections for PAWs](#07-paws-admin-templates-configure-paw-at-credui-protections-md)**
+    * **[REQ-PAW-187 - Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md)**
+    * **[REQ-PAW-188 - Administrative Templates: App Installer Protocol and Execution Controls for PAWs](#07-paws-admin-templates-configure-paw-at-app-installer-controls-md)**
+    * **[REQ-PAW-189 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs](#07-paws-admin-templates-configure-paw-at-event-log-sizes-md)**
+    * **[REQ-PAW-190 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs](#07-paws-admin-templates-configure-paw-at-file-explorer-motw-md)**
+    * **[REQ-PAW-191 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs](#07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md)**
+    * **[REQ-PAW-192 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs](#07-paws-admin-templates-configure-paw-at-defender-protection-options-md)**
+    * **[REQ-PAW-193 - Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md)**
+    * **[REQ-PAW-194 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md)**
+    * **[REQ-PAW-195 - Administrative Templates: Disable Windows Widgets and News Feed for PAWs](#07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md)**
+    * **[REQ-PAW-196 - Administrative Templates: Disable Windows Automatic Restart Sign-On for PAWs](#07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md)**
+    * **[REQ-PAW-197 - Administrative Templates: Windows Sandbox Clipboard and Network Isolation for PAWs](#07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md)**
+    * **[REQ-PAW-198 - Administrative Templates: Windows Update Deferral and Automatic Installation Policies for PAWs](#07-paws-admin-templates-configure-paw-at-windows-update-policies-md)**
 
 30. **[REQ-PAW-030 - Enable UEFI Secure Boot for PAWs](#07-paws-enable-secure-boot-md)**
     Mandates hardware-rooted platform integrity checks, verifying that UEFI Secure Boot is active on the operating system for PAWs.
@@ -60791,9 +60822,9 @@ if ($IsVulnerable) {
 
 <div id="07-paws-configure-system-administrative-templates-md"></div>
 
-<div id="07-paws-configure-system-administrative-templates-md-req-paw-029-configure-system-administrative-templates-for-paws"></div>
+<div id="07-paws-configure-system-administrative-templates-md-configure-system-administrative-templates-for-paws"></div>
 
-# [REQ-PAW-029] Configure System Administrative Templates for PAWs
+# Configure System Administrative Templates for PAWs
 
 <div id="07-paws-configure-system-administrative-templates-md-target-scope"></div>
 
@@ -60806,649 +60837,229 @@ if ($IsVulnerable) {
 <div id="07-paws-configure-system-administrative-templates-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Medium
+* **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\...`
-  * **Registry Location**: Multiple locations under `HKLM\SOFTWARE\Policies` and `HKLM\SYSTEM\CurrentControlSet` (see details below)
+  * **Registry Location**: Multiple locations under `HKLM\SOFTWARE\Policies` and `HKLM\SYSTEM\CurrentControlSet` (see individual requirements below)
 
 ---
 
 <div id="07-paws-configure-system-administrative-templates-md-rationale"></div>
 
 ## Rationale
-Administrative templates govern system-wide capabilities, behaviors, and diagnostic logging. Hardening these configurations reduces the attack surface and mitigates privilege escalation, credential theft, and unauthorized software installation:
+Privileged Access Workstations (PAWs) are dedicated exclusively to Tier 0 directory administration and Active Directory forest management. Compromise of a PAW leads directly to total domain compromise. Administrative template configurations on PAWs must enforce an absolute maximum security boundary, disabling non-essential features, legacy protocols, untrusted URI handlers, background telemetry, and unneeded consumer services:
 
-1. **Protocols Hardening**: Disabling legacy SMBv1 client/server components prevents exploitation of known protocol flaws. Configuring NetBIOS NodeType to P-Node prevents name resolution fallback issues.
-2. **Data Collection & Telemetry**: Disabling Insider builds, telemetry feedback, widgets, Cortana, and OneSettings downloads blocks potential information disclosure paths and aligns with clean enterprise environments.
-3. **App and Installer Restrictions**: Preventing non-admin users from installing packaged apps, limiting App Installer protocol handlers (`ms-appinstaller`), and disabling experimental installer features mitigates malware installation vectors.
-4. **Event Log Sizes**: Increasing maximum log file sizes (Application/Setup/System to 32,768 KB, Security to 196,608 KB) ensures security events are retained long enough for compliance auditing and forensic analysis.
-5. **Windows Update Controls**: Restricting update pauses and configuring daily update checks ensure client systems remain persistently patched.
+1. **Protocols Hardening**: Disabling legacy SMBv1 components stops known remote code execution flaws, and enforcing NetBT P-node prevents broadcast spoofing and relay attacks.
+2. **Data Collection & Telemetry**: Restricting diagnostic log collection, crash dump generation, feedback prompts, and dynamic cloud settings (OneSettings) prevents in-memory credential disclosure and eliminates external telemetry on Tier 0 stations.
+3. **App & Installer Restrictions**: Disallowing per-user unsigned app packages, preventing non-admin packaged app installation, and blocking the `ms-appinstaller` protocol handler closes drive-by malware delivery vectors.
+4. **Log Retention & Forensic Buffer**: Expanding event log maximum file sizes (Application/Setup/System to 32 MB, Security to 192 MB) guarantees that administrative security events are retained for auditing and forensic investigations.
+5. **Session & Credential Security**: Restricting credential display on the lock screen, disabling Automatic Restart Sign-On (ARSO), prohibiting local password reset questions, and blocking cleartext MPR password transfers prevents credential exposure.
+6. **Windows Update Management**: Disabling update pauses, managing feature update deferrals, and scheduling daily automatic installations ensures PAWs remain continuously patched against active vulnerabilities.
+
+This parent requirement coordinates the 31 individual unitary hardening requirements defined in the dedicated `admin-templates/` subsection for PAWs.
 
 ---
 
 <div id="07-paws-configure-system-administrative-templates-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **App Installers**: Disabling `ms-appinstaller` protocol handlers will block users from web-installing applications through the Appx installer interface.
-* **IE11 Standalone**: Disabling Internet Explorer 11 blocks the standalone browser, redirecting users to Microsoft Edge.
+* **SMBv1 Deprecation**: PAWs cannot connect to legacy storage appliances or pre-Windows Server 2008 systems that strictly require SMBv1. Tier 0 administrative management does not require SMBv1.
+* **App Installer Protocol**: Web-based "click-to-install" links utilizing `ms-appinstaller://` will not launch automatically. Software must be installed via approved administrative deployment tools.
+* **Internet Explorer 11**: Standalone IE11 is disabled and redirects to Microsoft Edge; web browsing on PAWs is strictly prohibited or restricted to approved administrative portals.
+* **Logon & Elevation**: Password reveal buttons are hidden and UAC prompts require manual entry of administrative credentials.
 
 ---
 
-<div id="07-paws-configure-system-administrative-templates-md-implementation-steps"></div>
+<div id="07-paws-configure-system-administrative-templates-md-administrative-templates-hardening-requirements-for-paws"></div>
+
+## Administrative Templates Hardening Requirements for PAWs
+
+The following 31 unitary administrative template hardening controls must be enforced on PAWs:
+
+1. **[REQ-PAW-168 - Administrative Templates: Disable SMBv1 Protocol Components for PAWs](#07-paws-admin-templates-configure-paw-at-smbv1-md)**
+2. **[REQ-PAW-169 - Administrative Templates: Configure NetBT Node Type and Name Release for PAWs](#07-paws-admin-templates-configure-paw-at-netbt-nodetype-md)**
+3. **[REQ-PAW-170 - Administrative Templates: MSS IP Source Routing and ICMP Redirects for PAWs](#07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md)**
+4. **[REQ-PAW-171 - Administrative Templates: MSS System and Session Security Protections for PAWs](#07-paws-admin-templates-configure-paw-at-mss-system-protections-md)**
+5. **[REQ-PAW-172 - Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs](#07-paws-admin-templates-configure-paw-at-device-metadata-md)**
+6. **[REQ-PAW-173 - Administrative Templates: Enforce Group Policy Background Processing for PAWs](#07-paws-admin-templates-configure-paw-at-gp-processing-md)**
+7. **[REQ-PAW-174 - Administrative Templates: Disable Cross-Device Experiences for PAWs](#07-paws-admin-templates-configure-paw-at-cross-device-experiences-md)**
+8. **[REQ-PAW-175 - Administrative Templates: Restrict Internet Communication and Web Downloads for PAWs](#07-paws-admin-templates-configure-paw-at-internet-communication-md)**
+9. **[REQ-PAW-176 - Administrative Templates: Block Custom SSPs and APs from Loading into LSASS for PAWs](#07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md)**
+10. **[REQ-PAW-177 - Administrative Templates: Logon Display and Credential Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-logon-display-options-md)**
+11. **[REQ-PAW-178 - Administrative Templates: Disable Connected Standby Network Connectivity for PAWs](#07-paws-admin-templates-configure-paw-at-power-connected-standby-md)**
+12. **[REQ-PAW-179 - Administrative Templates: Disable Remote Assistance for PAWs](#07-paws-admin-templates-configure-paw-at-remote-assistance-md)**
+13. **[REQ-PAW-180 - Administrative Templates: Enable RPC Endpoint Mapper Client Authentication for PAWs](#07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md)**
+14. **[REQ-PAW-181 - Administrative Templates: Configure Windows Time Service NTP Client and Server for PAWs](#07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md)**
+15. **[REQ-PAW-182 - Administrative Templates: App Package Deployment Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md)**
+16. **[REQ-PAW-183 - Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing for PAWs](#07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md)**
+17. **[REQ-PAW-184 - Administrative Templates: Disable Cloud Consumer Account State Content for PAWs](#07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md)**
+18. **[REQ-PAW-185 - Administrative Templates: Require PIN for Connect Wireless Pairing for PAWs](#07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md)**
+19. **[REQ-PAW-186 - Administrative Templates: Credential User Interface Security Protections for PAWs](#07-paws-admin-templates-configure-paw-at-credui-protections-md)**
+20. **[REQ-PAW-187 - Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md)**
+21. **[REQ-PAW-188 - Administrative Templates: App Installer Protocol and Execution Controls for PAWs](#07-paws-admin-templates-configure-paw-at-app-installer-controls-md)**
+22. **[REQ-PAW-189 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs](#07-paws-admin-templates-configure-paw-at-event-log-sizes-md)**
+23. **[REQ-PAW-190 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs](#07-paws-admin-templates-configure-paw-at-file-explorer-motw-md)**
+24. **[REQ-PAW-191 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs](#07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md)**
+25. **[REQ-PAW-192 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs](#07-paws-admin-templates-configure-paw-at-defender-protection-options-md)**
+26. **[REQ-PAW-193 - Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md)**
+27. **[REQ-PAW-194 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md)**
+28. **[REQ-PAW-195 - Administrative Templates: Disable Windows Widgets and News Feed for PAWs](#07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md)**
+29. **[REQ-PAW-196 - Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO) for PAWs](#07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md)**
+30. **[REQ-PAW-197 - Administrative Templates: Windows Sandbox Clipboard and Network Isolation for PAWs](#07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md)**
+31. **[REQ-PAW-198 - Administrative Templates: Windows Update Deferral and Automatic Installation Policies for PAWs](#07-paws-admin-templates-configure-paw-at-windows-update-policies-md)**
+
+---
+
+<div id="07-paws-configure-system-administrative-templates-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows Client Benchmark**: Section 18.4 (Network), Section 18.5 (MSS), Section 18.9 (System), and Section 18.10 (Windows Components)
+* **ANSSI Active Directory Hardening Guide**: Recommendations for Tier 0 Privileged Access Workstations (PAWs)
+* **Microsoft Security Baseline**: Windows Security Baseline for Privileged Access Workstations
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md-req-paw-168-administrative-templates-disable-smbv1-protocol-components-for-paws"></div>
+
+# [REQ-PAW-168] Administrative Templates: Disable SMBv1 Protocol Components for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SYSTEM\CurrentControlSet\Services\mrxsmb10\Start` = `4`
+  * `HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters\SMB1` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md-rationale"></div>
+
+## Rationale
+Legacy Server Message Block version 1 (SMBv1) protocol possesses fundamental architectural security weaknesses, lacks integrity and encryption controls, and was the primary exploitation vector in catastrophic automated malware outbreaks (e.g., WannaCry, NotPetya). Disabling both the client driver (mrxsmb10) and server service parameter completely eliminates this attack surface.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Endpoints will be unable to access file shares or network resources hosted on obsolete legacy NAS appliances or systems running Windows XP/Server 2003 that only support SMBv1.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md-implementation-steps"></div>
 
 ## Implementation Steps
 
-<div id="07-paws-configure-system-administrative-templates-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit the PAW GPO (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies grouped by their GPO nodes:
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
 
-<div id="07-paws-configure-system-administrative-templates-md-network-tcpip-settings"></div>
-
-#### Network & TCP/IP Settings
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Workstation`
-  * **Configure SMB v1 client driver**: Set to `Enabled`, select `Disable driver (recommended)`
+  * **Configure SMB v1 client driver**: Set to `Enabled` (Disable driver (recommended))
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Server`
   * **Configure SMB v1 server**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\TCPIP Settings\Parameters`
-  * **NetBT NodeType configuration**: Set to `Enabled`, select `P-node (recommended)`
 
-<div id="07-paws-configure-system-administrative-templates-md-legacy-security-options-mss-settings"></div>
-
-#### Legacy Security Options (MSS Settings)
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * Configure the following security settings (deploy via GPO Preferences Registry if Custom ADMX templates are not available):
-    * **MSS: (AutoAdminLogon) Enable Automatic Logon**: Set to `Disabled`
-    * **MSS: (DisableIPSourceRouting IPv6) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled`
-    * **MSS: (DisableIPSourceRouting) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled`
-    * **MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes**: Set to `Disabled`
-    * **MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers**: Set to `Enabled`
-    * **MSS: (SafeDllSearchMode) Enable Safe DLL search mode**: Set to `Enabled`
-    * **MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires**: Set to `Enabled: 5 or fewer seconds`
-    * **MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning**: Set to `Enabled: 90% or less`
-
-<div id="07-paws-configure-system-administrative-templates-md-system-group-policy-settings"></div>
-
-#### System & Group Policy Settings
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Device Installation`
-  * **Prevent device metadata retrieval from the Internet**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
-  * **Configure registry policy processing**: Set to `Enabled`
-    * Uncheck: `Do not apply during periodic background processing`
-    * Check: `Process even if the Group Policy objects have not changed`
-  * **Configure security policy processing**: Set to `Enabled`
-    * Uncheck: `Do not apply during periodic background processing`
-    * Check: `Process even if the Group Policy objects have not changed`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Cross-Device Experiences`
-  * **Continue experiences on this device**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
-  * **Turn off downloading of print drivers over HTTP**: Set to `Enabled`
-  * **Turn off Internet download for Web publishing and online ordering wizards**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Local Security Authority`
-  * **Allow Custom SSPs and APs to be loaded into LSASS**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
-  * **Block user from showing account details on sign-in**: Set to `Enabled`
-  * **Do not display network selection UI**: Set to `Enabled`
-  * **Do not enumerate connected users on domain-joined computers**: Set to `Enabled`
-  * **Turn off app notifications on the lock screen**: Set to `Enabled`
-  * **Turn off picture password sign-in**: Set to `Enabled`
-  * **Turn on convenience PIN sign-in**: Set to `Disabled`
-  * **Prevent the use of security questions for local accounts**: Set to `Enabled`
-  * **Configure the transmission of the user's password in the content of MPR notifications sent by winlogon.**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings`
-  * **Allow network connectivity during connected-standby (on battery)**: Set to `Disabled`
-  * **Allow network connectivity during connected-standby (plugged in)**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Assistance`
-  * **Configure Offer Remote Assistance**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call`
-  * **Enable RPC Endpoint Mapper Client Authentication**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers`
-  * **Enable Windows NTP Client**: Set to `Enabled`
-  * **Enable Windows NTP Server**: Set to `Disabled`
-
-<div id="07-paws-configure-system-administrative-templates-md-windows-components-settings"></div>
-
-#### Windows Components Settings
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment`
-  * **Not allow per-user unsigned packages to install by default (requires explicitly allow per install)**: Set to `Enabled`
-  * **Prevent non-admin users from installing packaged Windows apps**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Biometrics\Facial Features`
-  * **Configure enhanced anti-spoofing**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Cloud Content`
-  * **Turn off cloud consumer account state content**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Connect`
-  * **Require pin for pairing**: Set to `Enabled` (Select `First Time` or `Always`)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface`
-  * **Do not display the password reveal button**: Set to `Enabled`
-  * **Enumerate administrator accounts on elevation**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Disable OneSettings Downloads**: Set to `Enabled`
-  * **Do not show feedback notifications**: Set to `Enabled`
-  * **Enable OneSettings Auditing**: Set to `Enabled`
-  * **Limit Diagnostic Log Collection**: Set to `Enabled`
-  * **Limit Dump Collection**: Set to `Enabled`
-  * **Toggle user control over Insider builds**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
-  * **Enable App Installer Experimental Features**: Set to `Disabled`
-  * **Enable App Installer Hash Override**: Set to `Disabled`
-  * **Enable App Installer Local Archive Malware Scan Override**: Set to `Disabled`
-  * **Enable App Installer Microsoft Store Source Certificate Validation Bypass**: Set to `Disabled`
-  * **Enable App Installer ms-appinstaller protocol**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
-  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
-  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `32768`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
-  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
-  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `196608`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
-  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
-  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `32768`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
-  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
-  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `32768`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
-  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled`
-  * **Turn off shell protocol protected mode**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer`
-  * **Disable Internet Explorer 11 as a standalone browser**: Set to `Enabled`, select `Always`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
-  * **Prevent downloading of enclosures**: Set to `Enabled`
-  * **Turn on Basic feed authentication over HTTP**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection`
-  * **Configure Remote Encryption Protection Mode**: Set to `Enabled` (Select `Audit` or higher)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
-  * **Turn off scanning of packed executables**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection`
-  * **Prevent users from modifying settings**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow Cortana**: Set to `Disabled`
-  * **Allow Cortana above lock screen**: Set to `Disabled`
-  * **Allow indexing of encrypted files**: Set to `Disabled`
-  * **Allow search and Cortana to use location**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store`
-  * **Turn off Automatic Download and Install of updates**: Set to `Disabled`
-  * **Turn off the offer to update to the latest version of Windows**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Widgets`
-  * **Allow widgets**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Logon Options`
-  * **Sign-in and lock last interactive user automatically after a restart**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox`
-  * **Allow clipboard sharing with Windows Sandbox**: Set to `Disabled`
-  * **Allow networking in Windows Sandbox**: Set to `Disabled`
-
-<div id="07-paws-configure-system-administrative-templates-md-windows-update-settings"></div>
-
-#### Windows Update Settings
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update` (or `Windows Update\Manage end user experience` depending on ADMX version)
-  * **Remove access to “Pause updates” feature**: Set to `Enabled`
-  * **Manage preview builds**: Set to `Disabled`
-  * **Select when Preview Builds and Feature Updates are received**: Set to `Enabled`, set Defer Feature Updates Period in Days to `180` (or more)
-  * **Select when Quality Updates are received**: Set to `Enabled`, set Defer Quality Updates Period in Days to `0`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience` (or standard `Windows Update\AU` depending on ADMX version)
-  * **Configure Automatic Updates**: Set to `Enabled`, select `Scheduled install day` = `0 - Every day`
-  * **No auto-restart with logged on users for scheduled automatic updates installations**: Set to `Disabled`
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
 
 ---
 
-<div id="07-paws-configure-system-administrative-templates-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following script locally to configure the administrative templates registry values on PAWs.
+Run the following script locally to configure the administrative template registry values:
 
-[Download Script: Configure-PawSystemAdministrativeTemplates.ps1](implementation_scripts/Configure-PawSystemAdministrativeTemplates.ps1)
+[Download Script: Configure-PawAtSmbv1.ps1](../implementation_scripts/Configure-PawAtSmbv1.ps1)
 
 ```powershell
-# Configure-PawSystemAdministrativeTemplates.ps1
-# Description: Configures system and administrative template controls for PAWs.
+#Configure-PawAtSmbv1.ps1
+# Description: Configures Administrative Templates: Disable SMBv1 Protocol Components for PAWs.
 
-Write-Host "Applying System Administrative Templates hardening..." -ForegroundColor Cyan
+Write-Host "Configuring Administrative Templates: Disable SMBv1 Protocol Components for PAWs..." -ForegroundColor Cyan
 
-# Key Path: HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
-if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon")) {
-    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "AutoAdminLogon" -Value "0" -Type String
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "ScreenSaverGracePeriod" -Value 5 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI
-if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI")) {
-    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI" -Name "EnumerateAdministrators" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
-if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer")) {
-    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "NoWebServices" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "PreXPSP2ShellProtocolBehavior" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
-if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System")) {
-    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableMPR" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "DisableAutomaticRestartSignOn" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures" -Name "EnhancedAntiSpoofing" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Dsh
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Dsh")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Dsh" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Dsh" -Name "AllowNewsAndInterests" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -Name "DisableEnclosureDownload" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Name "NotifyDisableIEOptions" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -Name "DCSettingIndex" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -Name "ACSettingIndex" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient" -Name "Enabled" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer" -Name "Enabled" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Scan
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "DisablePackedExeScanning" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" -Name "DisableWebPnPDownload" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc" -Name "EnableAuthEpResolution" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Name "fAllowUnsolicited" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\WindowsStore
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Name "AutoDownload" -Value 4 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Name "DisableOSUpgrade" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableExperimentalFeatures" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableHashOverride" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableLocalArchiveMalwareScanOverride" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableBypassCertificatePinningForMicrosoftStore" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableMSAppInstallerProtocol" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx" -Name "DisablePerUserUnsignedPackagesByDefault" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx" -Name "BlockNonAdminUserInstall" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Name "DisableConsumerAccountStateContent" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Connect
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect" -Name "RequirePinForPairing" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\CredUI
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI" -Name "DisablePasswordReveal" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DisableOneSettingsDownloads" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DoNotShowFeedbackNotifications" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "EnableOneSettingsAuditing" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "LimitDiagnosticLogCollection" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "LimitDumpCollection" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Name "PreventDeviceMetadataFromNetwork" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "Retention" -Value "0" -Type String
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 32768 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "Retention" -Value "0" -Type String
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 196608 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "Retention" -Value "0" -Type String
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "MaxSize" -Value 32768 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "Retention" -Value "0" -Type String
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 32768 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableMotWOnInsecurePathCopy" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -Name "NoBackgroundPolicy" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -Name "NoGPOListChanges" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -Name "NoBackgroundPolicy" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -Name "NoGPOListChanges" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds" -Name "AllowBuildPreview" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox" -Name "AllowClipboardRedirection" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox" -Name "AllowNetworking" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\System
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableCdp" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowCustomSSPsAPs" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "BlockUserFromShowingAccountDetailsOnSignin" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DontDisplayNetworkSelectionUI" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DontEnumerateConnectedUsers" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DisableLockScreenAppNotifications" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "BlockDomainPicturePassword" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowDomainPINLogon" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "NoLocalPasswordResetQuestions" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortana" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortanaAboveLock" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowIndexingEncryptedStoresOrItems" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowSearchToUseLocation" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "SetDisablePauseUXAccess" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "ManagePreviewBuildsPolicyValue" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferFeatureUpdates" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferFeatureUpdatesPeriodInDays" -Value 180 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferQualityUpdates" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferQualityUpdatesPeriodInDays" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoRebootWithLoggedOnUsers" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "ScheduledInstallDay" -Value 0 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Control\Session Manager
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager")) {
-    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "SafeDllSearchMode" -Value 1 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security")) {
-    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security" -Name "WarningLevel" -Value 90 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters")) {
-    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -Name "SMB1" -Value 0 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters")) {
-    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Name "NodeType" -Value 2 -Type DWord
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Name "NoNameReleaseOnDemand" -Value 1 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters")) {
-    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" -Name "DisableIPSourceRouting" -Value 2 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters")) {
-    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "DisableIPSourceRouting" -Value 2 -Type DWord
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "EnableICMPRedirect" -Value 0 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Services\mrxsmb10
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10")) {
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10")) {
     New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10" -Force | Out-Null
 }
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10" -Name "Start" -Value 4 -Type DWord
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10" -Name "Start" -Value 4 -Type DWord -Force
 
-# Key Path: HKLM\Software\Policies\Microsoft\Internet Explorer\Feeds
-if (-not (Test-Path "HKLM:\Software\Policies\Microsoft\Internet Explorer\Feeds")) {
-    New-Item -Path "HKLM:\Software\Policies\Microsoft\Internet Explorer\Feeds" -Force | Out-Null
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters")) {
+    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -Force | Out-Null
 }
-Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Internet Explorer\Feeds" -Name "AllowBasicAuthInClear" -Value 0 -Type DWord
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -Name "SMB1" -Value 0 -Type DWord -Force
 
-Write-Host "[+] PAW administrative templates configured successfully." -ForegroundColor Green
+Write-Host "[+] Administrative Templates: Disable SMBv1 Protocol Components for PAWs applied successfully." -ForegroundColor Green
 ```
 
-*To verify the administrative template configuration on the PAW:*
+*To verify the configuration:*
 
-[Download Script: Get-PawSystemAdministrativeTemplatesStatus.ps1](audit_scripts/Get-PawSystemAdministrativeTemplatesStatus.ps1)
+[Download Script: Get-PawAtSmbv1Status.ps1](../audit_scripts/Get-PawAtSmbv1Status.ps1)
 
 ```powershell
-# Get-PawSystemAdministrativeTemplatesStatus.ps1
-# Description: Audits 84 system and administrative template controls on the local PAW.
+#Get-PawAtSmbv1Status.ps1
+# Description: Audits Administrative Templates: Disable SMBv1 Protocol Components for PAWs.
 
-Write-Host "--- Auditing System Administrative Templates Hardening ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Administrative Templates: Disable SMBv1 Protocol Components for PAWs ---" -ForegroundColor Cyan
 $script:Vulnerable = $false
 
-function Test-RegValue {
-    param(
-        [string]$RecNum,
-        [string]$Hive,
-        [string]$KeyPath,
-        [string]$ValueName,
-        [object]$ExpectedValue
-    )
-    $FullPath = "$($Hive):\$($KeyPath)"
-    if (Test-Path $FullPath) {
-        $Prop = Get-ItemProperty -Path $FullPath -Name $ValueName -ErrorAction SilentlyContinue
-        if ($null -ne $Prop) {
-            $ActualValue = $Prop.$ValueName
-            if ($ActualValue -eq $ExpectedValue) {
-                Write-Host "  [+] $RecNum | $ValueName = $ActualValue (Secure)" -ForegroundColor Green
-            } else {
-                Write-Host "  [!] MISMATCH: $RecNum | Path: $Hive\$KeyPath | Value: $ValueName | Current: $ActualValue (Expected: $ExpectedValue)" -ForegroundColor Red
-                $script:Vulnerable = $true
-            }
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10"
+$ValueName = "Start"
+$ExpectedValue = 4
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISSING VALUE: $RecNum | Path: $Hive\$KeyPath | Value: $ValueName (Expected: $ExpectedValue)" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING KEY: $RecNum | Path: $Hive\$KeyPath (Expected: $ValueName = $ExpectedValue)" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
 }
 
-Test-RegValue -RecNum "18.4.2" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\mrxsmb10" -ValueName "Start" -ExpectedValue 4
-Test-RegValue -RecNum "18.4.3" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -ValueName "SMB1" -ExpectedValue 0
-Test-RegValue -RecNum "18.4.7" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -ValueName "NodeType" -ExpectedValue 2
-Test-RegValue -RecNum "18.5.1" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -ValueName "AutoAdminLogon" -ExpectedValue "0"
-Test-RegValue -RecNum "18.5.2" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" -ValueName "DisableIPSourceRouting" -ExpectedValue 2
-Test-RegValue -RecNum "18.5.3" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -ValueName "DisableIPSourceRouting" -ExpectedValue 2
-Test-RegValue -RecNum "18.5.5" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -ValueName "EnableICMPRedirect" -ExpectedValue 0
-Test-RegValue -RecNum "18.5.7" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -ValueName "NoNameReleaseOnDemand" -ExpectedValue 1
-Test-RegValue -RecNum "18.5.9" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Control\Session Manager" -ValueName "SafeDllSearchMode" -ExpectedValue 1
-Test-RegValue -RecNum "18.5.10" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -ValueName "ScreenSaverGracePeriod" -ExpectedValue 5
-Test-RegValue -RecNum "18.5.13" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\Eventlog\Security" -ValueName "WarningLevel" -ExpectedValue 90
-Test-RegValue -RecNum "18.9.7.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -ValueName "PreventDeviceMetadataFromNetwork" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.19.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -ValueName "NoBackgroundPolicy" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.19.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -ValueName "NoGPOListChanges" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.19.4" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -ValueName "NoBackgroundPolicy" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.19.5" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -ValueName "NoGPOListChanges" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.19.6" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "EnableCdp" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.20.1.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows NT\Printers" -ValueName "DisableWebPnPDownload" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.20.1.6" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -ValueName "NoWebServices" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.26.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "AllowCustomSSPsAPs" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.28.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "BlockUserFromShowingAccountDetailsOnSignin" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.28.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "DontDisplayNetworkSelectionUI" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.28.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "DontEnumerateConnectedUsers" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.28.5" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "DisableLockScreenAppNotifications" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.28.6" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "BlockDomainPicturePassword" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.28.7" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "AllowDomainPINLogon" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.33.6.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -ValueName "DCSettingIndex" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.33.6.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -ValueName "ACSettingIndex" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.35.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -ValueName "fAllowUnsolicited" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.36.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows NT\Rpc" -ValueName "EnableAuthEpResolution" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.51.1.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient" -ValueName "Enabled" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.51.1.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer" -ValueName "Enabled" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.4.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Appx" -ValueName "DisablePerUserUnsignedPackagesByDefault" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.4.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Appx" -ValueName "BlockNonAdminUserInstall" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.9.1.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures" -ValueName "EnhancedAntiSpoofing" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.13.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\CloudContent" -ValueName "DisableConsumerAccountStateContent" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.14.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Connect" -ValueName "RequirePinForPairing" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.15.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\CredUI" -ValueName "DisablePasswordReveal" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.15.2" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI" -ValueName "EnumerateAdministrators" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.15.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "NoLocalPasswordResetQuestions" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.16.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\DataCollection" -ValueName "DisableOneSettingsDownloads" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.16.4" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\DataCollection" -ValueName "DoNotShowFeedbackNotifications" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.16.5" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\DataCollection" -ValueName "EnableOneSettingsAuditing" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.16.6" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\DataCollection" -ValueName "LimitDiagnosticLogCollection" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.16.7" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\DataCollection" -ValueName "LimitDumpCollection" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.16.8" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds" -ValueName "AllowBuildPreview" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.18.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -ValueName "EnableExperimentalFeatures" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.18.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -ValueName "EnableHashOverride" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.18.4" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -ValueName "EnableLocalArchiveMalwareScanOverride" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.18.5" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -ValueName "EnableBypassCertificatePinningForMicrosoftStore" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.18.6" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -ValueName "EnableMSAppInstallerProtocol" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.26.1.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -ValueName "Retention" -ExpectedValue "0"
-Test-RegValue -RecNum "18.10.26.1.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -ValueName "MaxSize" -ExpectedValue 32768
-Test-RegValue -RecNum "18.10.26.2.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -ValueName "Retention" -ExpectedValue "0"
-Test-RegValue -RecNum "18.10.26.2.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -ValueName "MaxSize" -ExpectedValue 196608
-Test-RegValue -RecNum "18.10.26.3.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -ValueName "Retention" -ExpectedValue "0"
-Test-RegValue -RecNum "18.10.26.3.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -ValueName "MaxSize" -ExpectedValue 32768
-Test-RegValue -RecNum "18.10.26.4.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -ValueName "Retention" -ExpectedValue "0"
-Test-RegValue -RecNum "18.10.26.4.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -ValueName "MaxSize" -ExpectedValue 32768
-Test-RegValue -RecNum "18.10.29.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Explorer" -ValueName "DisableMotWOnInsecurePathCopy" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.29.5" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -ValueName "PreXPSP2ShellProtocolBehavior" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.35.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -ValueName "NotifyDisableIEOptions" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.58.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -ValueName "DisableEnclosureDownload" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.58.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -ValueName "AllowBasicAuthInClear" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.43.11.1.1.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -ValueName "BruteForceProtectionConfiguredState" -ExpectedValue 2
-Test-RegValue -RecNum "18.10.43.13.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -ValueName "DisablePackedExeScanning" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.59.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Windows Search" -ValueName "AllowCortana" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.59.4" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Windows Search" -ValueName "AllowCortanaAboveLock" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.59.5" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Windows Search" -ValueName "AllowIndexingEncryptedStoresOrItems" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.59.6" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Windows Search" -ValueName "AllowSearchToUseLocation" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.66.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\WindowsStore" -ValueName "AutoDownload" -ExpectedValue 4
-Test-RegValue -RecNum "18.10.66.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\WindowsStore" -ValueName "DisableOSUpgrade" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.72.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Dsh" -ValueName "AllowNewsAndInterests" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.82.1" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -ValueName "EnableMPR" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.82.2" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -ValueName "DisableAutomaticRestartSignOn" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.91.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Sandbox" -ValueName "AllowClipboardRedirection" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.91.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Sandbox" -ValueName "AllowNetworking" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.93.2.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "SetDisablePauseUXAccess" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.93.4.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "ManagePreviewBuildsPolicyValue" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.93.4.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "DeferFeatureUpdates" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.93.4.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "DeferQualityUpdates" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.93.2.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -ValueName "ScheduledInstallDay" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.93.1.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -ValueName "NoAutoRebootWithLoggedOnUsers" -ExpectedValue 0
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
+$ValueName = "SMB1"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
 
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
@@ -61461,13 +61072,5436 @@ if ($script:Vulnerable) {
 
 ---
 
-<div id="07-paws-configure-system-administrative-templates-md-sources-compliance-references"></div>
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 18.2 to 18.10 Administrative template rules.
-* **Microsoft Windows Security Baselines**: Computer and updates client configuration parameters.
-* **DoD Windows 11 Computer STIG v2r6**: Event log, update client, network parameters, and device install templates.
-* **ANSSI AD Hardening Guide**: Recommendations on disabling legacy protocols (SMBv1, etc.) and enforcing cryptographic checks.
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.4.2, Section 18.4.3; ANSSI R21
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-req-paw-169-administrative-templates-configure-netbt-node-type-and-name-release-for-paws"></div>
+
+# [REQ-PAW-169] Administrative Templates: Configure NetBT Node Type and Name Release for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\NodeType` = `2`
+  * `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\NoNameReleaseOnDemand` = `1`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-rationale"></div>
+
+## Rationale
+Configuring NetBT NodeType to P-node (Point-to-Point) forces name resolution via unicast WINS rather than broadcast, preventing unauthenticated network adversaries from responding to NetBIOS broadcasts or poisoning name resolution caches. Forcing the system to ignore unauthenticated NetBIOS name release requests prevents denial-of-service attacks that force the computer to relinquish its registered network identity.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Environments relying purely on unrouted broadcast-based NetBIOS name resolution without DNS or WINS will experience resolution failures.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\TCPIP Settings\Parameters`
+  * **NetBT NodeType configuration**: Set to `Enabled` (P-node (recommended))
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtNetbtNodetype.ps1](../implementation_scripts/Configure-PawAtNetbtNodetype.ps1)
+
+```powershell
+#Configure-PawAtNetbtNodetype.ps1
+# Description: Configures Administrative Templates: Configure NetBT Node Type and Name Release for PAWs.
+
+Write-Host "Configuring Administrative Templates: Configure NetBT Node Type and Name Release for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters")) {
+    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Name "NodeType" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Name "NoNameReleaseOnDemand" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Configure NetBT Node Type and Name Release for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtNetbtNodetypeStatus.ps1](../audit_scripts/Get-PawAtNetbtNodetypeStatus.ps1)
+
+```powershell
+#Get-PawAtNetbtNodetypeStatus.ps1
+# Description: Audits Administrative Templates: Configure NetBT Node Type and Name Release for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Configure NetBT Node Type and Name Release for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters"
+$ValueName = "NodeType"
+$ExpectedValue = 2
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters"
+$ValueName = "NoNameReleaseOnDemand"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.4.7, Section 18.5.7
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-req-paw-170-administrative-templates-mss-ip-source-routing-and-icmp-redirects-for-paws"></div>
+
+# [REQ-PAW-170] Administrative Templates: MSS IP Source Routing and ICMP Redirects for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters\DisableIPSourceRouting` = `2`
+  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\DisableIPSourceRouting` = `2`
+  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\EnableICMPRedirect` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-rationale"></div>
+
+## Rationale
+IP source routing allows sending devices to dictate the exact network routing path rather than allowing routers to determine the path. Attackers can leverage source routing to bypass boundary firewalls and packet filters. Furthermore, ICMP redirects allow adjacent nodes to inject arbitrary routes into the local routing table, enabling man-in-the-middle packet interception.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: None on standard enterprise networks. Legacy diagnostic testing relying on manually routed packet paths will be rejected.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (DisableIPSourceRouting IPv6) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled`
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (DisableIPSourceRouting) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled`
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtMssIpSourceRouting.ps1](../implementation_scripts/Configure-PawAtMssIpSourceRouting.ps1)
+
+```powershell
+#Configure-PawAtMssIpSourceRouting.ps1
+# Description: Configures Administrative Templates: MSS IP Source Routing and ICMP Redirects for PAWs.
+
+Write-Host "Configuring Administrative Templates: MSS IP Source Routing and ICMP Redirects for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters")) {
+    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" -Name "DisableIPSourceRouting" -Value 2 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters")) {
+    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "DisableIPSourceRouting" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "EnableICMPRedirect" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: MSS IP Source Routing and ICMP Redirects for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtMssIpSourceRoutingStatus.ps1](../audit_scripts/Get-PawAtMssIpSourceRoutingStatus.ps1)
+
+```powershell
+#Get-PawAtMssIpSourceRoutingStatus.ps1
+# Description: Audits Administrative Templates: MSS IP Source Routing and ICMP Redirects for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: MSS IP Source Routing and ICMP Redirects for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
+$ValueName = "DisableIPSourceRouting"
+$ExpectedValue = 2
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+$ValueName = "DisableIPSourceRouting"
+$ExpectedValue = 2
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+$ValueName = "EnableICMPRedirect"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.5.2, Section 18.5.3, Section 18.5.5
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-req-paw-171-administrative-templates-mss-system-and-session-security-protections-for-paws"></div>
+
+# [REQ-PAW-171] Administrative Templates: MSS System and Session Security Protections for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon` = `0`
+  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\ScreenSaverGracePeriod` = `5`
+  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeDllSearchMode` = `1`
+  * `HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security\WarningLevel` = `90`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-rationale"></div>
+
+## Rationale
+Disabling AutoAdminLogon ensures unattended machines boot into an interactive credential prompt rather than logging into an active session. Safe DLL search mode prevents search-order hijacking by ensuring system directories are evaluated prior to the current working directory. The screensaver grace period minimizes the physical access window after screensaver lock, and the WarningLevel parameter issues administrative alerts before the security event log is exhausted.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Kiosk setups or automated test systems requiring automatic logon must use dedicated constrained user accounts. Third-party applications that rely on loading DLLs from the current directory must place libraries in application or system paths.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (AutoAdminLogon) Enable Automatic Logon**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (SafeDllSearchMode) Enable Safe DLL search mode**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires**: Set to `Enabled: 5 or fewer seconds`
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning**: Set to `Enabled: 90% or less`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtMssSystemProtections.ps1](../implementation_scripts/Configure-PawAtMssSystemProtections.ps1)
+
+```powershell
+#Configure-PawAtMssSystemProtections.ps1
+# Description: Configures Administrative Templates: MSS System and Session Security Protections for PAWs.
+
+Write-Host "Configuring Administrative Templates: MSS System and Session Security Protections for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon")) {
+    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "AutoAdminLogon" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "ScreenSaverGracePeriod" -Value 5 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager")) {
+    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "SafeDllSearchMode" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security")) {
+    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security" -Name "WarningLevel" -Value 90 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: MSS System and Session Security Protections for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtMssSystemProtectionsStatus.ps1](../audit_scripts/Get-PawAtMssSystemProtectionsStatus.ps1)
+
+```powershell
+#Get-PawAtMssSystemProtectionsStatus.ps1
+# Description: Audits Administrative Templates: MSS System and Session Security Protections for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: MSS System and Session Security Protections for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+$ValueName = "AutoAdminLogon"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+$ValueName = "ScreenSaverGracePeriod"
+$ExpectedValue = 5
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager"
+$ValueName = "SafeDllSearchMode"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security"
+$ValueName = "WarningLevel"
+$ExpectedValue = 90
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.5.1, Section 18.5.9, Section 18.5.10, Section 18.5.13
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-device-metadata-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-req-paw-172-administrative-templates-prevent-device-metadata-retrieval-from-network-for-paws"></div>
+
+# [REQ-PAW-172] Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Low
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata\PreventDeviceMetadataFromNetwork` = `1`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-rationale"></div>
+
+## Rationale
+Prevents the operating system from searching Windows Update and Microsoft public servers for device metadata, icons, and manufacturer information when new peripheral hardware is connected. This reduces unnecessary external telemetry and prevents information disclosure about attached hardware assets.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Custom peripheral icons and detailed hardware descriptions in the 'Devices and Printers' folder will revert to generic device symbols.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Device Installation`
+  * **Prevent device metadata retrieval from the Internet**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtDeviceMetadata.ps1](../implementation_scripts/Configure-PawAtDeviceMetadata.ps1)
+
+```powershell
+#Configure-PawAtDeviceMetadata.ps1
+# Description: Configures Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs.
+
+Write-Host "Configuring Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Name "PreventDeviceMetadataFromNetwork" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtDeviceMetadataStatus.ps1](../audit_scripts/Get-PawAtDeviceMetadataStatus.ps1)
+
+```powershell
+#Get-PawAtDeviceMetadataStatus.ps1
+# Description: Audits Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata"
+$ValueName = "PreventDeviceMetadataFromNetwork"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.7.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-gp-processing-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-req-paw-173-administrative-templates-enforce-group-policy-background-processing-for-paws"></div>
+
+# [REQ-PAW-173] Administrative Templates: Enforce Group Policy Background Processing for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}\NoBackgroundPolicy` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}\NoGPOListChanges` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\NoBackgroundPolicy` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\NoGPOListChanges` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-rationale"></div>
+
+## Rationale
+By default, Group Policy client side extensions skip reapplication of policies during background refreshes if the central GPO version has not incremented. Forcing background reapplication guarantees that any local registry tampering or administrative drift is continuously corrected and overwritten by enterprise security baselines.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Slight, negligible CPU overhead during background Group Policy refresh cycles.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
+  * **Configure registry policy processing**: Set to `Enabled` (Process even if GPO has not changed; do not skip during background processing)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
+  * **Configure security policy processing**: Set to `Enabled` (Process even if GPO has not changed; do not skip during background processing)
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtGpProcessing.ps1](../implementation_scripts/Configure-PawAtGpProcessing.ps1)
+
+```powershell
+#Configure-PawAtGpProcessing.ps1
+# Description: Configures Administrative Templates: Enforce Group Policy Background Processing for PAWs.
+
+Write-Host "Configuring Administrative Templates: Enforce Group Policy Background Processing for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -Name "NoBackgroundPolicy" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -Name "NoGPOListChanges" -Value 0 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -Name "NoBackgroundPolicy" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -Name "NoGPOListChanges" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Enforce Group Policy Background Processing for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtGpProcessingStatus.ps1](../audit_scripts/Get-PawAtGpProcessingStatus.ps1)
+
+```powershell
+#Get-PawAtGpProcessingStatus.ps1
+# Description: Audits Administrative Templates: Enforce Group Policy Background Processing for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Enforce Group Policy Background Processing for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}"
+$ValueName = "NoBackgroundPolicy"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}"
+$ValueName = "NoGPOListChanges"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}"
+$ValueName = "NoBackgroundPolicy"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}"
+$ValueName = "NoGPOListChanges"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.19.2, Section 18.9.19.3, Section 18.9.19.4, Section 18.9.19.5
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-req-paw-174-administrative-templates-disable-cross-device-experiences-for-paws"></div>
+
+# [REQ-PAW-174] Administrative Templates: Disable Cross-Device Experiences for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\EnableCdp` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-rationale"></div>
+
+## Rationale
+The Connected Devices Platform (CDP) coordinates cross-device application states and task handoffs over cloud synchronization and Bluetooth beacons. In enterprise environments, this introduces unmanaged synchronization pathways between managed corporate systems and external personal consumer devices.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Cross-device features such as 'Continue on PC' from companion mobile devices or shared browser sessions will be unavailable.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Cross-Device Experiences`
+  * **Continue experiences on this device**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtCrossDeviceExperiences.ps1](../implementation_scripts/Configure-PawAtCrossDeviceExperiences.ps1)
+
+```powershell
+#Configure-PawAtCrossDeviceExperiences.ps1
+# Description: Configures Administrative Templates: Disable Cross-Device Experiences for PAWs.
+
+Write-Host "Configuring Administrative Templates: Disable Cross-Device Experiences for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableCdp" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Disable Cross-Device Experiences for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtCrossDeviceExperiencesStatus.ps1](../audit_scripts/Get-PawAtCrossDeviceExperiencesStatus.ps1)
+
+```powershell
+#Get-PawAtCrossDeviceExperiencesStatus.ps1
+# Description: Audits Administrative Templates: Disable Cross-Device Experiences for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Disable Cross-Device Experiences for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "EnableCdp"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.19.6
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-req-paw-175-administrative-templates-restrict-internet-communication-and-web-downloads-for-paws"></div>
+
+# [REQ-PAW-175] Administrative Templates: Restrict Internet Communication and Web Downloads for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers\DisableWebPnPDownload` = `1`
+  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoWebServices` = `1`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-rationale"></div>
+
+## Rationale
+Downloading print drivers via HTTP exposes systems to cleartext traffic tampering and Point-and-Print driver replacement attacks. Web publishing wizards provide legacy, unauthenticated internet upload channels that can be abused for unauthorized data egress.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Print drivers must be distributed via trusted internal print servers or enterprise deployment mechanisms. The web publishing wizard option in Windows Explorer will be suppressed.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
+  * **Turn off downloading of print drivers over HTTP**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
+  * **Turn off Internet download for Web publishing and online ordering wizards**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtInternetCommunication.ps1](../implementation_scripts/Configure-PawAtInternetCommunication.ps1)
+
+```powershell
+#Configure-PawAtInternetCommunication.ps1
+# Description: Configures Administrative Templates: Restrict Internet Communication and Web Downloads for PAWs.
+
+Write-Host "Configuring Administrative Templates: Restrict Internet Communication and Web Downloads for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" -Name "DisableWebPnPDownload" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer")) {
+    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "NoWebServices" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Restrict Internet Communication and Web Downloads for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtInternetCommunicationStatus.ps1](../audit_scripts/Get-PawAtInternetCommunicationStatus.ps1)
+
+```powershell
+#Get-PawAtInternetCommunicationStatus.ps1
+# Description: Audits Administrative Templates: Restrict Internet Communication and Web Downloads for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Restrict Internet Communication and Web Downloads for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
+$ValueName = "DisableWebPnPDownload"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+$ValueName = "NoWebServices"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.20.1.2, Section 18.9.20.1.6
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-req-paw-176-administrative-templates-block-custom-ssps-and-aps-from-loading-into-lsass-for-paws"></div>
+
+# [REQ-PAW-176] Administrative Templates: Block Custom SSPs and APs from Loading into LSASS for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\AllowCustomSSPsAPs` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-rationale"></div>
+
+## Rationale
+Security Support Providers (SSPs) and Authentication Packages (APs) execute inside the Local Security Authority Subsystem Service (lsass.exe). Threat actors frequently register malicious SSP DLLs in the registry to achieve persistent credential harvesting and memory dumping. Disabling custom SSP loading blocks third-party DLLs from injecting into LSASS.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Third-party authentication software or legacy smartcard drivers that inject custom SSP DLLs into LSASS will be blocked from loading. Modern providers must support Microsoft Credential Provider architecture.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Local Security Authority`
+  * **Allow Custom SSPs and APs to be loaded into LSASS**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtLsaCustomSsps.ps1](../implementation_scripts/Configure-PawAtLsaCustomSsps.ps1)
+
+```powershell
+#Configure-PawAtLsaCustomSsps.ps1
+# Description: Configures Administrative Templates: Block Custom SSPs and APs from Loading into LSASS for PAWs.
+
+Write-Host "Configuring Administrative Templates: Block Custom SSPs and APs from Loading into LSASS for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowCustomSSPsAPs" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Block Custom SSPs and APs from Loading into LSASS for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtLsaCustomSspsStatus.ps1](../audit_scripts/Get-PawAtLsaCustomSspsStatus.ps1)
+
+```powershell
+#Get-PawAtLsaCustomSspsStatus.ps1
+# Description: Audits Administrative Templates: Block Custom SSPs and APs from Loading into LSASS for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Block Custom SSPs and APs from Loading into LSASS for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "AllowCustomSSPsAPs"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.26.1; ANSSI R38
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-req-paw-177-administrative-templates-logon-display-and-credential-restrictions-for-paws"></div>
+
+# [REQ-PAW-177] Administrative Templates: Logon Display and Credential Restrictions for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\BlockUserFromShowingAccountDetailsOnSignin` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DontDisplayNetworkSelectionUI` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DontEnumerateConnectedUsers` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DisableLockScreenAppNotifications` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\BlockDomainPicturePassword` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\AllowDomainPINLogon` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\NoLocalPasswordResetQuestions` = `1`
+  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableMPR` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-rationale"></div>
+
+## Rationale
+Exposing account names, pictures, or network selection controls on lock screens provides reconnaissance information to physical attackers. Convenience PINs and picture passwords offer poor entropy compared to domain Kerberos credentials or smartcards. Local account security questions introduce easily guessable bypasses, and Multiple Provider Router (MPR) password transmission exposes cleartext credentials during authentication notifications.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Users must input their full username and password/smartcard PIN at logon. Convenience PINs are blocked (Windows Hello for Business with TPM hardware binding must be used instead if PINs are required).
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Block user from showing account details on sign-in**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Do not display network selection UI**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Do not enumerate connected users on domain-joined computers**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Turn off app notifications on the lock screen**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Turn off picture password sign-in**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Turn on convenience PIN sign-in**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Prevent the use of security questions for local accounts**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Configure the transmission of the user's password in the content of MPR notifications sent by winlogon**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtLogonDisplayOptions.ps1](../implementation_scripts/Configure-PawAtLogonDisplayOptions.ps1)
+
+```powershell
+#Configure-PawAtLogonDisplayOptions.ps1
+# Description: Configures Administrative Templates: Logon Display and Credential Restrictions for PAWs.
+
+Write-Host "Configuring Administrative Templates: Logon Display and Credential Restrictions for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "BlockUserFromShowingAccountDetailsOnSignin" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DontDisplayNetworkSelectionUI" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DontEnumerateConnectedUsers" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DisableLockScreenAppNotifications" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "BlockDomainPicturePassword" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowDomainPINLogon" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "NoLocalPasswordResetQuestions" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableMPR" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Logon Display and Credential Restrictions for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtLogonDisplayOptionsStatus.ps1](../audit_scripts/Get-PawAtLogonDisplayOptionsStatus.ps1)
+
+```powershell
+#Get-PawAtLogonDisplayOptionsStatus.ps1
+# Description: Audits Administrative Templates: Logon Display and Credential Restrictions for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Logon Display and Credential Restrictions for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "BlockUserFromShowingAccountDetailsOnSignin"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "DontDisplayNetworkSelectionUI"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "DontEnumerateConnectedUsers"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "DisableLockScreenAppNotifications"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "BlockDomainPicturePassword"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "AllowDomainPINLogon"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "NoLocalPasswordResetQuestions"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "EnableMPR"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.28.1, 18.9.28.2, 18.9.28.3, 18.9.28.5, 18.9.28.6, 18.9.28.7, 18.10.15.3, 18.10.82.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-req-paw-178-administrative-templates-disable-connected-standby-network-connectivity-for-paws"></div>
+
+# [REQ-PAW-178] Administrative Templates: Disable Connected Standby Network Connectivity for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9\DCSettingIndex` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9\ACSettingIndex` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-rationale"></div>
+
+## Rationale
+Connected Standby (Modern Standby) maintains active wireless and network interfaces while the operating system is suspended. This allows background applications to receive traffic and process incoming network packets, exposing devices to remote attacks and unauthorized network reconnaissance while unattended.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Applications cannot receive real-time notifications or synchronize background data while the laptop lid is closed or during sleep states.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings`
+  * **Allow network connectivity during connected-standby (on battery)**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings`
+  * **Allow network connectivity during connected-standby (plugged in)**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtPowerConnectedStandby.ps1](../implementation_scripts/Configure-PawAtPowerConnectedStandby.ps1)
+
+```powershell
+#Configure-PawAtPowerConnectedStandby.ps1
+# Description: Configures Administrative Templates: Disable Connected Standby Network Connectivity for PAWs.
+
+Write-Host "Configuring Administrative Templates: Disable Connected Standby Network Connectivity for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -Name "DCSettingIndex" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -Name "ACSettingIndex" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Disable Connected Standby Network Connectivity for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtPowerConnectedStandbyStatus.ps1](../audit_scripts/Get-PawAtPowerConnectedStandbyStatus.ps1)
+
+```powershell
+#Get-PawAtPowerConnectedStandbyStatus.ps1
+# Description: Audits Administrative Templates: Disable Connected Standby Network Connectivity for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Disable Connected Standby Network Connectivity for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9"
+$ValueName = "DCSettingIndex"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9"
+$ValueName = "ACSettingIndex"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.33.6.1, Section 18.9.33.6.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-req-paw-179-administrative-templates-disable-remote-assistance-for-paws"></div>
+
+# [REQ-PAW-179] Administrative Templates: Disable Remote Assistance for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\fAllowUnsolicited` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-rationale"></div>
+
+## Rationale
+Unsolicited Remote Assistance permits an administrator or support technician to initiate remote session connections to client endpoints without an explicit user invitation. If compromised, this capability allows adversaries with elevated domain privileges to silently observe or control interactive user desktop sessions.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Helpdesk staff cannot offer unsolicited remote assistance. User-initiated assistance or approved enterprise remote support solutions (with session auditing) must be utilized.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Assistance`
+  * **Configure Offer Remote Assistance**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtRemoteAssistance.ps1](../implementation_scripts/Configure-PawAtRemoteAssistance.ps1)
+
+```powershell
+#Configure-PawAtRemoteAssistance.ps1
+# Description: Configures Administrative Templates: Disable Remote Assistance for PAWs.
+
+Write-Host "Configuring Administrative Templates: Disable Remote Assistance for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Name "fAllowUnsolicited" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Disable Remote Assistance for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtRemoteAssistanceStatus.ps1](../audit_scripts/Get-PawAtRemoteAssistanceStatus.ps1)
+
+```powershell
+#Get-PawAtRemoteAssistanceStatus.ps1
+# Description: Audits Administrative Templates: Disable Remote Assistance for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Disable Remote Assistance for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+$ValueName = "fAllowUnsolicited"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.35.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-req-paw-180-administrative-templates-enable-rpc-endpoint-mapper-client-authentication-for-paws"></div>
+
+# [REQ-PAW-180] Administrative Templates: Enable RPC Endpoint Mapper Client Authentication for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc\EnableAuthEpResolution` = `1`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-rationale"></div>
+
+## Rationale
+The RPC Endpoint Mapper listens on TCP port 135 to resolve dynamic server endpoints for RPC interfaces. Enabling client authentication forces clients to authenticate to the Endpoint Mapper before obtaining endpoint addresses, preventing unauthenticated network adversaries from performing RPC reconnaissance and MITM endpoint redirection.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Legacy pre-Windows Server 2003 or third-party UNIX RPC clients incapable of authenticating to the Endpoint Mapper will fail to resolve RPC endpoints.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call`
+  * **Enable RPC Endpoint Mapper Client Authentication**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtRpcEndpointMapperAuth.ps1](../implementation_scripts/Configure-PawAtRpcEndpointMapperAuth.ps1)
+
+```powershell
+#Configure-PawAtRpcEndpointMapperAuth.ps1
+# Description: Configures Administrative Templates: Enable RPC Endpoint Mapper Client Authentication for PAWs.
+
+Write-Host "Configuring Administrative Templates: Enable RPC Endpoint Mapper Client Authentication for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc" -Name "EnableAuthEpResolution" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Enable RPC Endpoint Mapper Client Authentication for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtRpcEndpointMapperAuthStatus.ps1](../audit_scripts/Get-PawAtRpcEndpointMapperAuthStatus.ps1)
+
+```powershell
+#Get-PawAtRpcEndpointMapperAuthStatus.ps1
+# Description: Audits Administrative Templates: Enable RPC Endpoint Mapper Client Authentication for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Enable RPC Endpoint Mapper Client Authentication for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
+$ValueName = "EnableAuthEpResolution"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.36.1; ANSSI R34
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-req-paw-181-administrative-templates-configure-windows-time-service-ntp-client-and-server-for-paws"></div>
+
+# [REQ-PAW-181] Administrative Templates: Configure Windows Time Service NTP Client and Server for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient\Enabled` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer\Enabled` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-rationale"></div>
+
+## Rationale
+Accurate time synchronization is critical for Kerberos authentication (which rejects ticket timestamps skewed by more than 5 minutes) and forensic log correlation. Enabling the NTP Client guarantees synchronization with domain hierarchy time sources, while disabling the NTP Server prevents client workstations from broadcasting unauthenticated time data to other local hosts.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Client workstations will not serve time to other network devices.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers`
+  * **Enable Windows NTP Client**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers`
+  * **Enable Windows NTP Server**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtW32timeNtpClient.ps1](../implementation_scripts/Configure-PawAtW32timeNtpClient.ps1)
+
+```powershell
+#Configure-PawAtW32timeNtpClient.ps1
+# Description: Configures Administrative Templates: Configure Windows Time Service NTP Client and Server for PAWs.
+
+Write-Host "Configuring Administrative Templates: Configure Windows Time Service NTP Client and Server for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient" -Name "Enabled" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer" -Name "Enabled" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Configure Windows Time Service NTP Client and Server for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtW32timeNtpClientStatus.ps1](../audit_scripts/Get-PawAtW32timeNtpClientStatus.ps1)
+
+```powershell
+#Get-PawAtW32timeNtpClientStatus.ps1
+# Description: Audits Administrative Templates: Configure Windows Time Service NTP Client and Server for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Configure Windows Time Service NTP Client and Server for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient"
+$ValueName = "Enabled"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer"
+$ValueName = "Enabled"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.51.1.1, Section 18.9.51.1.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-req-paw-182-administrative-templates-app-package-deployment-restrictions-for-paws"></div>
+
+# [REQ-PAW-182] Administrative Templates: App Package Deployment Restrictions for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx\DisablePerUserUnsignedPackagesByDefault` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx\BlockNonAdminUserInstall` = `1`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-rationale"></div>
+
+## Rationale
+Standard user accounts can bypass traditional software restriction policies by deploying modern packaged Windows applications (.appx / .msix) directly into user profile directories. Disallowing per-user unsigned packages and prohibiting non-administrators from installing packaged apps ensures that all installed software is audited, signed, and managed by IT administrators.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Non-administrative users will be blocked from installing modern Store or sideloaded applications on their own profile without administrator approval.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment`
+  * **Not allow per-user unsigned packages to install by default (requires explicitly allow per install)**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment`
+  * **Prevent non-admin users from installing packaged Windows apps**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtAppxDeploymentRestrictions.ps1](../implementation_scripts/Configure-PawAtAppxDeploymentRestrictions.ps1)
+
+```powershell
+#Configure-PawAtAppxDeploymentRestrictions.ps1
+# Description: Configures Administrative Templates: App Package Deployment Restrictions for PAWs.
+
+Write-Host "Configuring Administrative Templates: App Package Deployment Restrictions for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx" -Name "DisablePerUserUnsignedPackagesByDefault" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx" -Name "BlockNonAdminUserInstall" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: App Package Deployment Restrictions for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtAppxDeploymentRestrictionsStatus.ps1](../audit_scripts/Get-PawAtAppxDeploymentRestrictionsStatus.ps1)
+
+```powershell
+#Get-PawAtAppxDeploymentRestrictionsStatus.ps1
+# Description: Audits Administrative Templates: App Package Deployment Restrictions for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: App Package Deployment Restrictions for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx"
+$ValueName = "DisablePerUserUnsignedPackagesByDefault"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx"
+$ValueName = "BlockNonAdminUserInstall"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.4.2, Section 18.10.4.3
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-req-paw-183-administrative-templates-configure-biometrics-enhanced-anti-spoofing-for-paws"></div>
+
+# [REQ-PAW-183] Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures\EnhancedAntiSpoofing` = `1`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-rationale"></div>
+
+## Rationale
+Standard facial recognition can potentially be spoofed using high-resolution photographs, video playback, or realistic masks. Enhanced anti-spoofing requires facial recognition algorithms to verify depth and infrared illumination data from compatible biometric hardware sensors before granting access.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Devices with standard RGB-only webcams will not support facial recognition logon and must use smartcards or TPM-backed PINs.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Biometrics\Facial Features`
+  * **Configure enhanced anti-spoofing**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtBiometricsAntiSpoofing.ps1](../implementation_scripts/Configure-PawAtBiometricsAntiSpoofing.ps1)
+
+```powershell
+#Configure-PawAtBiometricsAntiSpoofing.ps1
+# Description: Configures Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing for PAWs.
+
+Write-Host "Configuring Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures" -Name "EnhancedAntiSpoofing" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtBiometricsAntiSpoofingStatus.ps1](../audit_scripts/Get-PawAtBiometricsAntiSpoofingStatus.ps1)
+
+```powershell
+#Get-PawAtBiometricsAntiSpoofingStatus.ps1
+# Description: Audits Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures"
+$ValueName = "EnhancedAntiSpoofing"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.9.1.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-req-paw-184-administrative-templates-disable-cloud-consumer-account-state-content-for-paws"></div>
+
+# [REQ-PAW-184] Administrative Templates: Disable Cloud Consumer Account State Content for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Low
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent\DisableConsumerAccountStateContent` = `1`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-rationale"></div>
+
+## Rationale
+Windows features consumer account state content cards and promotional recommendations in system menus. Disabling this content stops background queries to consumer cloud services, eliminates targeted promotional telemetry, and maintains a clean enterprise desktop interface.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Consumer account recommendation banners will be removed from system menus.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Cloud Content`
+  * **Turn off cloud consumer account state content**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtCloudConsumerContent.ps1](../implementation_scripts/Configure-PawAtCloudConsumerContent.ps1)
+
+```powershell
+#Configure-PawAtCloudConsumerContent.ps1
+# Description: Configures Administrative Templates: Disable Cloud Consumer Account State Content for PAWs.
+
+Write-Host "Configuring Administrative Templates: Disable Cloud Consumer Account State Content for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Name "DisableConsumerAccountStateContent" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Disable Cloud Consumer Account State Content for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtCloudConsumerContentStatus.ps1](../audit_scripts/Get-PawAtCloudConsumerContentStatus.ps1)
+
+```powershell
+#Get-PawAtCloudConsumerContentStatus.ps1
+# Description: Audits Administrative Templates: Disable Cloud Consumer Account State Content for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Disable Cloud Consumer Account State Content for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
+$ValueName = "DisableConsumerAccountStateContent"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.13.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-req-paw-185-administrative-templates-require-pin-for-connect-wireless-pairing-for-paws"></div>
+
+# [REQ-PAW-185] Administrative Templates: Require PIN for Connect Wireless Pairing for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Connect\RequirePinForPairing` = `1`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-rationale"></div>
+
+## Rationale
+The Windows Connect app allows nearby wireless devices to project their screens to the machine over Wi-Fi Direct (Miracast). Requiring a PIN for pairing prevents unauthorized external devices from projecting content or attempting connection hijack attacks without local physical verification.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Users initiating wireless projection must enter the displayed numeric PIN.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Connect`
+  * **Require pin for pairing**: Set to `Enabled` (First Time or Always)
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtConnectPinPairing.ps1](../implementation_scripts/Configure-PawAtConnectPinPairing.ps1)
+
+```powershell
+#Configure-PawAtConnectPinPairing.ps1
+# Description: Configures Administrative Templates: Require PIN for Connect Wireless Pairing for PAWs.
+
+Write-Host "Configuring Administrative Templates: Require PIN for Connect Wireless Pairing for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect" -Name "RequirePinForPairing" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Require PIN for Connect Wireless Pairing for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtConnectPinPairingStatus.ps1](../audit_scripts/Get-PawAtConnectPinPairingStatus.ps1)
+
+```powershell
+#Get-PawAtConnectPinPairingStatus.ps1
+# Description: Audits Administrative Templates: Require PIN for Connect Wireless Pairing for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Require PIN for Connect Wireless Pairing for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect"
+$ValueName = "RequirePinForPairing"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.14.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-req-paw-186-administrative-templates-credential-user-interface-security-protections-for-paws"></div>
+
+# [REQ-PAW-186] Administrative Templates: Credential User Interface Security Protections for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\CredUI\DisablePasswordReveal` = `1`
+  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI\EnumerateAdministrators` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-rationale"></div>
+
+## Rationale
+The password reveal ('eye') button exposes cleartext passwords on screen, creating shoulder-surfing and screen recording vulnerabilities. Enumerating administrator accounts on UAC elevation displays valid privileged usernames to standard users, facilitating targeted administrative reconnaissance and brute-force attacks.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: The password reveal button is disabled across all system credential prompts. Users elevating privileges must manually enter both the administrative username and password.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface`
+  * **Do not display the password reveal button**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface`
+  * **Enumerate administrator accounts on elevation**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtCreduiProtections.ps1](../implementation_scripts/Configure-PawAtCreduiProtections.ps1)
+
+```powershell
+#Configure-PawAtCreduiProtections.ps1
+# Description: Configures Administrative Templates: Credential User Interface Security Protections for PAWs.
+
+Write-Host "Configuring Administrative Templates: Credential User Interface Security Protections for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI" -Name "DisablePasswordReveal" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI")) {
+    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI" -Name "EnumerateAdministrators" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Credential User Interface Security Protections for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtCreduiProtectionsStatus.ps1](../audit_scripts/Get-PawAtCreduiProtectionsStatus.ps1)
+
+```powershell
+#Get-PawAtCreduiProtectionsStatus.ps1
+# Description: Audits Administrative Templates: Credential User Interface Security Protections for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Credential User Interface Security Protections for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI"
+$ValueName = "DisablePasswordReveal"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI"
+$ValueName = "EnumerateAdministrators"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.15.1, Section 18.10.15.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-req-paw-187-administrative-templates-diagnostic-data-collection-and-preview-builds-restrictions-for-paws"></div>
+
+# [REQ-PAW-187] Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\DisableOneSettingsDownloads` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\DoNotShowFeedbackNotifications` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\EnableOneSettingsAuditing` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\LimitDiagnosticLogCollection` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\LimitDumpCollection` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds\AllowBuildPreview` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-rationale"></div>
+
+## Rationale
+OneSettings downloads allow Microsoft to dynamically modify diagnostic configurations over the cloud. Limiting diagnostic and crash dump collection prevents in-memory sensitive data (such as passwords, tokens, or encryption keys) from being captured in automated crash reports and transmitted externally. Disabling Insider builds guarantees production systems only run fully vetted, stable OS builds.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Users cannot enroll in the Windows Insider program. Diagnostic feedback prompts are suppressed.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Disable OneSettings Downloads**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Do not show feedback notifications**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Enable OneSettings Auditing**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Limit Diagnostic Log Collection**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Limit Dump Collection**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Toggle user control over Insider builds**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtDataCollectionPreviewBuilds.ps1](../implementation_scripts/Configure-PawAtDataCollectionPreviewBuilds.ps1)
+
+```powershell
+#Configure-PawAtDataCollectionPreviewBuilds.ps1
+# Description: Configures Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions for PAWs.
+
+Write-Host "Configuring Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DisableOneSettingsDownloads" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DoNotShowFeedbackNotifications" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "EnableOneSettingsAuditing" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "LimitDiagnosticLogCollection" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "LimitDumpCollection" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds" -Name "AllowBuildPreview" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtDataCollectionPreviewBuildsStatus.ps1](../audit_scripts/Get-PawAtDataCollectionPreviewBuildsStatus.ps1)
+
+```powershell
+#Get-PawAtDataCollectionPreviewBuildsStatus.ps1
+# Description: Audits Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+$ValueName = "DisableOneSettingsDownloads"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+$ValueName = "DoNotShowFeedbackNotifications"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+$ValueName = "EnableOneSettingsAuditing"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+$ValueName = "LimitDiagnosticLogCollection"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+$ValueName = "LimitDumpCollection"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds"
+$ValueName = "AllowBuildPreview"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.16.3, 18.10.16.4, 18.10.16.5, 18.10.16.6, 18.10.16.7, 18.10.16.8
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-req-paw-188-administrative-templates-app-installer-protocol-and-execution-controls-for-paws"></div>
+
+# [REQ-PAW-188] Administrative Templates: App Installer Protocol and Execution Controls for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableExperimentalFeatures` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableHashOverride` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableLocalArchiveMalwareScanOverride` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableBypassCertificatePinningForMicrosoftStore` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableMSAppInstallerProtocol` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-rationale"></div>
+
+## Rationale
+The App Installer URI protocol (ms-appinstaller://) has been repeatedly abused in active malware campaigns to trigger zero-click or drive-by package installations directly from web browsers. Disabling this protocol and prohibiting security overrides (hash bypass, malware scan bypass, certificate bypass) completely closes this critical initial infection vector.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Web links utilizing ms-appinstaller will not launch automatically. Software must be deployed through enterprise deployment mechanisms or local signed packages.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
+  * **Enable App Installer Experimental Features**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
+  * **Enable App Installer Hash Override**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
+  * **Enable App Installer Local Archive Malware Scan Override**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
+  * **Enable App Installer Microsoft Store Source Certificate Validation Bypass**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
+  * **Enable App Installer ms-appinstaller protocol**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtAppInstallerControls.ps1](../implementation_scripts/Configure-PawAtAppInstallerControls.ps1)
+
+```powershell
+#Configure-PawAtAppInstallerControls.ps1
+# Description: Configures Administrative Templates: App Installer Protocol and Execution Controls for PAWs.
+
+Write-Host "Configuring Administrative Templates: App Installer Protocol and Execution Controls for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableExperimentalFeatures" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableHashOverride" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableLocalArchiveMalwareScanOverride" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableBypassCertificatePinningForMicrosoftStore" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableMSAppInstallerProtocol" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: App Installer Protocol and Execution Controls for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtAppInstallerControlsStatus.ps1](../audit_scripts/Get-PawAtAppInstallerControlsStatus.ps1)
+
+```powershell
+#Get-PawAtAppInstallerControlsStatus.ps1
+# Description: Audits Administrative Templates: App Installer Protocol and Execution Controls for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: App Installer Protocol and Execution Controls for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+$ValueName = "EnableExperimentalFeatures"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+$ValueName = "EnableHashOverride"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+$ValueName = "EnableLocalArchiveMalwareScanOverride"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+$ValueName = "EnableBypassCertificatePinningForMicrosoftStore"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+$ValueName = "EnableMSAppInstallerProtocol"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.18.2, 18.10.18.3, 18.10.18.4, 18.10.18.5, 18.10.18.6
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-req-paw-189-administrative-templates-event-log-maximum-file-sizes-and-retention-policies-for-paws"></div>
+
+# [REQ-PAW-189] Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\Retention` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\MaxSize` = `32768`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\Retention` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\MaxSize` = `196608`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\Retention` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\MaxSize` = `32768`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\Retention` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\MaxSize` = `32768`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-rationale"></div>
+
+## Rationale
+Default event log capacities (typically 20 MB) rollover within hours during active security events, overwriting vital evidence. Expanding the Security log to 192 MB (196,608 KB) and Application/Setup/System logs to 32 MB (32,768 KB) provides sufficient buffer for high-volume audit data and centralized SIEM ingestion.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Allocates approximately 300 MB of disk space in %SystemRoot%\System32\Winevt\Logs.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (32768 KB)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (196608 KB)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (32768 KB)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (32768 KB)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtEventLogSizes.ps1](../implementation_scripts/Configure-PawAtEventLogSizes.ps1)
+
+```powershell
+#Configure-PawAtEventLogSizes.ps1
+# Description: Configures Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs.
+
+Write-Host "Configuring Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 32768 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 196608 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "MaxSize" -Value 32768 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 32768 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtEventLogSizesStatus.ps1](../audit_scripts/Get-PawAtEventLogSizesStatus.ps1)
+
+```powershell
+#Get-PawAtEventLogSizesStatus.ps1
+# Description: Audits Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application"
+$ValueName = "MaxSize"
+$ExpectedValue = 32768
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security"
+$ValueName = "MaxSize"
+$ExpectedValue = 196608
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup"
+$ValueName = "MaxSize"
+$ExpectedValue = 32768
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System"
+$ValueName = "MaxSize"
+$ExpectedValue = 32768
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.26.1.1, 18.10.26.1.2, 18.10.26.2.1, 18.10.26.2.2, 18.10.26.3.1, 18.10.26.3.2, 18.10.26.4.1, 18.10.26.4.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-req-paw-190-administrative-templates-file-explorer-mark-of-the-web-and-shell-protocol-security-for-paws"></div>
+
+# [REQ-PAW-190] Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer\DisableMotWOnInsecurePathCopy` = `0`
+  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\PreXPSP2ShellProtocolBehavior` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-rationale"></div>
+
+## Rationale
+The Mark of the Web (Zone.Identifier alternate data stream) is the foundation of Windows download security, triggering SmartScreen, Defender reputation checks, and Office Protected View. Disabling MotW suppression ensures downloaded files maintain security tags even when transferred across insecure network shares. Shell protocol protected mode restricts rogue URL protocol invocations.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Downloaded files copied across local shares will correctly retain Internet security prompts when executed.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
+  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
+  * **Turn off shell protocol protected mode**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtFileExplorerMotw.ps1](../implementation_scripts/Configure-PawAtFileExplorerMotw.ps1)
+
+```powershell
+#Configure-PawAtFileExplorerMotw.ps1
+# Description: Configures Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs.
+
+Write-Host "Configuring Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableMotWOnInsecurePathCopy" -Value 0 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer")) {
+    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "PreXPSP2ShellProtocolBehavior" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtFileExplorerMotwStatus.ps1](../audit_scripts/Get-PawAtFileExplorerMotwStatus.ps1)
+
+```powershell
+#Get-PawAtFileExplorerMotwStatus.ps1
+# Description: Audits Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
+$ValueName = "DisableMotWOnInsecurePathCopy"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+$ValueName = "PreXPSP2ShellProtocolBehavior"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.29.3, Section 18.10.29.5
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-req-paw-191-administrative-templates-internet-explorer-11-and-web-feeds-retirement-controls-for-paws"></div>
+
+# [REQ-PAW-191] Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main\NotifyDisableIEOptions` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\DisableEnclosureDownload` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\AllowBasicAuthInClear` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-rationale"></div>
+
+## Rationale
+Internet Explorer 11 is retired and out of support, presenting severe unpatched memory corruption attack surfaces. Disabling IE11 as a standalone browser automatically redirects browser requests to Microsoft Edge. Prohibiting RSS enclosure downloads prevents automated malware payload staging, and blocking cleartext HTTP feed authentication prevents credential interception.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: iexplore.exe redirects to Microsoft Edge. Legacy enterprise applications requiring MSHTML must be configured via Enterprise Mode Site List in Edge IE Mode.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer`
+  * **Disable Internet Explorer 11 as a standalone browser**: Set to `Enabled: Always`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
+  * **Prevent downloading of enclosures**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
+  * **Turn on Basic feed authentication over HTTP**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtInternetExplorerRetirement.ps1](../implementation_scripts/Configure-PawAtInternetExplorerRetirement.ps1)
+
+```powershell
+#Configure-PawAtInternetExplorerRetirement.ps1
+# Description: Configures Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs.
+
+Write-Host "Configuring Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Name "NotifyDisableIEOptions" -Value 0 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -Name "DisableEnclosureDownload" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -Name "AllowBasicAuthInClear" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtInternetExplorerRetirementStatus.ps1](../audit_scripts/Get-PawAtInternetExplorerRetirementStatus.ps1)
+
+```powershell
+#Get-PawAtInternetExplorerRetirementStatus.ps1
+# Description: Audits Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main"
+$ValueName = "NotifyDisableIEOptions"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds"
+$ValueName = "DisableEnclosureDownload"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds"
+$ValueName = "AllowBasicAuthInClear"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.35.1, Section 18.10.58.1, Section 18.10.58.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-req-paw-192-administrative-templates-windows-defender-scan-and-exploit-protection-overrides-for-paws"></div>
+
+# [REQ-PAW-192] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection\BruteForceProtectionConfiguredState` = `2`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Scan\DisablePackedExeScanning` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection\DisallowExploitProtectionOverride` = `1`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-rationale"></div>
+
+## Rationale
+Remote Encryption Protection actively detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing packed executable scanning guarantees that software packed with UPX or custom packers is decompressed and analyzed for malicious payloads. Preventing users from modifying Exploit Protection settings secures core mitigations (DEP, ASLR, CFG) against local user tampering.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Scanning packed files may cause slight increases in scan duration. Standard users cannot alter App & Browser protection options in Windows Security.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection`
+  * **Configure Remote Encryption Protection Mode**: Set to `Enabled` (Audit or higher (Block mode recommended))
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
+  * **Turn off scanning of packed executables**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection`
+  * **Prevent users from modifying settings**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtDefenderProtectionOptions.ps1](../implementation_scripts/Configure-PawAtDefenderProtectionOptions.ps1)
+
+```powershell
+#Configure-PawAtDefenderProtectionOptions.ps1
+# Description: Configures Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs.
+
+Write-Host "Configuring Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "DisablePackedExeScanning" -Value 0 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtDefenderProtectionOptionsStatus.ps1](../audit_scripts/Get-PawAtDefenderProtectionOptionsStatus.ps1)
+
+```powershell
+#Get-PawAtDefenderProtectionOptionsStatus.ps1
+# Description: Audits Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+$ValueName = "BruteForceProtectionConfiguredState"
+$ExpectedValue = 2
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
+$ValueName = "DisablePackedExeScanning"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+$ValueName = "DisallowExploitProtectionOverride"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.43.11.1.1.2, Section 18.10.43.13.2, Section 18.10.92.2.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-req-paw-193-administrative-templates-windows-search-and-cortana-privacy-restrictions-for-paws"></div>
+
+# [REQ-PAW-193] Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowCortana` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowCortanaAboveLock` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowIndexingEncryptedStoresOrItems` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowSearchToUseLocation` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-rationale"></div>
+
+## Rationale
+Cortana voice integration introduces microphone listening risks, voice command execution from locked workstations, and external telemetry transmission. Indexing encrypted files in the Windows Search index creates unencrypted index cache entries, leaking sensitive plaintext data across file security boundaries.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Cortana voice assistance is deactivated. Encrypted files will not appear in instant search results.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
+  * **Allow Cortana**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
+  * **Allow Cortana above lock screen**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
+  * **Allow indexing of encrypted files**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
+  * **Allow search and Cortana to use location**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtSearchCortanaRestrictions.ps1](../implementation_scripts/Configure-PawAtSearchCortanaRestrictions.ps1)
+
+```powershell
+#Configure-PawAtSearchCortanaRestrictions.ps1
+# Description: Configures Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs.
+
+Write-Host "Configuring Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortana" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortanaAboveLock" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowIndexingEncryptedStoresOrItems" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowSearchToUseLocation" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtSearchCortanaRestrictionsStatus.ps1](../audit_scripts/Get-PawAtSearchCortanaRestrictionsStatus.ps1)
+
+```powershell
+#Get-PawAtSearchCortanaRestrictionsStatus.ps1
+# Description: Audits Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+$ValueName = "AllowCortana"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+$ValueName = "AllowCortanaAboveLock"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+$ValueName = "AllowIndexingEncryptedStoresOrItems"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+$ValueName = "AllowSearchToUseLocation"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.59.3, 18.10.59.4, 18.10.59.5, 18.10.59.6
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-req-paw-194-administrative-templates-windows-store-updates-and-os-upgrade-restrictions-for-paws"></div>
+
+# [REQ-PAW-194] Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore\AutoDownload` = `4`
+  * `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore\DisableOSUpgrade` = `1`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-rationale"></div>
+
+## Rationale
+Permitting automatic Store app updates ensures packaged applications and system appx dependencies stay continuously patched against published vulnerabilities. Suppressing consumer Windows upgrade offers prevents unauthorized major OS feature version upgrades that circumvent IT change management and testing.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Store apps receive automated updates; consumer version upgrade prompts are suppressed.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store`
+  * **Turn off Automatic Download and Install of updates**: Set to `Disabled` (Allow auto updates)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store`
+  * **Turn off the offer to update to the latest version of Windows**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtWindowsStoreRestrictions.ps1](../implementation_scripts/Configure-PawAtWindowsStoreRestrictions.ps1)
+
+```powershell
+#Configure-PawAtWindowsStoreRestrictions.ps1
+# Description: Configures Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs.
+
+Write-Host "Configuring Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Name "AutoDownload" -Value 4 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Name "DisableOSUpgrade" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtWindowsStoreRestrictionsStatus.ps1](../audit_scripts/Get-PawAtWindowsStoreRestrictionsStatus.ps1)
+
+```powershell
+#Get-PawAtWindowsStoreRestrictionsStatus.ps1
+# Description: Audits Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore"
+$ValueName = "AutoDownload"
+$ExpectedValue = 4
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore"
+$ValueName = "DisableOSUpgrade"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.66.2, Section 18.10.66.3
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-req-paw-195-administrative-templates-disable-windows-widgets-and-news-feed-for-paws"></div>
+
+# [REQ-PAW-195] Administrative Templates: Disable Windows Widgets and News Feed for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Low
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Dsh\AllowNewsAndInterests` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-rationale"></div>
+
+## Rationale
+Windows Widgets and News and Interests dynamically fetch unauthenticated internet news, weather, and third-party content onto the taskbar, generating continuous telemetry and background web requests. Disabling widgets eliminates this attack surface and eliminates unwanted distractions.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: The Widgets and News and Interests icon is removed from the taskbar.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Widgets`
+  * **Allow widgets**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtWindowsWidgetsDsh.ps1](../implementation_scripts/Configure-PawAtWindowsWidgetsDsh.ps1)
+
+```powershell
+#Configure-PawAtWindowsWidgetsDsh.ps1
+# Description: Configures Administrative Templates: Disable Windows Widgets and News Feed for PAWs.
+
+Write-Host "Configuring Administrative Templates: Disable Windows Widgets and News Feed for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Dsh")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Dsh" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Dsh" -Name "AllowNewsAndInterests" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Disable Windows Widgets and News Feed for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtWindowsWidgetsDshStatus.ps1](../audit_scripts/Get-PawAtWindowsWidgetsDshStatus.ps1)
+
+```powershell
+#Get-PawAtWindowsWidgetsDshStatus.ps1
+# Description: Audits Administrative Templates: Disable Windows Widgets and News Feed for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Disable Windows Widgets and News Feed for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Dsh"
+$ValueName = "AllowNewsAndInterests"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.72.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-req-paw-196-administrative-templates-disable-windows-automatic-restart-sign-on-arso-for-paws"></div>
+
+# [REQ-PAW-196] Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO) for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableAutomaticRestartSignOn` = `1`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-rationale"></div>
+
+## Rationale
+Automatic Restart Sign-On (ARSO) caches user credentials in memory to automatically log in and lock the desktop after Windows Update reboots. This credential staging mechanism creates exposure to physical memory extraction and DMA attacks. Disabling ARSO prevents credentials from persisting across automated reboots.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Following a restart, the computer remains at the initial Windows login screen until the user manually authenticates.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Logon Options`
+  * **Sign-in and lock last interactive user automatically after a restart**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtAutomaticRestartSignon.ps1](../implementation_scripts/Configure-PawAtAutomaticRestartSignon.ps1)
+
+```powershell
+#Configure-PawAtAutomaticRestartSignon.ps1
+# Description: Configures Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO) for PAWs.
+
+Write-Host "Configuring Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO) for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "DisableAutomaticRestartSignOn" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO) for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtAutomaticRestartSignonStatus.ps1](../audit_scripts/Get-PawAtAutomaticRestartSignonStatus.ps1)
+
+```powershell
+#Get-PawAtAutomaticRestartSignonStatus.ps1
+# Description: Audits Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO) for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO) for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "DisableAutomaticRestartSignOn"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.82.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-req-paw-197-administrative-templates-windows-sandbox-clipboard-and-network-isolation-for-paws"></div>
+
+# [REQ-PAW-197] Administrative Templates: Windows Sandbox Clipboard and Network Isolation for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox\AllowClipboardRedirection` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox\AllowNetworking` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-rationale"></div>
+
+## Rationale
+Windows Sandbox provides a lightweight virtualized environment for untrusted binary execution. If malware is detonated inside the sandbox, clipboard sharing allows potential escape or clipboard data harvesting, and network access permits external C2 communication and lateral scanning. Disabling clipboard redirection and networking enforces strict host and network isolation.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Users cannot copy/paste between host and sandbox, and Sandbox cannot connect to local or internet networks.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox`
+  * **Allow clipboard sharing with Windows Sandbox**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox`
+  * **Allow networking in Windows Sandbox**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtWindowsSandboxIsolation.ps1](../implementation_scripts/Configure-PawAtWindowsSandboxIsolation.ps1)
+
+```powershell
+#Configure-PawAtWindowsSandboxIsolation.ps1
+# Description: Configures Administrative Templates: Windows Sandbox Clipboard and Network Isolation for PAWs.
+
+Write-Host "Configuring Administrative Templates: Windows Sandbox Clipboard and Network Isolation for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox" -Name "AllowClipboardRedirection" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox" -Name "AllowNetworking" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Windows Sandbox Clipboard and Network Isolation for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtWindowsSandboxIsolationStatus.ps1](../audit_scripts/Get-PawAtWindowsSandboxIsolationStatus.ps1)
+
+```powershell
+#Get-PawAtWindowsSandboxIsolationStatus.ps1
+# Description: Audits Administrative Templates: Windows Sandbox Clipboard and Network Isolation for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Windows Sandbox Clipboard and Network Isolation for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox"
+$ValueName = "AllowClipboardRedirection"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox"
+$ValueName = "AllowNetworking"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.91.1, Section 18.10.91.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md"></div>
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-req-paw-198-administrative-templates-windows-update-deferral-and-automatic-installation-policies-for-paws"></div>
+
+# [REQ-PAW-198] Administrative Templates: Windows Update Deferral and Automatic Installation Policies for PAWs
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\SetDisablePauseUXAccess` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\ManagePreviewBuildsPolicyValue` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdates` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdatesPeriodInDays` = `180`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdates` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdatesPeriodInDays` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\NoAutoRebootWithLoggedOnUsers` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\ScheduledInstallDay` = `0`
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-rationale"></div>
+
+## Rationale
+Removing the ability to pause updates prevents users from indefinitely deferring critical security patches. Deferring quality updates by 0 days ensures critical security patches are installed immediately upon release, while daily scheduled installation and permitting automated reboots ensures systems stay continuously remediated against known exploits.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Users will not be able to pause updates. The system may reboot during designated maintenance windows to complete patch application.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
+  * **Remove access to 'Pause updates' feature**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
+  * **Manage preview builds**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
+  * **Select when Preview Builds and Feature Updates are received**: Set to `Enabled: Defer 180 days`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
+  * **Select when Quality Updates are received**: Set to `Enabled: Defer 0 days`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience`
+  * **Configure Automatic Updates**: Set to `Enabled: Scheduled install day 0 - Every day`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience`
+  * **No auto-restart with logged on users for scheduled automatic updates installations**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-PawAtWindowsUpdatePolicies.ps1](../implementation_scripts/Configure-PawAtWindowsUpdatePolicies.ps1)
+
+```powershell
+#Configure-PawAtWindowsUpdatePolicies.ps1
+# Description: Configures Administrative Templates: Windows Update Deferral and Automatic Installation Policies for PAWs.
+
+Write-Host "Configuring Administrative Templates: Windows Update Deferral and Automatic Installation Policies for PAWs..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "SetDisablePauseUXAccess" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "ManagePreviewBuildsPolicyValue" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferFeatureUpdates" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferFeatureUpdatesPeriodInDays" -Value 180 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferQualityUpdates" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferQualityUpdatesPeriodInDays" -Value 0 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoRebootWithLoggedOnUsers" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "ScheduledInstallDay" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Windows Update Deferral and Automatic Installation Policies for PAWs applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-PawAtWindowsUpdatePoliciesStatus.ps1](../audit_scripts/Get-PawAtWindowsUpdatePoliciesStatus.ps1)
+
+```powershell
+#Get-PawAtWindowsUpdatePoliciesStatus.ps1
+# Description: Audits Administrative Templates: Windows Update Deferral and Automatic Installation Policies for PAWs.
+
+Write-Host "--- Auditing Administrative Templates: Windows Update Deferral and Automatic Installation Policies for PAWs ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$ValueName = "SetDisablePauseUXAccess"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$ValueName = "ManagePreviewBuildsPolicyValue"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$ValueName = "DeferFeatureUpdates"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$ValueName = "DeferFeatureUpdatesPeriodInDays"
+$ExpectedValue = 180
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$ValueName = "DeferQualityUpdates"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$ValueName = "DeferQualityUpdatesPeriodInDays"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+$ValueName = "NoAutoRebootWithLoggedOnUsers"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+$ValueName = "ScheduledInstallDay"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.93.1.1, 18.10.93.2.2, 18.10.93.2.3, 18.10.93.4.1, 18.10.93.4.2, 18.10.93.4.3
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
 
 
 <div style="page-break-before: always;"></div>
@@ -64468,7 +69502,38 @@ To prevent initial access and lateral movement, the following unitary technical 
     Configures printing security, RPC over TCP communication, Point and Print restrictions, and Redirection Guard, and disables incoming print spooler connections.
 
 26. **[REQ-END-026 - Configure System Administrative Templates](#08-endpoints-configure-system-administrative-templates-md)**
-    Enforces 91 administrative template settings including SMBv1 driver blocks, event log size extensions, and Windows Update scheduling.
+    Coordinates system-wide administrative template policies across network protocols, session security, diagnostic data collection, application deployment, event log capacities, and update schedules.
+    * **[REQ-END-179 - Administrative Templates: Disable SMBv1 Protocol Components](#08-endpoints-admin-templates-configure-end-at-smbv1-md)**
+    * **[REQ-END-180 - Administrative Templates: Configure NetBT Node Type and Name Release](#08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md)**
+    * **[REQ-END-181 - Administrative Templates: MSS IP Source Routing and ICMP Redirects](#08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md)**
+    * **[REQ-END-182 - Administrative Templates: MSS System and Session Security Protections](#08-endpoints-admin-templates-configure-end-at-mss-system-protections-md)**
+    * **[REQ-END-183 - Administrative Templates: Prevent Device Metadata Retrieval from Network](#08-endpoints-admin-templates-configure-end-at-device-metadata-md)**
+    * **[REQ-END-184 - Administrative Templates: Enforce Group Policy Background Processing](#08-endpoints-admin-templates-configure-end-at-gp-processing-md)**
+    * **[REQ-END-185 - Administrative Templates: Disable Cross-Device Experiences](#08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md)**
+    * **[REQ-END-186 - Administrative Templates: Restrict Internet Communication and Web Downloads](#08-endpoints-admin-templates-configure-end-at-internet-communication-md)**
+    * **[REQ-END-187 - Administrative Templates: Block Custom SSPs and APs from Loading into LSASS](#08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md)**
+    * **[REQ-END-188 - Administrative Templates: Logon Display and Credential Restrictions](#08-endpoints-admin-templates-configure-end-at-logon-display-options-md)**
+    * **[REQ-END-189 - Administrative Templates: Disable Connected Standby Network Connectivity](#08-endpoints-admin-templates-configure-end-at-power-connected-standby-md)**
+    * **[REQ-END-190 - Administrative Templates: Disable Remote Assistance](#08-endpoints-admin-templates-configure-end-at-remote-assistance-md)**
+    * **[REQ-END-191 - Administrative Templates: Enable RPC Endpoint Mapper Client Authentication](#08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md)**
+    * **[REQ-END-192 - Administrative Templates: Configure Windows Time Service NTP Client and Server](#08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md)**
+    * **[REQ-END-193 - Administrative Templates: App Package Deployment Restrictions](#08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md)**
+    * **[REQ-END-194 - Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing](#08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md)**
+    * **[REQ-END-195 - Administrative Templates: Disable Cloud Consumer Account State Content](#08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md)**
+    * **[REQ-END-196 - Administrative Templates: Require PIN for Connect Wireless Pairing](#08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md)**
+    * **[REQ-END-197 - Administrative Templates: Credential User Interface Security Protections](#08-endpoints-admin-templates-configure-end-at-credui-protections-md)**
+    * **[REQ-END-198 - Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions](#08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md)**
+    * **[REQ-END-199 - Administrative Templates: App Installer Protocol and Execution Controls](#08-endpoints-admin-templates-configure-end-at-app-installer-controls-md)**
+    * **[REQ-END-200 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies](#08-endpoints-admin-templates-configure-end-at-event-log-sizes-md)**
+    * **[REQ-END-201 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security](#08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md)**
+    * **[REQ-END-202 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls](#08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md)**
+    * **[REQ-END-203 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides](#08-endpoints-admin-templates-configure-end-at-defender-protection-options-md)**
+    * **[REQ-END-204 - Administrative Templates: Windows Search and Cortana Privacy Restrictions](#08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md)**
+    * **[REQ-END-205 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions](#08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md)**
+    * **[REQ-END-206 - Administrative Templates: Disable Windows Widgets and News Feed](#08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md)**
+    * **[REQ-END-207 - Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO)](#08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md)**
+    * **[REQ-END-208 - Administrative Templates: Windows Sandbox Clipboard and Network Isolation](#08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md)**
+    * **[REQ-END-209 - Administrative Templates: Windows Update Deferral and Automatic Installation Policies](#08-endpoints-admin-templates-configure-end-at-windows-update-policies-md)**
 
 27. **[REQ-END-027 - Configure AppLocker Policies](#08-endpoints-configure-applocker-policies-md)**
     Deploys AppLocker application control policies to restrict unauthorized software and script execution, and prevents default AppLocker bypasses.
@@ -86402,9 +91467,9 @@ if ($script:Vulnerable) {
 
 <div id="08-endpoints-configure-system-administrative-templates-md"></div>
 
-<div id="08-endpoints-configure-system-administrative-templates-md-req-end-026-configure-system-administrative-templates"></div>
+<div id="08-endpoints-configure-system-administrative-templates-md-configure-system-administrative-templates"></div>
 
-# [REQ-END-026] Configure System Administrative Templates
+# Configure System Administrative Templates
 
 <div id="08-endpoints-configure-system-administrative-templates-md-target-scope"></div>
 
@@ -86417,655 +91482,229 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-configure-system-administrative-templates-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Medium
+* **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\...`
-  * **Registry Location**: Multiple locations under `HKLM\SOFTWARE\Policies` and `HKLM\SYSTEM\CurrentControlSet` (see details below)
+  * **Registry Location**: Multiple locations under `HKLM\SOFTWARE\Policies` and `HKLM\SYSTEM\CurrentControlSet` (see individual requirements below)
 
 ---
 
 <div id="08-endpoints-configure-system-administrative-templates-md-rationale"></div>
 
 ## Rationale
-Administrative templates govern system-wide capabilities, behaviors, and diagnostic logging. Hardening these configurations reduces the attack surface and mitigates privilege escalation, credential theft, and unauthorized software installation:
+Administrative templates govern system-wide capabilities, behaviors, network protocols, diagnostic logging, and component features. Hardening these configurations reduces the attack surface and mitigates critical attack vectors, including credential theft, lateral movement, unauthorized software deployment, and remote exploitation:
 
-1. **Protocols Hardening**: Disabling legacy SMBv1 client/server components prevents exploitation of known protocol flaws. Configuring NetBIOS NodeType to P-Node prevents name resolution fallback issues.
-2. **Data Collection & Telemetry**: Disabling Insider builds, telemetry feedback, widgets, Cortana, and OneSettings downloads blocks potential information disclosure paths and aligns with clean enterprise environments.
-3. **App and Installer Restrictions**: Preventing non-admin users from installing packaged apps, limiting App Installer protocol handlers (`ms-appinstaller`), and disabling experimental installer features mitigates malware installation vectors.
-4. **Event Log Sizes**: Increasing maximum log file sizes (Application/Setup/System to 32,768 KB, Security to 196,608 KB) ensures security events are retained long enough for compliance auditing and forensic analysis.
-5. **Windows Update Controls**: Restricting update pauses and configuring daily update checks ensure client systems remain persistently patched.
+1. **Protocols Hardening**: Disabling legacy SMBv1 components stops known remote code execution flaws (e.g., EternalBlue), and enforcing NetBT P-node prevents broadcast spoofing and relay attacks.
+2. **Data Collection & Telemetry**: Restricting diagnostic log collection, crash dump generation, feedback prompts, and dynamic cloud settings (OneSettings) prevents in-memory credential disclosure and limits external telemetry.
+3. **App & Installer Restrictions**: Disallowing per-user unsigned app packages, preventing non-admin packaged app installation, and blocking the `ms-appinstaller` protocol handler closes primary drive-by malware delivery paths.
+4. **Log Retention & Forensic Buffer**: Expanding event log maximum file sizes (Application/Setup/System to 32 MB, Security to 192 MB) guarantees that critical security events are retained for auditing and forensic investigations.
+5. **Session & Credential Security**: Restricting credential display on the lock screen, disabling Automatic Restart Sign-On (ARSO), prohibiting local password reset questions, and blocking cleartext MPR password transfers prevents credential exposure.
+6. **Windows Update Management**: Disabling update pauses, managing feature update deferrals, and scheduling daily automatic installations ensures workstations remain continuously patched against active vulnerabilities.
+
+This parent requirement coordinates the 31 individual unitary hardening requirements defined in the dedicated `admin-templates/` subsection.
 
 ---
 
 <div id="08-endpoints-configure-system-administrative-templates-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **App Installers**: Disabling `ms-appinstaller` protocol handlers will block users from web-installing applications through the Appx installer interface.
-* **IE11 Standalone**: Disabling Internet Explorer 11 blocks the standalone browser, redirecting users to Microsoft Edge.
+* **SMBv1 Deprecation**: Workstations cannot connect to legacy storage appliances or pre-Windows Server 2008 systems that strictly require SMBv1.
+* **App Installer Protocol**: Web-based "click-to-install" links utilizing `ms-appinstaller://` will not launch automatically. Software must be installed via approved administrative deployment tools.
+* **Internet Explorer 11**: Standalone IE11 is disabled and redirects to Microsoft Edge; legacy intranet sites requiring Trident rendering must be configured through Microsoft Edge IE Mode.
+* **Logon & Elevation**: Password reveal buttons are hidden and UAC prompts require manual entry of administrative credentials.
 
 ---
 
-<div id="08-endpoints-configure-system-administrative-templates-md-implementation-steps"></div>
+<div id="08-endpoints-configure-system-administrative-templates-md-administrative-templates-hardening-requirements"></div>
+
+## Administrative Templates Hardening Requirements
+
+The following 31 unitary administrative template hardening controls must be enforced:
+
+1. **[REQ-END-179 - Administrative Templates: Disable SMBv1 Protocol Components](#08-endpoints-admin-templates-configure-end-at-smbv1-md)**
+2. **[REQ-END-180 - Administrative Templates: Configure NetBT Node Type and Name Release](#08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md)**
+3. **[REQ-END-181 - Administrative Templates: MSS IP Source Routing and ICMP Redirects](#08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md)**
+4. **[REQ-END-182 - Administrative Templates: MSS System and Session Security Protections](#08-endpoints-admin-templates-configure-end-at-mss-system-protections-md)**
+5. **[REQ-END-183 - Administrative Templates: Prevent Device Metadata Retrieval from Network](#08-endpoints-admin-templates-configure-end-at-device-metadata-md)**
+6. **[REQ-END-184 - Administrative Templates: Enforce Group Policy Background Processing](#08-endpoints-admin-templates-configure-end-at-gp-processing-md)**
+7. **[REQ-END-185 - Administrative Templates: Disable Cross-Device Experiences](#08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md)**
+8. **[REQ-END-186 - Administrative Templates: Restrict Internet Communication and Web Downloads](#08-endpoints-admin-templates-configure-end-at-internet-communication-md)**
+9. **[REQ-END-187 - Administrative Templates: Block Custom SSPs and APs from Loading into LSASS](#08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md)**
+10. **[REQ-END-188 - Administrative Templates: Logon Display and Credential Restrictions](#08-endpoints-admin-templates-configure-end-at-logon-display-options-md)**
+11. **[REQ-END-189 - Administrative Templates: Disable Connected Standby Network Connectivity](#08-endpoints-admin-templates-configure-end-at-power-connected-standby-md)**
+12. **[REQ-END-190 - Administrative Templates: Disable Remote Assistance](#08-endpoints-admin-templates-configure-end-at-remote-assistance-md)**
+13. **[REQ-END-191 - Administrative Templates: Enable RPC Endpoint Mapper Client Authentication](#08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md)**
+14. **[REQ-END-192 - Administrative Templates: Configure Windows Time Service NTP Client and Server](#08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md)**
+15. **[REQ-END-193 - Administrative Templates: App Package Deployment Restrictions](#08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md)**
+16. **[REQ-END-194 - Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing](#08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md)**
+17. **[REQ-END-195 - Administrative Templates: Disable Cloud Consumer Account State Content](#08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md)**
+18. **[REQ-END-196 - Administrative Templates: Require PIN for Connect Wireless Pairing](#08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md)**
+19. **[REQ-END-197 - Administrative Templates: Credential User Interface Security Protections](#08-endpoints-admin-templates-configure-end-at-credui-protections-md)**
+20. **[REQ-END-198 - Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions](#08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md)**
+21. **[REQ-END-199 - Administrative Templates: App Installer Protocol and Execution Controls](#08-endpoints-admin-templates-configure-end-at-app-installer-controls-md)**
+22. **[REQ-END-200 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies](#08-endpoints-admin-templates-configure-end-at-event-log-sizes-md)**
+23. **[REQ-END-201 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security](#08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md)**
+24. **[REQ-END-202 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls](#08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md)**
+25. **[REQ-END-203 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides](#08-endpoints-admin-templates-configure-end-at-defender-protection-options-md)**
+26. **[REQ-END-204 - Administrative Templates: Windows Search and Cortana Privacy Restrictions](#08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md)**
+27. **[REQ-END-205 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions](#08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md)**
+28. **[REQ-END-206 - Administrative Templates: Disable Windows Widgets and News Feed](#08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md)**
+29. **[REQ-END-207 - Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO)](#08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md)**
+30. **[REQ-END-208 - Administrative Templates: Windows Sandbox Clipboard and Network Isolation](#08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md)**
+31. **[REQ-END-209 - Administrative Templates: Windows Update Deferral and Automatic Installation Policies](#08-endpoints-admin-templates-configure-end-at-windows-update-policies-md)**
+
+---
+
+<div id="08-endpoints-configure-system-administrative-templates-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Microsoft Windows Client Benchmark**: Section 18.4 (Network), Section 18.5 (MSS), Section 18.9 (System), and Section 18.10 (Windows Components)
+* **ANSSI Active Directory Hardening Guide**: Recommendations on protocol minimization, credential isolation, and client baselines
+* **Microsoft Security Baseline**: Windows Client Security Baseline recommendations
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-req-end-179-administrative-templates-disable-smbv1-protocol-components"></div>
+
+# [REQ-END-179] Administrative Templates: Disable SMBv1 Protocol Components
+
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SYSTEM\CurrentControlSet\Services\mrxsmb10\Start` = `4`
+  * `HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters\SMB1` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-rationale"></div>
+
+## Rationale
+Legacy Server Message Block version 1 (SMBv1) protocol possesses fundamental architectural security weaknesses, lacks integrity and encryption controls, and was the primary exploitation vector in catastrophic automated malware outbreaks (e.g., WannaCry, NotPetya). Disabling both the client driver (mrxsmb10) and server service parameter completely eliminates this attack surface.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Endpoints will be unable to access file shares or network resources hosted on obsolete legacy NAS appliances or systems running Windows XP/Server 2003 that only support SMBv1.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-implementation-steps"></div>
 
 ## Implementation Steps
 
-<div id="08-endpoints-configure-system-administrative-templates-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-1. Open the **Group Policy Management Console** (`gpmc.msc`) on an administrative workstation.
-2. Edit or create a GPO linked to endpoints (e.g., `GPO_Hardening_Endpoints_SystemTemplates`).
-3. Configure the following policies grouped by their GPO nodes:
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
 
-<div id="08-endpoints-configure-system-administrative-templates-md-network-tcpip-settings"></div>
-
-#### Network & TCP/IP Settings
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Workstation`
-  * **Configure SMB v1 client driver**: Set to `Enabled`, select `Disable driver (recommended)` (Recommendation 18.4.2)
+  * **Configure SMB v1 client driver**: Set to `Enabled` (Disable driver (recommended))
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Server`
-  * **Configure SMB v1 server**: Set to `Disabled` (Recommendation 18.4.3)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\TCPIP Settings\Parameters`
-  * **NetBT NodeType configuration**: Set to `Enabled`, select `P-node (recommended)` (Recommendation 18.4.7)
+  * **Configure SMB v1 server**: Set to `Disabled`
 
-<div id="08-endpoints-configure-system-administrative-templates-md-legacy-security-options-mss-settings"></div>
-
-#### Legacy Security Options (MSS Settings)
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * Configure the following security settings (alternatively, deploy via GPO Preferences Registry if Custom ADMX templates are not available):
-    * **MSS: (AutoAdminLogon) Enable Automatic Logon**: Set to `Disabled` (Recommendation 18.5.1)
-    * **MSS: (DisableIPSourceRouting IPv6) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled` (Recommendation 18.5.2)
-    * **MSS: (DisableIPSourceRouting) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled` (Recommendation 18.5.3)
-    * **MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes**: Set to `Disabled` (Recommendation 18.5.5)
-    * **MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers**: Set to `Enabled` (Recommendation 18.5.7)
-    * **MSS: (SafeDllSearchMode) Enable Safe DLL search mode**: Set to `Enabled` (Recommendation 18.5.9)
-    * **MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires**: Set to `Enabled: 5 or fewer seconds` (Recommendation 18.5.10)
-    * **MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning**: Set to `Enabled: 90% or less` (Recommendation 18.5.13)
-
-<div id="08-endpoints-configure-system-administrative-templates-md-system-group-policy-settings"></div>
-
-#### System & Group Policy Settings
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Device Installation`
-  * **Prevent device metadata retrieval from the Internet**: Set to `Enabled` (Recommendation 18.9.7.2)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
-  * **Configure registry policy processing**: Set to `Enabled`
-    * Uncheck: `Do not apply during periodic background processing` (Recommendation 18.9.19.2)
-    * Check: `Process even if the Group Policy objects have not changed` (Recommendation 18.9.19.3)
-  * **Configure security policy processing**: Set to `Enabled`
-    * Uncheck: `Do not apply during periodic background processing` (Recommendation 18.9.19.4)
-    * Check: `Process even if the Group Policy objects have not changed` (Recommendation 18.9.19.5)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Cross-Device Experiences`
-  * **Continue experiences on this device**: Set to `Disabled` (Recommendation 18.9.19.6)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
-  * **Turn off downloading of print drivers over HTTP**: Set to `Enabled` (Recommendation 18.9.20.1.2)
-  * **Turn off Internet download for Web publishing and online ordering wizards**: Set to `Enabled` (Recommendation 18.9.20.1.6)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Local Security Authority`
-  * **Allow Custom SSPs and APs to be loaded into LSASS**: Set to `Disabled` (Recommendation 18.9.26.1)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
-  * **Block user from showing account details on sign-in**: Set to `Enabled` (Recommendation 18.9.28.1)
-  * **Do not display network selection UI**: Set to `Enabled` (Recommendation 18.9.28.2)
-  * **Do not enumerate connected users on domain-joined computers**: Set to `Enabled` (Recommendation 18.9.28.3)
-  * **Turn off app notifications on the lock screen**: Set to `Enabled` (Recommendation 18.9.28.5)
-  * **Turn off picture password sign-in**: Set to `Enabled` (Recommendation 18.9.28.6)
-  * **Turn on convenience PIN sign-in**: Set to `Disabled` (Recommendation 18.9.28.7)
-  * **Prevent the use of security questions for local accounts**: Set to `Enabled` (Recommendation 18.10.15.3)
-  * **Configure the transmission of the user's password in the content of MPR notifications sent by winlogon.**: Set to `Disabled` (Recommendation 18.10.82.1)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings`
-  * **Allow network connectivity during connected-standby (on battery)**: Set to `Disabled` (Recommendation 18.9.33.6.1)
-  * **Allow network connectivity during connected-standby (plugged in)**: Set to `Disabled` (Recommendation 18.9.33.6.2)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Assistance`
-  * **Configure Offer Remote Assistance**: Set to `Disabled` (Recommendation 18.9.35.1)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call`
-  * **Enable RPC Endpoint Mapper Client Authentication**: Set to `Enabled` (Recommendation 18.9.36.1)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers`
-  * **Enable Windows NTP Client**: Set to `Enabled` (Recommendation 18.9.51.1.1)
-  * **Enable Windows NTP Server**: Set to `Disabled` (Recommendation 18.9.51.1.2)
-
-<div id="08-endpoints-configure-system-administrative-templates-md-windows-components-settings"></div>
-
-#### Windows Components Settings
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment`
-  * **Not allow per-user unsigned packages to install by default (requires explicitly allow per install)**: Set to `Enabled` (Recommendation 18.10.4.2)
-  * **Prevent non-admin users from installing packaged Windows apps**: Set to `Enabled` (Recommendation 18.10.4.3)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Biometrics\Facial Features`
-  * **Configure enhanced anti-spoofing**: Set to `Enabled` (Recommendation 18.10.9.1.1)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Cloud Content`
-  * **Turn off cloud consumer account state content**: Set to `Enabled` (Recommendation 18.10.13.1)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Connect`
-  * **Require pin for pairing**: Set to `Enabled` (Select `First Time` or `Always`) (Recommendation 18.10.14.1)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface`
-  * **Do not display the password reveal button**: Set to `Enabled` (Recommendation 18.10.15.1)
-  * **Enumerate administrator accounts on elevation**: Set to `Disabled` (Recommendation 18.10.15.2)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Disable OneSettings Downloads**: Set to `Enabled` (Recommendation 18.10.16.3)
-  * **Do not show feedback notifications**: Set to `Enabled` (Recommendation 18.10.16.4)
-  * **Enable OneSettings Auditing**: Set to `Enabled` (Recommendation 18.10.16.5)
-  * **Limit Diagnostic Log Collection**: Set to `Enabled` (Recommendation 18.10.16.6)
-  * **Limit Dump Collection**: Set to `Enabled` (Recommendation 18.10.16.7)
-  * **Toggle user control over Insider builds**: Set to `Disabled` (Recommendation 18.10.16.8)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
-  * **Enable App Installer Experimental Features**: Set to `Disabled` (Recommendation 18.10.18.2)
-  * **Enable App Installer Hash Override**: Set to `Disabled` (Recommendation 18.10.18.3)
-  * **Enable App Installer Local Archive Malware Scan Override**: Set to `Disabled` (Recommendation 18.10.18.4)
-  * **Enable App Installer Microsoft Store Source Certificate Validation Bypass**: Set to `Disabled` (Recommendation 18.10.18.5)
-  * **Enable App Installer ms-appinstaller protocol**: Set to `Disabled` (Recommendation 18.10.18.6)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
-  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled` (Recommendation 18.10.26.1.1)
-  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `32768` (Recommendation 18.10.26.1.2)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
-  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled` (Recommendation 18.10.26.2.1)
-  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `196608` (Recommendation 18.10.26.2.2)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
-  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled` (Recommendation 18.10.26.3.1)
-  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `32768` (Recommendation 18.10.26.3.2)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
-  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled` (Recommendation 18.10.26.4.1)
-  * **Specify the maximum log file size (KB)**: Set to `Enabled`, set maximum log size to `32768` (Recommendation 18.10.26.4.2)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
-  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled` (Recommendation 18.10.29.3)
-  * **Turn off shell protocol protected mode**: Set to `Disabled` (Recommendation 18.10.29.5)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer`
-  * **Disable Internet Explorer 11 as a standalone browser**: Set to `Enabled`, select `Always` (Recommendation 18.10.35.1)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
-  * **Prevent downloading of enclosures**: Set to `Enabled` (Recommendation 18.10.58.1)
-  * **Turn on Basic feed authentication over HTTP**: Set to `Disabled` (Recommendation 18.10.58.2)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection`
-  * **Configure Remote Encryption Protection Mode**: Set to `Enabled` (Select `Audit` or higher) (Recommendation 18.10.43.11.1.1.2)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
-  * **Turn off scanning of packed executables**: Set to `Disabled` (Recommendation 18.10.43.13.2)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection`
-  * **Prevent users from modifying settings**: Set to `Enabled` (Recommendation 18.10.92.2.1)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow Cortana**: Set to `Disabled` (Recommendation 18.10.59.3)
-  * **Allow Cortana above lock screen**: Set to `Disabled` (Recommendation 18.10.59.4)
-  * **Allow indexing of encrypted files**: Set to `Disabled` (Recommendation 18.10.59.5)
-  * **Allow search and Cortana to use location**: Set to `Disabled` (Recommendation 18.10.59.6)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store`
-  * **Turn off Automatic Download and Install of updates**: Set to `Disabled` (Recommendation 18.10.66.2)
-  * **Turn off the offer to update to the latest version of Windows**: Set to `Enabled` (Recommendation 18.10.66.3)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Widgets`
-  * **Allow widgets**: Set to `Disabled` (Recommendation 18.10.72.1)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Logon Options`
-  * **Sign-in and lock last interactive user automatically after a restart**: Set to `Disabled` (Recommendation 18.10.82.2)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox`
-  * **Allow clipboard sharing with Windows Sandbox**: Set to `Disabled` (Recommendation 18.10.91.1)
-  * **Allow networking in Windows Sandbox**: Set to `Disabled` (Recommendation 18.10.91.2)
-
-<div id="08-endpoints-configure-system-administrative-templates-md-windows-update-settings"></div>
-
-#### Windows Update Settings
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update` (or `Windows Update\Manage end user experience` depending on ADMX version)
-  * **Remove access to “Pause updates” feature**: Set to `Enabled` (Recommendation 18.10.93.2.3)
-  * **Manage preview builds**: Set to `Disabled` (Recommendation 18.10.93.4.1)
-  * **Select when Preview Builds and Feature Updates are received**: Set to `Enabled`, set Defer Feature Updates Period in Days to `180` (or more) (Recommendation 18.10.93.4.2)
-  * **Select when Quality Updates are received**: Set to `Enabled`, set Defer Quality Updates Period in Days to `0` (Recommendation 18.10.93.4.3)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience` (or standard `Windows Update\AU` depending on ADMX version)
-  * **Configure Automatic Updates**: Set to `Enabled`, select `Scheduled install day` = `0 - Every day` (Recommendation 18.10.93.2.2)
-  * **No auto-restart with logged on users for scheduled automatic updates installations**: Set to `Disabled` (Recommendation 18.10.93.1.1)
-
-4. Link the GPO to the target Organizational Unit (OU) containing workstations and member servers.
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
 
 ---
 
-<div id="08-endpoints-configure-system-administrative-templates-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Run the following script locally to configure the administrative templates registry values.
+Run the following script locally to configure the administrative template registry values:
 
-[Download Script: Configure-SystemAdministrativeTemplates.ps1](implementation_scripts/Configure-SystemAdministrativeTemplates.ps1)
+[Download Script: Configure-EndAtSmbv1.ps1](../implementation_scripts/Configure-EndAtSmbv1.ps1)
 
 ```powershell
-# Configure-SystemAdministrativeTemplates.ps1
-# Description: Configures 84 system and administrative template controls for Windows Client hardening.
+#Configure-EndAtSmbv1.ps1
+# Description: Configures Administrative Templates: Disable SMBv1 Protocol Components.
 
-Write-Host "Applying System Administrative Templates hardening..." -ForegroundColor Cyan
+Write-Host "Configuring Administrative Templates: Disable SMBv1 Protocol Components..." -ForegroundColor Cyan
 
-# Key Path: HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
-if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon")) {
-    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "AutoAdminLogon" -Value "0" -Type String
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "ScreenSaverGracePeriod" -Value 5 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI
-if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI")) {
-    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI" -Name "EnumerateAdministrators" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
-if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer")) {
-    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "NoWebServices" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "PreXPSP2ShellProtocolBehavior" -Value 0 -Type DWord
-
-
-# Key Path: HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
-if (-not (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System")) {
-    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableMPR" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "DisableAutomaticRestartSignOn" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures" -Name "EnhancedAntiSpoofing" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Dsh
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Dsh")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Dsh" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Dsh" -Name "AllowNewsAndInterests" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -Name "DisableEnclosureDownload" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Name "NotifyDisableIEOptions" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -Name "DCSettingIndex" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -Name "ACSettingIndex" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient" -Name "Enabled" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer" -Name "Enabled" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Scan
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "DisablePackedExeScanning" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" -Name "DisableWebPnPDownload" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc" -Name "EnableAuthEpResolution" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Name "fAllowUnsolicited" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\WindowsStore
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Name "AutoDownload" -Value 4 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Name "DisableOSUpgrade" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableExperimentalFeatures" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableHashOverride" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableLocalArchiveMalwareScanOverride" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableBypassCertificatePinningForMicrosoftStore" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableMSAppInstallerProtocol" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx" -Name "DisablePerUserUnsignedPackagesByDefault" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx" -Name "BlockNonAdminUserInstall" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Name "DisableConsumerAccountStateContent" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Connect
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect" -Name "RequirePinForPairing" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\CredUI
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI" -Name "DisablePasswordReveal" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DisableOneSettingsDownloads" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DoNotShowFeedbackNotifications" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "EnableOneSettingsAuditing" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "LimitDiagnosticLogCollection" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "LimitDumpCollection" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Name "PreventDeviceMetadataFromNetwork" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "Retention" -Value "0" -Type String
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 32768 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "Retention" -Value "0" -Type String
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 196608 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "Retention" -Value "0" -Type String
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "MaxSize" -Value 32768 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "Retention" -Value "0" -Type String
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 32768 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableMotWOnInsecurePathCopy" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -Name "NoBackgroundPolicy" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -Name "NoGPOListChanges" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -Name "NoBackgroundPolicy" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -Name "NoGPOListChanges" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds" -Name "AllowBuildPreview" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox" -Name "AllowClipboardRedirection" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox" -Name "AllowNetworking" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\System
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableCdp" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowCustomSSPsAPs" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "BlockUserFromShowingAccountDetailsOnSignin" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DontDisplayNetworkSelectionUI" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DontEnumerateConnectedUsers" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DisableLockScreenAppNotifications" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "BlockDomainPicturePassword" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowDomainPINLogon" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "NoLocalPasswordResetQuestions" -Value 1 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortana" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortanaAboveLock" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowIndexingEncryptedStoresOrItems" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowSearchToUseLocation" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "SetDisablePauseUXAccess" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "ManagePreviewBuildsPolicyValue" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferFeatureUpdates" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferFeatureUpdatesPeriodInDays" -Value 180 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferQualityUpdates" -Value 1 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferQualityUpdatesPeriodInDays" -Value 0 -Type DWord
-
-# Key Path: HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU
-if (-not (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoRebootWithLoggedOnUsers" -Value 0 -Type DWord
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "ScheduledInstallDay" -Value 0 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Control\Session Manager
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager")) {
-    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "SafeDllSearchMode" -Value 1 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security")) {
-    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security" -Name "WarningLevel" -Value 90 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters")) {
-    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -Name "SMB1" -Value 0 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters")) {
-    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Name "NodeType" -Value 2 -Type DWord
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Name "NoNameReleaseOnDemand" -Value 1 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters")) {
-    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" -Name "DisableIPSourceRouting" -Value 2 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters")) {
-    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "DisableIPSourceRouting" -Value 2 -Type DWord
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "EnableICMPRedirect" -Value 0 -Type DWord
-
-# Key Path: HKLM\SYSTEM\CurrentControlSet\Services\mrxsmb10
-if (-not (Test-Path "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10")) {
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10")) {
     New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10" -Force | Out-Null
 }
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10" -Name "Start" -Value 4 -Type DWord
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10" -Name "Start" -Value 4 -Type DWord -Force
 
-# Key Path: HKLM\Software\Policies\Microsoft\Internet Explorer\Feeds
-if (-not (Test-Path "HKLM:\Software\Policies\Microsoft\Internet Explorer\Feeds")) {
-    New-Item -Path "HKLM:\Software\Policies\Microsoft\Internet Explorer\Feeds" -Force | Out-Null
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters")) {
+    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -Force | Out-Null
 }
-Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Internet Explorer\Feeds" -Name "AllowBasicAuthInClear" -Value 0 -Type DWord
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -Name "SMB1" -Value 0 -Type DWord -Force
 
-Write-Host "[+] System administrative templates configured successfully." -ForegroundColor Green
+Write-Host "[+] Administrative Templates: Disable SMBv1 Protocol Components applied successfully." -ForegroundColor Green
 ```
 
-*To verify the administrative template configuration:*
+*To verify the configuration:*
 
-[Download Script: Get-SystemAdministrativeTemplatesStatus.ps1](audit_scripts/Get-SystemAdministrativeTemplatesStatus.ps1)
+[Download Script: Get-EndAtSmbv1Status.ps1](../audit_scripts/Get-EndAtSmbv1Status.ps1)
 
 ```powershell
-# Get-SystemAdministrativeTemplatesStatus.ps1
-# Description: Audits 84 system and administrative template controls on the local machine.
+#Get-EndAtSmbv1Status.ps1
+# Description: Audits Administrative Templates: Disable SMBv1 Protocol Components.
 
-Write-Host "--- Auditing System Administrative Templates Hardening ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Administrative Templates: Disable SMBv1 Protocol Components ---" -ForegroundColor Cyan
 $script:Vulnerable = $false
 
-function Test-RegValue {
-    param(
-        [string]$RecNum,
-        [string]$Hive,
-        [string]$KeyPath,
-        [string]$ValueName,
-        [object]$ExpectedValue
-    )
-    $FullPath = "$($Hive):\$($KeyPath)"
-    if (Test-Path $FullPath) {
-        $Prop = Get-ItemProperty -Path $FullPath -Name $ValueName -ErrorAction SilentlyContinue
-        if ($null -ne $Prop) {
-            $ActualValue = $Prop.$ValueName
-            if ($ActualValue -eq $ExpectedValue) {
-                Write-Host "  [+] $RecNum | $ValueName = $ActualValue (Secure)" -ForegroundColor Green
-            } else {
-                Write-Host "  [!] MISMATCH: $RecNum | Path: $Hive\$KeyPath | Value: $ValueName | Current: $ActualValue (Expected: $ExpectedValue)" -ForegroundColor Red
-                $script:Vulnerable = $true
-            }
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10"
+$ValueName = "Start"
+$ExpectedValue = 4
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISSING VALUE: $RecNum | Path: $Hive\$KeyPath | Value: $ValueName (Expected: $ExpectedValue)" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING KEY: $RecNum | Path: $Hive\$KeyPath (Expected: $ValueName = $ExpectedValue)" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
 }
 
-Test-RegValue -RecNum "18.4.2" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\mrxsmb10" -ValueName "Start" -ExpectedValue 4
-Test-RegValue -RecNum "18.4.3" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -ValueName "SMB1" -ExpectedValue 0
-Test-RegValue -RecNum "18.4.7" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -ValueName "NodeType" -ExpectedValue 2
-Test-RegValue -RecNum "18.5.1" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -ValueName "AutoAdminLogon" -ExpectedValue "0"
-Test-RegValue -RecNum "18.5.2" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" -ValueName "DisableIPSourceRouting" -ExpectedValue 2
-Test-RegValue -RecNum "18.5.3" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -ValueName "DisableIPSourceRouting" -ExpectedValue 2
-Test-RegValue -RecNum "18.5.5" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -ValueName "EnableICMPRedirect" -ExpectedValue 0
-Test-RegValue -RecNum "18.5.7" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -ValueName "NoNameReleaseOnDemand" -ExpectedValue 1
-Test-RegValue -RecNum "18.5.9" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Control\Session Manager" -ValueName "SafeDllSearchMode" -ExpectedValue 1
-Test-RegValue -RecNum "18.5.10" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -ValueName "ScreenSaverGracePeriod" -ExpectedValue 5
-Test-RegValue -RecNum "18.5.13" -Hive "HKLM" -KeyPath "SYSTEM\CurrentControlSet\Services\Eventlog\Security" -ValueName "WarningLevel" -ExpectedValue 90
-Test-RegValue -RecNum "18.9.7.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -ValueName "PreventDeviceMetadataFromNetwork" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.19.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -ValueName "NoBackgroundPolicy" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.19.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -ValueName "NoGPOListChanges" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.19.4" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -ValueName "NoBackgroundPolicy" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.19.5" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -ValueName "NoGPOListChanges" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.19.6" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "EnableCdp" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.20.1.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows NT\Printers" -ValueName "DisableWebPnPDownload" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.20.1.6" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -ValueName "NoWebServices" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.26.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "AllowCustomSSPsAPs" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.28.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "BlockUserFromShowingAccountDetailsOnSignin" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.28.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "DontDisplayNetworkSelectionUI" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.28.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "DontEnumerateConnectedUsers" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.28.5" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "DisableLockScreenAppNotifications" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.28.6" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "BlockDomainPicturePassword" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.28.7" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "AllowDomainPINLogon" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.33.6.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -ValueName "DCSettingIndex" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.33.6.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -ValueName "ACSettingIndex" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.35.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -ValueName "fAllowUnsolicited" -ExpectedValue 0
-Test-RegValue -RecNum "18.9.36.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows NT\Rpc" -ValueName "EnableAuthEpResolution" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.51.1.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient" -ValueName "Enabled" -ExpectedValue 1
-Test-RegValue -RecNum "18.9.51.1.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer" -ValueName "Enabled" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.4.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Appx" -ValueName "DisablePerUserUnsignedPackagesByDefault" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.4.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Appx" -ValueName "BlockNonAdminUserInstall" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.9.1.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures" -ValueName "EnhancedAntiSpoofing" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.13.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\CloudContent" -ValueName "DisableConsumerAccountStateContent" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.14.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Connect" -ValueName "RequirePinForPairing" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.15.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\CredUI" -ValueName "DisablePasswordReveal" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.15.2" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI" -ValueName "EnumerateAdministrators" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.15.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\System" -ValueName "NoLocalPasswordResetQuestions" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.16.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\DataCollection" -ValueName "DisableOneSettingsDownloads" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.16.4" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\DataCollection" -ValueName "DoNotShowFeedbackNotifications" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.16.5" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\DataCollection" -ValueName "EnableOneSettingsAuditing" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.16.6" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\DataCollection" -ValueName "LimitDiagnosticLogCollection" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.16.7" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\DataCollection" -ValueName "LimitDumpCollection" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.16.8" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds" -ValueName "AllowBuildPreview" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.18.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -ValueName "EnableExperimentalFeatures" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.18.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -ValueName "EnableHashOverride" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.18.4" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -ValueName "EnableLocalArchiveMalwareScanOverride" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.18.5" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -ValueName "EnableBypassCertificatePinningForMicrosoftStore" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.18.6" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -ValueName "EnableMSAppInstallerProtocol" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.26.1.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -ValueName "Retention" -ExpectedValue "0"
-Test-RegValue -RecNum "18.10.26.1.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -ValueName "MaxSize" -ExpectedValue 32768
-Test-RegValue -RecNum "18.10.26.2.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -ValueName "Retention" -ExpectedValue "0"
-Test-RegValue -RecNum "18.10.26.2.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -ValueName "MaxSize" -ExpectedValue 196608
-Test-RegValue -RecNum "18.10.26.3.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -ValueName "Retention" -ExpectedValue "0"
-Test-RegValue -RecNum "18.10.26.3.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -ValueName "MaxSize" -ExpectedValue 32768
-Test-RegValue -RecNum "18.10.26.4.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -ValueName "Retention" -ExpectedValue "0"
-Test-RegValue -RecNum "18.10.26.4.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -ValueName "MaxSize" -ExpectedValue 32768
-Test-RegValue -RecNum "18.10.29.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Explorer" -ValueName "DisableMotWOnInsecurePathCopy" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.29.5" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -ValueName "PreXPSP2ShellProtocolBehavior" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.35.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -ValueName "NotifyDisableIEOptions" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.43.11.1.1.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -ValueName "BruteForceProtectionConfiguredState" -ExpectedValue 2
-Test-RegValue -RecNum "18.10.43.13.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -ValueName "DisablePackedExeScanning" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.58.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -ValueName "DisableEnclosureDownload" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.58.2" -Hive "HKLM" -KeyPath "Software\Policies\Microsoft\Internet Explorer\Feeds" -ValueName "AllowBasicAuthInClear" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.59.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Windows Search" -ValueName "AllowCortana" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.59.4" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Windows Search" -ValueName "AllowCortanaAboveLock" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.59.5" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Windows Search" -ValueName "AllowIndexingEncryptedStoresOrItems" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.59.6" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Windows Search" -ValueName "AllowSearchToUseLocation" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.66.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\WindowsStore" -ValueName "AutoDownload" -ExpectedValue 4
-Test-RegValue -RecNum "18.10.66.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\WindowsStore" -ValueName "DisableOSUpgrade" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.72.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Dsh" -ValueName "AllowNewsAndInterests" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.82.1" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -ValueName "EnableMPR" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.82.2" -Hive "HKLM" -KeyPath "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -ValueName "DisableAutomaticRestartSignOn" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.91.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Sandbox" -ValueName "AllowClipboardRedirection" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.91.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\Sandbox" -ValueName "AllowNetworking" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.92.2.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -ValueName "DisallowExploitProtectionOverride" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.93.1.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -ValueName "NoAutoRebootWithLoggedOnUsers" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.93.2.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -ValueName "ScheduledInstallDay" -ExpectedValue 0
-Test-RegValue -RecNum "18.10.93.2.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "SetDisablePauseUXAccess" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.93.4.1" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "ManagePreviewBuildsPolicyValue" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.93.4.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "DeferFeatureUpdates" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.93.4.2" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "DeferFeatureUpdatesPeriodInDays" -ExpectedValue 180
-Test-RegValue -RecNum "18.10.93.4.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "DeferQualityUpdates" -ExpectedValue 1
-Test-RegValue -RecNum "18.10.93.4.3" -Hive "HKLM" -KeyPath "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -ValueName "DeferQualityUpdatesPeriodInDays" -ExpectedValue 0
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
+$ValueName = "SMB1"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
 
 if ($script:Vulnerable) {
     Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
@@ -87078,12 +91717,5436 @@ if ($script:Vulnerable) {
 
 ---
 
-<div id="08-endpoints-configure-system-administrative-templates-md-sources-compliance-references"></div>
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows Client Benchmark**: Section 18.4, 18.5, 18.9, and 18.10 (System Administrative Templates settings)
-* **ANSSI Active Directory Hardening Guide**: Recommendations on local account password management and protocol minimization
-* **Microsoft Security Baseline**: Windows Client Security Baseline recommendations
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.4.2, Section 18.4.3; ANSSI R21
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-req-end-180-administrative-templates-configure-netbt-node-type-and-name-release"></div>
+
+# [REQ-END-180] Administrative Templates: Configure NetBT Node Type and Name Release
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\NodeType` = `2`
+  * `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\NoNameReleaseOnDemand` = `1`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-rationale"></div>
+
+## Rationale
+Configuring NetBT NodeType to P-node (Point-to-Point) forces name resolution via unicast WINS rather than broadcast, preventing unauthenticated network adversaries from responding to NetBIOS broadcasts or poisoning name resolution caches. Forcing the system to ignore unauthenticated NetBIOS name release requests prevents denial-of-service attacks that force the computer to relinquish its registered network identity.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Environments relying purely on unrouted broadcast-based NetBIOS name resolution without DNS or WINS will experience resolution failures.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\TCPIP Settings\Parameters`
+  * **NetBT NodeType configuration**: Set to `Enabled` (P-node (recommended))
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtNetbtNodetype.ps1](../implementation_scripts/Configure-EndAtNetbtNodetype.ps1)
+
+```powershell
+#Configure-EndAtNetbtNodetype.ps1
+# Description: Configures Administrative Templates: Configure NetBT Node Type and Name Release.
+
+Write-Host "Configuring Administrative Templates: Configure NetBT Node Type and Name Release..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters")) {
+    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Name "NodeType" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" -Name "NoNameReleaseOnDemand" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Configure NetBT Node Type and Name Release applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtNetbtNodetypeStatus.ps1](../audit_scripts/Get-EndAtNetbtNodetypeStatus.ps1)
+
+```powershell
+#Get-EndAtNetbtNodetypeStatus.ps1
+# Description: Audits Administrative Templates: Configure NetBT Node Type and Name Release.
+
+Write-Host "--- Auditing Administrative Templates: Configure NetBT Node Type and Name Release ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters"
+$ValueName = "NodeType"
+$ExpectedValue = 2
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters"
+$ValueName = "NoNameReleaseOnDemand"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.4.7, Section 18.5.7
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-req-end-181-administrative-templates-mss-ip-source-routing-and-icmp-redirects"></div>
+
+# [REQ-END-181] Administrative Templates: MSS IP Source Routing and ICMP Redirects
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters\DisableIPSourceRouting` = `2`
+  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\DisableIPSourceRouting` = `2`
+  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\EnableICMPRedirect` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-rationale"></div>
+
+## Rationale
+IP source routing allows sending devices to dictate the exact network routing path rather than allowing routers to determine the path. Attackers can leverage source routing to bypass boundary firewalls and packet filters. Furthermore, ICMP redirects allow adjacent nodes to inject arbitrary routes into the local routing table, enabling man-in-the-middle packet interception.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: None on standard enterprise networks. Legacy diagnostic testing relying on manually routed packet paths will be rejected.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (DisableIPSourceRouting IPv6) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled`
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (DisableIPSourceRouting) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled`
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtMssIpSourceRouting.ps1](../implementation_scripts/Configure-EndAtMssIpSourceRouting.ps1)
+
+```powershell
+#Configure-EndAtMssIpSourceRouting.ps1
+# Description: Configures Administrative Templates: MSS IP Source Routing and ICMP Redirects.
+
+Write-Host "Configuring Administrative Templates: MSS IP Source Routing and ICMP Redirects..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters")) {
+    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" -Name "DisableIPSourceRouting" -Value 2 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters")) {
+    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "DisableIPSourceRouting" -Value 2 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "EnableICMPRedirect" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: MSS IP Source Routing and ICMP Redirects applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtMssIpSourceRoutingStatus.ps1](../audit_scripts/Get-EndAtMssIpSourceRoutingStatus.ps1)
+
+```powershell
+#Get-EndAtMssIpSourceRoutingStatus.ps1
+# Description: Audits Administrative Templates: MSS IP Source Routing and ICMP Redirects.
+
+Write-Host "--- Auditing Administrative Templates: MSS IP Source Routing and ICMP Redirects ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
+$ValueName = "DisableIPSourceRouting"
+$ExpectedValue = 2
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+$ValueName = "DisableIPSourceRouting"
+$ExpectedValue = 2
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+$ValueName = "EnableICMPRedirect"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.5.2, Section 18.5.3, Section 18.5.5
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-req-end-182-administrative-templates-mss-system-and-session-security-protections"></div>
+
+# [REQ-END-182] Administrative Templates: MSS System and Session Security Protections
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon` = `0`
+  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\ScreenSaverGracePeriod` = `5`
+  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeDllSearchMode` = `1`
+  * `HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security\WarningLevel` = `90`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-rationale"></div>
+
+## Rationale
+Disabling AutoAdminLogon ensures unattended machines boot into an interactive credential prompt rather than logging into an active session. Safe DLL search mode prevents search-order hijacking by ensuring system directories are evaluated prior to the current working directory. The screensaver grace period minimizes the physical access window after screensaver lock, and the WarningLevel parameter issues administrative alerts before the security event log is exhausted.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Kiosk setups or automated test systems requiring automatic logon must use dedicated constrained user accounts. Third-party applications that rely on loading DLLs from the current directory must place libraries in application or system paths.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (AutoAdminLogon) Enable Automatic Logon**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (SafeDllSearchMode) Enable Safe DLL search mode**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires**: Set to `Enabled: 5 or fewer seconds`
+* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
+  * **MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning**: Set to `Enabled: 90% or less`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtMssSystemProtections.ps1](../implementation_scripts/Configure-EndAtMssSystemProtections.ps1)
+
+```powershell
+#Configure-EndAtMssSystemProtections.ps1
+# Description: Configures Administrative Templates: MSS System and Session Security Protections.
+
+Write-Host "Configuring Administrative Templates: MSS System and Session Security Protections..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon")) {
+    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "AutoAdminLogon" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "ScreenSaverGracePeriod" -Value 5 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager")) {
+    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager" -Name "SafeDllSearchMode" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security")) {
+    New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security" -Name "WarningLevel" -Value 90 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: MSS System and Session Security Protections applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtMssSystemProtectionsStatus.ps1](../audit_scripts/Get-EndAtMssSystemProtectionsStatus.ps1)
+
+```powershell
+#Get-EndAtMssSystemProtectionsStatus.ps1
+# Description: Audits Administrative Templates: MSS System and Session Security Protections.
+
+Write-Host "--- Auditing Administrative Templates: MSS System and Session Security Protections ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+$ValueName = "AutoAdminLogon"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+$ValueName = "ScreenSaverGracePeriod"
+$ExpectedValue = 5
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager"
+$ValueName = "SafeDllSearchMode"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SYSTEM\CurrentControlSet\Services\Eventlog\Security"
+$ValueName = "WarningLevel"
+$ExpectedValue = 90
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.5.1, Section 18.5.9, Section 18.5.10, Section 18.5.13
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-req-end-183-administrative-templates-prevent-device-metadata-retrieval-from-network"></div>
+
+# [REQ-END-183] Administrative Templates: Prevent Device Metadata Retrieval from Network
+
+<div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Low
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata\PreventDeviceMetadataFromNetwork` = `1`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-rationale"></div>
+
+## Rationale
+Prevents the operating system from searching Windows Update and Microsoft public servers for device metadata, icons, and manufacturer information when new peripheral hardware is connected. This reduces unnecessary external telemetry and prevents information disclosure about attached hardware assets.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Custom peripheral icons and detailed hardware descriptions in the 'Devices and Printers' folder will revert to generic device symbols.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Device Installation`
+  * **Prevent device metadata retrieval from the Internet**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtDeviceMetadata.ps1](../implementation_scripts/Configure-EndAtDeviceMetadata.ps1)
+
+```powershell
+#Configure-EndAtDeviceMetadata.ps1
+# Description: Configures Administrative Templates: Prevent Device Metadata Retrieval from Network.
+
+Write-Host "Configuring Administrative Templates: Prevent Device Metadata Retrieval from Network..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Name "PreventDeviceMetadataFromNetwork" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Prevent Device Metadata Retrieval from Network applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtDeviceMetadataStatus.ps1](../audit_scripts/Get-EndAtDeviceMetadataStatus.ps1)
+
+```powershell
+#Get-EndAtDeviceMetadataStatus.ps1
+# Description: Audits Administrative Templates: Prevent Device Metadata Retrieval from Network.
+
+Write-Host "--- Auditing Administrative Templates: Prevent Device Metadata Retrieval from Network ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata"
+$ValueName = "PreventDeviceMetadataFromNetwork"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.7.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-req-end-184-administrative-templates-enforce-group-policy-background-processing"></div>
+
+# [REQ-END-184] Administrative Templates: Enforce Group Policy Background Processing
+
+<div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}\NoBackgroundPolicy` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}\NoGPOListChanges` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\NoBackgroundPolicy` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\NoGPOListChanges` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-rationale"></div>
+
+## Rationale
+By default, Group Policy client side extensions skip reapplication of policies during background refreshes if the central GPO version has not incremented. Forcing background reapplication guarantees that any local registry tampering or administrative drift is continuously corrected and overwritten by enterprise security baselines.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Slight, negligible CPU overhead during background Group Policy refresh cycles.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
+  * **Configure registry policy processing**: Set to `Enabled` (Process even if GPO has not changed; do not skip during background processing)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
+  * **Configure security policy processing**: Set to `Enabled` (Process even if GPO has not changed; do not skip during background processing)
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtGpProcessing.ps1](../implementation_scripts/Configure-EndAtGpProcessing.ps1)
+
+```powershell
+#Configure-EndAtGpProcessing.ps1
+# Description: Configures Administrative Templates: Enforce Group Policy Background Processing.
+
+Write-Host "Configuring Administrative Templates: Enforce Group Policy Background Processing..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -Name "NoBackgroundPolicy" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" -Name "NoGPOListChanges" -Value 0 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -Name "NoBackgroundPolicy" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" -Name "NoGPOListChanges" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Enforce Group Policy Background Processing applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtGpProcessingStatus.ps1](../audit_scripts/Get-EndAtGpProcessingStatus.ps1)
+
+```powershell
+#Get-EndAtGpProcessingStatus.ps1
+# Description: Audits Administrative Templates: Enforce Group Policy Background Processing.
+
+Write-Host "--- Auditing Administrative Templates: Enforce Group Policy Background Processing ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}"
+$ValueName = "NoBackgroundPolicy"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}"
+$ValueName = "NoGPOListChanges"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}"
+$ValueName = "NoBackgroundPolicy"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}"
+$ValueName = "NoGPOListChanges"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.19.2, Section 18.9.19.3, Section 18.9.19.4, Section 18.9.19.5
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-req-end-185-administrative-templates-disable-cross-device-experiences"></div>
+
+# [REQ-END-185] Administrative Templates: Disable Cross-Device Experiences
+
+<div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\EnableCdp` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-rationale"></div>
+
+## Rationale
+The Connected Devices Platform (CDP) coordinates cross-device application states and task handoffs over cloud synchronization and Bluetooth beacons. In enterprise environments, this introduces unmanaged synchronization pathways between managed corporate systems and external personal consumer devices.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Cross-device features such as 'Continue on PC' from companion mobile devices or shared browser sessions will be unavailable.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Cross-Device Experiences`
+  * **Continue experiences on this device**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtCrossDeviceExperiences.ps1](../implementation_scripts/Configure-EndAtCrossDeviceExperiences.ps1)
+
+```powershell
+#Configure-EndAtCrossDeviceExperiences.ps1
+# Description: Configures Administrative Templates: Disable Cross-Device Experiences.
+
+Write-Host "Configuring Administrative Templates: Disable Cross-Device Experiences..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableCdp" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Disable Cross-Device Experiences applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtCrossDeviceExperiencesStatus.ps1](../audit_scripts/Get-EndAtCrossDeviceExperiencesStatus.ps1)
+
+```powershell
+#Get-EndAtCrossDeviceExperiencesStatus.ps1
+# Description: Audits Administrative Templates: Disable Cross-Device Experiences.
+
+Write-Host "--- Auditing Administrative Templates: Disable Cross-Device Experiences ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "EnableCdp"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.19.6
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-req-end-186-administrative-templates-restrict-internet-communication-and-web-downloads"></div>
+
+# [REQ-END-186] Administrative Templates: Restrict Internet Communication and Web Downloads
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers\DisableWebPnPDownload` = `1`
+  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoWebServices` = `1`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-rationale"></div>
+
+## Rationale
+Downloading print drivers via HTTP exposes systems to cleartext traffic tampering and Point-and-Print driver replacement attacks. Web publishing wizards provide legacy, unauthenticated internet upload channels that can be abused for unauthorized data egress.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Print drivers must be distributed via trusted internal print servers or enterprise deployment mechanisms. The web publishing wizard option in Windows Explorer will be suppressed.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
+  * **Turn off downloading of print drivers over HTTP**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
+  * **Turn off Internet download for Web publishing and online ordering wizards**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtInternetCommunication.ps1](../implementation_scripts/Configure-EndAtInternetCommunication.ps1)
+
+```powershell
+#Configure-EndAtInternetCommunication.ps1
+# Description: Configures Administrative Templates: Restrict Internet Communication and Web Downloads.
+
+Write-Host "Configuring Administrative Templates: Restrict Internet Communication and Web Downloads..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers" -Name "DisableWebPnPDownload" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer")) {
+    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "NoWebServices" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Restrict Internet Communication and Web Downloads applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtInternetCommunicationStatus.ps1](../audit_scripts/Get-EndAtInternetCommunicationStatus.ps1)
+
+```powershell
+#Get-EndAtInternetCommunicationStatus.ps1
+# Description: Audits Administrative Templates: Restrict Internet Communication and Web Downloads.
+
+Write-Host "--- Auditing Administrative Templates: Restrict Internet Communication and Web Downloads ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
+$ValueName = "DisableWebPnPDownload"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+$ValueName = "NoWebServices"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.20.1.2, Section 18.9.20.1.6
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-req-end-187-administrative-templates-block-custom-ssps-and-aps-from-loading-into-lsass"></div>
+
+# [REQ-END-187] Administrative Templates: Block Custom SSPs and APs from Loading into LSASS
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\AllowCustomSSPsAPs` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-rationale"></div>
+
+## Rationale
+Security Support Providers (SSPs) and Authentication Packages (APs) execute inside the Local Security Authority Subsystem Service (lsass.exe). Threat actors frequently register malicious SSP DLLs in the registry to achieve persistent credential harvesting and memory dumping. Disabling custom SSP loading blocks third-party DLLs from injecting into LSASS.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Third-party authentication software or legacy smartcard drivers that inject custom SSP DLLs into LSASS will be blocked from loading. Modern providers must support Microsoft Credential Provider architecture.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Local Security Authority`
+  * **Allow Custom SSPs and APs to be loaded into LSASS**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtLsaCustomSsps.ps1](../implementation_scripts/Configure-EndAtLsaCustomSsps.ps1)
+
+```powershell
+#Configure-EndAtLsaCustomSsps.ps1
+# Description: Configures Administrative Templates: Block Custom SSPs and APs from Loading into LSASS.
+
+Write-Host "Configuring Administrative Templates: Block Custom SSPs and APs from Loading into LSASS..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowCustomSSPsAPs" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Block Custom SSPs and APs from Loading into LSASS applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtLsaCustomSspsStatus.ps1](../audit_scripts/Get-EndAtLsaCustomSspsStatus.ps1)
+
+```powershell
+#Get-EndAtLsaCustomSspsStatus.ps1
+# Description: Audits Administrative Templates: Block Custom SSPs and APs from Loading into LSASS.
+
+Write-Host "--- Auditing Administrative Templates: Block Custom SSPs and APs from Loading into LSASS ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "AllowCustomSSPsAPs"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.26.1; ANSSI R38
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-req-end-188-administrative-templates-logon-display-and-credential-restrictions"></div>
+
+# [REQ-END-188] Administrative Templates: Logon Display and Credential Restrictions
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\BlockUserFromShowingAccountDetailsOnSignin` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DontDisplayNetworkSelectionUI` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DontEnumerateConnectedUsers` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DisableLockScreenAppNotifications` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\BlockDomainPicturePassword` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\AllowDomainPINLogon` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\NoLocalPasswordResetQuestions` = `1`
+  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableMPR` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-rationale"></div>
+
+## Rationale
+Exposing account names, pictures, or network selection controls on lock screens provides reconnaissance information to physical attackers. Convenience PINs and picture passwords offer poor entropy compared to domain Kerberos credentials or smartcards. Local account security questions introduce easily guessable bypasses, and Multiple Provider Router (MPR) password transmission exposes cleartext credentials during authentication notifications.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Users must input their full username and password/smartcard PIN at logon. Convenience PINs are blocked (Windows Hello for Business with TPM hardware binding must be used instead if PINs are required).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Block user from showing account details on sign-in**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Do not display network selection UI**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Do not enumerate connected users on domain-joined computers**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Turn off app notifications on the lock screen**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Turn off picture password sign-in**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Turn on convenience PIN sign-in**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Prevent the use of security questions for local accounts**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
+  * **Configure the transmission of the user's password in the content of MPR notifications sent by winlogon**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtLogonDisplayOptions.ps1](../implementation_scripts/Configure-EndAtLogonDisplayOptions.ps1)
+
+```powershell
+#Configure-EndAtLogonDisplayOptions.ps1
+# Description: Configures Administrative Templates: Logon Display and Credential Restrictions.
+
+Write-Host "Configuring Administrative Templates: Logon Display and Credential Restrictions..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "BlockUserFromShowingAccountDetailsOnSignin" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DontDisplayNetworkSelectionUI" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DontEnumerateConnectedUsers" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "DisableLockScreenAppNotifications" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "BlockDomainPicturePassword" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowDomainPINLogon" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "NoLocalPasswordResetQuestions" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableMPR" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Logon Display and Credential Restrictions applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtLogonDisplayOptionsStatus.ps1](../audit_scripts/Get-EndAtLogonDisplayOptionsStatus.ps1)
+
+```powershell
+#Get-EndAtLogonDisplayOptionsStatus.ps1
+# Description: Audits Administrative Templates: Logon Display and Credential Restrictions.
+
+Write-Host "--- Auditing Administrative Templates: Logon Display and Credential Restrictions ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "BlockUserFromShowingAccountDetailsOnSignin"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "DontDisplayNetworkSelectionUI"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "DontEnumerateConnectedUsers"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "DisableLockScreenAppNotifications"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "BlockDomainPicturePassword"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "AllowDomainPINLogon"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$ValueName = "NoLocalPasswordResetQuestions"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "EnableMPR"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.28.1, 18.9.28.2, 18.9.28.3, 18.9.28.5, 18.9.28.6, 18.9.28.7, 18.10.15.3, 18.10.82.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-req-end-189-administrative-templates-disable-connected-standby-network-connectivity"></div>
+
+# [REQ-END-189] Administrative Templates: Disable Connected Standby Network Connectivity
+
+<div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9\DCSettingIndex` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9\ACSettingIndex` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-rationale"></div>
+
+## Rationale
+Connected Standby (Modern Standby) maintains active wireless and network interfaces while the operating system is suspended. This allows background applications to receive traffic and process incoming network packets, exposing devices to remote attacks and unauthorized network reconnaissance while unattended.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Applications cannot receive real-time notifications or synchronize background data while the laptop lid is closed or during sleep states.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings`
+  * **Allow network connectivity during connected-standby (on battery)**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings`
+  * **Allow network connectivity during connected-standby (plugged in)**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtPowerConnectedStandby.ps1](../implementation_scripts/Configure-EndAtPowerConnectedStandby.ps1)
+
+```powershell
+#Configure-EndAtPowerConnectedStandby.ps1
+# Description: Configures Administrative Templates: Disable Connected Standby Network Connectivity.
+
+Write-Host "Configuring Administrative Templates: Disable Connected Standby Network Connectivity..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -Name "DCSettingIndex" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" -Name "ACSettingIndex" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Disable Connected Standby Network Connectivity applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtPowerConnectedStandbyStatus.ps1](../audit_scripts/Get-EndAtPowerConnectedStandbyStatus.ps1)
+
+```powershell
+#Get-EndAtPowerConnectedStandbyStatus.ps1
+# Description: Audits Administrative Templates: Disable Connected Standby Network Connectivity.
+
+Write-Host "--- Auditing Administrative Templates: Disable Connected Standby Network Connectivity ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9"
+$ValueName = "DCSettingIndex"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9"
+$ValueName = "ACSettingIndex"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.33.6.1, Section 18.9.33.6.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-req-end-190-administrative-templates-disable-remote-assistance"></div>
+
+# [REQ-END-190] Administrative Templates: Disable Remote Assistance
+
+<div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\fAllowUnsolicited` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-rationale"></div>
+
+## Rationale
+Unsolicited Remote Assistance permits an administrator or support technician to initiate remote session connections to client endpoints without an explicit user invitation. If compromised, this capability allows adversaries with elevated domain privileges to silently observe or control interactive user desktop sessions.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Helpdesk staff cannot offer unsolicited remote assistance. User-initiated assistance or approved enterprise remote support solutions (with session auditing) must be utilized.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Assistance`
+  * **Configure Offer Remote Assistance**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtRemoteAssistance.ps1](../implementation_scripts/Configure-EndAtRemoteAssistance.ps1)
+
+```powershell
+#Configure-EndAtRemoteAssistance.ps1
+# Description: Configures Administrative Templates: Disable Remote Assistance.
+
+Write-Host "Configuring Administrative Templates: Disable Remote Assistance..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" -Name "fAllowUnsolicited" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Disable Remote Assistance applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtRemoteAssistanceStatus.ps1](../audit_scripts/Get-EndAtRemoteAssistanceStatus.ps1)
+
+```powershell
+#Get-EndAtRemoteAssistanceStatus.ps1
+# Description: Audits Administrative Templates: Disable Remote Assistance.
+
+Write-Host "--- Auditing Administrative Templates: Disable Remote Assistance ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+$ValueName = "fAllowUnsolicited"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.35.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-req-end-191-administrative-templates-enable-rpc-endpoint-mapper-client-authentication"></div>
+
+# [REQ-END-191] Administrative Templates: Enable RPC Endpoint Mapper Client Authentication
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc\EnableAuthEpResolution` = `1`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-rationale"></div>
+
+## Rationale
+The RPC Endpoint Mapper listens on TCP port 135 to resolve dynamic server endpoints for RPC interfaces. Enabling client authentication forces clients to authenticate to the Endpoint Mapper before obtaining endpoint addresses, preventing unauthenticated network adversaries from performing RPC reconnaissance and MITM endpoint redirection.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Legacy pre-Windows Server 2003 or third-party UNIX RPC clients incapable of authenticating to the Endpoint Mapper will fail to resolve RPC endpoints.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call`
+  * **Enable RPC Endpoint Mapper Client Authentication**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtRpcEndpointMapperAuth.ps1](../implementation_scripts/Configure-EndAtRpcEndpointMapperAuth.ps1)
+
+```powershell
+#Configure-EndAtRpcEndpointMapperAuth.ps1
+# Description: Configures Administrative Templates: Enable RPC Endpoint Mapper Client Authentication.
+
+Write-Host "Configuring Administrative Templates: Enable RPC Endpoint Mapper Client Authentication..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc" -Name "EnableAuthEpResolution" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Enable RPC Endpoint Mapper Client Authentication applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtRpcEndpointMapperAuthStatus.ps1](../audit_scripts/Get-EndAtRpcEndpointMapperAuthStatus.ps1)
+
+```powershell
+#Get-EndAtRpcEndpointMapperAuthStatus.ps1
+# Description: Audits Administrative Templates: Enable RPC Endpoint Mapper Client Authentication.
+
+Write-Host "--- Auditing Administrative Templates: Enable RPC Endpoint Mapper Client Authentication ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
+$ValueName = "EnableAuthEpResolution"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.36.1; ANSSI R34
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-req-end-192-administrative-templates-configure-windows-time-service-ntp-client-and-server"></div>
+
+# [REQ-END-192] Administrative Templates: Configure Windows Time Service NTP Client and Server
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient\Enabled` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer\Enabled` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-rationale"></div>
+
+## Rationale
+Accurate time synchronization is critical for Kerberos authentication (which rejects ticket timestamps skewed by more than 5 minutes) and forensic log correlation. Enabling the NTP Client guarantees synchronization with domain hierarchy time sources, while disabling the NTP Server prevents client workstations from broadcasting unauthenticated time data to other local hosts.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Client workstations will not serve time to other network devices.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers`
+  * **Enable Windows NTP Client**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers`
+  * **Enable Windows NTP Server**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtW32timeNtpClient.ps1](../implementation_scripts/Configure-EndAtW32timeNtpClient.ps1)
+
+```powershell
+#Configure-EndAtW32timeNtpClient.ps1
+# Description: Configures Administrative Templates: Configure Windows Time Service NTP Client and Server.
+
+Write-Host "Configuring Administrative Templates: Configure Windows Time Service NTP Client and Server..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient" -Name "Enabled" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer" -Name "Enabled" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Configure Windows Time Service NTP Client and Server applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtW32timeNtpClientStatus.ps1](../audit_scripts/Get-EndAtW32timeNtpClientStatus.ps1)
+
+```powershell
+#Get-EndAtW32timeNtpClientStatus.ps1
+# Description: Audits Administrative Templates: Configure Windows Time Service NTP Client and Server.
+
+Write-Host "--- Auditing Administrative Templates: Configure Windows Time Service NTP Client and Server ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient"
+$ValueName = "Enabled"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer"
+$ValueName = "Enabled"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.51.1.1, Section 18.9.51.1.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-req-end-193-administrative-templates-app-package-deployment-restrictions"></div>
+
+# [REQ-END-193] Administrative Templates: App Package Deployment Restrictions
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx\DisablePerUserUnsignedPackagesByDefault` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx\BlockNonAdminUserInstall` = `1`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-rationale"></div>
+
+## Rationale
+Standard user accounts can bypass traditional software restriction policies by deploying modern packaged Windows applications (.appx / .msix) directly into user profile directories. Disallowing per-user unsigned packages and prohibiting non-administrators from installing packaged apps ensures that all installed software is audited, signed, and managed by IT administrators.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Non-administrative users will be blocked from installing modern Store or sideloaded applications on their own profile without administrator approval.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment`
+  * **Not allow per-user unsigned packages to install by default (requires explicitly allow per install)**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment`
+  * **Prevent non-admin users from installing packaged Windows apps**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtAppxDeploymentRestrictions.ps1](../implementation_scripts/Configure-EndAtAppxDeploymentRestrictions.ps1)
+
+```powershell
+#Configure-EndAtAppxDeploymentRestrictions.ps1
+# Description: Configures Administrative Templates: App Package Deployment Restrictions.
+
+Write-Host "Configuring Administrative Templates: App Package Deployment Restrictions..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx" -Name "DisablePerUserUnsignedPackagesByDefault" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx" -Name "BlockNonAdminUserInstall" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: App Package Deployment Restrictions applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtAppxDeploymentRestrictionsStatus.ps1](../audit_scripts/Get-EndAtAppxDeploymentRestrictionsStatus.ps1)
+
+```powershell
+#Get-EndAtAppxDeploymentRestrictionsStatus.ps1
+# Description: Audits Administrative Templates: App Package Deployment Restrictions.
+
+Write-Host "--- Auditing Administrative Templates: App Package Deployment Restrictions ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx"
+$ValueName = "DisablePerUserUnsignedPackagesByDefault"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx"
+$ValueName = "BlockNonAdminUserInstall"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.4.2, Section 18.10.4.3
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-req-end-194-administrative-templates-configure-biometrics-enhanced-anti-spoofing"></div>
+
+# [REQ-END-194] Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures\EnhancedAntiSpoofing` = `1`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-rationale"></div>
+
+## Rationale
+Standard facial recognition can potentially be spoofed using high-resolution photographs, video playback, or realistic masks. Enhanced anti-spoofing requires facial recognition algorithms to verify depth and infrared illumination data from compatible biometric hardware sensors before granting access.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Devices with standard RGB-only webcams will not support facial recognition logon and must use smartcards or TPM-backed PINs.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Biometrics\Facial Features`
+  * **Configure enhanced anti-spoofing**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtBiometricsAntiSpoofing.ps1](../implementation_scripts/Configure-EndAtBiometricsAntiSpoofing.ps1)
+
+```powershell
+#Configure-EndAtBiometricsAntiSpoofing.ps1
+# Description: Configures Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing.
+
+Write-Host "Configuring Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures" -Name "EnhancedAntiSpoofing" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtBiometricsAntiSpoofingStatus.ps1](../audit_scripts/Get-EndAtBiometricsAntiSpoofingStatus.ps1)
+
+```powershell
+#Get-EndAtBiometricsAntiSpoofingStatus.ps1
+# Description: Audits Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing.
+
+Write-Host "--- Auditing Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures"
+$ValueName = "EnhancedAntiSpoofing"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.9.1.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-req-end-195-administrative-templates-disable-cloud-consumer-account-state-content"></div>
+
+# [REQ-END-195] Administrative Templates: Disable Cloud Consumer Account State Content
+
+<div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Low
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent\DisableConsumerAccountStateContent` = `1`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-rationale"></div>
+
+## Rationale
+Windows features consumer account state content cards and promotional recommendations in system menus. Disabling this content stops background queries to consumer cloud services, eliminates targeted promotional telemetry, and maintains a clean enterprise desktop interface.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Consumer account recommendation banners will be removed from system menus.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Cloud Content`
+  * **Turn off cloud consumer account state content**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtCloudConsumerContent.ps1](../implementation_scripts/Configure-EndAtCloudConsumerContent.ps1)
+
+```powershell
+#Configure-EndAtCloudConsumerContent.ps1
+# Description: Configures Administrative Templates: Disable Cloud Consumer Account State Content.
+
+Write-Host "Configuring Administrative Templates: Disable Cloud Consumer Account State Content..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Name "DisableConsumerAccountStateContent" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Disable Cloud Consumer Account State Content applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtCloudConsumerContentStatus.ps1](../audit_scripts/Get-EndAtCloudConsumerContentStatus.ps1)
+
+```powershell
+#Get-EndAtCloudConsumerContentStatus.ps1
+# Description: Audits Administrative Templates: Disable Cloud Consumer Account State Content.
+
+Write-Host "--- Auditing Administrative Templates: Disable Cloud Consumer Account State Content ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
+$ValueName = "DisableConsumerAccountStateContent"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.13.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-req-end-196-administrative-templates-require-pin-for-connect-wireless-pairing"></div>
+
+# [REQ-END-196] Administrative Templates: Require PIN for Connect Wireless Pairing
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Connect\RequirePinForPairing` = `1`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-rationale"></div>
+
+## Rationale
+The Windows Connect app allows nearby wireless devices to project their screens to the machine over Wi-Fi Direct (Miracast). Requiring a PIN for pairing prevents unauthorized external devices from projecting content or attempting connection hijack attacks without local physical verification.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Users initiating wireless projection must enter the displayed numeric PIN.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Connect`
+  * **Require pin for pairing**: Set to `Enabled` (First Time or Always)
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtConnectPinPairing.ps1](../implementation_scripts/Configure-EndAtConnectPinPairing.ps1)
+
+```powershell
+#Configure-EndAtConnectPinPairing.ps1
+# Description: Configures Administrative Templates: Require PIN for Connect Wireless Pairing.
+
+Write-Host "Configuring Administrative Templates: Require PIN for Connect Wireless Pairing..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect" -Name "RequirePinForPairing" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Require PIN for Connect Wireless Pairing applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtConnectPinPairingStatus.ps1](../audit_scripts/Get-EndAtConnectPinPairingStatus.ps1)
+
+```powershell
+#Get-EndAtConnectPinPairingStatus.ps1
+# Description: Audits Administrative Templates: Require PIN for Connect Wireless Pairing.
+
+Write-Host "--- Auditing Administrative Templates: Require PIN for Connect Wireless Pairing ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Connect"
+$ValueName = "RequirePinForPairing"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.14.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-req-end-197-administrative-templates-credential-user-interface-security-protections"></div>
+
+# [REQ-END-197] Administrative Templates: Credential User Interface Security Protections
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\CredUI\DisablePasswordReveal` = `1`
+  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI\EnumerateAdministrators` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-rationale"></div>
+
+## Rationale
+The password reveal ('eye') button exposes cleartext passwords on screen, creating shoulder-surfing and screen recording vulnerabilities. Enumerating administrator accounts on UAC elevation displays valid privileged usernames to standard users, facilitating targeted administrative reconnaissance and brute-force attacks.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: The password reveal button is disabled across all system credential prompts. Users elevating privileges must manually enter both the administrative username and password.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface`
+  * **Do not display the password reveal button**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface`
+  * **Enumerate administrator accounts on elevation**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtCreduiProtections.ps1](../implementation_scripts/Configure-EndAtCreduiProtections.ps1)
+
+```powershell
+#Configure-EndAtCreduiProtections.ps1
+# Description: Configures Administrative Templates: Credential User Interface Security Protections.
+
+Write-Host "Configuring Administrative Templates: Credential User Interface Security Protections..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI" -Name "DisablePasswordReveal" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI")) {
+    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI" -Name "EnumerateAdministrators" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Credential User Interface Security Protections applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtCreduiProtectionsStatus.ps1](../audit_scripts/Get-EndAtCreduiProtectionsStatus.ps1)
+
+```powershell
+#Get-EndAtCreduiProtectionsStatus.ps1
+# Description: Audits Administrative Templates: Credential User Interface Security Protections.
+
+Write-Host "--- Auditing Administrative Templates: Credential User Interface Security Protections ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI"
+$ValueName = "DisablePasswordReveal"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI"
+$ValueName = "EnumerateAdministrators"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.15.1, Section 18.10.15.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-req-end-198-administrative-templates-diagnostic-data-collection-and-preview-builds-restrictions"></div>
+
+# [REQ-END-198] Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions
+
+<div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\DisableOneSettingsDownloads` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\DoNotShowFeedbackNotifications` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\EnableOneSettingsAuditing` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\LimitDiagnosticLogCollection` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\LimitDumpCollection` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds\AllowBuildPreview` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-rationale"></div>
+
+## Rationale
+OneSettings downloads allow Microsoft to dynamically modify diagnostic configurations over the cloud. Limiting diagnostic and crash dump collection prevents in-memory sensitive data (such as passwords, tokens, or encryption keys) from being captured in automated crash reports and transmitted externally. Disabling Insider builds guarantees production systems only run fully vetted, stable OS builds.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Users cannot enroll in the Windows Insider program. Diagnostic feedback prompts are suppressed.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Disable OneSettings Downloads**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Do not show feedback notifications**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Enable OneSettings Auditing**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Limit Diagnostic Log Collection**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Limit Dump Collection**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
+  * **Toggle user control over Insider builds**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtDataCollectionPreviewBuilds.ps1](../implementation_scripts/Configure-EndAtDataCollectionPreviewBuilds.ps1)
+
+```powershell
+#Configure-EndAtDataCollectionPreviewBuilds.ps1
+# Description: Configures Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions.
+
+Write-Host "Configuring Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DisableOneSettingsDownloads" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DoNotShowFeedbackNotifications" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "EnableOneSettingsAuditing" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "LimitDiagnosticLogCollection" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "LimitDumpCollection" -Value 1 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds" -Name "AllowBuildPreview" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtDataCollectionPreviewBuildsStatus.ps1](../audit_scripts/Get-EndAtDataCollectionPreviewBuildsStatus.ps1)
+
+```powershell
+#Get-EndAtDataCollectionPreviewBuildsStatus.ps1
+# Description: Audits Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions.
+
+Write-Host "--- Auditing Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+$ValueName = "DisableOneSettingsDownloads"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+$ValueName = "DoNotShowFeedbackNotifications"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+$ValueName = "EnableOneSettingsAuditing"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+$ValueName = "LimitDiagnosticLogCollection"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
+$ValueName = "LimitDumpCollection"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds"
+$ValueName = "AllowBuildPreview"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.16.3, 18.10.16.4, 18.10.16.5, 18.10.16.6, 18.10.16.7, 18.10.16.8
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-req-end-199-administrative-templates-app-installer-protocol-and-execution-controls"></div>
+
+# [REQ-END-199] Administrative Templates: App Installer Protocol and Execution Controls
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableExperimentalFeatures` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableHashOverride` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableLocalArchiveMalwareScanOverride` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableBypassCertificatePinningForMicrosoftStore` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableMSAppInstallerProtocol` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-rationale"></div>
+
+## Rationale
+The App Installer URI protocol (ms-appinstaller://) has been repeatedly abused in active malware campaigns to trigger zero-click or drive-by package installations directly from web browsers. Disabling this protocol and prohibiting security overrides (hash bypass, malware scan bypass, certificate bypass) completely closes this critical initial infection vector.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Web links utilizing ms-appinstaller will not launch automatically. Software must be deployed through enterprise deployment mechanisms or local signed packages.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
+  * **Enable App Installer Experimental Features**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
+  * **Enable App Installer Hash Override**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
+  * **Enable App Installer Local Archive Malware Scan Override**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
+  * **Enable App Installer Microsoft Store Source Certificate Validation Bypass**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
+  * **Enable App Installer ms-appinstaller protocol**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtAppInstallerControls.ps1](../implementation_scripts/Configure-EndAtAppInstallerControls.ps1)
+
+```powershell
+#Configure-EndAtAppInstallerControls.ps1
+# Description: Configures Administrative Templates: App Installer Protocol and Execution Controls.
+
+Write-Host "Configuring Administrative Templates: App Installer Protocol and Execution Controls..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableExperimentalFeatures" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableHashOverride" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableLocalArchiveMalwareScanOverride" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableBypassCertificatePinningForMicrosoftStore" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller" -Name "EnableMSAppInstallerProtocol" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: App Installer Protocol and Execution Controls applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtAppInstallerControlsStatus.ps1](../audit_scripts/Get-EndAtAppInstallerControlsStatus.ps1)
+
+```powershell
+#Get-EndAtAppInstallerControlsStatus.ps1
+# Description: Audits Administrative Templates: App Installer Protocol and Execution Controls.
+
+Write-Host "--- Auditing Administrative Templates: App Installer Protocol and Execution Controls ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+$ValueName = "EnableExperimentalFeatures"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+$ValueName = "EnableHashOverride"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+$ValueName = "EnableLocalArchiveMalwareScanOverride"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+$ValueName = "EnableBypassCertificatePinningForMicrosoftStore"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+$ValueName = "EnableMSAppInstallerProtocol"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.18.2, 18.10.18.3, 18.10.18.4, 18.10.18.5, 18.10.18.6
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-req-end-200-administrative-templates-event-log-maximum-file-sizes-and-retention-policies"></div>
+
+# [REQ-END-200] Administrative Templates: Event Log Maximum File Sizes and Retention Policies
+
+<div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\Retention` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\MaxSize` = `32768`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\Retention` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\MaxSize` = `196608`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\Retention` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\MaxSize` = `32768`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\Retention` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\MaxSize` = `32768`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-rationale"></div>
+
+## Rationale
+Default event log capacities (typically 20 MB) rollover within hours during active security events, overwriting vital evidence. Expanding the Security log to 192 MB (196,608 KB) and Application/Setup/System logs to 32 MB (32,768 KB) provides sufficient buffer for high-volume audit data and centralized SIEM ingestion.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Allocates approximately 300 MB of disk space in %SystemRoot%\System32\Winevt\Logs.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (32768 KB)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (196608 KB)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (32768 KB)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (32768 KB)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtEventLogSizes.ps1](../implementation_scripts/Configure-EndAtEventLogSizes.ps1)
+
+```powershell
+#Configure-EndAtEventLogSizes.ps1
+# Description: Configures Administrative Templates: Event Log Maximum File Sizes and Retention Policies.
+
+Write-Host "Configuring Administrative Templates: Event Log Maximum File Sizes and Retention Policies..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 32768 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 196608 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "MaxSize" -Value 32768 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 32768 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Event Log Maximum File Sizes and Retention Policies applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtEventLogSizesStatus.ps1](../audit_scripts/Get-EndAtEventLogSizesStatus.ps1)
+
+```powershell
+#Get-EndAtEventLogSizesStatus.ps1
+# Description: Audits Administrative Templates: Event Log Maximum File Sizes and Retention Policies.
+
+Write-Host "--- Auditing Administrative Templates: Event Log Maximum File Sizes and Retention Policies ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application"
+$ValueName = "MaxSize"
+$ExpectedValue = 32768
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security"
+$ValueName = "MaxSize"
+$ExpectedValue = 196608
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup"
+$ValueName = "MaxSize"
+$ExpectedValue = 32768
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System"
+$ValueName = "MaxSize"
+$ExpectedValue = 32768
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.26.1.1, 18.10.26.1.2, 18.10.26.2.1, 18.10.26.2.2, 18.10.26.3.1, 18.10.26.3.2, 18.10.26.4.1, 18.10.26.4.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-req-end-201-administrative-templates-file-explorer-mark-of-the-web-and-shell-protocol-security"></div>
+
+# [REQ-END-201] Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer\DisableMotWOnInsecurePathCopy` = `0`
+  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\PreXPSP2ShellProtocolBehavior` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-rationale"></div>
+
+## Rationale
+The Mark of the Web (Zone.Identifier alternate data stream) is the foundation of Windows download security, triggering SmartScreen, Defender reputation checks, and Office Protected View. Disabling MotW suppression ensures downloaded files maintain security tags even when transferred across insecure network shares. Shell protocol protected mode restricts rogue URL protocol invocations.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Downloaded files copied across local shares will correctly retain Internet security prompts when executed.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
+  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
+  * **Turn off shell protocol protected mode**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtFileExplorerMotw.ps1](../implementation_scripts/Configure-EndAtFileExplorerMotw.ps1)
+
+```powershell
+#Configure-EndAtFileExplorerMotw.ps1
+# Description: Configures Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security.
+
+Write-Host "Configuring Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableMotWOnInsecurePathCopy" -Value 0 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer")) {
+    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "PreXPSP2ShellProtocolBehavior" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtFileExplorerMotwStatus.ps1](../audit_scripts/Get-EndAtFileExplorerMotwStatus.ps1)
+
+```powershell
+#Get-EndAtFileExplorerMotwStatus.ps1
+# Description: Audits Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security.
+
+Write-Host "--- Auditing Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
+$ValueName = "DisableMotWOnInsecurePathCopy"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+$ValueName = "PreXPSP2ShellProtocolBehavior"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.29.3, Section 18.10.29.5
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-req-end-202-administrative-templates-internet-explorer-11-and-web-feeds-retirement-controls"></div>
+
+# [REQ-END-202] Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main\NotifyDisableIEOptions` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\DisableEnclosureDownload` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\AllowBasicAuthInClear` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-rationale"></div>
+
+## Rationale
+Internet Explorer 11 is retired and out of support, presenting severe unpatched memory corruption attack surfaces. Disabling IE11 as a standalone browser automatically redirects browser requests to Microsoft Edge. Prohibiting RSS enclosure downloads prevents automated malware payload staging, and blocking cleartext HTTP feed authentication prevents credential interception.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: iexplore.exe redirects to Microsoft Edge. Legacy enterprise applications requiring MSHTML must be configured via Enterprise Mode Site List in Edge IE Mode.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer`
+  * **Disable Internet Explorer 11 as a standalone browser**: Set to `Enabled: Always`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
+  * **Prevent downloading of enclosures**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
+  * **Turn on Basic feed authentication over HTTP**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtInternetExplorerRetirement.ps1](../implementation_scripts/Configure-EndAtInternetExplorerRetirement.ps1)
+
+```powershell
+#Configure-EndAtInternetExplorerRetirement.ps1
+# Description: Configures Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls.
+
+Write-Host "Configuring Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main" -Name "NotifyDisableIEOptions" -Value 0 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -Name "DisableEnclosureDownload" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds" -Name "AllowBasicAuthInClear" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtInternetExplorerRetirementStatus.ps1](../audit_scripts/Get-EndAtInternetExplorerRetirementStatus.ps1)
+
+```powershell
+#Get-EndAtInternetExplorerRetirementStatus.ps1
+# Description: Audits Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls.
+
+Write-Host "--- Auditing Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Main"
+$ValueName = "NotifyDisableIEOptions"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds"
+$ValueName = "DisableEnclosureDownload"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds"
+$ValueName = "AllowBasicAuthInClear"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.35.1, Section 18.10.58.1, Section 18.10.58.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-req-end-203-administrative-templates-windows-defender-scan-and-exploit-protection-overrides"></div>
+
+# [REQ-END-203] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides
+
+<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection\BruteForceProtectionConfiguredState` = `2`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Scan\DisablePackedExeScanning` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection\DisallowExploitProtectionOverride` = `1`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-rationale"></div>
+
+## Rationale
+Remote Encryption Protection actively detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing packed executable scanning guarantees that software packed with UPX or custom packers is decompressed and analyzed for malicious payloads. Preventing users from modifying Exploit Protection settings secures core mitigations (DEP, ASLR, CFG) against local user tampering.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Scanning packed files may cause slight increases in scan duration. Standard users cannot alter App & Browser protection options in Windows Security.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection`
+  * **Configure Remote Encryption Protection Mode**: Set to `Enabled` (Audit or higher (Block mode recommended))
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
+  * **Turn off scanning of packed executables**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection`
+  * **Prevent users from modifying settings**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtDefenderProtectionOptions.ps1](../implementation_scripts/Configure-EndAtDefenderProtectionOptions.ps1)
+
+```powershell
+#Configure-EndAtDefenderProtectionOptions.ps1
+# Description: Configures Administrative Templates: Windows Defender Scan and Exploit Protection Overrides.
+
+Write-Host "Configuring Administrative Templates: Windows Defender Scan and Exploit Protection Overrides..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "DisablePackedExeScanning" -Value 0 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtDefenderProtectionOptionsStatus.ps1](../audit_scripts/Get-EndAtDefenderProtectionOptionsStatus.ps1)
+
+```powershell
+#Get-EndAtDefenderProtectionOptionsStatus.ps1
+# Description: Audits Administrative Templates: Windows Defender Scan and Exploit Protection Overrides.
+
+Write-Host "--- Auditing Administrative Templates: Windows Defender Scan and Exploit Protection Overrides ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+$ValueName = "BruteForceProtectionConfiguredState"
+$ExpectedValue = 2
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
+$ValueName = "DisablePackedExeScanning"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+$ValueName = "DisallowExploitProtectionOverride"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.43.11.1.1.2, Section 18.10.43.13.2, Section 18.10.92.2.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-req-end-204-administrative-templates-windows-search-and-cortana-privacy-restrictions"></div>
+
+# [REQ-END-204] Administrative Templates: Windows Search and Cortana Privacy Restrictions
+
+<div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowCortana` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowCortanaAboveLock` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowIndexingEncryptedStoresOrItems` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowSearchToUseLocation` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-rationale"></div>
+
+## Rationale
+Cortana voice integration introduces microphone listening risks, voice command execution from locked workstations, and external telemetry transmission. Indexing encrypted files in the Windows Search index creates unencrypted index cache entries, leaking sensitive plaintext data across file security boundaries.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Cortana voice assistance is deactivated. Encrypted files will not appear in instant search results.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
+  * **Allow Cortana**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
+  * **Allow Cortana above lock screen**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
+  * **Allow indexing of encrypted files**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
+  * **Allow search and Cortana to use location**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtSearchCortanaRestrictions.ps1](../implementation_scripts/Configure-EndAtSearchCortanaRestrictions.ps1)
+
+```powershell
+#Configure-EndAtSearchCortanaRestrictions.ps1
+# Description: Configures Administrative Templates: Windows Search and Cortana Privacy Restrictions.
+
+Write-Host "Configuring Administrative Templates: Windows Search and Cortana Privacy Restrictions..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortana" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortanaAboveLock" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowIndexingEncryptedStoresOrItems" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowSearchToUseLocation" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Windows Search and Cortana Privacy Restrictions applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtSearchCortanaRestrictionsStatus.ps1](../audit_scripts/Get-EndAtSearchCortanaRestrictionsStatus.ps1)
+
+```powershell
+#Get-EndAtSearchCortanaRestrictionsStatus.ps1
+# Description: Audits Administrative Templates: Windows Search and Cortana Privacy Restrictions.
+
+Write-Host "--- Auditing Administrative Templates: Windows Search and Cortana Privacy Restrictions ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+$ValueName = "AllowCortana"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+$ValueName = "AllowCortanaAboveLock"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+$ValueName = "AllowIndexingEncryptedStoresOrItems"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search"
+$ValueName = "AllowSearchToUseLocation"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.59.3, 18.10.59.4, 18.10.59.5, 18.10.59.6
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-req-end-205-administrative-templates-windows-store-updates-and-os-upgrade-restrictions"></div>
+
+# [REQ-END-205] Administrative Templates: Windows Store Updates and OS Upgrade Restrictions
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Medium
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore\AutoDownload` = `4`
+  * `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore\DisableOSUpgrade` = `1`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-rationale"></div>
+
+## Rationale
+Permitting automatic Store app updates ensures packaged applications and system appx dependencies stay continuously patched against published vulnerabilities. Suppressing consumer Windows upgrade offers prevents unauthorized major OS feature version upgrades that circumvent IT change management and testing.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Store apps receive automated updates; consumer version upgrade prompts are suppressed.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store`
+  * **Turn off Automatic Download and Install of updates**: Set to `Disabled` (Allow auto updates)
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store`
+  * **Turn off the offer to update to the latest version of Windows**: Set to `Enabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtWindowsStoreRestrictions.ps1](../implementation_scripts/Configure-EndAtWindowsStoreRestrictions.ps1)
+
+```powershell
+#Configure-EndAtWindowsStoreRestrictions.ps1
+# Description: Configures Administrative Templates: Windows Store Updates and OS Upgrade Restrictions.
+
+Write-Host "Configuring Administrative Templates: Windows Store Updates and OS Upgrade Restrictions..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Name "AutoDownload" -Value 4 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore" -Name "DisableOSUpgrade" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Windows Store Updates and OS Upgrade Restrictions applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtWindowsStoreRestrictionsStatus.ps1](../audit_scripts/Get-EndAtWindowsStoreRestrictionsStatus.ps1)
+
+```powershell
+#Get-EndAtWindowsStoreRestrictionsStatus.ps1
+# Description: Audits Administrative Templates: Windows Store Updates and OS Upgrade Restrictions.
+
+Write-Host "--- Auditing Administrative Templates: Windows Store Updates and OS Upgrade Restrictions ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore"
+$ValueName = "AutoDownload"
+$ExpectedValue = 4
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore"
+$ValueName = "DisableOSUpgrade"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.66.2, Section 18.10.66.3
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-req-end-206-administrative-templates-disable-windows-widgets-and-news-feed"></div>
+
+# [REQ-END-206] Administrative Templates: Disable Windows Widgets and News Feed
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: Low
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Dsh\AllowNewsAndInterests` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-rationale"></div>
+
+## Rationale
+Windows Widgets and News and Interests dynamically fetch unauthenticated internet news, weather, and third-party content onto the taskbar, generating continuous telemetry and background web requests. Disabling widgets eliminates this attack surface and eliminates unwanted distractions.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: The Widgets and News and Interests icon is removed from the taskbar.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Widgets`
+  * **Allow widgets**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtWindowsWidgetsDsh.ps1](../implementation_scripts/Configure-EndAtWindowsWidgetsDsh.ps1)
+
+```powershell
+#Configure-EndAtWindowsWidgetsDsh.ps1
+# Description: Configures Administrative Templates: Disable Windows Widgets and News Feed.
+
+Write-Host "Configuring Administrative Templates: Disable Windows Widgets and News Feed..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Dsh")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Dsh" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Dsh" -Name "AllowNewsAndInterests" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Disable Windows Widgets and News Feed applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtWindowsWidgetsDshStatus.ps1](../audit_scripts/Get-EndAtWindowsWidgetsDshStatus.ps1)
+
+```powershell
+#Get-EndAtWindowsWidgetsDshStatus.ps1
+# Description: Audits Administrative Templates: Disable Windows Widgets and News Feed.
+
+Write-Host "--- Auditing Administrative Templates: Disable Windows Widgets and News Feed ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Dsh"
+$ValueName = "AllowNewsAndInterests"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.72.1
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-req-end-207-administrative-templates-disable-windows-automatic-restart-sign-on-arso"></div>
+
+# [REQ-END-207] Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO)
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableAutomaticRestartSignOn` = `1`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-rationale"></div>
+
+## Rationale
+Automatic Restart Sign-On (ARSO) caches user credentials in memory to automatically log in and lock the desktop after Windows Update reboots. This credential staging mechanism creates exposure to physical memory extraction and DMA attacks. Disabling ARSO prevents credentials from persisting across automated reboots.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Following a restart, the computer remains at the initial Windows login screen until the user manually authenticates.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Logon Options`
+  * **Sign-in and lock last interactive user automatically after a restart**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtAutomaticRestartSignon.ps1](../implementation_scripts/Configure-EndAtAutomaticRestartSignon.ps1)
+
+```powershell
+#Configure-EndAtAutomaticRestartSignon.ps1
+# Description: Configures Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO).
+
+Write-Host "Configuring Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO)..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "DisableAutomaticRestartSignOn" -Value 1 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO) applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtAutomaticRestartSignonStatus.ps1](../audit_scripts/Get-EndAtAutomaticRestartSignonStatus.ps1)
+
+```powershell
+#Get-EndAtAutomaticRestartSignonStatus.ps1
+# Description: Audits Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO).
+
+Write-Host "--- Auditing Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO) ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "DisableAutomaticRestartSignOn"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.82.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-req-end-208-administrative-templates-windows-sandbox-clipboard-and-network-isolation"></div>
+
+# [REQ-END-208] Administrative Templates: Windows Sandbox Clipboard and Network Isolation
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox\AllowClipboardRedirection` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox\AllowNetworking` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-rationale"></div>
+
+## Rationale
+Windows Sandbox provides a lightweight virtualized environment for untrusted binary execution. If malware is detonated inside the sandbox, clipboard sharing allows potential escape or clipboard data harvesting, and network access permits external C2 communication and lateral scanning. Disabling clipboard redirection and networking enforces strict host and network isolation.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Users cannot copy/paste between host and sandbox, and Sandbox cannot connect to local or internet networks.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox`
+  * **Allow clipboard sharing with Windows Sandbox**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox`
+  * **Allow networking in Windows Sandbox**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtWindowsSandboxIsolation.ps1](../implementation_scripts/Configure-EndAtWindowsSandboxIsolation.ps1)
+
+```powershell
+#Configure-EndAtWindowsSandboxIsolation.ps1
+# Description: Configures Administrative Templates: Windows Sandbox Clipboard and Network Isolation.
+
+Write-Host "Configuring Administrative Templates: Windows Sandbox Clipboard and Network Isolation..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox" -Name "AllowClipboardRedirection" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox" -Name "AllowNetworking" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Windows Sandbox Clipboard and Network Isolation applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtWindowsSandboxIsolationStatus.ps1](../audit_scripts/Get-EndAtWindowsSandboxIsolationStatus.ps1)
+
+```powershell
+#Get-EndAtWindowsSandboxIsolationStatus.ps1
+# Description: Audits Administrative Templates: Windows Sandbox Clipboard and Network Isolation.
+
+Write-Host "--- Auditing Administrative Templates: Windows Sandbox Clipboard and Network Isolation ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox"
+$ValueName = "AllowClipboardRedirection"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Sandbox"
+$ValueName = "AllowNetworking"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.91.1, Section 18.10.91.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md"></div>
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-req-end-209-administrative-templates-windows-update-deferral-and-automatic-installation-policies"></div>
+
+# [REQ-END-209] Administrative Templates: Windows Update Deferral and Automatic Installation Policies
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\SetDisablePauseUXAccess` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\ManagePreviewBuildsPolicyValue` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdates` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdatesPeriodInDays` = `180`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdates` = `1`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdatesPeriodInDays` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\NoAutoRebootWithLoggedOnUsers` = `0`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\ScheduledInstallDay` = `0`
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-rationale"></div>
+
+## Rationale
+Removing the ability to pause updates prevents users from indefinitely deferring critical security patches. Deferring quality updates by 0 days ensures critical security patches are installed immediately upon release, while daily scheduled installation and permitting automated reboots ensures systems stay continuously remediated against known exploits.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Users will not be able to pause updates. The system may reboot during designated maintenance windows to complete patch application.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Configure the following policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
+  * **Remove access to 'Pause updates' feature**: Set to `Enabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
+  * **Manage preview builds**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
+  * **Select when Preview Builds and Feature Updates are received**: Set to `Enabled: Defer 180 days`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
+  * **Select when Quality Updates are received**: Set to `Enabled: Defer 0 days`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience`
+  * **Configure Automatic Updates**: Set to `Enabled: Scheduled install day 0 - Every day`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience`
+  * **No auto-restart with logged on users for scheduled automatic updates installations**: Set to `Disabled`
+
+4. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the administrative template registry values:
+
+[Download Script: Configure-EndAtWindowsUpdatePolicies.ps1](../implementation_scripts/Configure-EndAtWindowsUpdatePolicies.ps1)
+
+```powershell
+#Configure-EndAtWindowsUpdatePolicies.ps1
+# Description: Configures Administrative Templates: Windows Update Deferral and Automatic Installation Policies.
+
+Write-Host "Configuring Administrative Templates: Windows Update Deferral and Automatic Installation Policies..." -ForegroundColor Cyan
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "SetDisablePauseUXAccess" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "ManagePreviewBuildsPolicyValue" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferFeatureUpdates" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferFeatureUpdatesPeriodInDays" -Value 180 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferQualityUpdates" -Value 1 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "DeferQualityUpdatesPeriodInDays" -Value 0 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoRebootWithLoggedOnUsers" -Value 0 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "ScheduledInstallDay" -Value 0 -Type DWord -Force
+
+Write-Host "[+] Administrative Templates: Windows Update Deferral and Automatic Installation Policies applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-EndAtWindowsUpdatePoliciesStatus.ps1](../audit_scripts/Get-EndAtWindowsUpdatePoliciesStatus.ps1)
+
+```powershell
+#Get-EndAtWindowsUpdatePoliciesStatus.ps1
+# Description: Audits Administrative Templates: Windows Update Deferral and Automatic Installation Policies.
+
+Write-Host "--- Auditing Administrative Templates: Windows Update Deferral and Automatic Installation Policies ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$ValueName = "SetDisablePauseUXAccess"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$ValueName = "ManagePreviewBuildsPolicyValue"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$ValueName = "DeferFeatureUpdates"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$ValueName = "DeferFeatureUpdatesPeriodInDays"
+$ExpectedValue = 180
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$ValueName = "DeferQualityUpdates"
+$ExpectedValue = 1
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$ValueName = "DeferQualityUpdatesPeriodInDays"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+$ValueName = "NoAutoRebootWithLoggedOnUsers"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+$ValueName = "ScheduledInstallDay"
+$ExpectedValue = 0
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.93.1.1, 18.10.93.2.2, 18.10.93.2.3, 18.10.93.4.1, 18.10.93.4.2, 18.10.93.4.3
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
 
 
 <div style="page-break-before: always;"></div>
