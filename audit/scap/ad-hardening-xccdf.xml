@@ -35694,9 +35694,11 @@ try {
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers (Forest-wide configuration)</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers (Forest-wide configuration affecting all domains)</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016 and above</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Forest Functional Level</xhtml:strong>: Windows Server 2008 R2 or higher</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -35704,46 +35706,155 @@ try {
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>The Active Directory (AD) Recycle Bin is a critical availability and recovery component in an enterprise environment. It addresses risks related to accidental deletions, administrative scripting errors, and malicious insider sabotage targeting directory objects.</xhtml:p>
-        <xhtml:p>Enabling this feature provides several key benefits: 1. <xhtml:strong>Preserving Object State</xhtml:strong>: Unlike legacy "tombstone reanimation", the AD Recycle Bin preserves all link-valued attributes (such as group memberships, manager relationships, and direct reports) of deleted objects. When an object is restored, its security context and access privileges are reinstated exactly as they were, preventing security gaps associated with manual reconstruction. 2. <xhtml:strong>Operational Efficiency</xhtml:strong>: It allows administrators to restore objects without taking a Domain Controller offline to perform a Directory Services Restore Mode (DSRM) authoritative restore. This reduces downtime and maintains service availability. 3. <xhtml:strong>Data Lifecycle Alignment</xhtml:strong>: By explicitly defining the Deleted Object Lifetime (DOL), organizations ensure that deleted items are retained for a designated period before permanent sanitization.</xhtml:p>
+        <xhtml:p>The Active Directory (AD) Recycle Bin is an essential disaster recovery, availability, and incident response capability. In modern enterprise environments, directory availability is directly tied to core organizational operations. Accidental administrative errors, script bugs, malicious insider sabotage, and destructive cyberattacks (such as ransomware operations deploying wipers like HermeticWiper or deleting Tier 0 infrastructure to inhibit incident response) pose critical risks to Active Directory object integrity.</xhtml:p>
+        <xhtml:p>Enabling and properly configuring the Active Directory Recycle Bin provides vital security and operational defenses:</xhtml:p>
       </rationale>
       <fixtext>
-        <xhtml:h3>Option A: Active Directory Administrative Center (Preferred)</xhtml:h3>
+        <xhtml:h3>Option A: Active Directory Administrative Center (GUI Configuration &amp; Recovery)</xhtml:h3>
+        <xhtml:h4>1. Enabling the Recycle Bin (Forest Root Domain Controller)</xhtml:h4>
         <xhtml:ol>
-          <xhtml:li>Log on to a Domain Controller with <xhtml:strong>Enterprise Admins</xhtml:strong> credentials.</xhtml:li>
+          <xhtml:li>Log on to a Domain Controller in the forest root domain with an account that is a member of the <xhtml:strong>Enterprise Admins</xhtml:strong> group.</xhtml:li>
           <xhtml:li>Open <xhtml:strong>Active Directory Administrative Center</xhtml:strong> (<xhtml:code>dsac.exe</xhtml:code>).</xhtml:li>
-          <xhtml:li>In the left navigation pane, select the local domain name.</xhtml:li>
-          <xhtml:li>In the <xhtml:strong>Tasks</xhtml:strong> pane on the right side, click <xhtml:strong>Enable Recycle Bin...</xhtml:strong>.</xhtml:li>
-          <xhtml:li>In the confirmation warning dialog, click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
-          <xhtml:li>A notification dialog will state that the change will begin replicating across all Domain Controllers in the forest. Click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Refresh the Administrative Center interface; the "Enable Recycle Bin..." link will now be grayed out.</xhtml:li>
+          <xhtml:li>In the left navigation pane, select the forest root domain node.</xhtml:li>
+          <xhtml:li>In the right-hand <xhtml:strong>Tasks</xhtml:strong> pane, click <xhtml:strong>Enable Recycle Bin...</xhtml:strong>.</xhtml:li>
+          <xhtml:li>In the confirmation warning dialog informing that this action is irreversible, click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>A notification dialog will state that the feature will begin replicating across all Domain Controllers in the forest. Click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Refresh the Administrative Center interface; the "Enable Recycle Bin..." link will now be permanently grayed out.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>2. Restoring Deleted Objects via ADAC</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Open <xhtml:strong>Active Directory Administrative Center</xhtml:strong> (<xhtml:code>dsac.exe</xhtml:code>).</xhtml:li>
+          <xhtml:li>In the left navigation pane, expand the target domain node and click on the <xhtml:strong>Deleted Objects</xhtml:strong> container.</xhtml:li>
+          <xhtml:li>Locate the deleted object(s) using the search bar or filter criteria.</xhtml:li>
+          <xhtml:li>Right-click the object and select one of the following options:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Restore</xhtml:em>*: Restores the object directly to its original parent Organizational Unit.</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Restore To...</xhtml:em>*: Allows specifying an alternative target Organizational Unit (required if the original parent OU was deleted or relocated).</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
-        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Run the following scripts to audit and activate the optional feature forest-wide.</xhtml:p>
+        <xhtml:h3>Option B: PowerShell &amp; Directory Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>Run the following scripts to audit and activate the optional feature forest-wide, configure retention lifetimes, and verify container security.</xhtml:p>
         <xhtml:h4>1. Local Audit (Audit-ADRecycleBin.ps1)</xhtml:h4>
         <xhtml:p>
           <xhtml:a href="audit_scripts/Audit-ADRecycleBin.ps1">Download Script: Audit-ADRecycleBin.ps1</xhtml:a>
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Audit-ADRecycleBin.ps1
-# Description: Audits the enablement status of the AD Recycle Bin.
+# Description: Audits Active Directory Recycle Bin status, lifetime configurations, and container ACL permissions.
+# Target Engine: Windows PowerShell 5.1
 
-Import-Module ActiveDirectory
+Write-Host "--- Auditing Active Directory Recycle Bin Configuration ---" -ForegroundColor Cyan
 
-Write-Host "--- Auditing Active Directory Recycle Bin ---" -ForegroundColor Cyan
+$isVulnerable = $false
+
+# 1. Verify Active Directory module availability
+if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
+    Write-Host "VULNERABLE: The ActiveDirectory PowerShell module is not available on this system." -ForegroundColor Red
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    return
+}
+
+Import-Module ActiveDirectory -ErrorAction SilentlyContinue
 
 try {
-    $Forest = Get-ADForest -ErrorAction Stop
-    $EnabledFeatures = Get-ADOptionalFeature -Filter "Name -eq 'Recycle Bin Feature'" -Properties EnabledScopes | Select-Object -ExpandProperty EnabledScopes
-    
-    if ($EnabledFeatures) {
-        Write-Host "`nStatus: Compliant. Active Directory Recycle Bin is enabled in the forest '$($Forest.Name)'." -ForegroundColor Green
-    } else {
-        Write-Host "`nVULNERABLE: Active Directory Recycle Bin is NOT enabled in the forest '$($Forest.Name)'." -ForegroundColor Red
+    # 2. Check Forest and Forest Functional Level
+    $forest = Get-ADForest -ErrorAction Stop
+    $forestMode = $forest.ForestMode
+
+    Write-Host "[*] Active Directory Forest: $($forest.Name)" -ForegroundColor Gray
+    Write-Host "[*] Forest Functional Level: $($forestMode)" -ForegroundColor Gray
+
+    $validModes = @("Windows2008R2Forest", "Windows2012Forest", "Windows2012R2Forest", "Windows2016Forest", "Windows2025Forest")
+    if ($validModes -notcontains $forestMode) {
+        Write-Host "VULNERABLE: Forest Functional Level '$($forestMode)' does not support Active Directory Recycle Bin (requires Windows Server 2008 R2 or higher)." -ForegroundColor Red
+        $isVulnerable = $true
     }
+
+    # 3. Check Optional Feature Enablement
+    $recycleFeature = Get-ADOptionalFeature -Filter "Name -eq 'Recycle Bin Feature'" -Properties EnabledScopes -ErrorAction Stop
+    $enabledScopes = $recycleFeature.EnabledScopes
+
+    if ($enabledScopes -and ($enabledScopes -contains $forest.PartitionsContainer -or $enabledScopes.Count -gt 0)) {
+        Write-Host "[+] Recycle Bin Feature is ENABLED forest-wide." -ForegroundColor Green
+    } else {
+        Write-Host "VULNERABLE: Active Directory Recycle Bin Feature is NOT enabled in forest '$($forest.Name)'." -ForegroundColor Red
+        $isVulnerable = $true
+    }
+
+    # 4. Check Deleted Object Lifetime and Tombstone Lifetime
+    $rootDse = Get-ADRootDSE -ErrorAction Stop
+    $configNC = $rootDse.configurationNamingContext
+    $dsPath = "CN=Directory Service,CN=Windows NT,CN=Services,CN=Configuration,$configNC"
+
+    $dsConfig = Get-ADObject -Identity $dsPath -Properties msDS-deletedObjectLifetime, tombstoneLifetime -ErrorAction Stop
+    $dol = $dsConfig."msDS-deletedObjectLifetime"
+    $tombstone = $dsConfig.tombstoneLifetime
+
+    if ($null -eq $tombstone -or $tombstone -eq 0) {
+        $effectiveTombstone = 60 # Legacy Windows 2000/2003 default
+        Write-Host "[!] tombstoneLifetime attribute is not explicitly set (defaults to 60 days in legacy forests, or 180 days in modern forests)." -ForegroundColor Yellow
+    } else {
+        $effectiveTombstone = $tombstone
+        Write-Host "[*] tombstoneLifetime: $($effectiveTombstone) days" -ForegroundColor Gray
+    }
+
+    if ($null -eq $dol) {
+        Write-Host "[*] msDS-deletedObjectLifetime: (Not Set - defaults to tombstoneLifetime of $($effectiveTombstone) days)" -ForegroundColor Gray
+    } else {
+        Write-Host "[*] msDS-deletedObjectLifetime: $($dol) days" -ForegroundColor Gray
+        if ($dol -lt 60) {
+            Write-Host "VULNERABLE: msDS-deletedObjectLifetime is configured to less than 60 days ($($dol) days). Recovery window is excessively short." -ForegroundColor Red
+            $isVulnerable = $true
+        }
+    }
+
+    # 5. Audit Access Permissions on CN=Deleted Objects Container
+    $domainDN = $rootDse.defaultNamingContext
+    $deletedObjectsDN = "CN=Deleted Objects,$domainDN"
+
+    Write-Host "[*] Auditing security permissions on: $($deletedObjectsDN)" -ForegroundColor Gray
+
+    try {
+        $deletedObjACL = Get-Acl -Path "AD:\$deletedObjectsDN" -ErrorAction Stop
+        $suspiciousIdentities = @(
+            "NT AUTHORITY\Authenticated Users",
+            "Everyone",
+            "BUILTIN\Users",
+            "ANONYMOUS LOGON"
+        )
+
+        $flaggedAccess = $false
+        foreach ($accessRule in $deletedObjACL.Access) {
+            $identity = $accessRule.IdentityReference.Value
+            foreach ($suspicious in $suspiciousIdentities) {
+                if ($identity -like "*$suspicious*" -and $accessRule.AccessControlType -eq [System.Security.AccessControl.AccessControlType]::Allow) {
+                    Write-Host "VULNERABLE: Non-default permissive access granted to '$($identity)' on Deleted Objects container ($($accessRule.ActiveDirectoryRights))." -ForegroundColor Red
+                    $flaggedAccess = $true
+                    $isVulnerable = $true
+                }
+            }
+        }
+
+        if (-not $flaggedAccess) {
+            Write-Host "[+] Permissions on Deleted Objects container are restricted to privileged administrators." -ForegroundColor Green
+        }
+    } catch {
+        Write-Host "[*] Note: Unable to query Deleted Objects container ACL directly ($($_.Exception.Message))." -ForegroundColor Yellow
+    }
+
 } catch {
-    Write-Host "VULNERABLE: Could not query optional features. Error: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "VULNERABLE: Failed to complete Active Directory Recycle Bin audit. Error: $($_.Exception.Message)" -ForegroundColor Red
+    $isVulnerable = $true
+}
+
+Write-Host "--------------------------------------------------------" -ForegroundColor Cyan
+if ($isVulnerable) {
+    Write-Host "Audit Result: VULNERABLE - Active Directory Recycle Bin configuration requires remediation." -ForegroundColor Red
+} else {
+    Write-Host "Audit Result: SECURE - Active Directory Recycle Bin is enabled and correctly configured." -ForegroundColor Green
 }</xhtml:code>
         </xhtml:pre>
         <xhtml:h4>2. Local Remediation (Enable-ADRecycleBin.ps1)</xhtml:h4>
@@ -35752,51 +35863,184 @@ try {
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Enable-ADRecycleBin.ps1
-# Description: Enables the Active Directory Recycle Bin optional feature forest-wide.
+# Description: Validates forest prerequisites, enables Active Directory Recycle Bin forest-wide, and configures lifetimes.
+# Target Engine: Windows PowerShell 5.1
 
-Import-Module ActiveDirectory
+Write-Host "--- Applying Hardening Requirement: Enable Active Directory Recycle Bin ---" -ForegroundColor Cyan
 
-Write-Host "Applying hardening requirement: Enable Active Directory Recycle Bin..." -ForegroundColor Cyan
+# 1. Verify Active Directory module
+if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
+    Write-Error "The ActiveDirectory PowerShell module is required to execute this script."
+    return
+}
+
+Import-Module ActiveDirectory -ErrorAction Stop
 
 try {
-    $Forest = Get-ADForest -ErrorAction Stop
-    $RecycleBinFeature = Get-ADOptionalFeature -Filter "Name -eq 'Recycle Bin Feature'" -ErrorAction Stop
-    $EnabledFeatures = Get-ADOptionalFeature -Filter "Name -eq 'Recycle Bin Feature'" -Properties EnabledScopes | Select-Object -ExpandProperty EnabledScopes
-    
-    if (-not $EnabledFeatures) {
-        Write-Host "[+] Enabling Recycle Bin Feature in forest '$($Forest.Name)'..." -ForegroundColor Yellow
-        Enable-ADOptionalFeature -Identity $RecycleBinFeature -Scope ForestOrConfigurationSet -Target $Forest.Name -Confirm:$false -ErrorAction Stop
+    # 2. Forest and FFL Validation
+    $forest = Get-ADForest -ErrorAction Stop
+    $forestMode = $forest.ForestMode
+
+    Write-Host "[*] Target Forest: $($forest.Name)" -ForegroundColor Gray
+    Write-Host "[*] Current Forest Functional Level: $($forestMode)" -ForegroundColor Gray
+
+    $validModes = @("Windows2008R2Forest", "Windows2012Forest", "Windows2012R2Forest", "Windows2016Forest", "Windows2025Forest")
+    if ($validModes -notcontains $forestMode) {
+        Write-Error "Cannot enable Recycle Bin. Forest functional level must be Windows Server 2008 R2 or higher (Current: $($forestMode)). Raise forest functional level first."
+        return
+    }
+
+    # 3. Check and Enable Recycle Bin Feature
+    $recycleBinFeature = Get-ADOptionalFeature -Filter "Name -eq 'Recycle Bin Feature'" -ErrorAction Stop
+    $enabledScopes = $recycleBinFeature.EnabledScopes
+
+    if (-not $enabledScopes -or $enabledScopes.Count -eq 0) {
+        Write-Host "[+] Enabling Active Directory Recycle Bin optional feature in forest '$($forest.Name)'..." -ForegroundColor Yellow
+        Enable-ADOptionalFeature -Identity $recycleBinFeature -Scope ForestOrConfigurationSet -Target $forest.Name -Confirm:$false -ErrorAction Stop
         Write-Host "[+] Active Directory Recycle Bin enabled successfully." -ForegroundColor Green
     } else {
-        Write-Host "[+] Active Directory Recycle Bin is already enabled." -ForegroundColor Green
+        Write-Host "[+] Active Directory Recycle Bin is already enabled in forest '$($forest.Name)'." -ForegroundColor Green
     }
+
+    # 4. Configure / Verify msDS-deletedObjectLifetime
+    $rootDse = Get-ADRootDSE -ErrorAction Stop
+    $configNC = $rootDse.configurationNamingContext
+    $dsPath = "CN=Directory Service,CN=Windows NT,CN=Services,CN=Configuration,$configNC"
+
+    $dsConfig = Get-ADObject -Identity $dsPath -Properties msDS-deletedObjectLifetime, tombstoneLifetime -ErrorAction Stop
+    $tombstone = $dsConfig.tombstoneLifetime
+    $currentDol = $dsConfig."msDS-deletedObjectLifetime"
+
+    # Ensure tombstoneLifetime is at least 180 days
+    if ($null -eq $tombstone -or $tombstone -lt 180) {
+        Write-Host "[+] Setting tombstoneLifetime to 180 days on Directory Service configuration..." -ForegroundColor Yellow
+        Set-ADObject -Identity $dsPath -Replace @{ tombstoneLifetime = 180 } -ErrorAction Stop
+        Write-Host "[+] tombstoneLifetime updated to 180 days." -ForegroundColor Green
+    } else {
+        Write-Host "[+] tombstoneLifetime is currently configured to $($tombstone) days." -ForegroundColor Green
+    }
+
+    # Set explicit msDS-deletedObjectLifetime if missing or excessively low
+    if ($null -eq $currentDol -or $currentDol -lt 180) {
+        Write-Host "[+] Explicitly configuring msDS-deletedObjectLifetime to 180 days..." -ForegroundColor Yellow
+        Set-ADObject -Identity $dsPath -Replace @{ "msDS-deletedObjectLifetime" = 180 } -ErrorAction Stop
+        Write-Host "[+] msDS-deletedObjectLifetime configured to 180 days." -ForegroundColor Green
+    } else {
+        Write-Host "[+] msDS-deletedObjectLifetime is currently set to $($currentDol) days." -ForegroundColor Green
+    }
+
+    Write-Host "[+] Remediation completed successfully. Allow directory replication to synchronize across all Domain Controllers." -ForegroundColor Green
+
 } catch {
-    Write-Error "Failed to enable AD Recycle Bin. Error: $($_.Exception.Message)"
+    Write-Error "Failed to configure Active Directory Recycle Bin. Error: $($_.Exception.Message)"
 }</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+        <xhtml:h3>Option C: Operational Recovery Runbook (PowerShell)</xhtml:h3>
+        <xhtml:p>Use these commands during incident response or accidental deletion triage to locate and restore deleted objects.</xhtml:p>
+        <xhtml:h4>1. Discovering Deleted Objects</xhtml:h4>
+        <xhtml:pre>
+          <xhtml:code># List all deleted objects in the domain
+Get-ADObject -SearchBase "CN=Deleted Objects,$((Get-ADRootDSE).defaultNamingContext)" -IncludeDeletedObjects -Filter 'isDeleted -eq $true' -Properties sAMAccountName, whenChanged, lastKnownParent, objectClass
+
+# Find a deleted user by username
+Get-ADObject -Filter "sAMAccountName -eq 'jsmith' -and isDeleted -eq $true" -IncludeDeletedObjects -Properties sAMAccountName, lastKnownParent
+
+# Find all objects deleted within the last 24 hours
+$cutoff = (Get-Date).AddDays(-1)
+Get-ADObject -Filter "whenChanged -ge `$cutoff -and isDeleted -eq `$true" -IncludeDeletedObjects -Properties sAMAccountName, whenChanged, lastKnownParent</xhtml:code>
+        </xhtml:pre>
+        <xhtml:h4>2. Restoring a Single Deleted Object</xhtml:h4>
+        <xhtml:pre>
+          <xhtml:code># Restore a user object back to its original location (lastKnownParent)
+Get-ADObject -Filter "sAMAccountName -eq 'jsmith' -and isDeleted -eq $true" -IncludeDeletedObjects | Restore-ADObject
+
+# Restore an object to an alternative Organizational Unit
+$targetOU = "OU=Quarantine,DC=corp,DC=domain,DC=com"
+Get-ADObject -Filter "sAMAccountName -eq 'jsmith' -and isDeleted -eq $true" -IncludeDeletedObjects | Restore-ADObject -TargetPath $targetOU</xhtml:code>
+        </xhtml:pre>
+        <xhtml:h4>3. Restoring Nested Organizational Units and Dependent Child Objects</xhtml:h4>
+        <xhtml:p>When an Organizational Unit containing child objects (sub-OUs, users, groups, computers) is deleted, all objects move directly into <xhtml:code>CN=Deleted Objects</xhtml:code>. Because child objects reference their parent container, <xhtml:strong>the parent Organizational Unit must be restored first</xhtml:strong>, followed by subordinate child objects in hierarchical order:</xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Step 1: Restore the parent Organizational Unit first
+Get-ADObject -Filter "objectClass -eq 'organizationalUnit' -and name -like 'Finance*' -and isDeleted -eq $true" -IncludeDeletedObjects | Restore-ADObject
+
+# Step 2: Restore child objects (users, groups, computers) once parent OU exists
+Get-ADObject -Filter "lastKnownParent -like '*Finance*' -and isDeleted -eq $true" -IncludeDeletedObjects | Restore-ADObject</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
       <fix system="urn:xccdf:fix:script:powershell"># Enable-ADRecycleBin.ps1
-# Description: Enables the Active Directory Recycle Bin optional feature forest-wide.
+# Description: Validates forest prerequisites, enables Active Directory Recycle Bin forest-wide, and configures lifetimes.
+# Target Engine: Windows PowerShell 5.1
 
-Import-Module ActiveDirectory
+Write-Host "--- Applying Hardening Requirement: Enable Active Directory Recycle Bin ---" -ForegroundColor Cyan
 
-Write-Host "Applying hardening requirement: Enable Active Directory Recycle Bin..." -ForegroundColor Cyan
+# 1. Verify Active Directory module
+if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
+    Write-Error "The ActiveDirectory PowerShell module is required to execute this script."
+    return
+}
+
+Import-Module ActiveDirectory -ErrorAction Stop
 
 try {
-    $Forest = Get-ADForest -ErrorAction Stop
-    $RecycleBinFeature = Get-ADOptionalFeature -Filter "Name -eq 'Recycle Bin Feature'" -ErrorAction Stop
-    $EnabledFeatures = Get-ADOptionalFeature -Filter "Name -eq 'Recycle Bin Feature'" -Properties EnabledScopes | Select-Object -ExpandProperty EnabledScopes
-    
-    if (-not $EnabledFeatures) {
-        Write-Host "[+] Enabling Recycle Bin Feature in forest '$($Forest.Name)'..." -ForegroundColor Yellow
-        Enable-ADOptionalFeature -Identity $RecycleBinFeature -Scope ForestOrConfigurationSet -Target $Forest.Name -Confirm:$false -ErrorAction Stop
+    # 2. Forest and FFL Validation
+    $forest = Get-ADForest -ErrorAction Stop
+    $forestMode = $forest.ForestMode
+
+    Write-Host "[*] Target Forest: $($forest.Name)" -ForegroundColor Gray
+    Write-Host "[*] Current Forest Functional Level: $($forestMode)" -ForegroundColor Gray
+
+    $validModes = @("Windows2008R2Forest", "Windows2012Forest", "Windows2012R2Forest", "Windows2016Forest", "Windows2025Forest")
+    if ($validModes -notcontains $forestMode) {
+        Write-Error "Cannot enable Recycle Bin. Forest functional level must be Windows Server 2008 R2 or higher (Current: $($forestMode)). Raise forest functional level first."
+        return
+    }
+
+    # 3. Check and Enable Recycle Bin Feature
+    $recycleBinFeature = Get-ADOptionalFeature -Filter "Name -eq 'Recycle Bin Feature'" -ErrorAction Stop
+    $enabledScopes = $recycleBinFeature.EnabledScopes
+
+    if (-not $enabledScopes -or $enabledScopes.Count -eq 0) {
+        Write-Host "[+] Enabling Active Directory Recycle Bin optional feature in forest '$($forest.Name)'..." -ForegroundColor Yellow
+        Enable-ADOptionalFeature -Identity $recycleBinFeature -Scope ForestOrConfigurationSet -Target $forest.Name -Confirm:$false -ErrorAction Stop
         Write-Host "[+] Active Directory Recycle Bin enabled successfully." -ForegroundColor Green
     } else {
-        Write-Host "[+] Active Directory Recycle Bin is already enabled." -ForegroundColor Green
+        Write-Host "[+] Active Directory Recycle Bin is already enabled in forest '$($forest.Name)'." -ForegroundColor Green
     }
+
+    # 4. Configure / Verify msDS-deletedObjectLifetime
+    $rootDse = Get-ADRootDSE -ErrorAction Stop
+    $configNC = $rootDse.configurationNamingContext
+    $dsPath = "CN=Directory Service,CN=Windows NT,CN=Services,CN=Configuration,$configNC"
+
+    $dsConfig = Get-ADObject -Identity $dsPath -Properties msDS-deletedObjectLifetime, tombstoneLifetime -ErrorAction Stop
+    $tombstone = $dsConfig.tombstoneLifetime
+    $currentDol = $dsConfig."msDS-deletedObjectLifetime"
+
+    # Ensure tombstoneLifetime is at least 180 days
+    if ($null -eq $tombstone -or $tombstone -lt 180) {
+        Write-Host "[+] Setting tombstoneLifetime to 180 days on Directory Service configuration..." -ForegroundColor Yellow
+        Set-ADObject -Identity $dsPath -Replace @{ tombstoneLifetime = 180 } -ErrorAction Stop
+        Write-Host "[+] tombstoneLifetime updated to 180 days." -ForegroundColor Green
+    } else {
+        Write-Host "[+] tombstoneLifetime is currently configured to $($tombstone) days." -ForegroundColor Green
+    }
+
+    # Set explicit msDS-deletedObjectLifetime if missing or excessively low
+    if ($null -eq $currentDol -or $currentDol -lt 180) {
+        Write-Host "[+] Explicitly configuring msDS-deletedObjectLifetime to 180 days..." -ForegroundColor Yellow
+        Set-ADObject -Identity $dsPath -Replace @{ "msDS-deletedObjectLifetime" = 180 } -ErrorAction Stop
+        Write-Host "[+] msDS-deletedObjectLifetime configured to 180 days." -ForegroundColor Green
+    } else {
+        Write-Host "[+] msDS-deletedObjectLifetime is currently set to $($currentDol) days." -ForegroundColor Green
+    }
+
+    Write-Host "[+] Remediation completed successfully. Allow directory replication to synchronize across all Domain Controllers." -ForegroundColor Green
+
 } catch {
-    Write-Error "Failed to enable AD Recycle Bin. Error: $($_.Exception.Message)"
+    Write-Error "Failed to configure Active Directory Recycle Bin. Error: $($_.Exception.Message)"
 }</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6002" />
