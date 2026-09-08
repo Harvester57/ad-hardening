@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-09-08T09:54:40Z</oval:timestamp>
+    <oval:timestamp>2026-09-08T12:46:10Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -7072,7 +7072,7 @@ Hardening these service channels blocks the following exploit vectors:
     </definition>
     <definition id="oval:org.adhardening:def:4011" version="1" class="compliance">
       <metadata>
-        <title>[REQ-NET-011] Configure WMI Static Port</title>
+        <title>[REQ-NET-011] Configure WMI Static Port and Service Hardening</title>
         <affected family="windows">
           <platform>Microsoft Windows Server 2016</platform>
           <platform>Microsoft Windows Server 2019</platform>
@@ -7080,16 +7080,26 @@ Hardening these service channels blocks the following exploit vectors:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>By default, Windows Management Instrumentation (WMI) runs in a shared svchost.exe process and dynamically allocates high-order TCP ports (49152-65535) for remote connections. This dynamic behavior prevents network administrators from implementing restrictive firewall policies, leaving the entire ephemeral port range exposed to the network.
+        <description>Windows Management Instrumentation (WMI) is a core Windows administration framework built upon the Distributed Component Object Model (DCOM) and Remote Procedure Call (RPC) protocols. By default, WMI runs inside a shared service host process (`svchost.exe -k netsvcs`) and dynamically allocates ephemeral high-order TCP ports (range `49152-65535`) for remote client connections.
 
-Restricting WMI to a static port and process solves these security challenges:
-1. **Attack Surface Reduction**: By configuring WMI to run on a static port (TCP 24158), administrators can block access to the generic high-order port range on perimeter firewalls while keeping WMI management accessible.
-2. **Execution Isolation**: Moving WMI to a standalone host process prevents compromised shared services in the same svchost instance from tampering with management functions.
-3. **Authentication Privacy**: Running `winmgmt.exe /standalonehost 6` sets the DCOM authentication level to `RPC_C_AUTHN_LEVEL_PKT_PRIVACY` (6). This enforces packet encryption for all WMI communications, mitigating man-in-the-middle (MITM) session hijacking and credential sniffing attacks.</description>
+Leaving WMI in its default configuration presents four critical security risks:
+
+1. **The Dynamic RPC Port Dilemma &amp; Attack Surface Exposure**:
+   Because remote WMI clients dynamically negotiate communication ports via the RPC Endpoint Mapper (RPCSS on TCP port 135), network administrators who allow remote WMI must either open the entire ephemeral dynamic port range (`49152-65535`) on network firewalls or disable host firewalls entirely. Opening thousands of dynamic ports circumvents perimeter filtering and exposes every local service listening on high-order sockets to unauthorized network traversal. Pinning WMI to a dedicated static port (TCP `24158`) allows network and host firewalls to block the broad dynamic range and enforce strict microsegmentation.
+
+2. **Lateral Movement and Living-off-the-Land Exploitation (MITRE ATT&amp;CK T1047)**:
+   Adversaries frequently leverage WMI to orchestrate stealthy lateral movement, execute remote code, query system configuration, and deploy backdoors without triggering interactive logon events (Event ID 4624 Type 3 network logons). Widely abused post-exploitation toolkits (such as Impacket's `wmiexec.py`, SharpWMI, and PowerShell CIM cmdlets) abuse DCOM interfaces to spawn malicious processes under `WmiPrvSE.exe` (e.g., `Win32_Process.Create`). Restricting WMI to static port 24158 and strictly scoping firewall access to authorized PAW subnets eliminates unmonitored cross-subnet living-off-the-land attacks.
+
+3. **Wire Eavesdropping and Session Tampering Mitigation (CVE-2021-26414)**:
+   Remote DCOM communications that operate below authentication level 6 (`RPC_C_AUTHN_LEVEL_PKT_PRIVACY`) do not encrypt payload data. Attackers positioned on the network path could intercept sensitive administrative data returned in WMI queries (such as system configurations, installed software inventories, environment variables, or process lists) or tamper with in-flight RPC commands. Enforcing `AuthenticationLevel = 6` mandates packet-level Kerberos or NTLM encryption across all WMI communications, fully satisfying Microsoft DCOM security hardening requirements (KB5004442).
+
+4. **Process Isolation and Memory Containment**:
+   By default, the `winmgmt` service shares a single `svchost.exe` process instance with multiple other system services (such as IP Helper, Background Intelligent Transfer Service, and Windows Update). Moving WMI into a standalone host process (`SERVICE_WIN32_OWN_PROCESS`, `Type = 16`) isolates its heap, thread pools, security tokens, and memory space. If an adjacent service running in a shared host process is compromised, process isolation prevents direct in-memory manipulation, token stealing, or tampering with directory management capabilities.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SOFTWARE\Classes\AppID\{8BC3F05E-D86B-11D0-A075-00C04FB68820} Value Endpoints" test_ref="oval:org.adhardening:tst:4011001" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\winmgmt Value Type" test_ref="oval:org.adhardening:tst:4011002" />
+        <criterion comment="Check Registry Key SOFTWARE\Classes\AppID\{8BC3F05E-D86B-11D0-A075-00C04FB68820} Value AuthenticationLevel" test_ref="oval:org.adhardening:tst:4011002" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\winmgmt Value Type" test_ref="oval:org.adhardening:tst:4011003" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:4012" version="1" class="compliance">
@@ -13357,9 +13367,13 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:4011001" />
       <windows:state state_ref="oval:org.adhardening:ste:4011001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:4011002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\winmgmt Value Type" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:4011002" version="1" comment="Check Registry Key SOFTWARE\Classes\AppID\{8BC3F05E-D86B-11D0-A075-00C04FB68820} Value AuthenticationLevel" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4011002" />
       <windows:state state_ref="oval:org.adhardening:ste:4011002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:4011003" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\winmgmt Value Type" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:4011003" />
+      <windows:state state_ref="oval:org.adhardening:ste:4011003" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:4012" version="1" comment="Placeholder check for REQ-NET-012 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:4012" />
@@ -18885,6 +18899,12 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     <windows:registry_object id="oval:org.adhardening:obj:4011002" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Classes\AppID\{8BC3F05E-D86B-11D0-A075-00C04FB68820}</windows:key>
+      <windows:name>AuthenticationLevel</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:4011003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Services\winmgmt</windows:key>
       <windows:name>Type</windows:name>
     </windows:registry_object>
@@ -23750,6 +23770,10 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:value datatype="string">ncacn_ip_tcp,0,24158</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:4011002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">6</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:4011003" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">16</windows:value>
     </windows:registry_state>

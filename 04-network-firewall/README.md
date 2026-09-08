@@ -34,8 +34,8 @@ This directory contains network security architectures, active directory port co
 10. **[REQ-NET-010 - Harden WinRM Service and Restrict Remote RPC Clients](harden-winrm-service.md)**
     Disables Basic and Digest authentication, forces encrypted WinRM communications, restricts WinRM credential caching, and blocks anonymous RPC connections.
 
-11. **[REQ-NET-011 - Configure WMI Static Port](configure-wmi-static-port.md)**
-    Binds the WMI service to static TCP port 24158 and isolates it to a standalone host process with packet privacy enabled to limit remote lateral movement exposure.
+11. **[REQ-NET-011 - Configure WMI Static Port and Service Hardening](configure-wmi-static-port.md)**
+    Binds the WMI service to static TCP port 24158, enforces DCOM packet privacy, isolates execution to a standalone host process, and restricts inbound firewall rules to authorized management subnets.
 
 12. **[REQ-NET-012 - Configure RPC Filters for Named Pipes](configure-rpc-named-pipe-filters.md)**
     Enforces Windows Firewall RPC Filters to block administrative queries and code execution over SMB named pipes (e.g. SCM, Task Scheduler) from unauthorized subnets.
