@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-09-08T12:55:39Z</oval:timestamp>
+    <oval:timestamp>2026-09-08T13:00:53Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -7157,13 +7157,7 @@ Enforcing intra-DC remote management blocking resolves this vector:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The `krbtgt` account is a built-in local service account that serves as the Key Distribution Center (KDC) service account in Active Directory. The password hash of the `krbtgt` account is used to sign and encrypt all Kerberos Ticket Granting Tickets (TGTs) issued within the domain. 
-
-If an attacker compromises the Active Directory database (e.g., via NTDS.dit extraction) or obtains Domain Admin privileges, they can dump the `krbtgt` password hash and use it to craft forged Kerberos TGTs (a Golden Ticket attack). Golden Tickets allow attackers to authenticate as any user (including Domain Admins) to any service in the forest, bypassing password changes and maintaining persistent, virtually invisible administrative access.
-
-To mitigate the risk of Golden Ticket persistence, the `krbtgt` password must be rotated periodically. Active Directory stores the current password (history index 0) and the immediately previous password (history index 1) for the `krbtgt` account. This design allows existing tickets to remain valid until they expire or are renewed, avoiding service disruptions. 
-
-Therefore, a complete rotation requires resetting the password twice. The resets must be separated by a sufficient time window to allow the first reset to replicate across all domain controllers and for existing Kerberos ticket lifetimes (default of 10 hours) to expire.</description>
+        <description>The `krbtgt` account is a built-in local service account that serves as the Key Distribution Center (KDC) service account in Active Directory. The long-term secret cryptographic keys derived from the `krbtgt` account password are used by the KDC to sign and encrypt all Kerberos Ticket Granting Tickets (TGTs) issued within the domain, as well as to compute the Privilege Attribute Certificate (PAC) signatures that vouch for user identity, security identifiers (SIDs), and group memberships.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-OPS-001 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:6001" />

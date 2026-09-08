@@ -35531,9 +35531,11 @@ Write-Host "SYSVOL Decoy XML Honeypot configuration completed successfully." -Fo
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers (Primary Domain Controller / PDC Emulator, replica Domain Controllers)</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Directory Scope</xhtml:strong>: Forest Root Domain, Child Domains, and Read-Only Domain Controllers (RODCs)</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -35541,146 +35543,509 @@ Write-Host "SYSVOL Decoy XML Honeypot configuration completed successfully." -Fo
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>The <xhtml:code>krbtgt</xhtml:code> account is a built-in local service account that serves as the Key Distribution Center (KDC) service account in Active Directory. The password hash of the <xhtml:code>krbtgt</xhtml:code> account is used to sign and encrypt all Kerberos Ticket Granting Tickets (TGTs) issued within the domain.</xhtml:p>
-        <xhtml:p>If an attacker compromises the Active Directory database (e.g., via NTDS.dit extraction) or obtains Domain Admin privileges, they can dump the <xhtml:code>krbtgt</xhtml:code> password hash and use it to craft forged Kerberos TGTs (a Golden Ticket attack). Golden Tickets allow attackers to authenticate as any user (including Domain Admins) to any service in the forest, bypassing password changes and maintaining persistent, virtually invisible administrative access.</xhtml:p>
-        <xhtml:p>To mitigate the risk of Golden Ticket persistence, the <xhtml:code>krbtgt</xhtml:code> password must be rotated periodically. Active Directory stores the current password (history index 0) and the immediately previous password (history index 1) for the <xhtml:code>krbtgt</xhtml:code> account. This design allows existing tickets to remain valid until they expire or are renewed, avoiding service disruptions.</xhtml:p>
-        <xhtml:p>Therefore, a complete rotation requires resetting the password twice. The resets must be separated by a sufficient time window to allow the first reset to replicate across all domain controllers and for existing Kerberos ticket lifetimes (default of 10 hours) to expire.</xhtml:p>
+        <xhtml:p>The <xhtml:code>krbtgt</xhtml:code> account is a built-in local service account that serves as the Key Distribution Center (KDC) service account in Active Directory. The long-term secret cryptographic keys derived from the <xhtml:code>krbtgt</xhtml:code> account password are used by the KDC to sign and encrypt all Kerberos Ticket Granting Tickets (TGTs) issued within the domain, as well as to compute the Privilege Attribute Certificate (PAC) signatures that vouch for user identity, security identifiers (SIDs), and group memberships.</xhtml:p>
       </rationale>
       <fixtext>
-        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
-        <xhtml:p>Note: This control cannot be implemented or managed via standard Group Policy Objects (GPO). The KRBTGT password rotation is an operational database task performed directly on the Active Directory objects.</xhtml:p>
-        <xhtml:p>To execute the manual graphical procedure using Active Directory Users and Computers (ADUC):</xhtml:p>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Baseline &amp; Staged Administrative Procedure</xhtml:h3>
+        <xhtml:p>Kerberos ticket lifetimes are governed via Group Policy Objects, while the password rotation itself is an operational database procedure executed against Active Directory objects.</xhtml:p>
+        <xhtml:h4>1. Verify and Enforce Domain Kerberos Policy via GPO</xhtml:h4>
         <xhtml:ol>
-          <xhtml:li>Log on to a Domain Controller or management workstation with Domain Admin credentials.</xhtml:li>
-          <xhtml:li>Open <xhtml:strong>Active Directory Users and Computers</xhtml:strong> (<xhtml:code>dsa.msc</xhtml:code>).</xhtml:li>
-          <xhtml:li>Click the <xhtml:strong>View</xhtml:strong> menu at the top and ensure <xhtml:strong>Advanced Features</xhtml:strong> is enabled.</xhtml:li>
-          <xhtml:li>Navigate to the <xhtml:strong>Users</xhtml:strong> container (or the custom Organizational Unit where the <xhtml:code>krbtgt</xhtml:code> account resides).</xhtml:li>
-          <xhtml:li>Locate the <xhtml:strong>krbtgt</xhtml:strong> account.</xhtml:li>
-          <xhtml:li>Right-click the <xhtml:strong>krbtgt</xhtml:strong> account and select <xhtml:strong>Reset Password</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Enter a strong, randomly generated, complex password (minimum 128 characters) and confirm it. Click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
-          <xhtml:li>Verify that Active Directory replication is healthy across all Domain Controllers.</xhtml:li>
-          <xhtml:li>Wait at least 10 to 24 hours (allowing the default 10-hour Kerberos ticket lifetime to elapse).</xhtml:li>
-          <xhtml:li>Repeat steps 4-7 to perform the second password reset, retiring the compromised key from the password history.</xhtml:li>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
+          <xhtml:li>Edit the <xhtml:strong>Default Domain Policy</xhtml:strong> (or a dedicated Tier 0 Domain Controller Policy linked at the domain root).</xhtml:li>
+          <xhtml:li>Navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Policies\Windows Settings\Security Settings\Account Policies\Kerberos Policy</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Verify and enforce standard Kerberos parameters:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Enforce user logon restrictions</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Maximum lifetime for service ticket</xhtml:em>*: <xhtml:code>600</xhtml:code> minutes (10 hours)</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Maximum lifetime for user ticket</xhtml:em>*: <xhtml:code>10</xhtml:code> hours</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Maximum lifetime for user ticket renewal</xhtml:em>*: <xhtml:code>7</xhtml:code> days</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Maximum tolerance for computer clock synchronization</xhtml:em>*: <xhtml:code>5</xhtml:code> minutes</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>2. Staged Administrative Procedure for KRBTGT Rotation</xhtml:h4>
+        <xhtml:p>To execute the staged rotation using Active Directory administrative tools:</xhtml:p>
+        <xhtml:h5>Phase 1: Pre-Rotation Assessment</xhtml:h5>
+        <xhtml:ol>
+          <xhtml:li>Identify the Primary Domain Controller (PDC) Emulator for the domain:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code />`cmd</xhtml:li>
+          <xhtml:li>netdom query fsmo</xhtml:li>
+          <xhtml:li>
+            <xhtml:code />
+            <xhtml:code />
+          </xhtml:li>
+          <xhtml:li>Verify that Active Directory replication is completely healthy across all Domain Controllers:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code />`cmd</xhtml:li>
+          <xhtml:li>repadmin /replsummary</xhtml:li>
+          <xhtml:li>repadmin /showrepl * /csv</xhtml:li>
+          <xhtml:li>
+            <xhtml:code />
+            <xhtml:code />
+          </xhtml:li>
+          <xhtml:li>Audit the existing <xhtml:code>krbtgt</xhtml:code> password age and <xhtml:code>kvno</xhtml:code> (using the audit script below).</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h5>Phase 2: First Password Reset (Step 1)</xhtml:h5>
+        <xhtml:ol>
+          <xhtml:li>Log on to the <xhtml:strong>PDC Emulator</xhtml:strong> with Domain Admin or Enterprise Admin credentials.</xhtml:li>
+          <xhtml:li>Open <xhtml:strong>Active Directory Users and Computers</xhtml:strong> (<xhtml:code>dsa.msc</xhtml:code>), ensure <xhtml:strong>View -&gt; Advanced Features</xhtml:strong> is enabled.</xhtml:li>
+          <xhtml:li>Navigate to the <xhtml:strong>Users</xhtml:strong> container, right-click <xhtml:strong>krbtgt</xhtml:strong>, and select <xhtml:strong>Reset Password</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Enter a strong, cryptographically complex random password (minimum 128 characters) and confirm it. Click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Trigger replication across all Domain Controllers:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code />`cmd</xhtml:li>
+          <xhtml:li>repadmin /syncall /AdeP</xhtml:li>
+          <xhtml:li>
+            <xhtml:code />
+            <xhtml:code />
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h5>Phase 3: Cooldown and Ticket Expiration Window</xhtml:h5>
+        <xhtml:ol>
+          <xhtml:li>Wait a minimum of <xhtml:strong>10 to 24 hours</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Monitor Domain Controller Security Event Logs for Kerberos ticket renewal events (Event ID 4768) and verify replication convergence.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h5>Phase 4: Second Password Reset (Step 2)</xhtml:h5>
+        <xhtml:ol>
+          <xhtml:li>On the PDC Emulator, repeat the password reset procedure on the <xhtml:strong>krbtgt</xhtml:strong> account with a new, distinct 128-character password.</xhtml:li>
+          <xhtml:li>Trigger replication across all Domain Controllers:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code />`cmd</xhtml:li>
+          <xhtml:li>repadmin /syncall /AdeP</xhtml:li>
+          <xhtml:li>
+            <xhtml:code />
+            <xhtml:code />
+          </xhtml:li>
+        </xhtml:ol>
+        <xhtml:h5>Phase 5: Post-Rotation Verification</xhtml:h5>
+        <xhtml:ol>
+          <xhtml:li>Run the audit script below to verify that all Domain Controllers report the updated <xhtml:code>PasswordLastSet</xhtml:code> and matching <xhtml:code>kvno</xhtml:code>.</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
-        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Use the following scripts to audit the age of the <xhtml:code>krbtgt</xhtml:code> password and programmatically perform a reset.</xhtml:p>
+        <xhtml:h3>Option B: PowerShell Operational Automation (Remediation / Audit)</xhtml:h3>
+        <xhtml:p>Use the following enterprise-grade PowerShell scripts to programmatically manage and audit the KRBTGT password rotation lifecycle.</xhtml:p>
         <xhtml:p>
           <xhtml:a href="implementation_scripts/Reset-KrbtgtPassword.ps1">Download Script: Reset-KrbtgtPassword.ps1</xhtml:a>
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Reset-KrbtgtPassword.ps1
-# Description: Resets the password of the krbtgt account with a strong, random password.
+# Description: Resets the KRBTGT account password on the PDC Emulator with a cryptographically secure 128-character password, enforces cooldown safety, and triggers AD replication.
+# Target Engine: Windows PowerShell 5.1
 
-Import-Module ActiveDirectory
+[CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = "High")]
+param (
+    [Parameter(Mandatory = $false)]
+    [switch]$Force,
 
-Write-Host "Applying hardening requirement: KRBTGT Password Rotation..." -ForegroundColor Cyan
+    [Parameter(Mandatory = $false)]
+    [int]$MinCooldownHours = 10,
 
-# 1. Retrieve the krbtgt account
-$Krbtgt = Get-ADUser -Filter "Name -eq 'krbtgt'" -Properties PasswordLastSet, Enabled
-if (-not $Krbtgt) {
-    Write-Error "KRBTGT account not found in the Active Directory domain."
+    [Parameter(Mandatory = $false)]
+    [string]$Server
+)
+
+Write-Host "--- Applying Hardening Requirement: KRBTGT Password Rotation ---" -ForegroundColor Cyan
+
+# 1. Verify Active Directory module
+if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
+    Write-Error "The ActiveDirectory PowerShell module is required to execute this script."
     return
 }
 
-Write-Host "Current KRBTGT Password Last Set: $($Krbtgt.PasswordLastSet)" -ForegroundColor White
+Import-Module ActiveDirectory -ErrorAction Stop
 
-# 2. Generate a strong random password (128 characters)
-$Length = 128
-$Chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&amp;*()_+-="
-$RandomPassword = -join (1..$Length | ForEach-Object { $Chars[(Get-Random -Maximum $Chars.Length)] })
-
-$SecurePassword = New-Object System.Security.SecureString
-foreach ($Char in $RandomPassword.ToCharArray()) {
-    $SecurePassword.AppendChar($Char)
+# 2. Discover target Domain Controller (PDC Emulator)
+try {
+    $domain = Get-ADDomain -ErrorAction Stop
+    $targetServer = $Server
+    if (-not $targetServer) {
+        $targetServer = $domain.PDCEmulator
+    }
+    Write-Host "[*] Target Domain: $($domain.DNSRoot)" -ForegroundColor Gray
+    Write-Host "[*] Authoritative PDC Emulator: $targetServer" -ForegroundColor Gray
+} catch {
+    Write-Error "Failed to locate domain or PDC Emulator: $($_.Exception.Message)"
+    return
 }
 
-# 3. Apply the password change
+# 3. Retrieve authoritative KRBTGT object
 try {
-    Set-ADAccountPassword -Identity $Krbtgt -NewPassword $SecurePassword -Reset -ErrorAction Stop
-    Write-Host "[OK] KRBTGT password has been successfully reset." -ForegroundColor Green
-    Write-Host "[IMPORTANT] This is a single password reset." -ForegroundColor Yellow
-    Write-Host "[IMPORTANT] To fully invalidate old Kerberos tickets (e.g., to recover from Golden Ticket compromise)," -ForegroundColor Yellow
-    Write-Host "            you MUST perform a second reset AFTER all domain controllers have replicated the first reset" -ForegroundColor Yellow
-    Write-Host "            and the maximum Kerberos ticket lifetime (default 10 hours) has elapsed." -ForegroundColor Yellow
+    $krbtgt = Get-ADUser -Identity "krbtgt" -Server $targetServer -Properties PasswordLastSet, Enabled, "msDS-KeyVersionNumber", userAccountControl -ErrorAction Stop
+    if (-not $krbtgt) {
+        Write-Error "KRBTGT account not found on $targetServer."
+        return
+    }
 } catch {
-    Write-Error "Failed to reset KRBTGT password: $($_.Exception.Message)"
+    Write-Error "Failed to retrieve KRBTGT account from $($targetServer): $($_.Exception.Message)"
+    return
+}
+
+$lastSet = $krbtgt.PasswordLastSet
+$currentKvno = $krbtgt."msDS-KeyVersionNumber"
+
+Write-Host "[*] Current KRBTGT Password Last Set: $lastSet" -ForegroundColor Gray
+Write-Host "[*] Current Key Version Number (kvno): $currentKvno" -ForegroundColor Gray
+
+# 4. Enforce Cooldown Safety Check
+if ($null -ne $lastSet) {
+    $elapsedHours = (New-TimeSpan -Start $lastSet -End (Get-Date)).TotalHours
+    if ($elapsedHours -lt $MinCooldownHours -and -not $Force) {
+        $roundedHours = [math]::Round($elapsedHours, 1)
+        Write-Warning "SAFETY INTERLOCK ENGAGED: The KRBTGT password was last set only $roundedHours hours ago."
+        Write-Warning "Resetting KRBTGT again before the Kerberos ticket lifetime ($MinCooldownHours hours) has elapsed"
+        Write-Warning "will purge the previous key from history and invalidate ALL active domain TGTs,"
+        Write-Warning "causing enterprise-wide authentication failure for all users and services."
+        Write-Warning "To override this interlock (e.g., during active incident containment), specify -Force."
+        return
+    }
+}
+
+# 5. Generate Cryptographically Secure 128-Character Password
+$length = 128
+$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&amp;*()_+-=[]{}|;:,.&lt;&gt;?"
+$rng = New-Object System.Security.Cryptography.RNGCryptoServiceProvider
+$bytes = New-Object byte[] $length
+$rng.GetBytes($bytes)
+
+$securePassword = New-Object System.Security.SecureString
+for ($i = 0; $i -lt $length; $i++) {
+    $char = $chars[$bytes[$i] % $chars.Length]
+    $securePassword.AppendChar($char)
+}
+$securePassword.MakeReadOnly()
+$rng.Dispose()
+
+# 6. Execute Password Reset via ShouldProcess
+$confirmTarget = "KRBTGT account on $targetServer (Domain: $($domain.DNSRoot))"
+if ($PSCmdlet.ShouldProcess($confirmTarget, "Reset KRBTGT account password and increment kvno")) {
+    try {
+        Set-ADAccountPassword -Identity $krbtgt -Server $targetServer -NewPassword $securePassword -Reset -ErrorAction Stop
+        Write-Host "[+] KRBTGT password successfully reset on PDC Emulator ($targetServer)." -ForegroundColor Green
+
+        # Re-query to verify kvno increment
+        Start-Sleep -Seconds 2
+        $updatedKrbtgt = Get-ADUser -Identity "krbtgt" -Server $targetServer -Properties PasswordLastSet, "msDS-KeyVersionNumber" -ErrorAction Stop
+        Write-Host "[+] New Password Last Set: $($updatedKrbtgt.PasswordLastSet)" -ForegroundColor Green
+        Write-Host "[+] New Key Version Number (kvno): $($updatedKrbtgt.'msDS-KeyVersionNumber')" -ForegroundColor Green
+
+        # 7. Dispatch Active Directory Replication
+        Write-Host "[*] Triggering Active Directory replication synchronization..." -ForegroundColor Cyan
+        $repadmin = Get-Command -Name "repadmin.exe" -ErrorAction SilentlyContinue
+        if ($repadmin) {
+            &amp; repadmin.exe /syncall /AdeP | Out-Null
+            Write-Host "[+] Active Directory replication triggered across all domain partitions." -ForegroundColor Green
+        } else {
+            try {
+                Sync-ADObject -Identity $krbtgt.DistinguishedName -Server $targetServer -ErrorAction SilentlyContinue
+                Write-Host "[+] Sync-ADObject invoked for KRBTGT account." -ForegroundColor Green
+            } catch {
+                Write-Warning "Could not trigger replication automatically. Ensure replication runs across all domain controllers."
+            }
+        }
+
+        Write-Host ""
+        Write-Host "=========================================================================" -ForegroundColor Yellow
+        Write-Host "[IMPORTANT] Two-Step KRBTGT Password Rotation Protocol:" -ForegroundColor Yellow
+        Write-Host " 1. This reset constitutes Step 1 of the rotation cycle." -ForegroundColor Yellow
+        Write-Host " 2. Active Directory retains the previous key in history (index 1) so" -ForegroundColor Yellow
+        Write-Host "    existing valid Kerberos tickets continue to function until expiration." -ForegroundColor Yellow
+        Write-Host " 3. You MUST WAIT at least $MinCooldownHours to 24 hours for all active tickets" -ForegroundColor Yellow
+        Write-Host "    to renew and for replication to converge across all domain controllers." -ForegroundColor Yellow
+        Write-Host " 4. After the cooldown period, run this script again to perform Step 2," -ForegroundColor Yellow
+        Write-Host "    which purges the pre-rotation key and completely invalidates any" -ForegroundColor Yellow
+        Write-Host "    historical Golden, Diamond, or forged Kerberos tickets." -ForegroundColor Yellow
+        Write-Host "=========================================================================" -ForegroundColor Yellow
+    } catch {
+        Write-Error "Failed to reset KRBTGT password: $($_.Exception.Message)"
+    }
 }</xhtml:code>
         </xhtml:pre>
         <xhtml:p>
-          <xhtml:em>To audit the password last set age of the KRBTGT account:</xhtml:em>
+          <xhtml:em>To audit the password rotation status and replication convergence of the KRBTGT account:</xhtml:em>
+        </xhtml:p>
+        <xhtml:p>
           <xhtml:a href="audit_scripts/Get-KrbtgtRotationStatus.ps1">Download Script: Get-KrbtgtRotationStatus.ps1</xhtml:a>
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Get-KrbtgtRotationStatus.ps1
-# Description: Audits the password age of the krbtgt account.
+# Description: Audits KRBTGT password age, kvno, replication convergence across all Domain Controllers, and RODC accounts.
+# Target Engine: Windows PowerShell 5.1
 
-Import-Module ActiveDirectory
+Import-Module ActiveDirectory -ErrorAction Stop
 
 Write-Host "--- Auditing KRBTGT Password Rotation Status ---" -ForegroundColor Cyan
 
-$Krbtgt = Get-ADUser -Filter "Name -eq 'krbtgt'" -Properties PasswordLastSet, PasswordExpired, Enabled
+# 1. Discover Domain and Authoritative PDC Emulator
+try {
+    $domain = Get-ADDomain -ErrorAction Stop
+    $pdc = $domain.PDCEmulator
+    Write-Host "[*] Domain: $($domain.DNSRoot)" -ForegroundColor Gray
+    Write-Host "[*] Authoritative PDC Emulator: $pdc" -ForegroundColor Gray
+} catch {
+    Write-Error "Failed to query domain or PDC Emulator: $($_.Exception.Message)"
+    return
+}
 
-if ($Krbtgt) {
-    $PasswordLastSet = $Krbtgt.PasswordLastSet
-    if ($null -ne $PasswordLastSet) {
-        $AgeDays = (New-TimeSpan -Start $PasswordLastSet -End (Get-Date)).Days
-        $MaxAgeDays = 180 # STIG requirement threshold
-        
-        Write-Host "    - Account Name: $($Krbtgt.Name)" -ForegroundColor White
-        Write-Host "    - Enabled: $($Krbtgt.Enabled)" -ForegroundColor White
-        Write-Host "    - Password Last Set: $PasswordLastSet ($AgeDays days ago)" -ForegroundColor White
-        
-        if ($AgeDays -gt $MaxAgeDays) {
-            Write-Host "    - Status: WARNING - KRBTGT password has not been rotated in $AgeDays days (Threshold: $MaxAgeDays days)." -ForegroundColor Red
-        } else {
-            Write-Host "    - Status: OK - KRBTGT password was rotated recently ($AgeDays days ago)." -ForegroundColor Green
-        }
+# 2. Retrieve Kerberos Policy MaxTicketAge
+$maxTicketAgeHours = 10
+try {
+    $kerbPolicy = Get-ADDefaultDomainPasswordPolicy -ErrorAction SilentlyContinue
+    if ($kerbPolicy -and $kerbPolicy.MaxTicketAge) {
+        $maxTicketAgeHours = [math]::Round($kerbPolicy.MaxTicketAge.TotalHours, 1)
+    }
+} catch {
+    $maxTicketAgeHours = 10
+}
+Write-Host "[*] Configured Kerberos MaxTicketAge: $maxTicketAgeHours hours" -ForegroundColor Gray
+
+# 3. Query Primary KRBTGT Object on PDC
+$krbtgt = Get-ADUser -Identity "krbtgt" -Server $pdc -Properties PasswordLastSet, PasswordExpired, Enabled, "msDS-KeyVersionNumber", "msDS-SupportedEncryptionTypes" -ErrorAction SilentlyContinue
+
+if (-not $krbtgt) {
+    Write-Error "KRBTGT account not found in Active Directory."
+    return
+}
+
+$passwordLastSet = $krbtgt.PasswordLastSet
+$kvno = $krbtgt."msDS-KeyVersionNumber"
+$encTypes = $krbtgt."msDS-SupportedEncryptionTypes"
+
+Write-Host "    - Account Name: $($krbtgt.Name)" -ForegroundColor White
+Write-Host "    - Enabled: $($krbtgt.Enabled)" -ForegroundColor White
+Write-Host "    - Key Version Number (kvno): $kvno" -ForegroundColor White
+Write-Host "    - Supported Encryption Types Bitmask: $encTypes" -ForegroundColor White
+
+if ($null -ne $passwordLastSet) {
+    $ageDays = (New-TimeSpan -Start $passwordLastSet -End (Get-Date)).Days
+    $ageHours = (New-TimeSpan -Start $passwordLastSet -End (Get-Date)).TotalHours
+    $stigThresholdDays = 180
+    $anssiThresholdDays = 90
+
+    Write-Host "    - Password Last Set: $passwordLastSet ($ageDays days ago / $([math]::Round($ageHours, 1)) hours ago)" -ForegroundColor White
+
+    # Check if currently inside the two-step cooldown window
+    if ($ageHours -lt $maxTicketAgeHours) {
+        Write-Host "    - Cooldown Status: IN-PROGRESS (Step 1 executed $([math]::Round($ageHours, 1)) hours ago; wait until $maxTicketAgeHours hours have elapsed before executing Step 2)." -ForegroundColor Yellow
+    }
+
+    # Evaluate compliance thresholds
+    if ($ageDays -gt $stigThresholdDays) {
+        Write-Host "    - Compliance Status: FAILED - KRBTGT password has not been rotated in $ageDays days (DoD STIG threshold: $stigThresholdDays days)." -ForegroundColor Red
+    } elseif ($ageDays -gt $anssiThresholdDays) {
+        Write-Host "    - Compliance Status: WARNING - KRBTGT password age is $ageDays days (Exceeds ANSSI recommendation of $anssiThresholdDays days; compliant with STIG threshold of $stigThresholdDays days)." -ForegroundColor Yellow
     } else {
-        Write-Host "    - Status: WARNING - PasswordLastSet is not set for the krbtgt account." -ForegroundColor Red
+        Write-Host "    - Compliance Status: PASSED - KRBTGT password age is $ageDays days (Compliant with STIG and ANSSI baselines)." -ForegroundColor Green
     }
 } else {
-    Write-Error "KRBTGT account not found in the Active Directory domain."
+    Write-Host "    - Compliance Status: FAILED - PasswordLastSet attribute is null." -ForegroundColor Red
+}
+
+# 4. Audit Replication Consistency Across All Reachable DCs
+Write-Host "`n[*] Auditing KRBTGT Replication Convergence Across Domain Controllers:" -ForegroundColor Cyan
+$dcs = Get-ADDomainController -Filter * -ErrorAction SilentlyContinue
+$dcResults = @()
+$replicationDiscrepancy = $false
+
+foreach ($dc in $dcs) {
+    try {
+        $dcKrbtgt = Get-ADUser -Identity "krbtgt" -Server $dc.HostName -Properties PasswordLastSet, "msDS-KeyVersionNumber" -ErrorAction Stop
+        $match = ($dcKrbtgt.PasswordLastSet -eq $passwordLastSet) -and ($dcKrbtgt."msDS-KeyVersionNumber" -eq $kvno)
+        if (-not $match) {
+            $replicationDiscrepancy = $true
+        }
+        $dcResults += [PSCustomObject]@{
+            DomainController = $dc.HostName
+            Reachable        = $true
+            PasswordLastSet  = $dcKrbtgt.PasswordLastSet
+            Kvno             = $dcKrbtgt."msDS-KeyVersionNumber"
+            InSync           = $match
+        }
+    } catch {
+        $dcResults += [PSCustomObject]@{
+            DomainController = $dc.HostName
+            Reachable        = $false
+            PasswordLastSet  = $null
+            Kvno             = $null
+            InSync           = $false
+        }
+    }
+}
+
+foreach ($res in $dcResults) {
+    if ($res.Reachable -and $res.InSync) {
+        Write-Host "    [OK] $($res.DomainController): kvno=$($res.Kvno), LastSet=$($res.PasswordLastSet)" -ForegroundColor Green
+    } elseif ($res.Reachable -and -not $res.InSync) {
+        Write-Host "    [MISMATCH] $($res.DomainController): kvno=$($res.Kvno), LastSet=$($res.PasswordLastSet) (Out of sync with PDC)" -ForegroundColor Red
+    } else {
+        Write-Host "    [UNREACHABLE] $($res.DomainController): Unable to query" -ForegroundColor Yellow
+    }
+}
+
+if ($replicationDiscrepancy) {
+    Write-Host "    [!] Warning: Replication discrepancy detected across Domain Controllers." -ForegroundColor Red
+}
+
+# 5. Audit Read-Only Domain Controller (RODC) KRBTGT Accounts
+Write-Host "`n[*] Auditing Read-Only Domain Controller (RODC) KRBTGT Accounts:" -ForegroundColor Cyan
+$rodcAccounts = Get-ADUser -Filter "Name -like 'krbtgt_*'" -Server $pdc -Properties PasswordLastSet, "msDS-KeyVersionNumber", Enabled -ErrorAction SilentlyContinue
+
+if ($rodcAccounts -and $rodcAccounts.Count -gt 0) {
+    Write-Host "    Found $($rodcAccounts.Count) RODC KRBTGT account(s):" -ForegroundColor Gray
+    foreach ($rodc in $rodcAccounts) {
+        $rodcAgeDays = "N/A"
+        if ($rodc.PasswordLastSet) {
+            $rodcAgeDays = (New-TimeSpan -Start $rodc.PasswordLastSet -End (Get-Date)).Days
+        }
+        Write-Host "    - $($rodc.SamAccountName): kvno=$($rodc.'msDS-KeyVersionNumber'), LastSet=$($rodc.PasswordLastSet) ($rodcAgeDays days ago), Enabled=$($rodc.Enabled)" -ForegroundColor White
+    }
+} else {
+    Write-Host "    No Read-Only Domain Controller (RODC) accounts detected in this domain." -ForegroundColor Gray
 }</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
       <fix system="urn:xccdf:fix:script:powershell"># Reset-KrbtgtPassword.ps1
-# Description: Resets the password of the krbtgt account with a strong, random password.
+# Description: Resets the KRBTGT account password on the PDC Emulator with a cryptographically secure 128-character password, enforces cooldown safety, and triggers AD replication.
+# Target Engine: Windows PowerShell 5.1
 
-Import-Module ActiveDirectory
+[CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = "High")]
+param (
+    [Parameter(Mandatory = $false)]
+    [switch]$Force,
 
-Write-Host "Applying hardening requirement: KRBTGT Password Rotation..." -ForegroundColor Cyan
+    [Parameter(Mandatory = $false)]
+    [int]$MinCooldownHours = 10,
 
-# 1. Retrieve the krbtgt account
-$Krbtgt = Get-ADUser -Filter "Name -eq 'krbtgt'" -Properties PasswordLastSet, Enabled
-if (-not $Krbtgt) {
-    Write-Error "KRBTGT account not found in the Active Directory domain."
+    [Parameter(Mandatory = $false)]
+    [string]$Server
+)
+
+Write-Host "--- Applying Hardening Requirement: KRBTGT Password Rotation ---" -ForegroundColor Cyan
+
+# 1. Verify Active Directory module
+if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
+    Write-Error "The ActiveDirectory PowerShell module is required to execute this script."
     return
 }
 
-Write-Host "Current KRBTGT Password Last Set: $($Krbtgt.PasswordLastSet)" -ForegroundColor White
+Import-Module ActiveDirectory -ErrorAction Stop
 
-# 2. Generate a strong random password (128 characters)
-$Length = 128
-$Chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&amp;*()_+-="
-$RandomPassword = -join (1..$Length | ForEach-Object { $Chars[(Get-Random -Maximum $Chars.Length)] })
-
-$SecurePassword = New-Object System.Security.SecureString
-foreach ($Char in $RandomPassword.ToCharArray()) {
-    $SecurePassword.AppendChar($Char)
+# 2. Discover target Domain Controller (PDC Emulator)
+try {
+    $domain = Get-ADDomain -ErrorAction Stop
+    $targetServer = $Server
+    if (-not $targetServer) {
+        $targetServer = $domain.PDCEmulator
+    }
+    Write-Host "[*] Target Domain: $($domain.DNSRoot)" -ForegroundColor Gray
+    Write-Host "[*] Authoritative PDC Emulator: $targetServer" -ForegroundColor Gray
+} catch {
+    Write-Error "Failed to locate domain or PDC Emulator: $($_.Exception.Message)"
+    return
 }
 
-# 3. Apply the password change
+# 3. Retrieve authoritative KRBTGT object
 try {
-    Set-ADAccountPassword -Identity $Krbtgt -NewPassword $SecurePassword -Reset -ErrorAction Stop
-    Write-Host "[OK] KRBTGT password has been successfully reset." -ForegroundColor Green
-    Write-Host "[IMPORTANT] This is a single password reset." -ForegroundColor Yellow
-    Write-Host "[IMPORTANT] To fully invalidate old Kerberos tickets (e.g., to recover from Golden Ticket compromise)," -ForegroundColor Yellow
-    Write-Host "            you MUST perform a second reset AFTER all domain controllers have replicated the first reset" -ForegroundColor Yellow
-    Write-Host "            and the maximum Kerberos ticket lifetime (default 10 hours) has elapsed." -ForegroundColor Yellow
+    $krbtgt = Get-ADUser -Identity "krbtgt" -Server $targetServer -Properties PasswordLastSet, Enabled, "msDS-KeyVersionNumber", userAccountControl -ErrorAction Stop
+    if (-not $krbtgt) {
+        Write-Error "KRBTGT account not found on $targetServer."
+        return
+    }
 } catch {
-    Write-Error "Failed to reset KRBTGT password: $($_.Exception.Message)"
+    Write-Error "Failed to retrieve KRBTGT account from $($targetServer): $($_.Exception.Message)"
+    return
+}
+
+$lastSet = $krbtgt.PasswordLastSet
+$currentKvno = $krbtgt."msDS-KeyVersionNumber"
+
+Write-Host "[*] Current KRBTGT Password Last Set: $lastSet" -ForegroundColor Gray
+Write-Host "[*] Current Key Version Number (kvno): $currentKvno" -ForegroundColor Gray
+
+# 4. Enforce Cooldown Safety Check
+if ($null -ne $lastSet) {
+    $elapsedHours = (New-TimeSpan -Start $lastSet -End (Get-Date)).TotalHours
+    if ($elapsedHours -lt $MinCooldownHours -and -not $Force) {
+        $roundedHours = [math]::Round($elapsedHours, 1)
+        Write-Warning "SAFETY INTERLOCK ENGAGED: The KRBTGT password was last set only $roundedHours hours ago."
+        Write-Warning "Resetting KRBTGT again before the Kerberos ticket lifetime ($MinCooldownHours hours) has elapsed"
+        Write-Warning "will purge the previous key from history and invalidate ALL active domain TGTs,"
+        Write-Warning "causing enterprise-wide authentication failure for all users and services."
+        Write-Warning "To override this interlock (e.g., during active incident containment), specify -Force."
+        return
+    }
+}
+
+# 5. Generate Cryptographically Secure 128-Character Password
+$length = 128
+$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&amp;*()_+-=[]{}|;:,.&lt;&gt;?"
+$rng = New-Object System.Security.Cryptography.RNGCryptoServiceProvider
+$bytes = New-Object byte[] $length
+$rng.GetBytes($bytes)
+
+$securePassword = New-Object System.Security.SecureString
+for ($i = 0; $i -lt $length; $i++) {
+    $char = $chars[$bytes[$i] % $chars.Length]
+    $securePassword.AppendChar($char)
+}
+$securePassword.MakeReadOnly()
+$rng.Dispose()
+
+# 6. Execute Password Reset via ShouldProcess
+$confirmTarget = "KRBTGT account on $targetServer (Domain: $($domain.DNSRoot))"
+if ($PSCmdlet.ShouldProcess($confirmTarget, "Reset KRBTGT account password and increment kvno")) {
+    try {
+        Set-ADAccountPassword -Identity $krbtgt -Server $targetServer -NewPassword $securePassword -Reset -ErrorAction Stop
+        Write-Host "[+] KRBTGT password successfully reset on PDC Emulator ($targetServer)." -ForegroundColor Green
+
+        # Re-query to verify kvno increment
+        Start-Sleep -Seconds 2
+        $updatedKrbtgt = Get-ADUser -Identity "krbtgt" -Server $targetServer -Properties PasswordLastSet, "msDS-KeyVersionNumber" -ErrorAction Stop
+        Write-Host "[+] New Password Last Set: $($updatedKrbtgt.PasswordLastSet)" -ForegroundColor Green
+        Write-Host "[+] New Key Version Number (kvno): $($updatedKrbtgt.'msDS-KeyVersionNumber')" -ForegroundColor Green
+
+        # 7. Dispatch Active Directory Replication
+        Write-Host "[*] Triggering Active Directory replication synchronization..." -ForegroundColor Cyan
+        $repadmin = Get-Command -Name "repadmin.exe" -ErrorAction SilentlyContinue
+        if ($repadmin) {
+            &amp; repadmin.exe /syncall /AdeP | Out-Null
+            Write-Host "[+] Active Directory replication triggered across all domain partitions." -ForegroundColor Green
+        } else {
+            try {
+                Sync-ADObject -Identity $krbtgt.DistinguishedName -Server $targetServer -ErrorAction SilentlyContinue
+                Write-Host "[+] Sync-ADObject invoked for KRBTGT account." -ForegroundColor Green
+            } catch {
+                Write-Warning "Could not trigger replication automatically. Ensure replication runs across all domain controllers."
+            }
+        }
+
+        Write-Host ""
+        Write-Host "=========================================================================" -ForegroundColor Yellow
+        Write-Host "[IMPORTANT] Two-Step KRBTGT Password Rotation Protocol:" -ForegroundColor Yellow
+        Write-Host " 1. This reset constitutes Step 1 of the rotation cycle." -ForegroundColor Yellow
+        Write-Host " 2. Active Directory retains the previous key in history (index 1) so" -ForegroundColor Yellow
+        Write-Host "    existing valid Kerberos tickets continue to function until expiration." -ForegroundColor Yellow
+        Write-Host " 3. You MUST WAIT at least $MinCooldownHours to 24 hours for all active tickets" -ForegroundColor Yellow
+        Write-Host "    to renew and for replication to converge across all domain controllers." -ForegroundColor Yellow
+        Write-Host " 4. After the cooldown period, run this script again to perform Step 2," -ForegroundColor Yellow
+        Write-Host "    which purges the pre-rotation key and completely invalidates any" -ForegroundColor Yellow
+        Write-Host "    historical Golden, Diamond, or forged Kerberos tickets." -ForegroundColor Yellow
+        Write-Host "=========================================================================" -ForegroundColor Yellow
+    } catch {
+        Write-Error "Failed to reset KRBTGT password: $($_.Exception.Message)"
+    }
 }</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6001" />
