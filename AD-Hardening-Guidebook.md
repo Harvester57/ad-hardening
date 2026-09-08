@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: d88937f | Generated: September 07, 2026</span>
+      <span>Commit: afc6d70 | Generated: September 08, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -39,7 +39,7 @@ pdf_options:
     <li>Tier 2 Client Workstations: Windows 10 and above</li>
   </ul>
   <hr>
-  <p><em>Generated dynamically on: September 07, 2026</em></p>
+  <p><em>Generated dynamically on: September 08, 2026</em></p>
 </div>
 
 <div id="README-md"></div>
@@ -22504,15 +22504,15 @@ exit 1
 <div id="02-domain-controllers-configure-svchost-mitigation-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers and Member Servers.
-* **Operating Systems**: Windows Server 2022 (and above), Windows Server Semi-Annual Channel (1903 and above).
+* **Applicable Systems**: Domain Controllers (Tier 0) and Domain Member Servers (Tier 1). *(For Privileged Access Workstations, refer to [REQ-PAW-017](#07-paws-configure-svchost-mitigation-md); for Tier 2 Client Workstations, refer to [REQ-END-030](#08-endpoints-configure-svchost-mitigation-md)).*
+* **Operating Systems**: Windows Server 2022, Windows Server 2025, Windows Server Semi-Annual Channel (1903 and above).
 
 ---
 
 <div id="02-domain-controllers-configure-svchost-mitigation-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Medium
+* **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings\Enable svchost.exe mitigation options`
   * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\SCMConfig`
@@ -22525,20 +22525,81 @@ exit 1
 <div id="02-domain-controllers-configure-svchost-mitigation-md-rationale"></div>
 
 ## Rationale
-The Service Host (`svchost.exe`) process is a critical system component responsible for hosting multiple Windows services. Because `svchost.exe` runs with elevated privileges (such as `SYSTEM`, `Network Service`, or `Local Service`) and handles sensitive system tasks, it is a prime target for security evasion techniques, process hollowing, and DLL injection.
+The Service Host (`svchost.exe`) process is an essential operating system component responsible for hosting multiple background services in Windows. Because `svchost.exe` processes execute with the highest operating system privileges (typically `NT AUTHORITY\SYSTEM`, `NT AUTHORITY\LOCAL SERVICE`, or `NT AUTHORITY\NETWORK SERVICE`), they represent high-value targets for adversaries seeking privilege escalation, persistence, and defense evasion across both Domain Controllers and enterprise Domain Member Servers.
 
-Enabling `svchost.exe` mitigation options restricts the behavior of the `svchost.exe` process to enhance security:
-1. **Microsoft-Only Binary Enforcement**: Requires all binaries and dynamic-link libraries (DLLs) loaded into `svchost.exe` to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into `svchost.exe` instances.
-2. **Dynamic Code Blocking**: Prevents the execution of dynamically generated code (such as Just-In-Time compiled code) within `svchost.exe` processes, neutralizing typical in-memory exploitation vectors.
+<div id="02-domain-controllers-configure-svchost-mitigation-md-1-domain-controllers-tier-0-identity-infrastructure"></div>
+
+### 1. Domain Controllers (Tier 0 Identity Infrastructure)
+On Active Directory Domain Controllers, `svchost.exe` instances host critical directory, identity, and network management services:
+* **Kerberos Key Distribution Center (`Kdc`)**: Issues Kerberos ticket-granting tickets (TGTs) and service tickets.
+* **Security Accounts Manager (`SamSs`)**: Manages account databases and security principles.
+* **Netlogon Service (`Netlogon`)**: Maintains secure channels with member computers and authenticates domain logons.
+* **Active Directory Integrated DNS (`DNS`)**: Resolves domain records and service location records (SRV).
+* **Windows Time Service (`W32Time`)**: Synchronizes domain-wide Kerberos timestamps.
+
+Because Domain Controllers are strictly dedicated identity systems that should never run non-essential third-party applications, web browsers, or productivity suites, enforcing `svchost.exe` process mitigations carries minimal operational risk while shutting down major post-exploitation vectors. Attackers attempting to leverage compromised domain accounts to drop unsigned malicious DLLs (such as rogue `ServiceDll` implants) or inject shellcode directly into DC service hosts are intercepted and blocked by the kernel.
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-2-domain-member-servers-tier-1-enterprise-workloads"></div>
+
+### 2. Domain Member Servers (Tier 1 Enterprise Workloads)
+Enterprise Domain Member Servers host application workloads, database instances (SQL Server), web servers (IIS), file repositories, and IT management agents. In standard lateral movement playbooks:
+* **Living-off-the-Land & Evasion**: Attackers pivot from compromised workstations to member servers, using process injection (`CreateRemoteThread`, `QueueUserAPC`, `SetThreadContext`) to disguise C2 beacons and malicious activity under legitimate `svchost.exe` instances.
+* **Dynamic Code Execution**: Threat frameworks allocate executable memory pages (`PAGE_EXECUTE_READWRITE`) to decrypt and execute in-memory shellcode without creating files on disk.
+* **Malicious Service Registration (MITRE ATT&CK T1574.002)**: Adversaries establish persistence on member servers by modifying registry keys under `HKLM\System\CurrentControlSet\Services` to point `ServiceDll` to an unsigned backdoor DLL.
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-technical-mitigation-mechanics"></div>
+
+### Technical Mitigation Mechanics
+Enabling `EnableSvchostMitigationPolicy` instructs the Service Control Manager (SCM, `services.exe`) to configure Windows kernel process mitigation attributes (`PROC_THREAD_ATTRIBUTE_MITIGATION_POLICY`) whenever spawning any `svchost.exe` instance:
+1. **Microsoft-Only Binary Enforcement (`PROCESS_CREATION_MITIGATION_POLICY_BLOCK_NON_MICROSOFT_BINARIES_ALWAYS_ON`)**:
+   Mandates that every binary and Dynamic Link Library (DLL) loaded into the address space of `svchost.exe` must be digitally signed by a valid Microsoft certificate. Any unsigned, self-signed, or third-party binary attempting to map into `svchost.exe` fails with `STATUS_INVALID_IMAGE_HASH` (`0xC0000428`).
+2. **Prohibit Dynamic Code Execution (`PROCESS_CREATION_MITIGATION_POLICY_PROHIBIT_DYNAMIC_CODE_ALWAYS_ON`)**:
+   Blocks the generation and execution of dynamic code within `svchost.exe` processes. This prevents arbitrary executable memory page allocations (`VirtualAlloc` with `PAGE_EXECUTE*`), neutralizing JIT compilation abuse, reflective DLL loading, and in-memory shellcode staging.
+3. **Per-Service Host Isolation**:
+   On Windows Server 2022 and 2025 systems with more than 3.5 GB of RAM, services run in separate, dedicated `svchost.exe` processes. This ensures that a failure or mitigation block in one service container cannot compromise other unrelated system services.
 
 ---
 
 <div id="02-domain-controllers-configure-svchost-mitigation-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Third-Party Compatibility**: This policy requires all binaries loaded by `svchost.exe` to be Microsoft-signed. Any third-party software, security agents, or system drivers that attempt to run services inside the `svchost.exe` process space using non-Microsoft DLLs will fail to load. This has historically caused issues with legacy antivirus, third-party authentication plugins, or specialized management utilities.
-* **Operating System Support**: This policy has no effect on Windows Server versions prior to 1903 (such as Windows Server 2016 and Windows Server 2019).
-* **Deployment Validation**: It is recommended to perform extensive baseline testing on a representative subset of member servers running third-party software before deploying this configuration across the entire production domain.
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-tier-0-domain-controllers-vs-tier-1-member-servers"></div>
+
+### Tier 0 Domain Controllers vs. Tier 1 Member Servers
+* **Domain Controllers (Tier 0)**: Extremely low compatibility risk. Active Directory Domain Services, DNS, Kerberos KDC, and native Windows Server roles use 100% Microsoft-signed binaries and do not rely on dynamic code generation.
+* **Domain Member Servers (Tier 1)**: Moderate compatibility risk. While modern enterprise software runs as independent executables (`.exe`), certain legacy third-party management utilities, hardware monitoring agents, or outdated antivirus plugins historically registered as service DLLs loaded directly inside `svchost.exe`. If a non-Microsoft DLL is configured as a `ServiceDll` inside a shared svchost group, that service will fail to initialize.
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-pre-deployment-compatibility-audit-for-member-servers"></div>
+
+### Pre-Deployment Compatibility Audit for Member Servers
+Before enforcing this control across production Domain Member Server OUs, run the following PowerShell command on representative member servers to verify whether any third-party, non-Microsoft service DLLs are registered under `svchost.exe`:
+
+```powershell
+# Enumerate all svchost-hosted service DLLs and inspect digital signatures
+Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\*\Parameters" -Name "ServiceDll" -ErrorAction SilentlyContinue |
+    ForEach-Object {
+        $dllPath = [Environment]::ExpandEnvironmentVariables($_.ServiceDll)
+        if (Test-Path -Path $dllPath) {
+            $sig = Get-AuthenticodeSignature -FilePath $dllPath
+            if ($sig.Status -ne "Valid" -or $sig.SignerCertificate.Subject -notlike "*CN=Microsoft Corporation*") {
+                [PSCustomObject]@{
+                    ServicePath = $_.PSPath
+                    ServiceDll  = $dllPath
+                    Signer      = $sig.SignerCertificate.Subject
+                    Status      = $sig.Status
+                }
+            }
+        }
+    }
+```
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-operating-system-support-limitations"></div>
+
+### Operating System Support & Limitations
+* **Windows Server 2022 / 2025**: Fully supported natively via the SCM `EnableSvchostMitigationPolicy` registry setting and Group Policy.
+* **Windows Server 2016 / 2019**: These operating system builds (Build 14393 and 17763) precede the introduction of the SCM `EnableSvchostMitigationPolicy` setting. The registry value will have no operational effect on Windows Server 2016 or 2019. On those platforms, organizations should utilize Windows Defender Application Control (WDAC) driver blocklists ([REQ-DC-022](#02-domain-controllers-enable-wdac-driver-blocklist-md)) and AppLocker policies ([REQ-DC-021](#02-domain-controllers-configure-applocker-policies-md)) to restrict binary execution.
+* **Reboot Requirement**: SCM applies mitigation options at process creation time. While restarting individual services will enforce policies on new instances, core system services launched during initial system startup remain unmitigated until a **system restart** is performed.
 
 ---
 
@@ -22550,14 +22611,30 @@ Enabling `svchost.exe` mitigation options restricts the behavior of the `svchost
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
-2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_DomainControllers`).
+To ensure operational stability and permit phased deployment, configure separate GPOs for Tier 0 Domain Controllers and Tier 1 Member Servers.
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-1-configure-gpo-for-domain-controllers-tier-0"></div>
+
+#### 1. Configure GPO for Domain Controllers (Tier 0)
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a Domain Controller or management workstation.
+2. Edit the baseline Domain Controller hardening GPO (e.g., `GPO_Hardening_DomainControllers`).
 3. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings`
-4. Configure the following setting:
-   * **Policy**: `Enable svchost.exe mitigation options`
-   * **Setting**: `Enabled`
-5. Link the GPO to the Domain Controllers and Member Servers Organizational Units (OUs) containing the target systems.
+4. Double-click **Enable svchost.exe mitigation options**.
+5. Select **Enabled**.
+6. Click **Apply**, then **OK**.
+7. Link the GPO to the **Domain Controllers** Organizational Unit (`OU=Domain Controllers,DC=contoso,DC=com`).
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-2-configure-gpo-for-domain-member-servers-tier-1"></div>
+
+#### 2. Configure GPO for Domain Member Servers (Tier 1)
+1. In `gpmc.msc`, edit the baseline Member Server hardening GPO (e.g., `GPO_Hardening_MemberServers`).
+2. Navigate to:
+   `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings`
+3. Configure **Enable svchost.exe mitigation options** to **Enabled**.
+4. Link the GPO to your **Member Servers** Organizational Units (e.g., `OU=Tier1_Servers,OU=Servers,DC=contoso,DC=com`).
+5. Stage deployment across non-production and pilot server groups before enabling domain-wide.
+6. Perform a scheduled server restart during an authorized maintenance window to apply process mitigations across all system services.
 
 ---
 
@@ -22565,7 +22642,7 @@ Enabling `svchost.exe` mitigation options restricts the behavior of the `svchost
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Use this method to apply the setting locally on standalone systems or during reference image build phases.
+Use this method to apply the setting locally during base image creation, automated provisioning, or standalone server testing.
 
 [Download Script: Configure-SvchostMitigation.ps1](implementation_scripts/Configure-SvchostMitigation.ps1)
 
@@ -22573,18 +22650,47 @@ Use this method to apply the setting locally on standalone systems or during ref
 # Configure-SvchostMitigation.ps1
 # Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code.
 
+[CmdletBinding()]
+param()
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+# Verify minimum operating system build compatibility (Windows 10 1903 / Build 18362 or Windows Server 2022 / Build 20348)
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "The operating system build ($($osBuild)) does not support EnableSvchostMitigationPolicy (requires Windows Server 2022+ or Windows 10 1903+)."
+    exit 1
+}
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ValueData = 1
 
-Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+try {
+    if (-not (Test-Path -Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+        Write-Host "Created registry key: $($RegPath)" -ForegroundColor Gray
+    }
 
-if (-not (Test-Path $RegPath)) {
-    New-Item -Path $RegPath -Force | Out-Null
+    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
+
+    # Validate written value
+    $configuredValue = (Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction Stop).$ValueName
+    if ($configuredValue -eq $ValueData) {
+        Write-Host "Hardening applied successfully: $($ValueName) set to 1." -ForegroundColor Green
+        Write-Host "Note: This policy applies to newly created svchost.exe instances. A full system restart is required to protect services initialized at system boot." -ForegroundColor Yellow
+        exit 0
+    } else {
+        throw "Failed to verify registry property value after write."
+    }
+} catch {
+    Write-Error "Error configuring svchost.exe mitigation options: $($_.Exception.Message)"
+    exit 1
 }
-
-Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
-Write-Host "Hardening applied successfully." -ForegroundColor Green
 ```
 
 *To verify the setting has been applied:*
@@ -22595,31 +22701,71 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green
 # Get-SvchostMitigationStatus.ps1
 # Description: Audits the configuration state of svchost.exe mitigation options.
 
+[CmdletBinding()]
+param()
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ExpectedValue = 1
 
 Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
 
-if (Test-Path $RegPath) {
-    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
-        Write-Host "Audit Result: Compliant. svchost.exe mitigation options are enabled." -ForegroundColor Green
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "Audit Result: Non-Applicable / Unsupported. OS build $($osBuild) precedes the introduction of svchost mitigation policy (requires Windows Server 2022+ or Windows 10 1903+)."
+    exit 1
+}
+
+if (Test-Path -Path $RegPath) {
+    $item = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $item -and $item.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. svchost.exe mitigation policy is enabled in registry ($($RegPath)\$($ValueName) = 1)." -ForegroundColor Green
+
+        # Optional check for running svchost processes
+        $svchostProcesses = Get-Process -Name "svchost" -ErrorAction SilentlyContinue
+        if ($svchostProcesses) {
+            Write-Host "Found $($svchostProcesses.Count) running svchost.exe process instances. Process mitigation flags are enforced dynamically at process spawn by the Service Control Manager." -ForegroundColor Gray
+        }
+
         exit 0
     }
 }
 
-Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured." -ForegroundColor Red
+Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured ($($RegPath)\$($ValueName))." -ForegroundColor Red
 exit 1
 ```
+
+---
+
+<div id="02-domain-controllers-configure-svchost-mitigation-md-auditing-detection-telemetry"></div>
+
+## Auditing & Detection Telemetry
+
+When `EnableSvchostMitigationPolicy` is active on servers, monitor the following event logs for policy violations, blocked DLL loads, or dynamic code execution attempts:
+
+| Log Channel | Event ID | Event Source | Description & Operational Significance |
+| :--- | :--- | :--- | :--- |
+| **System** | `7000` | `Service Control Manager` | Service failed to start because the service DLL failed digital signature validation. |
+| **System** | `7023` / `7024` | `Service Control Manager` | Running service terminated unexpectedly due to an invalid image hash (`0x80070428` / `ERROR_INVALID_IMAGE_HASH`). |
+| **Microsoft-Windows-Security-Mitigations/KernelMode** | `1` | `Security-Mitigations` | Kernel process mitigation event indicating dynamic code generation was blocked inside `svchost.exe`. |
+| **Microsoft-Windows-CodeIntegrity/Operational** | `3033` | `CodeIntegrity` | Enforced block event. `svchost.exe` was blocked from loading a DLL that does not meet Microsoft Authenticode signature requirements. |
+| **Microsoft-Windows-CodeIntegrity/Operational** | `3077` | `CodeIntegrity` | Audit-mode event indicating an unsigned or third-party binary load was attempted in a service host container. |
 
 ---
 
 <div id="02-domain-controllers-configure-svchost-mitigation-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **Microsoft Learn**: Group Policy settings reference - Service Control Manager Settings
-* **Microsoft Security Guidance**: Removing "Enable svchost.exe mitigation options" from baseline recommendations (for compatibility awareness)
+* **Microsoft Learn**: [Service Control Manager Settings](https://learn.microsoft.com/en-us/windows/security/threat-protection/security-compliance-toolkit-10#service-control-manager-settings)
+* **Microsoft Security Guidance**: [Security baseline for Windows Server and Windows 10](https://techcommunity.microsoft.com/t5/microsoft-security-baselines/security-baseline-for-windows-10-version-2004-and-windows-server/ba-p/1460395)
+* **ANSSI AD Hardening Guide**: Section 3.2 - Service and System Process Hardening
+* **CIS Microsoft Windows Server 2022 Benchmark**: Section 18.9.30.1 - Ensure 'Enable svchost.exe mitigation options' is set to 'Enabled'
+* **MITRE ATT&CK Matrix**:
+  * [T1055 - Process Injection](https://attack.mitre.org/techniques/T1055/)
+  * [T1055.012 - Process Hollowing](https://attack.mitre.org/techniques/T1055/012/)
+  * [T1574.002 - Hijack Execution Flow: DLL Side-Loading / Service DLL](https://attack.mitre.org/techniques/T1574/002/)
 
 
 <div style="page-break-before: always;"></div>
@@ -48449,7 +48595,7 @@ exit 1
 <div id="07-paws-configure-svchost-mitigation-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs).
+* **Applicable Systems**: Privileged Access Workstations (PAWs). *(For Domain Controllers and Domain Member Servers, refer to [REQ-DC-029](#02-domain-controllers-configure-svchost-mitigation-md); for Tier 2 Client Workstations, refer to [REQ-END-030](#08-endpoints-configure-svchost-mitigation-md)).*
 * **Operating Systems**: Windows 10 (1903 and above), Windows 11 Enterprise.
 
 ---
@@ -48470,20 +48616,27 @@ exit 1
 <div id="07-paws-configure-svchost-mitigation-md-rationale"></div>
 
 ## Rationale
-Privileged Access Workstations (PAWs) host highly sensitive administrative sessions and credentials. Securing the Service Host (`svchost.exe`) process is critical to preventing kernel-level security evasion and credential harvesting techniques.
+Privileged Access Workstations (PAWs) host the most sensitive administrative credentials in an Active Directory environment, including Tier 0 Domain Admin Kerberos tickets, directory service RPC sessions, and PKI private key operations. Because PAWs are dedicated, single-purpose administrative endpoints, securing the Service Host (`svchost.exe`) process is critical to preventing kernel-level security evasion, process injection, and credential theft.
 
-Enabling `svchost.exe` mitigation options on PAWs restricts the behavior of the `svchost.exe` process to enhance security:
-1. **Microsoft-Only Binary Enforcement**: Requires all binaries and dynamic-link libraries (DLLs) loaded into `svchost.exe` to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into `svchost.exe` instances to tamper with administrative service processes.
-2. **Dynamic Code Blocking**: Prevents the execution of dynamically generated code (such as Just-In-Time compiled code) within `svchost.exe` processes, neutralizing typical in-memory exploitation vectors.
+Adversaries attempting to compromise administrative sessions frequently target `svchost.exe`:
+1. **Process Injection & Credential Harvesting**: Infiltrating an administrative session by injecting into a high-privilege `svchost.exe` process (`CreateRemoteThread`, `QueueUserAPC`, `SetThreadContext`) allows attackers to execute shellcode within the `NT AUTHORITY\SYSTEM` security context, evading endpoint monitoring and attempting to access memory spaces holding privileged administrative tokens.
+2. **Reflective DLL Loading & Dynamic Code Execution**: Advanced persistent threat (APT) frameworks execute memory-only payloads by allocating executable memory (`VirtualAlloc` with `PAGE_EXECUTE_READWRITE`) to bypass disk-based file scanners.
+3. **Ghost Service Implants (MITRE ATT&CK T1574.002)**: Dropping unsigned service DLLs and registering them under legitimate `svchost.exe` service groups to gain persistent administrative access.
+
+Enabling `svchost.exe` mitigation options on PAWs restricts the behavior of every `svchost.exe` process through kernel-level mitigation policies:
+* **Microsoft-Only Binary Enforcement (`PROCESS_CREATION_MITIGATION_POLICY_BLOCK_NON_MICROSOFT_BINARIES_ALWAYS_ON`)**: Requires all binaries and dynamic-link libraries (DLLs) loaded into `svchost.exe` to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into `svchost.exe` instances to tamper with administrative service processes. Any attempt to load non-Microsoft code is blocked with `STATUS_INVALID_IMAGE_HASH` (`0xC0000428`).
+* **Dynamic Code Execution Blocking (`PROCESS_CREATION_MITIGATION_POLICY_PROHIBIT_DYNAMIC_CODE_ALWAYS_ON`)**: Disallows the generation and execution of dynamic code within `svchost.exe` processes. This neutralizes in-memory shellcode execution, JIT compilation abuse, and typical process hollowing attack vectors.
+* **Service Host Isolation**: On modern Windows 10/11 Enterprise systems with more than 3.5 GB of RAM, services run in separate, dedicated `svchost.exe` processes, ensuring each administrative service host is strictly isolated and independently enforced.
 
 ---
 
 <div id="07-paws-configure-svchost-mitigation-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Third-Party Compatibility**: This policy requires all binaries loaded by `svchost.exe` to be Microsoft-signed. Since PAWs are strictly controlled, single-purpose administrative machines, they should run minimal third-party software. However, any security tools, smart card readers, or system drivers that attempt to run services inside the `svchost.exe` process space using non-Microsoft DLLs will fail to load.
-* **Operating System Support**: This policy has no effect on Windows 10 versions prior to 1903.
-* **Deployment Validation**: Ensure that any administrative agents or hardware verification drivers are fully certified and Microsoft-signed before enforcing this control.
+* **Third-Party Compatibility**: This policy requires all binaries loaded by `svchost.exe` to be Microsoft-signed. Because PAWs are strictly controlled, single-purpose administrative workstations, they must run minimal third-party software. However, any third-party management agents, smart card reader drivers, or security software that attempt to execute service DLLs inside the `svchost.exe` process space using non-Microsoft DLLs will fail to load.
+* **Administrative Tooling**: Standard Microsoft administrative tools (RSAT, Active Directory Administrative Center, DNS Manager, MMC snap-ins, PowerShell 5.1/7.x) run completely cleanly under this mitigation.
+* **Operating System Support**: This policy is natively supported on Windows 10 version 1903 (Build 18362) and above, and Windows 11 Enterprise.
+* **Process Lifecycle & Reboot Prerequisite**: The Service Control Manager applies mitigation attributes only when creating a new `svchost.exe` process. While restarting individual services will apply the policy to new instances, core system services initialized during the early kernel boot phase remain unmitigated until the PAW undergoes a **system restart**.
 
 ---
 
@@ -48495,14 +48648,15 @@ Enabling `svchost.exe` mitigation options on PAWs restricts the behavior of the 
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
-2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_PAW`).
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a PAW or Domain Controller.
+2. Edit the dedicated PAW hardening GPO (e.g., `GPO_Hardening_PAW`).
 3. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings`
-4. Configure the following setting:
-   * **Policy**: `Enable svchost.exe mitigation options`
-   * **Setting**: `Enabled`
-5. Link the GPO to the PAW Organizational Unit (OU) containing the target systems.
+4. Double-click **Enable svchost.exe mitigation options**.
+5. Select **Enabled**.
+6. Click **Apply**, then **OK**.
+7. Link the GPO to the dedicated **PAW** Organizational Unit (`OU=PAW,OU=Tier0,DC=contoso,DC=com`).
+8. Reboot the target PAW systems to ensure the mitigation policy is actively enforced across all system services.
 
 ---
 
@@ -48510,7 +48664,7 @@ Enabling `svchost.exe` mitigation options on PAWs restricts the behavior of the 
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Use this method to apply the setting locally on standalone systems or during reference image build phases.
+Use this method to apply the setting locally on standalone PAWs or during initial reference image provisioning.
 
 [Download Script: Configure-SvchostMitigation.ps1](implementation_scripts/Configure-SvchostMitigation.ps1)
 
@@ -48518,18 +48672,47 @@ Use this method to apply the setting locally on standalone systems or during ref
 # Configure-SvchostMitigation.ps1
 # Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code on PAWs.
 
+[CmdletBinding()]
+param()
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options for PAWs..." -ForegroundColor Cyan
+
+# Verify minimum operating system build compatibility (Windows 10 1903 / Build 18362 or Windows 11)
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "The operating system build ($($osBuild)) does not support EnableSvchostMitigationPolicy (requires Windows 10 1903+ or Windows 11)."
+    exit 1
+}
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ValueData = 1
 
-Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+try {
+    if (-not (Test-Path -Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+        Write-Host "Created registry key: $($RegPath)" -ForegroundColor Gray
+    }
 
-if (-not (Test-Path $RegPath)) {
-    New-Item -Path $RegPath -Force | Out-Null
+    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
+
+    # Validate written value
+    $configuredValue = (Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction Stop).$ValueName
+    if ($configuredValue -eq $ValueData) {
+        Write-Host "Hardening applied successfully: $($ValueName) set to 1." -ForegroundColor Green
+        Write-Host "Note: This policy applies to newly created svchost.exe instances. A full system restart is required to protect services initialized at system boot." -ForegroundColor Yellow
+        exit 0
+    } else {
+        throw "Failed to verify registry property value after write."
+    }
+} catch {
+    Write-Error "Error configuring svchost.exe mitigation options on PAW: $($_.Exception.Message)"
+    exit 1
 }
-
-Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
-Write-Host "Hardening applied successfully." -ForegroundColor Green
 ```
 
 *To verify the setting has been applied:*
@@ -48540,32 +48723,70 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green
 # Get-SvchostMitigationStatus.ps1
 # Description: Audits the configuration state of svchost.exe mitigation options on PAWs.
 
+[CmdletBinding()]
+param()
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ExpectedValue = 1
 
-Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options on PAW..." -ForegroundColor Cyan
 
-if (Test-Path $RegPath) {
-    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
-        Write-Host "Audit Result: Compliant. svchost.exe mitigation options are enabled." -ForegroundColor Green
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "Audit Result: Non-Applicable / Unsupported. OS build $($osBuild) precedes the introduction of svchost mitigation policy (requires Windows 10 1903+ or Windows 11)."
+    exit 1
+}
+
+if (Test-Path -Path $RegPath) {
+    $item = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $item -and $item.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. svchost.exe mitigation policy is enabled in registry ($($RegPath)\$($ValueName) = 1)." -ForegroundColor Green
+
+        # Optional check for running svchost processes
+        $svchostProcesses = Get-Process -Name "svchost" -ErrorAction SilentlyContinue
+        if ($svchostProcesses) {
+            Write-Host "Found $($svchostProcesses.Count) running svchost.exe process instances. Process mitigation flags are enforced dynamically at process spawn by the Service Control Manager." -ForegroundColor Gray
+        }
+
         exit 0
     }
 }
 
-Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured." -ForegroundColor Red
+Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured ($($RegPath)\$($ValueName))." -ForegroundColor Red
 exit 1
 ```
+
+---
+
+<div id="07-paws-configure-svchost-mitigation-md-auditing-detection-telemetry"></div>
+
+## Auditing & Detection Telemetry
+
+When `EnableSvchostMitigationPolicy` is active on PAWs, monitor the following event logs for policy violations, blocked DLL loads, or dynamic code execution attempts:
+
+| Log Channel | Event ID | Event Source | Description & Operational Significance |
+| :--- | :--- | :--- | :--- |
+| **System** | `7000` | `Service Control Manager` | Service failed to start because the service DLL failed digital signature validation. |
+| **System** | `7023` / `7024` | `Service Control Manager` | Running service terminated unexpectedly due to an invalid image hash (`0x80070428` / `ERROR_INVALID_IMAGE_HASH`). |
+| **Microsoft-Windows-Security-Mitigations/KernelMode** | `1` | `Security-Mitigations` | Kernel process mitigation event indicating dynamic code generation was blocked inside `svchost.exe`. |
+| **Microsoft-Windows-CodeIntegrity/Operational** | `3033` | `CodeIntegrity` | Enforced block event. `svchost.exe` was blocked from loading a DLL that does not meet Microsoft Authenticode signature requirements. |
+| **Microsoft-Windows-CodeIntegrity/Operational** | `3077` | `CodeIntegrity` | Audit-mode event indicating an unsigned or third-party binary load was attempted in a service host container. |
 
 ---
 
 <div id="07-paws-configure-svchost-mitigation-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **Microsoft Learn**: Group Policy settings reference - Service Control Manager Settings
-* **Microsoft Security Guidance**: Removing "Enable svchost.exe mitigation options" from baseline recommendations (for compatibility awareness)
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark (Section 18.9.30.1 - Mitigation Options reference)
+* **Microsoft Learn**: [Service Control Manager Settings](https://learn.microsoft.com/en-us/windows/security/threat-protection/security-compliance-toolkit-10#service-control-manager-settings)
+* **Microsoft Security Guidance**: [Security baseline for Windows 10 and PAW deployments](https://techcommunity.microsoft.com/t5/microsoft-security-baselines/security-baseline-for-windows-10-version-2004-and-windows-server/ba-p/1460395)
+* **CIS Microsoft Windows Client Benchmark**: Section 18.9.30.1 - Ensure 'Enable svchost.exe mitigation options' is set to 'Enabled'
+* **MITRE ATT&CK Matrix**:
+  * [T1055 - Process Injection](https://attack.mitre.org/techniques/T1055/)
+  * [T1055.012 - Process Hollowing](https://attack.mitre.org/techniques/T1055/012/)
+  * [T1574.002 - Hijack Execution Flow: DLL Side-Loading / Service DLL](https://attack.mitre.org/techniques/T1574/002/)
 
 
 <div style="page-break-before: always;"></div>
@@ -83834,7 +84055,7 @@ exit 1
 <div id="08-endpoints-configure-svchost-mitigation-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 Client Workstations.
+* **Applicable Systems**: Tier 2 Client Workstations. *(For Domain Controllers and Domain Member Servers, refer to [REQ-DC-029](#02-domain-controllers-configure-svchost-mitigation-md); for Privileged Access Workstations, refer to [REQ-PAW-017](#07-paws-configure-svchost-mitigation-md)).*
 * **Operating Systems**: Windows 10 (1903 and above), Windows 11 Enterprise/Professional.
 
 ---
@@ -83842,7 +84063,7 @@ exit 1
 <div id="08-endpoints-configure-svchost-mitigation-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Medium
+* **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings\Enable svchost.exe mitigation options`
   * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Control\SCMConfig`
@@ -83855,20 +84076,27 @@ exit 1
 <div id="08-endpoints-configure-svchost-mitigation-md-rationale"></div>
 
 ## Rationale
-The Service Host (`svchost.exe`) process runs multiple system services. Because these services execute with high privileges, they are frequently targeted for process injection, hollowing, or spoofing to execute arbitrary code or harvest credentials.
+The Service Host (`svchost.exe`) process is a fundamental Windows operating system binary designed to host one or more shared or isolated system services. Because `svchost.exe` instances execute with elevated privileges (such as `NT AUTHORITY\SYSTEM`, `NT AUTHORITY\LOCAL SERVICE`, or `NT AUTHORITY\NETWORK SERVICE`) and naturally maintain persistent execution across user sessions, they represent one of the primary targets for threat actors seeking privilege escalation, defense evasion, and persistence on client workstations.
 
-Enabling `svchost.exe` mitigation options restricts the behavior of the `svchost.exe` process to enhance security:
-1. **Microsoft-Only Binary Enforcement**: Requires all binaries and dynamic-link libraries (DLLs) loaded into `svchost.exe` to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into `svchost.exe` instances.
-2. **Dynamic Code Blocking**: Prevents the execution of dynamically generated code (such as Just-In-Time compiled code) within `svchost.exe` processes, neutralizing typical in-memory exploitation vectors.
+In client endpoint environments, workstations serve as the primary initial access vector for attackers through phishing attachments, malicious browser downloads, drive-by exploits, or compromised peripheral devices. Once a basic user-level foothold is achieved, adversaries frequently attempt to blend malicious activity into legitimate system traffic by targeting `svchost.exe`:
+1. **Process Injection & Hollowing (MITRE ATT&CK T1055, T1055.012)**: Attackers create a suspended `svchost.exe` process or inject malicious code into an existing service host instance (`CreateRemoteThread`, `QueueUserAPC`, `SetThreadContext`). This disguises command-and-control (C2) beaconing (e.g., Cobalt Strike, Sliver, Brute Ratel) under trusted system process names and bypasses basic endpoint security inspection.
+2. **Dynamic Code Execution & Reflective Loading**: In-memory payloads and exploitation frameworks rely on allocating executable memory (`PAGE_EXECUTE_READWRITE` via `VirtualAlloc` or `VirtualProtect`) to dynamically decrypt, compile, or inject unmapped DLLs directly into process memory without touching disk.
+3. **Ghost Service DLL Hijacking & Malicious Service Registration (MITRE ATT&CK T1574.002)**: Attackers modify service registry keys to point `ServiceDll` to unsigned, arbitrary third-party DLLs. When the Service Control Manager starts the service, `svchost.exe` loads the unauthorized DLL with SYSTEM privileges.
+
+Enabling `svchost.exe` mitigation options instructs the Windows Service Control Manager (SCM, `services.exe`) to apply strict kernel-enforced process creation mitigation policies whenever a new `svchost.exe` instance is spawned:
+* **Microsoft-Only Binary Enforcement (`PROCESS_CREATION_MITIGATION_POLICY_BLOCK_NON_MICROSOFT_BINARIES_ALWAYS_ON`)**: Enforces that every executable binary and Dynamic Link Library (DLL) loaded into the address space of any `svchost.exe` process must be digitally signed by a trusted Microsoft certificate (Windows Production Root, WHQL, or Microsoft Corporation). Any attempt by unsigned, self-signed, or third-party binaries to map into `svchost.exe` is immediately terminated by the Windows kernel with `STATUS_INVALID_IMAGE_HASH` (`0xC0000428`).
+* **Dynamic Code Execution Blocking (`PROCESS_CREATION_MITIGATION_POLICY_PROHIBIT_DYNAMIC_CODE_ALWAYS_ON`)**: Disallows the generation and execution of dynamic code within `svchost.exe` processes. This kernel mitigation blocks arbitrary memory page execution, preventing JIT compilation abuse, shellcode execution, and reflective DLL injection inside all system service containers.
+* **Service Host Splitting Synergies**: Since Windows 10 Version 1703, on workstations with more than 3.5 GB of RAM (`SvcHostSplitThresholdInKB`), Windows automatically isolates individual services into dedicated, standalone `svchost.exe` processes. When `EnableSvchostMitigationPolicy` is active, this per-service architecture ensures that every isolated service process receives independent, uncompromising mitigation enforcement.
 
 ---
 
 <div id="08-endpoints-configure-svchost-mitigation-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Third-Party Compatibility**: This policy requires all binaries loaded by `svchost.exe` to be Microsoft-signed. Any third-party software, security agents, or system drivers that attempt to run services inside the `svchost.exe` process space using non-Microsoft DLLs will fail to load. This has historically caused issues with legacy antivirus, third-party authentication plugins, or specialized management utilities on client systems.
-* **Operating System Support**: This policy has no effect on Windows 10 versions prior to 1903.
-* **Deployment Validation**: It is recommended to perform extensive baseline testing on a representative subset of workstations running third-party software before deploying this configuration across the entire production domain.
+* **Third-Party Antivirus, EDR, and Management Agents**: Historically, Microsoft included `Enable svchost.exe mitigation options` in early Windows 10 security baselines (versions 1709 through 1909), but removed it from default baseline guidance starting with Windows 10 2004. Microsoft explicitly documented that while this control provides exceptional security value, several legacy third-party antivirus utilities, endpoint management suites, and specialized hardware smart card minidrivers were architected as custom DLL plugins loaded directly inside `svchost.exe`. When non-Microsoft binaries are blocked, non-compliant third-party services fail to start.
+* **Modern Endpoint Posture**: Modern, supported enterprise software vendors (EDR agents, VPN clients, backup agents, printing utilities) run as independent standalone executables (`.exe`) or register isolated non-svchost service binaries. Organizations adopting an Active Directory hardening posture should enforce this setting on client endpoints after validating that all deployed management and security agents are compliant.
+* **Operating System Support**: This policy is natively supported on Windows 10 version 1903 (Build 18362) and above, and Windows 11. It has no effect on Windows 10 versions prior to 1903.
+* **Process Lifecycle & Reboot Prerequisite**: The Service Control Manager applies mitigation attributes only when creating a new `svchost.exe` process. While restarting individual services will apply the policy to new instances, core system services initialized during the early kernel boot phase remain unmitigated until the endpoint undergoes a **system restart**.
 
 ---
 
@@ -83880,14 +84108,15 @@ Enabling `svchost.exe` mitigation options restricts the behavior of the `svchost
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
-1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain controller or management host.
-2. Create a new GPO or edit an existing one (e.g., `GPO_Hardening_Endpoints`).
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on an administrative workstation or Domain Controller.
+2. Create a new GPO or edit an existing endpoint hardening GPO (e.g., `GPO_Hardening_Tier2_Endpoints`).
 3. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings`
-4. Configure the following setting:
-   * **Policy**: `Enable svchost.exe mitigation options`
-   * **Setting**: `Enabled`
-5. Link the GPO to the appropriate Organizational Unit (OU) containing the target client endpoints.
+4. In the right-hand details pane, double-click **Enable svchost.exe mitigation options**.
+5. Select **Enabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the Organizational Unit (OU) containing your Tier 2 client workstations (e.g., `OU=Workstations,DC=contoso,DC=com`).
+8. After applying the policy, schedule or initiate a system restart on target endpoints to enforce the mitigation policy across all boot-level service host instances.
 
 ---
 
@@ -83895,7 +84124,7 @@ Enabling `svchost.exe` mitigation options restricts the behavior of the `svchost
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
 
-Use this method to apply the setting locally on standalone systems or during reference image build phases.
+Use this method to apply the setting locally during gold master image creation, automated Intune / MDM provisioning, or standalone testing.
 
 [Download Script: Configure-SvchostMitigation.ps1](implementation_scripts/Configure-SvchostMitigation.ps1)
 
@@ -83903,18 +84132,47 @@ Use this method to apply the setting locally on standalone systems or during ref
 # Configure-SvchostMitigation.ps1
 # Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code.
 
+[CmdletBinding()]
+param()
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+# Verify minimum operating system build compatibility (Windows 10 1903 / Build 18362 or Windows Server 2022 / Build 20348)
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "The operating system build ($($osBuild)) does not support EnableSvchostMitigationPolicy (requires Windows 10 1903+ or Windows Server 2022+)."
+    exit 1
+}
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ValueData = 1
 
-Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+try {
+    if (-not (Test-Path -Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+        Write-Host "Created registry key: $($RegPath)" -ForegroundColor Gray
+    }
 
-if (-not (Test-Path $RegPath)) {
-    New-Item -Path $RegPath -Force | Out-Null
+    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
+
+    # Validate written value
+    $configuredValue = (Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction Stop).$ValueName
+    if ($configuredValue -eq $ValueData) {
+        Write-Host "Hardening applied successfully: $($ValueName) set to 1." -ForegroundColor Green
+        Write-Host "Note: This policy applies to newly created svchost.exe instances. A full system restart is required to protect services initialized at system boot." -ForegroundColor Yellow
+        exit 0
+    } else {
+        throw "Failed to verify registry property value after write."
+    }
+} catch {
+    Write-Error "Error configuring svchost.exe mitigation options: $($_.Exception.Message)"
+    exit 1
 }
-
-Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
-Write-Host "Hardening applied successfully." -ForegroundColor Green
 ```
 
 *To verify the setting has been applied:*
@@ -83925,32 +84183,70 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green
 # Get-SvchostMitigationStatus.ps1
 # Description: Audits the configuration state of svchost.exe mitigation options.
 
+[CmdletBinding()]
+param()
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ExpectedValue = 1
 
 Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
 
-if (Test-Path $RegPath) {
-    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
-        Write-Host "Audit Result: Compliant. svchost.exe mitigation options are enabled." -ForegroundColor Green
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "Audit Result: Non-Applicable / Unsupported. OS build $($osBuild) precedes the introduction of svchost mitigation policy (requires Windows 10 1903+ or Windows Server 2022+)."
+    exit 1
+}
+
+if (Test-Path -Path $RegPath) {
+    $item = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $item -and $item.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. svchost.exe mitigation policy is enabled in registry ($($RegPath)\$($ValueName) = 1)." -ForegroundColor Green
+
+        # Optional check for running svchost processes
+        $svchostProcesses = Get-Process -Name "svchost" -ErrorAction SilentlyContinue
+        if ($svchostProcesses) {
+            Write-Host "Found $($svchostProcesses.Count) running svchost.exe process instances. Process mitigation flags are enforced dynamically at process spawn by the Service Control Manager." -ForegroundColor Gray
+        }
+
         exit 0
     }
 }
 
-Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured." -ForegroundColor Red
+Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured ($($RegPath)\$($ValueName))." -ForegroundColor Red
 exit 1
 ```
+
+---
+
+<div id="08-endpoints-configure-svchost-mitigation-md-auditing-detection-telemetry"></div>
+
+## Auditing & Detection Telemetry
+
+When `EnableSvchostMitigationPolicy` is active, Windows kernel code integrity and the Service Control Manager generate high-fidelity event log entries if any process or unsigned binary violates the policy:
+
+| Log Channel | Event ID | Event Source | Description & Operational Significance |
+| :--- | :--- | :--- | :--- |
+| **System** | `7000` | `Service Control Manager` | Service failed to start because the binary or service DLL failed digital signature validation. |
+| **System** | `7023` / `7024` | `Service Control Manager` | A running service terminated prematurely due to an invalid image hash error (`0x80070428` / `ERROR_INVALID_IMAGE_HASH`). |
+| **Microsoft-Windows-Security-Mitigations/KernelMode** | `1` | `Security-Mitigations` | Kernel-level process mitigation enforcement event. Triggered when an in-memory dynamic code generation attempt is blocked inside `svchost.exe`. |
+| **Microsoft-Windows-CodeIntegrity/Operational** | `3033` | `CodeIntegrity` | Enforced block event. Triggered when `svchost.exe` attempts to load a DLL that does not satisfy Microsoft Authenticode signing criteria. |
+| **Microsoft-Windows-CodeIntegrity/Operational** | `3077` | `CodeIntegrity` | Audit-mode event indicating a non-compliant or unsigned binary load was attempted in a service host container. |
 
 ---
 
 <div id="08-endpoints-configure-svchost-mitigation-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **Microsoft Learn**: Group Policy settings reference - Service Control Manager Settings
-* **Microsoft Security Guidance**: Removing "Enable svchost.exe mitigation options" from baseline recommendations (for compatibility awareness)
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark (Section 18.9.30.1 - Mitigation Options reference)
+* **Microsoft Learn**: [Service Control Manager Settings](https://learn.microsoft.com/en-us/windows/security/threat-protection/security-compliance-toolkit-10#service-control-manager-settings)
+* **Microsoft Security Guidance**: [Why SCM svchost mitigation was retired from default baseline](https://techcommunity.microsoft.com/t5/microsoft-security-baselines/security-baseline-for-windows-10-version-2004-and-windows-server/ba-p/1460395)
+* **CIS Microsoft Windows Client Benchmark**: Section 18.9.30.1 - Ensure 'Enable svchost.exe mitigation options' is set to 'Enabled'
+* **MITRE ATT&CK Matrix**:
+  * [T1055 - Process Injection](https://attack.mitre.org/techniques/T1055/)
+  * [T1055.012 - Process Hollowing](https://attack.mitre.org/techniques/T1055/012/)
+  * [T1574.002 - Hijack Execution Flow: DLL Side-Loading / Service DLL](https://attack.mitre.org/techniques/T1574/002/)
 
 
 <div style="page-break-before: always;"></div>

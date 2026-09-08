@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Benchmark xmlns="http://checklists.nist.gov/xccdf/1.2" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xhtml="http://www.w3.org/1999/xhtml" id="xccdf_org.adhardening.benchmarks_benchmark_ad-hardening" resolved="false" xml:lang="en">
-  <status date="2026-09-07">accepted</status>
+  <status date="2026-09-08">accepted</status>
   <title>Active Directory Hardening Guidebook Benchmark</title>
   <description>Automated compliance checklist profiles and rules parsed directly from the Active Directory Hardening Guidebook.</description>
   <version>1.0</version>
   <metadata>
     <dc:publisher>Antigravity Hardening Project</dc:publisher>
     <dc:creator>Antigravity</dc:creator>
-    <dc:date>2026-09-07</dc:date>
+    <dc:date>2026-09-08</dc:date>
   </metadata>
   <Profile id="xccdf_org.adhardening.benchmarks_profile_DomainController">
     <title>Domain Controller Hardening Profile</title>
@@ -7370,7 +7370,7 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2028" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-029" severity="medium" weight="10.0" selected="false">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-029" severity="high" weight="10.0" selected="false">
       <title>[REQ-DC-029] Configure svchost.exe Mitigation Options</title>
       <description>
         <xhtml:p>
@@ -7378,9 +7378,10 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers and Member Servers.</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers (Tier 0) and Domain Member Servers (Tier 1). <xhtml:em>(For Privileged Access Workstations, refer to [REQ-PAW-017](../07-paws/configure-svchost-mitigation.md); for Tier 2 Client Workstations, refer to [REQ-END-030](../08-endpoints/configure-svchost-mitigation.md)).</xhtml:em>
+          </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2022 (and above), Windows Server Semi-Annual Channel (1903 and above).</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2022, Windows Server 2025, Windows Server Semi-Annual Channel (1903 and above).</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -7388,32 +7389,39 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>The Service Host (<xhtml:code>svchost.exe</xhtml:code>) process is a critical system component responsible for hosting multiple Windows services. Because <xhtml:code>svchost.exe</xhtml:code> runs with elevated privileges (such as <xhtml:code>SYSTEM</xhtml:code>, <xhtml:code>Network Service</xhtml:code>, or <xhtml:code>Local Service</xhtml:code>) and handles sensitive system tasks, it is a prime target for security evasion techniques, process hollowing, and DLL injection.</xhtml:p>
-        <xhtml:p>Enabling <xhtml:code>svchost.exe</xhtml:code> mitigation options restricts the behavior of the <xhtml:code>svchost.exe</xhtml:code> process to enhance security: 1. <xhtml:strong>Microsoft-Only Binary Enforcement</xhtml:strong>: Requires all binaries and dynamic-link libraries (DLLs) loaded into <xhtml:code>svchost.exe</xhtml:code> to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into <xhtml:code>svchost.exe</xhtml:code> instances. 2. <xhtml:strong>Dynamic Code Blocking</xhtml:strong>: Prevents the execution of dynamically generated code (such as Just-In-Time compiled code) within <xhtml:code>svchost.exe</xhtml:code> processes, neutralizing typical in-memory exploitation vectors.</xhtml:p>
+        <xhtml:p>The Service Host (<xhtml:code>svchost.exe</xhtml:code>) process is an essential operating system component responsible for hosting multiple background services in Windows. Because <xhtml:code>svchost.exe</xhtml:code> processes execute with the highest operating system privileges (typically <xhtml:code>NT AUTHORITY\SYSTEM</xhtml:code>, <xhtml:code>NT AUTHORITY\LOCAL SERVICE</xhtml:code>, or <xhtml:code>NT AUTHORITY\NETWORK SERVICE</xhtml:code>), they represent high-value targets for adversaries seeking privilege escalation, persistence, and defense evasion across both Domain Controllers and enterprise Domain Member Servers.</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:p>To ensure operational stability and permit phased deployment, configure separate GPOs for Tier 0 Domain Controllers and Tier 1 Member Servers.</xhtml:p>
+        <xhtml:h4>1. Configure GPO for Domain Controllers (Tier 0)</xhtml:h4>
         <xhtml:ol>
-          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>) on a domain controller or management host.</xhtml:li>
-          <xhtml:li>Create a new GPO or edit an existing one (e.g., <xhtml:code>GPO_Hardening_DomainControllers</xhtml:code>).</xhtml:li>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>) on a Domain Controller or management workstation.</xhtml:li>
+          <xhtml:li>Edit the baseline Domain Controller hardening GPO (e.g., <xhtml:code>GPO_Hardening_DomainControllers</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to:</xhtml:li>
           <xhtml:li>
             <xhtml:code>Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Configure the following setting:</xhtml:li>
+          <xhtml:li>Double-click <xhtml:strong>Enable svchost.exe mitigation options</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Select <xhtml:strong>Enabled</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Click <xhtml:strong>Apply</xhtml:strong>, then <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Link the GPO to the <xhtml:strong>Domain Controllers</xhtml:strong> Organizational Unit (<xhtml:code>OU=Domain Controllers,DC=contoso,DC=com</xhtml:code>).</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>2. Configure GPO for Domain Member Servers (Tier 1)</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>In <xhtml:code>gpmc.msc</xhtml:code>, edit the baseline Member Server hardening GPO (e.g., <xhtml:code>GPO_Hardening_MemberServers</xhtml:code>).</xhtml:li>
+          <xhtml:li>Navigate to:</xhtml:li>
           <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Policy</xhtml:em>*: <xhtml:code>Enable svchost.exe mitigation options</xhtml:code>
+            <xhtml:code>Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings</xhtml:code>
           </xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Setting</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>Link the GPO to the Domain Controllers and Member Servers Organizational Units (OUs) containing the target systems.</xhtml:li>
+          <xhtml:li>Configure <xhtml:strong>Enable svchost.exe mitigation options</xhtml:strong> to <xhtml:strong>Enabled</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Link the GPO to your <xhtml:strong>Member Servers</xhtml:strong> Organizational Units (e.g., <xhtml:code>OU=Tier1_Servers,OU=Servers,DC=contoso,DC=com</xhtml:code>).</xhtml:li>
+          <xhtml:li>Stage deployment across non-production and pilot server groups before enabling domain-wide.</xhtml:li>
+          <xhtml:li>Perform a scheduled server restart during an authorized maintenance window to apply process mitigations across all system services.</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Use this method to apply the setting locally on standalone systems or during reference image build phases.</xhtml:p>
+        <xhtml:p>Use this method to apply the setting locally during base image creation, automated provisioning, or standalone server testing.</xhtml:p>
         <xhtml:p>
           <xhtml:a href="implementation_scripts/Configure-SvchostMitigation.ps1">Download Script: Configure-SvchostMitigation.ps1</xhtml:a>
         </xhtml:p>
@@ -7421,18 +7429,47 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
           <xhtml:code># Configure-SvchostMitigation.ps1
 # Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code.
 
+[CmdletBinding()]
+param()
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+# Verify minimum operating system build compatibility (Windows 10 1903 / Build 18362 or Windows Server 2022 / Build 20348)
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "The operating system build ($($osBuild)) does not support EnableSvchostMitigationPolicy (requires Windows Server 2022+ or Windows 10 1903+)."
+    exit 1
+}
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ValueData = 1
 
-Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+try {
+    if (-not (Test-Path -Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+        Write-Host "Created registry key: $($RegPath)" -ForegroundColor Gray
+    }
 
-if (-not (Test-Path $RegPath)) {
-    New-Item -Path $RegPath -Force | Out-Null
-}
+    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
 
-Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
-Write-Host "Hardening applied successfully." -ForegroundColor Green</xhtml:code>
+    # Validate written value
+    $configuredValue = (Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction Stop).$ValueName
+    if ($configuredValue -eq $ValueData) {
+        Write-Host "Hardening applied successfully: $($ValueName) set to 1." -ForegroundColor Green
+        Write-Host "Note: This policy applies to newly created svchost.exe instances. A full system restart is required to protect services initialized at system boot." -ForegroundColor Yellow
+        exit 0
+    } else {
+        throw "Failed to verify registry property value after write."
+    }
+} catch {
+    Write-Error "Error configuring svchost.exe mitigation options: $($_.Exception.Message)"
+    exit 1
+}</xhtml:code>
         </xhtml:pre>
         <xhtml:p>
           <xhtml:em>To verify the setting has been applied:</xhtml:em>
@@ -7444,21 +7481,39 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</xhtml:code>
           <xhtml:code># Get-SvchostMitigationStatus.ps1
 # Description: Audits the configuration state of svchost.exe mitigation options.
 
+[CmdletBinding()]
+param()
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ExpectedValue = 1
 
 Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
 
-if (Test-Path $RegPath) {
-    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
-        Write-Host "Audit Result: Compliant. svchost.exe mitigation options are enabled." -ForegroundColor Green
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "Audit Result: Non-Applicable / Unsupported. OS build $($osBuild) precedes the introduction of svchost mitigation policy (requires Windows Server 2022+ or Windows 10 1903+)."
+    exit 1
+}
+
+if (Test-Path -Path $RegPath) {
+    $item = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $item -and $item.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. svchost.exe mitigation policy is enabled in registry ($($RegPath)\$($ValueName) = 1)." -ForegroundColor Green
+
+        # Optional check for running svchost processes
+        $svchostProcesses = Get-Process -Name "svchost" -ErrorAction SilentlyContinue
+        if ($svchostProcesses) {
+            Write-Host "Found $($svchostProcesses.Count) running svchost.exe process instances. Process mitigation flags are enforced dynamically at process spawn by the Service Control Manager." -ForegroundColor Gray
+        }
+
         exit 0
     }
 }
 
-Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured." -ForegroundColor Red
+Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured ($($RegPath)\$($ValueName))." -ForegroundColor Red
 exit 1</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
@@ -7466,18 +7521,47 @@ exit 1</xhtml:code>
       <fix system="urn:xccdf:fix:script:powershell"># Configure-SvchostMitigation.ps1
 # Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code.
 
+[CmdletBinding()]
+param()
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+# Verify minimum operating system build compatibility (Windows 10 1903 / Build 18362 or Windows Server 2022 / Build 20348)
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "The operating system build ($($osBuild)) does not support EnableSvchostMitigationPolicy (requires Windows Server 2022+ or Windows 10 1903+)."
+    exit 1
+}
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ValueData = 1
 
-Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+try {
+    if (-not (Test-Path -Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+        Write-Host "Created registry key: $($RegPath)" -ForegroundColor Gray
+    }
 
-if (-not (Test-Path $RegPath)) {
-    New-Item -Path $RegPath -Force | Out-Null
-}
+    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
 
-Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
-Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
+    # Validate written value
+    $configuredValue = (Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction Stop).$ValueName
+    if ($configuredValue -eq $ValueData) {
+        Write-Host "Hardening applied successfully: $($ValueName) set to 1." -ForegroundColor Green
+        Write-Host "Note: This policy applies to newly created svchost.exe instances. A full system restart is required to protect services initialized at system boot." -ForegroundColor Yellow
+        exit 0
+    } else {
+        throw "Failed to verify registry property value after write."
+    }
+} catch {
+    Write-Error "Error configuring svchost.exe mitigation options: $($_.Exception.Message)"
+    exit 1
+}</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2029" />
       </check>
@@ -40005,7 +40089,8 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs).</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs). <xhtml:em>(For Domain Controllers and Domain Member Servers, refer to [REQ-DC-029](../02-domain-controllers/configure-svchost-mitigation.md); for Tier 2 Client Workstations, refer to [REQ-END-030](../08-endpoints/configure-svchost-mitigation.md)).</xhtml:em>
+          </xhtml:li>
           <xhtml:li>
             <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 (1903 and above), Windows 11 Enterprise.</xhtml:li>
         </xhtml:ul>
@@ -40015,32 +40100,32 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>Privileged Access Workstations (PAWs) host highly sensitive administrative sessions and credentials. Securing the Service Host (<xhtml:code>svchost.exe</xhtml:code>) process is critical to preventing kernel-level security evasion and credential harvesting techniques.</xhtml:p>
-        <xhtml:p>Enabling <xhtml:code>svchost.exe</xhtml:code> mitigation options on PAWs restricts the behavior of the <xhtml:code>svchost.exe</xhtml:code> process to enhance security: 1. <xhtml:strong>Microsoft-Only Binary Enforcement</xhtml:strong>: Requires all binaries and dynamic-link libraries (DLLs) loaded into <xhtml:code>svchost.exe</xhtml:code> to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into <xhtml:code>svchost.exe</xhtml:code> instances to tamper with administrative service processes. 2. <xhtml:strong>Dynamic Code Blocking</xhtml:strong>: Prevents the execution of dynamically generated code (such as Just-In-Time compiled code) within <xhtml:code>svchost.exe</xhtml:code> processes, neutralizing typical in-memory exploitation vectors.</xhtml:p>
+        <xhtml:p>Privileged Access Workstations (PAWs) host the most sensitive administrative credentials in an Active Directory environment, including Tier 0 Domain Admin Kerberos tickets, directory service RPC sessions, and PKI private key operations. Because PAWs are dedicated, single-purpose administrative endpoints, securing the Service Host (<xhtml:code>svchost.exe</xhtml:code>) process is critical to preventing kernel-level security evasion, process injection, and credential theft.</xhtml:p>
+        <xhtml:p>Adversaries attempting to compromise administrative sessions frequently target <xhtml:code>svchost.exe</xhtml:code>: 1. <xhtml:strong>Process Injection &amp; Credential Harvesting</xhtml:strong>: Infiltrating an administrative session by injecting into a high-privilege <xhtml:code>svchost.exe</xhtml:code> process (<xhtml:code>CreateRemoteThread</xhtml:code>, <xhtml:code>QueueUserAPC</xhtml:code>, <xhtml:code>SetThreadContext</xhtml:code>) allows attackers to execute shellcode within the <xhtml:code>NT AUTHORITY\SYSTEM</xhtml:code> security context, evading endpoint monitoring and attempting to access memory spaces holding privileged administrative tokens. 2. <xhtml:strong>Reflective DLL Loading &amp; Dynamic Code Execution</xhtml:strong>: Advanced persistent threat (APT) frameworks execute memory-only payloads by allocating executable memory (<xhtml:code>VirtualAlloc</xhtml:code> with <xhtml:code>PAGE_EXECUTE_READWRITE</xhtml:code>) to bypass disk-based file scanners. 3. <xhtml:strong>Ghost Service Implants (MITRE ATT&amp;CK T1574.002)</xhtml:strong>: Dropping unsigned service DLLs and registering them under legitimate <xhtml:code>svchost.exe</xhtml:code> service groups to gain persistent administrative access.</xhtml:p>
+        <xhtml:p>Enabling <xhtml:code>svchost.exe</xhtml:code> mitigation options on PAWs restricts the behavior of every <xhtml:code>svchost.exe</xhtml:code> process through kernel-level mitigation policies: <xhtml:em> </xhtml:em>
+          <xhtml:em>Microsoft-Only Binary Enforcement (`PROCESS_CREATION_MITIGATION_POLICY_BLOCK_NON_MICROSOFT_BINARIES_ALWAYS_ON`)</xhtml:em>
+          <xhtml:em>: Requires all binaries and dynamic-link libraries (DLLs) loaded into `svchost.exe` to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into `svchost.exe` instances to tamper with administrative service processes. Any attempt to load non-Microsoft code is blocked with `STATUS_INVALID_IMAGE_HASH` (`0xC0000428`). </xhtml:em>
+          <xhtml:strong>Dynamic Code Execution Blocking (`PROCESS_CREATION_MITIGATION_POLICY_PROHIBIT_DYNAMIC_CODE_ALWAYS_ON`)</xhtml:strong>: Disallows the generation and execution of dynamic code within <xhtml:code>svchost.exe</xhtml:code> processes. This neutralizes in-memory shellcode execution, JIT compilation abuse, and typical process hollowing attack vectors. <xhtml:em> </xhtml:em>
+          <xhtml:em>Service Host Isolation</xhtml:em>*: On modern Windows 10/11 Enterprise systems with more than 3.5 GB of RAM, services run in separate, dedicated <xhtml:code>svchost.exe</xhtml:code> processes, ensuring each administrative service host is strictly isolated and independently enforced.</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
         <xhtml:ol>
-          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>) on a domain controller or management host.</xhtml:li>
-          <xhtml:li>Create a new GPO or edit an existing one (e.g., <xhtml:code>GPO_Hardening_PAW</xhtml:code>).</xhtml:li>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>) on a PAW or Domain Controller.</xhtml:li>
+          <xhtml:li>Edit the dedicated PAW hardening GPO (e.g., <xhtml:code>GPO_Hardening_PAW</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to:</xhtml:li>
           <xhtml:li>
             <xhtml:code>Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Configure the following setting:</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Policy</xhtml:em>*: <xhtml:code>Enable svchost.exe mitigation options</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Setting</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>Link the GPO to the PAW Organizational Unit (OU) containing the target systems.</xhtml:li>
+          <xhtml:li>Double-click <xhtml:strong>Enable svchost.exe mitigation options</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Select <xhtml:strong>Enabled</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Click <xhtml:strong>Apply</xhtml:strong>, then <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Link the GPO to the dedicated <xhtml:strong>PAW</xhtml:strong> Organizational Unit (<xhtml:code>OU=PAW,OU=Tier0,DC=contoso,DC=com</xhtml:code>).</xhtml:li>
+          <xhtml:li>Reboot the target PAW systems to ensure the mitigation policy is actively enforced across all system services.</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Use this method to apply the setting locally on standalone systems or during reference image build phases.</xhtml:p>
+        <xhtml:p>Use this method to apply the setting locally on standalone PAWs or during initial reference image provisioning.</xhtml:p>
         <xhtml:p>
           <xhtml:a href="implementation_scripts/Configure-SvchostMitigation.ps1">Download Script: Configure-SvchostMitigation.ps1</xhtml:a>
         </xhtml:p>
@@ -40048,18 +40133,47 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
           <xhtml:code># Configure-SvchostMitigation.ps1
 # Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code on PAWs.
 
+[CmdletBinding()]
+param()
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options for PAWs..." -ForegroundColor Cyan
+
+# Verify minimum operating system build compatibility (Windows 10 1903 / Build 18362 or Windows 11)
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "The operating system build ($($osBuild)) does not support EnableSvchostMitigationPolicy (requires Windows 10 1903+ or Windows 11)."
+    exit 1
+}
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ValueData = 1
 
-Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+try {
+    if (-not (Test-Path -Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+        Write-Host "Created registry key: $($RegPath)" -ForegroundColor Gray
+    }
 
-if (-not (Test-Path $RegPath)) {
-    New-Item -Path $RegPath -Force | Out-Null
-}
+    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
 
-Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
-Write-Host "Hardening applied successfully." -ForegroundColor Green</xhtml:code>
+    # Validate written value
+    $configuredValue = (Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction Stop).$ValueName
+    if ($configuredValue -eq $ValueData) {
+        Write-Host "Hardening applied successfully: $($ValueName) set to 1." -ForegroundColor Green
+        Write-Host "Note: This policy applies to newly created svchost.exe instances. A full system restart is required to protect services initialized at system boot." -ForegroundColor Yellow
+        exit 0
+    } else {
+        throw "Failed to verify registry property value after write."
+    }
+} catch {
+    Write-Error "Error configuring svchost.exe mitigation options on PAW: $($_.Exception.Message)"
+    exit 1
+}</xhtml:code>
         </xhtml:pre>
         <xhtml:p>
           <xhtml:em>To verify the setting has been applied:</xhtml:em>
@@ -40071,21 +40185,39 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</xhtml:code>
           <xhtml:code># Get-SvchostMitigationStatus.ps1
 # Description: Audits the configuration state of svchost.exe mitigation options on PAWs.
 
+[CmdletBinding()]
+param()
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ExpectedValue = 1
 
-Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options on PAW..." -ForegroundColor Cyan
 
-if (Test-Path $RegPath) {
-    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
-        Write-Host "Audit Result: Compliant. svchost.exe mitigation options are enabled." -ForegroundColor Green
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "Audit Result: Non-Applicable / Unsupported. OS build $($osBuild) precedes the introduction of svchost mitigation policy (requires Windows 10 1903+ or Windows 11)."
+    exit 1
+}
+
+if (Test-Path -Path $RegPath) {
+    $item = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $item -and $item.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. svchost.exe mitigation policy is enabled in registry ($($RegPath)\$($ValueName) = 1)." -ForegroundColor Green
+
+        # Optional check for running svchost processes
+        $svchostProcesses = Get-Process -Name "svchost" -ErrorAction SilentlyContinue
+        if ($svchostProcesses) {
+            Write-Host "Found $($svchostProcesses.Count) running svchost.exe process instances. Process mitigation flags are enforced dynamically at process spawn by the Service Control Manager." -ForegroundColor Gray
+        }
+
         exit 0
     }
 }
 
-Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured." -ForegroundColor Red
+Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured ($($RegPath)\$($ValueName))." -ForegroundColor Red
 exit 1</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
@@ -40093,18 +40225,47 @@ exit 1</xhtml:code>
       <fix system="urn:xccdf:fix:script:powershell"># Configure-SvchostMitigation.ps1
 # Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code on PAWs.
 
+[CmdletBinding()]
+param()
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options for PAWs..." -ForegroundColor Cyan
+
+# Verify minimum operating system build compatibility (Windows 10 1903 / Build 18362 or Windows 11)
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "The operating system build ($($osBuild)) does not support EnableSvchostMitigationPolicy (requires Windows 10 1903+ or Windows 11)."
+    exit 1
+}
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ValueData = 1
 
-Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+try {
+    if (-not (Test-Path -Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+        Write-Host "Created registry key: $($RegPath)" -ForegroundColor Gray
+    }
 
-if (-not (Test-Path $RegPath)) {
-    New-Item -Path $RegPath -Force | Out-Null
-}
+    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
 
-Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
-Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
+    # Validate written value
+    $configuredValue = (Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction Stop).$ValueName
+    if ($configuredValue -eq $ValueData) {
+        Write-Host "Hardening applied successfully: $($ValueName) set to 1." -ForegroundColor Green
+        Write-Host "Note: This policy applies to newly created svchost.exe instances. A full system restart is required to protect services initialized at system boot." -ForegroundColor Yellow
+        exit 0
+    } else {
+        throw "Failed to verify registry property value after write."
+    }
+} catch {
+    Write-Error "Error configuring svchost.exe mitigation options on PAW: $($_.Exception.Message)"
+    exit 1
+}</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7017" />
       </check>
@@ -67995,7 +68156,7 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8029" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-030" severity="medium" weight="10.0" selected="false">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-030" severity="high" weight="10.0" selected="false">
       <title>[REQ-END-030] Configure svchost.exe Mitigation Options</title>
       <description>
         <xhtml:p>
@@ -68003,7 +68164,8 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations.</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations. <xhtml:em>(For Domain Controllers and Domain Member Servers, refer to [REQ-DC-029](../02-domain-controllers/configure-svchost-mitigation.md); for Privileged Access Workstations, refer to [REQ-PAW-017](../07-paws/configure-svchost-mitigation.md)).</xhtml:em>
+          </xhtml:li>
           <xhtml:li>
             <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 (1903 and above), Windows 11 Enterprise/Professional.</xhtml:li>
         </xhtml:ul>
@@ -68013,32 +68175,32 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>The Service Host (<xhtml:code>svchost.exe</xhtml:code>) process runs multiple system services. Because these services execute with high privileges, they are frequently targeted for process injection, hollowing, or spoofing to execute arbitrary code or harvest credentials.</xhtml:p>
-        <xhtml:p>Enabling <xhtml:code>svchost.exe</xhtml:code> mitigation options restricts the behavior of the <xhtml:code>svchost.exe</xhtml:code> process to enhance security: 1. <xhtml:strong>Microsoft-Only Binary Enforcement</xhtml:strong>: Requires all binaries and dynamic-link libraries (DLLs) loaded into <xhtml:code>svchost.exe</xhtml:code> to be digitally signed by Microsoft. This prevents attackers from injecting custom, unsigned malicious DLLs into <xhtml:code>svchost.exe</xhtml:code> instances. 2. <xhtml:strong>Dynamic Code Blocking</xhtml:strong>: Prevents the execution of dynamically generated code (such as Just-In-Time compiled code) within <xhtml:code>svchost.exe</xhtml:code> processes, neutralizing typical in-memory exploitation vectors.</xhtml:p>
+        <xhtml:p>The Service Host (<xhtml:code>svchost.exe</xhtml:code>) process is a fundamental Windows operating system binary designed to host one or more shared or isolated system services. Because <xhtml:code>svchost.exe</xhtml:code> instances execute with elevated privileges (such as <xhtml:code>NT AUTHORITY\SYSTEM</xhtml:code>, <xhtml:code>NT AUTHORITY\LOCAL SERVICE</xhtml:code>, or <xhtml:code>NT AUTHORITY\NETWORK SERVICE</xhtml:code>) and naturally maintain persistent execution across user sessions, they represent one of the primary targets for threat actors seeking privilege escalation, defense evasion, and persistence on client workstations.</xhtml:p>
+        <xhtml:p>In client endpoint environments, workstations serve as the primary initial access vector for attackers through phishing attachments, malicious browser downloads, drive-by exploits, or compromised peripheral devices. Once a basic user-level foothold is achieved, adversaries frequently attempt to blend malicious activity into legitimate system traffic by targeting <xhtml:code>svchost.exe</xhtml:code>: 1. <xhtml:strong>Process Injection &amp; Hollowing (MITRE ATT&amp;CK T1055, T1055.012)</xhtml:strong>: Attackers create a suspended <xhtml:code>svchost.exe</xhtml:code> process or inject malicious code into an existing service host instance (<xhtml:code>CreateRemoteThread</xhtml:code>, <xhtml:code>QueueUserAPC</xhtml:code>, <xhtml:code>SetThreadContext</xhtml:code>). This disguises command-and-control (C2) beaconing (e.g., Cobalt Strike, Sliver, Brute Ratel) under trusted system process names and bypasses basic endpoint security inspection. 2. <xhtml:strong>Dynamic Code Execution &amp; Reflective Loading</xhtml:strong>: In-memory payloads and exploitation frameworks rely on allocating executable memory (<xhtml:code>PAGE_EXECUTE_READWRITE</xhtml:code> via <xhtml:code>VirtualAlloc</xhtml:code> or <xhtml:code>VirtualProtect</xhtml:code>) to dynamically decrypt, compile, or inject unmapped DLLs directly into process memory without touching disk. 3. <xhtml:strong>Ghost Service DLL Hijacking &amp; Malicious Service Registration (MITRE ATT&amp;CK T1574.002)</xhtml:strong>: Attackers modify service registry keys to point <xhtml:code>ServiceDll</xhtml:code> to unsigned, arbitrary third-party DLLs. When the Service Control Manager starts the service, <xhtml:code>svchost.exe</xhtml:code> loads the unauthorized DLL with SYSTEM privileges.</xhtml:p>
+        <xhtml:p>Enabling <xhtml:code>svchost.exe</xhtml:code> mitigation options instructs the Windows Service Control Manager (SCM, <xhtml:code>services.exe</xhtml:code>) to apply strict kernel-enforced process creation mitigation policies whenever a new <xhtml:code>svchost.exe</xhtml:code> instance is spawned: <xhtml:em> </xhtml:em>
+          <xhtml:em>Microsoft-Only Binary Enforcement (`PROCESS_CREATION_MITIGATION_POLICY_BLOCK_NON_MICROSOFT_BINARIES_ALWAYS_ON`)</xhtml:em>
+          <xhtml:em>: Enforces that every executable binary and Dynamic Link Library (DLL) loaded into the address space of any `svchost.exe` process must be digitally signed by a trusted Microsoft certificate (Windows Production Root, WHQL, or Microsoft Corporation). Any attempt by unsigned, self-signed, or third-party binaries to map into `svchost.exe` is immediately terminated by the Windows kernel with `STATUS_INVALID_IMAGE_HASH` (`0xC0000428`). </xhtml:em>
+          <xhtml:strong>Dynamic Code Execution Blocking (`PROCESS_CREATION_MITIGATION_POLICY_PROHIBIT_DYNAMIC_CODE_ALWAYS_ON`)</xhtml:strong>: Disallows the generation and execution of dynamic code within <xhtml:code>svchost.exe</xhtml:code> processes. This kernel mitigation blocks arbitrary memory page execution, preventing JIT compilation abuse, shellcode execution, and reflective DLL injection inside all system service containers. <xhtml:em> </xhtml:em>
+          <xhtml:em>Service Host Splitting Synergies</xhtml:em>*: Since Windows 10 Version 1703, on workstations with more than 3.5 GB of RAM (<xhtml:code>SvcHostSplitThresholdInKB</xhtml:code>), Windows automatically isolates individual services into dedicated, standalone <xhtml:code>svchost.exe</xhtml:code> processes. When <xhtml:code>EnableSvchostMitigationPolicy</xhtml:code> is active, this per-service architecture ensures that every isolated service process receives independent, uncompromising mitigation enforcement.</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
         <xhtml:ol>
-          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>) on a domain controller or management host.</xhtml:li>
-          <xhtml:li>Create a new GPO or edit an existing one (e.g., <xhtml:code>GPO_Hardening_Endpoints</xhtml:code>).</xhtml:li>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>) on an administrative workstation or Domain Controller.</xhtml:li>
+          <xhtml:li>Create a new GPO or edit an existing endpoint hardening GPO (e.g., <xhtml:code>GPO_Hardening_Tier2_Endpoints</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to:</xhtml:li>
           <xhtml:li>
             <xhtml:code>Computer Configuration\Policies\Administrative Templates\System\Service Control Manager Settings\Security Settings</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Configure the following setting:</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Policy</xhtml:em>*: <xhtml:code>Enable svchost.exe mitigation options</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Setting</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>Link the GPO to the appropriate Organizational Unit (OU) containing the target client endpoints.</xhtml:li>
+          <xhtml:li>In the right-hand details pane, double-click <xhtml:strong>Enable svchost.exe mitigation options</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Select <xhtml:strong>Enabled</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Click <xhtml:strong>Apply</xhtml:strong>, then click <xhtml:strong>OK</xhtml:strong>.</xhtml:li>
+          <xhtml:li>Link the GPO to the Organizational Unit (OU) containing your Tier 2 client workstations (e.g., <xhtml:code>OU=Workstations,DC=contoso,DC=com</xhtml:code>).</xhtml:li>
+          <xhtml:li>After applying the policy, schedule or initiate a system restart on target endpoints to enforce the mitigation policy across all boot-level service host instances.</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Use this method to apply the setting locally on standalone systems or during reference image build phases.</xhtml:p>
+        <xhtml:p>Use this method to apply the setting locally during gold master image creation, automated Intune / MDM provisioning, or standalone testing.</xhtml:p>
         <xhtml:p>
           <xhtml:a href="implementation_scripts/Configure-SvchostMitigation.ps1">Download Script: Configure-SvchostMitigation.ps1</xhtml:a>
         </xhtml:p>
@@ -68046,18 +68208,47 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
           <xhtml:code># Configure-SvchostMitigation.ps1
 # Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code.
 
+[CmdletBinding()]
+param()
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+# Verify minimum operating system build compatibility (Windows 10 1903 / Build 18362 or Windows Server 2022 / Build 20348)
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "The operating system build ($($osBuild)) does not support EnableSvchostMitigationPolicy (requires Windows 10 1903+ or Windows Server 2022+)."
+    exit 1
+}
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ValueData = 1
 
-Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+try {
+    if (-not (Test-Path -Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+        Write-Host "Created registry key: $($RegPath)" -ForegroundColor Gray
+    }
 
-if (-not (Test-Path $RegPath)) {
-    New-Item -Path $RegPath -Force | Out-Null
-}
+    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
 
-Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
-Write-Host "Hardening applied successfully." -ForegroundColor Green</xhtml:code>
+    # Validate written value
+    $configuredValue = (Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction Stop).$ValueName
+    if ($configuredValue -eq $ValueData) {
+        Write-Host "Hardening applied successfully: $($ValueName) set to 1." -ForegroundColor Green
+        Write-Host "Note: This policy applies to newly created svchost.exe instances. A full system restart is required to protect services initialized at system boot." -ForegroundColor Yellow
+        exit 0
+    } else {
+        throw "Failed to verify registry property value after write."
+    }
+} catch {
+    Write-Error "Error configuring svchost.exe mitigation options: $($_.Exception.Message)"
+    exit 1
+}</xhtml:code>
         </xhtml:pre>
         <xhtml:p>
           <xhtml:em>To verify the setting has been applied:</xhtml:em>
@@ -68069,21 +68260,39 @@ Write-Host "Hardening applied successfully." -ForegroundColor Green</xhtml:code>
           <xhtml:code># Get-SvchostMitigationStatus.ps1
 # Description: Audits the configuration state of svchost.exe mitigation options.
 
+[CmdletBinding()]
+param()
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ExpectedValue = 1
 
 Write-Host "Auditing hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
 
-if (Test-Path $RegPath) {
-    $value = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $value -and $value.$ValueName -eq $ExpectedValue) {
-        Write-Host "Audit Result: Compliant. svchost.exe mitigation options are enabled." -ForegroundColor Green
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "Audit Result: Non-Applicable / Unsupported. OS build $($osBuild) precedes the introduction of svchost mitigation policy (requires Windows 10 1903+ or Windows Server 2022+)."
+    exit 1
+}
+
+if (Test-Path -Path $RegPath) {
+    $item = Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $item -and $item.$ValueName -eq $ExpectedValue) {
+        Write-Host "Audit Result: Compliant. svchost.exe mitigation policy is enabled in registry ($($RegPath)\$($ValueName) = 1)." -ForegroundColor Green
+
+        # Optional check for running svchost processes
+        $svchostProcesses = Get-Process -Name "svchost" -ErrorAction SilentlyContinue
+        if ($svchostProcesses) {
+            Write-Host "Found $($svchostProcesses.Count) running svchost.exe process instances. Process mitigation flags are enforced dynamically at process spawn by the Service Control Manager." -ForegroundColor Gray
+        }
+
         exit 0
     }
 }
 
-Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured." -ForegroundColor Red
+Write-Host "Audit Result: Non-Compliant. svchost.exe mitigation options are disabled or not configured ($($RegPath)\$($ValueName))." -ForegroundColor Red
 exit 1</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
@@ -68091,18 +68300,47 @@ exit 1</xhtml:code>
       <fix system="urn:xccdf:fix:script:powershell"># Configure-SvchostMitigation.ps1
 # Description: Configures svchost.exe mitigation options to enforce Microsoft-signed binaries and block dynamic code.
 
+[CmdletBinding()]
+param()
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+
+# Verify minimum operating system build compatibility (Windows 10 1903 / Build 18362 or Windows Server 2022 / Build 20348)
+$osVersion = [System.Environment]::OSVersion.Version
+$osBuild = $osVersion.Build
+
+if ($osBuild -lt 18362) {
+    Write-Warning "The operating system build ($($osBuild)) does not support EnableSvchostMitigationPolicy (requires Windows 10 1903+ or Windows Server 2022+)."
+    exit 1
+}
+
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SCMConfig"
 $ValueName = "EnableSvchostMitigationPolicy"
 $ValueData = 1
 
-Write-Host "Applying hardening requirement: Configure svchost.exe mitigation options..." -ForegroundColor Cyan
+try {
+    if (-not (Test-Path -Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+        Write-Host "Created registry key: $($RegPath)" -ForegroundColor Gray
+    }
 
-if (-not (Test-Path $RegPath)) {
-    New-Item -Path $RegPath -Force | Out-Null
-}
+    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
 
-Set-ItemProperty -Path $RegPath -Name $ValueName -Value $ValueData -Type DWord -Force | Out-Null
-Write-Host "Hardening applied successfully." -ForegroundColor Green</fix>
+    # Validate written value
+    $configuredValue = (Get-ItemProperty -Path $RegPath -Name $ValueName -ErrorAction Stop).$ValueName
+    if ($configuredValue -eq $ValueData) {
+        Write-Host "Hardening applied successfully: $($ValueName) set to 1." -ForegroundColor Green
+        Write-Host "Note: This policy applies to newly created svchost.exe instances. A full system restart is required to protect services initialized at system boot." -ForegroundColor Yellow
+        exit 0
+    } else {
+        throw "Failed to verify registry property value after write."
+    }
+} catch {
+    Write-Error "Error configuring svchost.exe mitigation options: $($_.Exception.Message)"
+    exit 1
+}</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8030" />
       </check>
