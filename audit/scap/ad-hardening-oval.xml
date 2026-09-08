@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-09-08T09:20:04Z</oval:timestamp>
+    <oval:timestamp>2026-09-08T09:54:40Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -7102,14 +7102,13 @@ Restricting WMI to a static port and process solves these security challenges:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Active Directory domains heavily rely on the Server Message Block (SMB) protocol (TCP 445) for distributing group policies and replication via the SYSVOL and NETLOGON file shares. Therefore, SMB cannot simply be blocked at the network level on domain controllers.
+        <description>Active Directory domains heavily rely on the Server Message Block (SMB) protocol (TCP 445) for distributing group policies and replication via the SYSVOL and NETLOGON file shares. Because every joined domain member requires access to these shares, TCP port 445 cannot simply be blocked at the network perimeter or host firewall level on Domain Controllers.
 
-However, adversaries and common hacktools (e.g., PSExec, Mimikatz) abuse this exposure. They establish connections to SMB named pipes (such as `\PIPE\svcctl` for the Service Control Manager or `\PIPE\samr` for the Security Account Manager) to remotely execute code, manipulate services, or query administrative APIs.
+However, adversaries and post-exploitation frameworks (such as Impacket PsExec, SMBExec, AExec, Coercer, PetitPotam, and Mimikatz) routinely abuse this open SMB surface. Windows Remote Procedure Call (RPC) supports two primary transport protocols:
+1. **RPC over TCP/IP (`ncacn_ip_tcp`)**: Binds each service dynamically (or to configured static ports) across ephemeral TCP ports (49152-65535).
+2. **RPC over Named Pipes (`ncacn_np`)**: Multiplexes RPC requests directly through SMB named pipes over TCP port 445.
 
-Implementing Windows Firewall **RPC Filters** solves this vulnerability:
-1. **Granular Control over Named Pipes**: Unlike standard L3/L4 firewall rules which can only allow or block all of TCP 445, RPC Filters inspect the RPC interface UUID inside the SMB payload.
-2. **Selective Blocking**: Filters can block administrative RPC interfaces (like Service Control Manager `[MS-SCMR]`, Task Scheduler `[MS-TSCH]`, and Terminal Services runtime) over the `ncacn_np` (named pipe) transport, while leaving standard file sharing and replication functional.
-3. **Exploit Containment**: By blocking interfaces like the Terminal Services runtime or MimiCom (Mimikatz interface), lateral movement and remote code execution techniques are contained.</description>
+Standard Layer 3 and Layer 4 firewall rules can only permit or block the entire TCP port 445. If TCP 445 is permitted, an attacker with network access can connect to sensitive SMB named pipes (such as `\PIPE\svcctl` or `\PIPE\atsvc`) to execute remote code or trigger authentication coercion without ever needing access to dynamic RPC ports.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-NET-012 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:4012" />
