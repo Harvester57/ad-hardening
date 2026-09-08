@@ -36853,7 +36853,7 @@ Write-Host "[+] Local system configured to use secure WSUS server: $WsusServerUr
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:6005" />
       </check>
     </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-006" severity="medium" weight="10.0" selected="false">
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-OPS-006" severity="high" weight="10.0" selected="false">
       <title>[REQ-OPS-006] Redirect Default Users and Computers Containers</title>
       <description>
         <xhtml:p>
@@ -36861,9 +36861,11 @@ Write-Host "[+] Local system configured to use secure WSUS server: $WsusServerUr
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Active Directory Domain Controllers (Domain-wide structural policy)</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016 and above</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Domain Functional Level</xhtml:strong>: Windows Server 2003 or higher</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -36871,283 +36873,561 @@ Write-Host "[+] Local system configured to use secure WSUS server: $WsusServerUr
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>By default, new user and computer objects created in an Active Directory domain are placed in the default containers: <xhtml:em> </xhtml:em>
-          <xhtml:em>Users</xhtml:em>
+        <xhtml:p>In default Active Directory deployments, newly provisioned user and computer accounts are automatically instantiated within two legacy default containers located at the root of the domain: <xhtml:em> </xhtml:em>
+          <xhtml:em>Default Users Container</xhtml:em>
           <xhtml:em>: `CN=Users,DC=domain,DC=com` </xhtml:em>
-          <xhtml:strong>Computers</xhtml:strong>: <xhtml:code>CN=Computers,DC=domain,DC=com</xhtml:code>
+          <xhtml:strong>Default Computers Container</xhtml:strong>: <xhtml:code>CN=Computers,DC=domain,DC=com</xhtml:code>
         </xhtml:p>
-        <xhtml:p>These default paths present significant security and operational issues: 1. <xhtml:strong>Lack of GPO Enforcement</xhtml:strong>: Default containers are generic container objects, not Organizational Units (OUs). Consequently, Group Policy Objects (GPOs) cannot be linked directly to them. Any newly joined computer or newly created user remains unhardened and outside the scope of organizational baseline policies until an administrator manually moves them to an OU. 2. <xhtml:strong>Insecure Window of Exposure</xhtml:strong>: The period between the initial domain join/creation and the manual movement of the object creates a window of vulnerability where systems run without mandatory security controls (e.g., endpoint firewall rules, AppLocker, audit configurations, credential protection). 3. <xhtml:strong>Absence of Deletion Protection</xhtml:strong>: Default containers do not possess the standard accidental deletion protection attributes that can be applied to OUs, increasing the risk of administrative errors.</xhtml:p>
-        <xhtml:p>Redirecting the default creation paths of users and computers to dedicated, hardened OUs ensures that newly created objects immediately inherit appropriate GPOs and are protected against accidental deletion from the moment of creation.</xhtml:p>
+        <xhtml:p>From an enterprise security and systems architecture perspective, placing active operational assets in these default locations creates severe defensive gaps, policy blind spots, and lateral movement vulnerabilities.</xhtml:p>
       </rationale>
       <fixtext>
-        <xhtml:h3>Option A: Active Directory Administrative Tools &amp; CLI (Preferred)</xhtml:h3>
+        <xhtml:h3>Option A: Active Directory Administrative Center &amp; Native CLI Tools (Preferred)</xhtml:h3>
+        <xhtml:p>Execute the following procedure on a Domain Controller using an account with <xhtml:strong>Domain Admins</xhtml:strong> or <xhtml:strong>Enterprise Admins</xhtml:strong> privileges.</xhtml:p>
+        <xhtml:h4>1. Create and Protect Staging Organizational Units</xhtml:h4>
         <xhtml:ol>
-          <xhtml:li>Log on to a Domain Controller or a management host with <xhtml:strong>Domain Admins</xhtml:strong> or <xhtml:strong>Enterprise Admins</xhtml:strong> credentials.</xhtml:li>
-          <xhtml:li>Open <xhtml:strong>Active Directory Users and Computers</xhtml:strong> (<xhtml:code>dsa.msc</xhtml:code>).</xhtml:li>
-          <xhtml:li>Create two new Organizational Units (OUs) at the domain root:</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Name</xhtml:em>*: <xhtml:code>New-Users</xhtml:code>
+          <xhtml:li>Open <xhtml:strong>Active Directory Administrative Center</xhtml:strong> (<xhtml:code>dsac.exe</xhtml:code>) or <xhtml:strong>Active Directory Users and Computers</xhtml:strong> (<xhtml:code>dsa.msc</xhtml:code>).</xhtml:li>
+          <xhtml:li>Ensure <xhtml:strong>View -&gt; Advanced Features</xhtml:strong> is enabled in <xhtml:code>dsa.msc</xhtml:code>.</xhtml:li>
+          <xhtml:li>Create two dedicated staging Organizational Units at the appropriate administrative level (e.g., at the domain root or under a dedicated <xhtml:code>Staging</xhtml:code> hierarchy):</xhtml:li>
+          <xhtml:li>* <xhtml:code>OU=Staging-Computers,DC=domain,DC=com</xhtml:code>
           </xhtml:li>
-          <xhtml:li>
-            <xhtml:em> </xhtml:em>
-            <xhtml:em>Name</xhtml:em>*: <xhtml:code>New-Computers</xhtml:code>
+          <xhtml:li>* <xhtml:code>OU=Staging-Users,DC=domain,DC=com</xhtml:code>
           </xhtml:li>
-          <xhtml:li>For both OUs, ensure that accidental deletion protection is enabled:</xhtml:li>
+          <xhtml:li>For both OUs, verify that accidental deletion protection is active:</xhtml:li>
           <xhtml:li>
             <xhtml:em> Right-click the OU, select </xhtml:em>
-            <xhtml:em>Properties</xhtml:em>*.</xhtml:li>
+            <xhtml:em>Properties</xhtml:em>
+            <xhtml:em>, navigate to the </xhtml:em>
+            <xhtml:em>Object</xhtml:em>* tab.</xhtml:li>
           <xhtml:li>
-            <xhtml:em> Navigate to the </xhtml:em>
-            <xhtml:em>Object</xhtml:em>
-            <xhtml:em> tab (ensure </xhtml:em>
-            <xhtml:em>View -&gt; Advanced Features</xhtml:em>* is enabled in <xhtml:code>dsa.msc</xhtml:code> to see this tab).</xhtml:li>
-          <xhtml:li>
-            <xhtml:em> Check </xhtml:em>
+            <xhtml:em> Verify that </xhtml:em>
             <xhtml:em>Protect object from accidental deletion</xhtml:em>
-            <xhtml:em> and click </xhtml:em>
+            <xhtml:em> is checked. Click </xhtml:em>
             <xhtml:em>OK</xhtml:em>*.</xhtml:li>
-          <xhtml:li>Open an elevated command prompt on a Domain Controller.</xhtml:li>
-          <xhtml:li>Run the following command to redirect the default container for new computer objects:</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>2. Link Baseline Quarantine Group Policy Objects</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
+          <xhtml:li>Create and link a dedicated quarantine baseline GPO to <xhtml:code>OU=Staging-Computers</xhtml:code>:</xhtml:li>
+          <xhtml:li>* Enforce Windows LAPS with randomized high-entropy passwords.</xhtml:li>
+          <xhtml:li>* Enable Windows Firewall for all profiles with default inbound block rules, permitting only essential management traffic from authorized deployment servers and DCs.</xhtml:li>
+          <xhtml:li>* Enable Windows Defender Antivirus real-time protection and Credential Guard.</xhtml:li>
+          <xhtml:li>Link appropriate baseline policies to <xhtml:code>OU=Staging-Users</xhtml:code> (e.g., enforce Kerberos pre-authentication, smart card enforcement, or account disablement pending onboarding validation).</xhtml:li>
+        </xhtml:ol>
+        <xhtml:h4>3. Execute Container Redirection</xhtml:h4>
+        <xhtml:ol>
+          <xhtml:li>Open an elevated Command Prompt (<xhtml:code>cmd.exe</xhtml:code>) on a Domain Controller.</xhtml:li>
+          <xhtml:li>Redirect the default computer container to the new staging OU:</xhtml:li>
           <xhtml:li>
             <xhtml:code />`cmd</xhtml:li>
-          <xhtml:li>redircmp.exe OU=New-Computers,DC=domain,DC=local</xhtml:li>
+          <xhtml:li>redircmp.exe "OU=Staging-Computers,DC=domain,DC=com"</xhtml:li>
           <xhtml:li>
             <xhtml:code />
             <xhtml:code />
           </xhtml:li>
           <xhtml:li>
-            <xhtml:em>(Replace `DC=domain,DC=local` with the actual Distinguished Name of your domain).</xhtml:em>
+            <xhtml:em>(Replace `DC=domain,DC=com` with the actual Distinguished Name of the domain).</xhtml:em>
           </xhtml:li>
-          <xhtml:li>Run the following command to redirect the default container for new user objects:</xhtml:li>
+          <xhtml:li>Verify command output:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code />`text</xhtml:li>
+          <xhtml:li>Redirection was successful.</xhtml:li>
+          <xhtml:li>
+            <xhtml:code />
+            <xhtml:code />
+          </xhtml:li>
+          <xhtml:li>Redirect the default user container to the new staging OU:</xhtml:li>
           <xhtml:li>
             <xhtml:code />`cmd</xhtml:li>
-          <xhtml:li>redirusr.exe OU=New-Users,DC=domain,DC=local</xhtml:li>
+          <xhtml:li>redirusr.exe "OU=Staging-Users,DC=domain,DC=com"</xhtml:li>
           <xhtml:li>
             <xhtml:code />
             <xhtml:code />
           </xhtml:li>
           <xhtml:li>
-            <xhtml:em>(Replace `DC=domain,DC=local` with the actual Distinguished Name of your domain).</xhtml:em>
+            <xhtml:em>(Replace `DC=domain,DC=com` with the actual Distinguished Name of the domain).</xhtml:em>
           </xhtml:li>
-          <xhtml:li>Verify that the output of both commands states: <xhtml:code>Redirection was successful.</xhtml:code>
+          <xhtml:li>Verify command output:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code />`text</xhtml:li>
+          <xhtml:li>Redirection was successful.</xhtml:li>
+          <xhtml:li>
+            <xhtml:code />
+            <xhtml:code />
           </xhtml:li>
         </xhtml:ol>
+        <xhtml:h4>4. Delegate Computer Joining Permissions on Staging-Computers OU</xhtml:h4>
+        <xhtml:p>If authorized provisioning accounts or automated imaging systems (SCCM/MECM, MDT, WDS) need to join computers: 1. In <xhtml:code>dsa.msc</xhtml:code>, right-click <xhtml:code>OU=Staging-Computers</xhtml:code> and select <xhtml:strong>Delegate Control...</xhtml:strong>. 2. Add the designated provisioning service account or security group (e.g., <xhtml:code>SVC_ComputerJoiner_gMSA</xhtml:code> or <xhtml:code>GG_Workstation_Provisioning</xhtml:code>). 3. Select <xhtml:strong>Create a custom task to delegate</xhtml:strong> -&gt; <xhtml:strong>Next</xhtml:strong>. 4. Select <xhtml:strong>Only the following objects in the folder</xhtml:strong> -&gt; check <xhtml:strong>Computer objects</xhtml:strong> -&gt; check <xhtml:strong>Create selected objects in this folder</xhtml:strong>. 5. Click <xhtml:strong>Next</xhtml:strong>, grant <xhtml:code>Read</xhtml:code> and <xhtml:code>Write</xhtml:code> permissions for computer properties, and finish the wizard.</xhtml:p>
         <xhtml:hr />
-        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Run the following scripts on a Domain Controller or administrative system with remote AD management tools.</xhtml:p>
-        <xhtml:h4>1. Local Audit</xhtml:h4>
+        <xhtml:h3>Option B: PowerShell Automated Administration (Audit &amp; Remediation)</xhtml:h3>
+        <xhtml:p>The following PowerShell scripts run natively on <xhtml:strong>Windows PowerShell 5.1</xhtml:strong> on Domain Controllers with the Active Directory RSAT module installed.</xhtml:p>
+        <xhtml:h4>1. Local Audit (Audit-DefaultContainers.ps1)</xhtml:h4>
+        <xhtml:p>This script audits the redirection state of both user and computer containers, validates accidental deletion protection, verifies GPO linkages, and flags any unmanaged residual accounts remaining in legacy containers.</xhtml:p>
         <xhtml:p>
           <xhtml:a href="audit_scripts/Audit-DefaultContainers.ps1">Download Script: Audit-DefaultContainers.ps1</xhtml:a>
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Audit-DefaultContainers.ps1
-# Description: Audits if the default user and computer containers have been redirected to protected OUs.
+# Description: Audits Active Directory default user and computer container redirection,
+#              verifies accidental deletion protection, checks GPO linkage, and inventories residual accounts.
+# Target Engine: Windows PowerShell 5.1
+
+Write-Host "--- Auditing Active Directory Default Containers Redirection ---" -ForegroundColor Cyan
+
+# 1. Verify Active Directory module availability
+if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
+    Write-Host "VULNERABLE: The ActiveDirectory PowerShell module is not installed or available on this system." -ForegroundColor Red
+    exit 1
+}
 
 Import-Module ActiveDirectory
 
-Write-Host "--- Auditing Default User and Computer Containers Redirection ---" -ForegroundColor Cyan
+$isVulnerable = $false
 
 try {
-    $Domain = Get-ADDomain -ErrorAction Stop
-    $DomainDN = $Domain.DistinguishedName
-    $DefaultComputersDN = "CN=Computers,$($DomainDN)"
-    $DefaultUsersDN = "CN=Users,$($DomainDN)"
-    
-    $Compliant = $true
-    
-    # 1. Check Computers Container
-    Write-Host "[+] Current Computers Container: $($Domain.ComputersContainer)" -ForegroundColor Gray
-    if ($Domain.ComputersContainer -eq $DefaultComputersDN) {
-        Write-Host "VULNERABLE: Default Computers container is NOT redirected." -ForegroundColor Red
-        $Compliant = $false
+    $domain = Get-ADDomain -ErrorAction Stop
+    $domainDN = $domain.DistinguishedName
+    $defaultComputersDN = "CN=Computers,$($domainDN)"
+    $defaultUsersDN = "CN=Users,$($domainDN)"
+
+    Write-Host "[i] Domain Distinguished Name: $($domainDN)" -ForegroundColor Gray
+    Write-Host "[i] Domain Functional Level : $($domain.DomainMode)" -ForegroundColor Gray
+    Write-Host ""
+
+    # -------------------------------------------------------------
+    # 2. Check Computers Container Redirection
+    # -------------------------------------------------------------
+    Write-Host "Checking Computers Container Configuration..." -ForegroundColor Yellow
+    $currentCompContainer = $domain.ComputersContainer
+    Write-Host "[i] Current Computers Container: $($currentCompContainer)" -ForegroundColor Gray
+
+    if ($currentCompContainer -eq $defaultComputersDN) {
+        Write-Host "VULNERABLE: Default Computers container is NOT redirected. Newly joined computers land in unmanaged 'CN=Computers'." -ForegroundColor Red
+        $isVulnerable = $true
     } else {
-        # Verify the redirected container is an OU and is protected from deletion
-        $CompOU = Get-ADOrganizationalUnit -Identity $Domain.ComputersContainer -Properties ProtectedFromAccidentalDeletion -ErrorAction SilentlyContinue
-        if ($CompOU) {
-            if ($CompOU.ProtectedFromAccidentalDeletion) {
-                Write-Host "[+] Computers Container redirected to a protected OU (Compliant)." -ForegroundColor Green
-            } else {
-                Write-Host "VULNERABLE: Computers Container redirected to OU '$($CompOU.Name)' but Accidental Deletion Protection is DISABLED." -ForegroundColor Red
-                $Compliant = $false
-            }
+        # Verify the redirected container is an OU
+        $compTarget = Get-ADObject -Identity $currentCompContainer -Properties ProtectedFromAccidentalDeletion, gPLink -ErrorAction SilentlyContinue
+        if ($null -eq $compTarget) {
+            Write-Host "VULNERABLE: The redirected Computers target container does not exist: $($currentCompContainer)" -ForegroundColor Red
+            $isVulnerable = $true
+        } elseif ($compTarget.ObjectClass -ne "organizationalUnit") {
+            Write-Host "VULNERABLE: Computers container is redirected to object class '$($compTarget.ObjectClass)', NOT an Organizational Unit. GPOs cannot be linked directly." -ForegroundColor Red
+            $isVulnerable = $true
         } else {
-            Write-Host "VULNERABLE: Computers Container is redirected to a non-OU object or the target container does not exist." -ForegroundColor Red
-            $Compliant = $false
+            Write-Host "[+] Computers container is redirected to an Organizational Unit." -ForegroundColor Green
+
+            # Check accidental deletion protection
+            if ($compTarget.ProtectedFromAccidentalDeletion) {
+                Write-Host "[+] Computers OU has Accidental Deletion Protection ENABLED." -ForegroundColor Green
+            } else {
+                Write-Host "VULNERABLE: Computers OU '$($compTarget.Name)' has Accidental Deletion Protection DISABLED." -ForegroundColor Red
+                $isVulnerable = $true
+            }
+
+            # Check GPO linkage
+            if ([string]::IsNullOrEmpty($compTarget.gPLink)) {
+                Write-Host "WARNING: Computers target OU has NO Group Policy Objects linked. Newly joined machines will not receive hardening baselines." -ForegroundColor Yellow
+            } else {
+                Write-Host "[+] Computers target OU has active Group Policy Object(s) linked." -ForegroundColor Green
+            }
         }
     }
-    
-    # 2. Check Users Container
-    Write-Host "[+] Current Users Container: $($Domain.UsersContainer)" -ForegroundColor Gray
-    if ($Domain.UsersContainer -eq $DefaultUsersDN) {
-        Write-Host "VULNERABLE: Default Users container is NOT redirected." -ForegroundColor Red
-        $Compliant = $false
+
+    Write-Host ""
+
+    # -------------------------------------------------------------
+    # 3. Check Users Container Redirection
+    # -------------------------------------------------------------
+    Write-Host "Checking Users Container Configuration..." -ForegroundColor Yellow
+    $currentUserContainer = $domain.UsersContainer
+    Write-Host "[i] Current Users Container: $($currentUserContainer)" -ForegroundColor Gray
+
+    if ($currentUserContainer -eq $defaultUsersDN) {
+        Write-Host "VULNERABLE: Default Users container is NOT redirected. Newly created users land in unmanaged 'CN=Users'." -ForegroundColor Red
+        $isVulnerable = $true
     } else {
-        # Verify the redirected container is an OU and is protected from deletion
-        $UserOU = Get-ADOrganizationalUnit -Identity $Domain.UsersContainer -Properties ProtectedFromAccidentalDeletion -ErrorAction SilentlyContinue
-        if ($UserOU) {
-            if ($UserOU.ProtectedFromAccidentalDeletion) {
-                Write-Host "[+] Users Container redirected to a protected OU (Compliant)." -ForegroundColor Green
-            } else {
-                Write-Host "VULNERABLE: Users Container redirected to OU '$($UserOU.Name)' but Accidental Deletion Protection is DISABLED." -ForegroundColor Red
-                $Compliant = $false
-            }
+        # Verify the redirected container is an OU
+        $userTarget = Get-ADObject -Identity $currentUserContainer -Properties ProtectedFromAccidentalDeletion, gPLink -ErrorAction SilentlyContinue
+        if ($null -eq $userTarget) {
+            Write-Host "VULNERABLE: The redirected Users target container does not exist: $($currentUserContainer)" -ForegroundColor Red
+            $isVulnerable = $true
+        } elseif ($userTarget.ObjectClass -ne "organizationalUnit") {
+            Write-Host "VULNERABLE: Users container is redirected to object class '$($userTarget.ObjectClass)', NOT an Organizational Unit. GPOs cannot be linked directly." -ForegroundColor Red
+            $isVulnerable = $true
         } else {
-            Write-Host "VULNERABLE: Users Container is redirected to a non-OU object or the target container does not exist." -ForegroundColor Red
-            $Compliant = $false
+            Write-Host "[+] Users container is redirected to an Organizational Unit." -ForegroundColor Green
+
+            # Check accidental deletion protection
+            if ($userTarget.ProtectedFromAccidentalDeletion) {
+                Write-Host "[+] Users OU has Accidental Deletion Protection ENABLED." -ForegroundColor Green
+            } else {
+                Write-Host "VULNERABLE: Users OU '$($userTarget.Name)' has Accidental Deletion Protection DISABLED." -ForegroundColor Red
+                $isVulnerable = $true
+            }
+
+            # Check GPO linkage
+            if ([string]::IsNullOrEmpty($userTarget.gPLink)) {
+                Write-Host "WARNING: Users target OU has NO Group Policy Objects linked. Newly provisioned users will not receive hardening baselines." -ForegroundColor Yellow
+            } else {
+                Write-Host "[+] Users target OU has active Group Policy Object(s) linked." -ForegroundColor Green
+            }
         }
     }
-    
-    if ($Compliant) {
-        Write-Host "`nStatus: Compliant. User and Computer default containers are redirected to deletion-protected OUs." -ForegroundColor Green
-        exit 0
+
+    Write-Host ""
+
+    # -------------------------------------------------------------
+    # 4. Inventory Residual Accounts in Legacy Containers
+    # -------------------------------------------------------------
+    Write-Host "Inventorying Residual Non-Built-in Objects in Default Containers..." -ForegroundColor Yellow
+
+    # Residual computers in CN=Computers
+    $strayComputers = Get-ADComputer -SearchBase $defaultComputersDN -SearchScope OneLevel -Filter * -ErrorAction SilentlyContinue
+    if ($strayComputers) {
+        $count = ($strayComputers | Measure-Object).Count
+        Write-Host "WARNING: Found $($count) computer object(s) remaining in legacy default 'CN=Computers'. These should be migrated to appropriate tier OUs." -ForegroundColor Yellow
+        foreach ($comp in $strayComputers | Select-Object -First 5) {
+            Write-Host "  - $($comp.Name) (Enabled: $($comp.Enabled))" -ForegroundColor Gray
+        }
+        if ($count -gt 5) {
+            Write-Host "  - ... and $($count - 5) more computer(s)." -ForegroundColor Gray
+        }
     } else {
-        Write-Host "`nStatus: Non-Compliant. Default containers redirection needs to be configured or corrected." -ForegroundColor Red
+        Write-Host "[+] Legacy default 'CN=Computers' container has no residual computer objects." -ForegroundColor Green
+    }
+
+    # Residual non-system users in CN=Users
+    $builtinSids = @(
+        "$($domain.DomainSID)-500", # Administrator
+        "$($domain.DomainSID)-501", # Guest
+        "$($domain.DomainSID)-502"  # krbtgt
+    )
+    $strayUsers = Get-ADUser -SearchBase $defaultUsersDN -SearchScope OneLevel -Filter * -ErrorAction SilentlyContinue | Where-Object {
+        $builtinSids -notcontains $_.SID.Value -and $_.SamAccountName -ne "SUPPORT_388945a0"
+    }
+    if ($strayUsers) {
+        $userCount = ($strayUsers | Measure-Object).Count
+        Write-Host "WARNING: Found $($userCount) non-built-in user account(s) remaining in legacy default 'CN=Users'. These should be evaluated and migrated to tier OUs." -ForegroundColor Yellow
+        foreach ($usr in $strayUsers | Select-Object -First 5) {
+            Write-Host "  - $($usr.SamAccountName) (Enabled: $($usr.Enabled))" -ForegroundColor Gray
+        }
+        if ($userCount -gt 5) {
+            Write-Host "  - ... and $($userCount - 5) more user(s)." -ForegroundColor Gray
+        }
+    } else {
+        Write-Host "[+] Legacy default 'CN=Users' container contains only default built-in security principals." -ForegroundColor Green
+    }
+
+    Write-Host ""
+
+    # -------------------------------------------------------------
+    # 5. Final Compliance Assessment
+    # -------------------------------------------------------------
+    if ($isVulnerable) {
+        Write-Host "STATUS: NON-COMPLIANT - Default container redirection is not fully configured or protected." -ForegroundColor Red
         exit 1
+    } else {
+        Write-Host "STATUS: COMPLIANT - Default Users and Computers containers are properly redirected to deletion-protected Organizational Units." -ForegroundColor Green
+        exit 0
     }
+
 } catch {
-    Write-Host "VULNERABLE: Could not query Active Directory Domain settings. Error: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "VULNERABLE: Failed to query Active Directory domain configuration. Error: $($_.Exception.Message)" -ForegroundColor Red
     exit 1
 }</xhtml:code>
         </xhtml:pre>
-        <xhtml:h4>2. Local Remediation</xhtml:h4>
+        <xhtml:h4>2. Local Remediation (Set-DefaultContainersRedirection.ps1)</xhtml:h4>
+        <xhtml:p>This script creates the target staging Organizational Units, enables accidental deletion protection, executes <xhtml:code>redircmp.exe</xhtml:code> and <xhtml:code>redirusr.exe</xhtml:code>, and verifies the updated well-known objects in Active Directory.</xhtml:p>
         <xhtml:p>
           <xhtml:a href="implementation_scripts/Set-DefaultContainersRedirection.ps1">Download Script: Set-DefaultContainersRedirection.ps1</xhtml:a>
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Set-DefaultContainersRedirection.ps1
-# Description: Creates new OUs, protects them from accidental deletion, and redirects default users/computers containers.
+# Description: Creates staging OUs, configures accidental deletion protection,
+#              and redirects default user and computer containers using redircmp and redirusr.
+# Target Engine: Windows PowerShell 5.1
+
+[CmdletBinding(SupportsShouldProcess = $true)]
+param (
+    [Parameter(Mandatory = $false)]
+    [string]$TargetComputersOUName = "Staging-Computers",
+
+    [Parameter(Mandatory = $false)]
+    [string]$TargetUsersOUName = "Staging-Users",
+
+    [Parameter(Mandatory = $false)]
+    [string]$ParentOUPath
+)
+
+Write-Host "--- Applying Hardening: Redirect Default Users and Computers Containers ---" -ForegroundColor Cyan
+
+# 1. Verify Active Directory module availability
+if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
+    Write-Error "The ActiveDirectory PowerShell module is required to execute this script."
+    exit 1
+}
 
 Import-Module ActiveDirectory
 
-Write-Host "Applying hardening requirement: Redirect Default Containers to Protected OUs..." -ForegroundColor Cyan
-
 try {
-    $Domain = Get-ADDomain -ErrorAction Stop
-    $DomainDN = $Domain.DistinguishedName
-    $TargetComputersOU = "OU=New-Computers,$($DomainDN)"
-    $TargetUsersOU = "OU=New-Users,$($DomainDN)"
-    
-    # 1. Create and protect target Computers OU
-    if (-not (Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$TargetComputersOU'")) {
-        Write-Host "[+] Creating target Computers OU: New-Computers" -ForegroundColor Yellow
-        New-ADOrganizationalUnit -Name "New-Computers" -Path $DomainDN -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
-        Write-Host "[+] Computers OU created and protected successfully." -ForegroundColor Green
+    $domain = Get-ADDomain -ErrorAction Stop
+    $domainDN = $domain.DistinguishedName
+
+    # Determine base path
+    if ([string]::IsNullOrEmpty($ParentOUPath)) {
+        $basePath = $domainDN
+    } else {
+        $basePath = $ParentOUPath
+    }
+
+    $targetComputersDN = "OU=$($TargetComputersOUName),$($basePath)"
+    $targetUsersDN = "OU=$($TargetUsersOUName),$($basePath)"
+
+    Write-Host "[i] Target Computers OU DN: $($targetComputersDN)" -ForegroundColor Gray
+    Write-Host "[i] Target Users OU DN    : $($targetUsersDN)" -ForegroundColor Gray
+    Write-Host ""
+
+    # -------------------------------------------------------------
+    # 2. Provision and Protect Computers Staging OU
+    # -------------------------------------------------------------
+    $existingCompOU = Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$($targetComputersDN)'" -ErrorAction SilentlyContinue
+    if ($null -eq $existingCompOU) {
+        if ($PSCmdlet.ShouldProcess($targetComputersDN, "Create Organizational Unit and enable Accidental Deletion Protection")) {
+            Write-Host "[+] Creating target Computers OU: $($targetComputersDN)" -ForegroundColor Yellow
+            New-ADOrganizationalUnit -Name $TargetComputersOUName -Path $basePath -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
+            Write-Host "[+] Target Computers OU created and protected successfully." -ForegroundColor Green
+        }
     } else {
         Write-Host "[+] Target Computers OU already exists. Ensuring accidental deletion protection is enabled..." -ForegroundColor Yellow
-        Set-ADOrganizationalUnit -Identity $TargetComputersOU -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
-        Write-Host "[+] Accidental deletion protection verified on target Computers OU." -ForegroundColor Green
+        if ($PSCmdlet.ShouldProcess($targetComputersDN, "Set ProtectedFromAccidentalDeletion = $true")) {
+            Set-ADOrganizationalUnit -Identity $targetComputersDN -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
+            Write-Host "[+] Accidental deletion protection verified on Computers OU." -ForegroundColor Green
+        }
     }
-    
-    # 2. Create and protect target Users OU
-    if (-not (Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$TargetUsersOU'")) {
-        Write-Host "[+] Creating target Users OU: New-Users" -ForegroundColor Yellow
-        New-ADOrganizationalUnit -Name "New-Users" -Path $DomainDN -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
-        Write-Host "[+] Users OU created and protected successfully." -ForegroundColor Green
+
+    # -------------------------------------------------------------
+    # 3. Provision and Protect Users Staging OU
+    # -------------------------------------------------------------
+    $existingUserOU = Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$($targetUsersDN)'" -ErrorAction SilentlyContinue
+    if ($null -eq $existingUserOU) {
+        if ($PSCmdlet.ShouldProcess($targetUsersDN, "Create Organizational Unit and enable Accidental Deletion Protection")) {
+            Write-Host "[+] Creating target Users OU: $($targetUsersDN)" -ForegroundColor Yellow
+            New-ADOrganizationalUnit -Name $TargetUsersOUName -Path $basePath -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
+            Write-Host "[+] Target Users OU created and protected successfully." -ForegroundColor Green
+        }
     } else {
         Write-Host "[+] Target Users OU already exists. Ensuring accidental deletion protection is enabled..." -ForegroundColor Yellow
-        Set-ADOrganizationalUnit -Identity $TargetUsersOU -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
-        Write-Host "[+] Accidental deletion protection verified on target Users OU." -ForegroundColor Green
+        if ($PSCmdlet.ShouldProcess($targetUsersDN, "Set ProtectedFromAccidentalDeletion = $true")) {
+            Set-ADOrganizationalUnit -Identity $targetUsersDN -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
+            Write-Host "[+] Accidental deletion protection verified on Users OU." -ForegroundColor Green
+        }
     }
-    
-    # 3. Perform Computers Redirection
-    if ($Domain.ComputersContainer -ne $TargetComputersOU) {
-        Write-Host "[+] Redirecting default Computers container to $TargetComputersOU..." -ForegroundColor Yellow
-        $Output = &amp; redircmp.exe $TargetComputersOU 2&gt;&amp;1
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "[+] Computers container redirected successfully." -ForegroundColor Green
-        } else {
-            throw "Failed to redirect Computers container: $($Output)"
+
+    Write-Host ""
+
+    # -------------------------------------------------------------
+    # 4. Redirect Computers Container via redircmp.exe
+    # -------------------------------------------------------------
+    if ($domain.ComputersContainer -ne $targetComputersDN) {
+        if ($PSCmdlet.ShouldProcess($domainDN, "Redirect Computers Container to $($targetComputersDN)")) {
+            Write-Host "[+] Redirecting default Computers container to: $($targetComputersDN)..." -ForegroundColor Yellow
+            $outputComp = &amp; redircmp.exe $targetComputersDN 2&gt;&amp;1
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "[+] redircmp output: $($outputComp)" -ForegroundColor Green
+            } else {
+                throw "redircmp.exe failed with exit code $($LASTEXITCODE). Output: $($outputComp)"
+            }
         }
     } else {
-        Write-Host "[+] Computers container is already redirected to target OU." -ForegroundColor Green
+        Write-Host "[+] Computers container is already redirected to target OU: $($targetComputersDN)" -ForegroundColor Green
     }
-    
-    # 4. Perform Users Redirection
-    if ($Domain.UsersContainer -ne $TargetUsersOU) {
-        Write-Host "[+] Redirecting default Users container to $TargetUsersOU..." -ForegroundColor Yellow
-        $Output = &amp; redirusr.exe $TargetUsersOU 2&gt;&amp;1
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "[+] Users container redirected successfully." -ForegroundColor Green
-        } else {
-            throw "Failed to redirect Users container: $($Output)"
+
+    # -------------------------------------------------------------
+    # 5. Redirect Users Container via redirusr.exe
+    # -------------------------------------------------------------
+    if ($domain.UsersContainer -ne $targetUsersDN) {
+        if ($PSCmdlet.ShouldProcess($domainDN, "Redirect Users Container to $($targetUsersDN)")) {
+            Write-Host "[+] Redirecting default Users container to: $($targetUsersDN)..." -ForegroundColor Yellow
+            $outputUser = &amp; redirusr.exe $targetUsersDN 2&gt;&amp;1
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "[+] redirusr output: $($outputUser)" -ForegroundColor Green
+            } else {
+                throw "redirusr.exe failed with exit code $($LASTEXITCODE). Output: $($outputUser)"
+            }
         }
     } else {
-        Write-Host "[+] Users container is already redirected to target OU." -ForegroundColor Green
+        Write-Host "[+] Users container is already redirected to target OU: $($targetUsersDN)" -ForegroundColor Green
     }
-    
-    Write-Host "`n[+] Redirection operations completed successfully." -ForegroundColor Green
+
+    Write-Host ""
+
+    # -------------------------------------------------------------
+    # 6. Post-Remediation Verification
+    # -------------------------------------------------------------
+    $refreshedDomain = Get-ADDomain -ErrorAction Stop
+    Write-Host "Post-Remediation Verification:" -ForegroundColor Cyan
+    Write-Host "  - Domain ComputersContainer: $($refreshedDomain.ComputersContainer)" -ForegroundColor Gray
+    Write-Host "  - Domain UsersContainer    : $($refreshedDomain.UsersContainer)" -ForegroundColor Gray
+
+    if ($refreshedDomain.ComputersContainer -eq $targetComputersDN -and $refreshedDomain.UsersContainer -eq $targetUsersDN) {
+        Write-Host "`n[+] Default containers redirection completed successfully." -ForegroundColor Green
+    } else {
+        Write-Warning "Directory attributes have not yet reflected the redirection. Allow time for domain-wide replication."
+    }
+
+    Write-Host ""
+    Write-Host "[IMPORTANT NEXT STEPS]:" -ForegroundColor Yellow
+    Write-Host "1. Link a quarantine/staging Group Policy Object (GPO) to '$($targetComputersDN)' (enforcing LAPS, Firewall, Credential Guard)." -ForegroundColor Gray
+    Write-Host "2. Delegate 'Create Computer Objects' on '$($targetComputersDN)' to authorized provisioning service accounts." -ForegroundColor Gray
+    Write-Host "3. Inventory and migrate any non-built-in residual accounts from 'CN=Computers' and 'CN=Users' to appropriate production OUs." -ForegroundColor Gray
+
 } catch {
-    Write-Error "Failed to apply redirection. Error: $($_.Exception.Message)"
+    Write-Error "Remediation failed. Error: $($_.Exception.Message)"
     exit 1
 }</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
       <fix system="urn:xccdf:fix:script:powershell"># Set-DefaultContainersRedirection.ps1
-# Description: Creates new OUs, protects them from accidental deletion, and redirects default users/computers containers.
+# Description: Creates staging OUs, configures accidental deletion protection,
+#              and redirects default user and computer containers using redircmp and redirusr.
+# Target Engine: Windows PowerShell 5.1
+
+[CmdletBinding(SupportsShouldProcess = $true)]
+param (
+    [Parameter(Mandatory = $false)]
+    [string]$TargetComputersOUName = "Staging-Computers",
+
+    [Parameter(Mandatory = $false)]
+    [string]$TargetUsersOUName = "Staging-Users",
+
+    [Parameter(Mandatory = $false)]
+    [string]$ParentOUPath
+)
+
+Write-Host "--- Applying Hardening: Redirect Default Users and Computers Containers ---" -ForegroundColor Cyan
+
+# 1. Verify Active Directory module availability
+if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
+    Write-Error "The ActiveDirectory PowerShell module is required to execute this script."
+    exit 1
+}
 
 Import-Module ActiveDirectory
 
-Write-Host "Applying hardening requirement: Redirect Default Containers to Protected OUs..." -ForegroundColor Cyan
-
 try {
-    $Domain = Get-ADDomain -ErrorAction Stop
-    $DomainDN = $Domain.DistinguishedName
-    $TargetComputersOU = "OU=New-Computers,$($DomainDN)"
-    $TargetUsersOU = "OU=New-Users,$($DomainDN)"
-    
-    # 1. Create and protect target Computers OU
-    if (-not (Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$TargetComputersOU'")) {
-        Write-Host "[+] Creating target Computers OU: New-Computers" -ForegroundColor Yellow
-        New-ADOrganizationalUnit -Name "New-Computers" -Path $DomainDN -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
-        Write-Host "[+] Computers OU created and protected successfully." -ForegroundColor Green
+    $domain = Get-ADDomain -ErrorAction Stop
+    $domainDN = $domain.DistinguishedName
+
+    # Determine base path
+    if ([string]::IsNullOrEmpty($ParentOUPath)) {
+        $basePath = $domainDN
+    } else {
+        $basePath = $ParentOUPath
+    }
+
+    $targetComputersDN = "OU=$($TargetComputersOUName),$($basePath)"
+    $targetUsersDN = "OU=$($TargetUsersOUName),$($basePath)"
+
+    Write-Host "[i] Target Computers OU DN: $($targetComputersDN)" -ForegroundColor Gray
+    Write-Host "[i] Target Users OU DN    : $($targetUsersDN)" -ForegroundColor Gray
+    Write-Host ""
+
+    # -------------------------------------------------------------
+    # 2. Provision and Protect Computers Staging OU
+    # -------------------------------------------------------------
+    $existingCompOU = Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$($targetComputersDN)'" -ErrorAction SilentlyContinue
+    if ($null -eq $existingCompOU) {
+        if ($PSCmdlet.ShouldProcess($targetComputersDN, "Create Organizational Unit and enable Accidental Deletion Protection")) {
+            Write-Host "[+] Creating target Computers OU: $($targetComputersDN)" -ForegroundColor Yellow
+            New-ADOrganizationalUnit -Name $TargetComputersOUName -Path $basePath -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
+            Write-Host "[+] Target Computers OU created and protected successfully." -ForegroundColor Green
+        }
     } else {
         Write-Host "[+] Target Computers OU already exists. Ensuring accidental deletion protection is enabled..." -ForegroundColor Yellow
-        Set-ADOrganizationalUnit -Identity $TargetComputersOU -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
-        Write-Host "[+] Accidental deletion protection verified on target Computers OU." -ForegroundColor Green
+        if ($PSCmdlet.ShouldProcess($targetComputersDN, "Set ProtectedFromAccidentalDeletion = $true")) {
+            Set-ADOrganizationalUnit -Identity $targetComputersDN -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
+            Write-Host "[+] Accidental deletion protection verified on Computers OU." -ForegroundColor Green
+        }
     }
-    
-    # 2. Create and protect target Users OU
-    if (-not (Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$TargetUsersOU'")) {
-        Write-Host "[+] Creating target Users OU: New-Users" -ForegroundColor Yellow
-        New-ADOrganizationalUnit -Name "New-Users" -Path $DomainDN -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
-        Write-Host "[+] Users OU created and protected successfully." -ForegroundColor Green
+
+    # -------------------------------------------------------------
+    # 3. Provision and Protect Users Staging OU
+    # -------------------------------------------------------------
+    $existingUserOU = Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$($targetUsersDN)'" -ErrorAction SilentlyContinue
+    if ($null -eq $existingUserOU) {
+        if ($PSCmdlet.ShouldProcess($targetUsersDN, "Create Organizational Unit and enable Accidental Deletion Protection")) {
+            Write-Host "[+] Creating target Users OU: $($targetUsersDN)" -ForegroundColor Yellow
+            New-ADOrganizationalUnit -Name $TargetUsersOUName -Path $basePath -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
+            Write-Host "[+] Target Users OU created and protected successfully." -ForegroundColor Green
+        }
     } else {
         Write-Host "[+] Target Users OU already exists. Ensuring accidental deletion protection is enabled..." -ForegroundColor Yellow
-        Set-ADOrganizationalUnit -Identity $TargetUsersOU -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
-        Write-Host "[+] Accidental deletion protection verified on target Users OU." -ForegroundColor Green
+        if ($PSCmdlet.ShouldProcess($targetUsersDN, "Set ProtectedFromAccidentalDeletion = $true")) {
+            Set-ADOrganizationalUnit -Identity $targetUsersDN -ProtectedFromAccidentalDeletion $true -ErrorAction Stop
+            Write-Host "[+] Accidental deletion protection verified on Users OU." -ForegroundColor Green
+        }
     }
-    
-    # 3. Perform Computers Redirection
-    if ($Domain.ComputersContainer -ne $TargetComputersOU) {
-        Write-Host "[+] Redirecting default Computers container to $TargetComputersOU..." -ForegroundColor Yellow
-        $Output = &amp; redircmp.exe $TargetComputersOU 2&gt;&amp;1
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "[+] Computers container redirected successfully." -ForegroundColor Green
-        } else {
-            throw "Failed to redirect Computers container: $($Output)"
+
+    Write-Host ""
+
+    # -------------------------------------------------------------
+    # 4. Redirect Computers Container via redircmp.exe
+    # -------------------------------------------------------------
+    if ($domain.ComputersContainer -ne $targetComputersDN) {
+        if ($PSCmdlet.ShouldProcess($domainDN, "Redirect Computers Container to $($targetComputersDN)")) {
+            Write-Host "[+] Redirecting default Computers container to: $($targetComputersDN)..." -ForegroundColor Yellow
+            $outputComp = &amp; redircmp.exe $targetComputersDN 2&gt;&amp;1
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "[+] redircmp output: $($outputComp)" -ForegroundColor Green
+            } else {
+                throw "redircmp.exe failed with exit code $($LASTEXITCODE). Output: $($outputComp)"
+            }
         }
     } else {
-        Write-Host "[+] Computers container is already redirected to target OU." -ForegroundColor Green
+        Write-Host "[+] Computers container is already redirected to target OU: $($targetComputersDN)" -ForegroundColor Green
     }
-    
-    # 4. Perform Users Redirection
-    if ($Domain.UsersContainer -ne $TargetUsersOU) {
-        Write-Host "[+] Redirecting default Users container to $TargetUsersOU..." -ForegroundColor Yellow
-        $Output = &amp; redirusr.exe $TargetUsersOU 2&gt;&amp;1
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "[+] Users container redirected successfully." -ForegroundColor Green
-        } else {
-            throw "Failed to redirect Users container: $($Output)"
+
+    # -------------------------------------------------------------
+    # 5. Redirect Users Container via redirusr.exe
+    # -------------------------------------------------------------
+    if ($domain.UsersContainer -ne $targetUsersDN) {
+        if ($PSCmdlet.ShouldProcess($domainDN, "Redirect Users Container to $($targetUsersDN)")) {
+            Write-Host "[+] Redirecting default Users container to: $($targetUsersDN)..." -ForegroundColor Yellow
+            $outputUser = &amp; redirusr.exe $targetUsersDN 2&gt;&amp;1
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "[+] redirusr output: $($outputUser)" -ForegroundColor Green
+            } else {
+                throw "redirusr.exe failed with exit code $($LASTEXITCODE). Output: $($outputUser)"
+            }
         }
     } else {
-        Write-Host "[+] Users container is already redirected to target OU." -ForegroundColor Green
+        Write-Host "[+] Users container is already redirected to target OU: $($targetUsersDN)" -ForegroundColor Green
     }
-    
-    Write-Host "`n[+] Redirection operations completed successfully." -ForegroundColor Green
+
+    Write-Host ""
+
+    # -------------------------------------------------------------
+    # 6. Post-Remediation Verification
+    # -------------------------------------------------------------
+    $refreshedDomain = Get-ADDomain -ErrorAction Stop
+    Write-Host "Post-Remediation Verification:" -ForegroundColor Cyan
+    Write-Host "  - Domain ComputersContainer: $($refreshedDomain.ComputersContainer)" -ForegroundColor Gray
+    Write-Host "  - Domain UsersContainer    : $($refreshedDomain.UsersContainer)" -ForegroundColor Gray
+
+    if ($refreshedDomain.ComputersContainer -eq $targetComputersDN -and $refreshedDomain.UsersContainer -eq $targetUsersDN) {
+        Write-Host "`n[+] Default containers redirection completed successfully." -ForegroundColor Green
+    } else {
+        Write-Warning "Directory attributes have not yet reflected the redirection. Allow time for domain-wide replication."
+    }
+
+    Write-Host ""
+    Write-Host "[IMPORTANT NEXT STEPS]:" -ForegroundColor Yellow
+    Write-Host "1. Link a quarantine/staging Group Policy Object (GPO) to '$($targetComputersDN)' (enforcing LAPS, Firewall, Credential Guard)." -ForegroundColor Gray
+    Write-Host "2. Delegate 'Create Computer Objects' on '$($targetComputersDN)' to authorized provisioning service accounts." -ForegroundColor Gray
+    Write-Host "3. Inventory and migrate any non-built-in residual accounts from 'CN=Computers' and 'CN=Users' to appropriate production OUs." -ForegroundColor Gray
+
 } catch {
-    Write-Error "Failed to apply redirection. Error: $($_.Exception.Message)"
+    Write-Error "Remediation failed. Error: $($_.Exception.Message)"
     exit 1
 }</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
