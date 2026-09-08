@@ -397,6 +397,7 @@
         * [REQ-PAW-136 - Audit Policy: Policy Change Auditing for PAWs](07-paws/audit-policy/configure-paw-audit-policy-change.md)
         * [REQ-PAW-137 - Audit Policy: Privilege Use Auditing for PAWs](07-paws/audit-policy/configure-paw-audit-privilege-use.md)
         * [REQ-PAW-138 - Audit Policy: System Events Auditing for PAWs](07-paws/audit-policy/configure-paw-audit-system-events.md)
+    * [REQ-PAW-167 - Enable Kerberos Armoring for PAWs](07-paws/enable-kerberos-armoring.md)
 ## Module 8: Endpoint Hardening
 * [Module 8: Endpoint Hardening](08-endpoints/README.md)
     * [REQ-END-001 - Harden Network Parameters and Disable Legacy Name Resolution](08-endpoints/harden-network-and-name-resolution.md)
@@ -575,6 +576,7 @@
         * [REQ-END-147 - Audit Policy: Policy Change Auditing for Endpoints](08-endpoints/audit-policy/configure-end-audit-policy-change.md)
         * [REQ-END-148 - Audit Policy: Privilege Use Auditing for Endpoints](08-endpoints/audit-policy/configure-end-audit-privilege-use.md)
         * [REQ-END-149 - Audit Policy: System Events Auditing for Endpoints](08-endpoints/audit-policy/configure-end-audit-system-events.md)
+    * [REQ-END-178 - Enable Kerberos Armoring for Endpoints](08-endpoints/enable-kerberos-armoring.md)
 
 ## Implementation Roadmap
 * [Implementation Plan and Prioritized Roadmap](roadmap/implementation-plan.md)

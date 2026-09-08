@@ -1,12 +1,12 @@
 # Configure-KerberosArmoring.ps1
-# Description: Configures Kerberos Armoring (FAST) registry settings on Domain Controllers and clients.
+# Description: Configures Kerberos Armoring (FAST) and PKInit Freshness Extension registry settings on Domain Controllers and Kerberos clients.
 
-Write-Host "Applying hardening requirement: Enable Kerberos Armoring (FAST)..." -ForegroundColor Cyan
+Write-Host "Applying hardening requirement: Enable Kerberos Armoring (FAST) on Domain Controllers..." -ForegroundColor Cyan
 
 $ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
 $KdcRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters"
 
-# Configure client-side setting (applicable to all systems, including DCs)
+# Configure client-side settings (applicable to all systems, including DCs for DC-to-DC authentication)
 if (-not (Test-Path $ClientRegPath)) {
     New-Item -Path $ClientRegPath -Force | Out-Null
 }
@@ -20,7 +20,7 @@ $DomainRole = (Get-CimInstance -ClassName Win32_ComputerSystem).DomainRole
 $IsDC = ($DomainRole -eq 4) -or ($DomainRole -eq 5)
 
 if ($IsDC) {
-    Write-Host "Domain Controller detected. Enabling KDC support for Kerberos Armoring..." -ForegroundColor Cyan
+    Write-Host "Domain Controller detected. Enabling KDC support for Kerberos Armoring and PKInit Freshness..." -ForegroundColor Cyan
     if (-not (Test-Path $KdcRegPath)) {
         New-Item -Path $KdcRegPath -Force | Out-Null
     }
@@ -28,5 +28,8 @@ if ($IsDC) {
     # Value 1 = Supported (Safe deployment baseline)
     # Value 3 = Fail unarmored authentication requests (Strict/Enforced state)
     Set-ItemProperty -Path $KdcRegPath -Name "EnableCbacAndArmor" -Value 1 -Type DWord
-    Write-Host "KDC support for claims and armoring set to Supported." -ForegroundColor Green
+    Set-ItemProperty -Path $KdcRegPath -Name "CbacAndArmorLevel" -Value 1 -Type DWord
+    # Value 1 = Supported for PKInit Freshness Extension (RFC 8070)
+    Set-ItemProperty -Path $KdcRegPath -Name "PKINITFreshness" -Value 1 -Type DWord
+    Write-Host "KDC support for claims, armoring (Supported: 1), and PKInit Freshness enabled successfully." -ForegroundColor Green
 }

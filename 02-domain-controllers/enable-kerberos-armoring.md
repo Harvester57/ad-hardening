@@ -1,8 +1,8 @@
 # [REQ-DC-013] Enable Kerberos Armoring
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers, Member Servers, Tier 2 Clients
-* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11
+* **Applicable Systems**: Domain Controllers
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025
 
 ---
 
@@ -11,10 +11,14 @@
 * **GPO Path / Registry Location**:
   * **KDC Settings (Domain Controllers)**:
     * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\KDC`
-    * **Policy**: `KDC support for claims, compound authentication and Kerberos armoring`
-    * **Setting**: `Supported` (or `Fail unarmored authentication requests` for strict enforcement)
-    * **Registry Location**: `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters` -> `EnableCbacAndArmor` = `1` (Supported) or `3` (Fail unarmored) (REG_DWORD)
-  * **Client Settings (Workstations & Member Servers)**:
+    * **Policies**:
+      * `KDC support for claims, compound authentication and Kerberos armoring` -> Enabled: Supported (or `Fail unarmored authentication requests` for strict enforcement)
+      * `KDC support for PKInit Freshness Extension` -> Enabled: Supported
+    * **Registry Location**: `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters`
+      * `EnableCbacAndArmor` = `1` (REG_DWORD)
+      * `CbacAndArmorLevel` = `1` (REG_DWORD)
+      * `PKINITFreshness` = `1` (REG_DWORD)
+  * **Client Settings (Domain Controllers)**:
     * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\System\Kerberos`
     * **Policies**:
       * `Kerberos client support for claims, compound authentication and Kerberos armoring` -> Enabled
@@ -29,16 +33,18 @@
 ## Rationale
 Active Directory environments relying on standard Kerberos authentication are susceptible to offline brute-force, dictionary attacks, and credential harvesting. During the initial Kerberos pre-authentication phase, the client requests a Ticket Granting Ticket (TGT) in clear text by sending an AS-REQ containing encrypted timestamps. Attackers monitoring network traffic can intercept these exchanges, or perform AS-REP roasting against accounts that do not require pre-authentication, conducting offline password cracking to compromise credentials.
 
-Kerberos Armoring, also known as Flexible Authentication Secure Tunneling (FAST), mitigates this vulnerability by establishing an encrypted channel (a secure tunnel) between the Kerberos client and the Key Distribution Center (KDC) on the Domain Controller. This tunnel is encrypted using the computer account's credential (or the local system's credential), protecting the pre-authentication messages (AS-REQ and AS-REP) from eavesdropping and tampering.
+Kerberos Armoring, also known as Flexible Authentication Secure Tunneling (FAST - RFC 6113), mitigates this vulnerability by establishing an encrypted channel (a secure tunnel) between the Kerberos client and the Key Distribution Center (KDC) on the Domain Controller. This tunnel is encrypted using the computer account's credential (or the local system's credential), protecting the pre-authentication messages (AS-REQ and AS-REP) from eavesdropping, offline dictionary attacks, and tampering.
 
-Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Control (DAC) and Compound Authentication (which validates both the user's and the device's identities before granting access). Implementing Kerberos Armoring significantly enhances the directory service's resistance to credential relaying, user enumeration, and offline brute-force cracking.
+Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Control (DAC), Compound Authentication (which validates both the user's and the device's identities before granting access), and Authentication Silos. On Windows Server 2016 and newer domain controllers, configuring KDC support for the PKInit Freshness Extension (RFC 8070) further strengthens public key authentication by ensuring that certificates cannot be reused in pre-authentication replay attacks.
+
+Domain Controllers function both as KDC servers handling authentication requests and as Kerberos clients during domain controller replication, directory operations, and inter-forest authentication. Consequently, both KDC-side and client-side Kerberos armoring policies must be enabled on all Domain Controllers.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operating System Requirements**: Kerberos Armoring requires at least a Windows Server 2012 domain functional level. Target clients and servers must run Windows 8 / Windows Server 2012 or newer.
-* **Enforcement Risk**: Setting KDC support to "Fail unarmored authentication requests" (Value 3) too early will prevent systems that are not configured for FAST, legacy operating systems (e.g., Windows 7, Windows Server 2008 R2), and non-domain-joined devices from authenticating, resulting in complete denial of service.
-* **Staged Deployment**: A phased rollout is highly recommended. Administrators must first configure all client systems to support claims and armoring. Once client compliance is verified, KDC support should be set to "Supported" (Value 1) to allow armored connections without failing unarmored ones. After validating the environment and verifying that no authentication errors occur, KDC support can be transitioned to "Fail unarmored authentication requests" (Value 3) for maximum security.
+* **Domain Functional Level Requirements**: Kerberos Armoring requires at least a Windows Server 2012 domain functional level (DFL). The PKInit Freshness Extension requires a Windows Server 2016 DFL.
+* **Enforcement Risk**: Setting KDC support to "Fail unarmored authentication requests" (`CbacAndArmorLevel = 3`) too early will prevent systems that are not configured for FAST, legacy operating systems (e.g., Windows 7, Windows Server 2008 R2), and non-domain-joined devices from authenticating, resulting in denial of service.
+* **Staged Deployment**: A phased rollout is required. Administrators must first configure all client systems and member servers to support claims and armoring. Once client compliance is verified across all tiers, KDC support should be set to "Supported" (`CbacAndArmorLevel = 1`) to allow armored connections without dropping unarmored requests. After complete validation and confirming that no authentication error events (Event ID 19 or Event ID 306 in the System log) occur, KDC support can be transitioned to "Fail unarmored authentication requests" (`CbacAndArmorLevel = 3`) for maximum security.
 
 ---
 
@@ -47,24 +53,26 @@ Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Cont
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 #### Configure Domain Controller KDC Policy
-1. Open the **Group Policy Management Console** (`gpmc.msc`) on a management host.
-2. Edit the appropriate Domain Controllers hardening GPO (e.g., `GPO_Hardening_DomainControllers`).
+1. Open the **Group Policy Management Console** (`gpmc.msc`) on a domain management workstation.
+2. Edit the Domain Controllers hardening GPO linked to the **Domain Controllers** OU (e.g., `GPO_Hardening_DomainControllers`).
 3. Navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\KDC`
-4. Configure the following setting:
+4. Configure the following settings:
    * **Policy**: `KDC support for claims, compound authentication and Kerberos armoring`
-   * **Setting**: `Enabled`
-   * **Options**: Select `Supported` from the dropdown list (upgrade to `Fail unarmored authentication requests` only after full client rollout and validation).
-5. Link the GPO to the Domain Controllers Organizational Unit (OU).
+     * **Setting**: `Enabled`
+     * **Options**: Select `Supported` from the dropdown list (upgrade to `Fail unarmored authentication requests` only after full client rollout and validation).
+   * **Policy**: `KDC support for PKInit Freshness Extension`
+     * **Setting**: `Enabled`
+     * **Options**: Select `Supported` from the dropdown list.
+5. Link the GPO to the Domain Controllers Organizational Unit.
 
-#### Configure Client & Member Server Policy
-1. In the **Group Policy Management Console**, edit the GPO applied to clients and member servers (e.g., `GPO_Hardening_Clients`).
-2. Navigate to:
+#### Configure Domain Controller Client Policy
+1. In the same Domain Controllers hardening GPO, navigate to:
    `Computer Configuration\Policies\Administrative Templates\System\Kerberos`
-3. Configure the following settings:
+2. Configure the following settings:
    * **Policy**: `Kerberos client support for claims, compound authentication and Kerberos armoring` -> **Enabled**
    * **Policy**: `Support device authentication using certificate` -> **Enabled** (Select `Automatic` in options)
-4. Link the GPO to the appropriate OUs containing workstations and member servers.
+3. Ensure the GPO is enforced across all Domain Controllers.
 
 ---
 
@@ -76,14 +84,14 @@ Use this method to apply the setting locally (for testing or standalone systems)
 
 ```powershell
 # Configure-KerberosArmoring.ps1
-# Description: Configures Kerberos Armoring (FAST) registry settings on Domain Controllers and clients.
+# Description: Configures Kerberos Armoring (FAST) and PKInit Freshness Extension registry settings on Domain Controllers and Kerberos clients.
 
-Write-Host "Applying hardening requirement: Enable Kerberos Armoring (FAST)..." -ForegroundColor Cyan
+Write-Host "Applying hardening requirement: Enable Kerberos Armoring (FAST) on Domain Controllers..." -ForegroundColor Cyan
 
 $ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
 $KdcRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters"
 
-# Configure client-side setting (applicable to all systems, including DCs)
+# Configure client-side settings (applicable to all systems, including DCs for DC-to-DC authentication)
 if (-not (Test-Path $ClientRegPath)) {
     New-Item -Path $ClientRegPath -Force | Out-Null
 }
@@ -97,7 +105,7 @@ $DomainRole = (Get-CimInstance -ClassName Win32_ComputerSystem).DomainRole
 $IsDC = ($DomainRole -eq 4) -or ($DomainRole -eq 5)
 
 if ($IsDC) {
-    Write-Host "Domain Controller detected. Enabling KDC support for Kerberos Armoring..." -ForegroundColor Cyan
+    Write-Host "Domain Controller detected. Enabling KDC support for Kerberos Armoring and PKInit Freshness..." -ForegroundColor Cyan
     if (-not (Test-Path $KdcRegPath)) {
         New-Item -Path $KdcRegPath -Force | Out-Null
     }
@@ -105,7 +113,10 @@ if ($IsDC) {
     # Value 1 = Supported (Safe deployment baseline)
     # Value 3 = Fail unarmored authentication requests (Strict/Enforced state)
     Set-ItemProperty -Path $KdcRegPath -Name "EnableCbacAndArmor" -Value 1 -Type DWord
-    Write-Host "KDC support for claims and armoring set to Supported." -ForegroundColor Green
+    Set-ItemProperty -Path $KdcRegPath -Name "CbacAndArmorLevel" -Value 1 -Type DWord
+    # Value 1 = Supported for PKInit Freshness Extension (RFC 8070)
+    Set-ItemProperty -Path $KdcRegPath -Name "PKINITFreshness" -Value 1 -Type DWord
+    Write-Host "KDC support for claims, armoring (Supported: 1), and PKInit Freshness enabled successfully." -ForegroundColor Green
 }
 ```
 
@@ -114,7 +125,7 @@ if ($IsDC) {
 
 ```powershell
 # Get-KerberosArmoringStatus.ps1
-# Description: Audits the Kerberos Armoring (FAST) configuration on DCs and clients.
+# Description: Audits the Kerberos Armoring (FAST) and PKInit Freshness configuration on Domain Controllers and clients.
 
 Write-Host "--- Auditing Kerberos Armoring (FAST) Configuration ---" -ForegroundColor Cyan
 
@@ -122,6 +133,8 @@ $DomainRole = (Get-CimInstance -ClassName Win32_ComputerSystem).DomainRole
 $IsDC = ($DomainRole -eq 4) -or ($DomainRole -eq 5)
 $ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
 $KdcRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters"
+
+$Vulnerable = $false
 
 # 1. Audit Client-side support
 $ClientValue = Get-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -ErrorAction SilentlyContinue
@@ -131,33 +144,55 @@ $DeviceBehavior = Get-ItemProperty -Path $ClientRegPath -Name "DevicePKInitBehav
 if ($null -ne $ClientValue -and $ClientValue.EnableCbacAndArmor -eq 1) {
     Write-Host "[+] Client-side Kerberos Armoring is ENABLED (EnableCbacAndArmor = 1)." -ForegroundColor Green
 } else {
-    Write-Host "[!] Client-side Kerberos Armoring is DISABLED/MISSING." -ForegroundColor Red
+    Write-Host "[!] VULNERABLE: Client-side Kerberos Armoring is DISABLED or missing." -ForegroundColor Red
+    $Vulnerable = $true
 }
 
 if ($null -ne $DevicePKInit -and $DevicePKInit.DevicePKInitEnabled -eq 1 -and $null -ne $DeviceBehavior -and $DeviceBehavior.DevicePKInitBehavior -eq 0) {
     Write-Host "[+] Certificate device authentication is ENABLED: Automatic." -ForegroundColor Green
 } else {
-    Write-Host "[!] Certificate device authentication is NOT compliant or not configured." -ForegroundColor Red
+    Write-Host "[!] VULNERABLE: Certificate device authentication is not compliant or not configured." -ForegroundColor Red
+    $Vulnerable = $true
 }
 
 # 2. Audit KDC support if Domain Controller
 if ($IsDC) {
     Write-Host "Domain Controller detected. Auditing KDC support..." -ForegroundColor Cyan
-    $KdcValue = Get-ItemProperty -Path $KdcRegPath -Name "EnableCbacAndArmor" -ErrorAction SilentlyContinue
-    if ($null -ne $KdcValue) {
-        $KdcState = $KdcValue.EnableCbacAndArmor
-        if ($KdcState -eq 1) {
+    $KdcCbac = Get-ItemProperty -Path $KdcRegPath -Name "EnableCbacAndArmor" -ErrorAction SilentlyContinue
+    $KdcLevel = Get-ItemProperty -Path $KdcRegPath -Name "CbacAndArmorLevel" -ErrorAction SilentlyContinue
+    $KdcFresh = Get-ItemProperty -Path $KdcRegPath -Name "PKINITFreshness" -ErrorAction SilentlyContinue
+
+    if ($null -ne $KdcCbac -and $KdcCbac.EnableCbacAndArmor -eq 1 -and $null -ne $KdcLevel) {
+        $LevelVal = $KdcLevel.CbacAndArmorLevel
+        if ($LevelVal -eq 1) {
             Write-Host "[+] KDC support for claims and armoring is ENABLED (Supported: 1)." -ForegroundColor Green
-        } elseif ($KdcState -eq 2) {
+        } elseif ($LevelVal -eq 2) {
             Write-Host "[+] KDC support for claims and armoring is ENABLED (Always provide claims: 2)." -ForegroundColor Green
-        } elseif ($KdcState -eq 3) {
+        } elseif ($LevelVal -eq 3) {
             Write-Host "[+] KDC support for claims and armoring is ENABLED and ENFORCED (Fail unarmored: 3)." -ForegroundColor Green
         } else {
-            Write-Host "[!] KDC support for claims and armoring is configured with unrecognized value: $($KdcState)." -ForegroundColor Red
+            Write-Host "[!] VULNERABLE: KDC CbacAndArmorLevel configured with invalid value: $($LevelVal)." -ForegroundColor Red
+            $Vulnerable = $true
         }
     } else {
-        Write-Host "[!] KDC support for claims and armoring configuration is MISSING (Disabled by default)." -ForegroundColor Red
+        Write-Host "[!] VULNERABLE: KDC support for claims and armoring is MISSING or misconfigured." -ForegroundColor Red
+        $Vulnerable = $true
     }
+
+    if ($null -ne $KdcFresh -and ($KdcFresh.PKINITFreshness -eq 1 -or $KdcFresh.PKINITFreshness -eq 2)) {
+        Write-Host "[+] KDC PKInit Freshness Extension is ENABLED (Value: $($KdcFresh.PKINITFreshness))." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: KDC PKInit Freshness Extension is MISSING or disabled." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+}
+
+if ($Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
 }
 ```
 
@@ -165,5 +200,7 @@ if ($IsDC) {
 
 ## Sources & Compliance References
 * **ANSSI AD Hardening Guide**: Recommendation R20 (Claims, compound authentication, and Kerberos armoring)
-* **CIS Benchmark**: CIS Microsoft Windows Server 2016 Benchmark - Section 18.9.4.1 (Ensure 'KDC support for claims, compound authentication and Kerberos armoring' is configured) & Section 18.9.11.1 (Ensure 'Kerberos client support for claims, compound authentication and Kerberos armoring' is configured) & Section 18.9.11.2 (Ensure 'Support device authentication using certificate' is configured)
+* **CIS Microsoft Windows Server Benchmark**: Section 18.9.4.1 (Ensure 'KDC support for claims, compound authentication and Kerberos armoring' is configured), Section 18.9.4.3 (Ensure 'KDC support for PKInit Freshness Extension' is configured), Section 18.9.11.1 (Ensure 'Kerberos client support for claims, compound authentication and Kerberos armoring' is configured), Section 18.9.11.2 (Ensure 'Support device authentication using certificate' is configured)
+* **RFC 6113**: Flexible Authentication Secure Tunneling (FAST)
+* **RFC 8070**: Public Key Cryptography for Initial Authentication in Kerberos (PKINIT) Freshness Extension
 * **Microsoft Security Baseline Focus**: KDC and Kerberos Administrative Templates

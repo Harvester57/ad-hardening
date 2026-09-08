@@ -256,5 +256,5 @@ To prevent initial access and lateral movement, the following unitary technical 
     * **[REQ-END-148 - Audit Policy: Privilege Use Auditing for Endpoints](audit-policy/configure-end-audit-privilege-use.md)**
     * **[REQ-END-149 - Audit Policy: System Events Auditing for Endpoints](audit-policy/configure-end-audit-system-events.md)**
 
-
-
+38. **[REQ-END-178 - Enable Kerberos Armoring for Endpoints](enable-kerberos-armoring.md)**
+    Enables client-side Kerberos Armoring (FAST) and certificate device authentication on Tier 2 client endpoints with opportunistic FAST negotiation to protect authentication traffic while preserving compatibility.

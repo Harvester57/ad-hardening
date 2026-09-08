@@ -243,6 +243,5 @@ This directory contains the physical isolation policies and operating system sec
     * **[REQ-PAW-137 - Audit Policy: Privilege Use Auditing for PAWs](audit-policy/configure-paw-audit-privilege-use.md)**
     * **[REQ-PAW-138 - Audit Policy: System Events Auditing for PAWs](audit-policy/configure-paw-audit-system-events.md)**
 
-
-
-
+38. **[REQ-PAW-167 - Enable Kerberos Armoring for PAWs](enable-kerberos-armoring.md)**
+    Enforces Kerberos Armoring (FAST) with strict enforcement (`RequireFast = 1`) and certificate device authentication on Privileged Access Workstations to protect administrative authentication exchanges from offline cracking and protocol downgrade attacks.

@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-09-08T09:00:03Z</oval:timestamp>
+    <oval:timestamp>2026-09-08T09:10:36Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -410,15 +410,19 @@ Tools like BloodHound/SharpHound, or simple commands like `net user /domain`, re
         </affected>
         <description>Active Directory environments relying on standard Kerberos authentication are susceptible to offline brute-force, dictionary attacks, and credential harvesting. During the initial Kerberos pre-authentication phase, the client requests a Ticket Granting Ticket (TGT) in clear text by sending an AS-REQ containing encrypted timestamps. Attackers monitoring network traffic can intercept these exchanges, or perform AS-REP roasting against accounts that do not require pre-authentication, conducting offline password cracking to compromise credentials.
 
-Kerberos Armoring, also known as Flexible Authentication Secure Tunneling (FAST), mitigates this vulnerability by establishing an encrypted channel (a secure tunnel) between the Kerberos client and the Key Distribution Center (KDC) on the Domain Controller. This tunnel is encrypted using the computer account's credential (or the local system's credential), protecting the pre-authentication messages (AS-REQ and AS-REP) from eavesdropping and tampering.
+Kerberos Armoring, also known as Flexible Authentication Secure Tunneling (FAST - RFC 6113), mitigates this vulnerability by establishing an encrypted channel (a secure tunnel) between the Kerberos client and the Key Distribution Center (KDC) on the Domain Controller. This tunnel is encrypted using the computer account's credential (or the local system's credential), protecting the pre-authentication messages (AS-REQ and AS-REP) from eavesdropping, offline dictionary attacks, and tampering.
 
-Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Control (DAC) and Compound Authentication (which validates both the user's and the device's identities before granting access). Implementing Kerberos Armoring significantly enhances the directory service's resistance to credential relaying, user enumeration, and offline brute-force cracking.</description>
+Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Control (DAC), Compound Authentication (which validates both the user's and the device's identities before granting access), and Authentication Silos. On Windows Server 2016 and newer domain controllers, configuring KDC support for the PKInit Freshness Extension (RFC 8070) further strengthens public key authentication by ensuring that certificates cannot be reused in pre-authentication replay attacks.
+
+Domain Controllers function both as KDC servers handling authentication requests and as Kerberos clients during domain controller replication, directory operations, and inter-forest authentication. Consequently, both KDC-side and client-side Kerberos armoring policies must be enabled on all Domain Controllers.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters Value EnableCbacAndArmor" test_ref="oval:org.adhardening:tst:2013001" />
-        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value EnableCbacAndArmor" test_ref="oval:org.adhardening:tst:2013002" />
-        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitEnabled" test_ref="oval:org.adhardening:tst:2013003" />
-        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitBehavior" test_ref="oval:org.adhardening:tst:2013004" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters Value CbacAndArmorLevel" test_ref="oval:org.adhardening:tst:2013002" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters Value PKINITFreshness" test_ref="oval:org.adhardening:tst:2013003" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value EnableCbacAndArmor" test_ref="oval:org.adhardening:tst:2013004" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitEnabled" test_ref="oval:org.adhardening:tst:2013005" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitBehavior" test_ref="oval:org.adhardening:tst:2013006" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:2014" version="1" class="compliance">
@@ -6182,6 +6186,29 @@ Disabling the WebClient service on standard endpoints and servers closes this at
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\$($ServiceName) Value Start" test_ref="oval:org.adhardening:tst:8177001" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:8178" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-END-178] Enable Kerberos Armoring for Endpoints</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Active Directory environments relying on standard Kerberos authentication are susceptible to offline brute-force, dictionary attacks, and credential harvesting. During standard Kerberos pre-authentication, the client sends an Authentication Service Request (AS-REQ) containing timestamp data encrypted with the user's password hash. Attackers monitoring network traffic can intercept these timestamps, or execute AS-REP roasting against accounts that do not require Kerberos pre-authentication (`DONT_REQ_PREAUTH`), conducting offline hash cracking to recover cleartext credentials.
+
+Kerberos Armoring, also known as Flexible Authentication Secure Tunneling (FAST - RFC 6113), mitigates this vulnerability by establishing an encrypted channel between the client workstation and the Key Distribution Center (KDC) on the Domain Controller. This tunnel is encrypted using the computer account's credential (or machine certificate), protecting pre-authentication messages (AS-REQ and AS-REP) from eavesdropping, offline dictionary attacks, and message tampering.
+
+On standard Tier 2 client workstations, Kerberos Armoring is configured for opportunistic negotiation (`RequireFast = 0`). This instructs the Windows Kerberos security provider to request armored exchanges whenever communicating with FAST-capable Domain Controllers, while maintaining backward compatibility with legacy resource servers, external forest trusts, and non-Windows Kerberos realms that do not yet support RFC 6113 FAST.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value EnableCbacAndArmor" test_ref="oval:org.adhardening:tst:8178001" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitEnabled" test_ref="oval:org.adhardening:tst:8178002" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitBehavior" test_ref="oval:org.adhardening:tst:8178003" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value RequireFast" test_ref="oval:org.adhardening:tst:8178004" />
+      </criteria>
+    </definition>
     <definition id="oval:org.adhardening:def:3001" version="1" class="compliance">
       <metadata>
         <title>[REQ-ID-001] Enforce Fine-Grained Password Policies</title>
@@ -10358,6 +10385,29 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
         <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\$($ServiceName) Value Start" test_ref="oval:org.adhardening:tst:7166001" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:7167" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-PAW-167] Enable Kerberos Armoring for PAWs</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Privileged Access Workstations (PAWs) host high-privilege administrative sessions used to manage Active Directory Domain Controllers and Tier 0 identity infrastructure. Standard Kerberos pre-authentication transmits the initial authentication request (AS-REQ) containing timestamp data that can be intercepted by adversaries monitoring network traffic, facilitating offline dictionary attacks and password cracking. Furthermore, accounts configured without Kerberos pre-authentication (`DONT_REQ_PREAUTH`) remain susceptible to AS-REP roasting attacks.
+
+Kerberos Armoring, or Flexible Authentication Secure Tunneling (FAST - RFC 6113), establishes an encrypted channel between the Kerberos client and the Key Distribution Center (KDC) using the client computer's account credential or machine certificate. This protects the AS-REQ and AS-REP exchanges against sniffing, offline cracking, and message tampering.
+
+In accordance with Tier 0 hardening baselines, the PAW configuration is strictly tightened compared to standard end-user workstations. While standard endpoints negotiate FAST opportunistically, PAWs configure **Fail authentication requests when Kerberos armoring is not available** (`RequireFast = 1`). This policy mandates that all authentication service (AS) and ticket-granting service (TGS) exchanges must be armored. If a Domain Controller does not support FAST or an attacker attempts a protocol downgrade, authentication is immediately terminated, ensuring that Tier 0 credentials are never exposed over unarmored channels.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value EnableCbacAndArmor" test_ref="oval:org.adhardening:tst:7167001" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitEnabled" test_ref="oval:org.adhardening:tst:7167002" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitBehavior" test_ref="oval:org.adhardening:tst:7167003" />
+        <criterion comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value RequireFast" test_ref="oval:org.adhardening:tst:7167004" />
+      </criteria>
+    </definition>
   </definitions>
   <tests>
     <windows:userright_test id="oval:org.adhardening:tst:1001210" version="1" comment="Check User Right Assignment SeDenyInteractiveLogonRight" check="all">
@@ -10488,17 +10538,25 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
       <windows:object object_ref="oval:org.adhardening:obj:2013001" />
       <windows:state state_ref="oval:org.adhardening:ste:2013001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2013002" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value EnableCbacAndArmor" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:2013002" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters Value CbacAndArmorLevel" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2013002" />
       <windows:state state_ref="oval:org.adhardening:ste:2013002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2013003" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitEnabled" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:2013003" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters Value PKINITFreshness" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2013003" />
       <windows:state state_ref="oval:org.adhardening:ste:2013003" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:2013004" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitBehavior" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:2013004" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value EnableCbacAndArmor" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2013004" />
       <windows:state state_ref="oval:org.adhardening:ste:2013004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2013005" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitEnabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2013005" />
+      <windows:state state_ref="oval:org.adhardening:ste:2013005" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2013006" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitBehavior" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2013006" />
+      <windows:state state_ref="oval:org.adhardening:ste:2013006" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:2014001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netlogon\Parameters Value AuditNTLMInDomain" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:2014001" />
@@ -12932,6 +12990,22 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
       <windows:object object_ref="oval:org.adhardening:obj:8177001" />
       <windows:state state_ref="oval:org.adhardening:ste:8177001" />
     </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8178001" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value EnableCbacAndArmor" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8178001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8178001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8178002" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitEnabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8178002" />
+      <windows:state state_ref="oval:org.adhardening:ste:8178002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8178003" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitBehavior" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8178003" />
+      <windows:state state_ref="oval:org.adhardening:ste:8178003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8178004" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value RequireFast" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8178004" />
+      <windows:state state_ref="oval:org.adhardening:ste:8178004" />
+    </windows:registry_test>
     <windows:passwordpolicy_test id="oval:org.adhardening:tst:3001900" version="1" comment="Check local Password Policy settings" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:3001900" />
       <windows:state state_ref="oval:org.adhardening:ste:3001900" />
@@ -14671,6 +14745,22 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
       <windows:object object_ref="oval:org.adhardening:obj:7166001" />
       <windows:state state_ref="oval:org.adhardening:ste:7166001" />
     </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7167001" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value EnableCbacAndArmor" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7167001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7167001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7167002" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitEnabled" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7167002" />
+      <windows:state state_ref="oval:org.adhardening:ste:7167002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7167003" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value DevicePKInitBehavior" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7167003" />
+      <windows:state state_ref="oval:org.adhardening:ste:7167003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7167004" version="1" comment="Check Registry Key Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters Value RequireFast" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7167004" />
+      <windows:state state_ref="oval:org.adhardening:ste:7167004" />
+    </windows:registry_test>
   </tests>
   <objects>
     <windows:userright_object id="oval:org.adhardening:obj:1001210" version="1">
@@ -14854,16 +14944,28 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
     <windows:registry_object id="oval:org.adhardening:obj:2013002" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters</windows:key>
+      <windows:name>CbacAndArmorLevel</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2013003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters</windows:key>
+      <windows:name>PKINITFreshness</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2013004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters</windows:key>
       <windows:name>EnableCbacAndArmor</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2013003" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:2013005" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters</windows:key>
       <windows:name>DevicePKInitEnabled</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:2013004" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:2013006" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters</windows:key>
@@ -18242,6 +18344,30 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
       <windows:key>SYSTEM\CurrentControlSet\Services\$($ServiceName)</windows:key>
       <windows:name>Start</windows:name>
     </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8178001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters</windows:key>
+      <windows:name>EnableCbacAndArmor</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8178002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters</windows:key>
+      <windows:name>DevicePKInitEnabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8178003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters</windows:key>
+      <windows:name>DevicePKInitBehavior</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8178004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters</windows:key>
+      <windows:name>RequireFast</windows:name>
+    </windows:registry_object>
     <windows:passwordpolicy_object id="oval:org.adhardening:obj:3001900" version="1" />
     <windows:lockoutpolicy_object id="oval:org.adhardening:obj:3001910" version="1" />
     <windows:registry_object id="oval:org.adhardening:obj:3002001" version="1">
@@ -20717,6 +20843,30 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
       <windows:key>SYSTEM\CurrentControlSet\Services\$($ServiceName)</windows:key>
       <windows:name>Start</windows:name>
     </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7167001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters</windows:key>
+      <windows:name>EnableCbacAndArmor</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7167002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters</windows:key>
+      <windows:name>DevicePKInitEnabled</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7167003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters</windows:key>
+      <windows:name>DevicePKInitBehavior</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7167004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters</windows:key>
+      <windows:name>RequireFast</windows:name>
+    </windows:registry_object>
   </objects>
   <states>
     <windows:userright_state id="oval:org.adhardening:ste:9999" version="1">
@@ -20855,6 +21005,14 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:2013004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2013005" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2013006" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
@@ -23205,6 +23363,22 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">4</windows:value>
     </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8178001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8178002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8178003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8178004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
     <windows:passwordpolicy_state id="oval:org.adhardening:ste:3001900" version="1">
       <windows:min_passwd_len datatype="int">20</windows:min_passwd_len>
       <windows:password_hist_len datatype="int">24</windows:password_hist_len>
@@ -24917,6 +25091,22 @@ Disabling the WebClient service on Tier 0 PAWs provides critical security benefi
     <windows:registry_state id="oval:org.adhardening:ste:7166001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">4</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7167001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7167002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7167003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7167004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
   </states>
 </oval_definitions>

@@ -404,6 +404,7 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-164" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-165" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-166" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-167" selected="true" />
   </Profile>
   <Profile id="xccdf_org.adhardening.benchmarks_profile_Endpoint">
     <title>Endpoint Hardening Profile</title>
@@ -577,6 +578,7 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-175" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-176" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-177" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-END-178" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-006" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-007" selected="true" />
@@ -3608,9 +3610,9 @@ Write-Host "SAM remote API access restricted to Administrators (SDDL applied)." 
         </xhtml:p>
         <xhtml:ul>
           <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers, Member Servers, Tier 2 Clients</xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Domain Controllers</xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows 10, Windows 11</xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025</xhtml:li>
         </xhtml:ul>
         <xhtml:p>
           <xhtml:strong>File Path: </xhtml:strong>
@@ -3619,20 +3621,21 @@ Write-Host "SAM remote API access restricted to Administrators (SDDL applied)." 
       </description>
       <rationale>
         <xhtml:p>Active Directory environments relying on standard Kerberos authentication are susceptible to offline brute-force, dictionary attacks, and credential harvesting. During the initial Kerberos pre-authentication phase, the client requests a Ticket Granting Ticket (TGT) in clear text by sending an AS-REQ containing encrypted timestamps. Attackers monitoring network traffic can intercept these exchanges, or perform AS-REP roasting against accounts that do not require pre-authentication, conducting offline password cracking to compromise credentials.</xhtml:p>
-        <xhtml:p>Kerberos Armoring, also known as Flexible Authentication Secure Tunneling (FAST), mitigates this vulnerability by establishing an encrypted channel (a secure tunnel) between the Kerberos client and the Key Distribution Center (KDC) on the Domain Controller. This tunnel is encrypted using the computer account's credential (or the local system's credential), protecting the pre-authentication messages (AS-REQ and AS-REP) from eavesdropping and tampering.</xhtml:p>
-        <xhtml:p>Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Control (DAC) and Compound Authentication (which validates both the user's and the device's identities before granting access). Implementing Kerberos Armoring significantly enhances the directory service's resistance to credential relaying, user enumeration, and offline brute-force cracking.</xhtml:p>
+        <xhtml:p>Kerberos Armoring, also known as Flexible Authentication Secure Tunneling (FAST - RFC 6113), mitigates this vulnerability by establishing an encrypted channel (a secure tunnel) between the Kerberos client and the Key Distribution Center (KDC) on the Domain Controller. This tunnel is encrypted using the computer account's credential (or the local system's credential), protecting the pre-authentication messages (AS-REQ and AS-REP) from eavesdropping, offline dictionary attacks, and tampering.</xhtml:p>
+        <xhtml:p>Additionally, Kerberos Armoring is a strict prerequisite for Dynamic Access Control (DAC), Compound Authentication (which validates both the user's and the device's identities before granting access), and Authentication Silos. On Windows Server 2016 and newer domain controllers, configuring KDC support for the PKInit Freshness Extension (RFC 8070) further strengthens public key authentication by ensuring that certificates cannot be reused in pre-authentication replay attacks.</xhtml:p>
+        <xhtml:p>Domain Controllers function both as KDC servers handling authentication requests and as Kerberos clients during domain controller replication, directory operations, and inter-forest authentication. Consequently, both KDC-side and client-side Kerberos armoring policies must be enabled on all Domain Controllers.</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
         <xhtml:h4>Configure Domain Controller KDC Policy</xhtml:h4>
         <xhtml:ol>
-          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>) on a management host.</xhtml:li>
-          <xhtml:li>Edit the appropriate Domain Controllers hardening GPO (e.g., <xhtml:code>GPO_Hardening_DomainControllers</xhtml:code>).</xhtml:li>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>) on a domain management workstation.</xhtml:li>
+          <xhtml:li>Edit the Domain Controllers hardening GPO linked to the <xhtml:strong>Domain Controllers</xhtml:strong> OU (e.g., <xhtml:code>GPO_Hardening_DomainControllers</xhtml:code>).</xhtml:li>
           <xhtml:li>Navigate to:</xhtml:li>
           <xhtml:li>
             <xhtml:code>Computer Configuration\Policies\Administrative Templates\System\KDC</xhtml:code>
           </xhtml:li>
-          <xhtml:li>Configure the following setting:</xhtml:li>
+          <xhtml:li>Configure the following settings:</xhtml:li>
           <xhtml:li>
             <xhtml:em> </xhtml:em>
             <xhtml:em>Policy</xhtml:em>*: <xhtml:code>KDC support for claims, compound authentication and Kerberos armoring</xhtml:code>
@@ -3644,12 +3647,22 @@ Write-Host "SAM remote API access restricted to Administrators (SDDL applied)." 
           <xhtml:li>
             <xhtml:em> </xhtml:em>
             <xhtml:em>Options</xhtml:em>*: Select <xhtml:code>Supported</xhtml:code> from the dropdown list (upgrade to <xhtml:code>Fail unarmored authentication requests</xhtml:code> only after full client rollout and validation).</xhtml:li>
-          <xhtml:li>Link the GPO to the Domain Controllers Organizational Unit (OU).</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>*: <xhtml:code>KDC support for PKInit Freshness Extension</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Setting</xhtml:em>*: <xhtml:code>Enabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Options</xhtml:em>*: Select <xhtml:code>Supported</xhtml:code> from the dropdown list.</xhtml:li>
+          <xhtml:li>Link the GPO to the Domain Controllers Organizational Unit.</xhtml:li>
         </xhtml:ol>
-        <xhtml:h4>Configure Client &amp; Member Server Policy</xhtml:h4>
+        <xhtml:h4>Configure Domain Controller Client Policy</xhtml:h4>
         <xhtml:ol>
-          <xhtml:li>In the <xhtml:strong>Group Policy Management Console</xhtml:strong>, edit the GPO applied to clients and member servers (e.g., <xhtml:code>GPO_Hardening_Clients</xhtml:code>).</xhtml:li>
-          <xhtml:li>Navigate to:</xhtml:li>
+          <xhtml:li>In the same Domain Controllers hardening GPO, navigate to:</xhtml:li>
           <xhtml:li>
             <xhtml:code>Computer Configuration\Policies\Administrative Templates\System\Kerberos</xhtml:code>
           </xhtml:li>
@@ -3666,7 +3679,7 @@ Write-Host "SAM remote API access restricted to Administrators (SDDL applied)." 
             <xhtml:em>Policy</xhtml:em>
             <xhtml:em>: `Support device authentication using certificate` -&gt; </xhtml:em>
             <xhtml:em>Enabled</xhtml:em>* (Select <xhtml:code>Automatic</xhtml:code> in options)</xhtml:li>
-          <xhtml:li>Link the GPO to the appropriate OUs containing workstations and member servers.</xhtml:li>
+          <xhtml:li>Ensure the GPO is enforced across all Domain Controllers.</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -3676,14 +3689,14 @@ Write-Host "SAM remote API access restricted to Administrators (SDDL applied)." 
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Configure-KerberosArmoring.ps1
-# Description: Configures Kerberos Armoring (FAST) registry settings on Domain Controllers and clients.
+# Description: Configures Kerberos Armoring (FAST) and PKInit Freshness Extension registry settings on Domain Controllers and Kerberos clients.
 
-Write-Host "Applying hardening requirement: Enable Kerberos Armoring (FAST)..." -ForegroundColor Cyan
+Write-Host "Applying hardening requirement: Enable Kerberos Armoring (FAST) on Domain Controllers..." -ForegroundColor Cyan
 
 $ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
 $KdcRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters"
 
-# Configure client-side setting (applicable to all systems, including DCs)
+# Configure client-side settings (applicable to all systems, including DCs for DC-to-DC authentication)
 if (-not (Test-Path $ClientRegPath)) {
     New-Item -Path $ClientRegPath -Force | Out-Null
 }
@@ -3697,7 +3710,7 @@ $DomainRole = (Get-CimInstance -ClassName Win32_ComputerSystem).DomainRole
 $IsDC = ($DomainRole -eq 4) -or ($DomainRole -eq 5)
 
 if ($IsDC) {
-    Write-Host "Domain Controller detected. Enabling KDC support for Kerberos Armoring..." -ForegroundColor Cyan
+    Write-Host "Domain Controller detected. Enabling KDC support for Kerberos Armoring and PKInit Freshness..." -ForegroundColor Cyan
     if (-not (Test-Path $KdcRegPath)) {
         New-Item -Path $KdcRegPath -Force | Out-Null
     }
@@ -3705,7 +3718,10 @@ if ($IsDC) {
     # Value 1 = Supported (Safe deployment baseline)
     # Value 3 = Fail unarmored authentication requests (Strict/Enforced state)
     Set-ItemProperty -Path $KdcRegPath -Name "EnableCbacAndArmor" -Value 1 -Type DWord
-    Write-Host "KDC support for claims and armoring set to Supported." -ForegroundColor Green
+    Set-ItemProperty -Path $KdcRegPath -Name "CbacAndArmorLevel" -Value 1 -Type DWord
+    # Value 1 = Supported for PKInit Freshness Extension (RFC 8070)
+    Set-ItemProperty -Path $KdcRegPath -Name "PKINITFreshness" -Value 1 -Type DWord
+    Write-Host "KDC support for claims, armoring (Supported: 1), and PKInit Freshness enabled successfully." -ForegroundColor Green
 }</xhtml:code>
         </xhtml:pre>
         <xhtml:p>
@@ -3714,7 +3730,7 @@ if ($IsDC) {
         </xhtml:p>
         <xhtml:pre>
           <xhtml:code># Get-KerberosArmoringStatus.ps1
-# Description: Audits the Kerberos Armoring (FAST) configuration on DCs and clients.
+# Description: Audits the Kerberos Armoring (FAST) and PKInit Freshness configuration on Domain Controllers and clients.
 
 Write-Host "--- Auditing Kerberos Armoring (FAST) Configuration ---" -ForegroundColor Cyan
 
@@ -3722,6 +3738,8 @@ $DomainRole = (Get-CimInstance -ClassName Win32_ComputerSystem).DomainRole
 $IsDC = ($DomainRole -eq 4) -or ($DomainRole -eq 5)
 $ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
 $KdcRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters"
+
+$Vulnerable = $false
 
 # 1. Audit Client-side support
 $ClientValue = Get-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -ErrorAction SilentlyContinue
@@ -3731,46 +3749,68 @@ $DeviceBehavior = Get-ItemProperty -Path $ClientRegPath -Name "DevicePKInitBehav
 if ($null -ne $ClientValue -and $ClientValue.EnableCbacAndArmor -eq 1) {
     Write-Host "[+] Client-side Kerberos Armoring is ENABLED (EnableCbacAndArmor = 1)." -ForegroundColor Green
 } else {
-    Write-Host "[!] Client-side Kerberos Armoring is DISABLED/MISSING." -ForegroundColor Red
+    Write-Host "[!] VULNERABLE: Client-side Kerberos Armoring is DISABLED or missing." -ForegroundColor Red
+    $Vulnerable = $true
 }
 
 if ($null -ne $DevicePKInit -and $DevicePKInit.DevicePKInitEnabled -eq 1 -and $null -ne $DeviceBehavior -and $DeviceBehavior.DevicePKInitBehavior -eq 0) {
     Write-Host "[+] Certificate device authentication is ENABLED: Automatic." -ForegroundColor Green
 } else {
-    Write-Host "[!] Certificate device authentication is NOT compliant or not configured." -ForegroundColor Red
+    Write-Host "[!] VULNERABLE: Certificate device authentication is not compliant or not configured." -ForegroundColor Red
+    $Vulnerable = $true
 }
 
 # 2. Audit KDC support if Domain Controller
 if ($IsDC) {
     Write-Host "Domain Controller detected. Auditing KDC support..." -ForegroundColor Cyan
-    $KdcValue = Get-ItemProperty -Path $KdcRegPath -Name "EnableCbacAndArmor" -ErrorAction SilentlyContinue
-    if ($null -ne $KdcValue) {
-        $KdcState = $KdcValue.EnableCbacAndArmor
-        if ($KdcState -eq 1) {
+    $KdcCbac = Get-ItemProperty -Path $KdcRegPath -Name "EnableCbacAndArmor" -ErrorAction SilentlyContinue
+    $KdcLevel = Get-ItemProperty -Path $KdcRegPath -Name "CbacAndArmorLevel" -ErrorAction SilentlyContinue
+    $KdcFresh = Get-ItemProperty -Path $KdcRegPath -Name "PKINITFreshness" -ErrorAction SilentlyContinue
+
+    if ($null -ne $KdcCbac -and $KdcCbac.EnableCbacAndArmor -eq 1 -and $null -ne $KdcLevel) {
+        $LevelVal = $KdcLevel.CbacAndArmorLevel
+        if ($LevelVal -eq 1) {
             Write-Host "[+] KDC support for claims and armoring is ENABLED (Supported: 1)." -ForegroundColor Green
-        } elseif ($KdcState -eq 2) {
+        } elseif ($LevelVal -eq 2) {
             Write-Host "[+] KDC support for claims and armoring is ENABLED (Always provide claims: 2)." -ForegroundColor Green
-        } elseif ($KdcState -eq 3) {
+        } elseif ($LevelVal -eq 3) {
             Write-Host "[+] KDC support for claims and armoring is ENABLED and ENFORCED (Fail unarmored: 3)." -ForegroundColor Green
         } else {
-            Write-Host "[!] KDC support for claims and armoring is configured with unrecognized value: $($KdcState)." -ForegroundColor Red
+            Write-Host "[!] VULNERABLE: KDC CbacAndArmorLevel configured with invalid value: $($LevelVal)." -ForegroundColor Red
+            $Vulnerable = $true
         }
     } else {
-        Write-Host "[!] KDC support for claims and armoring configuration is MISSING (Disabled by default)." -ForegroundColor Red
+        Write-Host "[!] VULNERABLE: KDC support for claims and armoring is MISSING or misconfigured." -ForegroundColor Red
+        $Vulnerable = $true
     }
+
+    if ($null -ne $KdcFresh -and ($KdcFresh.PKINITFreshness -eq 1 -or $KdcFresh.PKINITFreshness -eq 2)) {
+        Write-Host "[+] KDC PKInit Freshness Extension is ENABLED (Value: $($KdcFresh.PKINITFreshness))." -ForegroundColor Green
+    } else {
+        Write-Host "[!] VULNERABLE: KDC PKInit Freshness Extension is MISSING or disabled." -ForegroundColor Red
+        $Vulnerable = $true
+    }
+}
+
+if ($Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
 }</xhtml:code>
         </xhtml:pre>
         <xhtml:hr />
       </fixtext>
       <fix system="urn:xccdf:fix:script:powershell"># Configure-KerberosArmoring.ps1
-# Description: Configures Kerberos Armoring (FAST) registry settings on Domain Controllers and clients.
+# Description: Configures Kerberos Armoring (FAST) and PKInit Freshness Extension registry settings on Domain Controllers and Kerberos clients.
 
-Write-Host "Applying hardening requirement: Enable Kerberos Armoring (FAST)..." -ForegroundColor Cyan
+Write-Host "Applying hardening requirement: Enable Kerberos Armoring (FAST) on Domain Controllers..." -ForegroundColor Cyan
 
 $ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
 $KdcRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\KDC\Parameters"
 
-# Configure client-side setting (applicable to all systems, including DCs)
+# Configure client-side settings (applicable to all systems, including DCs for DC-to-DC authentication)
 if (-not (Test-Path $ClientRegPath)) {
     New-Item -Path $ClientRegPath -Force | Out-Null
 }
@@ -3784,7 +3824,7 @@ $DomainRole = (Get-CimInstance -ClassName Win32_ComputerSystem).DomainRole
 $IsDC = ($DomainRole -eq 4) -or ($DomainRole -eq 5)
 
 if ($IsDC) {
-    Write-Host "Domain Controller detected. Enabling KDC support for Kerberos Armoring..." -ForegroundColor Cyan
+    Write-Host "Domain Controller detected. Enabling KDC support for Kerberos Armoring and PKInit Freshness..." -ForegroundColor Cyan
     if (-not (Test-Path $KdcRegPath)) {
         New-Item -Path $KdcRegPath -Force | Out-Null
     }
@@ -3792,7 +3832,10 @@ if ($IsDC) {
     # Value 1 = Supported (Safe deployment baseline)
     # Value 3 = Fail unarmored authentication requests (Strict/Enforced state)
     Set-ItemProperty -Path $KdcRegPath -Name "EnableCbacAndArmor" -Value 1 -Type DWord
-    Write-Host "KDC support for claims and armoring set to Supported." -ForegroundColor Green
+    Set-ItemProperty -Path $KdcRegPath -Name "CbacAndArmorLevel" -Value 1 -Type DWord
+    # Value 1 = Supported for PKInit Freshness Extension (RFC 8070)
+    Set-ItemProperty -Path $KdcRegPath -Name "PKINITFreshness" -Value 1 -Type DWord
+    Write-Host "KDC support for claims, armoring (Supported: 1), and PKInit Freshness enabled successfully." -ForegroundColor Green
 }</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2013" />
@@ -47111,6 +47154,167 @@ if ($script:Vulnerable) {
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7165" />
       </check>
     </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-167" severity="high" weight="10.0" selected="false">
+      <title>[REQ-PAW-167] Enable Kerberos Armoring for PAWs</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs) (Tier 0 Workstations)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 Enterprise, Windows 11 Enterprise</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>07-paws/enable-kerberos-armoring.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Privileged Access Workstations (PAWs) host high-privilege administrative sessions used to manage Active Directory Domain Controllers and Tier 0 identity infrastructure. Standard Kerberos pre-authentication transmits the initial authentication request (AS-REQ) containing timestamp data that can be intercepted by adversaries monitoring network traffic, facilitating offline dictionary attacks and password cracking. Furthermore, accounts configured without Kerberos pre-authentication (<xhtml:code>DONT_REQ_PREAUTH</xhtml:code>) remain susceptible to AS-REP roasting attacks.</xhtml:p>
+        <xhtml:p>Kerberos Armoring, or Flexible Authentication Secure Tunneling (FAST - RFC 6113), establishes an encrypted channel between the Kerberos client and the Key Distribution Center (KDC) using the client computer's account credential or machine certificate. This protects the AS-REQ and AS-REP exchanges against sniffing, offline cracking, and message tampering.</xhtml:p>
+        <xhtml:p>In accordance with Tier 0 hardening baselines, the PAW configuration is strictly tightened compared to standard end-user workstations. While standard endpoints negotiate FAST opportunistically, PAWs configure <xhtml:strong>Fail authentication requests when Kerberos armoring is not available</xhtml:strong> (<xhtml:code>RequireFast = 1</xhtml:code>). This policy mandates that all authentication service (AS) and ticket-granting service (TGS) exchanges must be armored. If a Domain Controller does not support FAST or an attacker attempts a protocol downgrade, authentication is immediately terminated, ensuring that Tier 0 credentials are never exposed over unarmored channels.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>) on a Tier 0 management host.</xhtml:li>
+          <xhtml:li>Edit the dedicated PAW Computer Hardening GPO (e.g., <xhtml:code>GPO_Hardening_PAW_Computers</xhtml:code>).</xhtml:li>
+          <xhtml:li>Navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Policies\Administrative Templates\System\Kerberos</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the following settings:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Kerberos client support for claims, compound authentication and Kerberos armoring` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Support device authentication using certificate` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>* (Select <xhtml:code>Automatic</xhtml:code> in options)</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Fail authentication requests when Kerberos armoring is not available` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>Link the GPO to the <xhtml:strong>Tier 0 PAWs</xhtml:strong> Organizational Unit (OU).</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>Use this method to apply the setting locally (for standalone PAW provisioning or gold image preparation) or if the control is not manageable via standard GPO interfaces.</xhtml:p>
+        <xhtml:p>
+          <xhtml:a href="implementation_scripts/Configure-PawKerberosArmoring.ps1">Download Script: Configure-PawKerberosArmoring.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-PawKerberosArmoring.ps1
+# Description: Configures Kerberos Armoring (FAST) with strict enforcement and certificate device authentication on PAWs.
+
+Write-Host "Applying hardening requirement: Enable Kerberos Armoring (FAST) on PAWs..." -ForegroundColor Cyan
+
+$ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
+
+if (-not (Test-Path $ClientRegPath)) {
+    New-Item -Path $ClientRegPath -Force | Out-Null
+}
+
+# 1. Enable Kerberos client support for claims and armoring
+Set-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -Value 1 -Type DWord
+
+# 2. Support device authentication using certificate (Automatic)
+Set-ItemProperty -Path $ClientRegPath -Name "DevicePKInitEnabled" -Value 1 -Type DWord
+Set-ItemProperty -Path $ClientRegPath -Name "DevicePKInitBehavior" -Value 0 -Type DWord
+
+# 3. Fail authentication requests when Kerberos armoring is not available (Strict FAST enforcement on Tier 0 PAWs)
+Set-ItemProperty -Path $ClientRegPath -Name "RequireFast" -Value 1 -Type DWord
+
+Write-Host "PAW Kerberos Armoring configured successfully with strict enforcement (RequireFast = 1)." -ForegroundColor Green</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To verify the setting has been applied:</xhtml:em>
+          <xhtml:a href="audit_scripts/Get-PawKerberosArmoringStatus.ps1">Download Script: Get-PawKerberosArmoringStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-PawKerberosArmoringStatus.ps1
+# Description: Audits Kerberos Armoring (FAST) configuration on Privileged Access Workstations (PAWs).
+
+Write-Host "--- Auditing PAW Kerberos Armoring Configuration ---" -ForegroundColor Cyan
+
+$ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
+$Vulnerable = $false
+
+$ClientValue = Get-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -ErrorAction SilentlyContinue
+$DevicePKInit = Get-ItemProperty -Path $ClientRegPath -Name "DevicePKInitEnabled" -ErrorAction SilentlyContinue
+$DeviceBehavior = Get-ItemProperty -Path $ClientRegPath -Name "DevicePKInitBehavior" -ErrorAction SilentlyContinue
+$RequireFast = Get-ItemProperty -Path $ClientRegPath -Name "RequireFast" -ErrorAction SilentlyContinue
+
+# 1. Audit Client-side support for claims and armoring
+if ($null -ne $ClientValue -and $ClientValue.EnableCbacAndArmor -eq 1) {
+    Write-Host "[+] Client-side Kerberos Armoring is ENABLED (EnableCbacAndArmor = 1)." -ForegroundColor Green
+} else {
+    Write-Host "[!] VULNERABLE: Client-side Kerberos Armoring is DISABLED or missing." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+# 2. Audit Certificate device authentication
+if ($null -ne $DevicePKInit -and $DevicePKInit.DevicePKInitEnabled -eq 1 -and $null -ne $DeviceBehavior -and $DeviceBehavior.DevicePKInitBehavior -eq 0) {
+    Write-Host "[+] Certificate device authentication is ENABLED: Automatic." -ForegroundColor Green
+} else {
+    Write-Host "[!] VULNERABLE: Certificate device authentication is not compliant or not configured." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+# 3. Audit Strict Armoring Enforcement (RequireFast = 1)
+if ($null -ne $RequireFast -and $RequireFast.RequireFast -eq 1) {
+    Write-Host "[+] Strict Kerberos Armoring enforcement is ENABLED (RequireFast = 1)." -ForegroundColor Green
+} else {
+    Write-Host "[!] VULNERABLE: Strict Kerberos Armoring enforcement is NOT configured (RequireFast != 1)." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+if ($Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-PawKerberosArmoring.ps1
+# Description: Configures Kerberos Armoring (FAST) with strict enforcement and certificate device authentication on PAWs.
+
+Write-Host "Applying hardening requirement: Enable Kerberos Armoring (FAST) on PAWs..." -ForegroundColor Cyan
+
+$ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
+
+if (-not (Test-Path $ClientRegPath)) {
+    New-Item -Path $ClientRegPath -Force | Out-Null
+}
+
+# 1. Enable Kerberos client support for claims and armoring
+Set-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -Value 1 -Type DWord
+
+# 2. Support device authentication using certificate (Automatic)
+Set-ItemProperty -Path $ClientRegPath -Name "DevicePKInitEnabled" -Value 1 -Type DWord
+Set-ItemProperty -Path $ClientRegPath -Name "DevicePKInitBehavior" -Value 0 -Type DWord
+
+# 3. Fail authentication requests when Kerberos armoring is not available (Strict FAST enforcement on Tier 0 PAWs)
+Set-ItemProperty -Path $ClientRegPath -Name "RequireFast" -Value 1 -Type DWord
+
+Write-Host "PAW Kerberos Armoring configured successfully with strict enforcement (RequireFast = 1)." -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7167" />
+      </check>
+    </Rule>
     <Group id="xccdf_org.adhardening.benchmarks_group_Module_7__Privileged_Access_Workstations__PAWs__Hardening_Defender_Antivirus">
       <title>Defender Antivirus</title>
       <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-057" severity="high" weight="10.0" selected="false">
@@ -71378,6 +71582,164 @@ if ($script:Vulnerable) {
       </fixtext>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8176" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-178" severity="medium" weight="10.0" selected="false">
+      <title>[REQ-END-178] Enable Kerberos Armoring for Endpoints</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 Client Workstations</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10, Windows 11</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>08-endpoints/enable-kerberos-armoring.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Active Directory environments relying on standard Kerberos authentication are susceptible to offline brute-force, dictionary attacks, and credential harvesting. During standard Kerberos pre-authentication, the client sends an Authentication Service Request (AS-REQ) containing timestamp data encrypted with the user's password hash. Attackers monitoring network traffic can intercept these timestamps, or execute AS-REP roasting against accounts that do not require Kerberos pre-authentication (<xhtml:code>DONT_REQ_PREAUTH</xhtml:code>), conducting offline hash cracking to recover cleartext credentials.</xhtml:p>
+        <xhtml:p>Kerberos Armoring, also known as Flexible Authentication Secure Tunneling (FAST - RFC 6113), mitigates this vulnerability by establishing an encrypted channel between the client workstation and the Key Distribution Center (KDC) on the Domain Controller. This tunnel is encrypted using the computer account's credential (or machine certificate), protecting pre-authentication messages (AS-REQ and AS-REP) from eavesdropping, offline dictionary attacks, and message tampering.</xhtml:p>
+        <xhtml:p>On standard Tier 2 client workstations, Kerberos Armoring is configured for opportunistic negotiation (<xhtml:code>RequireFast = 0</xhtml:code>). This instructs the Windows Kerberos security provider to request armored exchanges whenever communicating with FAST-capable Domain Controllers, while maintaining backward compatibility with legacy resource servers, external forest trusts, and non-Windows Kerberos realms that do not yet support RFC 6113 FAST.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>) on an administrative workstation.</xhtml:li>
+          <xhtml:li>Edit the workstation hardening GPO applied to standard clients (e.g., <xhtml:code>GPO_Hardening_Workstations_Tier2</xhtml:code>).</xhtml:li>
+          <xhtml:li>Navigate to:</xhtml:li>
+          <xhtml:li>
+            <xhtml:code>Computer Configuration\Policies\Administrative Templates\System\Kerberos</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Configure the following settings:</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Kerberos client support for claims, compound authentication and Kerberos armoring` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Support device authentication using certificate` -&gt; </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>* (Select <xhtml:code>Automatic</xhtml:code> in options)</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> </xhtml:em>
+            <xhtml:em>Policy</xhtml:em>
+            <xhtml:em>: `Fail authentication requests when Kerberos armoring is not available` -&gt; </xhtml:em>
+            <xhtml:em>Disabled</xhtml:em>* (or Not Configured)</xhtml:li>
+          <xhtml:li>Link the GPO to the appropriate Tier 2 Workstations Organizational Units (OUs).</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>Use this method to apply the setting locally (for testing, non-domain scenarios, or standalone client deployment) or if the control is not manageable via standard GPO interfaces.</xhtml:p>
+        <xhtml:p>
+          <xhtml:a href="implementation_scripts/Configure-EndKerberosArmoring.ps1">Download Script: Configure-EndKerberosArmoring.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Configure-EndKerberosArmoring.ps1
+# Description: Configures client-side Kerberos Armoring (FAST) and certificate device authentication on Tier 2 client endpoints.
+
+Write-Host "Applying hardening requirement: Enable Kerberos Armoring on Tier 2 Endpoints..." -ForegroundColor Cyan
+
+$ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
+
+if (-not (Test-Path $ClientRegPath)) {
+    New-Item -Path $ClientRegPath -Force | Out-Null
+}
+
+# 1. Enable Kerberos client support for claims and armoring
+Set-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -Value 1 -Type DWord
+
+# 2. Support device authentication using certificate (Automatic)
+Set-ItemProperty -Path $ClientRegPath -Name "DevicePKInitEnabled" -Value 1 -Type DWord
+Set-ItemProperty -Path $ClientRegPath -Name "DevicePKInitBehavior" -Value 0 -Type DWord
+
+# 3. Ensure RequireFast is set to 0 (Opportunistic negotiation for general client workstations)
+Set-ItemProperty -Path $ClientRegPath -Name "RequireFast" -Value 0 -Type DWord
+
+Write-Host "Client endpoint Kerberos Armoring configured successfully." -ForegroundColor Green</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To verify the setting has been applied:</xhtml:em>
+          <xhtml:a href="audit_scripts/Get-EndKerberosArmoringStatus.ps1">Download Script: Get-EndKerberosArmoringStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code># Get-EndKerberosArmoringStatus.ps1
+# Description: Audits client-side Kerberos Armoring configuration on Tier 2 endpoints.
+
+Write-Host "--- Auditing Endpoint Kerberos Armoring Configuration ---" -ForegroundColor Cyan
+
+$ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
+$Vulnerable = $false
+
+$ClientValue = Get-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -ErrorAction SilentlyContinue
+$DevicePKInit = Get-ItemProperty -Path $ClientRegPath -Name "DevicePKInitEnabled" -ErrorAction SilentlyContinue
+$DeviceBehavior = Get-ItemProperty -Path $ClientRegPath -Name "DevicePKInitBehavior" -ErrorAction SilentlyContinue
+$RequireFast = Get-ItemProperty -Path $ClientRegPath -Name "RequireFast" -ErrorAction SilentlyContinue
+
+# 1. Audit Client-side support for claims and armoring
+if ($null -ne $ClientValue -and $ClientValue.EnableCbacAndArmor -eq 1) {
+    Write-Host "[+] Client-side Kerberos Armoring is ENABLED (EnableCbacAndArmor = 1)." -ForegroundColor Green
+} else {
+    Write-Host "[!] VULNERABLE: Client-side Kerberos Armoring is DISABLED or missing." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+# 2. Audit Certificate device authentication
+if ($null -ne $DevicePKInit -and $DevicePKInit.DevicePKInitEnabled -eq 1 -and $null -ne $DeviceBehavior -and $DeviceBehavior.DevicePKInitBehavior -eq 0) {
+    Write-Host "[+] Certificate device authentication is ENABLED: Automatic." -ForegroundColor Green
+} else {
+    Write-Host "[!] VULNERABLE: Certificate device authentication is not compliant or not configured." -ForegroundColor Red
+    $Vulnerable = $true
+}
+
+# 3. Audit RequireFast (for endpoints, 0 or absent is acceptable for opportunistic FAST)
+if ($null -eq $RequireFast -or $RequireFast.RequireFast -eq 0) {
+    Write-Host "[+] Kerberos Armoring mode is configured for opportunistic negotiation (RequireFast = 0)." -ForegroundColor Green
+} else {
+    Write-Host "[-] Information: RequireFast is set to $($RequireFast.RequireFast)." -ForegroundColor Yellow
+}
+
+if ($Vulnerable) {
+    Write-Output "Non-Compliant"
+    exit 1
+} else {
+    Write-Output "Compliant"
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell"># Configure-EndKerberosArmoring.ps1
+# Description: Configures client-side Kerberos Armoring (FAST) and certificate device authentication on Tier 2 client endpoints.
+
+Write-Host "Applying hardening requirement: Enable Kerberos Armoring on Tier 2 Endpoints..." -ForegroundColor Cyan
+
+$ClientRegPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\Kerberos\Parameters"
+
+if (-not (Test-Path $ClientRegPath)) {
+    New-Item -Path $ClientRegPath -Force | Out-Null
+}
+
+# 1. Enable Kerberos client support for claims and armoring
+Set-ItemProperty -Path $ClientRegPath -Name "EnableCbacAndArmor" -Value 1 -Type DWord
+
+# 2. Support device authentication using certificate (Automatic)
+Set-ItemProperty -Path $ClientRegPath -Name "DevicePKInitEnabled" -Value 1 -Type DWord
+Set-ItemProperty -Path $ClientRegPath -Name "DevicePKInitBehavior" -Value 0 -Type DWord
+
+# 3. Ensure RequireFast is set to 0 (Opportunistic negotiation for general client workstations)
+Set-ItemProperty -Path $ClientRegPath -Name "RequireFast" -Value 0 -Type DWord
+
+Write-Host "Client endpoint Kerberos Armoring configured successfully." -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8178" />
       </check>
     </Rule>
     <Group id="xccdf_org.adhardening.benchmarks_group_Module_8__Endpoint_Hardening_Defender_Antivirus">
