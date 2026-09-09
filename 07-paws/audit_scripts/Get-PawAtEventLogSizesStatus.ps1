@@ -28,19 +28,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application"
 $ValueName = "MaxSize"
-$ExpectedValue = 32768
+$ExpectedValue = 131072
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -72,19 +72,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security"
 $ValueName = "MaxSize"
-$ExpectedValue = 196608
+$ExpectedValue = 1048576
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -121,14 +121,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -160,19 +160,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System"
 $ValueName = "MaxSize"
-$ExpectedValue = 32768
+$ExpectedValue = 131072
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {

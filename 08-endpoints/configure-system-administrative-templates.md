@@ -20,11 +20,11 @@ Administrative templates govern system-wide capabilities, behaviors, network pro
 1. **Protocols Hardening**: Disabling legacy SMBv1 components stops known remote code execution flaws (e.g., EternalBlue), and enforcing NetBT P-node prevents broadcast spoofing and relay attacks.
 2. **Data Collection & Telemetry**: Restricting diagnostic log collection, crash dump generation, feedback prompts, and dynamic cloud settings (OneSettings) prevents in-memory credential disclosure and limits external telemetry.
 3. **App & Installer Restrictions**: Disallowing per-user unsigned app packages, preventing non-admin packaged app installation, and blocking the `ms-appinstaller` protocol handler closes primary drive-by malware delivery paths.
-4. **Log Retention & Forensic Buffer**: Expanding event log maximum file sizes (Application/Setup/System to 32 MB, Security to 192 MB) guarantees that critical security events are retained for auditing and forensic investigations.
+4. **Log Retention & Forensic Buffer**: Expanding event log maximum file sizes (Application/System to 128 MB, Setup to 32 MB, Security to 1 GB) guarantees that critical security events are retained for auditing and forensic investigations.
 5. **Session & Credential Security**: Restricting credential display on the lock screen, disabling Automatic Restart Sign-On (ARSO), prohibiting local password reset questions, and blocking cleartext MPR password transfers prevents credential exposure.
 6. **Windows Update Management**: Disabling update pauses, managing feature update deferrals, and scheduling daily automatic installations ensures workstations remain continuously patched against active vulnerabilities.
 
-This parent requirement coordinates the 31 individual unitary hardening requirements defined in the dedicated `admin-templates/` subsection.
+This parent requirement coordinates the 30 individual unitary hardening requirements defined in the dedicated `admin-templates/` subsection.
 
 ---
 
@@ -38,7 +38,7 @@ This parent requirement coordinates the 31 individual unitary hardening requirem
 
 ## Administrative Templates Hardening Requirements
 
-The following 31 unitary administrative template hardening controls must be enforced:
+The following 30 unitary administrative template hardening controls must be enforced:
 
 1. **[REQ-END-179 - Administrative Templates: Disable SMBv1 Protocol Components](admin-templates/configure-end-at-smbv1.md)**
 2. **[REQ-END-180 - Administrative Templates: Configure NetBT Node Type and Name Release](admin-templates/configure-end-at-netbt-nodetype.md)**
@@ -64,13 +64,12 @@ The following 31 unitary administrative template hardening controls must be enfo
 22. **[REQ-END-200 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies](admin-templates/configure-end-at-event-log-sizes.md)**
 23. **[REQ-END-201 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security](admin-templates/configure-end-at-file-explorer-motw.md)**
 24. **[REQ-END-202 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls](admin-templates/configure-end-at-internet-explorer-retirement.md)**
-25. **[REQ-END-203 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides](admin-templates/configure-end-at-defender-protection-options.md)**
-26. **[REQ-END-204 - Administrative Templates: Windows Search and Cortana Privacy Restrictions](admin-templates/configure-end-at-search-cortana-restrictions.md)**
-27. **[REQ-END-205 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions](admin-templates/configure-end-at-windows-store-restrictions.md)**
-28. **[REQ-END-206 - Administrative Templates: Disable Windows Widgets and News Feed](admin-templates/configure-end-at-windows-widgets-dsh.md)**
-29. **[REQ-END-207 - Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO)](admin-templates/configure-end-at-automatic-restart-signon.md)**
-30. **[REQ-END-208 - Administrative Templates: Windows Sandbox Clipboard and Network Isolation](admin-templates/configure-end-at-windows-sandbox-isolation.md)**
-31. **[REQ-END-209 - Administrative Templates: Windows Update Deferral and Automatic Installation Policies](admin-templates/configure-end-at-windows-update-policies.md)**
+25. **[REQ-END-204 - Administrative Templates: Windows Search and Cortana Privacy Restrictions](admin-templates/configure-end-at-search-cortana-restrictions.md)**
+26. **[REQ-END-205 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions](admin-templates/configure-end-at-windows-store-restrictions.md)**
+27. **[REQ-END-206 - Administrative Templates: Disable Windows Widgets and News Feed](admin-templates/configure-end-at-windows-widgets-dsh.md)**
+28. **[REQ-END-207 - Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO)](admin-templates/configure-end-at-automatic-restart-signon.md)**
+29. **[REQ-END-208 - Administrative Templates: Windows Sandbox Clipboard and Network Isolation](admin-templates/configure-end-at-windows-sandbox-isolation.md)**
+30. **[REQ-END-209 - Administrative Templates: Windows Update Deferral and Automatic Installation Policies](admin-templates/configure-end-at-windows-update-policies.md)**
 
 ---
 

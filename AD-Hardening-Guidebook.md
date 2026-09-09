@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 7cfa127 | Generated: September 08, 2026</span>
+      <span>Commit: 6d88590 | Generated: September 09, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -39,7 +39,7 @@ pdf_options:
     <li>Tier 2 Client Workstations: Windows 10 and above</li>
   </ul>
   <hr>
-  <p><em>Generated dynamically on: September 08, 2026</em></p>
+  <p><em>Generated dynamically on: September 09, 2026</em></p>
 </div>
 
 <div id="README-md"></div>
@@ -1869,6 +1869,8 @@ This directory contains security baselines for Domain Controllers running Window
   Requirement to mitigate physical access and direct memory access threat vectors by disabling standby sleep states (S1-S3), enforcing wake passwords, blocking DMA device enumeration under lock, disabling unapproved device classes and hardware IDs, and blocking unencrypted USB write access.
 * **[REQ-DC-159 - Disable Windows Script Host and Remap Scripting Extensions on Domain Controllers](#02-domain-controllers-disable-windows-script-host-md)**
   Requirement to eliminate Living-off-the-Land Binary (LOLBin) attack surfaces by disabling Windows Script Host across 64-bit and WOW6432Node hives, enforcing TrustPolicy, and remapping legacy script file extensions to Notepad.
+* **[REQ-DC-160 - Configure Event Log Maximum File Sizes and Retention Policies on Domain Controllers](#02-domain-controllers-configure-event-log-sizes-md)**
+  Requirement to configure event log maximum file sizes and retention policies on Domain Controllers, expanding Security to 4 GB, System, Directory Service, and DNS Server to 256 MB, Application and DFS Replication to 128 MB, and Setup to 32 MB to mitigate log-flushing attacks and ensure forensic evidence preservation.
 
 
 <div style="page-break-before: always;"></div>
@@ -26505,6 +26507,438 @@ if ($script:Vulnerable) {
 
 <div style="page-break-before: always;"></div>
 
+<div id="02-domain-controllers-configure-event-log-sizes-md"></div>
+
+<div id="02-domain-controllers-configure-event-log-sizes-md-req-dc-160-configure-event-log-maximum-file-sizes-and-retention-policies-on-domain-controllers"></div>
+
+# [REQ-DC-160] Configure Event Log Maximum File Sizes and Retention Policies on Domain Controllers
+
+<div id="02-domain-controllers-configure-event-log-sizes-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Active Directory Domain Controllers.
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025.
+
+---
+
+<div id="02-domain-controllers-configure-event-log-sizes-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **Core Windows Event Log Channels (Administrative Templates)**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\Retention` = `0`
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\MaxSize` = `131072` (128 MB)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\Retention` = `0`
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\MaxSize` = `4194304` (4 GB)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\Retention` = `0`
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\MaxSize` = `32768` (32 MB)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\Retention` = `0`
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\MaxSize` = `262144` (256 MB)
+  * **Active Directory Role-Specific Channels (Service Configuration)**:
+    * `HKLM\SYSTEM\CurrentControlSet\Services\EventLog\Directory Service\Retention` = `0`
+    * `HKLM\SYSTEM\CurrentControlSet\Services\EventLog\Directory Service\MaxSize` = `268435456` (256 MB in bytes)
+    * `HKLM\SYSTEM\CurrentControlSet\Services\EventLog\DNS Server\Retention` = `0`
+    * `HKLM\SYSTEM\CurrentControlSet\Services\EventLog\DNS Server\MaxSize` = `268435456` (256 MB in bytes)
+    * `HKLM\SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication\Retention` = `0`
+    * `HKLM\SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication\MaxSize` = `134217728` (128 MB in bytes)
+
+---
+
+<div id="02-domain-controllers-configure-event-log-sizes-md-rationale"></div>
+
+## Rationale
+Active Directory Domain Controllers are the highest-value targets (Tier 0) in an enterprise forest. In addition to serving as the central authentication authority, Domain Controllers continuously process authentication requests, Kerberos ticket issuances, directory service modifications, and directory replication. 
+
+When comprehensive security audit policies are enforced on Domain Controllers (such as Kerberos Service Ticket operations [Event ID 4769], Account Logon events [Event ID 4768/4771], Directory Service Object Access [Event ID 4662], and Group Membership changes [Event ID 4728/4738]), Domain Controllers generate between 500 MB and multiple gigabytes of security telemetry daily.
+
+Default event log capacities (20 MB for standard channels, 16 MB to 32 MB for role channels) roll over in a matter of minutes to hours during production load. This creates severe security vulnerabilities:
+1. **Mitigation of Log-Flushing Attacks**: Adversaries executing high-frequency attacks (e.g., Kerberoasting, AS-REP Roasting, password spraying, or DCSync via `DsGetNCChanges`) frequently attempt to "flush" the Security log by generating floods of benign authentication or LDAP requests to overwrite compromise indicators before detection. Expanding the Security log to **4 GB** (`4,194,304 KB`) provides a resilient on-box buffer that retains weeks of forensic evidence even under heavy attack activity.
+2. **Preservation of System and Replication Diagnostics**: Domain Controllers log extensive Netlogon, KDC, DNS, DFS Replication, and NTDS replication events into the **System**, **Directory Service**, **DNS Server**, and **DFS Replication** event channels. Allocating **256 MB** to System, Directory Service, and DNS Server logs prevents replication failures and tombstone synchronization issues from being overwritten during diagnostic troubleshooting.
+3. **64 KB Boundary Alignment**: The Windows Event Log service allocates memory in 64 KB blocks. Configured sizes must be exact integer multiples of 64 (`SizeKB % 64 == 0`). Non-aligned values will be automatically truncated or rounded by the operating system (`4,194,304 / 64 = 65,536`; `262,144 / 64 = 4,096`; `131,072 / 64 = 2,048`; `32,768 / 64 = 512`).
+4. **Retention Policy**: Enforcing retention method `0` (GPO: `Disabled` / Overwrite events as needed) guarantees that new security audits are continuously recorded rather than halted when log capacity is reached.
+
+---
+
+<div id="02-domain-controllers-configure-event-log-sizes-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: Allocates approximately 5.1 GB of maximum disk space in `%SystemRoot%\System32\Winevt\Logs`. Modern enterprise Domain Controller storage arrays (RAID 1/10 SSD or NVMe volumes with hundreds of gigabytes allocated to the system drive) easily accommodate this footprint without performance degradation.
+* **Memory Utilization**: Windows utilizes memory-mapped files (`.evtx`) for the Event Log service. Only actively accessed pages are mapped into virtual memory; larger file limits do not consume active physical RAM.
+
+---
+
+<div id="02-domain-controllers-configure-event-log-sizes-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="02-domain-controllers-configure-event-log-sizes-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to the **Domain Controllers** Organizational Unit (e.g., `GPO_Hardening_DomainControllers`).
+3. Configure the core Event Log Administrative Template policies:
+
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (`131072` KB)
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (`4194304` KB)
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (`32768` KB)
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
+* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (`262144` KB)
+  * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
+
+4. Configure Active Directory role-specific channels via Group Policy Preferences (Registry):
+* Navigate to: `Computer Configuration\Preferences\Windows Settings\Registry`
+  * Add **Registry Item**:
+    * Action: `Update`
+    * Hive: `HKEY_LOCAL_MACHINE`
+    * Key Path: `SYSTEM\CurrentControlSet\Services\EventLog\Directory Service`
+    * Value Name: `MaxSize`
+    * Value Type: `REG_DWORD`
+    * Value Data: `268435456` (Decimal)
+  * Add **Registry Item**:
+    * Action: `Update`
+    * Hive: `HKEY_LOCAL_MACHINE`
+    * Key Path: `SYSTEM\CurrentControlSet\Services\EventLog\Directory Service`
+    * Value Name: `Retention`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Decimal)
+  * Add **Registry Item**:
+    * Action: `Update`
+    * Hive: `HKEY_LOCAL_MACHINE`
+    * Key Path: `SYSTEM\CurrentControlSet\Services\EventLog\DNS Server`
+    * Value Name: `MaxSize`
+    * Value Type: `REG_DWORD`
+    * Value Data: `268435456` (Decimal)
+  * Add **Registry Item**:
+    * Action: `Update`
+    * Hive: `HKEY_LOCAL_MACHINE`
+    * Key Path: `SYSTEM\CurrentControlSet\Services\EventLog\DNS Server`
+    * Value Name: `Retention`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Decimal)
+  * Add **Registry Item**:
+    * Action: `Update`
+    * Hive: `HKEY_LOCAL_MACHINE`
+    * Key Path: `SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication`
+    * Value Name: `MaxSize`
+    * Value Type: `REG_DWORD`
+    * Value Data: `134217728` (Decimal)
+  * Add **Registry Item**:
+    * Action: `Update`
+    * Hive: `HKEY_LOCAL_MACHINE`
+    * Key Path: `SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication`
+    * Value Name: `Retention`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Decimal)
+
+5. Link the GPO to the Domain Controllers OU and verify replication.
+
+---
+
+<div id="02-domain-controllers-configure-event-log-sizes-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally on Domain Controllers to configure the event log maximum sizes and retention policies:
+
+[Download Script: Configure-DcEventLogSizes.ps1](implementation_scripts/Configure-DcEventLogSizes.ps1)
+
+```powershell
+#Configure-DcEventLogSizes.ps1
+# Description: Configures Event Log Maximum File Sizes and Retention Policies on Domain Controllers.
+
+Write-Host "Configuring Event Log Maximum File Sizes and Retention Policies on Domain Controllers..." -ForegroundColor Cyan
+
+# 1. Core Channels via Policy Registry Branch (values in KB)
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 131072 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 4194304 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "MaxSize" -Value 32768 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 262144 -Type DWord -Force
+
+# 2. Active Directory Role Channels via Service Registry Branch (values in bytes)
+$RoleChannels = @(
+    @{ Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\Directory Service"; MaxSizeBytes = 268435456 },
+    @{ Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\DNS Server"; MaxSizeBytes = 268435456 },
+    @{ Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication"; MaxSizeBytes = 134217728 }
+)
+
+foreach ($Channel in $RoleChannels) {
+    if (Test-Path -Path $Channel.Path) {
+        Set-ItemProperty -Path $Channel.Path -Name "Retention" -Value 0 -Type DWord -Force
+        Set-ItemProperty -Path $Channel.Path -Name "MaxSize" -Value $Channel.MaxSizeBytes -Type DWord -Force
+        Write-Host "  [+] Configured $($Channel.Path) MaxSize to $($Channel.MaxSizeBytes) bytes" -ForegroundColor Green
+    }
+}
+
+Write-Host "[+] Domain Controller Event Log Maximum File Sizes and Retention Policies applied successfully." -ForegroundColor Green
+```
+
+*To verify the configuration:*
+
+[Download Script: Get-DcEventLogSizesStatus.ps1](audit_scripts/Get-DcEventLogSizesStatus.ps1)
+
+```powershell
+#Get-DcEventLogSizesStatus.ps1
+# Description: Audits Event Log Maximum File Sizes and Retention Policies on Domain Controllers.
+
+Write-Host "--- Auditing Domain Controller Event Log Maximum File Sizes and Retention Policies ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+# 1. Audit Application Log
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] Application $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Application $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: Application $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$ValueName = "MaxSize"
+$ExpectedValue = 131072
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] Application $ValueName = $($Actual) KB (Secure - Meets or exceeds threshold $($ExpectedValue) KB)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Application $ValueName = $($Actual) KB (Expected: >= $($ExpectedValue) KB)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: Application $ValueName (Expected: >= $($ExpectedValue) KB)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 2. Audit Security Log
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] Security $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Security $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: Security $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$ValueName = "MaxSize"
+$ExpectedValue = 4194304
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] Security $ValueName = $($Actual) KB (Secure - Meets or exceeds threshold $($ExpectedValue) KB)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Security $ValueName = $($Actual) KB (Expected: >= $($ExpectedValue) KB)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: Security $ValueName (Expected: >= $($ExpectedValue) KB)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 3. Audit Setup Log
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] Setup $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Setup $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: Setup $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$ValueName = "MaxSize"
+$ExpectedValue = 32768
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] Setup $ValueName = $($Actual) KB (Secure - Meets or exceeds threshold $($ExpectedValue) KB)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Setup $ValueName = $($Actual) KB (Expected: >= $($ExpectedValue) KB)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: Setup $ValueName (Expected: >= $($ExpectedValue) KB)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 4. Audit System Log
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] System $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: System $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: System $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$ValueName = "MaxSize"
+$ExpectedValue = 262144
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] System $ValueName = $($Actual) KB (Secure - Meets or exceeds threshold $($ExpectedValue) KB)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: System $ValueName = $($Actual) KB (Expected: >= $($ExpectedValue) KB)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: System $ValueName (Expected: >= $($ExpectedValue) KB)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 5. Audit Role-Specific Channels (Directory Service, DNS Server, DFS Replication)
+$RoleAudit = @(
+    @{ Name = "Directory Service"; Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\Directory Service"; MinBytes = 268435456 },
+    @{ Name = "DNS Server"; Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\DNS Server"; MinBytes = 268435456 },
+    @{ Name = "DFS Replication"; Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication"; MinBytes = 134217728 }
+)
+
+foreach ($Item in $RoleAudit) {
+    if (Test-Path -Path $Item.Path) {
+        $Prop = Get-ItemProperty -Path $Item.Path -ErrorAction SilentlyContinue
+        if ($null -ne $Prop) {
+            $ActualSize = $Prop.MaxSize
+            $ActualRetention = $Prop.Retention
+            
+            if ($null -ne $ActualRetention -and $ActualRetention -eq 0) {
+                Write-Host "  [+] $($Item.Name) Retention = $($ActualRetention) (Secure)" -ForegroundColor Green
+            } else {
+                Write-Host "  [!] MISMATCH: $($Item.Name) Retention = $($ActualRetention) (Expected: 0)" -ForegroundColor Red
+                $script:Vulnerable = $true
+            }
+            
+            if ($null -ne $ActualSize -and [int64]$ActualSize -ge [int64]$Item.MinBytes) {
+                Write-Host "  [+] $($Item.Name) MaxSize = $($ActualSize) bytes (Secure - Meets or exceeds threshold $($Item.MinBytes) bytes)" -ForegroundColor Green
+            } else {
+                Write-Host "  [!] MISMATCH: $($Item.Name) MaxSize = $($ActualSize) bytes (Expected: >= $($Item.MinBytes) bytes)" -ForegroundColor Red
+                $script:Vulnerable = $true
+            }
+        }
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}
+```
+
+---
+
+<div id="02-domain-controllers-configure-event-log-sizes-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **DoD Windows Server Domain Controller Security Technical Implementation Guide (STIG)**: Rule SV-205713r856754_rule (WN16-DC-000030 / WN19-DC-000030 / WN22-DC-000030: Security Log size >= 1,024,000 KB; enterprise DC recommendation >= 4 GB)
+* **CIS Benchmark**: CIS Microsoft Windows Server Benchmark: Section 18.10.26.1.1, 18.10.26.1.2 (Application >= 32,768 KB), 18.10.26.2.1, 18.10.26.2.2 (Security >= 196,608 KB), 18.10.26.3.1, 18.10.26.3.2 (Setup >= 32,768 KB), 18.10.26.4.1, 18.10.26.4.2 (System >= 32,768 KB)
+* **Microsoft Security Guidance**: Active Directory Domain Services Audit and Logging Recommendations for Enterprise Environments
+* **ANSSI Active Directory Hardening Guide**: Recommendation R52 and event logging retention strategies for Domain Controllers
+
+
+<div style="page-break-before: always;"></div>
+
 <div id="03-identities-services-README-md"></div>
 
 <div id="03-identities-services-README-md-module-3-identities-services-hardening"></div>
@@ -39992,6 +40426,7 @@ This directory contains the physical isolation policies and operating system sec
    * **[REQ-PAW-073 - Configure Tamper Protection for PAWs](#07-paws-defender-configure-tamper-protection-md)**
    * **[REQ-PAW-074 - Configure Sandbox Execution Environment for PAWs](#07-paws-defender-configure-sandbox-execution-environment-md)**
    * **[REQ-PAW-075 - Configure AMSI Authenticode Signature Verification for PAWs](#07-paws-defender-configure-amsi-authenticode-signature-verification-md)**
+   * **[REQ-PAW-192 - Configure Remote Encryption Protection Mode for PAWs](#07-paws-defender-configure-remote-encryption-protection-md)**
 
 9. **[REQ-PAW-009 - Configure User Rights Assignments for PAWs](#07-paws-configure-user-rights-assignments-md)**
    Restricts critical user rights assignments (URAs) such as debugging programs, token impersonation, and denying network/interactive logon permissions for standard accounts on PAWs.
@@ -40163,7 +40598,6 @@ This directory contains the physical isolation policies and operating system sec
     * **[REQ-PAW-189 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs](#07-paws-admin-templates-configure-paw-at-event-log-sizes-md)**
     * **[REQ-PAW-190 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs](#07-paws-admin-templates-configure-paw-at-file-explorer-motw-md)**
     * **[REQ-PAW-191 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs](#07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md)**
-    * **[REQ-PAW-192 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs](#07-paws-admin-templates-configure-paw-at-defender-protection-options-md)**
     * **[REQ-PAW-193 - Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md)**
     * **[REQ-PAW-194 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md)**
     * **[REQ-PAW-195 - Administrative Templates: Disable Windows Widgets and News Feed for PAWs](#07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md)**
@@ -41902,6 +42336,7 @@ The following Defender Antivirus configurations must be enforced on PAWs:
 17. **[REQ-PAW-073 - Configure Tamper Protection for PAWs](#07-paws-defender-configure-tamper-protection-md)**
 18. **[REQ-PAW-074 - Configure Sandbox Execution Environment for PAWs](#07-paws-defender-configure-sandbox-execution-environment-md)**
 19. **[REQ-PAW-075 - Configure AMSI Authenticode Signature Verification for PAWs](#07-paws-defender-configure-amsi-authenticode-signature-verification-md)**
+20. **[REQ-PAW-192 - Configure Remote Encryption Protection Mode for PAWs](#07-paws-defender-configure-remote-encryption-protection-md)**
 
 ---
 
@@ -45165,6 +45600,118 @@ exit 1
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.9 (Windows Defender Antivirus configuration parameters)
 * **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="07-paws-defender-configure-remote-encryption-protection-md"></div>
+
+<div id="07-paws-defender-configure-remote-encryption-protection-md-req-paw-192-configure-remote-encryption-protection-mode-for-paws"></div>
+
+# [REQ-PAW-192] Configure Remote Encryption Protection Mode for PAWs
+
+<div id="07-paws-defender-configure-remote-encryption-protection-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+
+---
+
+<div id="07-paws-defender-configure-remote-encryption-protection-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection` -> **Configure Remote Encryption Protection Mode**
+  * **Registry Location**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection`
+      * `BruteForceProtectionConfiguredState` = `2` (REG_DWORD)
+
+---
+
+<div id="07-paws-defender-configure-remote-encryption-protection-md-rationale"></div>
+
+## Rationale
+Privileged Access Workstations (PAWs) must maintain the highest standard of endpoint protection against ransomware and lateral movement attempts. Remote Encryption Protection detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing Block mode terminates the malicious remote process or network connection attempting rapid or unauthorized file encryption, safeguarding Tier 0 administrative assets from network-based extortion attacks.
+
+---
+
+<div id="07-paws-defender-configure-remote-encryption-protection-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: High-volume legitimate batch modifications to SMB shares could theoretically trigger heuristics. Because PAWs are strictly dedicated administrative workstations with no local business file shares, operational impact is negligible.
+
+---
+
+<div id="07-paws-defender-configure-remote-encryption-protection-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="07-paws-defender-configure-remote-encryption-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection`
+4. Double-click **Configure Remote Encryption Protection Mode**.
+5. Set the policy to **Enabled**, and select **Block** (value `2`) in the dropdown options.
+6. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="07-paws-defender-configure-remote-encryption-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the Remote Encryption Protection registry value on PAWs:
+
+[Download Script: Configure-PawRemoteEncryptionProtection.ps1](../implementation_scripts/Configure-PawRemoteEncryptionProtection.ps1)
+
+```powershell
+# Configure-PawRemoteEncryptionProtection.ps1
+# Description: Configures Microsoft Defender Remote Encryption Protection in Block mode on PAWs.
+
+Write-Host "Configuring Microsoft Defender Remote Encryption Protection for PAWs..." -ForegroundColor Cyan
+
+$KeyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+if (-not (Test-Path -Path $KeyPath)) {
+    New-Item -Path $KeyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KeyPath -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord -Force
+
+Write-Host "[+] Remote Encryption Protection applied successfully on PAWs (Block mode)." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-PawRemoteEncryptionProtectionStatus.ps1](../audit_scripts/Get-PawRemoteEncryptionProtectionStatus.ps1)
+
+```powershell
+# Get-PawRemoteEncryptionProtectionStatus.ps1
+# Description: Audits Microsoft Defender Remote Encryption Protection configuration status on PAWs.
+
+$KeyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+$Reg = Get-ItemProperty -Path $KeyPath -Name "BruteForceProtectionConfiguredState" -ErrorAction SilentlyContinue
+
+if ($Reg -and $Reg.BruteForceProtectionConfiguredState -eq 2) {
+    Write-Output "Compliant"
+    exit 0
+} else {
+    Write-Output "Non-Compliant"
+    exit 1
+}
+```
+
+---
+
+<div id="07-paws-defender-configure-remote-encryption-protection-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.43.11.1.1.2
+* **ANSSI Active Directory Hardening Guide**: Recommendations for Tier 0 Privileged Access Workstations (PAWs)
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
 
 
 <div style="page-break-before: always;"></div>
@@ -57150,12 +57697,15 @@ if ($script:Vulnerable) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * **GPO Paths**:
-    * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Exploit Guard\Exploit Protection` -> **Use a common set of exploit protection settings`
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Exploit Guard\Exploit Protection` -> **Use a common set of exploit protection settings**
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection` -> **Prevent users from modifying settings**
     * `Computer Configuration\Administrative Templates\MS Security Guide` -> **Enable Certificate Padding**
     * `Computer Configuration\Administrative Templates\MS Security Guide` -> **Enable Structured Exception Handling Overwrite Protection (SEHOP)**
   * **Registry Locations**:
     * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection`
       * `ExploitProtectionSettings` = `C:\ProgramData\ExploitProtection\ExploitProtectionSettings.xml` (REG_SZ)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection`
+      * `DisallowExploitProtectionOverride` = `1` (REG_DWORD)
     * `HKLM\SOFTWARE\Microsoft\Cryptography\Wintrust\Config`
       * `EnableCertPaddingCheck` = `1` (REG_DWORD)
     * `HKLM\SOFTWARE\Wow6432Node\Microsoft\Cryptography\Wintrust\Config`
@@ -57230,6 +57780,10 @@ Before configuring the GPO, you must create a reference XML file containing the 
    * Configure policies:
      * **Policy**: `Enable Certificate Padding` -> Set to **Enabled**
      * **Policy**: `Enable Structured Exception Handling Overwrite Protection (SEHOP)` -> Set to **Enabled**
+6. Lock down Exploit Protection settings against user tampering:
+   * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection`
+   * Configure policy: **Prevent users from modifying settings** -> Set to **Enabled**
+7. Link the GPO to the appropriate Organizational Unit (OU) containing the target PAWs.
 
 ---
 
@@ -57326,6 +57880,14 @@ if (-not (Test-Path $SessionKernelPath)) {
 }
 Set-ItemProperty -Path $SessionKernelPath -Name "DisableExceptionChainValidation" -Value 0 -Type DWord -Force
 Write-Host "[+] Certificate Padding check and SEHOP registry keys applied." -ForegroundColor Green
+
+# 6. Prevent users from modifying Exploit Protection settings in Windows Security Center
+$SecCenterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+if (-not (Test-Path $SecCenterPath)) {
+    New-Item -Path $SecCenterPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SecCenterPath -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord -Force
+Write-Host "[+] Exploit protection override lockdown applied." -ForegroundColor Green
 
 Write-Host "Exploit Protection Profile application completed successfully." -ForegroundColor Cyan
 ```
@@ -57454,6 +58016,9 @@ Test-MitigationRegistryValue $WintrustWow64Path "EnableCertPaddingCheck" 1
 $SessionKernelPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel"
 Test-MitigationRegistryValue $SessionKernelPath "DisableExceptionChainValidation" 0
 
+$SecCenterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+Test-MitigationRegistryValue $SecCenterPath "DisallowExploitProtectionOverride" 1
+
 Write-Host ""
 if ($BaselineFailed) {
     Write-Host "Auditing FAILED: One or more configurations do not match the secure baseline." -ForegroundColor Red
@@ -57471,6 +58036,7 @@ if ($BaselineFailed) {
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Client Benchmark**: Section 18.9.30 (ASR/Exploit Guard Mitigation Policy configurations)
 * **CIS Microsoft Windows 10/11 Client Benchmark**: Section 18.4.4 (Enable Certificate Padding), Section 18.4.5 (Enable Structured Exception Handling Overwrite Protection (SEHOP))
+* **CIS Microsoft Windows Client Benchmark**: Section 18.10.92.2.1 (Prevent users from modifying settings in App and Browser protection)
 * **Microsoft Security Baselines**: Exploit Protection baseline templates and application configurations
 * **ANSSI Active Directory Hardening Guide**: Recommendations regarding endpoint protective controls
 
@@ -61153,11 +61719,11 @@ Privileged Access Workstations (PAWs) are dedicated exclusively to Tier 0 direct
 1. **Protocols Hardening**: Disabling legacy SMBv1 components stops known remote code execution flaws, and enforcing NetBT P-node prevents broadcast spoofing and relay attacks.
 2. **Data Collection & Telemetry**: Restricting diagnostic log collection, crash dump generation, feedback prompts, and dynamic cloud settings (OneSettings) prevents in-memory credential disclosure and eliminates external telemetry on Tier 0 stations.
 3. **App & Installer Restrictions**: Disallowing per-user unsigned app packages, preventing non-admin packaged app installation, and blocking the `ms-appinstaller` protocol handler closes drive-by malware delivery vectors.
-4. **Log Retention & Forensic Buffer**: Expanding event log maximum file sizes (Application/Setup/System to 32 MB, Security to 192 MB) guarantees that administrative security events are retained for auditing and forensic investigations.
+4. **Log Retention & Forensic Buffer**: Expanding event log maximum file sizes (Application/System to 128 MB, Setup to 32 MB, Security to 1 GB) guarantees that administrative security events are retained for auditing and forensic investigations.
 5. **Session & Credential Security**: Restricting credential display on the lock screen, disabling Automatic Restart Sign-On (ARSO), prohibiting local password reset questions, and blocking cleartext MPR password transfers prevents credential exposure.
 6. **Windows Update Management**: Disabling update pauses, managing feature update deferrals, and scheduling daily automatic installations ensures PAWs remain continuously patched against active vulnerabilities.
 
-This parent requirement coordinates the 31 individual unitary hardening requirements defined in the dedicated `admin-templates/` subsection for PAWs.
+This parent requirement coordinates the 30 individual unitary hardening requirements defined in the dedicated `admin-templates/` subsection for PAWs.
 
 ---
 
@@ -61175,7 +61741,7 @@ This parent requirement coordinates the 31 individual unitary hardening requirem
 
 ## Administrative Templates Hardening Requirements for PAWs
 
-The following 31 unitary administrative template hardening controls must be enforced on PAWs:
+The following 30 unitary administrative template hardening controls must be enforced on PAWs:
 
 1. **[REQ-PAW-168 - Administrative Templates: Disable SMBv1 Protocol Components for PAWs](#07-paws-admin-templates-configure-paw-at-smbv1-md)**
 2. **[REQ-PAW-169 - Administrative Templates: Configure NetBT Node Type and Name Release for PAWs](#07-paws-admin-templates-configure-paw-at-netbt-nodetype-md)**
@@ -61201,13 +61767,12 @@ The following 31 unitary administrative template hardening controls must be enfo
 22. **[REQ-PAW-189 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs](#07-paws-admin-templates-configure-paw-at-event-log-sizes-md)**
 23. **[REQ-PAW-190 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs](#07-paws-admin-templates-configure-paw-at-file-explorer-motw-md)**
 24. **[REQ-PAW-191 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs](#07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md)**
-25. **[REQ-PAW-192 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs](#07-paws-admin-templates-configure-paw-at-defender-protection-options-md)**
-26. **[REQ-PAW-193 - Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md)**
-27. **[REQ-PAW-194 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md)**
-28. **[REQ-PAW-195 - Administrative Templates: Disable Windows Widgets and News Feed for PAWs](#07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md)**
-29. **[REQ-PAW-196 - Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO) for PAWs](#07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md)**
-30. **[REQ-PAW-197 - Administrative Templates: Windows Sandbox Clipboard and Network Isolation for PAWs](#07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md)**
-31. **[REQ-PAW-198 - Administrative Templates: Windows Update Deferral and Automatic Installation Policies for PAWs](#07-paws-admin-templates-configure-paw-at-windows-update-policies-md)**
+25. **[REQ-PAW-193 - Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md)**
+26. **[REQ-PAW-194 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md)**
+27. **[REQ-PAW-195 - Administrative Templates: Disable Windows Widgets and News Feed for PAWs](#07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md)**
+28. **[REQ-PAW-196 - Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO) for PAWs](#07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md)**
+29. **[REQ-PAW-197 - Administrative Templates: Windows Sandbox Clipboard and Network Isolation for PAWs](#07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md)**
+30. **[REQ-PAW-198 - Administrative Templates: Windows Update Deferral and Automatic Installation Policies for PAWs](#07-paws-admin-templates-configure-paw-at-windows-update-policies-md)**
 
 ---
 
@@ -64855,27 +65420,34 @@ if ($script:Vulnerable) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\MaxSize` = `32768`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\MaxSize` = `131072`
   * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\MaxSize` = `196608`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\MaxSize` = `1048576`
   * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\Retention` = `0`
   * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\MaxSize` = `32768`
   * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\MaxSize` = `32768`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\MaxSize` = `131072`
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-rationale"></div>
 
 ## Rationale
-Default event log capacities (typically 20 MB) rollover within hours during active security events, overwriting vital evidence. Expanding the Security log to 192 MB (196,608 KB) and Application/Setup/System logs to 32 MB (32,768 KB) provides sufficient buffer for high-volume audit data and centralized SIEM ingestion.
+Privileged Access Workstations (PAWs) serve as the dedicated management plane for Active Directory Domain Controllers, Tier 0 directory services, and critical identity infrastructure. Every interactive logon, administrative command execution, PowerShell script block, and remote management session initiated from a PAW carries severe security sensitivity.
+
+Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidly during heavy administrative activity or forensic investigations, destroying vital attribution evidence. Expanding the **Security** log to **1 GB** (`1,048,576 KB`), **System** and **Application** logs to **128 MB** (`131,072 KB`), and **Setup** log to **32 MB** (`32,768 KB`) establishes a robust local forensic buffer that preserves audit trails across extended operational periods:
+
+1. **High-Privilege Forensic Attribution**: Detailed auditing of administrative tooling (e.g., Active Directory Administrative Center, RSAT, PowerShell remoting, Mimikatz defense telemetry) generates voluminous Security event records. A 1 GB Security log ensures high-fidelity evidence preservation even if centralized log forwarding encounters temporary network partitions.
+2. **64 KB Boundary Alignment**: The Windows Event Log service allocates and writes event records in 64 KB memory chunks. All configured sizes in KB must be integer multiples of 64 (`SizeKB % 64 == 0`). Non-aligned values will be automatically truncated or rounded by the operating system (`1,048,576 / 64 = 16,384`; `131,072 / 64 = 2,048`; `32,768 / 64 = 512`).
+3. **Retention Policy**: Configuring retention behavior to "Overwrite events as needed" (GPO: `Disabled`, registry value `0`) ensures that new audit entries are never rejected or dropped when capacity is reached.
+4. **Memory and I/O Impact**: Windows utilizes memory-mapped files (`.evtx`) for the Event Log service. Only actively accessed pages are mapped into virtual memory; larger file limits do not consume active physical RAM.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Allocates approximately 300 MB of disk space in %SystemRoot%\System32\Winevt\Logs.
+* **Operational Impact**: Allocates approximately 1.32 GB of maximum disk space in `%SystemRoot%\System32\Winevt\Logs`. Modern PAW hardware specifications easily absorb this footprint (representing less than 0.3% of total storage).
 
 ---
 
@@ -64892,19 +65464,19 @@ Default event log capacities (typically 20 MB) rollover within hours during acti
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
-  * **Specify the maximum log file size (KB)**: Set to `Enabled` (32768 KB)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (`131072` KB)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
-  * **Specify the maximum log file size (KB)**: Set to `Enabled` (196608 KB)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (`1048576` KB)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
-  * **Specify the maximum log file size (KB)**: Set to `Enabled` (32768 KB)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (`32768` KB)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
-  * **Specify the maximum log file size (KB)**: Set to `Enabled` (32768 KB)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (`131072` KB)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 
@@ -64930,13 +65502,13 @@ if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Ap
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Force | Out-Null
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "Retention" -Value "0" -Type String -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 32768 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 131072 -Type DWord -Force
 
 if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security")) {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Force | Out-Null
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "Retention" -Value "0" -Type String -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 196608 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 1048576 -Type DWord -Force
 
 if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup")) {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Force | Out-Null
@@ -64948,7 +65520,7 @@ if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Sy
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Force | Out-Null
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "Retention" -Value "0" -Type String -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 32768 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 131072 -Type DWord -Force
 
 Write-Host "[+] Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs applied successfully." -ForegroundColor Green
 ```
@@ -64988,19 +65560,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application"
 $ValueName = "MaxSize"
-$ExpectedValue = 32768
+$ExpectedValue = 131072
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -65032,19 +65604,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security"
 $ValueName = "MaxSize"
-$ExpectedValue = 196608
+$ExpectedValue = 1048576
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -65081,14 +65653,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -65120,19 +65692,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System"
 $ValueName = "MaxSize"
-$ExpectedValue = 32768
+$ExpectedValue = 131072
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -65154,9 +65726,11 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.26.1.1, 18.10.26.1.2, 18.10.26.2.1, 18.10.26.2.2, 18.10.26.3.1, 18.10.26.3.2, 18.10.26.4.1, 18.10.26.4.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **DoD Windows 10/11 Security Technical Implementation Guide (STIG)**: Rule SV-220707r879607_rule (Security Log MaxSize >= 1,024,000 KB), SV-220705r556754_rule (Application Log MaxSize >= 32,768 KB), SV-220709r556766_rule (System Log MaxSize >= 32,768 KB)
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.26.1.1, 18.10.26.1.2 (Application >= 32,768 KB), 18.10.26.2.1, 18.10.26.2.2 (Security >= 196,608 KB), 18.10.26.3.1, 18.10.26.3.2 (Setup >= 32,768 KB), 18.10.26.4.1, 18.10.26.4.2 (System >= 32,768 KB)
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions for Windows client platforms
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters and forensic preservation recommendations for Tier 0 administrative workstations
+
 
 
 <div style="page-break-before: always;"></div>
@@ -65505,198 +66079,6 @@ if ($script:Vulnerable) {
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.35.1, Section 18.10.58.1, Section 18.10.58.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
-
-
-<div style="page-break-before: always;"></div>
-
-<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md"></div>
-
-<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-req-paw-192-administrative-templates-windows-defender-scan-and-exploit-protection-overrides-for-paws"></div>
-
-# [REQ-PAW-192] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs
-
-<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-target-scope"></div>
-
-## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
-
----
-
-<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-implementation-details"></div>
-
-## Implementation Details
-* **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection\BruteForceProtectionConfiguredState` = `2`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Scan\DisablePackedExeScanning` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection\DisallowExploitProtectionOverride` = `1`
-
----
-
-<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-rationale"></div>
-
-## Rationale
-Remote Encryption Protection actively detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing packed executable scanning guarantees that software packed with UPX or custom packers is decompressed and analyzed for malicious payloads. Preventing users from modifying Exploit Protection settings secures core mitigations (DEP, ASLR, CFG) against local user tampering.
-
----
-
-<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-legacy-impact-compatibility"></div>
-
-## Legacy Impact & Compatibility
-* **Operational Impact**: Scanning packed files may cause slight increases in scan duration. Standard users cannot alter App & Browser protection options in Windows Security.
-
----
-
-<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-implementation-steps"></div>
-
-## Implementation Steps
-
-<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
-
-### Option A: Group Policy Object (GPO) Configuration (Preferred)
-
-1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection`
-  * **Configure Remote Encryption Protection Mode**: Set to `Enabled` (Audit or higher (Block mode recommended))
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
-  * **Turn off scanning of packed executables**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection`
-  * **Prevent users from modifying settings**: Set to `Enabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
-
----
-
-<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
-
-### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
-
-Run the following script locally to configure the administrative template registry values:
-
-[Download Script: Configure-PawAtDefenderProtectionOptions.ps1](../implementation_scripts/Configure-PawAtDefenderProtectionOptions.ps1)
-
-```powershell
-#Configure-PawAtDefenderProtectionOptions.ps1
-# Description: Configures Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs.
-
-Write-Host "Configuring Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs..." -ForegroundColor Cyan
-
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord -Force
-
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "DisablePackedExeScanning" -Value 0 -Type DWord -Force
-
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord -Force
-
-Write-Host "[+] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs applied successfully." -ForegroundColor Green
-```
-
-*To verify the configuration:*
-
-[Download Script: Get-PawAtDefenderProtectionOptionsStatus.ps1](../audit_scripts/Get-PawAtDefenderProtectionOptionsStatus.ps1)
-
-```powershell
-#Get-PawAtDefenderProtectionOptionsStatus.ps1
-# Description: Audits Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs.
-
-Write-Host "--- Auditing Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs ---" -ForegroundColor Cyan
-$script:Vulnerable = $false
-
-$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
-$ValueName = "BruteForceProtectionConfiguredState"
-$ExpectedValue = 2
-if (Test-Path -Path $TargetKey) {
-    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Prop) {
-        $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
-        } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
-            $script:Vulnerable = $true
-        }
-    } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
-$ValueName = "DisablePackedExeScanning"
-$ExpectedValue = 0
-if (Test-Path -Path $TargetKey) {
-    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Prop) {
-        $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
-        } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
-            $script:Vulnerable = $true
-        }
-    } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
-$ValueName = "DisallowExploitProtectionOverride"
-$ExpectedValue = 1
-if (Test-Path -Path $TargetKey) {
-    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Prop) {
-        $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
-        } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
-            $script:Vulnerable = $true
-        }
-    } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-if ($script:Vulnerable) {
-    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
-    exit 1
-} else {
-    Write-Host "Audit Result: SECURE" -ForegroundColor Green
-    exit 0
-}
-```
-
----
-
-<div id="07-paws-admin-templates-configure-paw-at-defender-protection-options-md-sources-compliance-references"></div>
-
-## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.43.11.1.1.2, Section 18.10.43.13.2, Section 18.10.92.2.1
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
 * **Microsoft Security Baseline**: Recommended administrative template and component restrictions
 
@@ -69755,6 +70137,7 @@ To prevent initial access and lateral movement, the following unitary technical 
    * **[REQ-END-077 - Configure File Explorer SmartScreen](#08-endpoints-defender-configure-file-explorer-smartscreen-md)**
    * **[REQ-END-078 - Disable OneDrive File Sync](#08-endpoints-defender-disable-onedrive-file-sync-md)**
    * **[REQ-END-079 - Enforce Antivirus Scan on Opening Attachments](#08-endpoints-defender-enforce-antivirus-scan-on-opening-attachments-md)**
+   * **[REQ-END-203 - Configure Remote Encryption Protection Mode](#08-endpoints-defender-configure-remote-encryption-protection-md)**
 
 8. **[REQ-END-008 - WSUS Client Configuration](#08-endpoints-wsus-client-config-md)**
    Enforces update client registry baselines to ensure workstations pull OS patches and security signatures exclusively from the local, offline WSUS server.
@@ -69927,7 +70310,6 @@ To prevent initial access and lateral movement, the following unitary technical 
     * **[REQ-END-200 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies](#08-endpoints-admin-templates-configure-end-at-event-log-sizes-md)**
     * **[REQ-END-201 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security](#08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md)**
     * **[REQ-END-202 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls](#08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md)**
-    * **[REQ-END-203 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides](#08-endpoints-admin-templates-configure-end-at-defender-protection-options-md)**
     * **[REQ-END-204 - Administrative Templates: Windows Search and Cortana Privacy Restrictions](#08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md)**
     * **[REQ-END-205 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions](#08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md)**
     * **[REQ-END-206 - Administrative Templates: Disable Windows Widgets and News Feed](#08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md)**
@@ -71443,6 +71825,7 @@ The following Defender Antivirus configurations must be enforced:
 21. **[REQ-END-077 - Configure File Explorer SmartScreen](#08-endpoints-defender-configure-file-explorer-smartscreen-md)**
 22. **[REQ-END-078 - Disable OneDrive File Sync](#08-endpoints-defender-disable-onedrive-file-sync-md)**
 23. **[REQ-END-079 - Enforce Antivirus Scan on Opening Attachments](#08-endpoints-defender-enforce-antivirus-scan-on-opening-attachments-md)**
+24. **[REQ-END-203 - Configure Remote Encryption Protection Mode](#08-endpoints-defender-configure-remote-encryption-protection-md)**
 
 ---
 
@@ -75076,6 +75459,118 @@ if ($Reg -and $Reg.ScanWithAntiVirus -eq 3) {
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10 Benchmark**: Section 18.9 (Windows Defender Antivirus configuration parameters)
 * **ANSSI Active Directory Hardening Guide**: Protective controls baselines on client workstations
+
+
+<div style="page-break-before: always;"></div>
+
+<div id="08-endpoints-defender-configure-remote-encryption-protection-md"></div>
+
+<div id="08-endpoints-defender-configure-remote-encryption-protection-md-req-end-203-configure-remote-encryption-protection-mode"></div>
+
+# [REQ-END-203] Configure Remote Encryption Protection Mode
+
+<div id="08-endpoints-defender-configure-remote-encryption-protection-md-target-scope"></div>
+
+## Target Scope
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+
+---
+
+<div id="08-endpoints-defender-configure-remote-encryption-protection-md-implementation-details"></div>
+
+## Implementation Details
+* **Priority**: High
+* **GPO Path / Registry Location**:
+  * **GPO Path**: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection` -> **Configure Remote Encryption Protection Mode**
+  * **Registry Location**:
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection`
+      * `BruteForceProtectionConfiguredState` = `2` (REG_DWORD)
+
+---
+
+<div id="08-endpoints-defender-configure-remote-encryption-protection-md-rationale"></div>
+
+## Rationale
+Remote Encryption Protection actively detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing Block mode terminates the malicious remote process or connection attempting rapid or unauthorized file encryption over network shares, halting lateral encryption attacks from unmanaged or compromised domain assets.
+
+---
+
+<div id="08-endpoints-defender-configure-remote-encryption-protection-md-legacy-impact-compatibility"></div>
+
+## Legacy Impact & Compatibility
+* **Operational Impact**: High-volume legitimate batch modifications to SMB shares by custom scripts could theoretically trip aggressive heuristics. Block mode severs the offending session. Pilot testing in Audit mode (`1`) is recommended for environments running legacy custom batch processing tools before transitioning to Block mode (`2`).
+
+---
+
+<div id="08-endpoints-defender-configure-remote-encryption-protection-md-implementation-steps"></div>
+
+## Implementation Steps
+
+<div id="08-endpoints-defender-configure-remote-encryption-protection-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
+
+### Option A: Group Policy Object (GPO) Configuration (Preferred)
+
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
+3. Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection`
+4. Double-click **Configure Remote Encryption Protection Mode**.
+5. Set the policy to **Enabled**, and select **Block** (value `2`) in the dropdown options.
+6. Link the GPO to the appropriate Organizational Unit and verify replication.
+
+---
+
+<div id="08-endpoints-defender-configure-remote-encryption-protection-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
+
+### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to configure the Remote Encryption Protection registry value:
+
+[Download Script: Configure-RemoteEncryptionProtection.ps1](../implementation_scripts/Configure-RemoteEncryptionProtection.ps1)
+
+```powershell
+# Configure-RemoteEncryptionProtection.ps1
+# Description: Configures Microsoft Defender Remote Encryption Protection in Block mode.
+
+Write-Host "Configuring Microsoft Defender Remote Encryption Protection..." -ForegroundColor Cyan
+
+$KeyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+if (-not (Test-Path -Path $KeyPath)) {
+    New-Item -Path $KeyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KeyPath -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord -Force
+
+Write-Host "[+] Remote Encryption Protection applied successfully (Block mode)." -ForegroundColor Green
+```
+
+*To audit the hardening status:*
+
+[Download Script: Get-RemoteEncryptionProtectionStatus.ps1](../audit_scripts/Get-RemoteEncryptionProtectionStatus.ps1)
+
+```powershell
+# Get-RemoteEncryptionProtectionStatus.ps1
+# Description: Audits Microsoft Defender Remote Encryption Protection configuration status.
+
+$KeyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+$Reg = Get-ItemProperty -Path $KeyPath -Name "BruteForceProtectionConfiguredState" -ErrorAction SilentlyContinue
+
+if ($Reg -and $Reg.BruteForceProtectionConfiguredState -eq 2) {
+    Write-Output "Compliant"
+    exit 0
+} else {
+    Write-Output "Non-Compliant"
+    exit 1
+}
+```
+
+---
+
+<div id="08-endpoints-defender-configure-remote-encryption-protection-md-sources-compliance-references"></div>
+
+## Sources & Compliance References
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.43.11.1.1.2
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
 
 
 <div style="page-break-before: always;"></div>
@@ -87384,11 +87879,14 @@ if ($script:Vulnerable) {
 * **GPO Path / Registry Location**:
   * **GPO Paths**:
     * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Exploit Guard\Exploit Protection` -> **Use a common set of exploit protection settings**
+    * `Computer Configuration\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection` -> **Prevent users from modifying settings**
     * `Computer Configuration\Administrative Templates\MS Security Guide` -> **Enable Certificate Padding**
     * `Computer Configuration\Administrative Templates\MS Security Guide` -> **Enable Structured Exception Handling Overwrite Protection (SEHOP)**
   * **Registry Locations**:
     * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection`
       * `ExploitProtectionSettings` = `C:\ProgramData\ExploitProtection\ExploitProtectionSettings.xml` (REG_SZ)
+    * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection`
+      * `DisallowExploitProtectionOverride` = `1` (REG_DWORD)
     * `HKLM\SOFTWARE\Microsoft\Cryptography\Wintrust\Config`
       * `EnableCertPaddingCheck` = `1` (REG_DWORD)
     * `HKLM\SOFTWARE\Wow6432Node\Microsoft\Cryptography\Wintrust\Config`
@@ -87474,7 +87972,10 @@ Before configuring the GPO, you must create a reference XML file containing the 
    * Configure policies:
      * **Policy**: `Enable Certificate Padding` -> Set to **Enabled**
      * **Policy**: `Enable Structured Exception Handling Overwrite Protection (SEHOP)` -> Set to **Enabled**
-6. Link the GPO to the appropriate Organizational Unit (OU) containing the target client endpoints and member servers.
+6. Lock down Exploit Protection settings against user tampering:
+   * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection`
+   * Configure policy: **Prevent users from modifying settings** -> Set to **Enabled**
+7. Link the GPO to the appropriate Organizational Unit (OU) containing the target client endpoints and member servers.
 
 ---
 
@@ -87675,6 +88176,14 @@ if (-not (Test-Path $SessionKernelPath)) {
 Set-ItemProperty -Path $SessionKernelPath -Name "DisableExceptionChainValidation" -Value 0 -Type DWord -Force
 Write-Host "[+] Certificate Padding check and SEHOP registry keys applied." -ForegroundColor Green
 
+# 6. Prevent users from modifying Exploit Protection settings in Windows Security Center
+$SecCenterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+if (-not (Test-Path $SecCenterPath)) {
+    New-Item -Path $SecCenterPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SecCenterPath -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord -Force
+Write-Host "[+] Exploit protection override lockdown applied." -ForegroundColor Green
+
 Write-Host "Exploit Protection Profile application completed successfully." -ForegroundColor Cyan
 ```
 
@@ -87802,6 +88311,9 @@ Test-MitigationRegistryValue $WintrustWow64Path "EnableCertPaddingCheck" 1
 $SessionKernelPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel"
 Test-MitigationRegistryValue $SessionKernelPath "DisableExceptionChainValidation" 0
 
+$SecCenterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+Test-MitigationRegistryValue $SecCenterPath "DisallowExploitProtectionOverride" 1
+
 Write-Host ""
 if ($BaselineFailed) {
     Write-Host "Auditing FAILED: One or more configurations do not match the secure baseline." -ForegroundColor Red
@@ -87819,6 +88331,7 @@ if ($BaselineFailed) {
 ## Sources & Compliance References
 * **CIS Microsoft Windows 10/11 Client Benchmark**: Section 18.9.30 (ASR/Exploit Guard Mitigation Policy configurations)
 * **CIS Microsoft Windows 10/11 Client Benchmark**: Section 18.4.4 (Enable Certificate Padding), Section 18.4.5 (Enable Structured Exception Handling Overwrite Protection (SEHOP))
+* **CIS Microsoft Windows Client Benchmark**: Section 18.10.92.2.1 (Prevent users from modifying settings in App and Browser protection)
 * **Microsoft Security Baselines**: Exploit Protection baseline templates and application configurations
 * **ANSSI Active Directory Hardening Guide**: Recommendations regarding endpoint protective controls
 
@@ -91897,11 +92410,11 @@ Administrative templates govern system-wide capabilities, behaviors, network pro
 1. **Protocols Hardening**: Disabling legacy SMBv1 components stops known remote code execution flaws (e.g., EternalBlue), and enforcing NetBT P-node prevents broadcast spoofing and relay attacks.
 2. **Data Collection & Telemetry**: Restricting diagnostic log collection, crash dump generation, feedback prompts, and dynamic cloud settings (OneSettings) prevents in-memory credential disclosure and limits external telemetry.
 3. **App & Installer Restrictions**: Disallowing per-user unsigned app packages, preventing non-admin packaged app installation, and blocking the `ms-appinstaller` protocol handler closes primary drive-by malware delivery paths.
-4. **Log Retention & Forensic Buffer**: Expanding event log maximum file sizes (Application/Setup/System to 32 MB, Security to 192 MB) guarantees that critical security events are retained for auditing and forensic investigations.
+4. **Log Retention & Forensic Buffer**: Expanding event log maximum file sizes (Application/System to 128 MB, Setup to 32 MB, Security to 1 GB) guarantees that critical security events are retained for auditing and forensic investigations.
 5. **Session & Credential Security**: Restricting credential display on the lock screen, disabling Automatic Restart Sign-On (ARSO), prohibiting local password reset questions, and blocking cleartext MPR password transfers prevents credential exposure.
 6. **Windows Update Management**: Disabling update pauses, managing feature update deferrals, and scheduling daily automatic installations ensures workstations remain continuously patched against active vulnerabilities.
 
-This parent requirement coordinates the 31 individual unitary hardening requirements defined in the dedicated `admin-templates/` subsection.
+This parent requirement coordinates the 30 individual unitary hardening requirements defined in the dedicated `admin-templates/` subsection.
 
 ---
 
@@ -91919,7 +92432,7 @@ This parent requirement coordinates the 31 individual unitary hardening requirem
 
 ## Administrative Templates Hardening Requirements
 
-The following 31 unitary administrative template hardening controls must be enforced:
+The following 30 unitary administrative template hardening controls must be enforced:
 
 1. **[REQ-END-179 - Administrative Templates: Disable SMBv1 Protocol Components](#08-endpoints-admin-templates-configure-end-at-smbv1-md)**
 2. **[REQ-END-180 - Administrative Templates: Configure NetBT Node Type and Name Release](#08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md)**
@@ -91945,13 +92458,12 @@ The following 31 unitary administrative template hardening controls must be enfo
 22. **[REQ-END-200 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies](#08-endpoints-admin-templates-configure-end-at-event-log-sizes-md)**
 23. **[REQ-END-201 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security](#08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md)**
 24. **[REQ-END-202 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls](#08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md)**
-25. **[REQ-END-203 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides](#08-endpoints-admin-templates-configure-end-at-defender-protection-options-md)**
-26. **[REQ-END-204 - Administrative Templates: Windows Search and Cortana Privacy Restrictions](#08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md)**
-27. **[REQ-END-205 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions](#08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md)**
-28. **[REQ-END-206 - Administrative Templates: Disable Windows Widgets and News Feed](#08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md)**
-29. **[REQ-END-207 - Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO)](#08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md)**
-30. **[REQ-END-208 - Administrative Templates: Windows Sandbox Clipboard and Network Isolation](#08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md)**
-31. **[REQ-END-209 - Administrative Templates: Windows Update Deferral and Automatic Installation Policies](#08-endpoints-admin-templates-configure-end-at-windows-update-policies-md)**
+25. **[REQ-END-204 - Administrative Templates: Windows Search and Cortana Privacy Restrictions](#08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md)**
+26. **[REQ-END-205 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions](#08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md)**
+27. **[REQ-END-206 - Administrative Templates: Disable Windows Widgets and News Feed](#08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md)**
+28. **[REQ-END-207 - Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO)](#08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md)**
+29. **[REQ-END-208 - Administrative Templates: Windows Sandbox Clipboard and Network Isolation](#08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md)**
+30. **[REQ-END-209 - Administrative Templates: Windows Update Deferral and Automatic Installation Policies](#08-endpoints-admin-templates-configure-end-at-windows-update-policies-md)**
 
 ---
 
@@ -95599,27 +96111,36 @@ if ($script:Vulnerable) {
 * **Priority**: High
 * **GPO Path / Registry Location**:
   * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\MaxSize` = `32768`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\MaxSize` = `131072`
   * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\MaxSize` = `196608`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\MaxSize` = `1048576`
   * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\Retention` = `0`
   * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\MaxSize` = `32768`
   * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\MaxSize` = `32768`
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\MaxSize` = `131072`
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-rationale"></div>
 
 ## Rationale
-Default event log capacities (typically 20 MB) rollover within hours during active security events, overwriting vital evidence. Expanding the Security log to 192 MB (196,608 KB) and Application/Setup/System logs to 32 MB (32,768 KB) provides sufficient buffer for high-volume audit data and centralized SIEM ingestion.
+Default Windows event log capacities (typically 20 MB) rollover within hours during normal workstation activity, and can be completely overwritten within minutes during active security incidents, brute-force attempts, or high-volume administrative operations. 
+
+In hardened environments enforcing comprehensive audit policies (such as Process Creation with command-line arguments [Event ID 4688], PowerShell Script Block Logging [Event ID 4104], and detailed logon/logoff auditing), workstations typically generate between 100 MB and 300+ MB of security telemetry daily. A legacy 192 MB Security log preserves only 12 to 48 hours of telemetry, creating severe risks for endpoints operating off-network (remote users, field devices) where real-time SIEM shipping may be delayed.
+
+Expanding the **Security** log to **1 GB** (`1,048,576 KB`), **System** and **Application** logs to **128 MB** (`131,072 KB`), and **Setup** log to **32 MB** (`32,768 KB`) provides a resilient 7-to-14-day on-box forensic retention buffer.
+
+Key engineering considerations:
+1. **64 KB Boundary Alignment**: The Windows Event Log service allocates and writes event records in 64 KB memory blocks. All configured sizes in KB must be integer multiples of 64 (`SizeKB % 64 == 0`). Sizes that do not align with 64 KB boundaries are rounded down by the operating system (`1,048,576 / 64 = 16,384`; `131,072 / 64 = 2,048`; `32,768 / 64 = 512`).
+2. **Retention Policy**: Configuring retention behavior to "Overwrite events as needed" (GPO: `Disabled`, registry value `0`) prevents the Event Log service from refusing new events when capacity is reached, guaranteeing continuous logging of recent attacker activity.
+3. **Memory and I/O Impact**: Windows utilizes memory-mapped files (`.evtx`) for the Event Log service. Only actively accessed pages are mapped into virtual memory; larger file limits do not consume active physical RAM.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Allocates approximately 300 MB of disk space in %SystemRoot%\System32\Winevt\Logs.
+* **Operational Impact**: Allocates approximately 1.32 GB of maximum disk space in `%SystemRoot%\System32\Winevt\Logs`. Modern enterprise workstations with 256 GB to 1 TB SSDs easily absorb this footprint (representing less than 0.3% of total storage).
 
 ---
 
@@ -95636,19 +96157,19 @@ Default event log capacities (typically 20 MB) rollover within hours during acti
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
-  * **Specify the maximum log file size (KB)**: Set to `Enabled` (32768 KB)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (`131072` KB)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
-  * **Specify the maximum log file size (KB)**: Set to `Enabled` (196608 KB)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (`1048576` KB)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
-  * **Specify the maximum log file size (KB)**: Set to `Enabled` (32768 KB)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (`32768` KB)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
-  * **Specify the maximum log file size (KB)**: Set to `Enabled` (32768 KB)
+  * **Specify the maximum log file size (KB)**: Set to `Enabled` (`131072` KB)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 
@@ -95674,13 +96195,13 @@ if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Ap
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Force | Out-Null
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "Retention" -Value "0" -Type String -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 32768 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 131072 -Type DWord -Force
 
 if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security")) {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Force | Out-Null
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "Retention" -Value "0" -Type String -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 196608 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 1048576 -Type DWord -Force
 
 if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup")) {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Force | Out-Null
@@ -95692,7 +96213,7 @@ if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Sy
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Force | Out-Null
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "Retention" -Value "0" -Type String -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 32768 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 131072 -Type DWord -Force
 
 Write-Host "[+] Administrative Templates: Event Log Maximum File Sizes and Retention Policies applied successfully." -ForegroundColor Green
 ```
@@ -95732,19 +96253,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application"
 $ValueName = "MaxSize"
-$ExpectedValue = 32768
+$ExpectedValue = 131072
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -95776,19 +96297,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security"
 $ValueName = "MaxSize"
-$ExpectedValue = 196608
+$ExpectedValue = 1048576
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -95825,14 +96346,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -95864,19 +96385,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System"
 $ValueName = "MaxSize"
-$ExpectedValue = 32768
+$ExpectedValue = 131072
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -95898,9 +96419,11 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.26.1.1, 18.10.26.1.2, 18.10.26.2.1, 18.10.26.2.2, 18.10.26.3.1, 18.10.26.3.2, 18.10.26.4.1, 18.10.26.4.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **DoD Windows 10/11 Security Technical Implementation Guide (STIG)**: Rule SV-220707r879607_rule (Security Log MaxSize >= 1,024,000 KB), SV-220705r556754_rule (Application Log MaxSize >= 32,768 KB), SV-220709r556766_rule (System Log MaxSize >= 32,768 KB)
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.26.1.1, 18.10.26.1.2 (Application >= 32,768 KB), 18.10.26.2.1, 18.10.26.2.2 (Security >= 196,608 KB), 18.10.26.3.1, 18.10.26.3.2 (Setup >= 32,768 KB), 18.10.26.4.1, 18.10.26.4.2 (System >= 32,768 KB)
+* **Microsoft Security Baseline**: Recommended administrative template and component restrictions for Windows client platforms
+* **ANSSI Active Directory Hardening Guide**: Baseline security parameters and forensic preservation recommendations for managed Windows environments
+
 
 
 <div style="page-break-before: always;"></div>
@@ -96249,198 +96772,6 @@ if ($script:Vulnerable) {
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.35.1, Section 18.10.58.1, Section 18.10.58.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
-
-
-<div style="page-break-before: always;"></div>
-
-<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md"></div>
-
-<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-req-end-203-administrative-templates-windows-defender-scan-and-exploit-protection-overrides"></div>
-
-# [REQ-END-203] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides
-
-<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-target-scope"></div>
-
-## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
-
----
-
-<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-implementation-details"></div>
-
-## Implementation Details
-* **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection\BruteForceProtectionConfiguredState` = `2`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Scan\DisablePackedExeScanning` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection\DisallowExploitProtectionOverride` = `1`
-
----
-
-<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-rationale"></div>
-
-## Rationale
-Remote Encryption Protection actively detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing packed executable scanning guarantees that software packed with UPX or custom packers is decompressed and analyzed for malicious payloads. Preventing users from modifying Exploit Protection settings secures core mitigations (DEP, ASLR, CFG) against local user tampering.
-
----
-
-<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-legacy-impact-compatibility"></div>
-
-## Legacy Impact & Compatibility
-* **Operational Impact**: Scanning packed files may cause slight increases in scan duration. Standard users cannot alter App & Browser protection options in Windows Security.
-
----
-
-<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-implementation-steps"></div>
-
-## Implementation Steps
-
-<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-option-a-group-policy-object-gpo-configuration-preferred"></div>
-
-### Option A: Group Policy Object (GPO) Configuration (Preferred)
-
-1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection`
-  * **Configure Remote Encryption Protection Mode**: Set to `Enabled` (Audit or higher (Block mode recommended))
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan`
-  * **Turn off scanning of packed executables**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection`
-  * **Prevent users from modifying settings**: Set to `Enabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
-
----
-
-<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-option-b-powershell-registry-configuration-remediation-non-gpo"></div>
-
-### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
-
-Run the following script locally to configure the administrative template registry values:
-
-[Download Script: Configure-EndAtDefenderProtectionOptions.ps1](../implementation_scripts/Configure-EndAtDefenderProtectionOptions.ps1)
-
-```powershell
-#Configure-EndAtDefenderProtectionOptions.ps1
-# Description: Configures Administrative Templates: Windows Defender Scan and Exploit Protection Overrides.
-
-Write-Host "Configuring Administrative Templates: Windows Defender Scan and Exploit Protection Overrides..." -ForegroundColor Cyan
-
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord -Force
-
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "DisablePackedExeScanning" -Value 0 -Type DWord -Force
-
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord -Force
-
-Write-Host "[+] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides applied successfully." -ForegroundColor Green
-```
-
-*To verify the configuration:*
-
-[Download Script: Get-EndAtDefenderProtectionOptionsStatus.ps1](../audit_scripts/Get-EndAtDefenderProtectionOptionsStatus.ps1)
-
-```powershell
-#Get-EndAtDefenderProtectionOptionsStatus.ps1
-# Description: Audits Administrative Templates: Windows Defender Scan and Exploit Protection Overrides.
-
-Write-Host "--- Auditing Administrative Templates: Windows Defender Scan and Exploit Protection Overrides ---" -ForegroundColor Cyan
-$script:Vulnerable = $false
-
-$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
-$ValueName = "BruteForceProtectionConfiguredState"
-$ExpectedValue = 2
-if (Test-Path -Path $TargetKey) {
-    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Prop) {
-        $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
-        } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
-            $script:Vulnerable = $true
-        }
-    } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
-$ValueName = "DisablePackedExeScanning"
-$ExpectedValue = 0
-if (Test-Path -Path $TargetKey) {
-    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Prop) {
-        $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
-        } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
-            $script:Vulnerable = $true
-        }
-    } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
-$ValueName = "DisallowExploitProtectionOverride"
-$ExpectedValue = 1
-if (Test-Path -Path $TargetKey) {
-    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Prop) {
-        $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
-        } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
-            $script:Vulnerable = $true
-        }
-    } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-if ($script:Vulnerable) {
-    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
-    exit 1
-} else {
-    Write-Host "Audit Result: SECURE" -ForegroundColor Green
-    exit 0
-}
-```
-
----
-
-<div id="08-endpoints-admin-templates-configure-end-at-defender-protection-options-md-sources-compliance-references"></div>
-
-## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.43.11.1.1.2, Section 18.10.43.13.2, Section 18.10.92.2.1
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
 * **Microsoft Security Baseline**: Recommended administrative template and component restrictions
 

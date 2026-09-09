@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-09-08T13:39:01Z</oval:timestamp>
+    <oval:timestamp>2026-09-09T09:38:24Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -3092,6 +3092,35 @@ On Tier 0 Domain Controllers:
         <criterion comment="Check Registry Key SOFTWARE\Classes\. Value &lt;ext&gt;" test_ref="oval:org.adhardening:tst:2159007" />
       </criteria>
     </definition>
+    <definition id="oval:org.adhardening:def:2160" version="1" class="compliance">
+      <metadata>
+        <title>[REQ-DC-160] Configure Event Log Maximum File Sizes and Retention Policies on Domain Controllers</title>
+        <affected family="windows">
+          <platform>Microsoft Windows Server 2016</platform>
+          <platform>Microsoft Windows Server 2019</platform>
+          <platform>Microsoft Windows Server 2022</platform>
+          <platform>Microsoft Windows 10</platform>
+          <platform>Microsoft Windows 11</platform>
+        </affected>
+        <description>Active Directory Domain Controllers are the highest-value targets (Tier 0) in an enterprise forest. In addition to serving as the central authentication authority, Domain Controllers continuously process authentication requests, Kerberos ticket issuances, directory service modifications, and directory replication. 
+
+When comprehensive security audit policies are enforced on Domain Controllers (such as Kerberos Service Ticket operations [Event ID 4769], Account Logon events [Event ID 4768/4771], Directory Service Object Access [Event ID 4662], and Group Membership changes [Event ID 4728/4738]), Domain Controllers generate between 500 MB and multiple gigabytes of security telemetry daily.
+
+Default event log capacities (20 MB for standard channels, 16 MB to 32 MB for role channels) roll over in a matter of minutes to hours during production load. This creates severe security vulnerabilities:
+1. **Mitigation of Log-Flushing Attacks**: Adversaries executing high-frequency attacks (e.g., Kerberoasting, AS-REP Roasting, password spraying, or DCSync via `DsGetNCChanges`) frequently attempt to "flush" the Security log by generating floods of benign authentication or LDAP requests to overwrite compromise indicators before detection. Expanding the Security log to **4 GB** (`4,194,304 KB`) provides a resilient on-box buffer that retains weeks of forensic evidence even under heavy attack activity.
+2. **Preservation of System and Replication Diagnostics**: Domain Controllers log extensive Netlogon, KDC, DNS, DFS Replication, and NTDS replication events into the **System**, **Directory Service**, **DNS Server**, and **DFS Replication** event channels. Allocating **256 MB** to System, Directory Service, and DNS Server logs prevents replication failures and tombstone synchronization issues from being overwritten during diagnostic troubleshooting.
+3. **64 KB Boundary Alignment**: The Windows Event Log service allocates memory in 64 KB blocks. Configured sizes must be exact integer multiples of 64 (`SizeKB % 64 == 0`). Non-aligned values will be automatically truncated or rounded by the operating system (`4,194,304 / 64 = 65,536`; `262,144 / 64 = 4,096`; `131,072 / 64 = 2,048`; `32,768 / 64 = 512`).
+4. **Retention Policy**: Enforcing retention method `0` (GPO: `Disabled` / Overwrite events as needed) guarantees that new security audits are continuously recorded rather than halted when log capacity is reached.</description>
+      </metadata>
+      <criteria operator="AND">
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\EventLog\Directory Service Value MaxSize" test_ref="oval:org.adhardening:tst:2160001" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\EventLog\Directory Service Value Retention" test_ref="oval:org.adhardening:tst:2160002" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\EventLog\DNS Server Value MaxSize" test_ref="oval:org.adhardening:tst:2160003" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\EventLog\DNS Server Value Retention" test_ref="oval:org.adhardening:tst:2160004" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication Value MaxSize" test_ref="oval:org.adhardening:tst:2160005" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication Value Retention" test_ref="oval:org.adhardening:tst:2160006" />
+      </criteria>
+    </definition>
     <definition id="oval:org.adhardening:def:8001" version="1" class="compliance">
       <metadata>
         <title>[REQ-END-001] Harden Network Parameters and Disable Legacy Name Resolution</title>
@@ -3548,9 +3577,10 @@ By enforcing system-wide mitigations:
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection Value ExploitProtectionSettings" test_ref="oval:org.adhardening:tst:8020001" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:8020002" />
-        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:8020003" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" test_ref="oval:org.adhardening:tst:8020004" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection Value DisallowExploitProtectionOverride" test_ref="oval:org.adhardening:tst:8020002" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:8020003" />
+        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:8020004" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" test_ref="oval:org.adhardening:tst:8020005" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8021" version="1" class="compliance">
@@ -6554,7 +6584,16 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Default event log capacities (typically 20 MB) rollover within hours during active security events, overwriting vital evidence. Expanding the Security log to 192 MB (196,608 KB) and Application/Setup/System logs to 32 MB (32,768 KB) provides sufficient buffer for high-volume audit data and centralized SIEM ingestion.</description>
+        <description>Default Windows event log capacities (typically 20 MB) rollover within hours during normal workstation activity, and can be completely overwritten within minutes during active security incidents, brute-force attempts, or high-volume administrative operations. 
+
+In hardened environments enforcing comprehensive audit policies (such as Process Creation with command-line arguments [Event ID 4688], PowerShell Script Block Logging [Event ID 4104], and detailed logon/logoff auditing), workstations typically generate between 100 MB and 300+ MB of security telemetry daily. A legacy 192 MB Security log preserves only 12 to 48 hours of telemetry, creating severe risks for endpoints operating off-network (remote users, field devices) where real-time SIEM shipping may be delayed.
+
+Expanding the **Security** log to **1 GB** (`1,048,576 KB`), **System** and **Application** logs to **128 MB** (`131,072 KB`), and **Setup** log to **32 MB** (`32,768 KB`) provides a resilient 7-to-14-day on-box forensic retention buffer.
+
+Key engineering considerations:
+1. **64 KB Boundary Alignment**: The Windows Event Log service allocates and writes event records in 64 KB memory blocks. All configured sizes in KB must be integer multiples of 64 (`SizeKB % 64 == 0`). Sizes that do not align with 64 KB boundaries are rounded down by the operating system (`1,048,576 / 64 = 16,384`; `131,072 / 64 = 2,048`; `32,768 / 64 = 512`).
+2. **Retention Policy**: Configuring retention behavior to "Overwrite events as needed" (GPO: `Disabled`, registry value `0`) prevents the Event Log service from refusing new events when capacity is reached, guaranteeing continuous logging of recent attacker activity.
+3. **Memory and I/O Impact**: Windows utilizes memory-mapped files (`.evtx`) for the Event Log service. Only actively accessed pages are mapped into virtual memory; larger file limits do not consume active physical RAM.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-200 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8200" />
@@ -6594,7 +6633,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
     </definition>
     <definition id="oval:org.adhardening:def:8203" version="1" class="compliance">
       <metadata>
-        <title>[REQ-END-203] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides</title>
+        <title>[REQ-END-203] Configure Remote Encryption Protection Mode</title>
         <affected family="windows">
           <platform>Microsoft Windows Server 2016</platform>
           <platform>Microsoft Windows Server 2019</platform>
@@ -6602,10 +6641,10 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Remote Encryption Protection actively detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing packed executable scanning guarantees that software packed with UPX or custom packers is decompressed and analyzed for malicious payloads. Preventing users from modifying Exploit Protection settings secures core mitigations (DEP, ASLR, CFG) against local user tampering.</description>
+        <description>Remote Encryption Protection actively detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing Block mode terminates the malicious remote process or connection attempting rapid or unauthorized file encryption over network shares, halting lateral encryption attacks from unmanaged or compromised domain assets.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-END-203 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8203" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection Value BruteForceProtectionConfiguredState" test_ref="oval:org.adhardening:tst:8203001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8204" version="1" class="compliance">
@@ -8442,9 +8481,10 @@ By enforcing system-wide mitigations:
       </metadata>
       <criteria operator="AND">
         <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender ExploitGuard\Exploit Protection Value ExploitProtectionSettings" test_ref="oval:org.adhardening:tst:7025001" />
-        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:7025002" />
-        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:7025003" />
-        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" test_ref="oval:org.adhardening:tst:7025004" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection Value DisallowExploitProtectionOverride" test_ref="oval:org.adhardening:tst:7025002" />
+        <criterion comment="Check Registry Key SOFTWARE\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:7025003" />
+        <criterion comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" test_ref="oval:org.adhardening:tst:7025004" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" test_ref="oval:org.adhardening:tst:7025005" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7026" version="1" class="compliance">
@@ -11160,7 +11200,14 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Default event log capacities (typically 20 MB) rollover within hours during active security events, overwriting vital evidence. Expanding the Security log to 192 MB (196,608 KB) and Application/Setup/System logs to 32 MB (32,768 KB) provides sufficient buffer for high-volume audit data and centralized SIEM ingestion.</description>
+        <description>Privileged Access Workstations (PAWs) serve as the dedicated management plane for Active Directory Domain Controllers, Tier 0 directory services, and critical identity infrastructure. Every interactive logon, administrative command execution, PowerShell script block, and remote management session initiated from a PAW carries severe security sensitivity.
+
+Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidly during heavy administrative activity or forensic investigations, destroying vital attribution evidence. Expanding the **Security** log to **1 GB** (`1,048,576 KB`), **System** and **Application** logs to **128 MB** (`131,072 KB`), and **Setup** log to **32 MB** (`32,768 KB`) establishes a robust local forensic buffer that preserves audit trails across extended operational periods:
+
+1. **High-Privilege Forensic Attribution**: Detailed auditing of administrative tooling (e.g., Active Directory Administrative Center, RSAT, PowerShell remoting, Mimikatz defense telemetry) generates voluminous Security event records. A 1 GB Security log ensures high-fidelity evidence preservation even if centralized log forwarding encounters temporary network partitions.
+2. **64 KB Boundary Alignment**: The Windows Event Log service allocates and writes event records in 64 KB memory chunks. All configured sizes in KB must be integer multiples of 64 (`SizeKB % 64 == 0`). Non-aligned values will be automatically truncated or rounded by the operating system (`1,048,576 / 64 = 16,384`; `131,072 / 64 = 2,048`; `32,768 / 64 = 512`).
+3. **Retention Policy**: Configuring retention behavior to "Overwrite events as needed" (GPO: `Disabled`, registry value `0`) ensures that new audit entries are never rejected or dropped when capacity is reached.
+4. **Memory and I/O Impact**: Windows utilizes memory-mapped files (`.evtx`) for the Event Log service. Only actively accessed pages are mapped into virtual memory; larger file limits do not consume active physical RAM.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-189 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7189" />
@@ -11200,7 +11247,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     </definition>
     <definition id="oval:org.adhardening:def:7192" version="1" class="compliance">
       <metadata>
-        <title>[REQ-PAW-192] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs</title>
+        <title>[REQ-PAW-192] Configure Remote Encryption Protection Mode for PAWs</title>
         <affected family="windows">
           <platform>Microsoft Windows Server 2016</platform>
           <platform>Microsoft Windows Server 2019</platform>
@@ -11208,10 +11255,10 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Remote Encryption Protection actively detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing packed executable scanning guarantees that software packed with UPX or custom packers is decompressed and analyzed for malicious payloads. Preventing users from modifying Exploit Protection settings secures core mitigations (DEP, ASLR, CFG) against local user tampering.</description>
+        <description>Privileged Access Workstations (PAWs) must maintain the highest standard of endpoint protection against ransomware and lateral movement attempts. Remote Encryption Protection detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing Block mode terminates the malicious remote process or network connection attempting rapid or unauthorized file encryption, safeguarding Tier 0 administrative assets from network-based extortion attacks.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-192 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7192" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection Value BruteForceProtectionConfiguredState" test_ref="oval:org.adhardening:tst:7192001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7193" version="1" class="compliance">
@@ -12472,6 +12519,30 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:2159007" />
       <windows:state state_ref="oval:org.adhardening:ste:2159007" />
     </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2160001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\EventLog\Directory Service Value MaxSize" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2160001" />
+      <windows:state state_ref="oval:org.adhardening:ste:2160001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2160002" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\EventLog\Directory Service Value Retention" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2160002" />
+      <windows:state state_ref="oval:org.adhardening:ste:2160002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2160003" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\EventLog\DNS Server Value MaxSize" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2160003" />
+      <windows:state state_ref="oval:org.adhardening:ste:2160003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2160004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\EventLog\DNS Server Value Retention" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2160004" />
+      <windows:state state_ref="oval:org.adhardening:ste:2160004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2160005" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication Value MaxSize" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2160005" />
+      <windows:state state_ref="oval:org.adhardening:ste:2160005" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:2160006" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication Value Retention" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:2160006" />
+      <windows:state state_ref="oval:org.adhardening:ste:2160006" />
+    </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8001001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Services\Netbt\Parameters Value NoNameReleaseOnDemand" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8001001" />
       <windows:state state_ref="oval:org.adhardening:ste:8001001" />
@@ -12960,17 +13031,21 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:8020001" />
       <windows:state state_ref="oval:org.adhardening:ste:8020001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8020002" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8020002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection Value DisallowExploitProtectionOverride" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8020002" />
       <windows:state state_ref="oval:org.adhardening:ste:8020002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8020003" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8020003" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8020003" />
       <windows:state state_ref="oval:org.adhardening:ste:8020003" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8020004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:8020004" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8020004" />
       <windows:state state_ref="oval:org.adhardening:ste:8020004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8020005" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8020005" />
+      <windows:state state_ref="oval:org.adhardening:ste:8020005" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8021001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value SafeModeBlockNonAdmins" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8021001" />
@@ -13820,9 +13895,9 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:8202" />
       <windows:state state_ref="oval:org.adhardening:ste:8202" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8203" version="1" comment="Placeholder check for REQ-END-203 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8203" />
-      <windows:state state_ref="oval:org.adhardening:ste:8203" />
+    <windows:registry_test id="oval:org.adhardening:tst:8203001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection Value BruteForceProtectionConfiguredState" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8203001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8203001" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8204" version="1" comment="Placeholder check for REQ-END-204 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8204" />
@@ -14647,17 +14722,21 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:7025001" />
       <windows:state state_ref="oval:org.adhardening:ste:7025001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7025002" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7025002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection Value DisallowExploitProtectionOverride" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7025002" />
       <windows:state state_ref="oval:org.adhardening:ste:7025002" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7025003" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7025003" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7025003" />
       <windows:state state_ref="oval:org.adhardening:ste:7025003" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7025004" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" check="all">
+    <windows:registry_test id="oval:org.adhardening:tst:7025004" version="1" comment="Check Registry Key SOFTWARE\Wow6432Node\Microsoft\Cryptography\Wintrust\Config Value EnableCertPaddingCheck" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7025004" />
       <windows:state state_ref="oval:org.adhardening:ste:7025004" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7025005" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Session Manager\kernel Value DisableExceptionChainValidation" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7025005" />
+      <windows:state state_ref="oval:org.adhardening:ste:7025005" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7026001" version="1" comment="Check Registry Key SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System Value SafeModeBlockNonAdmins" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7026001" />
@@ -15431,9 +15510,9 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:object object_ref="oval:org.adhardening:obj:7191" />
       <windows:state state_ref="oval:org.adhardening:ste:7191" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7192" version="1" comment="Placeholder check for REQ-PAW-192 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7192" />
-      <windows:state state_ref="oval:org.adhardening:ste:7192" />
+    <windows:registry_test id="oval:org.adhardening:tst:7192001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection Value BruteForceProtectionConfiguredState" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7192001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7192001" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7193" version="1" comment="Placeholder check for REQ-PAW-193 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7193" />
@@ -17046,6 +17125,42 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:key>SOFTWARE\Classes\.</windows:key>
       <windows:name>&lt;ext&gt;</windows:name>
     </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2160001" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\EventLog\Directory Service</windows:key>
+      <windows:name>MaxSize</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2160002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\EventLog\Directory Service</windows:key>
+      <windows:name>Retention</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2160003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\EventLog\DNS Server</windows:key>
+      <windows:name>MaxSize</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2160004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\EventLog\DNS Server</windows:key>
+      <windows:name>Retention</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2160005" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication</windows:key>
+      <windows:name>MaxSize</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:2160006" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication</windows:key>
+      <windows:name>Retention</windows:name>
+    </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8001001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
@@ -17787,16 +17902,22 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     <windows:registry_object id="oval:org.adhardening:obj:8020002" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection</windows:key>
+      <windows:name>DisallowExploitProtectionOverride</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8020003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Cryptography\Wintrust\Config</windows:key>
       <windows:name>EnableCertPaddingCheck</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8020003" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8020004" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Wow6432Node\Microsoft\Cryptography\Wintrust\Config</windows:key>
       <windows:name>EnableCertPaddingCheck</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8020004" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8020005" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\kernel</windows:key>
@@ -18934,11 +19055,11 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8203" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8203001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection</windows:key>
+      <windows:name>BruteForceProtectionConfiguredState</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8204" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -20163,16 +20284,22 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     <windows:registry_object id="oval:org.adhardening:obj:7025002" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection</windows:key>
+      <windows:name>DisallowExploitProtectionOverride</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7025003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Microsoft\Cryptography\Wintrust\Config</windows:key>
       <windows:name>EnableCertPaddingCheck</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7025003" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7025004" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SOFTWARE\Wow6432Node\Microsoft\Cryptography\Wintrust\Config</windows:key>
       <windows:name>EnableCertPaddingCheck</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7025004" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7025005" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
       <windows:key>SYSTEM\CurrentControlSet\Control\Session Manager\kernel</windows:key>
@@ -21217,11 +21344,11 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7192" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7192001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection</windows:key>
+      <windows:name>BruteForceProtectionConfiguredState</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7193" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -22385,6 +22512,30 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string">`vbs`, `vbe`, `js`, `jse`, `wsf`, `wsh`, `hta`)</windows:value>
     </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2160001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">268435456</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2160002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2160003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">268435456</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2160004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2160005" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">134217728</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:2160006" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8001001" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">1</windows:value>
@@ -22870,6 +23021,10 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:value datatype="int">1</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8020004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8020005" version="1">
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
@@ -23683,9 +23838,9 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8203" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    <windows:registry_state id="oval:org.adhardening:ste:8203001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8204" version="1">
       <windows:type>reg_sz</windows:type>
@@ -24519,6 +24674,10 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7025004" version="1">
       <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">1</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7025005" version="1">
+      <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7026001" version="1">
@@ -25268,9 +25427,9 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7192" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    <windows:registry_state id="oval:org.adhardening:ste:7192001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">2</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7193" version="1">
       <windows:type>reg_sz</windows:type>

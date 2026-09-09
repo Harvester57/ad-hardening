@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Benchmark xmlns="http://checklists.nist.gov/xccdf/1.2" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xhtml="http://www.w3.org/1999/xhtml" id="xccdf_org.adhardening.benchmarks_benchmark_ad-hardening" resolved="false" xml:lang="en">
-  <status date="2026-09-08">accepted</status>
+  <status date="2026-09-09">accepted</status>
   <title>Active Directory Hardening Guidebook Benchmark</title>
   <description>Automated compliance checklist profiles and rules parsed directly from the Active Directory Hardening Guidebook.</description>
   <version>1.0</version>
   <metadata>
     <dc:publisher>Antigravity Hardening Project</dc:publisher>
     <dc:creator>Antigravity</dc:creator>
-    <dc:date>2026-09-08</dc:date>
+    <dc:date>2026-09-09</dc:date>
   </metadata>
   <Profile id="xccdf_org.adhardening.benchmarks_profile_DomainController">
     <title>Domain Controller Hardening Profile</title>
@@ -173,6 +173,7 @@
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-157" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-158" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-159" selected="true" />
+    <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-DC-160" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-001" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-002" selected="true" />
     <select idref="xccdf_org.adhardening.benchmarks_rule_REQ-ID-003" selected="true" />
@@ -9598,6 +9599,491 @@ Write-Host "[+] Script file extension handlers mapped to Notepad." -ForegroundCo
 Write-Host "[i] Note: Software Licensing Management Tool (slmgr.vbs) requires ADBA or KMS. Use Get-CimInstance SoftwareLicensingProduct for querying status." -ForegroundColor Yellow</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2159" />
+      </check>
+    </Rule>
+    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-DC-160" severity="high" weight="10.0" selected="false">
+      <title>[REQ-DC-160] Configure Event Log Maximum File Sizes and Retention Policies on Domain Controllers</title>
+      <description>
+        <xhtml:p>
+          <xhtml:strong>Target Scope:</xhtml:strong>
+        </xhtml:p>
+        <xhtml:ul>
+          <xhtml:li>
+            <xhtml:strong>Applicable Systems</xhtml:strong>: Active Directory Domain Controllers.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Operating Systems</xhtml:strong>: Windows Server 2016, Windows Server 2019, Windows Server 2022, Windows Server 2025.</xhtml:li>
+        </xhtml:ul>
+        <xhtml:p>
+          <xhtml:strong>File Path: </xhtml:strong>
+          <xhtml:code>02-domain-controllers/configure-event-log-sizes.md</xhtml:code>
+        </xhtml:p>
+      </description>
+      <rationale>
+        <xhtml:p>Active Directory Domain Controllers are the highest-value targets (Tier 0) in an enterprise forest. In addition to serving as the central authentication authority, Domain Controllers continuously process authentication requests, Kerberos ticket issuances, directory service modifications, and directory replication.</xhtml:p>
+        <xhtml:p>When comprehensive security audit policies are enforced on Domain Controllers (such as Kerberos Service Ticket operations [Event ID 4769], Account Logon events [Event ID 4768/4771], Directory Service Object Access [Event ID 4662], and Group Membership changes [Event ID 4728/4738]), Domain Controllers generate between 500 MB and multiple gigabytes of security telemetry daily.</xhtml:p>
+        <xhtml:p>Default event log capacities (20 MB for standard channels, 16 MB to 32 MB for role channels) roll over in a matter of minutes to hours during production load. This creates severe security vulnerabilities: 1. <xhtml:strong>Mitigation of Log-Flushing Attacks</xhtml:strong>: Adversaries executing high-frequency attacks (e.g., Kerberoasting, AS-REP Roasting, password spraying, or DCSync via <xhtml:code>DsGetNCChanges</xhtml:code>) frequently attempt to "flush" the Security log by generating floods of benign authentication or LDAP requests to overwrite compromise indicators before detection. Expanding the Security log to <xhtml:strong>4 GB</xhtml:strong> (<xhtml:code>4,194,304 KB</xhtml:code>) provides a resilient on-box buffer that retains weeks of forensic evidence even under heavy attack activity. 2. <xhtml:strong>Preservation of System and Replication Diagnostics</xhtml:strong>: Domain Controllers log extensive Netlogon, KDC, DNS, DFS Replication, and NTDS replication events into the <xhtml:strong>System</xhtml:strong>, <xhtml:strong>Directory Service</xhtml:strong>, <xhtml:strong>DNS Server</xhtml:strong>, and <xhtml:strong>DFS Replication</xhtml:strong> event channels. Allocating <xhtml:strong>256 MB</xhtml:strong> to System, Directory Service, and DNS Server logs prevents replication failures and tombstone synchronization issues from being overwritten during diagnostic troubleshooting. 3. <xhtml:strong>64 KB Boundary Alignment</xhtml:strong>: The Windows Event Log service allocates memory in 64 KB blocks. Configured sizes must be exact integer multiples of 64 (<xhtml:code>SizeKB % 64 == 0</xhtml:code>). Non-aligned values will be automatically truncated or rounded by the operating system (<xhtml:code>4,194,304 / 64 = 65,536</xhtml:code>; <xhtml:code>262,144 / 64 = 4,096</xhtml:code>; <xhtml:code>131,072 / 64 = 2,048</xhtml:code>; <xhtml:code>32,768 / 64 = 512</xhtml:code>). 4. <xhtml:strong>Retention Policy</xhtml:strong>: Enforcing retention method <xhtml:code>0</xhtml:code> (GPO: <xhtml:code>Disabled</xhtml:code> / Overwrite events as needed) guarantees that new security audits are continuously recorded rather than halted when log capacity is reached.</xhtml:p>
+      </rationale>
+      <fixtext>
+        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+        <xhtml:ol>
+          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
+          <xhtml:li>Edit or create the target GPO linked to the <xhtml:strong>Domain Controllers</xhtml:strong> Organizational Unit (e.g., <xhtml:code>GPO_Hardening_DomainControllers</xhtml:code>).</xhtml:li>
+          <xhtml:li>Configure the core Event Log Administrative Template policies:</xhtml:li>
+        </xhtml:ol>
+        <xhtml:ul>
+          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (<xhtml:code>131072</xhtml:code> KB)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Control Event Log behavior when the log file reaches its maximum size</xhtml:strong>: Set to <xhtml:code>Disabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (<xhtml:code>4194304</xhtml:code> KB)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Control Event Log behavior when the log file reaches its maximum size</xhtml:strong>: Set to <xhtml:code>Disabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (<xhtml:code>32768</xhtml:code> KB)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Control Event Log behavior when the log file reaches its maximum size</xhtml:strong>: Set to <xhtml:code>Disabled</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (<xhtml:code>262144</xhtml:code> KB)</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Control Event Log behavior when the log file reaches its maximum size</xhtml:strong>: Set to <xhtml:code>Disabled</xhtml:code>
+          </xhtml:li>
+        </xhtml:ul>
+        <xhtml:ol>
+          <xhtml:li>Configure Active Directory role-specific channels via Group Policy Preferences (Registry):</xhtml:li>
+          <xhtml:li>* Navigate to: <xhtml:code>Computer Configuration\Preferences\Windows Settings\Registry</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Add </xhtml:em>
+            <xhtml:em>Registry Item</xhtml:em>*:</xhtml:li>
+          <xhtml:li>* Action: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Hive: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Key Path: <xhtml:code>SYSTEM\CurrentControlSet\Services\EventLog\Directory Service</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Name: <xhtml:code>MaxSize</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Type: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Data: <xhtml:code>268435456</xhtml:code> (Decimal)</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Add </xhtml:em>
+            <xhtml:em>Registry Item</xhtml:em>*:</xhtml:li>
+          <xhtml:li>* Action: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Hive: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Key Path: <xhtml:code>SYSTEM\CurrentControlSet\Services\EventLog\Directory Service</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Name: <xhtml:code>Retention</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Type: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Data: <xhtml:code>0</xhtml:code> (Decimal)</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Add </xhtml:em>
+            <xhtml:em>Registry Item</xhtml:em>*:</xhtml:li>
+          <xhtml:li>* Action: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Hive: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Key Path: <xhtml:code>SYSTEM\CurrentControlSet\Services\EventLog\DNS Server</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Name: <xhtml:code>MaxSize</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Type: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Data: <xhtml:code>268435456</xhtml:code> (Decimal)</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Add </xhtml:em>
+            <xhtml:em>Registry Item</xhtml:em>*:</xhtml:li>
+          <xhtml:li>* Action: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Hive: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Key Path: <xhtml:code>SYSTEM\CurrentControlSet\Services\EventLog\DNS Server</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Name: <xhtml:code>Retention</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Type: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Data: <xhtml:code>0</xhtml:code> (Decimal)</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Add </xhtml:em>
+            <xhtml:em>Registry Item</xhtml:em>*:</xhtml:li>
+          <xhtml:li>* Action: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Hive: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Key Path: <xhtml:code>SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Name: <xhtml:code>MaxSize</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Type: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Data: <xhtml:code>134217728</xhtml:code> (Decimal)</xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Add </xhtml:em>
+            <xhtml:em>Registry Item</xhtml:em>*:</xhtml:li>
+          <xhtml:li>* Action: <xhtml:code>Update</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Hive: <xhtml:code>HKEY_LOCAL_MACHINE</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Key Path: <xhtml:code>SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Name: <xhtml:code>Retention</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Type: <xhtml:code>REG_DWORD</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>* Value Data: <xhtml:code>0</xhtml:code> (Decimal)</xhtml:li>
+        </xhtml:ol>
+        <xhtml:ol>
+          <xhtml:li>Link the GPO to the Domain Controllers OU and verify replication.</xhtml:li>
+        </xhtml:ol>
+        <xhtml:hr />
+        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+        <xhtml:p>Run the following script locally on Domain Controllers to configure the event log maximum sizes and retention policies:</xhtml:p>
+        <xhtml:p>
+          <xhtml:a href="implementation_scripts/Configure-DcEventLogSizes.ps1">Download Script: Configure-DcEventLogSizes.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code>#Configure-DcEventLogSizes.ps1
+# Description: Configures Event Log Maximum File Sizes and Retention Policies on Domain Controllers.
+
+Write-Host "Configuring Event Log Maximum File Sizes and Retention Policies on Domain Controllers..." -ForegroundColor Cyan
+
+# 1. Core Channels via Policy Registry Branch (values in KB)
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 131072 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 4194304 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "MaxSize" -Value 32768 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 262144 -Type DWord -Force
+
+# 2. Active Directory Role Channels via Service Registry Branch (values in bytes)
+$RoleChannels = @(
+    @{ Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\Directory Service"; MaxSizeBytes = 268435456 },
+    @{ Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\DNS Server"; MaxSizeBytes = 268435456 },
+    @{ Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication"; MaxSizeBytes = 134217728 }
+)
+
+foreach ($Channel in $RoleChannels) {
+    if (Test-Path -Path $Channel.Path) {
+        Set-ItemProperty -Path $Channel.Path -Name "Retention" -Value 0 -Type DWord -Force
+        Set-ItemProperty -Path $Channel.Path -Name "MaxSize" -Value $Channel.MaxSizeBytes -Type DWord -Force
+        Write-Host "  [+] Configured $($Channel.Path) MaxSize to $($Channel.MaxSizeBytes) bytes" -ForegroundColor Green
+    }
+}
+
+Write-Host "[+] Domain Controller Event Log Maximum File Sizes and Retention Policies applied successfully." -ForegroundColor Green</xhtml:code>
+        </xhtml:pre>
+        <xhtml:p>
+          <xhtml:em>To verify the configuration:</xhtml:em>
+        </xhtml:p>
+        <xhtml:p>
+          <xhtml:a href="audit_scripts/Get-DcEventLogSizesStatus.ps1">Download Script: Get-DcEventLogSizesStatus.ps1</xhtml:a>
+        </xhtml:p>
+        <xhtml:pre>
+          <xhtml:code>#Get-DcEventLogSizesStatus.ps1
+# Description: Audits Event Log Maximum File Sizes and Retention Policies on Domain Controllers.
+
+Write-Host "--- Auditing Domain Controller Event Log Maximum File Sizes and Retention Policies ---" -ForegroundColor Cyan
+$script:Vulnerable = $false
+
+# 1. Audit Application Log
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] Application $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Application $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: Application $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$ValueName = "MaxSize"
+$ExpectedValue = 131072
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] Application $ValueName = $($Actual) KB (Secure - Meets or exceeds threshold $($ExpectedValue) KB)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Application $ValueName = $($Actual) KB (Expected: &gt;= $($ExpectedValue) KB)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: Application $ValueName (Expected: &gt;= $($ExpectedValue) KB)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 2. Audit Security Log
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] Security $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Security $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: Security $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$ValueName = "MaxSize"
+$ExpectedValue = 4194304
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] Security $ValueName = $($Actual) KB (Secure - Meets or exceeds threshold $($ExpectedValue) KB)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Security $ValueName = $($Actual) KB (Expected: &gt;= $($ExpectedValue) KB)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: Security $ValueName (Expected: &gt;= $($ExpectedValue) KB)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 3. Audit Setup Log
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] Setup $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Setup $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: Setup $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$ValueName = "MaxSize"
+$ExpectedValue = 32768
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] Setup $ValueName = $($Actual) KB (Secure - Meets or exceeds threshold $($ExpectedValue) KB)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: Setup $ValueName = $($Actual) KB (Expected: &gt;= $($ExpectedValue) KB)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: Setup $ValueName (Expected: &gt;= $($ExpectedValue) KB)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 4. Audit System Log
+$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System"
+$ValueName = "Retention"
+$ExpectedValue = "0"
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] System $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: System $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: System $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+$ValueName = "MaxSize"
+$ExpectedValue = 262144
+if (Test-Path -Path $TargetKey) {
+    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
+    if ($null -ne $Prop) {
+        $Actual = $Prop.$ValueName
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] System $ValueName = $($Actual) KB (Secure - Meets or exceeds threshold $($ExpectedValue) KB)" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] MISMATCH: System $ValueName = $($Actual) KB (Expected: &gt;= $($ExpectedValue) KB)" -ForegroundColor Red
+            $script:Vulnerable = $true
+        }
+    } else {
+        Write-Host "  [!] MISSING VALUE: System $ValueName (Expected: &gt;= $($ExpectedValue) KB)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    }
+} else {
+    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
+    $script:Vulnerable = $true
+}
+
+# 5. Audit Role-Specific Channels (Directory Service, DNS Server, DFS Replication)
+$RoleAudit = @(
+    @{ Name = "Directory Service"; Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\Directory Service"; MinBytes = 268435456 },
+    @{ Name = "DNS Server"; Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\DNS Server"; MinBytes = 268435456 },
+    @{ Name = "DFS Replication"; Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication"; MinBytes = 134217728 }
+)
+
+foreach ($Item in $RoleAudit) {
+    if (Test-Path -Path $Item.Path) {
+        $Prop = Get-ItemProperty -Path $Item.Path -ErrorAction SilentlyContinue
+        if ($null -ne $Prop) {
+            $ActualSize = $Prop.MaxSize
+            $ActualRetention = $Prop.Retention
+            
+            if ($null -ne $ActualRetention -and $ActualRetention -eq 0) {
+                Write-Host "  [+] $($Item.Name) Retention = $($ActualRetention) (Secure)" -ForegroundColor Green
+            } else {
+                Write-Host "  [!] MISMATCH: $($Item.Name) Retention = $($ActualRetention) (Expected: 0)" -ForegroundColor Red
+                $script:Vulnerable = $true
+            }
+            
+            if ($null -ne $ActualSize -and [int64]$ActualSize -ge [int64]$Item.MinBytes) {
+                Write-Host "  [+] $($Item.Name) MaxSize = $($ActualSize) bytes (Secure - Meets or exceeds threshold $($Item.MinBytes) bytes)" -ForegroundColor Green
+            } else {
+                Write-Host "  [!] MISMATCH: $($Item.Name) MaxSize = $($ActualSize) bytes (Expected: &gt;= $($Item.MinBytes) bytes)" -ForegroundColor Red
+                $script:Vulnerable = $true
+            }
+        }
+    }
+}
+
+if ($script:Vulnerable) {
+    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
+    exit 1
+} else {
+    Write-Host "Audit Result: SECURE" -ForegroundColor Green
+    exit 0
+}</xhtml:code>
+        </xhtml:pre>
+        <xhtml:hr />
+      </fixtext>
+      <fix system="urn:xccdf:fix:script:powershell">#Configure-DcEventLogSizes.ps1
+# Description: Configures Event Log Maximum File Sizes and Retention Policies on Domain Controllers.
+
+Write-Host "Configuring Event Log Maximum File Sizes and Retention Policies on Domain Controllers..." -ForegroundColor Cyan
+
+# 1. Core Channels via Policy Registry Branch (values in KB)
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 131072 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 4194304 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Name "MaxSize" -Value 32768 -Type DWord -Force
+
+if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System")) {
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Force | Out-Null
+}
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "Retention" -Value "0" -Type String -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 262144 -Type DWord -Force
+
+# 2. Active Directory Role Channels via Service Registry Branch (values in bytes)
+$RoleChannels = @(
+    @{ Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\Directory Service"; MaxSizeBytes = 268435456 },
+    @{ Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\DNS Server"; MaxSizeBytes = 268435456 },
+    @{ Path = "HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\DFS Replication"; MaxSizeBytes = 134217728 }
+)
+
+foreach ($Channel in $RoleChannels) {
+    if (Test-Path -Path $Channel.Path) {
+        Set-ItemProperty -Path $Channel.Path -Name "Retention" -Value 0 -Type DWord -Force
+        Set-ItemProperty -Path $Channel.Path -Name "MaxSize" -Value $Channel.MaxSizeBytes -Type DWord -Force
+        Write-Host "  [+] Configured $($Channel.Path) MaxSize to $($Channel.MaxSizeBytes) bytes" -ForegroundColor Green
+    }
+}
+
+Write-Host "[+] Domain Controller Event Log Maximum File Sizes and Retention Policies applied successfully." -ForegroundColor Green</fix>
+      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:2160" />
       </check>
     </Rule>
     <Group id="xccdf_org.adhardening.benchmarks_group_Module_2__Domain_Controller_Hardening_Defender_Antivirus">
@@ -45177,6 +45663,17 @@ Write-Host "[+] Local WSUS parameters and Delivery Optimization download mode ap
             <xhtml:em>Enabled</xhtml:em>
             <xhtml:em />
           </xhtml:li>
+          <xhtml:li>Lock down Exploit Protection settings against user tampering:</xhtml:li>
+          <xhtml:li>* Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Configure policy: </xhtml:em>
+            <xhtml:em>Prevent users from modifying settings</xhtml:em>
+            <xhtml:em> -&gt; Set to </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
+          <xhtml:li>Link the GPO to the appropriate Organizational Unit (OU) containing the target PAWs.</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
         <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
@@ -45269,6 +45766,14 @@ if (-not (Test-Path $SessionKernelPath)) {
 }
 Set-ItemProperty -Path $SessionKernelPath -Name "DisableExceptionChainValidation" -Value 0 -Type DWord -Force
 Write-Host "[+] Certificate Padding check and SEHOP registry keys applied." -ForegroundColor Green
+
+# 6. Prevent users from modifying Exploit Protection settings in Windows Security Center
+$SecCenterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+if (-not (Test-Path $SecCenterPath)) {
+    New-Item -Path $SecCenterPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SecCenterPath -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord -Force
+Write-Host "[+] Exploit protection override lockdown applied." -ForegroundColor Green
 
 Write-Host "Exploit Protection Profile application completed successfully." -ForegroundColor Cyan</xhtml:code>
         </xhtml:pre>
@@ -45398,6 +45903,9 @@ Test-MitigationRegistryValue $WintrustWow64Path "EnableCertPaddingCheck" 1
 $SessionKernelPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel"
 Test-MitigationRegistryValue $SessionKernelPath "DisableExceptionChainValidation" 0
 
+$SecCenterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+Test-MitigationRegistryValue $SecCenterPath "DisallowExploitProtectionOverride" 1
+
 Write-Host ""
 if ($BaselineFailed) {
     Write-Host "Auditing FAILED: One or more configurations do not match the secure baseline." -ForegroundColor Red
@@ -45493,6 +46001,14 @@ if (-not (Test-Path $SessionKernelPath)) {
 }
 Set-ItemProperty -Path $SessionKernelPath -Name "DisableExceptionChainValidation" -Value 0 -Type DWord -Force
 Write-Host "[+] Certificate Padding check and SEHOP registry keys applied." -ForegroundColor Green
+
+# 6. Prevent users from modifying Exploit Protection settings in Windows Security Center
+$SecCenterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+if (-not (Test-Path $SecCenterPath)) {
+    New-Item -Path $SecCenterPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SecCenterPath -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord -Force
+Write-Host "[+] Exploit protection override lockdown applied." -ForegroundColor Green
 
 Write-Host "Exploit Protection Profile application completed successfully." -ForegroundColor Cyan</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
@@ -52582,7 +53098,18 @@ if ($script:Vulnerable) {
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>Default event log capacities (typically 20 MB) rollover within hours during active security events, overwriting vital evidence. Expanding the Security log to 192 MB (196,608 KB) and Application/Setup/System logs to 32 MB (32,768 KB) provides sufficient buffer for high-volume audit data and centralized SIEM ingestion.</xhtml:p>
+        <xhtml:p>Privileged Access Workstations (PAWs) serve as the dedicated management plane for Active Directory Domain Controllers, Tier 0 directory services, and critical identity infrastructure. Every interactive logon, administrative command execution, PowerShell script block, and remote management session initiated from a PAW carries severe security sensitivity.</xhtml:p>
+        <xhtml:p>Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidly during heavy administrative activity or forensic investigations, destroying vital attribution evidence. Expanding the <xhtml:strong>Security</xhtml:strong> log to <xhtml:strong>1 GB</xhtml:strong> (<xhtml:code>1,048,576 KB</xhtml:code>), <xhtml:strong>System</xhtml:strong> and <xhtml:strong>Application</xhtml:strong> logs to <xhtml:strong>128 MB</xhtml:strong> (<xhtml:code>131,072 KB</xhtml:code>), and <xhtml:strong>Setup</xhtml:strong> log to <xhtml:strong>32 MB</xhtml:strong> (<xhtml:code>32,768 KB</xhtml:code>) establishes a robust local forensic buffer that preserves audit trails across extended operational periods:</xhtml:p>
+        <xhtml:ol>
+          <xhtml:li>
+            <xhtml:strong>High-Privilege Forensic Attribution</xhtml:strong>: Detailed auditing of administrative tooling (e.g., Active Directory Administrative Center, RSAT, PowerShell remoting, Mimikatz defense telemetry) generates voluminous Security event records. A 1 GB Security log ensures high-fidelity evidence preservation even if centralized log forwarding encounters temporary network partitions.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>64 KB Boundary Alignment</xhtml:strong>: The Windows Event Log service allocates and writes event records in 64 KB memory chunks. All configured sizes in KB must be integer multiples of 64 (<xhtml:code>SizeKB % 64 == 0</xhtml:code>). Non-aligned values will be automatically truncated or rounded by the operating system (<xhtml:code>1,048,576 / 64 = 16,384</xhtml:code>; <xhtml:code>131,072 / 64 = 2,048</xhtml:code>; <xhtml:code>32,768 / 64 = 512</xhtml:code>).</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Retention Policy</xhtml:strong>: Configuring retention behavior to "Overwrite events as needed" (GPO: <xhtml:code>Disabled</xhtml:code>, registry value <xhtml:code>0</xhtml:code>) ensures that new audit entries are never rejected or dropped when capacity is reached.</xhtml:li>
+          <xhtml:li>
+            <xhtml:strong>Memory and I/O Impact</xhtml:strong>: Windows utilizes memory-mapped files (<xhtml:code>.evtx</xhtml:code>) for the Event Log service. Only actively accessed pages are mapped into virtual memory; larger file limits do not consume active physical RAM.</xhtml:li>
+        </xhtml:ol>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
@@ -52595,7 +53122,7 @@ if ($script:Vulnerable) {
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application</xhtml:code>
           </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (32768 KB)</xhtml:li>
+            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (<xhtml:code>131072</xhtml:code> KB)</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application</xhtml:code>
           </xhtml:li>
           <xhtml:li>
@@ -52604,7 +53131,7 @@ if ($script:Vulnerable) {
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security</xhtml:code>
           </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (196608 KB)</xhtml:li>
+            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (<xhtml:code>1048576</xhtml:code> KB)</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security</xhtml:code>
           </xhtml:li>
           <xhtml:li>
@@ -52613,7 +53140,7 @@ if ($script:Vulnerable) {
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup</xhtml:code>
           </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (32768 KB)</xhtml:li>
+            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (<xhtml:code>32768</xhtml:code> KB)</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup</xhtml:code>
           </xhtml:li>
           <xhtml:li>
@@ -52622,7 +53149,7 @@ if ($script:Vulnerable) {
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System</xhtml:code>
           </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (32768 KB)</xhtml:li>
+            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (<xhtml:code>131072</xhtml:code> KB)</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System</xhtml:code>
           </xhtml:li>
           <xhtml:li>
@@ -52648,13 +53175,13 @@ if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Ap
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Force | Out-Null
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "Retention" -Value "0" -Type String -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 32768 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 131072 -Type DWord -Force
 
 if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security")) {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Force | Out-Null
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "Retention" -Value "0" -Type String -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 196608 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 1048576 -Type DWord -Force
 
 if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup")) {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Force | Out-Null
@@ -52666,7 +53193,7 @@ if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Sy
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Force | Out-Null
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "Retention" -Value "0" -Type String -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 32768 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 131072 -Type DWord -Force
 
 Write-Host "[+] Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs applied successfully." -ForegroundColor Green</xhtml:code>
         </xhtml:pre>
@@ -52707,19 +53234,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application"
 $ValueName = "MaxSize"
-$ExpectedValue = 32768
+$ExpectedValue = 131072
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -52751,19 +53278,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security"
 $ValueName = "MaxSize"
-$ExpectedValue = 196608
+$ExpectedValue = 1048576
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -52800,14 +53327,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -52839,19 +53366,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System"
 $ValueName = "MaxSize"
-$ExpectedValue = 32768
+$ExpectedValue = 131072
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -53173,174 +53700,6 @@ if ($script:Vulnerable) {
       </fixtext>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7191" />
-      </check>
-    </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-192" severity="high" weight="10.0" selected="false">
-      <title>[REQ-PAW-192] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs</title>
-      <description>
-        <xhtml:p>
-          <xhtml:strong>Target Scope:</xhtml:strong>
-        </xhtml:p>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.</xhtml:li>
-        </xhtml:ul>
-        <xhtml:p>
-          <xhtml:strong>File Path: </xhtml:strong>
-          <xhtml:code>07-paws/admin-templates/configure-paw-at-defender-protection-options.md</xhtml:code>
-        </xhtml:p>
-      </description>
-      <rationale>
-        <xhtml:p>Remote Encryption Protection actively detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing packed executable scanning guarantees that software packed with UPX or custom packers is decompressed and analyzed for malicious payloads. Preventing users from modifying Exploit Protection settings secures core mitigations (DEP, ASLR, CFG) against local user tampering.</xhtml:p>
-      </rationale>
-      <fixtext>
-        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
-        <xhtml:ol>
-          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
-          <xhtml:li>Edit or create the target GPO linked to PAWs Organizational Unit (e.g., <xhtml:code>GPO_Hardening_PAW</xhtml:code>).</xhtml:li>
-          <xhtml:li>Configure the following policies:</xhtml:li>
-        </xhtml:ol>
-        <xhtml:ul>
-          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Configure Remote Encryption Protection Mode</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (Audit or higher (Block mode recommended))</xhtml:li>
-          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Turn off scanning of packed executables</xhtml:strong>: Set to <xhtml:code>Disabled</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Prevent users from modifying settings</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ol>
-          <xhtml:li>Link the GPO to the appropriate Organizational Unit and verify replication.</xhtml:li>
-        </xhtml:ol>
-        <xhtml:hr />
-        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Run the following script locally to configure the administrative template registry values:</xhtml:p>
-        <xhtml:p>
-          <xhtml:a href="../implementation_scripts/Configure-PawAtDefenderProtectionOptions.ps1">Download Script: Configure-PawAtDefenderProtectionOptions.ps1</xhtml:a>
-        </xhtml:p>
-        <xhtml:pre>
-          <xhtml:code>#Configure-PawAtDefenderProtectionOptions.ps1
-# Description: Configures Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs.
-
-Write-Host "Configuring Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs..." -ForegroundColor Cyan
-
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord -Force
-
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "DisablePackedExeScanning" -Value 0 -Type DWord -Force
-
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord -Force
-
-Write-Host "[+] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs applied successfully." -ForegroundColor Green</xhtml:code>
-        </xhtml:pre>
-        <xhtml:p>
-          <xhtml:em>To verify the configuration:</xhtml:em>
-        </xhtml:p>
-        <xhtml:p>
-          <xhtml:a href="../audit_scripts/Get-PawAtDefenderProtectionOptionsStatus.ps1">Download Script: Get-PawAtDefenderProtectionOptionsStatus.ps1</xhtml:a>
-        </xhtml:p>
-        <xhtml:pre>
-          <xhtml:code>#Get-PawAtDefenderProtectionOptionsStatus.ps1
-# Description: Audits Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs.
-
-Write-Host "--- Auditing Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs ---" -ForegroundColor Cyan
-$script:Vulnerable = $false
-
-$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
-$ValueName = "BruteForceProtectionConfiguredState"
-$ExpectedValue = 2
-if (Test-Path -Path $TargetKey) {
-    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Prop) {
-        $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
-        } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
-            $script:Vulnerable = $true
-        }
-    } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
-$ValueName = "DisablePackedExeScanning"
-$ExpectedValue = 0
-if (Test-Path -Path $TargetKey) {
-    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Prop) {
-        $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
-        } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
-            $script:Vulnerable = $true
-        }
-    } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
-$ValueName = "DisallowExploitProtectionOverride"
-$ExpectedValue = 1
-if (Test-Path -Path $TargetKey) {
-    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Prop) {
-        $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
-        } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
-            $script:Vulnerable = $true
-        }
-    } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-if ($script:Vulnerable) {
-    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
-    exit 1
-} else {
-    Write-Host "Audit Result: SECURE" -ForegroundColor Green
-    exit 0
-}</xhtml:code>
-        </xhtml:pre>
-        <xhtml:hr />
-      </fixtext>
-      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
-        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7192" />
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-193" severity="medium" weight="10.0" selected="false">
@@ -55509,6 +55868,96 @@ if (-not (Test-Path $AmsiPath)) { New-Item -Path $AmsiPath -Force | Out-Null }
 Set-ItemProperty -Path $AmsiPath -Name "FeatureBits" -Value 2 -Type DWord -Force</fix>
         <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
           <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7075" />
+        </check>
+      </Rule>
+      <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-PAW-192" severity="high" weight="10.0" selected="false">
+        <title>[REQ-PAW-192] Configure Remote Encryption Protection Mode for PAWs</title>
+        <description>
+          <xhtml:p>
+            <xhtml:strong>Target Scope:</xhtml:strong>
+          </xhtml:p>
+          <xhtml:ul>
+            <xhtml:li>
+              <xhtml:strong>Applicable Systems</xhtml:strong>: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.</xhtml:li>
+            <xhtml:li>
+              <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.</xhtml:li>
+          </xhtml:ul>
+          <xhtml:p>
+            <xhtml:strong>File Path: </xhtml:strong>
+            <xhtml:code>07-paws/defender/configure-remote-encryption-protection.md</xhtml:code>
+          </xhtml:p>
+        </description>
+        <rationale>
+          <xhtml:p>Privileged Access Workstations (PAWs) must maintain the highest standard of endpoint protection against ransomware and lateral movement attempts. Remote Encryption Protection detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing Block mode terminates the malicious remote process or network connection attempting rapid or unauthorized file encryption, safeguarding Tier 0 administrative assets from network-based extortion attacks.</xhtml:p>
+        </rationale>
+        <fixtext>
+          <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+          <xhtml:ol>
+            <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
+            <xhtml:li>Edit or create the target GPO linked to PAWs Organizational Unit (e.g., <xhtml:code>GPO_Hardening_PAW</xhtml:code>).</xhtml:li>
+            <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection</xhtml:code>
+            </xhtml:li>
+            <xhtml:li>Double-click <xhtml:strong>Configure Remote Encryption Protection Mode</xhtml:strong>.</xhtml:li>
+            <xhtml:li>Set the policy to <xhtml:strong>Enabled</xhtml:strong>, and select <xhtml:strong>Block</xhtml:strong> (value <xhtml:code>2</xhtml:code>) in the dropdown options.</xhtml:li>
+            <xhtml:li>Link the GPO to the appropriate Organizational Unit and verify replication.</xhtml:li>
+          </xhtml:ol>
+          <xhtml:hr />
+          <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+          <xhtml:p>Run the following script locally to configure the Remote Encryption Protection registry value on PAWs:</xhtml:p>
+          <xhtml:p>
+            <xhtml:a href="../implementation_scripts/Configure-PawRemoteEncryptionProtection.ps1">Download Script: Configure-PawRemoteEncryptionProtection.ps1</xhtml:a>
+          </xhtml:p>
+          <xhtml:pre>
+            <xhtml:code># Configure-PawRemoteEncryptionProtection.ps1
+# Description: Configures Microsoft Defender Remote Encryption Protection in Block mode on PAWs.
+
+Write-Host "Configuring Microsoft Defender Remote Encryption Protection for PAWs..." -ForegroundColor Cyan
+
+$KeyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+if (-not (Test-Path -Path $KeyPath)) {
+    New-Item -Path $KeyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KeyPath -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord -Force
+
+Write-Host "[+] Remote Encryption Protection applied successfully on PAWs (Block mode)." -ForegroundColor Green</xhtml:code>
+          </xhtml:pre>
+          <xhtml:p>
+            <xhtml:em>To audit the hardening status:</xhtml:em>
+          </xhtml:p>
+          <xhtml:p>
+            <xhtml:a href="../audit_scripts/Get-PawRemoteEncryptionProtectionStatus.ps1">Download Script: Get-PawRemoteEncryptionProtectionStatus.ps1</xhtml:a>
+          </xhtml:p>
+          <xhtml:pre>
+            <xhtml:code># Get-PawRemoteEncryptionProtectionStatus.ps1
+# Description: Audits Microsoft Defender Remote Encryption Protection configuration status on PAWs.
+
+$KeyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+$Reg = Get-ItemProperty -Path $KeyPath -Name "BruteForceProtectionConfiguredState" -ErrorAction SilentlyContinue
+
+if ($Reg -and $Reg.BruteForceProtectionConfiguredState -eq 2) {
+    Write-Output "Compliant"
+    exit 0
+} else {
+    Write-Output "Non-Compliant"
+    exit 1
+}</xhtml:code>
+          </xhtml:pre>
+          <xhtml:hr />
+        </fixtext>
+        <fix system="urn:xccdf:fix:script:powershell"># Configure-PawRemoteEncryptionProtection.ps1
+# Description: Configures Microsoft Defender Remote Encryption Protection in Block mode on PAWs.
+
+Write-Host "Configuring Microsoft Defender Remote Encryption Protection for PAWs..." -ForegroundColor Cyan
+
+$KeyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+if (-not (Test-Path -Path $KeyPath)) {
+    New-Item -Path $KeyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KeyPath -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord -Force
+
+Write-Host "[+] Remote Encryption Protection applied successfully on PAWs (Block mode)." -ForegroundColor Green</fix>
+        <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+          <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:7192" />
         </check>
       </Rule>
     </Group>
@@ -71823,6 +72272,16 @@ Write-Host "DMA and physical security settings applied successfully." -Foregroun
             <xhtml:em>Enabled</xhtml:em>
             <xhtml:em />
           </xhtml:li>
+          <xhtml:li>Lock down Exploit Protection settings against user tampering:</xhtml:li>
+          <xhtml:li>* Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection</xhtml:code>
+          </xhtml:li>
+          <xhtml:li>
+            <xhtml:em> Configure policy: </xhtml:em>
+            <xhtml:em>Prevent users from modifying settings</xhtml:em>
+            <xhtml:em> -&gt; Set to </xhtml:em>
+            <xhtml:em>Enabled</xhtml:em>
+            <xhtml:em />
+          </xhtml:li>
           <xhtml:li>Link the GPO to the appropriate Organizational Unit (OU) containing the target client endpoints and member servers.</xhtml:li>
         </xhtml:ol>
         <xhtml:hr />
@@ -72020,6 +72479,14 @@ if (-not (Test-Path $SessionKernelPath)) {
 Set-ItemProperty -Path $SessionKernelPath -Name "DisableExceptionChainValidation" -Value 0 -Type DWord -Force
 Write-Host "[+] Certificate Padding check and SEHOP registry keys applied." -ForegroundColor Green
 
+# 6. Prevent users from modifying Exploit Protection settings in Windows Security Center
+$SecCenterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+if (-not (Test-Path $SecCenterPath)) {
+    New-Item -Path $SecCenterPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SecCenterPath -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord -Force
+Write-Host "[+] Exploit protection override lockdown applied." -ForegroundColor Green
+
 Write-Host "Exploit Protection Profile application completed successfully." -ForegroundColor Cyan</xhtml:code>
         </xhtml:pre>
         <xhtml:p>
@@ -72147,6 +72614,9 @@ Test-MitigationRegistryValue $WintrustWow64Path "EnableCertPaddingCheck" 1
 
 $SessionKernelPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\kernel"
 Test-MitigationRegistryValue $SessionKernelPath "DisableExceptionChainValidation" 0
+
+$SecCenterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+Test-MitigationRegistryValue $SecCenterPath "DisallowExploitProtectionOverride" 1
 
 Write-Host ""
 if ($BaselineFailed) {
@@ -72346,6 +72816,14 @@ if (-not (Test-Path $SessionKernelPath)) {
 }
 Set-ItemProperty -Path $SessionKernelPath -Name "DisableExceptionChainValidation" -Value 0 -Type DWord -Force
 Write-Host "[+] Certificate Padding check and SEHOP registry keys applied." -ForegroundColor Green
+
+# 6. Prevent users from modifying Exploit Protection settings in Windows Security Center
+$SecCenterPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+if (-not (Test-Path $SecCenterPath)) {
+    New-Item -Path $SecCenterPath -Force | Out-Null
+}
+Set-ItemProperty -Path $SecCenterPath -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord -Force
+Write-Host "[+] Exploit protection override lockdown applied." -ForegroundColor Green
 
 Write-Host "Exploit Protection Profile application completed successfully." -ForegroundColor Cyan</fix>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
@@ -81011,7 +81489,10 @@ if ($script:Vulnerable) {
         </xhtml:p>
       </description>
       <rationale>
-        <xhtml:p>Default event log capacities (typically 20 MB) rollover within hours during active security events, overwriting vital evidence. Expanding the Security log to 192 MB (196,608 KB) and Application/Setup/System logs to 32 MB (32,768 KB) provides sufficient buffer for high-volume audit data and centralized SIEM ingestion.</xhtml:p>
+        <xhtml:p>Default Windows event log capacities (typically 20 MB) rollover within hours during normal workstation activity, and can be completely overwritten within minutes during active security incidents, brute-force attempts, or high-volume administrative operations.</xhtml:p>
+        <xhtml:p>In hardened environments enforcing comprehensive audit policies (such as Process Creation with command-line arguments [Event ID 4688], PowerShell Script Block Logging [Event ID 4104], and detailed logon/logoff auditing), workstations typically generate between 100 MB and 300+ MB of security telemetry daily. A legacy 192 MB Security log preserves only 12 to 48 hours of telemetry, creating severe risks for endpoints operating off-network (remote users, field devices) where real-time SIEM shipping may be delayed.</xhtml:p>
+        <xhtml:p>Expanding the <xhtml:strong>Security</xhtml:strong> log to <xhtml:strong>1 GB</xhtml:strong> (<xhtml:code>1,048,576 KB</xhtml:code>), <xhtml:strong>System</xhtml:strong> and <xhtml:strong>Application</xhtml:strong> logs to <xhtml:strong>128 MB</xhtml:strong> (<xhtml:code>131,072 KB</xhtml:code>), and <xhtml:strong>Setup</xhtml:strong> log to <xhtml:strong>32 MB</xhtml:strong> (<xhtml:code>32,768 KB</xhtml:code>) provides a resilient 7-to-14-day on-box forensic retention buffer.</xhtml:p>
+        <xhtml:p>Key engineering considerations: 1. <xhtml:strong>64 KB Boundary Alignment</xhtml:strong>: The Windows Event Log service allocates and writes event records in 64 KB memory blocks. All configured sizes in KB must be integer multiples of 64 (<xhtml:code>SizeKB % 64 == 0</xhtml:code>). Sizes that do not align with 64 KB boundaries are rounded down by the operating system (<xhtml:code>1,048,576 / 64 = 16,384</xhtml:code>; <xhtml:code>131,072 / 64 = 2,048</xhtml:code>; <xhtml:code>32,768 / 64 = 512</xhtml:code>). 2. <xhtml:strong>Retention Policy</xhtml:strong>: Configuring retention behavior to "Overwrite events as needed" (GPO: <xhtml:code>Disabled</xhtml:code>, registry value <xhtml:code>0</xhtml:code>) prevents the Event Log service from refusing new events when capacity is reached, guaranteeing continuous logging of recent attacker activity. 3. <xhtml:strong>Memory and I/O Impact</xhtml:strong>: Windows utilizes memory-mapped files (<xhtml:code>.evtx</xhtml:code>) for the Event Log service. Only actively accessed pages are mapped into virtual memory; larger file limits do not consume active physical RAM.</xhtml:p>
       </rationale>
       <fixtext>
         <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
@@ -81024,7 +81505,7 @@ if ($script:Vulnerable) {
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application</xhtml:code>
           </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (32768 KB)</xhtml:li>
+            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (<xhtml:code>131072</xhtml:code> KB)</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application</xhtml:code>
           </xhtml:li>
           <xhtml:li>
@@ -81033,7 +81514,7 @@ if ($script:Vulnerable) {
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security</xhtml:code>
           </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (196608 KB)</xhtml:li>
+            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (<xhtml:code>1048576</xhtml:code> KB)</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security</xhtml:code>
           </xhtml:li>
           <xhtml:li>
@@ -81042,7 +81523,7 @@ if ($script:Vulnerable) {
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup</xhtml:code>
           </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (32768 KB)</xhtml:li>
+            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (<xhtml:code>32768</xhtml:code> KB)</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup</xhtml:code>
           </xhtml:li>
           <xhtml:li>
@@ -81051,7 +81532,7 @@ if ($script:Vulnerable) {
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System</xhtml:code>
           </xhtml:li>
           <xhtml:li>
-            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (32768 KB)</xhtml:li>
+            <xhtml:strong>Specify the maximum log file size (KB)</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (<xhtml:code>131072</xhtml:code> KB)</xhtml:li>
           <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System</xhtml:code>
           </xhtml:li>
           <xhtml:li>
@@ -81077,13 +81558,13 @@ if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Ap
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Force | Out-Null
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "Retention" -Value "0" -Type String -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 32768 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application" -Name "MaxSize" -Value 131072 -Type DWord -Force
 
 if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security")) {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Force | Out-Null
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "Retention" -Value "0" -Type String -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 196608 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security" -Name "MaxSize" -Value 1048576 -Type DWord -Force
 
 if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup")) {
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup" -Force | Out-Null
@@ -81095,7 +81576,7 @@ if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Sy
     New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Force | Out-Null
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "Retention" -Value "0" -Type String -Force
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 32768 -Type DWord -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System" -Name "MaxSize" -Value 131072 -Type DWord -Force
 
 Write-Host "[+] Administrative Templates: Event Log Maximum File Sizes and Retention Policies applied successfully." -ForegroundColor Green</xhtml:code>
         </xhtml:pre>
@@ -81136,19 +81617,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application"
 $ValueName = "MaxSize"
-$ExpectedValue = 32768
+$ExpectedValue = 131072
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -81180,19 +81661,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security"
 $ValueName = "MaxSize"
-$ExpectedValue = 196608
+$ExpectedValue = 1048576
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -81229,14 +81710,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -81268,19 +81749,19 @@ if (Test-Path -Path $TargetKey) {
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\System"
 $ValueName = "MaxSize"
-$ExpectedValue = 32768
+$ExpectedValue = 131072
 if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
+        if ([int64]$Actual -ge [int64]$ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: &gt;= $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -81602,174 +82083,6 @@ if ($script:Vulnerable) {
       </fixtext>
       <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
         <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8202" />
-      </check>
-    </Rule>
-    <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-203" severity="high" weight="10.0" selected="false">
-      <title>[REQ-END-203] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides</title>
-      <description>
-        <xhtml:p>
-          <xhtml:strong>Target Scope:</xhtml:strong>
-        </xhtml:p>
-        <xhtml:ul>
-          <xhtml:li>
-            <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 client workstations and member servers.</xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).</xhtml:li>
-        </xhtml:ul>
-        <xhtml:p>
-          <xhtml:strong>File Path: </xhtml:strong>
-          <xhtml:code>08-endpoints/admin-templates/configure-end-at-defender-protection-options.md</xhtml:code>
-        </xhtml:p>
-      </description>
-      <rationale>
-        <xhtml:p>Remote Encryption Protection actively detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing packed executable scanning guarantees that software packed with UPX or custom packers is decompressed and analyzed for malicious payloads. Preventing users from modifying Exploit Protection settings secures core mitigations (DEP, ASLR, CFG) against local user tampering.</xhtml:p>
-      </rationale>
-      <fixtext>
-        <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
-        <xhtml:ol>
-          <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
-          <xhtml:li>Edit or create the target GPO linked to workstations and member servers (e.g., <xhtml:code>GPO_Hardening_Endpoints</xhtml:code>).</xhtml:li>
-          <xhtml:li>Configure the following policies:</xhtml:li>
-        </xhtml:ol>
-        <xhtml:ul>
-          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Configure Remote Encryption Protection Mode</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code> (Audit or higher (Block mode recommended))</xhtml:li>
-          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Scan</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Turn off scanning of packed executables</xhtml:strong>: Set to <xhtml:code>Disabled</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Security Center\App and Browser protection</xhtml:code>
-          </xhtml:li>
-          <xhtml:li>
-            <xhtml:strong>Prevent users from modifying settings</xhtml:strong>: Set to <xhtml:code>Enabled</xhtml:code>
-          </xhtml:li>
-        </xhtml:ul>
-        <xhtml:ol>
-          <xhtml:li>Link the GPO to the appropriate Organizational Unit and verify replication.</xhtml:li>
-        </xhtml:ol>
-        <xhtml:hr />
-        <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
-        <xhtml:p>Run the following script locally to configure the administrative template registry values:</xhtml:p>
-        <xhtml:p>
-          <xhtml:a href="../implementation_scripts/Configure-EndAtDefenderProtectionOptions.ps1">Download Script: Configure-EndAtDefenderProtectionOptions.ps1</xhtml:a>
-        </xhtml:p>
-        <xhtml:pre>
-          <xhtml:code>#Configure-EndAtDefenderProtectionOptions.ps1
-# Description: Configures Administrative Templates: Windows Defender Scan and Exploit Protection Overrides.
-
-Write-Host "Configuring Administrative Templates: Windows Defender Scan and Exploit Protection Overrides..." -ForegroundColor Cyan
-
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection" -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord -Force
-
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan" -Name "DisablePackedExeScanning" -Value 0 -Type DWord -Force
-
-if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection")) {
-    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Force | Out-Null
-}
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection" -Name "DisallowExploitProtectionOverride" -Value 1 -Type DWord -Force
-
-Write-Host "[+] Administrative Templates: Windows Defender Scan and Exploit Protection Overrides applied successfully." -ForegroundColor Green</xhtml:code>
-        </xhtml:pre>
-        <xhtml:p>
-          <xhtml:em>To verify the configuration:</xhtml:em>
-        </xhtml:p>
-        <xhtml:p>
-          <xhtml:a href="../audit_scripts/Get-EndAtDefenderProtectionOptionsStatus.ps1">Download Script: Get-EndAtDefenderProtectionOptionsStatus.ps1</xhtml:a>
-        </xhtml:p>
-        <xhtml:pre>
-          <xhtml:code>#Get-EndAtDefenderProtectionOptionsStatus.ps1
-# Description: Audits Administrative Templates: Windows Defender Scan and Exploit Protection Overrides.
-
-Write-Host "--- Auditing Administrative Templates: Windows Defender Scan and Exploit Protection Overrides ---" -ForegroundColor Cyan
-$script:Vulnerable = $false
-
-$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
-$ValueName = "BruteForceProtectionConfiguredState"
-$ExpectedValue = 2
-if (Test-Path -Path $TargetKey) {
-    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Prop) {
-        $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
-        } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
-            $script:Vulnerable = $true
-        }
-    } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
-$ValueName = "DisablePackedExeScanning"
-$ExpectedValue = 0
-if (Test-Path -Path $TargetKey) {
-    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Prop) {
-        $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
-        } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
-            $script:Vulnerable = $true
-        }
-    } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-$TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
-$ValueName = "DisallowExploitProtectionOverride"
-$ExpectedValue = 1
-if (Test-Path -Path $TargetKey) {
-    $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
-    if ($null -ne $Prop) {
-        $Actual = $Prop.$ValueName
-        if ($Actual -eq $ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
-        } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
-            $script:Vulnerable = $true
-        }
-    } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
-        $script:Vulnerable = $true
-    }
-} else {
-    Write-Host "  [!] MISSING KEY: $TargetKey" -ForegroundColor Red
-    $script:Vulnerable = $true
-}
-
-if ($script:Vulnerable) {
-    Write-Host "Audit Result: VULNERABLE" -ForegroundColor Red
-    exit 1
-} else {
-    Write-Host "Audit Result: SECURE" -ForegroundColor Green
-    exit 0
-}</xhtml:code>
-        </xhtml:pre>
-        <xhtml:hr />
-      </fixtext>
-      <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
-        <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8203" />
       </check>
     </Rule>
     <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-204" severity="medium" weight="10.0" selected="false">
@@ -84194,6 +84507,96 @@ if (-not (Test-Path $Path)) { New-Item -Path $Path -Force | Out-Null }
 Set-ItemProperty -Path $Path -Name "ScanWithAntiVirus" -Value 3 -Type DWord -Force</fix>
         <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
           <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8079" />
+        </check>
+      </Rule>
+      <Rule id="xccdf_org.adhardening.benchmarks_rule_REQ-END-203" severity="high" weight="10.0" selected="false">
+        <title>[REQ-END-203] Configure Remote Encryption Protection Mode</title>
+        <description>
+          <xhtml:p>
+            <xhtml:strong>Target Scope:</xhtml:strong>
+          </xhtml:p>
+          <xhtml:ul>
+            <xhtml:li>
+              <xhtml:strong>Applicable Systems</xhtml:strong>: Tier 2 client workstations and member servers.</xhtml:li>
+            <xhtml:li>
+              <xhtml:strong>Operating Systems</xhtml:strong>: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).</xhtml:li>
+          </xhtml:ul>
+          <xhtml:p>
+            <xhtml:strong>File Path: </xhtml:strong>
+            <xhtml:code>08-endpoints/defender/configure-remote-encryption-protection.md</xhtml:code>
+          </xhtml:p>
+        </description>
+        <rationale>
+          <xhtml:p>Remote Encryption Protection actively detects and terminates network ransomware attempting to encrypt files over SMB shares. Enforcing Block mode terminates the malicious remote process or connection attempting rapid or unauthorized file encryption over network shares, halting lateral encryption attacks from unmanaged or compromised domain assets.</xhtml:p>
+        </rationale>
+        <fixtext>
+          <xhtml:h3>Option A: Group Policy Object (GPO) Configuration (Preferred)</xhtml:h3>
+          <xhtml:ol>
+            <xhtml:li>Open the <xhtml:strong>Group Policy Management Console</xhtml:strong> (<xhtml:code>gpmc.msc</xhtml:code>).</xhtml:li>
+            <xhtml:li>Edit or create the target GPO linked to workstations and member servers (e.g., <xhtml:code>GPO_Hardening_Endpoints</xhtml:code>).</xhtml:li>
+            <xhtml:li>Navigate to: <xhtml:code>Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Defender Antivirus\Remediation\Behavioral Network Blocks\Brute Force Protection</xhtml:code>
+            </xhtml:li>
+            <xhtml:li>Double-click <xhtml:strong>Configure Remote Encryption Protection Mode</xhtml:strong>.</xhtml:li>
+            <xhtml:li>Set the policy to <xhtml:strong>Enabled</xhtml:strong>, and select <xhtml:strong>Block</xhtml:strong> (value <xhtml:code>2</xhtml:code>) in the dropdown options.</xhtml:li>
+            <xhtml:li>Link the GPO to the appropriate Organizational Unit and verify replication.</xhtml:li>
+          </xhtml:ol>
+          <xhtml:hr />
+          <xhtml:h3>Option B: PowerShell &amp; Registry Configuration (Remediation / Non-GPO)</xhtml:h3>
+          <xhtml:p>Run the following script locally to configure the Remote Encryption Protection registry value:</xhtml:p>
+          <xhtml:p>
+            <xhtml:a href="../implementation_scripts/Configure-RemoteEncryptionProtection.ps1">Download Script: Configure-RemoteEncryptionProtection.ps1</xhtml:a>
+          </xhtml:p>
+          <xhtml:pre>
+            <xhtml:code># Configure-RemoteEncryptionProtection.ps1
+# Description: Configures Microsoft Defender Remote Encryption Protection in Block mode.
+
+Write-Host "Configuring Microsoft Defender Remote Encryption Protection..." -ForegroundColor Cyan
+
+$KeyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+if (-not (Test-Path -Path $KeyPath)) {
+    New-Item -Path $KeyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KeyPath -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord -Force
+
+Write-Host "[+] Remote Encryption Protection applied successfully (Block mode)." -ForegroundColor Green</xhtml:code>
+          </xhtml:pre>
+          <xhtml:p>
+            <xhtml:em>To audit the hardening status:</xhtml:em>
+          </xhtml:p>
+          <xhtml:p>
+            <xhtml:a href="../audit_scripts/Get-RemoteEncryptionProtectionStatus.ps1">Download Script: Get-RemoteEncryptionProtectionStatus.ps1</xhtml:a>
+          </xhtml:p>
+          <xhtml:pre>
+            <xhtml:code># Get-RemoteEncryptionProtectionStatus.ps1
+# Description: Audits Microsoft Defender Remote Encryption Protection configuration status.
+
+$KeyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+$Reg = Get-ItemProperty -Path $KeyPath -Name "BruteForceProtectionConfiguredState" -ErrorAction SilentlyContinue
+
+if ($Reg -and $Reg.BruteForceProtectionConfiguredState -eq 2) {
+    Write-Output "Compliant"
+    exit 0
+} else {
+    Write-Output "Non-Compliant"
+    exit 1
+}</xhtml:code>
+          </xhtml:pre>
+          <xhtml:hr />
+        </fixtext>
+        <fix system="urn:xccdf:fix:script:powershell"># Configure-RemoteEncryptionProtection.ps1
+# Description: Configures Microsoft Defender Remote Encryption Protection in Block mode.
+
+Write-Host "Configuring Microsoft Defender Remote Encryption Protection..." -ForegroundColor Cyan
+
+$KeyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+if (-not (Test-Path -Path $KeyPath)) {
+    New-Item -Path $KeyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $KeyPath -Name "BruteForceProtectionConfiguredState" -Value 2 -Type DWord -Force
+
+Write-Host "[+] Remote Encryption Protection applied successfully (Block mode)." -ForegroundColor Green</fix>
+        <check system="http://oval.mitre.org/XMLSchema/oval-definitions-5">
+          <check-content-ref href="ad-hardening-oval.xml" name="oval:org.adhardening:def:8203" />
         </check>
       </Rule>
     </Group>
