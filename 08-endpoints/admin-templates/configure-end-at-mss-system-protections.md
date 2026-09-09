@@ -8,21 +8,39 @@
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon` = `0`
-  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\ScreenSaverGracePeriod` = `5`
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeDllSearchMode` = `1`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security\WarningLevel` = `90`
+* **Policy Category**: Computer Configuration -> Policies -> Windows Settings -> Security Settings -> Local Policies -> Security Options (MSS Settings)
+* **Policy Settings**:
+  * MSS: (AutoAdminLogon) Enable Automatic Logon
+  * MSS: (SafeDllSearchMode) Enable Safe DLL search mode
+  * MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires
+  * MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning
+* **Registry Keys & Values**:
+  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon` = `"0"` (REG_SZ)
+  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\ScreenSaverGracePeriod` = `5` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeDllSearchMode` = `1` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security\WarningLevel` = `90` (REG_DWORD)
+* **Vulnerability References**: MITRE ATT&CK: T1574.001 (DLL Search Order Hijacking), T1552.002 (Credentials in Registry), T1070.001 (Clear Windows Event Logs), T1200 (Hardware Additions / Physical Access)
 
 ---
 
 ## Rationale
-Disabling AutoAdminLogon ensures unattended machines boot into an interactive credential prompt rather than logging into an active session. Safe DLL search mode prevents search-order hijacking by ensuring system directories are evaluated prior to the current working directory. The screensaver grace period minimizes the physical access window after screensaver lock, and the WarningLevel parameter issues administrative alerts before the security event log is exhausted.
+
+The Microsoft Solutions for Security (MSS) baseline settings provide low-level kernel, session manager, and authentication subsystem protections. These settings address fundamental Windows operating system security behaviors, including DLL search-order resolution, automatic logon credential storage, physical console lockout latency, and security event log capacity alerting.
+
+### Technical Threat Vectors & System Protections
+1. **DLL Search-Order Hijacking Mitigation (`SafeDllSearchMode = 1`)**: When an executable calls `LoadLibrary()` or `LoadLibraryEx()` without specifying an absolute path, Windows searches for the requested DLL across predefined locations. In legacy or unhardened mode, the Current Working Directory (CWD) is evaluated immediately after the application directory (position 2), prior to `%SystemRoot%\System32`. If an attacker tricks a user into opening an application from an untrusted or world-writable directory (e.g., `C:\Temp`, downloads folders, or an SMB file share containing a malicious DLL named `version.dll` or `cryptbase.dll`), the executable loads the attacker's payload. Enabling Safe DLL Search Mode shifts the current directory to position 5, evaluating `%SystemRoot%\System32`, `%SystemRoot%\System`, and `%SystemRoot%` first, neutralizing CWD-based DLL preloading attacks.
+2. **Preventing Plaintext Credential Storage & Unattended Access (`AutoAdminLogon = 0`)**: Windows AutoAdminLogon allows automated interactive logons upon system reboot. To accomplish this, Windows stores the username, domain, and unencrypted cleartext password (`DefaultPassword`) in the local registry. Any local user, remote administrator, or offline registry extraction tool can easily dump these plain-text credentials. Furthermore, automatic logon leaves unattended workstations booted directly into an authenticated session. Enforcing `AutoAdminLogon = 0` guarantees that an interactive credential challenge is mandatory at boot.
+3. **Minimizing Physical Console Hijacking Latency (`ScreenSaverGracePeriod = 5`)**: When a workstation screensaver activates or display lock initiates, Windows provides an unauthenticated grace period during which moving the mouse or pressing a key restores the session without prompting for credentials. If left unconfigured or set to excessive values, an opportunistic physical adversary walking past an unattended desk can seize control of an active corporate session. Constraining the grace period to 5 seconds or fewer closes this physical exploitation window.
+4. **Early Warning for Security Event Log Exhaustion (`WarningLevel = 90`)**: Security event log exhaustion occurs when rapid logging activity or malicious event flooding threatens to overwrite critical forensic telemetry. When the security log reaches 90% capacity, the Local Security Authority (LSA) generates Event ID 1104 ("The security log is now full" warning), alerting security analysts and centralized SIEM collectors to rotate logs or investigate potential denial-of-service attempts before evidence is lost.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Kiosk setups or automated test systems requiring automatic logon must use dedicated constrained user accounts. Third-party applications that rely on loading DLLs from the current directory must place libraries in application or system paths.
+
+* **Operational Impact**: Systems requiring automatic logon (such as interactive kiosks or dedicated display monitors) must utilize specialized restricted Shell Launcher configurations rather than Winlogon automatic logon. Applications that rely on loading custom DLLs from the current directory must be updated to place libraries in the application directory or specify full qualified file paths.
+* **User Experience**: Workstations require authentication immediately after the screensaver engages (5-second grace window).
+* **Forensic Integrity**: SIEM and operations teams receive early capacity warnings when security logs reach 90% utilization.
+* **Rollout Recommendations**: Safe for immediate enterprise-wide deployment across all member servers and workstations.
 
 ---
 
@@ -32,18 +50,17 @@ Disabling AutoAdminLogon ensures unattended machines boot into an interactive cr
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (AutoAdminLogon) Enable Automatic Logon**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (SafeDllSearchMode) Enable Safe DLL search mode**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires**: Set to `Enabled: 5 or fewer seconds`
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning**: Set to `Enabled: 90% or less`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options
+   ```
+4. Configure the following MSS policies (imported via `Secedit` or Microsoft Security Compliance Toolkit):
+   * **MSS: (AutoAdminLogon) Enable Automatic Logon**: Set to `Disabled`
+   * **MSS: (SafeDllSearchMode) Enable Safe DLL search mode**: Set to `Enabled`
+   * **MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires**: Set to `Enabled: 5 or fewer seconds`
+   * **MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning**: Set to `Enabled: 90% or less`
+5. Click **Apply**, then click **OK** for each policy.
+6. Link the GPO to the appropriate Organizational Unit (OU) and verify replication across all domain controllers.
 
 ---
 
@@ -188,7 +205,28 @@ if ($script:Vulnerable) {
 
 ---
 
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v ScreenSaverGracePeriod
+reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager" /v SafeDllSearchMode
+reg query "HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security" /v WarningLevel
+```
+Expected output:
+```text
+AutoAdminLogon            REG_SZ       0
+ScreenSaverGracePeriod    REG_DWORD    0x5
+SafeDllSearchMode         REG_DWORD    0x1
+WarningLevel              REG_DWORD    0x5a
+```
+
+---
+
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.5.1, Section 18.5.9, Section 18.5.10, Section 18.5.13
+* **Microsoft Security Compliance Toolkit**: MSS (Microsoft Solutions for Security) Baseline Settings
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1574.001: DLL Search Order Hijacking](https://attack.mitre.org/techniques/T1574/001/), [T1552.002: Credentials in Registry](https://attack.mitre.org/techniques/T1552/002/), [T1070.001: Clear Windows Event Logs](https://attack.mitre.org/techniques/T1070/001/), [T1200: Hardware Additions](https://attack.mitre.org/techniques/T1200/)
+* **Related Controls**: [REQ-END-188: Administrative Templates: Interactive Logon and Credential Display Options](configure-end-at-logon-display-options.md), [REQ-END-200: Administrative Templates: Configure Advanced Event Log Sizes](configure-end-at-event-log-sizes.md)

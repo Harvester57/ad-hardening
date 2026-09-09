@@ -18,7 +18,7 @@ pdf_options:
     </div>
   footerTemplate: |
     <div style="font-size: 8px; font-family: 'Inter', sans-serif; width: 100%; padding-left: 20mm; padding-right: 20mm; display: flex; justify-content: space-between; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 4px;">
-      <span>Commit: 636ecec | Generated: September 09, 2026</span>
+      <span>Commit: 36bd2bd | Generated: September 09, 2026</span>
       <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
     </div>
 ---
@@ -61795,7 +61795,7 @@ The following 30 unitary administrative template hardening controls must be enfo
 <div id="07-paws-admin-templates-configure-paw-at-smbv1-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-179](#08-endpoints-admin-templates-configure-end-at-smbv1-md); for Domain Controllers, refer to [REQ-DC-016](#02-domain-controllers-disable-smbv1-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -61804,23 +61804,54 @@ The following 30 unitary administrative template hardening controls must be enfo
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SYSTEM\CurrentControlSet\Services\mrxsmb10\Start` = `4`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters\SMB1` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Lanman Workstation (SMB Client Driver)**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Workstation\Configure SMB v1 client driver` -> **Enabled** (Value: `Disable driver (recommended)`)
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\mrxsmb10`
+    * Value Name: `Start`
+    * Value Type: `REG_DWORD`
+    * Value Data: `4` (Disabled)
+  * **Lanman Server (SMB Server Service)**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Server\Configure SMB v1 server` -> **Disabled**
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters`
+    * Value Name: `SMB1`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-smbv1-md-rationale"></div>
 
 ## Rationale
-Legacy Server Message Block version 1 (SMBv1) protocol possesses fundamental architectural security weaknesses, lacks integrity and encryption controls, and was the primary exploitation vector in catastrophic automated malware outbreaks (e.g., WannaCry, NotPetya). Disabling both the client driver (mrxsmb10) and server service parameter completely eliminates this attack surface.
+Privileged Access Workstations (PAWs) serve as the sensitive administrative bridge between Tier 0 operators and Tier 0 Active Directory Domain Controllers. Any security compromise of a PAW results in complete loss of forest integrity. Legacy Server Message Block version 1 (SMBv1) introduces catastrophic architectural vulnerabilities that cannot be permitted on privileged hardware.
+
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md-1-threat-vectors-and-architectural-insecurity"></div>
+
+### 1. Threat Vectors and Architectural Insecurity
+SMBv1 contains severe design flaws dating to early LAN protocols:
+* **Remote Kernel Execution and Worm Propagation**: SMBv1 vulnerabilities (such as MS17-010 / CVE-2017-0144) allow unauthenticated remote attackers to execute arbitrary shellcode directly inside Windows kernel ring 0. On a PAW, this completely bypasses virtualization-based security (VBS), Credential Guard, and Endpoint Detection and Response (EDR) agents.
+* **Absence of Cryptographic Integrity and Signing**: SMBv1 relies on legacy single-DES derived signatures and lacks pre-authentication integrity. An adversary situated on the management VLAN could perform adversary-in-the-middle (AiTM) packet manipulation or session hijacking during administrative file transfer operations.
+* **Inability to Negotiate Secure Dialects**: Disabling the client driver (`mrxsmb10.sys`) guarantees that the PAW operating system kernel cannot be coerced into negotiating legacy dialects with rogue servers attempting NTLM credential harvesting or SMB downgrade relay attacks.
+
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md-2-privileged-access-environment-requirements"></div>
+
+### 2. Privileged Access Environment Requirements
+Tier 0 PAWs must never participate in peer-to-peer file sharing or connect to unmanaged legacy file shares. Administrative tooling, scripts, and updates must be delivered exclusively through authenticated, encrypted conduits (SMB 3.1.1 with AES-256-GCM signing/encryption, WinRM over HTTPS, or dedicated enterprise repositories). Completely disabling both the client driver and the server listener guarantees zero residual SMBv1 exposure.
+
+<div id="07-paws-admin-templates-configure-paw-at-smbv1-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1210 - Exploitation of Remote Services**: Lateral exploitation of legacy SMB vulnerabilities against administrative nodes.
+* **T1557.001 - Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay**: Relaying captured administrative SMB authentications.
+* **T1021.002 - Remote Services: SMB/Windows Admin Shares**: Accessing administrative shares over unhardened network protocols.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-smbv1-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Endpoints will be unable to access file shares or network resources hosted on obsolete legacy NAS appliances or systems running Windows XP/Server 2003 that only support SMBv1.
+* **Operational Impact**: PAWs will be unable to access file shares hosted on legacy NAS appliances, obsolete embedded devices, or Windows Server 2003/XP hosts. Because Tier 0 management boundaries strictly forbid interaction with legacy non-Tier-0 systems, this constraint reinforces architectural isolation.
+* **Administrative Workflows**: Tier 0 administrators must manage modern Domain Controllers and directory servers that fully support SMB 3.1.1 with mutual Kerberos authentication and AES encryption. No legitimate administrative tasks require SMBv1.
 
 ---
 
@@ -61833,15 +61864,16 @@ Legacy Server Message Block version 1 (SMBv1) protocol possesses fundamental arc
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Workstation`
-  * **Configure SMB v1 client driver**: Set to `Enabled` (Disable driver (recommended))
+  * **Configure SMB v1 client driver**: Set to `Enabled`
+  * Set **Driver state** drop-down to: `Disable driver (recommended)`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Server`
   * **Configure SMB v1 server**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication.
 
 ---
 
@@ -61941,9 +61973,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-smbv1-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.4.2, Section 18.4.3; ANSSI R21
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.4.2, Section 18.4.3; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.4.2, Section 18.4.3
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000210, Windows 11 STIG Rule WN11-CC-000210
+* **ANSSI Active Directory Hardening Guide**: Recommendation R42 (Decommissioning legacy network protocols and SMBv1)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Hardware and Baseline Hardening Specifications
 
 
 <div style="page-break-before: always;"></div>
@@ -61957,7 +61990,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-180](#08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md); for Domain Controllers, refer to [REQ-DC-017](#02-domain-controllers-harden-network-parameters-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -61966,23 +61999,57 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\NodeType` = `2`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\NoNameReleaseOnDemand` = `1`
+* **GPO Paths / Registry Locations**:
+  * **NetBT Node Type (P-Node)**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\TCPIP Settings\Parameters\NetBT NodeType configuration` -> **Enabled** (Value: `P-node (recommended)`)
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters`
+    * Value Name: `NodeType`
+    * Value Type: `REG_DWORD`
+    * Value Data: `2` (P-node / Point-to-Point)
+  * **NetBIOS Name Release Protection**:
+    * GPO Path: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers` -> **Enabled**
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters`
+    * Value Name: `NoNameReleaseOnDemand`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Ignore unauthenticated release requests)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-rationale"></div>
 
 ## Rationale
-Configuring NetBT NodeType to P-node (Point-to-Point) forces name resolution via unicast WINS rather than broadcast, preventing unauthenticated network adversaries from responding to NetBIOS broadcasts or poisoning name resolution caches. Forcing the system to ignore unauthenticated NetBIOS name release requests prevents denial-of-service attacks that force the computer to relinquish its registered network identity.
+Privileged Access Workstations (PAWs) are high-value targets operating within dedicated administrative management zones. Permitting unauthenticated broadcast resolution protocols on a PAW introduces critical risks of credential relay and network-level denial of service.
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-1-eliminating-broadcast-poisoning-vectors-on-tier-0-management-hosts"></div>
+
+### 1. Eliminating Broadcast Poisoning Vectors on Tier 0 Management Hosts
+If a PAW attempts to resolve a hostname that is misspelled or temporarily unreachable via DNS, standard Windows configurations fall back to NetBIOS over TCP/IP (NetBT) broadcast queries over UDP port 137. 
+* Attackers positioned on the management segment or utilizing compromised intermediary switches can use tools like Responder or Inveigh to spoof NBNS responses.
+* The PAW's local security authority would then attempt an NTLM authentication handshake against the attacker's IP, exposing highly sensitive Tier 0 administrative Kerberos tickets or NTLMv2 challenge-response hashes.
+* Configuring **P-node (`NodeType = 2`)** completely disables broadcast name resolution. The PAW will only query authoritative unicast servers, eliminating the generation of unauthenticated broadcast traffic.
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-2-guarding-against-host-identity-hijacking-and-dos"></div>
+
+### 2. Guarding Against Host Identity Hijacking and DoS
+In default configurations, Windows endpoints honor unauthenticated NetBIOS Name Release packets sent across the local subnet.
+* A rogue actor or compromised host on the network can transmit forged Name Release packets targeting the PAW's registered NetBIOS identity.
+* The PAW would immediately surrender its NetBIOS name registration, causing Active Directory management tools, Remote Server Administration Tools (RSAT), and remote PowerShell sessions to disconnect.
+* Setting `NoNameReleaseOnDemand = 1` ensures that the PAW ignores all unauthenticated name release demands, accepting identity management directives exclusively from authenticated, authoritative WINS servers.
+
+<div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1557.001 - Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay**: Poisoning broadcast name resolution to intercept administrative credentials.
+* **T1040 - Network Sniffing**: Capturing broadcast resolution traffic on privileged administrative segments.
+* **T1498 - Network Denial of Service**: Disrupting administrative session availability via spoofed name release frames.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Environments relying purely on unrouted broadcast-based NetBIOS name resolution without DNS or WINS will experience resolution failures.
+* **Enterprise Administrative Compatibility**: Tier 0 administrative activities rely exclusively on Active Directory integrated DNS infrastructure. Domain Controllers, administrative hypervisors, and directory services communicate via fully qualified domain names (FQDNs) and Kerberos SPNs. P-node enforcement has zero impact on legitimate directory administration.
+* **WINS Requirements**: If legacy management networks utilize WINS, the PAW can query the designated WINS server via unicast. If WINS is absent, the PAW relies purely on secure DNS resolution.
 
 ---
 
@@ -61995,15 +62062,16 @@ Configuring NetBT NodeType to P-node (Point-to-Point) forces name resolution via
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\TCPIP Settings\Parameters`
-  * **NetBT NodeType configuration**: Set to `Enabled` (P-node (recommended))
+  * **NetBT NodeType configuration**: Set to `Enabled`
+  * Set **NetBT NodeType** drop-down to: `P-node (recommended)`
 * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
   * **MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -62099,9 +62167,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-netbt-nodetype-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.4.7, Section 18.5.7
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.4.7; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.4.7
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000215, Windows 11 STIG Rule WN11-CC-000215
+* **ANSSI Active Directory Hardening Guide**: Recommendation R42 (Suppression of obsolete name resolution protocols)
+* **Microsoft Privileged Access Workstation Guidance**: Network Profile Isolation and Protocol Hardening Specifications
 
 
 <div style="page-break-before: always;"></div>
@@ -62115,7 +62184,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-181](#08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md); for Domain Controllers, refer to [REQ-DC-018](#02-domain-controllers-harden-network-parameters-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -62124,24 +62193,63 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters\DisableIPSourceRouting` = `2`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\DisableIPSourceRouting` = `2`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\EnableICMPRedirect` = `0`
+* **GPO Paths / Registry Locations**:
+  * **IPv6 IP Source Routing Protection**:
+    * GPO Path: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\MSS: (DisableIPSourceRouting IPv6) IP source routing protection level` -> **Enabled** (Value: `Highest protection, source routing is completely disabled`)
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters`
+    * Value Name: `DisableIPSourceRouting`
+    * Value Type: `REG_DWORD`
+    * Value Data: `2` (Highest protection)
+  * **IPv4 IP Source Routing Protection**:
+    * GPO Path: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\MSS: (DisableIPSourceRouting) IP source routing protection level` -> **Enabled** (Value: `Highest protection, source routing is completely disabled`)
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
+    * Value Name: `DisableIPSourceRouting`
+    * Value Type: `REG_DWORD`
+    * Value Data: `2` (Highest protection)
+  * **Disable ICMP Redirect Processing**:
+    * GPO Path: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes` -> **Disabled**
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
+    * Value Name: `EnableICMPRedirect`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Ignore ICMP redirects)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-rationale"></div>
 
 ## Rationale
-IP source routing allows sending devices to dictate the exact network routing path rather than allowing routers to determine the path. Attackers can leverage source routing to bypass boundary firewalls and packet filters. Furthermore, ICMP redirects allow adjacent nodes to inject arbitrary routes into the local routing table, enabling man-in-the-middle packet interception.
+Privileged Access Workstations (PAWs) establish highly privileged administrative sessions (including Kerberos-authenticated WinRM, Remote Desktop with Restricted Admin mode, and LDAP over TLS) to Tier 0 infrastructure. Preserving absolute network routing integrity is critical to prevent traffic interception or session manipulation.
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-1-protection-against-administrative-session-redirection"></div>
+
+### 1. Protection Against Administrative Session Redirection
+Unauthenticated ICMP Type 5 Redirect messages can be used by an attacker on an adjacent subnet to manipulate the PAW's local IP routing table:
+* An attacker can forge ICMP redirect messages indicating that traffic directed toward Domain Controllers or management hypervisors should traverse an intermediary attacking host.
+* If the PAW's TCP/IP stack accepts the redirect, outbound administrative management traffic is redirected through the adversary's machine, exposing the operator to TLS downgrade attacks, NTLM relaying, or credential harvesting.
+* Enforcing `EnableICMPRedirect = 0` guarantees that the PAW strictly adheres to statically configured or DHCP-provisioned default gateways, ignoring all dynamically injected ICMP route modifications.
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-2-elimination-of-ip-source-routing-vectors"></div>
+
+### 2. Elimination of IP Source Routing Vectors
+IP Source Routing allows packet senders to specify intermediate transit hops:
+* Attackers can abuse loose or strict source routing to bypass boundary firewalls isolating the PAW management network from general enterprise subnets.
+* By specifying reverse source routing paths, an attacker can conduct blind TCP spoofing attacks against listening management services.
+* Enforcing `DisableIPSourceRouting = 2` on both IPv4 and IPv6 stacks instructs the Windows kernel to unconditionally drop all packets containing source route options, ensuring that the PAW only communicates over deterministically routed enterprise paths.
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1557 - Adversary-in-the-Middle**: Route manipulation to intercept administrative sessions between PAWs and Domain Controllers.
+* **T1565.002 - Data Manipulation: Transmitted Data Manipulation**: Unauthorized modification of routing paths for privileged traffic.
+* **T1498 - Network Denial of Service**: Disruption of administrative access via malicious gateway manipulation.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: None on standard enterprise networks. Legacy diagnostic testing relying on manually routed packet paths will be rejected.
+* **Operational Impact**: None. Tier 0 administrative networks utilize dedicated, deterministic routing infrastructure. PAWs have no requirement to process ICMP redirects or handle source-routed packets.
+* **Management Traffic Integrity**: Hardening the TCP/IP stack guarantees that administrative sessions to Domain Controllers remain strictly confined to designated management transit links.
 
 ---
 
@@ -62154,17 +62262,19 @@ IP source routing allows sending devices to dictate the exact network routing pa
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (DisableIPSourceRouting IPv6) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled`
+  * **MSS: (DisableIPSourceRouting IPv6) IP source routing protection level**: Set to `Enabled`
+  * Select drop-down value: `Highest protection, source routing is completely disabled`
 * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (DisableIPSourceRouting) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled`
+  * **MSS: (DisableIPSourceRouting) IP source routing protection level**: Set to `Enabled`
+  * Select drop-down value: `Highest protection, source routing is completely disabled`
 * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
   * **MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -62287,9 +62397,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.5.2, Section 18.5.3, Section 18.5.5
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.5.8, Section 18.5.9, Section 18.5.10; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.5.8, Section 18.5.9, Section 18.5.10
+* **DISA STIG**: Windows 10 STIG Rules WN10-SO-000185, WN10-SO-000190, WN10-SO-000195
+* **ANSSI Active Directory Hardening Guide**: Section 3.2.4 (TCP/IP Stack Hardening on Managed Nodes)
+* **Microsoft Privileged Access Workstation Guidance**: Tier 0 Network Boundary Protection Specifications
 
 
 <div style="page-break-before: always;"></div>
@@ -62312,25 +62423,45 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon` = `0`
-  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\ScreenSaverGracePeriod` = `5`
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeDllSearchMode` = `1`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security\WarningLevel` = `90`
+* **Policy Category**: Computer Configuration -> Policies -> Windows Settings -> Security Settings -> Local Policies -> Security Options (MSS Settings)
+* **Policy Settings**:
+  * MSS: (AutoAdminLogon) Enable Automatic Logon
+  * MSS: (SafeDllSearchMode) Enable Safe DLL search mode
+  * MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires
+  * MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning
+* **Registry Keys & Values**:
+  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon` = `"0"` (REG_SZ)
+  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\ScreenSaverGracePeriod` = `5` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeDllSearchMode` = `1` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security\WarningLevel` = `90` (REG_DWORD)
+* **Vulnerability References**: MITRE ATT&CK: T1574.001 (DLL Search Order Hijacking), T1552.002 (Credentials in Registry), T1070.001 (Clear Windows Event Logs), T1200 (Hardware Additions / Physical Access)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-rationale"></div>
 
 ## Rationale
-Disabling AutoAdminLogon ensures unattended machines boot into an interactive credential prompt rather than logging into an active session. Safe DLL search mode prevents search-order hijacking by ensuring system directories are evaluated prior to the current working directory. The screensaver grace period minimizes the physical access window after screensaver lock, and the WarningLevel parameter issues administrative alerts before the security event log is exhausted.
+
+Privileged Access Workstations (PAWs) are hardened bastion hosts utilized by directory administrators to manage Active Directory domain controllers, Kerberos policies, and enterprise identity databases. Because PAWs operate under maximum privilege conditions, fundamental session security, DLL loading mechanisms, physical console timeouts, and security audit log thresholds must be enforced with zero tolerance for compromise.
+
+<div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-technical-threat-vectors-paw-core-subsystem-protection"></div>
+
+### Technical Threat Vectors & PAW Core Subsystem Protection
+1. **Strict Prohibition of Automatic Administrative Logon (`AutoAdminLogon = 0`)**: Enabling automatic logon on a PAW would cause the host to automatically boot directly into an active, authenticated administrative session. This exposes the host to immediate physical compromise upon system restart and requires storing the administrative account password in cleartext within the registry (`DefaultPassword`). Disabling automatic logon guarantees that multi-factor authentication (smart card or FIDO2 hardware token) and interactive credential input are strictly enforced at every system boot.
+2. **DLL Search-Order Preloading Defense (`SafeDllSearchMode = 1`)**: Tier 0 administrators execute powerful administrative utilities, custom PowerShell management modules, and directory inspection binaries. If Safe DLL Search Mode is inactive, an attacker with file-write permissions to any shared folder or working directory can drop a malicious DLL masquerading as a legitimate Windows system library. When an administrator executes a management binary from that path, the tool loads the malicious DLL with administrative privileges. Safe DLL Search Mode ensures the current working directory is only checked after protected system folders (`%SystemRoot%\System32`, `%SystemRoot%`), neutralizing DLL preloading and hijacking vectors.
+3. **Lock Screen Console Seizure Mitigation (`ScreenSaverGracePeriod = 5`)**: When an administrator steps away from a PAW in a secure operations center or data center floor, the screen lock engages after a brief period of inactivity. If a prolonged grace period is permitted, an unauthorized individual could seize physical control of an active Tier 0 session without entering credentials. Enforcing a grace period of 5 seconds or fewer ensures the console requires immediate re-authentication.
+4. **Guaranteed Forensics via Security Log Threshold Alerting (`WarningLevel = 90`)**: PAWs generate vital audit logs tracking directory modifications, PowerShell command execution, and authentication events. If an adversary attempts to blind security operations by flooding event logs to force overwrite conditions, setting `WarningLevel = 90` ensures that Windows Event ID 1104 is generated when log capacity reaches 90%. This gives SIEM operations immediate warning to preserve forensic evidence and investigate anomalous volume.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Kiosk setups or automated test systems requiring automatic logon must use dedicated constrained user accounts. Third-party applications that rely on loading DLLs from the current directory must place libraries in application or system paths.
+
+* **Operational Impact**: Automatic logons are strictly barred on PAW hardware. Tier 0 administrators must provide smart card PINs or cryptographic tokens at every boot. All native administrative tools (Active Directory Administrative Center, RSAT, PowerShell, Hyper-V Manager) load standard system libraries from secure system directories without disruption.
+* **Console Security**: The console locks completely 5 seconds after screen saver engagement, preventing unauthorized physical walk-up access.
+* **Forensic Auditing**: Guarantees early warning event generation before security audit logs overwrite active data.
+* **Rollout Recommendations**: Mandatory for all PAW deployment rings; apply immediately.
 
 ---
 
@@ -62343,19 +62474,18 @@ Disabling AutoAdminLogon ensures unattended machines boot into an interactive cr
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (AutoAdminLogon) Enable Automatic Logon**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (SafeDllSearchMode) Enable Safe DLL search mode**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires**: Set to `Enabled: 5 or fewer seconds`
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning**: Set to `Enabled: 90% or less`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options
+   ```
+4. Configure the following MSS policies:
+   * **MSS: (AutoAdminLogon) Enable Automatic Logon**: Set to `Disabled`
+   * **MSS: (SafeDllSearchMode) Enable Safe DLL search mode**: Set to `Enabled`
+   * **MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires**: Set to `Enabled: 5 or fewer seconds`
+   * **MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning**: Set to `Enabled: 90% or less`
+5. Click **Apply**, then click **OK** for each policy.
+6. Link the GPO to the dedicated PAW Organizational Unit and verify policy replication across all Domain Controllers.
 
 ---
 
@@ -62502,12 +62632,35 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v ScreenSaverGracePeriod
+reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager" /v SafeDllSearchMode
+reg query "HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security" /v WarningLevel
+```
+Expected output:
+```text
+AutoAdminLogon            REG_SZ       0
+ScreenSaverGracePeriod    REG_DWORD    0x5
+SafeDllSearchMode         REG_DWORD    0x1
+WarningLevel              REG_DWORD    0x5a
+```
+
+---
+
 <div id="07-paws-admin-templates-configure-paw-at-mss-system-protections-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.5.1, Section 18.5.9, Section 18.5.10, Section 18.5.13
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **Microsoft Security Compliance Toolkit**: MSS (Microsoft Solutions for Security) Baseline Settings
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Administrative Endpoint Hardening
+* **MITRE ATT&CK**: [T1574.001: DLL Search Order Hijacking](https://attack.mitre.org/techniques/T1574/001/), [T1552.002: Credentials in Registry](https://attack.mitre.org/techniques/T1552/002/), [T1070.001: Clear Windows Event Logs](https://attack.mitre.org/techniques/T1070/001/), [T1200: Hardware Additions](https://attack.mitre.org/techniques/T1200/)
+* **Related Controls**: [REQ-PAW-177: Administrative Templates: Interactive Logon and Credential Display Options for PAWs](#07-paws-admin-templates-configure-paw-at-logon-display-options-md), [REQ-PAW-189: Administrative Templates: Configure Advanced Event Log Sizes for PAWs](#07-paws-admin-templates-configure-paw-at-event-log-sizes-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -62529,23 +62682,44 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Low
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata\PreventDeviceMetadataFromNetwork` = `1`
+* **Priority**: Medium
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Device Installation
+* **Policy Name**: Prevent device metadata retrieval from the Internet
+* **Supported On**: Windows 7 / Windows Server 2008 R2 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata`
+* **Registry Value**: `PreventDeviceMetadataFromNetwork`
+* **Value Type**: `REG_DWORD`
+* **Value Data**: `1` (0x00000001 = Suppress device metadata retrieval from external network)
+* **Vulnerability References**: MITRE ATT&CK: T1082 (System Information Discovery), T1120 (Peripheral Device Discovery), T1041 (Exfiltration Over C2 Channel)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-rationale"></div>
 
 ## Rationale
-Prevents the operating system from searching Windows Update and Microsoft public servers for device metadata, icons, and manufacturer information when new peripheral hardware is connected. This reduces unnecessary external telemetry and prevents information disclosure about attached hardware assets.
+
+Privileged Access Workstations (PAWs) host high-privilege administrative sessions where access to Active Directory domain controllers, PKI certificate authorities, and Tier 0 identity assets is executed. Hardware peripherals utilized on PAWs are strictly constrained to high-assurance authentication devices, such as smart card readers, cryptographic hardware security keys (FIDO2/YubiKeys), and dedicated administrative input hardware.
+
+<div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-technical-threat-vectors-paw-isolation-assurance"></div>
+
+### Technical Threat Vectors & PAW Isolation Assurance
+1. **Network Egress & Perimeter Leakage**: In a properly architected Tier 0 environment, PAWs are placed in dedicated management VLANs with firewall rules blocking direct Internet access. When new peripheral hardware is inserted, the default Windows Device Setup Manager (DSM) behavior attempts outbound HTTP/HTTPS connections to Microsoft Windows Metadata and Internet Services (WMIS). These requests fail or trigger firewall alarms, creating egress log noise.
+2. **Cryptographic Token & Hardware Disclosure**: The metadata queries transmitted by the DSM include granular Vendor IDs (VID), Product IDs (PID), and device serial numbers. Transmitting these queries externally exposes the specific cryptographic hardware models, firmware revisions, and smart card brands used for Tier 0 multi-factor authentication to third-party CDNs and network eavesdroppers.
+3. **Preventing Untrusted Ingestion**: Device metadata packages contain external XML manifests, branding schemas, and companion software prompts. While cryptographically signed, ingesting external metadata into the administrative host creates unnecessary software parsing overhead and increases the attack surface of the local device setup infrastructure.
+4. **Enforcing Deterministic Administrative Baselines**: All driver packages, cryptographic minidrivers, and peripheral management tools on a PAW must be deployed exclusively through vetted, pre-approved administrative configuration packages, never dynamically retrieved from consumer-facing Internet services.
+
+Enabling this policy completely disables online metadata queries, ensuring that PAW device setup remains strictly local, silent, and secure.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Custom peripheral icons and detailed hardware descriptions in the 'Devices and Printers' folder will revert to generic device symbols.
+
+* **Operational Impact**: Connected smart card readers, security keys, and approved administrative peripherals will display generic operating system device class icons instead of OEM branding in administrative interfaces. Cryptographic functionality, smart card logon, FIDO2 authentication, and driver operations are completely unaffected.
+* **User Experience**: Completely transparent to administrators during daily operations.
+* **Network Impact**: Completely eliminates outbound HTTPS connection attempts targeting Microsoft metadata services (`dmd.metaservices.microsoft.com`).
+* **Rollout Recommendations**: Mandatory for all PAW hardware images; apply immediately with zero operational risk.
 
 ---
 
@@ -62558,13 +62732,15 @@ Prevents the operating system from searching Windows Update and Microsoft public
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Device Installation`
-  * **Prevent device metadata retrieval from the Internet**: Set to `Enabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Device Installation
+   ```
+4. Double-click **Prevent device metadata retrieval from the Internet**.
+5. Select **Enabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the dedicated PAW Organizational Unit and verify policy replication across all Domain Controllers.
 
 ---
 
@@ -62587,7 +62763,7 @@ if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Meta
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Name "PreventDeviceMetadataFromNetwork" -Value 1 -Type DWord -Force
 
-Write-Host "[+] Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs applied successfully." -ForegroundColor Green
+Write-Host "[+] Administrative Templates: Prevent Device Metadata Retrieval from Network applied successfully." -ForegroundColor Green
 ```
 
 *To verify the configuration:*
@@ -62598,7 +62774,7 @@ Write-Host "[+] Administrative Templates: Prevent Device Metadata Retrieval from
 #Get-PawAtDeviceMetadataStatus.ps1
 # Description: Audits Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs.
 
-Write-Host "--- Auditing Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Administrative Templates: Prevent Device Metadata Retrieval from Network ---" -ForegroundColor Cyan
 $script:Vulnerable = $false
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata"
@@ -62634,12 +62810,29 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy setting via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" /v PreventDeviceMetadataFromNetwork
+```
+Expected output:
+```text
+PreventDeviceMetadataFromNetwork    REG_DWORD    0x1
+```
+
+---
+
 <div id="07-paws-admin-templates-configure-paw-at-device-metadata-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.7.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Device Installation
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Hardware Control
+* **MITRE ATT&CK**: [T1082: System Information Discovery](https://attack.mitre.org/techniques/T1082/), [T1120: Peripheral Device Discovery](https://attack.mitre.org/techniques/T1120/), [T1041: Exfiltration Over C2 Channel](https://attack.mitre.org/techniques/T1041/)
+* **Related Controls**: [REQ-PAW-175: Administrative Templates: Restrict Internet Communication for PAWs](#07-paws-admin-templates-configure-paw-at-internet-communication-md), [REQ-PAW-185: Administrative Templates: Require PIN Pairing for Connect on PAWs](#07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -62661,26 +62854,46 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}\NoBackgroundPolicy` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}\NoGPOListChanges` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\NoBackgroundPolicy` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\NoGPOListChanges` = `0`
+* **Priority**: High
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Group Policy
+* **Policy Settings**:
+  * Configure registry policy processing
+  * Configure security policy processing
+* **Supported On**: Windows 2000 or Windows Server 2003 and above
+* **Registry Keys & Client-Side Extension (CSE) GUIDs**:
+  * Registry Extension: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}`
+  * Security Extension: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}`
+* **Registry Values**:
+  * `NoBackgroundPolicy` = `0` (REG_DWORD, Process policies during periodic background refresh)
+  * `NoGPOListChanges` = `0` (REG_DWORD, Process and reapply policies even if GPOs have not changed)
+* **Vulnerability References**: MITRE ATT&CK: T1562.001 (Impair Defenses: Disable or Modify Tools), T1112 (Modify Registry), T1484.001 (Group Policy Modification)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-rationale"></div>
 
 ## Rationale
-By default, Group Policy client side extensions skip reapplication of policies during background refreshes if the central GPO version has not incremented. Forcing background reapplication guarantees that any local registry tampering or administrative drift is continuously corrected and overwritten by enterprise security baselines.
+
+Privileged Access Workstations (PAWs) are high-security administrative bastion hosts dedicated exclusively to Tier 0 directory services management. Maintaining a deterministic, tamper-resistant system state on PAWs is a foundational requirement of the Microsoft Clean Source and tiering security models.
+
+<div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-technical-threat-vectors-paw-state-integrity"></div>
+
+### Technical Threat Vectors & PAW State Integrity
+1. **Automated Remediation of Defense Impairment (`NoGPOListChanges = 0`)**: Attackers gaining localized access to an administrative workstation often attempt to impair defenses by silently modifying security registry keys (e.g., turning off Credential Guard, weakening LSA RunAsPPL protections, disabling AppLocker enforcement, or clearing audit policies). Under default Windows Group Policy behavior, Client-Side Extensions (CSEs) for Registry and Security settings skip background execution if the central GPO version in Active Directory SYSVOL has not changed. This leaves compromised or weakened registry settings active indefinitely. Enforcing `NoGPOListChanges = 0` forces the operating system to overwrite local registry settings with the approved Tier 0 baseline during every background refresh cycle, providing an automated self-healing mechanism against administrative tampering.
+2. **Deterministic Baseline Enforcement without Reboots (`NoBackgroundPolicy = 0`)**: Tier 0 administrators frequently keep long-running administrative sessions open across multiple days or weeks. Forcing background processing guarantees that critical security policies and registry restrictions are continuously reapplied throughout active sessions, rather than waiting for a system restart or user logoff.
+3. **Elimination of Administrative Configuration Drift**: When performing ad-hoc diagnostics or deploying specialized management packages, administrators might temporarily adjust security settings. Continuous background enforcement ensures that all PAW systems deterministically revert back to the authoritative enterprise baseline within 90 minutes.
+4. **Guaranteed Consistency for Registry & Security CSEs**: Applying this policy to both the Registry CSE (`{35378EAC-683F-11D2-A89A-00C04FBBCFA2}`) and the Security Settings CSE (`{827D319E-6EAC-11D2-A4EA-00C04F79F83A}`) ensures comprehensive coverage over administrative templates, local rights assignments, system access permissions, and registry keys.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Slight, negligible CPU overhead during background Group Policy refresh cycles.
+
+* **Operational Impact**: Negligible CPU and disk I/O impact during background refresh cycles. The Group Policy engine evaluates cached local policies, ensuring that administrative operations (RSAT, PowerShell scripting, Active Directory Administrative Center) experience zero disruption.
+* **Administrative Impact**: Temporary manual adjustments made to hardened registry parameters will be automatically reverted during the next 90-minute background cycle.
+* **Network Impact**: Zero additional bandwidth utilization on the administrative management network.
+* **Rollout Recommendations**: Mandatory baseline setting for all PAW deployment rings; apply immediately.
 
 ---
 
@@ -62693,15 +62906,21 @@ By default, Group Policy client side extensions skip reapplication of policies d
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
-  * **Configure registry policy processing**: Set to `Enabled` (Process even if GPO has not changed; do not skip during background processing)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
-  * **Configure security policy processing**: Set to `Enabled` (Process even if GPO has not changed; do not skip during background processing)
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Group Policy
+   ```
+4. Double-click **Configure registry policy processing**:
+   * Set to **Enabled**.
+   * Check **Process even if the Group Policy objects have not changed**.
+   * Uncheck **Do not apply during periodic background processing**.
+5. Double-click **Configure security policy processing**:
+   * Set to **Enabled**.
+   * Check **Process even if the Group Policy objects have not changed**.
+   * Uncheck **Do not apply during periodic background processing**.
+6. Click **Apply**, then click **OK** for both policies.
+7. Link the GPO to the dedicated PAW Organizational Unit and verify policy replication across all Domain Controllers.
 
 ---
 
@@ -62844,12 +63063,27 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" /s
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" /s
+```
+Verify that `NoBackgroundPolicy` and `NoGPOListChanges` are present and set to `0x0`.
+
+---
+
 <div id="07-paws-admin-templates-configure-paw-at-gp-processing-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.19.2, Section 18.9.19.3, Section 18.9.19.4, Section 18.9.19.5
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.31.2, Section 18.9.31.3
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Group Policy Client-Side Extension Processing
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Administrative Endpoint Hardening
+* **MITRE ATT&CK**: [T1562.001: Impair Defenses: Disable or Modify Tools](https://attack.mitre.org/techniques/T1562/001/), [T1112: Modify Registry](https://attack.mitre.org/techniques/T1112/), [T1484.001: Group Policy Modification](https://attack.mitre.org/techniques/T1484/001/)
+* **Related Controls**: [REQ-PAW-171: Administrative Templates: MSS System and Session Security Protections for PAWs](#07-paws-admin-templates-configure-paw-at-mss-system-protections-md), [REQ-PAW-177: Administrative Templates: Interactive Logon and Credential Display Options for PAWs](#07-paws-admin-templates-configure-paw-at-logon-display-options-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -62871,23 +63105,44 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\EnableCdp` = `0`
+* **Priority**: High
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Cross-Device Experiences
+* **Policy Name**: Continue experiences on this device
+* **Supported On**: Windows 10 (Version 1703) or Windows Server 2016 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+* **Registry Value**: `EnableCdp`
+* **Value Type**: `REG_DWORD`
+* **Value Data**: `0` (0x00000000 = Cross-Device Experiences / CDP Disabled)
+* **Vulnerability References**: MITRE ATT&CK: T1020 (Automated Exfiltration), T1115 (Clipboard Data), T1552 (Unsecured Credentials), T1080 (Taint Shared Content)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-rationale"></div>
 
 ## Rationale
-The Connected Devices Platform (CDP) coordinates cross-device application states and task handoffs over cloud synchronization and Bluetooth beacons. In enterprise environments, this introduces unmanaged synchronization pathways between managed corporate systems and external personal consumer devices.
+
+Privileged Access Workstations (PAWs) provide a dedicated, isolated execution environment for managing Tier 0 Active Directory Domain Services, Public Key Infrastructure (PKI), and critical identity systems. The Windows Connected Devices Platform (CDP / Project Rome) introduces capabilities—such as cross-device task roaming, shared activity feeds, and cloud-synchronized clipboard buffers—that are fundamentally incompatible with the strict tiering and isolation guarantees required on a PAW.
+
+<div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-technical-threat-vectors-tier-0-isolation-risks"></div>
+
+### Technical Threat Vectors & Tier 0 Isolation Risks
+1. **Shatering Tiering Boundaries**: PAWs are designed to operate in total isolation from lower-tier workstations (Tier 1/Tier 2) and consumer devices (smartphones, tablets). If CDP is active, an administrator logging into a PAW who shares an identity or companion link with an unmanaged personal device creates an automatic synchronization bridge between Tier 0 and Tier 2/untrusted environments.
+2. **Exfiltration of Tier 0 Secrets via Cloud Clipboard**: Administrative workflows frequently involve high-value strings—such as emergency break-glass passwords, LAPS credentials, Kerberos delegation hashes, or PowerShell scripts with embedded tokens. CDP can synchronize clipboard history to cloud graphs or companion mobile devices, completely bypassing network egress blocks and exposing Tier 0 credentials on unmanaged consumer hardware.
+3. **Remote Intent Injection & Lateral Movement**: CDP supports remote application launching and inter-device message delivery via Bluetooth Low Energy (BLE) and local Wi-Fi multicast. A compromised lower-tier workstation or mobile device on the same local network could leverage CDP APIs to send intent payloads or open malicious URLs directly on the PAW.
+4. **Wireless Egress & Proximity Attacks**: CDP actively broadcasts BLE beacons and initiates Wi-Fi Direct handshakes to discover nearby devices. On hardened PAW hardware, where Bluetooth and unmanaged wireless interfaces must be disabled or strictly constrained, CDP background activities violate wireless security standards.
+
+Disabling CDP ensures the Connected Devices Platform User Service (`CDPUserSvc`) is inert, stopping all local peer discovery and external activity transmission.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Cross-device features such as 'Continue on PC' from companion mobile devices or shared browser sessions will be unavailable.
+
+* **Operational Impact**: All cross-device continuity features ('Continue on PC', cross-device clipboard, Timeline activity roaming) are permanently suppressed. Essential Tier 0 administrative tooling (Active Directory Administrative Center, PowerShell 5.1/7 consoles, RSAT, MMC, Remote Server Administration Tools) operates with zero degradation.
+* **User Experience**: Tier 0 operators work in a self-contained, high-assurance desktop session without distraction or unintended cloud synchronization.
+* **Network & Firewall Impact**: Halts CDP broadcast discovery packets and prevents attempts to contact Microsoft Project Rome cloud relays over the administrative management network.
+* **Rollout Recommendations**: Mandatory for all PAW deployment baselines; zero operational risk for administrative workflows.
 
 ---
 
@@ -62900,13 +63155,15 @@ The Connected Devices Platform (CDP) coordinates cross-device application states
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Cross-Device Experiences`
-  * **Continue experiences on this device**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Cross-Device Experiences
+   ```
+4. Double-click **Continue experiences on this device**.
+5. Select **Disabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the dedicated PAW Organizational Unit and verify policy replication across all Domain Controllers.
 
 ---
 
@@ -62976,12 +63233,29 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy setting via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v EnableCdp
+```
+Expected output:
+```text
+EnableCdp    REG_DWORD    0x0
+```
+
+---
+
 <div id="07-paws-admin-templates-configure-paw-at-cross-device-experiences-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.19.6
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Cross-Device Experiences
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Hardening Controls
+* **MITRE ATT&CK**: [T1020: Automated Exfiltration](https://attack.mitre.org/techniques/T1020/), [T1115: Clipboard Data](https://attack.mitre.org/techniques/T1115/), [T1552: Unsecured Credentials](https://attack.mitre.org/techniques/T1552/), [T1080: Taint Shared Content](https://attack.mitre.org/techniques/T1080/)
+* **Related Controls**: [REQ-PAW-175: Administrative Templates: Restrict Internet Communication for PAWs](#07-paws-admin-templates-configure-paw-at-internet-communication-md), [REQ-PAW-185: Administrative Templates: Require PIN Pairing for Connect on PAWs](#07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -62995,7 +63269,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-186](#08-endpoints-admin-templates-configure-end-at-internet-communication-md); for Domain Controllers, refer to [REQ-DC-027](#02-domain-controllers-configure-telemetry-privacy-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -63004,23 +63278,57 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers\DisableWebPnPDownload` = `1`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoWebServices` = `1`
+* **GPO Paths / Registry Locations**:
+  * **Turn off downloading of print drivers over HTTP**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings\Turn off downloading of print drivers over HTTP` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers`
+    * Value Name: `DisableWebPnPDownload`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Disabled / Block HTTP print driver downloads)
+  * **Turn off Internet download for Web publishing and online ordering wizards**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings\Turn off Internet download for Web publishing and online ordering wizards` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer`
+    * Value Name: `NoWebServices`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Disabled / Block web wizard downloads)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-rationale"></div>
 
 ## Rationale
-Downloading print drivers via HTTP exposes systems to cleartext traffic tampering and Point-and-Print driver replacement attacks. Web publishing wizards provide legacy, unauthenticated internet upload channels that can be abused for unauthorized data egress.
+Privileged Access Workstations (PAWs) reside in isolated administrative zones dedicated to the management of Active Directory Domain Controllers and enterprise tier-0 identity infrastructure. Automated internet communication channels, web wizard downloads, and dynamic HTTP driver retrieval represent intolerable attack surfaces on privileged hosts.
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-1-eliminating-web-point-and-print-exploitation-vectors"></div>
+
+### 1. Eliminating Web Point and Print Exploitation Vectors
+Dynamic printer driver acquisition over unencrypted HTTP (Web Point and Print) introduces severe privilege escalation vectors:
+* **Privilege Escalation inside Print Spooler**: Print drivers execute with full administrative privileges within `spoolsv.exe` (`NT AUTHORITY\SYSTEM`). Vulnerabilities such as PrintNightmare (CVE-2021-1675 / CVE-2021-34527) demonstrated that malicious print drivers can achieve immediate, unconstrained code execution on the local system.
+* **Adversary-in-the-Middle (AiTM) Poisoning**: If a PAW is connected to a local subnet or transit network where web printer discovery occurs, an adversary could forge HTTP driver download responses, injecting malicious binaries directly into the driver repository.
+* Setting `DisableWebPnPDownload = 1` completely forbids the PAW from fetching print drivers over HTTP. PAWs should ideally have the Print Spooler service disabled entirely ([REQ-PAW-012](#07-paws-disable-unnecessary-system-services-md)), but enforcing this policy provides essential defense-in-depth against accidental service activation.
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-2-suppression-of-unauthenticated-web-wizards-and-outbound-telemetry"></div>
+
+### 2. Suppression of Unauthenticated Web Wizards and Outbound Telemetry
+Windows Explorer includes legacy wizards for publishing media to the web or placing online print orders:
+* **Outbound Traffic Egress**: These wizards attempt to connect to external Microsoft and third-party web endpoints, generating unauthenticated HTTP outbound requests that can leak workstation hostnames, network topologies, and metadata.
+* **Data Exfiltration Vectors**: Legacy web wizards provide unmonitored file upload conduits that could be misused for unauthorized file egress.
+* Setting `NoWebServices = 1` disables web wizard download functions, keeping Windows Explorer strictly offline and focused on local administrative tasks.
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1574.002 - Hijack Execution Flow: DLL Side-Loading / Driver Sideloading**: Sideloading rogue drivers through unauthenticated HTTP driver acquisition.
+* **T1068 - Exploitation for Privilege Escalation**: Escalating to SYSTEM privileges via printer driver installation mechanisms.
+* **T1048 - Exfiltration Over Alternative Protocol**: Unsanctioned data egress utilizing built-in web publishing wizards.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Print drivers must be distributed via trusted internal print servers or enterprise deployment mechanisms. The web publishing wizard option in Windows Explorer will be suppressed.
+* **Operational Impact**: None. PAWs are dedicated to directory administration and have zero legitimate requirement to connect to web-based printers or utilize consumer web publishing wizards.
+* **Administrative Operations**: All administrative tooling is installed via approved enterprise software repositories or Microsoft-signed RSAT packages.
 
 ---
 
@@ -63033,7 +63341,7 @@ Downloading print drivers via HTTP exposes systems to cleartext traffic tamperin
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
@@ -63041,7 +63349,7 @@ Downloading print drivers via HTTP exposes systems to cleartext traffic tamperin
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
   * **Turn off Internet download for Web publishing and online ordering wizards**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -63141,9 +63449,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-internet-communication-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.20.1.2, Section 18.9.20.1.6
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.30.2, Section 18.9.30.3; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.30.2, Section 18.9.30.3
+* **DISA STIG**: Windows 10 STIG Rules WN10-CC-000280, WN10-CC-000285; Windows 11 STIG Rules WN11-CC-000280, WN11-CC-000285
+* **ANSSI Active Directory Hardening Guide**: Section 3.2 (Restricting unnecessary internet-facing services and protocols)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Network and Service Exposure Rules
 
 
 <div style="page-break-before: always;"></div>
@@ -63157,8 +63466,8 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-187](#08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md); for complementary LSA Protection, refer to [REQ-PAW-007](#07-paws-enable-lsa-protection-md)).*
+* **Operating Systems**: Windows 10 Enterprise (1903+) and Windows 11 Enterprise.
 
 ---
 
@@ -63167,21 +63476,49 @@ if ($script:Vulnerable) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\AllowCustomSSPsAPs` = `0`
+  * **Allow Custom SSPs and APs to be loaded into LSASS**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Local Security Authority\Allow Custom SSPs and APs to be loaded into LSASS` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `AllowCustomSSPsAPs`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Prohibit custom SSP and AP loading)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-rationale"></div>
 
 ## Rationale
-Security Support Providers (SSPs) and Authentication Packages (APs) execute inside the Local Security Authority Subsystem Service (lsass.exe). Threat actors frequently register malicious SSP DLLs in the registry to achieve persistent credential harvesting and memory dumping. Disabling custom SSP loading blocks third-party DLLs from injecting into LSASS.
+Privileged Access Workstations (PAWs) operate in the Tier 0 administrative plane, handling Kerberos Ticket Granting Tickets (TGTs), Smart Card PINs, and administrative authentication tokens for Active Directory Domain Controllers. Protecting the Local Security Authority Subsystem Service (`lsass.exe`) against DLL injection and persistence is a vital baseline defense.
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-1-guarding-tier-0-credentials-in-lsass-memory"></div>
+
+### 1. Guarding Tier 0 Credentials in LSASS Memory
+Adversaries who achieve local access on an administrative host routinely seek to intercept high-privilege credentials:
+* **The Custom SSP Persistence Technique**: By registering a custom Security Support Provider (SSP) or Authentication Package (AP) in `HKLM\SYSTEM\CurrentControlSet\Control\Lsa`, adversaries ensure that `lsass.exe` loads their malicious DLL at boot.
+* **Harvesting Domain Administrator Credentials**: Because SSPs sit directly inside the authentication pipeline, a malicious SSP intercepts administrative passwords and Kerberos authentications in plaintext, recording them to covert staging directories or transmitting them off-host.
+* **Neutralizing In-Memory Injection**: Setting `AllowCustomSSPsAPs = 0` guarantees that the operating system kernel and LSA subsystem unconditionally refuse to load third-party SSP and AP DLLs, closing the registry-based persistence vector.
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-2-reinforcing-lsa-protected-process-light-runasppl"></div>
+
+### 2. Reinforcing LSA Protected Process Light (RunAsPPL)
+In conjunction with LSA Protection / RunAsPPL ([REQ-PAW-007](#07-paws-enable-lsa-protection-md)):
+* Disallowing custom SSPs ensures that even if an attacker tampers with registry configuration, `lsass.exe` maintains strict adherence to inbox Microsoft-signed security providers.
+* Tier 0 credential operations remain entirely confined to verified, native Windows security components.
+
+<div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1547.005 - Boot or Logon Autostart Execution: Security Support Provider**: Adversaries registering malicious SSP/AP DLLs in the LSA registry.
+* **T1003.001 - OS Credential Dumping: LSASS Memory**: In-memory harvesting of administrative credentials.
+* **T1556.002 - Modify Authentication Process: Password Filter DLL**: Tampering with LSA authentication handlers.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Third-party authentication software or legacy smartcard drivers that inject custom SSP DLLs into LSASS will be blocked from loading. Modern providers must support Microsoft Credential Provider architecture.
+* **Operational Impact**: None. PAWs utilize native Windows Kerberos, FIDO2/WebAuthn, and Smart Card Credential Providers that operate through standard Windows APIs without loading third-party SSP DLLs into LSASS.
+* **Administrative Operations**: Domain administration consoles, RSAT tools, and privileged logon workflows operate seamlessly.
 
 ---
 
@@ -63194,13 +63531,13 @@ Security Support Providers (SSPs) and Authentication Packages (APs) execute insi
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Local Security Authority`
   * **Allow Custom SSPs and APs to be loaded into LSASS**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -63273,9 +63610,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.26.1; ANSSI R38
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.35.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.35.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000290, Windows 11 STIG Rule WN11-CC-000290
+* **ANSSI Active Directory Hardening Guide**: Recommendation R30 (Protection of the Local Security Authority subsystem)
+* **Microsoft Privileged Access Workstation Guidance**: PAW LSASS Protection and Memory Hardening Rules
 
 
 <div style="page-break-before: always;"></div>
@@ -63289,7 +63627,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-188](#08-endpoints-admin-templates-configure-end-at-logon-display-options-md); for Domain Controllers, refer to [REQ-DC-024](#02-domain-controllers-configure-security-options-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -63298,29 +63636,108 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\BlockUserFromShowingAccountDetailsOnSignin` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DontDisplayNetworkSelectionUI` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DontEnumerateConnectedUsers` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DisableLockScreenAppNotifications` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\BlockDomainPicturePassword` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\AllowDomainPINLogon` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\NoLocalPasswordResetQuestions` = `1`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableMPR` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Block user from showing account details on sign-in**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Block user from showing account details on sign-in` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `BlockUserFromShowingAccountDetailsOnSignin`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Do not display network selection UI**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Do not display network selection UI` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `DontDisplayNetworkSelectionUI`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Do not enumerate connected users on domain-joined computers**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Do not enumerate connected users on domain-joined computers` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `DontEnumerateConnectedUsers`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Turn off app notifications on the lock screen**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Turn off app notifications on the lock screen` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `DisableLockScreenAppNotifications`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Turn off picture password sign-in**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Turn off picture password sign-in` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `BlockDomainPicturePassword`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Turn on convenience PIN sign-in**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Turn on convenience PIN sign-in` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `AllowDomainPINLogon`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Prevent the use of security questions for local accounts**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Prevent the use of security questions for local accounts` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `NoLocalPasswordResetQuestions`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Configure transmission of user password in MPR notifications**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Configure the transmission of the user's password in the content of MPR notifications sent by winlogon` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
+    * Value Name: `EnableMPR`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-rationale"></div>
 
 ## Rationale
-Exposing account names, pictures, or network selection controls on lock screens provides reconnaissance information to physical attackers. Convenience PINs and picture passwords offer poor entropy compared to domain Kerberos credentials or smartcards. Local account security questions introduce easily guessable bypasses, and Multiple Provider Router (MPR) password transmission exposes cleartext credentials during authentication notifications.
+Privileged Access Workstations (PAWs) serve as the dedicated management perimeter for Active Directory Domain Controllers and enterprise tier-0 administrative roles. Visual information disclosure, network re-association controls at lock screen, and consumer authentication features introduce critical exposure to administrative credential theft and physical exploitation.
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-1-absolute-lock-screen-visual-confidentiality-on-tier-0-hosts"></div>
+
+### 1. Absolute Lock Screen Visual Confidentiality on Tier 0 Hosts
+Exposing administrative account identifiers creates severe physical intelligence leakage:
+* Displaying usernames, email addresses, or avatars of Tier 0 administrators (such as members of Domain Admins or Enterprise Admins) allows observers to map administrative accounts and target them with social engineering or spear-phishing.
+* Fast User Switching tiles reveal active administrative sessions.
+* Enforcing `BlockUserFromShowingAccountDetailsOnSignin = 1` and `DontEnumerateConnectedUsers = 1` strips all personal identifiers from the logon screen. Administrators must explicitly type their full administrative credentials.
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-2-guarding-the-paw-management-network-boundary"></div>
+
+### 2. Guarding the PAW Management Network Boundary
+The lock screen network selection flyout allows physical interaction with the host's network state:
+* An attacker with temporary physical proximity could disconnect the PAW from the secure management VLAN and connect it to a rogue access point or malicious cellular hotspot.
+* Once diverted, the attacker could poison local DNS or capture administrative NTLM handshakes initiated by background services.
+* Enforcing `DontDisplayNetworkSelectionUI = 1` removes the network selection interface entirely from the lock screen.
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-3-preventing-data-leakage-via-notifications"></div>
+
+### 3. Preventing Data Leakage via Notifications
+Administrative alerts, security operational notifications, or multi-factor authentication (MFA) verification codes displayed on the lock screen can be viewed by unauthorized observers:
+* Enforcing `DisableLockScreenAppNotifications = 1` guarantees that all notification content is suppressed until the operator successfully authenticates.
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-4-prohibiting-substandard-authentication-mechanisms"></div>
+
+### 4. Prohibiting Substandard Authentication Mechanisms
+Tier 0 administrative access requires cryptographic authentication:
+* **Picture Passwords & Convenience PINs**: Picture passwords and non-TPM convenience PINs lack hardware attestation and brute-force resistance. They are strictly prohibited on PAWs. (Hardware-backed Smart Cards and TPM 2.0-bound Windows Hello for Business remain fully supported).
+* **Security Questions**: Local account security questions provide trivial password bypasses and must be eliminated via `NoLocalPasswordResetQuestions = 1`.
+* **MPR Notifications**: Passing cleartext passwords in Multiple Provider Router notifications exposes credentials in memory and must be disabled (`EnableMPR = 0`).
+
+<div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-5-mitre-attck-mapping"></div>
+
+### 5. MITRE ATT&CK Mapping
+* **T1087.001 - Account Discovery: Local Account**: Harvesting Tier 0 administrator accounts displayed on the lock screen.
+* **T1040 - Network Sniffing**: Diverting locked PAWs to rogue Wi-Fi networks to intercept management traffic.
+* **T1110.001 - Brute Force: Password Guessing**: Bypassing strong authentication via convenience PINs or security questions.
+* **T1552.001 - Unsecured Credentials: Credentials In Files / Memory**: Intercepting cleartext MPR notifications.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users must input their full username and password/smartcard PIN at logon. Convenience PINs are blocked (Windows Hello for Business with TPM hardware binding must be used instead if PINs are required).
+* **Operational Impact**: Operators must type their full username and password or authenticate using their hardware smartcard.
+* **Network Management**: PAW hardware connects exclusively to authorized wired management switchports or dedicated, certificate-authenticated enterprise Wi-Fi networks. Unauthenticated wireless switching is blocked.
 
 ---
 
@@ -63333,27 +63750,20 @@ Exposing account names, pictures, or network selection controls on lock screens 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Block user from showing account details on sign-in**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Do not display network selection UI**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Do not enumerate connected users on domain-joined computers**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Turn off app notifications on the lock screen**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Turn off picture password sign-in**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Turn on convenience PIN sign-in**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Prevent the use of security questions for local accounts**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Configure the transmission of the user's password in the content of MPR notifications sent by winlogon**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -63591,9 +64001,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-logon-display-options-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.28.1, 18.9.28.2, 18.9.28.3, 18.9.28.5, 18.9.28.6, 18.9.28.7, 18.10.15.3, 18.10.82.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.28.1, 18.9.28.2, 18.9.28.3, 18.9.28.5, 18.9.28.6, 18.9.28.7, 18.10.15.3, 18.10.82.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.28.1, 18.9.28.2, 18.9.28.3, 18.9.28.5, 18.9.28.6, 18.9.28.7, 18.10.15.3, 18.10.82.1
+* **DISA STIG**: Windows 10 STIG Rules WN10-CC-000075, WN10-CC-000080, WN10-CC-000085, WN10-CC-000090
+* **ANSSI Active Directory Hardening Guide**: Section 3.1 (Securing interactive logon prompts and disabling unauthenticated lock screen features)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Visual Confidentiality and Physical Host Hardening
 
 
 <div style="page-break-before: always;"></div>
@@ -63615,24 +64026,46 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9\DCSettingIndex` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9\ACSettingIndex` = `0`
+* **Priority**: High
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Power Management -> Sleep Settings
+* **Policy Settings**:
+  * Allow network connectivity during connected-standby (on battery)
+  * Allow network connectivity during connected-standby (plugged in)
+* **Supported On**: Windows 10 (Version 1607) or Windows Server 2016 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9`
+* **Registry Values**:
+  * `DCSettingIndex` = `0` (REG_DWORD, Disconnect network during standby on battery)
+  * `ACSettingIndex` = `0` (REG_DWORD, Disconnect network during standby when plugged in)
+* **Vulnerability References**: MITRE ATT&CK: T1200 (Hardware Additions), T1040 (Network Sniffing), T1557 (Adversary-in-the-Middle), T1021 (Remote Services)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-rationale"></div>
 
 ## Rationale
-Connected Standby (Modern Standby) maintains active wireless and network interfaces while the operating system is suspended. This allows background applications to receive traffic and process incoming network packets, exposing devices to remote attacks and unauthorized network reconnaissance while unattended.
+
+Privileged Access Workstations (PAWs) are high-assurance hardware platforms dedicated exclusively to Tier 0 directory administration. Modern laptop hardware supporting Modern Standby (S0 Low Power Idle) allows network adapters (Wi-Fi, Ethernet, cellular) to maintain active IP stacks and receive incoming network frames while the machine is sleeping or the lid is closed. Allowing unattended network activity on a PAW directly violates Tier 0 physical and network isolation standards.
+
+<div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-technical-threat-vectors-paw-isolation-risks"></div>
+
+### Technical Threat Vectors & PAW Isolation Risks
+1. **Unattended Sleep-State Attack Surface**: A PAW must only process network traffic when an authorized administrator is interactively authenticated at the physical console. If Connected Standby is permitted, the TCP/IP stack, SMB client/server, and RPC runtimes remain energized and listen on management subnets while the screen is dark. An attacker or rogue host on the local subnet could exploit sleep-state network vulnerabilities, trigger authentication coercion (PetitPotam/MS-EFSRPC), or probe exposed RPC endpoints completely undetected.
+2. **Wi-Fi Beaconing and Probe Leaks in Transit**: When administrative laptops are transported between secure facilities or data centers, active wireless interfaces in Connected Standby continue transmitting probe requests for remembered networks. Attackers in physical proximity can exploit this behavior using rogue Wi-Fi access points (Evil Twin attacks), attempting to establish rogue connections and intercept unencrypted network payloads or inject spoofed DNS responses.
+3. **Prevention of Rogue Wake-on-LAN Triggers**: Malicious network frames designed to trigger operating system wake events cannot execute when network connectivity is severed during standby, preventing unauthorized remote power-on maneuvers.
+4. **Physical Security Boundary Alignment**: Disabling Connected Standby network connectivity ensures that the instant an administrative laptop lid is closed or the console enters sleep, all network sockets are cleanly dropped, preventing any network interactions until the operator logs in with a smart card or FIDO2 key.
+
+Enforcing Disconnected Standby (`DCSettingIndex = 0` and `ACSettingIndex = 0`) guarantees that all network hardware powers down during sleep states.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Applications cannot receive real-time notifications or synchronize background data while the laptop lid is closed or during sleep states.
+
+* **Operational Impact**: Background network tasks (such as mailbox synchronization or background downloads) are suspended while the PAW is in sleep mode. Full connectivity resumes immediately when the administrator opens the lid and unlocks the console.
+* **Administrative Impact**: Zero impact on administrative tools, RSAT consoles, or Active Directory management sessions.
+* **Hardware Health**: Dramatically preserves laptop battery life and prevents overheating inside laptop cases.
+* **Rollout Recommendations**: Mandatory baseline setting for all mobile PAWs; apply immediately.
 
 ---
 
@@ -63645,15 +64078,17 @@ Connected Standby (Modern Standby) maintains active wireless and network interfa
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings`
-  * **Allow network connectivity during connected-standby (on battery)**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings`
-  * **Allow network connectivity during connected-standby (plugged in)**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings
+   ```
+4. Double-click **Allow network connectivity during connected-standby (on battery)**:
+   * Set to **Disabled**.
+5. Double-click **Allow network connectivity during connected-standby (plugged in)**:
+   * Set to **Disabled**.
+6. Click **Apply**, then click **OK** for both policies.
+7. Link the GPO to the dedicated PAW Organizational Unit and verify policy replication across all Domain Controllers.
 
 ---
 
@@ -63746,12 +64181,30 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" /s
+```
+Expected output:
+```text
+DCSettingIndex    REG_DWORD    0x0
+ACSettingIndex    REG_DWORD    0x0
+```
+
+---
+
 <div id="07-paws-admin-templates-configure-paw-at-power-connected-standby-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.33.6.1, Section 18.9.33.6.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Power Management
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Administrative Endpoint Hardening
+* **MITRE ATT&CK**: [T1200: Hardware Additions](https://attack.mitre.org/techniques/T1200/), [T1040: Network Sniffing](https://attack.mitre.org/techniques/T1040/), [T1557: Adversary-in-the-Middle](https://attack.mitre.org/techniques/T1557/), [T1021: Remote Services](https://attack.mitre.org/techniques/T1021/)
+* **Related Controls**: [REQ-PAW-175: Administrative Templates: Restrict Internet Communication for PAWs](#07-paws-admin-templates-configure-paw-at-internet-communication-md), [REQ-PAW-171: Administrative Templates: MSS System and Session Security Protections for PAWs](#07-paws-admin-templates-configure-paw-at-mss-system-protections-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -63773,23 +64226,44 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\fAllowUnsolicited` = `0`
+* **Priority**: Critical
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Remote Assistance
+* **Policy Name**: Configure Offer Remote Assistance
+* **Supported On**: Windows Vista / Windows Server 2008 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services`
+* **Registry Value**: `fAllowUnsolicited`
+* **Value Type**: `REG_DWORD`
+* **Value Data**: `0` (0x00000000 = Suppress unsolicited Offer Remote Assistance)
+* **Vulnerability References**: MITRE ATT&CK: T1021.001 (Remote Services: Remote Desktop Protocol), T1113 (Screen Capture), T1219 (Remote Access Software), T1078 (Valid Accounts)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-rationale"></div>
 
 ## Rationale
-Unsolicited Remote Assistance permits an administrator or support technician to initiate remote session connections to client endpoints without an explicit user invitation. If compromised, this capability allows adversaries with elevated domain privileges to silently observe or control interactive user desktop sessions.
+
+Privileged Access Workstations (PAWs) are dedicated exclusively to managing Tier 0 Active Directory Domain Services, root certificate authorities, and core directory security infrastructure. Permitting any form of Remote Assistance on a PAW constitutes an intolerable security architecture violation that shatters Active Directory administrative tiering.
+
+<div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-technical-threat-vectors-tiering-violation-risks"></div>
+
+### Technical Threat Vectors & Tiering Violation Risks
+1. **Catastrophic Tiering Breach via Session Shadowing**: In an Active Directory enterprise, helpdesk and IT support technicians operate at Tier 1 or Tier 2. If unsolicited Remote Assistance ("Offer Remote Assistance") is active on a PAW, a compromised Tier 1 helpdesk account or service credential could connect to an active PAW session while a Domain Admin is performing directory tasks. The adversary could shadow the session, harvest Tier 0 credentials from memory or screen display, and seize keyboard control to execute arbitrary code across Domain Controllers.
+2. **Elimination of Administrative Session Hijacking**: Tier 0 administrative workflows routinely involve highly privileged PowerShell consoles, Active Directory Administrative Center snap-ins, and disaster recovery procedures. Remote Assistance allows full interactive control over the console, enabling an attacker to manipulate administrative tools in real time under the authenticated context of the Tier 0 operator.
+3. **Closing Legacy DCOM and Dynamic RPC Listeners**: Offering Remote Assistance requires endpoints to listen on DCOM interfaces and dynamically assigned RPC high ports. On a hardened PAW, host-based firewalls must enforce strict default-deny rules on all inbound ports. Disabling Remote Assistance eliminates unnecessary DCOM endpoints and prevents RPC coercion and relay attacks.
+4. **Enforcing Physical and Clean Source Principles**: PAW troubleshooting and hardware maintenance must occur in person or through dedicated, out-of-band management channels with hardware-enforced isolation. General remote support tooling must never be permitted on administrative bastion hosts.
+
+Disabling unsolicited Remote Assistance ensures that inbound remote assistance requests are unconditionally rejected by the operating system.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Helpdesk staff cannot offer unsolicited remote assistance. User-initiated assistance or approved enterprise remote support solutions (with session auditing) must be utilized.
+
+* **Operational Impact**: Unsolicited Remote Assistance is completely blocked on all PAWs. Standard outbound administrative management connections (such as initiating RDP or PowerShell Remoting from the PAW to Domain Controllers) are completely unaffected.
+* **Administrative Impact**: Zero impact on day-to-day Active Directory management.
+* **Network Impact**: Eliminates inbound DCOM/RPC listening ports on administrative subnets.
+* **Rollout Recommendations**: Mandatory baseline requirement across all PAW systems; deploy immediately.
 
 ---
 
@@ -63802,13 +64276,15 @@ Unsolicited Remote Assistance permits an administrator or support technician to 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Assistance`
-  * **Configure Offer Remote Assistance**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Remote Assistance
+   ```
+4. Double-click **Configure Offer Remote Assistance**.
+5. Select **Disabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the dedicated PAW Organizational Unit and verify policy replication across all Domain Controllers.
 
 ---
 
@@ -63878,12 +64354,29 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy setting via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v fAllowUnsolicited
+```
+Expected output:
+```text
+fAllowUnsolicited    REG_DWORD    0x0
+```
+
+---
+
 <div id="07-paws-admin-templates-configure-paw-at-remote-assistance-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.35.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Remote Assistance
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Tiering Enforcement
+* **MITRE ATT&CK**: [T1021.001: Remote Services: Remote Desktop Protocol](https://attack.mitre.org/techniques/T1021/001/), [T1113: Screen Capture](https://attack.mitre.org/techniques/T1113/), [T1219: Remote Access Software](https://attack.mitre.org/techniques/T1219/), [T1078: Valid Accounts](https://attack.mitre.org/techniques/T1078/)
+* **Related Controls**: [REQ-PAW-171: Administrative Templates: MSS System and Session Security Protections for PAWs](#07-paws-admin-templates-configure-paw-at-mss-system-protections-md), [REQ-PAW-177: Administrative Templates: Interactive Logon and Credential Display Options for PAWs](#07-paws-admin-templates-configure-paw-at-logon-display-options-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -63897,7 +64390,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-191](#08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md); for Domain Controllers, refer to [REQ-DC-018](#02-domain-controllers-harden-network-parameters-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -63907,21 +64400,50 @@ if ($script:Vulnerable) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc\EnableAuthEpResolution` = `1`
+  * **Enable RPC Endpoint Mapper Client Authentication**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call\Enable RPC Endpoint Mapper Client Authentication` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc`
+    * Value Name: `EnableAuthEpResolution`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Authenticate to Endpoint Mapper)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-rationale"></div>
 
 ## Rationale
-The RPC Endpoint Mapper listens on TCP port 135 to resolve dynamic server endpoints for RPC interfaces. Enabling client authentication forces clients to authenticate to the Endpoint Mapper before obtaining endpoint addresses, preventing unauthenticated network adversaries from performing RPC reconnaissance and MITM endpoint redirection.
+Privileged Access Workstations (PAWs) execute high-privilege Remote Procedure Call (RPC) routines when administering Domain Controllers, certificate authorities, and directory services. Hardening the RPC resolution mechanism is essential to protect administrative credentials and prevent malicious traffic redirection.
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-1-guarding-privileged-management-rpc-channels"></div>
+
+### 1. Guarding Privileged Management RPC Channels
+Tier 0 administrative tools (such as Active Directory Users and Computers, Group Policy Management, and remote PowerShell remoting over WinRM/DCOM) interact with Domain Controllers across several RPC protocols:
+* When a PAW initiates an RPC binding to a Domain Controller interface (such as MS-DRSR, MS-SAMR, or MS-LSAD), it queries the target's RPC Endpoint Mapper (`epmapper`) on TCP port 135 to discover the dynamic TCP port assigned to that interface.
+* In unhardened environments, this initial query is unauthenticated. An attacker with network access to the management VLAN could spoof the response packet, redirecting the PAW's subsequent RPC call to a rogue endpoint.
+* If redirected, the PAW could inadvertently transmit Tier 0 administrative Kerberos service tickets or NTLM authentications to the rogue host, exposing administrative credentials to relaying or offline cracking.
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-2-enforcing-cryptographic-resolution-verification"></div>
+
+### 2. Enforcing Cryptographic Resolution Verification
+Setting `EnableAuthEpResolution = 1` forces the PAW's RPC runtime (`rpcrt4.dll`) to mutually authenticate with the target endpoint mapper before requesting interface bindings:
+* The lookup requires Kerberos mutual authentication against the target Domain Controller's computer account SPN.
+* Integrity signing is enforced on the returned port mapping, guaranteeing that network adversaries cannot alter the dynamic port assignment.
+* The PAW unconditionally drops connections to unauthenticated endpoint mappers, eliminating exposure to AiTM redirection.
+
+<div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1046 - Network Service Discovery**: Anonymous enumeration of RPC interfaces on management workstations.
+* **T1557 - Adversary-in-the-Middle**: Spoofing RPC endpoint mappings to intercept administrative sessions.
+* **T1021.002 - Remote Services: SMB/Windows Admin Shares**: Abuse of RPC services for lateral movement.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Legacy pre-Windows Server 2003 or third-party UNIX RPC clients incapable of authenticating to the Endpoint Mapper will fail to resolve RPC endpoints.
+* **Tier 0 Operational Compatibility**: All supported Windows Server releases (2016 through 2025) running as Domain Controllers natively support authenticated RPC endpoint resolution. PAW administrative tools function seamlessly using Kerberos authentication.
+* **Workgroup and Non-Domain Systems**: Because PAWs are strictly restricted to managing Tier 0 Active Directory domain assets and never connect to untrusted non-domain nodes, no compatibility issues arise.
 
 ---
 
@@ -63934,13 +64456,13 @@ The RPC Endpoint Mapper listens on TCP port 135 to resolve dynamic server endpoi
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call`
   * **Enable RPC Endpoint Mapper Client Authentication**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -64013,9 +64535,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.36.1; ANSSI R34
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.36.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.36.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000300, Windows 11 STIG Rule WN11-CC-000300
+* **ANSSI Active Directory Hardening Guide**: Recommendation R34 (Securing RPC endpoint mapping and remote procedure calls)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Component and Management Network Protection Rules
 
 
 <div style="page-break-before: always;"></div>
@@ -64029,7 +64552,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-192](#08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md); for Domain Controllers, refer to [REQ-DC-020](#02-domain-controllers-configure-pdc-time-sync-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -64038,23 +64561,62 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient\Enabled` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer\Enabled` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Enable Windows NTP Client**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers\Enable Windows NTP Client` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient`
+    * Value Name: `Enabled`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Disable Windows NTP Server**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers\Enable Windows NTP Server` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer`
+    * Value Name: `Enabled`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-rationale"></div>
 
 ## Rationale
-Accurate time synchronization is critical for Kerberos authentication (which rejects ticket timestamps skewed by more than 5 minutes) and forensic log correlation. Enabling the NTP Client guarantees synchronization with domain hierarchy time sources, while disabling the NTP Server prevents client workstations from broadcasting unauthenticated time data to other local hosts.
+Privileged Access Workstations (PAWs) perform high-consequence administrative operations across Tier 0 infrastructure. Precise timekeeping is a non-negotiable prerequisite for Kerberos ticket validation, security event audit sequencing, and cryptographic certificate verification.
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-1-guaranteeing-tier-0-kerberos-authentication-integrity"></div>
+
+### 1. Guaranteeing Tier 0 Kerberos Authentication Integrity
+PAW operators routinely request high-privilege Kerberos Ticket Granting Tickets (TGTs) and service tickets to administer Active Directory Domain Controllers, Certificate Authorities, and Key Storage Providers:
+* The Kerberos v5 protocol strictly enforces a maximum clock skew threshold of 300 seconds. If a PAW's local clock drifts beyond 5 minutes, all administrative authentications fail immediately, precipitating management outages or dangerous fallback attempts.
+* Threat actors attempting adversary-in-the-middle attacks or offline ticket manipulation rely on clock distortion to bypass validity periods. Enforcing `NtpClient\Enabled = 1` ensures that the PAW continuously synchronizes its clock with authenticating Domain Controllers over the secure domain time hierarchy.
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-2-forensic-timeline-non-repudiation-for-administrative-auditing"></div>
+
+### 2. Forensic Timeline Non-Repudiation for Administrative Auditing
+Actions taken on a PAW (such as schema modifications, privilege escalations, or policy deployments) must generate forensically unassailable audit events:
+* Accurate log correlation across Tier 0 Security logs, PowerShell Script Block Logging, and centralized SIEM aggregators requires synchronized sub-second timestamping.
+* Any time disparity introduces ambiguity during forensic incident analysis, potentially undermining the detection of advanced persistent threats.
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-3-attack-surface-reduction-ntp-server-elimination"></div>
+
+### 3. Attack Surface Reduction (NTP Server Elimination)
+A dedicated administrative station must never act as a network time provider:
+* Running the NTP Server listener (`NtpServer\Enabled = 1`) exposes UDP port 123 on the management VLAN, introducing risks of reflection amplification and time poisoning.
+* Enforcing `NtpServer\Enabled = 0` guarantees that the PAW acts exclusively as an NTP consumer, keeping UDP port 123 closed to inbound traffic.
+
+<div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-4-mitre-attck-mapping"></div>
+
+### 4. MITRE ATT&CK Mapping
+* **T1558 - Steal or Forge Kerberos Tickets**: Exploiting or inducing clock skew to disrupt ticket validation.
+* **T1070.006 - Indicator Removal: Timestomp**: Altering timestamp metadata to mask administrative or unauthorized modifications.
+* **T1498.002 - Network Denial of Service: Reflection Amplification**: Weaponizing open UDP network listeners.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Client workstations will not serve time to other network devices.
+* **Operational Impact**: None. PAWs automatically synchronize time with authenticating Domain Controllers using domain time hierarchy protocols (`Nt5DS`). No external internet connectivity is required.
+* **Administrative Operations**: Reliable time synchronization prevents Kerberos authentication failures during administrative sessions.
 
 ---
 
@@ -64067,7 +64629,7 @@ Accurate time synchronization is critical for Kerberos authentication (which rej
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers`
@@ -64075,7 +64637,7 @@ Accurate time synchronization is critical for Kerberos authentication (which rej
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers`
   * **Enable Windows NTP Server**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -64175,9 +64737,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.51.1.1, Section 18.9.51.1.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.102.1, Section 18.9.102.2; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.102.1, Section 18.9.102.2
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000310, Windows 11 STIG Rule WN11-CC-000310
+* **ANSSI Active Directory Hardening Guide**: Recommendation R35 (Time synchronization and Kerberos integrity)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Security Architecture and Infrastructure Baseline
 
 
 <div style="page-break-before: always;"></div>
@@ -64191,7 +64754,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-193](#08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -64200,23 +64763,57 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx\DisablePerUserUnsignedPackagesByDefault` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx\BlockNonAdminUserInstall` = `1`
+* **GPO Paths / Registry Locations**:
+  * **Not allow per-user unsigned packages to install by default**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment\Not allow per-user unsigned packages to install by default (requires explicitly allow per install)` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx`
+    * Value Name: `DisablePerUserUnsignedPackagesByDefault`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Prohibit unsigned packages)
+  * **Prevent non-admin users from installing packaged Windows apps**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment\Prevent non-admin users from installing packaged Windows apps` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx`
+    * Value Name: `BlockNonAdminUserInstall`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Restrict to administrators)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-rationale"></div>
 
 ## Rationale
-Standard user accounts can bypass traditional software restriction policies by deploying modern packaged Windows applications (.appx / .msix) directly into user profile directories. Disallowing per-user unsigned packages and prohibiting non-administrators from installing packaged apps ensures that all installed software is audited, signed, and managed by IT administrators.
+Privileged Access Workstations (PAWs) are dedicated exclusively to directory administration and Tier 0 infrastructure management. Application installation on a PAW must adhere to the strictest change management, code signing, and administrative boundaries.
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-1-eliminating-untrusted-package-execution-on-tier-0-hosts"></div>
+
+### 1. Eliminating Untrusted Package Execution on Tier 0 Hosts
+Modern Windows AppX and MSIX packages can introduce unauthorized code into user profiles:
+* Standard user profiles allow modern packaged applications to execute without requiring full machine-wide installation. On a PAW, allowing any user-level package installation introduces severe risks of malicious software sideloading, persistence establishment, and evasive code execution.
+* Adversaries target privileged workstations with crafted application bundles designed to evade standard application whitelisting rules by executing from user-writable AppData subdirectories.
+* Setting `BlockNonAdminUserInstall = 1` enforces that standard users cannot register or execute modern application packages. All installed utilities must be provisioned machine-wide by administrators or enterprise management systems.
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-2-prohibiting-unsigned-package-execution"></div>
+
+### 2. Prohibiting Unsigned Package Execution
+Unsigned or developer-mode package deployment bypasses standard code integrity mechanisms:
+* An operator or rogue script could attempt to sideload unverified utility packages containing unsigned binaries or modified libraries.
+* Setting `DisablePerUserUnsignedPackagesByDefault = 1` guarantees that Windows rejects unsigned modern packages, requiring explicit, cryptographically verifiable code signing from trusted enterprise roots or Microsoft before any package can be registered.
+
+<div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1059 - Command and Scripting Interpreter**: Executing living-off-the-land scripts via modern application packages.
+* **T1546 - Event Triggered Execution**: Using package lifecycle triggers for persistent execution.
+* **T1204.002 - User Execution: Malicious File**: Launching unauthorized packaged software on privileged hosts.
+* **T1553.002 - Subvert Trust Controls: Code Signing**: Enforcing rigorous digital signature verification on all executable packages.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Non-administrative users will be blocked from installing modern Store or sideloaded applications on their own profile without administrator approval.
+* **Operational Impact**: None. PAWs are provisioned with a minimal, hardened set of administrative tools (RSAT, administrative PowerShell modules, and directory management consoles). Consumer or developer packaged applications have no role in Tier 0 operations.
+* **Administrative Tooling**: Management tools installed via official enterprise packages or standard Windows Feature on Demand (FoD) packages install and operate without disruption.
 
 ---
 
@@ -64229,7 +64826,7 @@ Standard user accounts can bypass traditional software restriction policies by d
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment`
@@ -64237,7 +64834,7 @@ Standard user accounts can bypass traditional software restriction policies by d
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment`
   * **Prevent non-admin users from installing packaged Windows apps**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -64333,9 +64930,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.4.2, Section 18.10.4.3
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.14.1, Section 18.10.14.2; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.14.1, Section 18.10.14.2
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000330, Windows 11 STIG Rule WN11-CC-000330
+* **ANSSI Active Directory Hardening Guide**: Section 3.3 (Application Whitelisting and Code Signing Enforcement)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Application Whitelisting and Software Execution Baseline
 
 
 <div style="page-break-before: always;"></div>
@@ -64349,7 +64947,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-194](#08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -64359,21 +64957,48 @@ if ($script:Vulnerable) {
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures\EnhancedAntiSpoofing` = `1`
+  * **Configure enhanced anti-spoofing**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Biometrics\Facial Features\Configure enhanced anti-spoofing` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures`
+    * Value Name: `EnhancedAntiSpoofing`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Enforce hardware depth and IR liveness)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-rationale"></div>
 
 ## Rationale
-Standard facial recognition can potentially be spoofed using high-resolution photographs, video playback, or realistic masks. Enhanced anti-spoofing requires facial recognition algorithms to verify depth and infrared illumination data from compatible biometric hardware sensors before granting access.
+Privileged Access Workstations (PAWs) serve as the highest-trust endpoints within an Active Directory enterprise architecture. Physical access to an unlocked PAW grants direct compromise capability over Tier 0 directory services. If biometric facial verification is utilized for PAW operator logon, it must enforce the highest cryptographic and hardware liveness guarantees.
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-1-guarding-tier-0-console-access-against-presentation-attacks"></div>
+
+### 1. Guarding Tier 0 Console Access Against Presentation Attacks
+Standard 2D optical facial recognition can be deceived by visual replicas:
+* An adversary obtaining physical proximity to an unattended PAW could attempt presentation attacks using high-resolution photographs, video playback on portable screens, or 3D synthetic masks.
+* On a PAW, any successful spoof immediately exposes Domain Admin sessions, active RSAT consoles, and Kerberos Ticket Granting Service keys to unauthorized operators.
+* Enforcing `EnhancedAntiSpoofing = 1` requires the biometric subsystem to perform rigorous infrared spectral analysis and 3D depth mesh confirmation. Flat images, video screens, and non-living models are unconditionally rejected.
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-2-ensuring-strict-biometric-sensor-certification"></div>
+
+### 2. Ensuring Strict Biometric Sensor Certification
+Enforcing enhanced anti-spoofing mandates compliant hardware:
+* The Windows Biometric Framework strictly blocks facial logon on devices lacking dedicated near-IR depth sensors certified for enterprise anti-spoofing.
+* This guarantees that PAW operators only utilize secure biometric hardware backed by TPM 2.0 key sealing.
+
+<div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1110 - Brute Force / Biometric Spoofing**: Presentation attacks against Tier 0 administrative workstation locks.
+* **T1078 - Valid Accounts**: Unauthorized console access to administrative sessions.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Devices with standard RGB-only webcams will not support facial recognition logon and must use smartcards or TPM-backed PINs.
+* **Operational Impact**: PAWs lacking certified Windows Hello IR cameras will disallow facial recognition configuration. Operators on these machines authenticate using dedicated hardware Smart Cards (PIV/CAC) or FIDO2 hardware keys.
+* **Administrative Operations**: No disruption to Tier 0 directory management workflows.
 
 ---
 
@@ -64386,13 +65011,13 @@ Standard facial recognition can potentially be spoofed using high-resolution pho
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Biometrics\Facial Features`
   * **Configure enhanced anti-spoofing**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -64465,9 +65090,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.9.1.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.11.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.11.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000315, Windows 11 STIG Rule WN11-CC-000315
+* **ANSSI Active Directory Hardening Guide**: Section 3.1 (Biometric authentication security requirements)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Biometric and Strong Authentication Baseline
 
 
 <div style="page-break-before: always;"></div>
@@ -64489,23 +65115,41 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Low
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent\DisableConsumerAccountStateContent` = `1`
+* **Priority**: Medium
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Cloud Content
+* **Policy Name**: Turn off cloud consumer account state content
+* **Supported On**: Windows 10 (Version 1703) or Windows Server 2016 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent`
+* **Registry Value**: `DisableConsumerAccountStateContent`
+* **Value Type**: `REG_DWORD`
+* **Value Data**: `1` (0x00000001 = Consumer account state content suppressed)
+* **Vulnerability References**: MITRE ATT&CK: T1566 (Phishing), T1078 (Valid Accounts), T1020 (Automated Exfiltration)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-rationale"></div>
 
 ## Rationale
-Windows features consumer account state content cards and promotional recommendations in system menus. Disabling this content stops background queries to consumer cloud services, eliminates targeted promotional telemetry, and maintains a clean enterprise desktop interface.
+
+Privileged Access Workstations (PAWs) are dedicated, single-purpose endpoints reserved exclusively for Tier 0 Active Directory and infrastructure administration. Windows consumer-oriented shell enhancements—such as promotional subscription cards, consumer OneDrive prompts, and personal Microsoft Account (MSA) suggestions—introduce severe architectural and operational risks to high-assurance administrative hosts.
+
+<div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-technical-threat-vector-paw-isolation-risks"></div>
+
+### Technical Threat Vector & PAW Isolation Risks
+1. **Air-Gap & Perimeter Violation**: PAWs must operate under strict egress filtering where outbound Internet access is either completely blocked or restricted to authenticated internal admin gateways. Cloud consumer cards make continuous unauthenticated calls to Microsoft consumer CDNs, triggering firewall alarm floods and exposing the PAW to untrusted cloud metadata feeds.
+2. **Identity Isolation & Tiering Breach**: Tier 0 administrators must never connect personal identities to management endpoints. Allowing consumer account prompts on a PAW invites accidental or coerced association of personal credentials (e.g., personal Microsoft Accounts), potentially exposing Tier 0 hosts to cloud-based identity compromise or unmonitored consumer OneDrive synchronization.
+3. **Shell Hardening & Attack Surface Elimination**: Every dynamic web-backed widget or banner rendered within the Windows Explorer shell or Settings application requires memory resources and relies on HTML/XAML rendering engines. Eliminating consumer content ensures that the administrative desktop remains strictly deterministic, minimal, and secure.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Consumer account recommendation banners will be removed from system menus.
+
+* **Operational Impact**: Suppresses all consumer account recommendation banners, promotional tiles, and subscription prompts within the Settings app and Start menu. Tier 0 administrative tooling (RSAT, PowerShell 5.1/7, MMC consoles, and Hyper-V management) is completely unaffected.
+* **User Experience**: Administrators receive a lean, distraction-free environment free of consumer clutter and consumer account prompts.
+* **Network Impact**: Eliminates background DNS queries and outbound HTTPS connection attempts targeting consumer cloud endpoints (`*.wns.windows.com`, `*.live.com`, `*.microsoft.com`).
+* **Rollout Recommendations**: Completely safe to apply across all PAW deployment rings immediately.
 
 ---
 
@@ -64519,12 +65163,14 @@ Windows features consumer account state content cards and promotional recommenda
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Cloud Content`
-  * **Turn off cloud consumer account state content**: Set to `Enabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\Windows Components\Cloud Content
+   ```
+4. Double-click **Turn off cloud consumer account state content**.
+5. Select **Enabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the dedicated PAW Organizational Unit and initiate policy replication across all Domain Controllers.
 
 ---
 
@@ -64594,12 +65240,29 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy setting via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableConsumerAccountStateContent
+```
+Expected output:
+```text
+DisableConsumerAccountStateContent    REG_DWORD    0x1
+```
+
+---
+
 <div id="07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.13.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Cloud Content Recommendations
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Administrative Endpoint Hardening
+* **MITRE ATT&CK**: [T1566: Phishing](https://attack.mitre.org/techniques/T1566/), [T1078: Valid Accounts](https://attack.mitre.org/techniques/T1078/), [T1020: Automated Exfiltration](https://attack.mitre.org/techniques/T1020/)
+* **Related Controls**: [REQ-PAW-194: Administrative Templates: Restrict Windows Store and Appx Execution for PAWs](#07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md), [REQ-PAW-175: Administrative Templates: Restrict Internet Communication for PAWs](#07-paws-admin-templates-configure-paw-at-internet-communication-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -64613,7 +65276,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-196](#08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -64623,21 +65286,48 @@ if ($script:Vulnerable) {
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Connect\RequirePinForPairing` = `1`
+  * **Require pin for pairing**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Connect\Require pin for pairing` -> **Enabled** (Select: `Always`)
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Connect`
+    * Value Name: `RequirePinForPairing`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Require PIN for pairing)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-rationale"></div>
 
 ## Rationale
-The Windows Connect app allows nearby wireless devices to project their screens to the machine over Wi-Fi Direct (Miracast). Requiring a PIN for pairing prevents unauthorized external devices from projecting content or attempting connection hijack attacks without local physical verification.
+Privileged Access Workstations (PAWs) operate within dedicated administrative perimeters for Tier 0 Active Directory management. Wireless projection capabilities (Miracast over Wi-Fi Direct) introduce serious risks of over-the-air hijacking and unauthenticated input injection if not strictly hardened.
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-1-eliminating-over-the-air-hijacking-on-administrative-consoles"></div>
+
+### 1. Eliminating Over-the-Air Hijacking on Administrative Consoles
+Unauthenticated Miracast pairing allows nearby wireless devices to project to a host:
+* An attacker within Wi-Fi range of a PAW could attempt to initiate a wireless projection session, displaying fraudulent login screens or intercepting operator display output.
+* If User Input Back Channel (UIBC) is enabled, the connecting device could inject simulated keystrokes and mouse events directly into the PAW operating system, attempting to execute commands in the administrator's active session.
+* Enforcing `RequirePinForPairing = 1` requires the connecting device to submit a dynamic numeric PIN displayed on the PAW's physical display before any pairing is accepted.
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-2-tightened-tier-0-wireless-boundary"></div>
+
+### 2. Tightened Tier 0 Wireless Boundary
+In high-security administrative environments, unmanaged wireless peer-to-peer protocols represent an unacceptable bypass of physical security:
+* PAW hardware should operate over dedicated wired management links. If wireless capabilities are enabled on portable PAWs, mandatory PIN entry prevents blind pairing attempts and ensures complete physical visibility of all connection requests.
+
+<div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1200 - Direct Network / Hardware Access / Wireless Compromise**: Establishing rogue wireless peer-to-peer tunnels.
+* **T1557 - Adversary-in-the-Middle**: Interception of wireless management displays.
+* **T1056.001 - Input Capture: Keylogging / Input Injection**: Keystroke and input injection via unauthenticated wireless input back channels.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users initiating wireless projection must enter the displayed numeric PIN.
+* **Operational Impact**: None. PAWs are dedicated to directory administration and are not used as wireless conference room display targets.
+* **Administrative Operations**: No impact on directory management or remote administrative tools.
 
 ---
 
@@ -64650,13 +65340,14 @@ The Windows Connect app allows nearby wireless devices to project their screens 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Connect`
-  * **Require pin for pairing**: Set to `Enabled` (First Time or Always)
+  * **Require pin for pairing**: Set to `Enabled`
+  * Select drop-down value: `Always` (or `First Time`)
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -64729,9 +65420,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.14.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.15.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.15.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000318, Windows 11 STIG Rule WN11-CC-000318
+* **ANSSI Active Directory Hardening Guide**: Section 3.2 (Restricting unauthenticated wireless protocols and P2P communication)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Physical and Wireless Interface Restrictions
 
 
 <div style="page-break-before: always;"></div>
@@ -64745,7 +65437,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-197](#08-endpoints-admin-templates-configure-end-at-credui-protections-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -64754,23 +65446,55 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\CredUI\DisablePasswordReveal` = `1`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI\EnumerateAdministrators` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Do not display the password reveal button**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface\Do not display the password reveal button` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\CredUI`
+    * Value Name: `DisablePasswordReveal`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Disable password reveal button)
+  * **Enumerate administrator accounts on elevation**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface\Enumerate administrator accounts on elevation` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI`
+    * Value Name: `EnumerateAdministrators`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Require username and password)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-rationale"></div>
 
 ## Rationale
-The password reveal ('eye') button exposes cleartext passwords on screen, creating shoulder-surfing and screen recording vulnerabilities. Enumerating administrator accounts on UAC elevation displays valid privileged usernames to standard users, facilitating targeted administrative reconnaissance and brute-force attacks.
+Privileged Access Workstations (PAWs) are dedicated exclusively to high-privilege Tier 0 Active Directory management tasks. Credential collection interfaces must maintain maximum visual confidentiality and prevent information disclosure regarding administrative identities.
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-1-eliminating-visual-exposure-of-tier-0-passwords-and-pins"></div>
+
+### 1. Eliminating Visual Exposure of Tier 0 Passwords and PINs
+The password reveal button allows users to unmask typed characters:
+* On a PAW, operators type complex administrative passwords, smart card PINs, and directory restoration secrets. Any visual exposure of these credentials creates high-consequence risks from shoulder surfing, physical surveillance cameras in operations centers, or background screen-sharing utilities.
+* Setting `DisablePasswordReveal = 1` permanently disables the reveal button across all CredUI dialogs, ensuring characters remain strictly masked during administrative entry.
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-2-suppressing-tier-0-administrative-account-discovery"></div>
+
+### 2. Suppressing Tier 0 Administrative Account Discovery
+Default UAC elevation dialogs display tiles for all accounts holding local administrative privileges:
+* Displaying valid administrative accounts on screen allows observers or unprivileged processes to enumerate dedicated administrative usernames, emergency break-glass accounts, and administrative naming conventions.
+* Setting `EnumerateAdministrators = 0` forces CredUI to present empty username and password fields, requiring the operator to manually supply both credentials. This prevents opportunistic discovery of Tier 0 administrative account names.
+
+<div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1087.001 - Account Discovery: Local Account**: Discovery of administrative usernames in elevation prompts.
+* **T1056.002 - Input Capture: GUI Input Capture**: Visual capture of unmasked administrative credentials.
+* **T1548.002 - Abuse Elevation Control Mechanism: Bypass User Account Control**: Exploiting UAC interface disclosures.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: The password reveal button is disabled across all system credential prompts. Users elevating privileges must manually enter both the administrative username and password.
+* **Operational Impact**: Operators elevating applications must type their administrative account name and credentials manually.
+* **Administrative Operations**: No impact on Smart Card or Windows Hello for Business PIN entry; keys and PINs remain masked.
 
 ---
 
@@ -64783,7 +65507,7 @@ The password reveal ('eye') button exposes cleartext passwords on screen, creati
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface`
@@ -64791,7 +65515,7 @@ The password reveal ('eye') button exposes cleartext passwords on screen, creati
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface`
   * **Enumerate administrator accounts on elevation**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -64891,9 +65615,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-credui-protections-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.15.1, Section 18.10.15.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.22.1, Section 18.10.22.2; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.22.1, Section 18.10.22.2
+* **DISA STIG**: Windows 10 STIG Rules WN10-CC-000320, WN10-CC-000325; Windows 11 STIG Rules WN11-CC-000320, WN11-CC-000325
+* **ANSSI Active Directory Hardening Guide**: Section 3.1 (Securing interactive authentication interfaces and credential prompts)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Visual Confidentiality and Elevation Policy
 
 
 <div style="page-break-before: always;"></div>
@@ -64915,28 +65640,54 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\DisableOneSettingsDownloads` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\DoNotShowFeedbackNotifications` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\EnableOneSettingsAuditing` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\LimitDiagnosticLogCollection` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\LimitDumpCollection` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds\AllowBuildPreview` = `0`
+* **Priority**: Critical
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Data Collection and Preview Builds
+* **Policy Settings**:
+  * Disable OneSettings Downloads
+  * Do not show feedback notifications
+  * Enable OneSettings Auditing
+  * Limit Diagnostic Log Collection
+  * Limit Dump Collection
+  * Toggle user control over Insider builds (Preview Builds)
+* **Supported On**: Windows 10 (Version 1703) or Windows Server 2016 and above
+* **Registry Keys & Values**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\DisableOneSettingsDownloads` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\DoNotShowFeedbackNotifications` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\EnableOneSettingsAuditing` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\LimitDiagnosticLogCollection` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\LimitDumpCollection` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds\AllowBuildPreview` = `0` (REG_DWORD)
+* **Vulnerability References**: MITRE ATT&CK: T1003 (OS Credential Dumping), T1020 (Automated Exfiltration), T1082 (System Information Discovery), T1499 (Endpoint Denial of Service)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-rationale"></div>
 
 ## Rationale
-OneSettings downloads allow Microsoft to dynamically modify diagnostic configurations over the cloud. Limiting diagnostic and crash dump collection prevents in-memory sensitive data (such as passwords, tokens, or encryption keys) from being captured in automated crash reports and transmitted externally. Disabling Insider builds guarantees production systems only run fully vetted, stable OS builds.
+
+Privileged Access Workstations (PAWs) are the dedicated administrative bastion hosts for Tier 0 Active Directory Domain Services, enterprise root certification authorities, and identity synchronization infrastructure. Workstations in this tier manage unconstrained directory objects, Kerberos Ticket Granting Service (TGS) sessions, and domain administrator secrets. The default Windows diagnostic telemetry, crash reporting, and preview build mechanisms pose catastrophic security risks to high-assurance Tier 0 environments.
+
+<div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-technical-threat-vectors-tier-0-credential-protection"></div>
+
+### Technical Threat Vectors & Tier 0 Credential Protection
+1. **Tier 0 Credential Dumping via Crash Dumps & ETW Logs**: When an administrative console (such as PowerShell, Active Directory Users and Computers, or an MMC snap-in) or a system service crashes, Windows can capture full or triage memory dumps. Memory dumps of administrative sessions contain raw Tier 0 credentials—including plaintext passwords, Kerberos session keys, NTLM hashes, and DPAPI master keys. Allowing unconstrained memory dump collection (`LimitDumpCollection = 0`) creates localized dump files and triggers automated upload workflows to Microsoft telemetry clouds, risking the external exposure of root directory credentials.
+2. **Dynamic Configuration Tampering via OneSettings**: Microsoft OneSettings is an online configuration service designed to dynamically adjust telemetry levels, feature flags, and diagnostic behaviors over the cloud. On a PAW, the operating system configuration baseline must remain static, cryptographically verified, and strictly under internal enterprise administrative control. Permitting OneSettings downloads allows remote cloud services to modify diagnostic and telemetry parameters on a Tier 0 workstation, subverting local security baselines.
+3. **Auditing Unauthorized Cloud Ingestion Attempts**: Enabling OneSettings auditing ensures that any anomalous network connection or telemetry invocation attempt by the Windows operating system is captured in the local event log (`Microsoft-Windows-DataCollection/Operational`), providing Tier 0 SOC teams with immediate visibility into potential telemetry bypasses.
+4. **Prohibition of Unvetted Code via Insider Preview Builds**: Windows Insider builds contain experimental kernel revisions, unvetted device drivers, and incomplete security patches. Enrolling a PAW in preview channels introduces software instabilities, voids compliance baselines, and risks breaking core Tier 0 security agents (such as hardware-enforced isolation, credential guard, and EDR agents).
+5. **Suppression of Distracting Feedback Mechanisms**: PAWs must operate without user-facing distractions, promotional prompts, or consumer feedback dialogues that could tempt administrators into transmitting diagnostic screenshots or environment metadata.
+
+Limiting diagnostic and dump collections to absolute minimum sanitized headers, disabling OneSettings downloads, and permanently prohibiting preview builds ensures that Tier 0 administrative secrets remain strictly contained.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users cannot enroll in the Windows Insider program. Diagnostic feedback prompts are suppressed.
+
+* **Operational Impact**: Enrollment in Windows Insider preview channels is blocked. Feedback notifications are completely suppressed. Memory crash dumps are restricted to minimal headers with sensitive memory pages excluded. Core Tier 0 administration tools (RSAT, PowerShell, Hyper-V management, Active Directory Administrative Center) operate without interruption.
+* **Security Assurance**: Eliminates the catastrophic risk of Tier 0 domain credentials or administrative session keys leaking via automated crash reporting or telemetry pipelines.
+* **Network & Firewall Impact**: Eliminates background HTTPS connections to Microsoft telemetry endpoints (`*.events.data.microsoft.com`, `*.telemetry.microsoft.com`).
+* **Rollout Recommendations**: Mandatory baseline setting for all PAW deployment rings; apply immediately.
 
 ---
 
@@ -64949,23 +65700,20 @@ OneSettings downloads allow Microsoft to dynamically modify diagnostic configura
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Disable OneSettings Downloads**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Do not show feedback notifications**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Enable OneSettings Auditing**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Limit Diagnostic Log Collection**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Limit Dump Collection**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Toggle user control over Insider builds**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds
+   ```
+4. Configure the following policies:
+   * **Disable OneSettings Downloads**: Set to `Enabled`
+   * **Do not show feedback notifications**: Set to `Enabled`
+   * **Enable OneSettings Auditing**: Set to `Enabled`
+   * **Limit Diagnostic Log Collection**: Set to `Enabled`
+   * **Limit Dump Collection**: Set to `Enabled`
+   * **Toggle user control over Insider builds**: Set to `Disabled`
+5. Click **Apply**, then click **OK** for each policy.
+6. Link the GPO to the dedicated PAW Organizational Unit and verify policy replication across all Domain Controllers.
 
 ---
 
@@ -65154,12 +65902,35 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /s
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds" /v AllowBuildPreview
+```
+Verify the expected DWORD values:
+```text
+DisableOneSettingsDownloads     REG_DWORD    0x1
+DoNotShowFeedbackNotifications  REG_DWORD    0x1
+EnableOneSettingsAuditing       REG_DWORD    0x1
+LimitDiagnosticLogCollection    REG_DWORD    0x1
+LimitDumpCollection             REG_DWORD    0x1
+AllowBuildPreview               REG_DWORD    0x0
+```
+
+---
+
 <div id="07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.16.3, 18.10.16.4, 18.10.16.5, 18.10.16.6, 18.10.16.7, 18.10.16.8
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Sections 18.10.16.3, 18.10.16.4, 18.10.16.5, 18.10.16.6, 18.10.16.7, 18.10.16.8
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Data Collection and Preview Builds
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Administrative Endpoint Hardening
+* **MITRE ATT&CK**: [T1003: OS Credential Dumping](https://attack.mitre.org/techniques/T1003/), [T1020: Automated Exfiltration](https://attack.mitre.org/techniques/T1020/), [T1082: System Information Discovery](https://attack.mitre.org/techniques/T1082/), [T1499: Endpoint Denial of Service](https://attack.mitre.org/techniques/T1499/)
+* **Related Controls**: [REQ-PAW-175: Administrative Templates: Restrict Internet Communication for PAWs](#07-paws-admin-templates-configure-paw-at-internet-communication-md), [REQ-PAW-198: Administrative Templates: Windows Update Delivery and Deferral Policies for PAWs](#07-paws-admin-templates-configure-paw-at-windows-update-policies-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -65173,8 +65944,8 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-199](#08-endpoints-admin-templates-configure-end-at-app-installer-controls-md)).*
+* **Operating Systems**: Windows 10 Enterprise (1709+) and Windows 11 Enterprise.
 
 ---
 
@@ -65182,26 +65953,77 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableExperimentalFeatures` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableHashOverride` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableLocalArchiveMalwareScanOverride` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableBypassCertificatePinningForMicrosoftStore` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableMSAppInstallerProtocol` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Disable App Installer ms-appinstaller Protocol**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer\Enable App Installer ms-appinstaller protocol` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller`
+    * Value Name: `EnableMSAppInstallerProtocol`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Disable App Installer Experimental Features**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer\Enable App Installer Experimental Features` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller`
+    * Value Name: `EnableExperimentalFeatures`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Disable App Installer Hash Override**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer\Enable App Installer Hash Override` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller`
+    * Value Name: `EnableHashOverride`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Disable Local Archive Malware Scan Override**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer\Enable App Installer Local Archive Malware Scan Override` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller`
+    * Value Name: `EnableLocalArchiveMalwareScanOverride`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Enforce Microsoft Store Certificate Pinning**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer\Enable App Installer Microsoft Store Source Certificate Validation Bypass` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller`
+    * Value Name: `EnableBypassCertificatePinningForMicrosoftStore`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Bypass disallowed)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-rationale"></div>
 
 ## Rationale
-The App Installer URI protocol (ms-appinstaller://) has been repeatedly abused in active malware campaigns to trigger zero-click or drive-by package installations directly from web browsers. Disabling this protocol and prohibiting security overrides (hash bypass, malware scan bypass, certificate bypass) completely closes this critical initial infection vector.
+Privileged Access Workstations (PAWs) serve as the dedicated platform for Tier 0 Active Directory operations. Protecting the workstation from remote initial access vectors is paramount. The Windows App Installer protocol and package execution mechanisms present a severe vector for untrusted payload delivery that must be comprehensively disabled.
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-1-eliminating-drive-by-initial-access-vectors-on-tier-0-hosts"></div>
+
+### 1. Eliminating Drive-By Initial Access Vectors on Tier 0 Hosts
+The `ms-appinstaller://` URI scheme enables web-driven execution of MSIX packages:
+* Threat actors targeting enterprise infrastructure frequently weaponize `ms-appinstaller` in spear-phishing or watering-hole attacks to bypass browser controls and deliver initial-access implants (such as BatLoader, Emotet, or custom beacon payloads).
+* On a PAW, any execution of untrusted third-party code threatens to compromise directory credentials, LSA secrets, and Kerberos Ticket Granting Service keys.
+* Disabling `EnableMSAppInstallerProtocol` completely unbinds the URI protocol handler, ensuring that even if an administrator encounters a malicious URI, the operating system refuses to invoke `AppInstaller.exe`.
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-2-enforcing-strict-package-verification-and-integrity"></div>
+
+### 2. Enforcing Strict Package Verification and Integrity
+In the unlikely event that App Installer binaries are invoked on a PAW, security bypass mechanisms must be strictly disabled:
+* **Prohibiting Hash Overrides (`EnableHashOverride = 0`)**: Enforces cryptographic package signature and digest integrity, preventing installation of modified packages.
+* **Mandatory Malware Scanning (`EnableLocalArchiveMalwareScanOverride = 0`)**: Guarantees that local archive extraction is inspected by Microsoft Defender Antivirus through AMSI.
+* **Certificate Pinning Validation (`EnableBypassCertificatePinningForMicrosoftStore = 0`)**: Prevents untrusted root certificates or TLS proxy inspection from spoofing Store endpoints.
+* **Suppressing Experimental Code Paths (`EnableExperimentalFeatures = 0`)**: Eliminates unverified developer features that may contain privilege escalation bugs.
+
+<div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1218 - System Binary Proxy Execution**: Proxying execution through Microsoft App Installer.
+* **T1566.002 - Phishing: Spearphishing Link**: Delivery of malicious package links via phishing channels.
+* **T1204.001 - User Execution: Malicious Link**: User-initiated package execution via browser links.
+* **T1553.005 - Subvert Trust Controls: Treat As Untrusted**: Enforcing cryptographic package validation.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Web links utilizing ms-appinstaller will not launch automatically. Software must be deployed through enterprise deployment mechanisms or local signed packages.
+* **Operational Impact**: None. PAWs are dedicated to directory administration and never utilize consumer or web-delivered MSIX applications.
+* **Administrative Tooling**: Administrative tools (such as RSAT, Azure CLI, and PowerShell modules) are installed via enterprise-managed channels and standard Windows feature installations, remaining unaffected.
 
 ---
 
@@ -65214,21 +66036,17 @@ The App Installer URI protocol (ms-appinstaller://) has been repeatedly abused i
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
-  * **Enable App Installer Experimental Features**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
-  * **Enable App Installer Hash Override**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
-  * **Enable App Installer Local Archive Malware Scan Override**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
-  * **Enable App Installer Microsoft Store Source Certificate Validation Bypass**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
   * **Enable App Installer ms-appinstaller protocol**: Set to `Disabled`
+  * **Enable App Installer Experimental Features**: Set to `Disabled`
+  * **Enable App Installer Hash Override**: Set to `Disabled`
+  * **Enable App Installer Local Archive Malware Scan Override**: Set to `Disabled`
+  * **Enable App Installer Microsoft Store Source Certificate Validation Bypass**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -65393,9 +66211,10 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-app-installer-controls-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.18.2, 18.10.18.3, 18.10.18.4, 18.10.18.5, 18.10.18.6
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.18.2, 18.10.18.3, 18.10.18.4, 18.10.18.5, 18.10.18.6; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.18.2, 18.10.18.3, 18.10.18.4, 18.10.18.5, 18.10.18.6
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000340, Windows 11 STIG Rule WN11-CC-000340
+* **Microsoft Security Advisory**: Disabling the MSIX ms-appinstaller protocol scheme (CVE-2021-43890)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Application Whitelisting and Installation Hardening
 
 
 <div style="page-break-before: always;"></div>
@@ -65418,36 +66237,53 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\MaxSize` = `131072`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\MaxSize` = `1048576`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\MaxSize` = `32768`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\MaxSize` = `131072`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Event Log Service
+* **Policy Settings**:
+  * Application: Specify the maximum log file size (KB) & Control Event Log behavior when the log file reaches its maximum size
+  * Security: Specify the maximum log file size (KB) & Control Event Log behavior when the log file reaches its maximum size
+  * Setup: Specify the maximum log file size (KB) & Control Event Log behavior when the log file reaches its maximum size
+  * System: Specify the maximum log file size (KB) & Control Event Log behavior when the log file reaches its maximum size
+* **Supported On**: Windows 10 / Windows Server 2016 and above
+* **Registry Keys & Values**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\MaxSize` = `131072` (REG_DWORD, 128 MB)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\Retention` = `"0"` (REG_SZ, Overwrite as needed)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\MaxSize` = `1048576` (REG_DWORD, 1 GB)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\Retention` = `"0"` (REG_SZ, Overwrite as needed)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\MaxSize` = `32768` (REG_DWORD, 32 MB)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\Retention` = `"0"` (REG_SZ, Overwrite as needed)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\MaxSize` = `131072` (REG_DWORD, 128 MB)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\Retention` = `"0"` (REG_SZ, Overwrite as needed)
+* **Vulnerability References**: MITRE ATT&CK: T1070.001 (Indicator Removal on Host: Clear Windows Event Logs), T1562.002 (Impair Defenses: Disable Windows Event Logging)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-rationale"></div>
 
 ## Rationale
+
 Privileged Access Workstations (PAWs) serve as the dedicated management plane for Active Directory Domain Controllers, Tier 0 directory services, and critical identity infrastructure. Every interactive logon, administrative command execution, PowerShell script block, and remote management session initiated from a PAW carries severe security sensitivity.
 
 Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidly during heavy administrative activity or forensic investigations, destroying vital attribution evidence. Expanding the **Security** log to **1 GB** (`1,048,576 KB`), **System** and **Application** logs to **128 MB** (`131,072 KB`), and **Setup** log to **32 MB** (`32,768 KB`) establishes a robust local forensic buffer that preserves audit trails across extended operational periods:
 
-1. **High-Privilege Forensic Attribution**: Detailed auditing of administrative tooling (e.g., Active Directory Administrative Center, RSAT, PowerShell remoting, Mimikatz defense telemetry) generates voluminous Security event records. A 1 GB Security log ensures high-fidelity evidence preservation even if centralized log forwarding encounters temporary network partitions.
-2. **64 KB Boundary Alignment**: The Windows Event Log service allocates and writes event records in 64 KB memory chunks. All configured sizes in KB must be integer multiples of 64 (`SizeKB % 64 == 0`). Non-aligned values will be automatically truncated or rounded by the operating system (`1,048,576 / 64 = 16,384`; `131,072 / 64 = 2,048`; `32,768 / 64 = 512`).
-3. **Retention Policy**: Configuring retention behavior to "Overwrite events as needed" (GPO: `Disabled`, registry value `0`) ensures that new audit entries are never rejected or dropped when capacity is reached.
+<div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-technical-engineering-forensic-considerations"></div>
+
+### Technical Engineering & Forensic Considerations
+1. **High-Privilege Forensic Attribution**: Detailed auditing of administrative tooling (e.g., Active Directory Administrative Center, RSAT, PowerShell remoting, Mimikatz defense telemetry) generates voluminous Security event records. A 1 GB Security log ensures high-fidelity evidence preservation even if centralized log forwarding encounters temporary network partitions or management subnet isolation.
+2. **64 KB Boundary Alignment**: The Windows Event Log service allocates and writes event records in 64 KB memory chunks. All configured sizes in KB must be integer multiples of 64 (`SizeKB % 64 == 0`). Non-aligned values will be automatically truncated or rounded down by the operating system (`1,048,576 / 64 = 16,384`; `131,072 / 64 = 2,048`; `32,768 / 64 = 512`).
+3. **Retention Policy**: Configuring retention behavior to "Overwrite events as needed" (GPO: `Disabled`, registry value `0`) ensures that new audit entries are never rejected or dropped when capacity is reached, guaranteeing unbroken capture of ongoing administrative actions.
 4. **Memory and I/O Impact**: Windows utilizes memory-mapped files (`.evtx`) for the Event Log service. Only actively accessed pages are mapped into virtual memory; larger file limits do not consume active physical RAM.
+5. **Mitigating Anti-Forensic Log Flooding**: An adversary who achieves localized execution on a PAW cannot easily overwrite recent audit records by generating frivolous events, as the 1 GB log buffer demands sustained, noticeable event generation that immediately trips SIEM threshold alerts.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
+
 * **Operational Impact**: Allocates approximately 1.32 GB of maximum disk space in `%SystemRoot%\System32\Winevt\Logs`. Modern PAW hardware specifications easily absorb this footprint (representing less than 0.3% of total storage).
+* **System Performance**: Memory-mapped architecture ensures zero perceptible impact on system responsiveness or CPU overhead during logging events.
+* **WEF & SIEM Integration**: Provides robust offline buffering when administrative hosts are isolated from monitoring collectors.
+* **Rollout Recommendations**: Mandatory baseline setting for all PAW deployment rings; apply immediately.
 
 ---
 
@@ -65465,22 +66301,18 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
   * **Specify the maximum log file size (KB)**: Set to `Enabled` (`131072` KB)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
   * **Specify the maximum log file size (KB)**: Set to `Enabled` (`1048576` KB)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
   * **Specify the maximum log file size (KB)**: Set to `Enabled` (`32768` KB)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
   * **Specify the maximum log file size (KB)**: Set to `Enabled` (`131072` KB)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the dedicated PAW Organizational Unit and verify replication across all Domain Controllers.
 
 ---
 
@@ -65565,14 +66397,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ([int64]$Actual -ge [int64]$ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -65609,14 +66441,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ([int64]$Actual -ge [int64]$ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -65653,14 +66485,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ([int64]$Actual -ge [int64]$ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -65697,14 +66529,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ([int64]$Actual -ge [int64]$ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -65723,14 +66555,30 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied log configurations via command line using `wevtutil`:
+```cmd
+wevtutil gl Application
+wevtutil gl Security
+wevtutil gl Setup
+wevtutil gl System
+```
+Verify that `maxSize` reflects the configured byte values (`1073741824` bytes for Security, `134217728` bytes for System/Application, `33554432` bytes for Setup) and `retention` is set to `false`.
+
+---
+
 <div id="07-paws-admin-templates-configure-paw-at-event-log-sizes-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **DoD Windows 10/11 Security Technical Implementation Guide (STIG)**: Rule SV-220707r879607_rule (Security Log MaxSize >= 1,024,000 KB), SV-220705r556754_rule (Application Log MaxSize >= 32,768 KB), SV-220709r556766_rule (System Log MaxSize >= 32,768 KB)
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.26.1.1, 18.10.26.1.2 (Application >= 32,768 KB), 18.10.26.2.1, 18.10.26.2.2 (Security >= 196,608 KB), 18.10.26.3.1, 18.10.26.3.2 (Setup >= 32,768 KB), 18.10.26.4.1, 18.10.26.4.2 (System >= 32,768 KB)
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions for Windows client platforms
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters and forensic preservation recommendations for Tier 0 administrative workstations
-
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Event Log Service
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Administrative Endpoint Hardening
+* **MITRE ATT&CK**: [T1070.001: Indicator Removal on Host: Clear Windows Event Logs](https://attack.mitre.org/techniques/T1070/001/), [T1562.002: Impair Defenses: Disable Windows Event Logging](https://attack.mitre.org/techniques/T1562/002/)
+* **Related Controls**: [REQ-DC-121: Domain Controller Event Log Maximum File Sizes and Retention Policies](#02-domain-controllers-configure-event-log-sizes-md), [REQ-PAW-171: Administrative Templates: MSS System and Session Security Protections for PAWs](#07-paws-admin-templates-configure-paw-at-mss-system-protections-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -65744,7 +66592,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-201](#08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -65753,23 +66601,57 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer\DisableMotWOnInsecurePathCopy` = `0`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\PreXPSP2ShellProtocolBehavior` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Do not apply the Mark of the Web tag to files copied from insecure sources**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer\Do not apply the Mark of the Web tag to files copied from insecure sources` -> **Disabled** (Enforces MotW tagging)
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer`
+    * Value Name: `DisableMotWOnInsecurePathCopy`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / MotW preserved)
+  * **Turn off shell protocol protected mode**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer\Turn off shell protocol protected mode` -> **Disabled** (Enforces shell protocol protected mode)
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer`
+    * Value Name: `PreXPSP2ShellProtocolBehavior`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Protected mode enforced)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-rationale"></div>
 
 ## Rationale
-The Mark of the Web (Zone.Identifier alternate data stream) is the foundation of Windows download security, triggering SmartScreen, Defender reputation checks, and Office Protected View. Disabling MotW suppression ensures downloaded files maintain security tags even when transferred across insecure network shares. Shell protocol protected mode restricts rogue URL protocol invocations.
+Privileged Access Workstations (PAWs) represent Tier 0 administrative boundaries. Protecting these high-value machines against unauthorized code execution requires enforcing all layers of Windows execution policy and download origin tracking.
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-1-preserving-origin-metadata-for-administrative-assets"></div>
+
+### 1. Preserving Origin Metadata for Administrative Assets
+When administrative scripts, tools, or update archives are staged onto a PAW across network paths:
+* The Mark of the Web (`Zone.Identifier` alternate data stream) serves as the primary metadata indicator alerting the operating system that a file originated from outside the trusted local security zone.
+* The presence of this tag triggers Windows Defender SmartScreen, PowerShell Execution Policy restrictions (`AllSigned` or `RemoteSigned`), and attachment inspection handlers.
+* If MotW tags are stripped during file copy operations across network shares, untrusted scripts could execute with unvetted administrative authority.
+* Disabling `DisableMotWOnInsecurePathCopy` ensures that the `Zone.Identifier` ADS is strictly preserved during file transfers, preventing the accidental laundering of untrusted binaries into trusted local assets.
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-2-guarding-against-shell-protocol-parameter-injection"></div>
+
+### 2. Guarding Against Shell Protocol Parameter Injection
+Privileged administrative shells must never execute unsanitized protocol parameters:
+* Disabling Protected Mode (`PreXPSP2ShellProtocolBehavior = 1`) exposes the operating system to legacy shell vulnerabilities where malicious URLs or shortcut files (`.lnk`, `.url`) invoke external binaries with arbitrary command arguments.
+* Enforcing `PreXPSP2ShellProtocolBehavior = 0` guarantees that File Explorer validates and sanitizes all shell protocol parameters, prompting the operator and preventing argument injection exploits.
+
+<div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1553.005 - Subvert Trust Controls: Mark-of-the-Web Bypass**: Circumventing execution controls by stripping MotW metadata.
+* **T1204.002 - User Execution: Malicious File**: Inadvertent execution of untrusted scripts or tools on a PAW.
+* **T1218 - System Binary Proxy Execution**: Proxying execution via vulnerable shell protocol handlers.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Downloaded files copied across local shares will correctly retain Internet security prompts when executed.
+* **Operational Impact**: None on legitimate administration. Administrative scripts and binaries officially approved for Tier 0 deployment are digitally signed by an internal enterprise code-signing certificate and trusted by AppLocker / WDAC policies.
+* **Administrative Tooling**: Unsigned or untrusted third-party utilities copied onto a PAW will trigger standard security warnings, requiring administrators to review and verify the tool before execution.
 
 ---
 
@@ -65782,15 +66664,15 @@ The Mark of the Web (Zone.Identifier alternate data stream) is the foundation of
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
-  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled`
+  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled` (Ensures MotW is applied)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
-  * **Turn off shell protocol protected mode**: Set to `Disabled`
+  * **Turn off shell protocol protected mode**: Set to `Disabled` (Ensures Protected Mode is enforced)
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -65890,9 +66772,9 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-file-explorer-motw-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.29.3, Section 18.10.29.5
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.43.3, Section 18.10.43.14; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.43.3, Section 18.10.43.14
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000370, Windows 11 STIG Rule WN11-CC-000370
+* **Microsoft Privileged Access Workstation Guidance**: Tier 0 File System Integrity and Host Execution Policy
 
 
 <div style="page-break-before: always;"></div>
@@ -65906,7 +66788,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-202](#08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -65915,24 +66797,62 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main\NotifyDisableIEOptions` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\DisableEnclosureDownload` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\AllowBasicAuthInClear` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Disable Internet Explorer 11 as a Standalone Browser**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Disable Internet Explorer 11 as a standalone browser` -> **Enabled** (Select: `Always`)
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main`
+    * Value Name: `NotifyDisableIEOptions`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Always disabled / Never prompt user)
+  * **Prevent Downloading of Enclosures in Web Feeds**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds\Prevent downloading of enclosures` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds`
+    * Value Name: `DisableEnclosureDownload`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Block enclosure downloads)
+  * **Disable Cleartext Basic Feed Authentication over HTTP**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds\Turn on Basic feed authentication over HTTP` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds`
+    * Value Name: `AllowBasicAuthInClear`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Prohibit cleartext basic auth)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-rationale"></div>
 
 ## Rationale
-Internet Explorer 11 is retired and out of support, presenting severe unpatched memory corruption attack surfaces. Disabling IE11 as a standalone browser automatically redirects browser requests to Microsoft Edge. Prohibiting RSS enclosure downloads prevents automated malware payload staging, and blocking cleartext HTTP feed authentication prevents credential interception.
+Privileged Access Workstations (PAWs) are hardened environments dedicated to Tier 0 infrastructure management. General web browsing on a PAW is strictly prohibited by design. However, legacy operating system binaries and background feed engines remain embedded in the Windows platform, requiring absolute administrative disabling to prevent exploitation.
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-1-eliminating-standalone-ie11-and-mshtml-exploitation-surfaces"></div>
+
+### 1. Eliminating Standalone IE11 and MSHTML Exploitation Surfaces
+Internet Explorer 11 is retired and contains obsolete memory management logic:
+* Standalone `iexplore.exe` lacks modern sandbox isolation and exploit mitigations. Adversaries targeting privileged administrators with targeted malicious documents or URI links can invoke legacy MSHTML rendering routines to achieve code execution on the management host.
+* Setting `NotifyDisableIEOptions = 0` (GPO: **Enabled: Always**) permanently shuts down the standalone IE11 executable, automatically redirecting any accidental or programmatic invocation to modern Microsoft Edge.
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-2-disabling-web-feed-staging-and-cleartext-authentication"></div>
+
+### 2. Disabling Web Feed Staging and Cleartext Authentication
+The Windows Feeds subsystem provides background content aggregation services that must be restricted:
+* **Background Attachment Ingress**: Web feeds supporting enclosure downloads can be abused by adversaries to silently stage malicious binaries onto disk without triggering browser download warnings. Disabling `DisableEnclosureDownload` prevents the feeds engine from downloading binary attachments.
+* **Prohibiting Unencrypted Feed Credentials**: Transmitting HTTP Basic credentials in cleartext exposes administrative accounts to network interception. Disabling `AllowBasicAuthInClear` ensures cleartext authentication is strictly rejected.
+
+<div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1189 - Drive-by Compromise**: Exploitation of legacy browser engine vulnerabilities.
+* **T1204.001 - User Execution: Malicious Link**: Directing users to malicious URLs targeting retired browser components.
+* **T1105 - Ingress Tool Transfer**: Automated staging of malicious binaries via RSS feed enclosures.
+* **T1557 - Adversary-in-the-Middle**: Intercepting cleartext credentials transmitted across management segments.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: iexplore.exe redirects to Microsoft Edge. Legacy enterprise applications requiring MSHTML must be configured via Enterprise Mode Site List in Edge IE Mode.
+* **Operational Impact**: None. PAWs are dedicated to directory administration and never require standalone Internet Explorer or web feed subscriptions.
+* **Administrative Management**: Administrative consoles requiring web-based interfaces (such as Azure Portal, Microsoft Entra ID admin center, or modern management appliances) are accessed via hardened modern browsers (Microsoft Edge with AppLocker/WDAC restrictions).
 
 ---
 
@@ -65945,17 +66865,18 @@ Internet Explorer 11 is retired and out of support, presenting severe unpatched 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer`
-  * **Disable Internet Explorer 11 as a standalone browser**: Set to `Enabled: Always`
+  * **Disable Internet Explorer 11 as a standalone browser**: Set to `Enabled`
+  * Select drop-down value: `Always`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
   * **Prevent downloading of enclosures**: Set to `Enabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
   * **Turn on Basic feed authentication over HTTP**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -66078,9 +66999,9 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.35.1, Section 18.10.58.1, Section 18.10.58.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.45.1, Section 18.10.45.2, Section 18.10.45.3; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.45.1, Section 18.10.45.2, Section 18.10.45.3
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000380, Windows 11 STIG Rule WN11-CC-000380
+* **Microsoft Privileged Access Workstation Guidance**: PAW Software and Browser Attack Surface Reduction Rules
 
 
 <div style="page-break-before: always;"></div>
@@ -66102,26 +67023,50 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowCortana` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowCortanaAboveLock` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowIndexingEncryptedStoresOrItems` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowSearchToUseLocation` = `0`
+* **Priority**: High
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Search
+* **Policy Settings**:
+  * Allow Cortana
+  * Allow Cortana above lock screen
+  * Allow indexing of encrypted files
+  * Allow search and Cortana to use location
+* **Supported On**: Windows 10 (Version 1511) or Windows Server 2016 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search`
+* **Registry Values**:
+  * `AllowCortana` = `0` (REG_DWORD, Suppress Cortana voice assistance)
+  * `AllowCortanaAboveLock` = `0` (REG_DWORD, Block Cortana execution when device is locked)
+  * `AllowIndexingEncryptedStoresOrItems` = `0` (REG_DWORD, Prevent indexing of EFS/encrypted files)
+  * `AllowSearchToUseLocation` = `0` (REG_DWORD, Block search features from accessing device location)
+* **Vulnerability References**: MITRE ATT&CK: T1005 (Data from Local System), T1083 (File and Directory Discovery), T1056 (Input Capture), T1200 (Hardware Additions / Physical Access), T1020 (Automated Exfiltration)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-rationale"></div>
 
 ## Rationale
-Cortana voice integration introduces microphone listening risks, voice command execution from locked workstations, and external telemetry transmission. Indexing encrypted files in the Windows Search index creates unencrypted index cache entries, leaking sensitive plaintext data across file security boundaries.
+
+Privileged Access Workstations (PAWs) are dedicated exclusively to Tier 0 Active Directory and core infrastructure administration. Because administrative consoles are used to generate disaster-recovery scripts, inspect Active Directory objects, and manage domain secrets, the operating system search subsystem must be strictly constrained against cryptographic degradation and side-channel leakage.
+
+<div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-technical-threat-vectors-paw-security-exposure"></div>
+
+### Technical Threat Vectors & PAW Security Exposure
+1. **Cryptographic Protection Bypass via Search Indexing**: PAW operators frequently handle sensitive, locally encrypted files (such as emergency break-glass procedures, offline key backups, and sensitive audit manifests). If the search indexer (`SearchIndexer.exe`) processes encrypted stores, it decrypts file content and writes plain-text indexes into `Windows.edb` (`C:\ProgramData\Microsoft\Search\Data\Applications\Windows\Windows.edb`). Any process with read access to the database or offline disk access can recover decrypted administrative plaintext, subverting file-level encryption controls.
+2. **Physical Lock Screen Bypass via Voice Assistants**: When voice assistance is enabled above the lock screen, an adversary with temporary physical proximity to a locked PAW can execute voice commands. This permits unauthorized inspection of administrative notifications, active tasks, and system parameters without authenticating via smart card or multi-factor authentication.
+3. **Ambient Audio Capture & Egress Traffic**: Voice recognition features continuously monitor the workstation microphone for trigger words and transmit voice telemetry to cloud speech processing services. In secure administrative operations centers or server rooms, ambient voice transmission presents an intolerable eavesdropping and compliance risk.
+4. **Geolocation Tracking**: Permitting search services to track location leaks the physical facilities and network points of presence where Tier 0 administrative operations take place.
+
+Disabling Cortana, suppressing above-lock interactions, disabling location access, and prohibiting the indexing of encrypted files guarantees that the PAW search engine operates strictly as a local, secure text query service.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Cortana voice assistance is deactivated. Encrypted files will not appear in instant search results.
+
+* **Operational Impact**: Cortana voice interaction is completely disabled on PAWs. Encrypted files (EFS) will not be indexed in rapid full-text search results, requiring explicit navigation via File Explorer or PowerShell. Core administrative search capabilities (searching for installed MMC tools, PowerShell cmdlets, and local configuration files) operate with full responsiveness.
+* **User Experience**: The search interface operates in an austere, local-only mode without voice prompts or web search suggestions.
+* **Cryptographic Integrity**: Guarantees that encrypted administrative files cannot have their plaintext contents cached in the shared search database.
+* **Rollout Recommendations**: Mandatory for all PAW deployment baselines; zero risk to administrative workflows.
 
 ---
 
@@ -66134,19 +67079,18 @@ Cortana voice integration introduces microphone listening risks, voice command e
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow Cortana**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow Cortana above lock screen**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow indexing of encrypted files**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow search and Cortana to use location**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\Windows Components\Search
+   ```
+4. Configure the following policies:
+   * **Allow Cortana**: Set to `Disabled`
+   * **Allow Cortana above lock screen**: Set to `Disabled`
+   * **Allow indexing of encrypted files**: Set to `Disabled`
+   * **Allow search and Cortana to use location**: Set to `Disabled`
+5. Click **Apply**, then click **OK** for each policy.
+6. Link the GPO to the dedicated PAW Organizational Unit and verify policy replication across all Domain Controllers.
 
 ---
 
@@ -66285,12 +67229,32 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /s
+```
+Expected output:
+```text
+AllowCortana                          REG_DWORD    0x0
+AllowCortanaAboveLock                 REG_DWORD    0x0
+AllowIndexingEncryptedStoresOrItems   REG_DWORD    0x0
+AllowSearchToUseLocation              REG_DWORD    0x0
+```
+
+---
+
 <div id="07-paws-admin-templates-configure-paw-at-search-cortana-restrictions-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.59.3, 18.10.59.4, 18.10.59.5, 18.10.59.6
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Sections 18.10.59.3, 18.10.59.4, 18.10.59.5, 18.10.59.6
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Windows Search
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Administrative Endpoint Hardening
+* **MITRE ATT&CK**: [T1005: Data from Local System](https://attack.mitre.org/techniques/T1005/), [T1083: File and Directory Discovery](https://attack.mitre.org/techniques/T1083/), [T1056: Input Capture](https://attack.mitre.org/techniques/T1056/), [T1200: Hardware Additions](https://attack.mitre.org/techniques/T1200/), [T1020: Automated Exfiltration](https://attack.mitre.org/techniques/T1020/)
+* **Related Controls**: [REQ-PAW-175: Administrative Templates: Restrict Internet Communication for PAWs](#07-paws-admin-templates-configure-paw-at-internet-communication-md), [REQ-PAW-177: Administrative Templates: Interactive Logon and Credential Display Options for PAWs](#07-paws-admin-templates-configure-paw-at-logon-display-options-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -66304,7 +67268,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-205](#08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -66313,23 +67277,55 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore\AutoDownload` = `4`
-  * `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore\DisableOSUpgrade` = `1`
+* **GPO Paths / Registry Locations**:
+  * **Allow Automatic Download and Installation of Store App Updates**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store\Turn off Automatic Download and Install of updates` -> **Disabled** (Enforces automatic updates)
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore`
+    * Value Name: `AutoDownload`
+    * Value Type: `REG_DWORD`
+    * Value Data: `4` (Automatic update installation enabled)
+  * **Turn off the offer to update to the latest version of Windows**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store\Turn off the offer to update to the latest version of Windows` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore`
+    * Value Name: `DisableOSUpgrade`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Block consumer OS upgrade offers)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-rationale"></div>
 
 ## Rationale
-Permitting automatic Store app updates ensures packaged applications and system appx dependencies stay continuously patched against published vulnerabilities. Suppressing consumer Windows upgrade offers prevents unauthorized major OS feature version upgrades that circumvent IT change management and testing.
+Privileged Access Workstations (PAWs) execute mission-critical directory administration tools. Essential system management utilities (such as Windows Terminal and system runtime dependencies) are maintained through modern packaging pipelines, requiring rigorous patch hygiene without exposing the privileged environment to uncoordinated operating system upgrades.
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-1-ensuring-patch-currency-for-pre-installed-administrative-components"></div>
+
+### 1. Ensuring Patch Currency for Pre-Installed Administrative Components
+Even in minimal Tier 0 installations, modern Windows builds include foundational packages:
+* Core utilities such as Windows Terminal, PowerShell 7 packages, and underlying runtime components (like WebP libraries and .NET AppContainer dependencies) require regular security updates.
+* If automatic updates are prohibited on a PAW, system packages remain vulnerable to publicly disclosed vulnerabilities, potentially allowing local privilege escalation or remote code execution.
+* Setting `AutoDownload = 4` (disabling "Turn off Automatic Download and Install of updates") ensures that any packaged components present on the PAW receive timely security patches from Microsoft update channels.
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-2-guarding-tier-0-systems-against-unmanaged-os-migrations"></div>
+
+### 2. Guarding Tier 0 Systems Against Unmanaged OS Migrations
+Uncontrolled operating system feature upgrades present severe operational risks:
+* Upgrading an administrative workstation across major OS releases (e.g., Windows 10 to Windows 11) outside of a tested enterprise deployment can break credential isolation controls (Credential Guard, WDAC policies, or smart card authentication drivers).
+* Setting `DisableOSUpgrade = 1` completely suppresses consumer upgrade offers from the Windows Store, ensuring that PAWs undergo major version migrations only through tested, validated enterprise staging processes.
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1195.002 - Supply Chain Compromise: Compromised Software Dependencies**: Patching system runtime components to eliminate known CVEs.
+* **T1489 - Service Stop / System Disruption**: Preventing uncontrolled OS migrations that disrupt administrative operations.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Store apps receive automated updates; consumer version upgrade prompts are suppressed.
+* **Operational Impact**: None. Administrative workflows on PAWs are maintained with patched components while major OS version upgrades are strictly scheduled.
+* **Administrative Tooling**: Essential administrative command-line tools remain stable and secure.
 
 ---
 
@@ -66342,15 +67338,15 @@ Permitting automatic Store app updates ensures packaged applications and system 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store`
-  * **Turn off Automatic Download and Install of updates**: Set to `Disabled` (Allow auto updates)
+  * **Turn off Automatic Download and Install of updates**: Set to `Disabled` (Ensures updates are downloaded automatically)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store`
   * **Turn off the offer to update to the latest version of Windows**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -66446,9 +67442,9 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.66.2, Section 18.10.66.3
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.87.1, Section 18.10.87.2; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.87.1, Section 18.10.87.2
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000350, Windows 11 STIG Rule WN11-CC-000350
+* **Microsoft Privileged Access Workstation Guidance**: Tier 0 Software Maintenance and Lifecycle Standards
 
 
 <div style="page-break-before: always;"></div>
@@ -66470,23 +67466,44 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Low
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Dsh\AllowNewsAndInterests` = `0`
+* **Priority**: High
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Widgets
+* **Policy Name**: Allow widgets
+* **Supported On**: Windows 11 (all versions), Windows 10 (version 21H1 and above with News and Interests)
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Dsh`
+* **Registry Value**: `AllowNewsAndInterests`
+* **Value Type**: `REG_DWORD`
+* **Value Data**: `0` (0x00000000 = Suppress widgets and taskbar news feed)
+* **Vulnerability References**: MITRE ATT&CK: T1189 (Drive-by Compromise), T1071 (Application Layer Protocol), T1204 (User Execution), T1059 (Command and Scripting Interpreter)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-rationale"></div>
 
 ## Rationale
-Windows Widgets and News and Interests dynamically fetch unauthenticated internet news, weather, and third-party content onto the taskbar, generating continuous telemetry and background web requests. Disabling widgets eliminates this attack surface and eliminates unwanted distractions.
+
+Privileged Access Workstations (PAWs) provide the highest level of security isolation for Tier 0 Active Directory administration. They operate under a strict "clean source" principle where only vetted administrative binaries and management consoles are permitted to execute. Windows Widgets and News and Interests dynamically embed web rendering runtimes (Microsoft Edge WebView2) into the taskbar shell, directly violating core PAW security architecture.
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-technical-threat-vectors-tier-0-risks"></div>
+
+### Technical Threat Vectors & Tier 0 Risks
+1. **Unacceptable Dynamic Web Rendering on PAWs**: Running a Chromium-based browser rendering engine (`widgets.exe`) directly within an active Tier 0 administrative session exposes the host to web-based code execution vulnerabilities, memory corruption flaws, and DOM-based exploits. Web rendering runtimes must never operate inside an administrative logon session.
+2. **Breach of Network Isolation & Egress Policy**: Dedicated PAWs operate in segmented administrative subnets with egress firewalls blocking all general Internet traffic. The Widgets process continuously attempts to establish outbound HTTPS sessions to MSN, Bing, and advertising CDNs (`*.msn.com`, `*.bing.com`), causing constant egress rule violations and flooding security operations center (SOC) log collectors with unauthorized connection attempts.
+3. **Third-Party Content Ingestion**: The Widgets framework ingests external news headlines, weather forecasts, and sponsored marketing content from public content distribution networks. Allowing untrusted third-party internet content onto an administrative screen increases the risk of social engineering, accidental clickthroughs, and credential harvesting redirects.
+4. **Administrative Host Resource Preservation**: PAW systems require predictable, lightweight operational environments. Terminating unnecessary background web engines frees CPU and RAM resources for administrative operations, PowerShell scripting, and security tooling.
+
+Disabling widgets eliminates the taskbar component entirely and guarantees that the Desktop Shell Host will not initiate network sessions or load web rendering modules.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: The Widgets and News and Interests icon is removed from the taskbar.
+
+* **Operational Impact**: The Widgets icon and News and Interests feed are completely disabled on PAW workstations. All Tier 0 administrative tooling (Active Directory Administrative Center, MMC, PowerShell, RSAT) functions without impact.
+* **User Experience**: Tier 0 administrators work within a clean, austere, and hardened desktop interface without consumer feeds or accidental popup flyouts.
+* **Network Impact**: Eliminates unauthorized outbound HTTP/HTTPS traffic to public news, weather, and consumer CDN endpoints.
+* **Rollout Recommendations**: Mandatory baseline setting for all PAWs; apply immediately across all administrative host profiles.
 
 ---
 
@@ -66499,13 +67516,15 @@ Windows Widgets and News and Interests dynamically fetch unauthenticated interne
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Widgets`
-  * **Allow widgets**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\Windows Components\Widgets
+   ```
+4. Double-click **Allow widgets**.
+5. Select **Disabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the dedicated PAW Organizational Unit and verify policy replication across all Domain Controllers.
 
 ---
 
@@ -66575,12 +67594,29 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy setting via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Dsh" /v AllowNewsAndInterests
+```
+Expected output:
+```text
+AllowNewsAndInterests    REG_DWORD    0x0
+```
+
+---
+
 <div id="07-paws-admin-templates-configure-paw-at-windows-widgets-dsh-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.72.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Widgets
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Administrative Endpoint Hardening
+* **MITRE ATT&CK**: [T1189: Drive-by Compromise](https://attack.mitre.org/techniques/T1189/), [T1071: Application Layer Protocol](https://attack.mitre.org/techniques/T1071/), [T1204: User Execution](https://attack.mitre.org/techniques/T1204/)
+* **Related Controls**: [REQ-PAW-184: Administrative Templates: Disable Cloud Consumer Account State Content for PAWs](#07-paws-admin-templates-configure-paw-at-cloud-consumer-content-md), [REQ-PAW-175: Administrative Templates: Restrict Internet Communication for PAWs](#07-paws-admin-templates-configure-paw-at-internet-communication-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -66594,7 +67630,7 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-207](#08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -66604,21 +67640,50 @@ if ($script:Vulnerable) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableAutomaticRestartSignOn` = `1`
+  * **Sign-in and lock last interactive user automatically after a restart**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Logon Options\Sign-in and lock last interactive user automatically after a restart` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
+    * Value Name: `DisableAutomaticRestartSignOn`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Disabled / ARSO blocked)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-rationale"></div>
 
 ## Rationale
-Automatic Restart Sign-On (ARSO) caches user credentials in memory to automatically log in and lock the desktop after Windows Update reboots. This credential staging mechanism creates exposure to physical memory extraction and DMA attacks. Disabling ARSO prevents credentials from persisting across automated reboots.
+Privileged Access Workstations (PAWs) process the enterprise's most sensitive credentials, including Active Directory Domain Admin tokens, Kerberos krbtgt keys, and enterprise root CA certificates. Permitting any automated, unattended credential persistence across reboots is fundamentally incompatible with Tier 0 security architectures.
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-1-eliminating-tier-0-credential-exposure-in-memory"></div>
+
+### 1. Eliminating Tier 0 Credential Exposure in Memory
+Automatic Restart Sign-On (ARSO) caches user credentials across reboot cycles to automatically log on and lock the machine:
+* On a PAW, allowing automated logon instantiates full administrative tokens, Kerberos service tickets, and LSA secrets directly into physical DRAM while the device sits unattended.
+* An adversary gaining physical access to the unattended administrative host can execute Direct Memory Access (DMA) attacks via external PCIe/Thunderbolt controllers or cold-boot attacks to extract Tier 0 tickets from memory.
+* Furthermore, ARSO relies on staging decrypted secrets within the LSA and TPM subsystems. Any memory analysis or hardware-level tapping could recover staged administrative secrets.
+* Setting `DisableAutomaticRestartSignOn = 1` guarantees that the PAW halts strictly at an unauthenticated logon screen following every reboot.
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-2-enforcing-strict-physical-presence-and-hardware-token-re-authentication"></div>
+
+### 2. Enforcing Strict Physical Presence and Hardware Token Re-Authentication
+Hardened administrative access demands deliberate, verifiable human presence:
+* Tier 0 operators must re-authenticate explicitly using physical hardware tokens (such as FIDO2 security keys or PIV/CAC smart cards) following any system reboot or maintenance event.
+* Automated logon features bypass physical possession checks and must be comprehensively suppressed.
+
+<div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1003.001 - OS Credential Dumping: LSASS Memory**: Intercepting privileged credentials loaded into volatile memory by automated logon.
+* **T1200 - Direct Network / Hardware Access**: Physical memory extraction from unattended administrative workstations.
+* **T1078 - Valid Accounts**: Misusing unattended administrative session states.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Following a restart, the computer remains at the initial Windows login screen until the user manually authenticates.
+* **Operational Impact**: Following any scheduled reboot or update, the PAW will remain at the initial Windows logon screen until the administrator physically logs in.
+* **Administrative Operations**: Preserves zero-trust administrative principles without impacting legitimate remote management of Domain Controllers.
 
 ---
 
@@ -66631,13 +67696,13 @@ Automatic Restart Sign-On (ARSO) caches user credentials in memory to automatica
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Logon Options`
   * **Sign-in and lock last interactive user automatically after a restart**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -66710,9 +67775,9 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.82.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.99.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.99.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000390, Windows 11 STIG Rule WN11-CC-000390
+* **Microsoft Privileged Access Workstation Guidance**: PAW Physical Security and Credential Lifecycle Architecture
 
 
 <div style="page-break-before: always;"></div>
@@ -66726,8 +67791,8 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-208](#08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md)).*
+* **Operating Systems**: Windows 10 Enterprise (1903+) and Windows 11 Enterprise.
 
 ---
 
@@ -66735,23 +67800,59 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox\AllowClipboardRedirection` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox\AllowNetworking` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Disable Clipboard Sharing with Windows Sandbox**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox\Allow clipboard sharing with Windows Sandbox` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox`
+    * Value Name: `AllowClipboardRedirection`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Disable Networking in Windows Sandbox**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox\Allow networking in Windows Sandbox` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox`
+    * Value Name: `AllowNetworking`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-rationale"></div>
 
 ## Rationale
-Windows Sandbox provides a lightweight virtualized environment for untrusted binary execution. If malware is detonated inside the sandbox, clipboard sharing allows potential escape or clipboard data harvesting, and network access permits external C2 communication and lateral scanning. Disabling clipboard redirection and networking enforces strict host and network isolation.
+Privileged Access Workstations (PAWs) manage the enterprise's most sensitive Tier 0 identity boundaries. While Windows Sandbox allows isolated testing of administrative scripts or packages, running any virtualized container on a PAW without absolute host-isolation controls introduces severe risks to directory security.
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-1-preventing-tier-0-credential-exfiltration-via-clipboard-redirection"></div>
+
+### 1. Preventing Tier 0 Credential Exfiltration via Clipboard Redirection
+PAW operators routinely handle high-entropy administrative secrets, including Kerberos tickets, directory recovery passwords, LSA secret tokens, and BitLocker recovery keys:
+* When clipboard redirection is active, the containerized guest environment shares the Windows clipboard buffer with the host operating system.
+* Malicious code or compromised testing utilities executing inside the sandbox can inspect the clipboard stream, capturing privileged credentials copied by the operator in other host management windows.
+* In addition, guest-to-host clipboard injection allows container malware to replace clipboard text with weaponized administrative commands.
+* Disabling `AllowClipboardRedirection` enforces total clipboard isolation, preventing cross-boundary credential leakage and injection attacks.
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-2-guarding-the-tier-0-management-network-from-container-traversal"></div>
+
+### 2. Guarding the Tier 0 Management Network from Container Traversal
+By default, Windows Sandbox provisions a virtual network adapter that bridges into the host's network:
+* On a PAW, the host's physical network connection has direct reachability to Tier 0 Domain Controllers, management hypervisors, and Hardware Security Modules (HSMs).
+* Permitting network access within the sandbox gives containerized code an unobstructed network path to port-scan Domain Controllers, attempt Kerberos brute-forcing, or launch network exploits against directory infrastructure.
+* Disabling `AllowNetworking` detaches the virtual network adapter, isolating the container in an offline air-gap state.
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1115 - Clipboard Data**: Adversary interception of sensitive administrative credentials across virtualization boundaries.
+* **T1071 - Application Layer Protocol**: Outbound communication to external adversary command and control nodes.
+* **T1046 - Network Service Discovery**: Unauthorized network reconnaissance against Tier 0 directory services.
+* **T1204.002 - User Execution: Malicious File**: Detonating untrusted scripts within privileged management environments.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users cannot copy/paste between host and sandbox, and Sandbox cannot connect to local or internet networks.
+* **Operational Impact**: None on standard administrative tasks. If administrators utilize Windows Sandbox to test PowerShell scripts or automation templates, they must stage all dependencies using offline folder mounts.
+* **Network Testing**: Network-dependent scripts cannot be tested within the sandbox; such testing must be performed in dedicated, isolated staging laboratories rather than on production PAWs.
 
 ---
 
@@ -66764,7 +67865,7 @@ Windows Sandbox provides a lightweight virtualized environment for untrusted bin
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox`
@@ -66772,7 +67873,7 @@ Windows Sandbox provides a lightweight virtualized environment for untrusted bin
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox`
   * **Allow networking in Windows Sandbox**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -66868,9 +67969,9 @@ if ($script:Vulnerable) {
 <div id="07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.91.1, Section 18.10.91.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.106.1, Section 18.10.106.2; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.106.1, Section 18.10.106.2
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000360, Windows 11 STIG Rule WN11-CC-000360
+* **Microsoft Privileged Access Workstation Guidance**: PAW Virtualization and Isolation Controls
 
 
 <div style="page-break-before: always;"></div>
@@ -66893,29 +67994,53 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\SetDisablePauseUXAccess` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\ManagePreviewBuildsPolicyValue` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdates` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdatesPeriodInDays` = `180`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdates` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdatesPeriodInDays` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\NoAutoRebootWithLoggedOnUsers` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\ScheduledInstallDay` = `0`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Windows Update
+* **Policy Settings**:
+  * Remove access to 'Pause updates' feature
+  * Manage preview builds
+  * Select when Preview Builds and Feature Updates are received
+  * Select when Quality Updates are received
+  * Configure Automatic Updates
+  * No auto-restart with logged on users for scheduled automatic updates installations
+* **Supported On**: Windows 10 (Version 1607) or Windows Server 2016 and above
+* **Registry Keys & Values**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\SetDisablePauseUXAccess` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\ManagePreviewBuildsPolicyValue` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdates` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdatesPeriodInDays` = `180` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdates` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdatesPeriodInDays` = `0` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\NoAutoRebootWithLoggedOnUsers` = `0` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\ScheduledInstallDay` = `0` (REG_DWORD, Every day)
+* **Vulnerability References**: MITRE ATT&CK: T1190 (Exploit Public-Facing Application), T1068 (Exploitation for Privilege Escalation), T1210 (Exploitation of Remote Services), T1562.001 (Impair Defenses: Disable or Modify Tools)
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-rationale"></div>
 
 ## Rationale
-Removing the ability to pause updates prevents users from indefinitely deferring critical security patches. Deferring quality updates by 0 days ensures critical security patches are installed immediately upon release, while daily scheduled installation and permitting automated reboots ensures systems stay continuously remediated against known exploits.
+
+Privileged Access Workstations (PAWs) host the most sensitive interactive sessions and management credentials across the entire enterprise directory structure. Because PAWs are high-value targets for sophisticated adversaries seeking lateral movement into Active Directory Domain Controllers, applying cumulative security patches without latency is vital to system survival.
+
+<div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-technical-threat-vectors-paw-patch-assurance"></div>
+
+### Technical Threat Vectors & PAW Patch Assurance
+1. **Immediate Remediation of Known Vulnerabilities (`DeferQualityUpdatesPeriodInDays = 0`)**: Cumulative quality updates address critical vulnerabilities in core Windows subsystems, including the Windows kernel, LSASS, Remote Procedure Call (RPC), Kerberos authentication packages, and cryptographic minidrivers. Deferring quality updates by 0 days ensures that PAW hosts retrieve and stage security patches immediately upon availability, drastically shrinking the exploitation window against weaponized CVE exploits.
+2. **Elimination of Administrative Update Deferral (`SetDisablePauseUXAccess = 1`)**: Tier 0 operators frequently manage demanding operational workloads and may be tempted to click "Pause updates" to avoid scheduled reboots. Allowing updates to be paused on a PAW risks leaving the management plane exposed to public exploits for weeks. Disabling UX pause controls ensures that security patch installation is non-negotiable and deterministic.
+3. **Mandatory Restart Enforcement for Kernel Patch Activation (`NoAutoRebootWithLoggedOnUsers = 0`)**: Security patches that fix memory-resident DLLs, RPC runtimes, and kernel drivers cannot complete their installation until the host reboots. If a disconnected or locked administrative session halts the reboot process, the PAW remains vulnerable despite patches being staged on disk. Setting this policy to `0` (Disabled in GPO) allows automated reboots during off-hours maintenance windows to finalize patch activation.
+4. **Controlled Feature Update Lifecycle (`DeferFeatureUpdatesPeriodInDays = 180`)**: Major Windows feature updates introduce architectural modifications and updated driver frameworks. Deferring feature upgrades by 180 days protects Tier 0 administrative tooling (RSAT, smart card drivers, hardware token software, MMC snap-ins) from regression-induced failures while ensuring the operating system remains within supported enterprise servicing branches.
+5. **Absolute Prohibition of Preview Channel Builds (`ManagePreviewBuildsPolicyValue = 1`)**: Enrolling a PAW in Windows Insider preview builds introduces untested pre-release code into Tier 0. Pre-release builds violate isolation and verification principles and must never execute on administrative hardware.
 
 ---
 
 <div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users will not be able to pause updates. The system may reboot during designated maintenance windows to complete patch application.
+
+* **Operational Impact**: Tier 0 administrators cannot pause updates. Automated reboots occur during off-hours maintenance windows (e.g., 03:00 AM) to complete patch installations.
+* **Compatibility**: 180-day feature update deferral preserves administrative tool compatibility (RSAT, Active Directory Administrative Center, PowerShell modules). Quality updates are applied without deferral.
+* **Network & WSUS Architecture**: PAWs in isolated management VLANs retrieve updates from internal, dedicated Tier 0 WSUS servers or secure update relays.
+* **Rollout Recommendations**: Mandatory for all PAWs; coordinate with directory administration teams regarding designated daily maintenance reboot windows.
 
 ---
 
@@ -66928,23 +68053,19 @@ Removing the ability to pause updates prevents users from indefinitely deferring
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
   * **Remove access to 'Pause updates' feature**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
   * **Manage preview builds**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
-  * **Select when Preview Builds and Feature Updates are received**: Set to `Enabled: Defer 180 days`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
-  * **Select when Quality Updates are received**: Set to `Enabled: Defer 0 days`
+  * **Select when Preview Builds and Feature Updates are received**: Set to `Enabled`, select **Semi-Annual Channel**, and set deferral to `180` days
+  * **Select when Quality Updates are received**: Set to `Enabled`, set deferral to `0` days
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience`
-  * **Configure Automatic Updates**: Set to `Enabled: Scheduled install day 0 - Every day`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience`
+  * **Configure Automatic Updates**: Set to `Enabled`, select option **4 - Auto download and schedule the install**, set scheduled install day to `0 - Every day`, and configure a suitable maintenance hour (e.g., `03:00`)
   * **No auto-restart with logged on users for scheduled automatic updates installations**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the dedicated PAW Organizational Unit and verify replication across all Domain Controllers.
 
 ---
 
@@ -67179,12 +68300,27 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /s
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /s
+```
+Verify that all configured values match the defined baseline.
+
+---
+
 <div id="07-paws-admin-templates-configure-paw-at-windows-update-policies-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.93.1.1, 18.10.93.2.2, 18.10.93.2.3, 18.10.93.4.1, 18.10.93.4.2, 18.10.93.4.3
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.93.1, 18.10.93.2, 18.10.93.3, 18.10.93.4
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Windows Update
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Administrative Endpoint Hardening
+* **MITRE ATT&CK**: [T1190: Exploit Public-Facing Application](https://attack.mitre.org/techniques/T1190/), [T1068: Exploitation for Privilege Escalation](https://attack.mitre.org/techniques/T1068/), [T1210: Exploitation of Remote Services](https://attack.mitre.org/techniques/T1210/), [T1562.001: Impair Defenses: Disable or Modify Tools](https://attack.mitre.org/techniques/T1562/001/)
+* **Related Controls**: [REQ-PAW-187: Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions for PAWs](#07-paws-admin-templates-configure-paw-at-data-collection-preview-builds-md), [REQ-PAW-175: Administrative Templates: Restrict Internet Communication for PAWs](#07-paws-admin-templates-configure-paw-at-internet-communication-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -92486,8 +93622,8 @@ The following 30 unitary administrative template hardening controls must be enfo
 <div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-168](#07-paws-admin-templates-configure-paw-at-smbv1-md); for Domain Controllers, refer to [REQ-DC-016](#02-domain-controllers-disable-smbv1-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -92495,23 +93631,57 @@ The following 30 unitary administrative template hardening controls must be enfo
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SYSTEM\CurrentControlSet\Services\mrxsmb10\Start` = `4`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters\SMB1` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Lanman Workstation (SMB Client Driver)**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Workstation\Configure SMB v1 client driver` -> **Enabled** (Value: `Disable driver (recommended)`)
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\mrxsmb10`
+    * Value Name: `Start`
+    * Value Type: `REG_DWORD`
+    * Value Data: `4` (Disabled)
+  * **Lanman Server (SMB Server Service)**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Server\Configure SMB v1 server` -> **Disabled**
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters`
+    * Value Name: `SMB1`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-rationale"></div>
 
 ## Rationale
-Legacy Server Message Block version 1 (SMBv1) protocol possesses fundamental architectural security weaknesses, lacks integrity and encryption controls, and was the primary exploitation vector in catastrophic automated malware outbreaks (e.g., WannaCry, NotPetya). Disabling both the client driver (mrxsmb10) and server service parameter completely eliminates this attack surface.
+Server Message Block version 1 (SMBv1) is a legacy file and print sharing protocol designed in the early 1980s that suffers from severe architectural design flaws, obsolete cryptographic mechanisms, and extensive vulnerabilities exploited in widespread cyberattacks.
+
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-1-architectural-insecurity-and-exploitation-vectors"></div>
+
+### 1. Architectural Insecurity and Exploitation Vectors
+SMBv1 lacks modern integrity validation, message authentication, and transport layer encryption:
+* **Remote Code Execution (RCE) and Wormable Exploits**: SMBv1 handling within the Windows kernel (`srv.sys` and `srvnet.sys`) was the primary execution vehicle for EternalBlue (MS17-010 / CVE-2017-0144), which facilitated devastating autonomous ransomware outbreaks including WannaCry, NotPetya, and BadRabbit. Buffer handling vulnerabilities in SMBv1 transaction processing allow unauthenticated remote attackers to execute arbitrary shellcode in ring 0 kernel space.
+* **Lack of Pre-Authentication Integrity**: SMBv1 lacks pre-authentication integrity checks (introduced in SMB 3.1.1), making SMB sessions vulnerable to adversary-in-the-middle (AiTM) tampering, connection downgrades, and credential stripping.
+* **Insecure Legacy Cryptography**: SMBv1 relies on DES and single-DES derived hashes for integrity signing, which can be cracked or forged in real time by adversaries, facilitating session hijacking and credential relaying.
+
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-2-comprehensive-dual-component-decommissioning"></div>
+
+### 2. Comprehensive Dual-Component Decommissioning
+Effective deprecation of SMBv1 requires disabling both the client and server components:
+* Setting `Start = 4` on the `mrxsmb10` service stops the SMBv1 client mini-redirector driver from loading into kernel memory, preventing the endpoint from initiating outbound SMBv1 connections to rogue or compromised servers.
+* Setting `SMB1 = 0` under `LanmanServer\Parameters` prevents the local server service from negotiating SMBv1 sessions with inbound network nodes, closing the listening attack surface on TCP port 445 and NetBIOS port 139.
+
+<div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1210 - Exploitation of Remote Services**: Exploitation of legacy SMBv1 vulnerabilities for network lateral movement.
+* **T1557.001 - Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay**: Intercepting and relaying unauthenticated or weakly signed SMB negotiation handshakes.
+* **T1021.002 - Remote Services: SMB/Windows Admin Shares**: Adversary access to administrative shares over insecure SMB channels.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Endpoints will be unable to access file shares or network resources hosted on obsolete legacy NAS appliances or systems running Windows XP/Server 2003 that only support SMBv1.
+* **Enterprise Network Compatibility**: Modern Windows releases (Windows 10 version 1709+, Windows 11, Windows Server 2019+) disable SMBv1 by default. Commercial file servers running Windows Server 2012 and later, Samba 4.x, and contemporary NAS operating systems fully support SMB 2.0.2, 2.1, 3.0, 3.0.2, and 3.1.1.
+* **Legacy Storage and Embedded Devices**: Network appliances manufactured prior to 2010 (e.g., legacy network scanners, multi-function copiers, obsolete Linux-based NAS units, or embedded industrial controllers) that only support SMBv1 will be unable to access file shares on hardened workstations or receive scan-to-folder transmissions.
+* **Remediation for Legacy Dependencies**: Organizations must upgrade device firmware, replace obsolete hardware, or transition file ingest workflows to secure protocols (e.g., SFTP, HTTPS WebDAV, or cloud storage APIs) rather than enabling SMBv1 on corporate endpoints.
 
 ---
 
@@ -92528,11 +93698,12 @@ Legacy Server Message Block version 1 (SMBv1) protocol possesses fundamental arc
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Workstation`
-  * **Configure SMB v1 client driver**: Set to `Enabled` (Disable driver (recommended))
+  * **Configure SMB v1 client driver**: Set to `Enabled`
+  * Set **Driver state** drop-down to: `Disable driver (recommended)`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\Lanman Server`
   * **Configure SMB v1 server**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit (OU) and verify policy replication across endpoints using `gpupdate /force`.
 
 ---
 
@@ -92632,9 +93803,11 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-smbv1-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.4.2, Section 18.4.3; ANSSI R21
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.4.2, Section 18.4.3; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.4.2, Section 18.4.3
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000210, Windows 11 STIG Rule WN11-CC-000210
+* **ANSSI Active Directory Hardening Guide**: Recommendation R42 (Decommissioning legacy network protocols and SMBv1)
+* **Microsoft Security Baseline**: Windows Client and Server Security Baseline (Disabling SMBv1 Client and Server)
+* **Microsoft Security Bulletin**: MS17-010 (Vulnerabilities in Microsoft Windows SMB Server - CVE-2017-0143, CVE-2017-0144)
 
 
 <div style="page-break-before: always;"></div>
@@ -92648,8 +93821,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-169](#07-paws-admin-templates-configure-paw-at-netbt-nodetype-md); for Domain Controllers, refer to [REQ-DC-017](#02-domain-controllers-harden-network-parameters-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -92657,23 +93830,61 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\NodeType` = `2`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\NoNameReleaseOnDemand` = `1`
+* **GPO Paths / Registry Locations**:
+  * **NetBT Node Type (P-Node)**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\TCPIP Settings\Parameters\NetBT NodeType configuration` -> **Enabled** (Value: `P-node (recommended)`)
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters`
+    * Value Name: `NodeType`
+    * Value Type: `REG_DWORD`
+    * Value Data: `2` (P-node / Point-to-Point)
+  * **NetBIOS Name Release Protection**:
+    * GPO Path: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers` -> **Enabled**
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters`
+    * Value Name: `NoNameReleaseOnDemand`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Ignore unauthenticated release requests)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-rationale"></div>
 
 ## Rationale
-Configuring NetBT NodeType to P-node (Point-to-Point) forces name resolution via unicast WINS rather than broadcast, preventing unauthenticated network adversaries from responding to NetBIOS broadcasts or poisoning name resolution caches. Forcing the system to ignore unauthenticated NetBIOS name release requests prevents denial-of-service attacks that force the computer to relinquish its registered network identity.
+NetBIOS over TCP/IP (NetBT, defined in RFC 1001/1002) is a legacy name resolution and session transport protocol that relies heavily on unauthenticated IP broadcasts over UDP port 137. In modern enterprise environments, NetBT introduces significant attack vectors that can be weaponized for credential theft and denial of service.
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-1-suppression-of-broadcast-name-poisoning-p-node-enforcement"></div>
+
+### 1. Suppression of Broadcast Name Poisoning (P-Node Enforcement)
+The Windows TCP/IP stack supports four NetBIOS node types:
+* **1 (B-node / Broadcast)**: Performs name resolution exclusively via IP subnet broadcasts.
+* **2 (P-node / Peer-to-Peer)**: Resolves names strictly via directed unicast queries to designated WINS servers. Broadcast queries are entirely prohibited.
+* **4 (M-node / Mixed)**: Broadcasts first, then queries WINS if broadcast fails.
+* **8 (H-node / Hybrid)**: Queries WINS first, then falls back to subnet broadcast if WINS fails to resolve the name.
+
+In default configurations, Windows systems frequently operate as B-node or H-node. When a client attempts to resolve an unavailable or misspelled network resource, it transmits unauthenticated NetBIOS Name Service (NBNS) broadcast frames across the local collision domain. Threat actors running tools such as Responder or Inveigh capture these broadcasts and reply with forged IP mappings, coercing the victim into initiating NTLM authentication against the adversary's machine. Enforcing **P-node (`NodeType = 2`)** completely eliminates NBNS broadcast generation, neutralizing broadcast poisoning at the transport layer.
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-2-denial-of-service-via-spoofed-name-release-requests"></div>
+
+### 2. Denial of Service via Spoofed Name Release Requests
+NetBT includes an unauthenticated "Name Release" packet type intended to resolve IP address conflicts. If `NoNameReleaseOnDemand` is not explicitly enforced (`0`), any network node can send a spoofed UDP port 137 packet claiming that the victim's NetBIOS computer name conflicts with an existing machine:
+* The receiving Windows system immediately relinquishes its registered NetBIOS identity and ceases responding to inbound network requests under that name.
+* Attackers can systematically de-register file servers, print servers, or administrative management endpoints, causing targeted network denial of service.
+* Setting `NoNameReleaseOnDemand = 1` instructs the Windows network subsystem to ignore all unsolicited Name Release demands unless they originate from an authoritative, trusted WINS server.
+
+<div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1557.001 - Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay**: Intercepting broadcast name requests to capture or relay NTLM credentials.
+* **T1040 - Network Sniffing**: Sniffing broadcast name resolution traffic across the local LAN segment.
+* **T1498 - Network Denial of Service**: Forcing victim endpoints to surrender their network identities via spoofed name release frames.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Environments relying purely on unrouted broadcast-based NetBIOS name resolution without DNS or WINS will experience resolution failures.
+* **Active Directory DNS Compatibility**: Production Active Directory networks utilize DNS as the primary locator mechanism for Kerberos, LDAP, and SMB communications. Enforcing P-node does not impact DNS name resolution.
+* **WINS Server Requirements**: If legacy enterprise line-of-business applications require NetBIOS name resolution, designated WINS servers must be deployed and assigned via DHCP option 44/46. If no WINS servers are configured, NetBT resolution fails silently and queries fall through directly to DNS, which is the desired secure behavior.
+* **Peer-to-Peer Workgroups**: Isolated workgroups lacking a local DNS server or WINS infrastructure will experience name resolution failures between local workstations if NetBT is restricted to P-node. Such unmanaged configurations are unsupported in hardened corporate Active Directory architectures.
 
 ---
 
@@ -92690,11 +93901,12 @@ Configuring NetBT NodeType to P-node (Point-to-Point) forces name resolution via
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\TCPIP Settings\Parameters`
-  * **NetBT NodeType configuration**: Set to `Enabled` (P-node (recommended))
+  * **NetBT NodeType configuration**: Set to `Enabled`
+  * Set **NetBT NodeType** drop-down to: `P-node (recommended)`
 * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
   * **MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -92790,9 +94002,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-netbt-nodetype-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.4.7, Section 18.5.7
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.4.7; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.4.7; CIS Windows Server Benchmark: Section 18.4.7
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000215, Windows 11 STIG Rule WN11-CC-000215
+* **ANSSI Active Directory Hardening Guide**: Recommendation R42 (Suppression of obsolete name resolution protocols)
+* **Microsoft Security Guidance**: NetBIOS over TCP/IP Implementation Specifications (RFC 1001, RFC 1002)
 
 
 <div style="page-break-before: always;"></div>
@@ -92806,8 +94019,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-170](#07-paws-admin-templates-configure-paw-at-mss-ip-source-routing-md); for Domain Controllers, refer to [REQ-DC-018](#02-domain-controllers-harden-network-parameters-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -92815,24 +94028,64 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters\DisableIPSourceRouting` = `2`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\DisableIPSourceRouting` = `2`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\EnableICMPRedirect` = `0`
+* **GPO Paths / Registry Locations**:
+  * **IPv6 IP Source Routing Protection**:
+    * GPO Path: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\MSS: (DisableIPSourceRouting IPv6) IP source routing protection level` -> **Enabled** (Value: `Highest protection, source routing is completely disabled`)
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters`
+    * Value Name: `DisableIPSourceRouting`
+    * Value Type: `REG_DWORD`
+    * Value Data: `2` (Highest protection)
+  * **IPv4 IP Source Routing Protection**:
+    * GPO Path: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\MSS: (DisableIPSourceRouting) IP source routing protection level` -> **Enabled** (Value: `Highest protection, source routing is completely disabled`)
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
+    * Value Name: `DisableIPSourceRouting`
+    * Value Type: `REG_DWORD`
+    * Value Data: `2` (Highest protection)
+  * **Disable ICMP Redirect Processing**:
+    * GPO Path: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes` -> **Disabled**
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
+    * Value Name: `EnableICMPRedirect`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Ignore ICMP redirects)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-rationale"></div>
 
 ## Rationale
-IP source routing allows sending devices to dictate the exact network routing path rather than allowing routers to determine the path. Attackers can leverage source routing to bypass boundary firewalls and packet filters. Furthermore, ICMP redirects allow adjacent nodes to inject arbitrary routes into the local routing table, enabling man-in-the-middle packet interception.
+The Internet Protocol suite (IPv4 RFC 791 and IPv6 RFC 2460/8200) contains legacy diagnostic and routing mechanisms that allow packet senders and adjacent network nodes to manipulate routing decisions. In hostile or untrusted network environments, these capabilities introduce critical exposure to packet spoofing, firewall evasion, and adversary-in-the-middle attacks.
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-1-ip-source-routing-exploitation-vectors"></div>
+
+### 1. IP Source Routing Exploitation Vectors
+IP Source Routing (both Strict and Loose Source and Record Route options in IPv4, and Routing Header Type 0 in IPv6) permits the originating sender to embed a sequence of intermediate IP hops directly within the packet header, overriding standard autonomous system and router path decisions:
+* **Perimeter Firewall and Boundary Filter Bypasses**: Attackers can specify trusted intermediate transit routers to guide unauthorized packets across network boundaries or through packet-filtering gateways that would normally drop external traffic.
+* **Blind TCP Spoofing and Session Injection**: When source routing is enabled, an external attacker who cannot see legitimate two-way traffic can forge the source IP of a trusted internal machine and designate an attacker-controlled intermediary router as a return hop. The victim endpoint obeys the reverse source route, returning SYN-ACK and payload responses directly to the attacker, completing the TCP handshake and enabling unauthorized command injection.
+* **IPv6 Routing Header Type 0 Amplification Attacks**: In IPv6, maliciously constructed RH0 headers allow packets to loop between nodes repeatedly, causing network bandwidth exhaustion and CPU denial of service (CVE-2007-2242 / RFC 5095).
+* Setting `DisableIPSourceRouting = 2` enforces the highest protection level on both IPv4 and IPv6 stacks, instructing the Windows kernel to unconditionally drop all packets containing source route options.
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-2-icmp-redirect-type-5-route-hijacking"></div>
+
+### 2. ICMP Redirect (Type 5) Route Hijacking
+ICMP Redirect messages are designed to notify hosts when an alternate local gateway provides a shorter path to a specific destination network. However, ICMP redirect packets lack cryptographic authentication:
+* **Route Table Poisoning**: An unauthenticated attacker situated on the same local subnet can transmit spoofed ICMP Type 5 Redirect frames claiming to be the default gateway.
+* **Adversary-in-the-Middle (AiTM) Positioning**: The victim endpoint's IP stack dynamically inserts the attacker's chosen gateway into its route table cache. Outbound connections destined for critical resources (such as Domain Controllers, authentication proxies, or intranet servers) are redirected through the attacker's host.
+* Setting `EnableICMPRedirect = 0` completely disables the processing of ICMP Redirect messages, guaranteeing that the endpoint's routing table cannot be altered by unauthenticated network packets.
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1557 - Adversary-in-the-Middle**: Route hijacking via forged ICMP redirect messages to inspect or alter transit traffic.
+* **T1565.002 - Data Manipulation: Transmitted Data Manipulation**: Manipulating packet delivery paths to intercept sensitive communications.
+* **T1498 - Network Denial of Service**: Generating artificial routing loops or blackholing network traffic via forged routing headers.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: None on standard enterprise networks. Legacy diagnostic testing relying on manually routed packet paths will be rejected.
+* **Production Enterprise Networks**: Standard corporate networks manage routing exclusively at the layer-3 switch and router tier using dynamic protocols (OSPF, BGP) or First Hop Redundancy Protocols (HSRP, VRRP). Client endpoints and member servers have no legitimate requirement to process ICMP redirects or execute source-routed packets.
+* **Network Diagnostics**: Specialized legacy diagnostic tools that explicitly craft source-routed probe packets will fail to elicit responses from hardened endpoints. Standard diagnostics (`ping`, `traceroute`, `pathping`) function normally without issue.
 
 ---
 
@@ -92849,13 +94102,15 @@ IP source routing allows sending devices to dictate the exact network routing pa
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (DisableIPSourceRouting IPv6) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled`
+  * **MSS: (DisableIPSourceRouting IPv6) IP source routing protection level**: Set to `Enabled`
+  * Select drop-down value: `Highest protection, source routing is completely disabled`
 * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (DisableIPSourceRouting) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled`
+  * **MSS: (DisableIPSourceRouting) IP source routing protection level**: Set to `Enabled`
+  * Select drop-down value: `Highest protection, source routing is completely disabled`
 * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
   * **MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify replication using `gpupdate /force`.
 
 ---
 
@@ -92978,9 +94233,11 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-mss-ip-source-routing-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.5.2, Section 18.5.3, Section 18.5.5
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.5.8, Section 18.5.9, Section 18.5.10; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.5.8, Section 18.5.9, Section 18.5.10
+* **DISA STIG**: Windows 10 STIG Rules WN10-SO-000185, WN10-SO-000190, WN10-SO-000195
+* **ANSSI Active Directory Hardening Guide**: Section 3.2.4 (TCP/IP Stack Hardening on Managed Nodes)
+* **Microsoft Security Baseline**: MSS (Microsoft Security Compliance Toolkit) Parameter Baseline
+* **IETF RFCs**: RFC 791 (Internet Protocol), RFC 5095 (Deprecation of Type 0 Routing Headers in IPv6)
 
 
 <div style="page-break-before: always;"></div>
@@ -93003,25 +94260,45 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon` = `0`
-  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\ScreenSaverGracePeriod` = `5`
-  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeDllSearchMode` = `1`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security\WarningLevel` = `90`
+* **Policy Category**: Computer Configuration -> Policies -> Windows Settings -> Security Settings -> Local Policies -> Security Options (MSS Settings)
+* **Policy Settings**:
+  * MSS: (AutoAdminLogon) Enable Automatic Logon
+  * MSS: (SafeDllSearchMode) Enable Safe DLL search mode
+  * MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires
+  * MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning
+* **Registry Keys & Values**:
+  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoAdminLogon` = `"0"` (REG_SZ)
+  * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\ScreenSaverGracePeriod` = `5` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeDllSearchMode` = `1` (REG_DWORD)
+  * `HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security\WarningLevel` = `90` (REG_DWORD)
+* **Vulnerability References**: MITRE ATT&CK: T1574.001 (DLL Search Order Hijacking), T1552.002 (Credentials in Registry), T1070.001 (Clear Windows Event Logs), T1200 (Hardware Additions / Physical Access)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-rationale"></div>
 
 ## Rationale
-Disabling AutoAdminLogon ensures unattended machines boot into an interactive credential prompt rather than logging into an active session. Safe DLL search mode prevents search-order hijacking by ensuring system directories are evaluated prior to the current working directory. The screensaver grace period minimizes the physical access window after screensaver lock, and the WarningLevel parameter issues administrative alerts before the security event log is exhausted.
+
+The Microsoft Solutions for Security (MSS) baseline settings provide low-level kernel, session manager, and authentication subsystem protections. These settings address fundamental Windows operating system security behaviors, including DLL search-order resolution, automatic logon credential storage, physical console lockout latency, and security event log capacity alerting.
+
+<div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-technical-threat-vectors-system-protections"></div>
+
+### Technical Threat Vectors & System Protections
+1. **DLL Search-Order Hijacking Mitigation (`SafeDllSearchMode = 1`)**: When an executable calls `LoadLibrary()` or `LoadLibraryEx()` without specifying an absolute path, Windows searches for the requested DLL across predefined locations. In legacy or unhardened mode, the Current Working Directory (CWD) is evaluated immediately after the application directory (position 2), prior to `%SystemRoot%\System32`. If an attacker tricks a user into opening an application from an untrusted or world-writable directory (e.g., `C:\Temp`, downloads folders, or an SMB file share containing a malicious DLL named `version.dll` or `cryptbase.dll`), the executable loads the attacker's payload. Enabling Safe DLL Search Mode shifts the current directory to position 5, evaluating `%SystemRoot%\System32`, `%SystemRoot%\System`, and `%SystemRoot%` first, neutralizing CWD-based DLL preloading attacks.
+2. **Preventing Plaintext Credential Storage & Unattended Access (`AutoAdminLogon = 0`)**: Windows AutoAdminLogon allows automated interactive logons upon system reboot. To accomplish this, Windows stores the username, domain, and unencrypted cleartext password (`DefaultPassword`) in the local registry. Any local user, remote administrator, or offline registry extraction tool can easily dump these plain-text credentials. Furthermore, automatic logon leaves unattended workstations booted directly into an authenticated session. Enforcing `AutoAdminLogon = 0` guarantees that an interactive credential challenge is mandatory at boot.
+3. **Minimizing Physical Console Hijacking Latency (`ScreenSaverGracePeriod = 5`)**: When a workstation screensaver activates or display lock initiates, Windows provides an unauthenticated grace period during which moving the mouse or pressing a key restores the session without prompting for credentials. If left unconfigured or set to excessive values, an opportunistic physical adversary walking past an unattended desk can seize control of an active corporate session. Constraining the grace period to 5 seconds or fewer closes this physical exploitation window.
+4. **Early Warning for Security Event Log Exhaustion (`WarningLevel = 90`)**: Security event log exhaustion occurs when rapid logging activity or malicious event flooding threatens to overwrite critical forensic telemetry. When the security log reaches 90% capacity, the Local Security Authority (LSA) generates Event ID 1104 ("The security log is now full" warning), alerting security analysts and centralized SIEM collectors to rotate logs or investigate potential denial-of-service attempts before evidence is lost.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Kiosk setups or automated test systems requiring automatic logon must use dedicated constrained user accounts. Third-party applications that rely on loading DLLs from the current directory must place libraries in application or system paths.
+
+* **Operational Impact**: Systems requiring automatic logon (such as interactive kiosks or dedicated display monitors) must utilize specialized restricted Shell Launcher configurations rather than Winlogon automatic logon. Applications that rely on loading custom DLLs from the current directory must be updated to place libraries in the application directory or specify full qualified file paths.
+* **User Experience**: Workstations require authentication immediately after the screensaver engages (5-second grace window).
+* **Forensic Integrity**: SIEM and operations teams receive early capacity warnings when security logs reach 90% utilization.
+* **Rollout Recommendations**: Safe for immediate enterprise-wide deployment across all member servers and workstations.
 
 ---
 
@@ -93035,18 +94312,17 @@ Disabling AutoAdminLogon ensures unattended machines boot into an interactive cr
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (AutoAdminLogon) Enable Automatic Logon**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (SafeDllSearchMode) Enable Safe DLL search mode**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires**: Set to `Enabled: 5 or fewer seconds`
-* Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning**: Set to `Enabled: 90% or less`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options
+   ```
+4. Configure the following MSS policies (imported via `Secedit` or Microsoft Security Compliance Toolkit):
+   * **MSS: (AutoAdminLogon) Enable Automatic Logon**: Set to `Disabled`
+   * **MSS: (SafeDllSearchMode) Enable Safe DLL search mode**: Set to `Enabled`
+   * **MSS: (ScreenSaverGracePeriod) The time in seconds before the screen saver grace period expires**: Set to `Enabled: 5 or fewer seconds`
+   * **MSS: (WarningLevel) Percentage threshold for the security event log at which the system will generate a warning**: Set to `Enabled: 90% or less`
+5. Click **Apply**, then click **OK** for each policy.
+6. Link the GPO to the appropriate Organizational Unit (OU) and verify replication across all domain controllers.
 
 ---
 
@@ -93193,12 +94469,35 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v ScreenSaverGracePeriod
+reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager" /v SafeDllSearchMode
+reg query "HKLM\SYSTEM\CurrentControlSet\Services\Eventlog\Security" /v WarningLevel
+```
+Expected output:
+```text
+AutoAdminLogon            REG_SZ       0
+ScreenSaverGracePeriod    REG_DWORD    0x5
+SafeDllSearchMode         REG_DWORD    0x1
+WarningLevel              REG_DWORD    0x5a
+```
+
+---
+
 <div id="08-endpoints-admin-templates-configure-end-at-mss-system-protections-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.5.1, Section 18.5.9, Section 18.5.10, Section 18.5.13
+* **Microsoft Security Compliance Toolkit**: MSS (Microsoft Solutions for Security) Baseline Settings
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1574.001: DLL Search Order Hijacking](https://attack.mitre.org/techniques/T1574/001/), [T1552.002: Credentials in Registry](https://attack.mitre.org/techniques/T1552/002/), [T1070.001: Clear Windows Event Logs](https://attack.mitre.org/techniques/T1070/001/), [T1200: Hardware Additions](https://attack.mitre.org/techniques/T1200/)
+* **Related Controls**: [REQ-END-188: Administrative Templates: Interactive Logon and Credential Display Options](#08-endpoints-admin-templates-configure-end-at-logon-display-options-md), [REQ-END-200: Administrative Templates: Configure Advanced Event Log Sizes](#08-endpoints-admin-templates-configure-end-at-event-log-sizes-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -93221,22 +94520,43 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Low
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata\PreventDeviceMetadataFromNetwork` = `1`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Device Installation
+* **Policy Name**: Prevent device metadata retrieval from the Internet
+* **Supported On**: Windows 7 / Windows Server 2008 R2 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata`
+* **Registry Value**: `PreventDeviceMetadataFromNetwork`
+* **Value Type**: `REG_DWORD`
+* **Value Data**: `1` (0x00000001 = Suppress device metadata retrieval from external network)
+* **Vulnerability References**: MITRE ATT&CK: T1082 (System Information Discovery), T1120 (Peripheral Device Discovery), T1041 (Exfiltration Over C2 Channel)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-rationale"></div>
 
 ## Rationale
-Prevents the operating system from searching Windows Update and Microsoft public servers for device metadata, icons, and manufacturer information when new peripheral hardware is connected. This reduces unnecessary external telemetry and prevents information disclosure about attached hardware assets.
+
+When physical or virtual peripherals—such as USB security tokens, smart card readers, external storage media, printers, or network adapters—are connected to a Windows system, the Device Setup Manager (DSM) initiates automated queries to Microsoft Windows Metadata and Internet Services (WMIS). These services deliver OEM-branded device icons, detailed model descriptions, and companion application links displayed in the "Devices and Printers" interface.
+
+<div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-technical-threat-vectors-telemetry-exposure"></div>
+
+### Technical Threat Vectors & Telemetry Exposure
+1. **Peripheral Hardware Fingerprinting & Information Disclosure**: Outbound WMIS requests transmit specific hardware identifiers, including Vendor IDs (VID), Product IDs (PID), revision codes, and subsystem identifiers over network channels. Upstream network eavesdroppers, compromised intermediate proxies, or external telemetry monitors can passively inspect these requests to catalogue connected peripheral assets, identify high-assurance hardware tokens (such as FIDO2 authenticators or PKI smart cards), and map internal system hardware architectures.
+2. **Uncontrolled Egress Connections**: In regulated or segmented enterprise environments, workstations should not initiate automated outbound connections to public Internet CDNs whenever a user connects peripheral equipment. These spontaneous lookups create noise in proxy logs and firewall egress inspection consoles.
+3. **Attack Surface Reduction**: Device metadata packages contain XML manifests, icon binaries, and software staging links. Ingesting and parsing remote metadata packages from public CDNs within the operating system device installer infrastructure creates an unnecessary attack surface against parser vulnerabilities.
+4. **Deterministic Device Management**: Corporate device configuration should remain fully deterministic and managed through approved enterprise driver repositories (such as WSUS, SCCM/MECM, or Intune) rather than opportunistic public CDN queries.
+
+Enabling this control forces Windows to rely solely on locally cached driver metadata and generic operating system device classes, eliminating external metadata network requests.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Custom peripheral icons and detailed hardware descriptions in the 'Devices and Printers' folder will revert to generic device symbols.
+
+* **Operational Impact**: Connected peripherals will display standard generic device icons (e.g., standard generic smart card, printer, or keyboard icon) instead of vendor-branded photorealistic artwork in the Windows shell. Functional device driver installation and hardware operations are completely unaffected; drivers included in the local Driver Store or distributed via corporate management channels install normally.
+* **User Experience**: Minimal to zero impact. Users see generic hardware icons in legacy Control Panel applets.
+* **Network Impact**: Eliminates outbound HTTP/HTTPS connections targeting `dmd.metaservices.microsoft.com` and related metadata distribution endpoints.
+* **Rollout Recommendations**: Can be deployed immediately across all enterprise client workstations and servers with no operational disruption.
 
 ---
 
@@ -93250,12 +94570,14 @@ Prevents the operating system from searching Windows Update and Microsoft public
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Device Installation`
-  * **Prevent device metadata retrieval from the Internet**: Set to `Enabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Device Installation
+   ```
+4. Double-click **Prevent device metadata retrieval from the Internet**.
+5. Select **Enabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the appropriate Organizational Unit (OU) and verify policy replication across domain controllers.
 
 ---
 
@@ -93325,12 +94647,29 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy setting via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" /v PreventDeviceMetadataFromNetwork
+```
+Expected output:
+```text
+PreventDeviceMetadataFromNetwork    REG_DWORD    0x1
+```
+
+---
+
 <div id="08-endpoints-admin-templates-configure-end-at-device-metadata-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.7.2
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Device Installation
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1082: System Information Discovery](https://attack.mitre.org/techniques/T1082/), [T1120: Peripheral Device Discovery](https://attack.mitre.org/techniques/T1120/), [T1041: Exfiltration Over C2 Channel](https://attack.mitre.org/techniques/T1041/)
+* **Related Controls**: [REQ-END-186: Administrative Templates: Restrict Internet Communication](#08-endpoints-admin-templates-configure-end-at-internet-communication-md), [REQ-END-196: Administrative Templates: Require PIN Pairing for Connect](#08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -93352,26 +94691,46 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-implementation-details"></div>
 
 ## Implementation Details
-* **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}\NoBackgroundPolicy` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}\NoGPOListChanges` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\NoBackgroundPolicy` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\NoGPOListChanges` = `0`
+* **Priority**: High
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Group Policy
+* **Policy Settings**:
+  * Configure registry policy processing
+  * Configure security policy processing
+* **Supported On**: Windows 2000 or Windows Server 2003 and above
+* **Registry Keys & Client-Side Extension (CSE) GUIDs**:
+  * Registry Extension: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}`
+  * Security Extension: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}`
+* **Registry Values**:
+  * `NoBackgroundPolicy` = `0` (REG_DWORD, Process policies during periodic background refresh)
+  * `NoGPOListChanges` = `0` (REG_DWORD, Process and reapply policies even if GPOs have not changed)
+* **Vulnerability References**: MITRE ATT&CK: T1562.001 (Impair Defenses: Disable or Modify Tools), T1112 (Modify Registry), T1484.001 (Group Policy Modification)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-rationale"></div>
 
 ## Rationale
-By default, Group Policy client side extensions skip reapplication of policies during background refreshes if the central GPO version has not incremented. Forcing background reapplication guarantees that any local registry tampering or administrative drift is continuously corrected and overwritten by enterprise security baselines.
+
+The Windows Group Policy service (`gpsvc`) manages operating system and security configurations through Client-Side Extensions (CSEs). To minimize network overhead and processing latency, the default Windows Group Policy engine implements an optimization check: during periodic background refresh cycles (every 90 minutes with a randomized 30-minute delta), CSEs compare the local GPO version with the Active Directory SYSVOL version. If the GPO version has not incremented, the CSE skips applying settings.
+
+<div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-technical-threat-vectors-anti-tampering-defense"></div>
+
+### Technical Threat Vectors & Anti-Tampering Defense
+1. **Remediating Local Defense Impairment & Registry Tampering**: Threat actors, living-off-the-land techniques, and malware frequently tamper with local registry values to weaken defenses (e.g., disabling Windows Defender, downgrading LSA protection, clearing audit policies, or re-enabling insecure legacy protocols). Under default Windows behavior, once an attacker modifies a hardened registry setting, the machine remains vulnerable indefinitely—even across background refresh cycles—because the central GPO version has not changed. Enforcing `NoGPOListChanges = 0` forces the Registry and Security CSEs to re-read and overwrite local settings during every background cycle, ensuring that unauthorized registry modifications are automatically reverted to the enterprise security baseline.
+2. **Eliminating Configuration Drift**: Administrative configuration drift occurs when local IT staff make temporary modifications during troubleshooting or software deployment and neglect to restore original parameters. Continuous background enforcement ensures that endpoints deterministically converge back to corporate security baselines.
+3. **Background Processing Enforcement (`NoBackgroundPolicy = 0`)**: Some legacy or degraded configurations restrict policy processing strictly to computer boot or user interactive logon. Enforcing background processing ensures that workstations and servers continuously refresh and validate their security posture without requiring machine restarts.
+4. **Resilience Against Ransomware Pre-Encryption Steps**: Many modern ransomware families attempt to disable local defense mechanisms prior to encrypting volumes. Continuous background policy re-enforcement continually asserts security controls, limiting the attacker's window of opportunity.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Slight, negligible CPU overhead during background Group Policy refresh cycles.
+
+* **Operational Impact**: Negligible CPU and disk I/O increase during the 90-minute background Group Policy refresh cycle. The Group Policy service reads locally cached security templates (`Secedit.sdb`) and registry policies (`Registry.pol`), resulting in lightweight execution that is imperceptible to users.
+* **Administrative Impact**: Local administrators cannot permanently override corporate baseline settings; any manual registry modifications to hardened parameters will be overwritten during the next refresh cycle.
+* **Network Impact**: Zero increase in network bandwidth, as the policy utilizes cached local policies when Active Directory versions match.
+* **Rollout Recommendations**: High security benefit with virtually zero operational risk; deploy across all workstations and member servers.
 
 ---
 
@@ -93385,14 +94744,20 @@ By default, Group Policy client side extensions skip reapplication of policies d
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
-  * **Configure registry policy processing**: Set to `Enabled` (Process even if GPO has not changed; do not skip during background processing)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
-  * **Configure security policy processing**: Set to `Enabled` (Process even if GPO has not changed; do not skip during background processing)
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Group Policy
+   ```
+4. Double-click **Configure registry policy processing**:
+   * Set to **Enabled**.
+   * Check **Process even if the Group Policy objects have not changed**.
+   * Uncheck **Do not apply during periodic background processing**.
+5. Double-click **Configure security policy processing**:
+   * Set to **Enabled**.
+   * Check **Process even if the Group Policy objects have not changed**.
+   * Uncheck **Do not apply during periodic background processing**.
+6. Click **Apply**, then click **OK** for both policies.
+7. Link the GPO to the appropriate Organizational Unit (OU) and verify policy replication across all domain controllers.
 
 ---
 
@@ -93535,12 +94900,27 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" /s
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" /s
+```
+Verify that `NoBackgroundPolicy` and `NoGPOListChanges` are present and set to `0x0`.
+
+---
+
 <div id="08-endpoints-admin-templates-configure-end-at-gp-processing-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.19.2, Section 18.9.19.3, Section 18.9.19.4, Section 18.9.19.5
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.31.2, Section 18.9.31.3
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Group Policy Client-Side Extension Processing
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1562.001: Impair Defenses: Disable or Modify Tools](https://attack.mitre.org/techniques/T1562/001/), [T1112: Modify Registry](https://attack.mitre.org/techniques/T1112/), [T1484.001: Group Policy Modification](https://attack.mitre.org/techniques/T1484/001/)
+* **Related Controls**: [REQ-END-182: Administrative Templates: MSS System and Session Security Protections](#08-endpoints-admin-templates-configure-end-at-mss-system-protections-md), [REQ-END-188: Administrative Templates: Interactive Logon and Credential Display Options](#08-endpoints-admin-templates-configure-end-at-logon-display-options-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -93563,22 +94943,43 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\EnableCdp` = `0`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Cross-Device Experiences
+* **Policy Name**: Continue experiences on this device
+* **Supported On**: Windows 10 (Version 1703) or Windows Server 2016 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+* **Registry Value**: `EnableCdp`
+* **Value Type**: `REG_DWORD`
+* **Value Data**: `0` (0x00000000 = Cross-Device Experiences / CDP Disabled)
+* **Vulnerability References**: MITRE ATT&CK: T1020 (Automated Exfiltration), T1115 (Clipboard Data), T1552 (Unsecured Credentials), T1080 (Taint Shared Content)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-rationale"></div>
 
 ## Rationale
-The Connected Devices Platform (CDP) coordinates cross-device application states and task handoffs over cloud synchronization and Bluetooth beacons. In enterprise environments, this introduces unmanaged synchronization pathways between managed corporate systems and external personal consumer devices.
+
+The Windows Connected Devices Platform (CDP, also known internally as Project Rome) facilitates device-to-device communication, application activity roaming, session continuation ("Continue on PC"), and cross-device clipboard sharing across Windows, iOS, and Android devices. While convenient for consumer multi-device environments, CDP introduces severe security and data-governance vulnerabilities within corporate enterprise networks.
+
+<div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-technical-threat-vectors-enterprise-risks"></div>
+
+### Technical Threat Vectors & Enterprise Risks
+1. **Unmanaged Data Exfiltration & Synchronization**: CDP continuously discovers companion devices using Bluetooth Low Energy (BLE) beacons, local Wi-Fi multicast, and Microsoft cloud relay graphs. When active, CDP synchronizes user activities, document titles, recently visited web URLs, and cloud clipboard contents across all devices linked to the user's Microsoft Account or Azure AD / Entra ID identity. This facilitates inadvertent or malicious exfiltration of sensitive enterprise assets to unmanaged personal devices.
+2. **Cross-Boundary Session Hijacking**: If an unmanaged personal phone or laptop sharing the user's identity is infected with malware, an attacker can exploit CDP remote-launch APIs to initiate malicious application commands, push arbitrary web URLs, or interact with services running on the domain-joined workstation without triggering perimeter network detection.
+3. **Bypassing Network Boundary Controls**: CDP leverages peer-to-peer Wi-Fi Direct and local subnet broadcast mechanisms, establishing ad-hoc communications channels between systems that bypass corporate firewalls, IDS/IPS sensors, and proxy inspection gateways.
+4. **Credential & Token Exposure**: Cloud-synchronized activity histories and clipboard caches may contain sensitive session tokens, temporary passwords, API secrets, or PII copied during day-to-day operations, exposing them to non-compliant cloud repositories and secondary endpoints.
+
+Disabling CDP completely shuts down the Connected Devices Platform User Service (`CDPUserSvc`), suppresses peer discovery broadcasts, and blocks cloud activity synchronization.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Cross-device features such as 'Continue on PC' from companion mobile devices or shared browser sessions will be unavailable.
+
+* **Operational Impact**: Cross-device handoff features (such as sending web pages from mobile browsers to desktop, syncing clipboard history across distinct endpoints, and roaming recent app activities) will be unavailable. Standard local clipboard operations, in-session cut/copy/paste, and managed Remote Desktop (RDP) clipboard redirection remain fully functional.
+* **User Experience**: Users cannot link personal mobile devices or unmanaged home PCs to their corporate desktop sessions for task handoff.
+* **Network & Firewall Impact**: Reduces local subnet mDNS/UDP discovery traffic and halts outbound connections to Microsoft Project Rome cloud relays.
+* **Rollout Recommendations**: High security benefit with negligible impact on core enterprise workflows. Can be deployed broadly across all Tier 2 endpoints following brief communication to users regarding cross-device sync restrictions.
 
 ---
 
@@ -93592,12 +94993,14 @@ The Connected Devices Platform (CDP) coordinates cross-device application states
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Cross-Device Experiences`
-  * **Continue experiences on this device**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Cross-Device Experiences
+   ```
+4. Double-click **Continue experiences on this device**.
+5. Select **Disabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the appropriate Organizational Unit (OU) and verify policy replication across domain controllers.
 
 ---
 
@@ -93667,12 +95070,29 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy setting via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v EnableCdp
+```
+Expected output:
+```text
+EnableCdp    REG_DWORD    0x0
+```
+
+---
+
 <div id="08-endpoints-admin-templates-configure-end-at-cross-device-experiences-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.19.6
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - System / Cross-Device Experiences
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1020: Automated Exfiltration](https://attack.mitre.org/techniques/T1020/), [T1115: Clipboard Data](https://attack.mitre.org/techniques/T1115/), [T1552: Unsecured Credentials](https://attack.mitre.org/techniques/T1552/), [T1080: Taint Shared Content](https://attack.mitre.org/techniques/T1080/)
+* **Related Controls**: [REQ-END-186: Administrative Templates: Restrict Internet Communication](#08-endpoints-admin-templates-configure-end-at-internet-communication-md), [REQ-END-196: Administrative Templates: Require PIN Pairing for Connect](#08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -93686,8 +95106,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-175](#07-paws-admin-templates-configure-paw-at-internet-communication-md); for Domain Controllers, refer to [REQ-DC-027](#02-domain-controllers-configure-telemetry-privacy-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -93695,23 +95115,57 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers\DisableWebPnPDownload` = `1`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoWebServices` = `1`
+* **GPO Paths / Registry Locations**:
+  * **Turn off downloading of print drivers over HTTP**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings\Turn off downloading of print drivers over HTTP` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers`
+    * Value Name: `DisableWebPnPDownload`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Disabled / Block HTTP print driver downloads)
+  * **Turn off Internet download for Web publishing and online ordering wizards**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings\Turn off Internet download for Web publishing and online ordering wizards` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer`
+    * Value Name: `NoWebServices`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Disabled / Block web wizard downloads)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-rationale"></div>
 
 ## Rationale
-Downloading print drivers via HTTP exposes systems to cleartext traffic tampering and Point-and-Print driver replacement attacks. Web publishing wizards provide legacy, unauthenticated internet upload channels that can be abused for unauthorized data egress.
+The Windows operating system includes several legacy features designed to download supplemental drivers, wizard components, and third-party web provider templates over unauthenticated internet connections. In enterprise environments, these automated internet interactions expose endpoints to remote code execution and data exfiltration.
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-1-print-driver-delivery-security-and-printnightmare-mitigations"></div>
+
+### 1. Print Driver Delivery Security and PrintNightmare Mitigations
+Web Point and Print allows Windows clients to query web print servers and automatically download printer driver packages across unencrypted HTTP channels:
+* **Adversary-in-the-Middle (AiTM) Driver Tampering**: Because HTTP lacks cryptographic integrity protection, an adversary positioned on the local network or transit path can intercept the driver request and inject modified DLLs or INF configuration files.
+* **SYSTEM Privilege Escalation via Print Spooler**: Print drivers execute in ring 0 kernel space or inside the highly privileged Print Spooler service (`spoolsv.exe`, operating as `NT AUTHORITY\SYSTEM`). Vulnerabilities such as PrintNightmare (CVE-2021-1675, CVE-2021-34527) demonstrated that malicious print drivers can achieve immediate, unconstrained code execution on the client host.
+* Setting `DisableWebPnPDownload = 1` prevents the Windows print subsystem from ever requesting or downloading printer driver packages over HTTP. All driver installations must be sourced from the local Windows Driver Store or deployed via authenticated, enterprise-managed administrative software.
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-2-elimination-of-unauthenticated-web-wizard-channels"></div>
+
+### 2. Elimination of Unauthenticated Web Wizard Channels
+Windows Explorer includes legacy wizards for "Publish to Web" and "Order Prints Online" that dynamically fetch provider manifests and schema files from the internet:
+* **Data Exfiltration and Metadata Leakage**: These wizards initiate unsolicited outbound HTTP connections that transmit system environmental parameters, network identifiers, and user metadata to external servers.
+* **Phishing and Rogue Provider Redirection**: In unhardened configurations, obsolete wizard schemas could be weaponized to present fraudulent upload forms to users, facilitating credential harvesting or sensitive document exfiltration.
+* Setting `NoWebServices = 1` eliminates the retrieval of external provider lists, ensuring Windows Explorer does not establish unmanaged internet connections during file browsing.
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1574.002 - Hijack Execution Flow: DLL Side-Loading / Driver Sideloading**: Injecting malicious driver components via unauthenticated HTTP Point and Print.
+* **T1068 - Exploitation for Privilege Escalation**: Abusing print driver installation mechanisms to execute code in the context of `NT AUTHORITY\SYSTEM`.
+* **T1048 - Exfiltration Over Alternative Protocol**: Unauthorized transmission of sensitive data using legacy web publishing channels.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Print drivers must be distributed via trusted internal print servers or enterprise deployment mechanisms. The web publishing wizard option in Windows Explorer will be suppressed.
+* **Corporate Printing Infrastructure**: Enterprise print environments utilize Active Directory Domain Services (AD DS) shared printers or modern print management platforms (such as Universal Print, PaperCut, or PrinterLogic) that deliver pre-packaged, digitally signed print drivers. Blocking HTTP driver downloads does not affect internal print queues managed via authenticated RPC/SMB.
+* **Home and Remote Printing**: Teleworkers connecting to personal home printers must ensure that vendor drivers are pre-installed via manufacturer installers or Windows Update rather than attempting Web Point and Print over HTTP.
 
 ---
 
@@ -93732,7 +95186,7 @@ Downloading print drivers via HTTP exposes systems to cleartext traffic tamperin
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
   * **Turn off Internet download for Web publishing and online ordering wizards**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -93832,9 +95286,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-internet-communication-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.20.1.2, Section 18.9.20.1.6
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.30.2, Section 18.9.30.3; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.30.2, Section 18.9.30.3; CIS Windows Server Benchmark: Section 18.9.30.2, Section 18.9.30.3
+* **DISA STIG**: Windows 10 STIG Rules WN10-CC-000280, WN10-CC-000285; Windows 11 STIG Rules WN11-CC-000280, WN11-CC-000285
+* **ANSSI Active Directory Hardening Guide**: Section 3.2 (Restricting unnecessary internet-facing services and protocols)
+* **Microsoft Security Guidance**: Point and Print Hardening Rules (KB5005010 / CVE-2021-34527)
 
 
 <div style="page-break-before: always;"></div>
@@ -93848,8 +95303,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-176](#07-paws-admin-templates-configure-paw-at-lsa-custom-ssps-md); for complementary LSA Protection, refer to [REQ-END-007](#08-endpoints-enable-lsa-protection-md)).*
+* **Operating Systems**: Windows 10 (1903 and above) Enterprise/Professional, Windows 11 Enterprise/Pro, Windows Server 2019, 2022, and 2025.
 
 ---
 
@@ -93858,21 +95313,50 @@ if ($script:Vulnerable) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\AllowCustomSSPsAPs` = `0`
+  * **Allow Custom SSPs and APs to be loaded into LSASS**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Local Security Authority\Allow Custom SSPs and APs to be loaded into LSASS` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `AllowCustomSSPsAPs`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Prohibit custom SSP and AP loading)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-rationale"></div>
 
 ## Rationale
-Security Support Providers (SSPs) and Authentication Packages (APs) execute inside the Local Security Authority Subsystem Service (lsass.exe). Threat actors frequently register malicious SSP DLLs in the registry to achieve persistent credential harvesting and memory dumping. Disabling custom SSP loading blocks third-party DLLs from injecting into LSASS.
+The Local Security Authority Subsystem Service (`lsass.exe`) is the central authentication authority in the Windows operating system, responsible for credential validation, token creation, and interactive logons. Security Support Providers (SSPs) and Authentication Packages (APs) execute as dynamic link libraries (DLLs) directly inside the `lsass.exe` memory space.
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-1-the-custom-sspap-persistence-and-credential-theft-threat-vector"></div>
+
+### 1. The Custom SSP/AP Persistence and Credential Theft Threat Vector
+Adversaries with administrative access frequently target the LSA subsystem for persistent credential harvesting:
+* **In-Memory Credential Interception**: Threat actors register custom SSP DLLs (e.g., Mimikatz `memssp` or custom malicious security packages) by adding their names to `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages` or `Authentication Packages`.
+* **Execution Inside LSASS**: During system boot or upon explicit dynamic loading, `lsass.exe` loads the registered DLL into its process address space. Because the custom SSP receives plaintext user credentials, Kerberos tickets, and NTLM hashes during logon processing, it can log cleartext credentials to an unencrypted file or exfiltrate them across the network.
+* **Persistent Evasion**: Unlike transient LSASS memory scraping tools (which trigger EDR memory read alerts), a registered SSP operates legitimately within the authentication pipeline, surviving system reboots and operating with full system privileges.
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-2-mandatory-prohibition-of-third-party-lsa-extension-libraries"></div>
+
+### 2. Mandatory Prohibition of Third-Party LSA Extension Libraries
+Setting `AllowCustomSSPsAPs = 0` (by configuring the GPO "Allow Custom SSPs and APs to be loaded into LSASS" to **Disabled**) enforces strict inbox validation:
+* The Local Security Authority kernel loader strictly refuses to load any custom or third-party SSP or AP DLL into `lsass.exe`, even if registered by an administrator or malware in the registry.
+* Only core, Microsoft-signed inbox security providers (such as `msv1_0.dll`, `kerberos.dll`, `schannel.dll`, and `cloudAP.dll`) are permitted to execute within LSASS.
+* When combined with LSA Protection / RunAsPPL ([REQ-END-007](#08-endpoints-enable-lsa-protection-md)), this control completely neutralizes SSP-based DLL injection and persistent credential theft.
+
+<div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1547.005 - Boot or Logon Autostart Execution: Security Support Provider**: Adversaries registering malicious SSP/AP DLLs in the LSA registry.
+* **T1003.001 - OS Credential Dumping: LSASS Memory**: Intercepting in-memory plaintext credentials during logon events.
+* **T1556.002 - Modify Authentication Process: Password Filter DLL**: Tampering with authentication packages to log credentials.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Third-party authentication software or legacy smartcard drivers that inject custom SSP DLLs into LSASS will be blocked from loading. Modern providers must support Microsoft Credential Provider architecture.
+* **Modern Authentication Platforms**: Modern enterprise multi-factor authentication (MFA) agents, smart card middleware, and FIDO2 authentication solutions integrate with Windows via the **Credential Provider architecture** (`ICredentialProvider`), which operates in `winlogon.exe` and does not require injecting custom SSPs into `lsass.exe`.
+* **Legacy Smart Card and Biometric Drivers**: Obsolete third-party authentication solutions developed prior to Windows 10 that rely on custom in-process LSASS AP DLLs will fail to initialize. Organizations must upgrade to modern Credential Providers or native Windows Hello for Business infrastructure.
 
 ---
 
@@ -93891,7 +95375,7 @@ Security Support Providers (SSPs) and Authentication Packages (APs) execute insi
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Local Security Authority`
   * **Allow Custom SSPs and APs to be loaded into LSASS**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -93964,9 +95448,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-lsa-custom-ssps-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.26.1; ANSSI R38
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.35.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.35.1; CIS Windows Server Benchmark: Section 18.9.35.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000290, Windows 11 STIG Rule WN11-CC-000290
+* **ANSSI Active Directory Hardening Guide**: Recommendation R30 (Protection of the Local Security Authority subsystem)
+* **Microsoft Security Baseline**: Local Security Authority Subsystem Security Policy Recommendations
 
 
 <div style="page-break-before: always;"></div>
@@ -93980,8 +95465,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-177](#07-paws-admin-templates-configure-paw-at-logon-display-options-md); for Domain Controllers, refer to [REQ-DC-024](#02-domain-controllers-configure-security-options-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -93989,29 +95474,111 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\BlockUserFromShowingAccountDetailsOnSignin` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DontDisplayNetworkSelectionUI` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DontEnumerateConnectedUsers` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DisableLockScreenAppNotifications` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\BlockDomainPicturePassword` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\AllowDomainPINLogon` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\NoLocalPasswordResetQuestions` = `1`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableMPR` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Block user from showing account details on sign-in**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Block user from showing account details on sign-in` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `BlockUserFromShowingAccountDetailsOnSignin`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Do not display network selection UI**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Do not display network selection UI` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `DontDisplayNetworkSelectionUI`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Do not enumerate connected users on domain-joined computers**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Do not enumerate connected users on domain-joined computers` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `DontEnumerateConnectedUsers`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Turn off app notifications on the lock screen**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Turn off app notifications on the lock screen` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `DisableLockScreenAppNotifications`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Turn off picture password sign-in**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Turn off picture password sign-in` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `BlockDomainPicturePassword`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Turn on convenience PIN sign-in**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Turn on convenience PIN sign-in` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `AllowDomainPINLogon`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Prevent the use of security questions for local accounts**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Prevent the use of security questions for local accounts` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `NoLocalPasswordResetQuestions`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Configure transmission of user password in MPR notifications**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Configure the transmission of the user's password in the content of MPR notifications sent by winlogon` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
+    * Value Name: `EnableMPR`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-rationale"></div>
 
 ## Rationale
-Exposing account names, pictures, or network selection controls on lock screens provides reconnaissance information to physical attackers. Convenience PINs and picture passwords offer poor entropy compared to domain Kerberos credentials or smartcards. Local account security questions introduce easily guessable bypasses, and Multiple Provider Router (MPR) password transmission exposes cleartext credentials during authentication notifications.
+The Windows logon desktop and lock screen represent the physical perimeter of the operating system. In unhardened configurations, the logon interface exposes critical internal network information, leaks corporate usernames, presents weak authentication alternatives, and permits unauthorized network reconfigurations without authentication.
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-1-eliminating-lock-screen-reconnaissance-and-identity-harvesting"></div>
+
+### 1. Eliminating Lock Screen Reconnaissance and Identity Harvesting
+By default, the Windows lock screen displays the identity of the previously authenticated user or enumerates all active sessions:
+* **Account Name and Email Harvesting**: Displaying user names, email addresses, and account pictures allows physical bystanders, building visitors, or surveillance cameras to harvest valid enterprise logon names and administrative IDs.
+* **Enumeration of Signed-In Users**: When multiple users share a machine, Fast User Switching displays account tiles for every connected user.
+* Enforcing `BlockUserFromShowingAccountDetailsOnSignin = 1` and `DontEnumerateConnectedUsers = 1` strips personal identifiers from the lock screen, presenting an uninformative, generic authentication prompt that requires manual entry of the username and password.
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-2-guarding-the-lock-screen-network-boundary"></div>
+
+### 2. Guarding the Lock Screen Network Boundary
+The lock screen provides a network flyout control in the lower-right corner:
+* **Rogue Network Redirection**: Anyone with physical access to an unattended, locked workstation can click the network icon to disconnect the machine from the corporate LAN/Wi-Fi and connect it to an untrusted rogue Wi-Fi access point (such as an "Evil Twin" or cellular hotspot).
+* **Adversary-in-the-Middle Positioning**: Once connected to an attacker-controlled network, the attacker can poison DNS, initiate NTLM credential harvesting against background services, or attempt network exploits against open listening ports before the user ever unlocks the desktop.
+* Setting `DontDisplayNetworkSelectionUI = 1` completely removes the network flyout from the lock screen, preventing unauthenticated network switching.
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-3-preventing-data-leakage-via-lock-screen-toast-notifications"></div>
+
+### 3. Preventing Data Leakage via Lock Screen Toast Notifications
+Toast notifications from productivity applications (Outlook, Teams, messaging platforms) frequently display snippet previews above the lock screen barrier:
+* Notifications often reveal sensitive business discussions, meeting invitations, and two-factor authentication (2FA) verification codes or SMS OTPs.
+* Setting `DisableLockScreenAppNotifications = 1` suppresses all lock screen toast notifications, ensuring message content is only visible after successful interactive authentication.
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-4-prohibiting-weak-authentication-and-credential-overrides"></div>
+
+### 4. Prohibiting Weak Authentication and Credential Overrides
+Consumer-grade authentication mechanisms undermine enterprise Kerberos and PKI standards:
+* **Picture Passwords (`BlockDomainPicturePassword = 1`)**: Feature low entropy, are susceptible to smudge analysis on touchscreen devices, and can be trivially observed through shoulder surfing.
+* **Convenience PINs (`AllowDomainPINLogon = 0`)**: Convenience PINs store cached credential hashes on the local disk without TPM-backed cryptographic hardware binding or hardware rate-limiting. *(Note: This does not affect Windows Hello for Business, which utilizes asymmetric keys sealed in the TPM 2.0 module and is governed under dedicated WHfB policies).*
+* **Security Questions (`NoLocalPasswordResetQuestions = 1`)**: Password reset questions rely on static trivia easily discoverable via open-source intelligence (OSINT) and social engineering.
+* **MPR Notification Password Suppression (`EnableMPR = 0`)**: Disables passing cleartext passwords inside Multiple Provider Router notifications from Winlogon to third-party network providers.
+
+<div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-5-mitre-attck-mapping"></div>
+
+### 5. MITRE ATT&CK Mapping
+* **T1087.001 - Account Discovery: Local Account**: Discovery of valid usernames on lock screens.
+* **T1040 - Network Sniffing**: Diverting locked hosts to rogue wireless networks to capture traffic.
+* **T1110.001 - Brute Force: Password Guessing**: Exploiting weak convenience PINs or predictable security questions.
+* **T1552.001 - Unsecured Credentials: Credentials In Files / Memory**: Intercepting cleartext MPR notifications.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users must input their full username and password/smartcard PIN at logon. Convenience PINs are blocked (Windows Hello for Business with TPM hardware binding must be used instead if PINs are required).
+* **Interactive Logon Experience**: Users must type their full username and password or insert their smartcard. Account tiles and pictures will not appear automatically.
+* **Network Roaming for Mobile Users**: Laptops traveling between known networks will connect automatically to pre-configured corporate SSIDs. If an end user needs to join a new hotel or public Wi-Fi network, they must log in using cached credentials before associating with the network in the desktop tray.
+* **Windows Hello for Business**: Enterprise WHfB PIN and biometric authentication remain fully operational when deployed via Microsoft Intune or Group Policy WHfB templates.
 
 ---
 
@@ -94029,22 +95596,15 @@ Exposing account names, pictures, or network selection controls on lock screens 
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Block user from showing account details on sign-in**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Do not display network selection UI**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Do not enumerate connected users on domain-joined computers**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Turn off app notifications on the lock screen**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Turn off picture password sign-in**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Turn on convenience PIN sign-in**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Prevent the use of security questions for local accounts**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Configure the transmission of the user's password in the content of MPR notifications sent by winlogon**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -94282,9 +95842,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-logon-display-options-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.28.1, 18.9.28.2, 18.9.28.3, 18.9.28.5, 18.9.28.6, 18.9.28.7, 18.10.15.3, 18.10.82.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.28.1, 18.9.28.2, 18.9.28.3, 18.9.28.5, 18.9.28.6, 18.9.28.7, 18.10.15.3, 18.10.82.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.28.1, 18.9.28.2, 18.9.28.3, 18.9.28.5, 18.9.28.6, 18.9.28.7, 18.10.15.3, 18.10.82.1
+* **DISA STIG**: Windows 10 STIG Rules WN10-CC-000075, WN10-CC-000080, WN10-CC-000085, WN10-CC-000090
+* **ANSSI Active Directory Hardening Guide**: Section 3.1 (Securing interactive logon prompts and disabling unauthenticated lock screen features)
+* **Microsoft Security Baseline**: Windows Client Security Baseline (Logon and Credential Protections)
 
 
 <div style="page-break-before: always;"></div>
@@ -94307,23 +95868,45 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9\DCSettingIndex` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9\ACSettingIndex` = `0`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Power Management -> Sleep Settings
+* **Policy Settings**:
+  * Allow network connectivity during connected-standby (on battery)
+  * Allow network connectivity during connected-standby (plugged in)
+* **Supported On**: Windows 10 (Version 1607) or Windows Server 2016 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9`
+* **Registry Values**:
+  * `DCSettingIndex` = `0` (REG_DWORD, Disconnect network during standby on battery)
+  * `ACSettingIndex` = `0` (REG_DWORD, Disconnect network during standby when plugged in)
+* **Vulnerability References**: MITRE ATT&CK: T1200 (Hardware Additions), T1040 (Network Sniffing), T1557 (Adversary-in-the-Middle), T1021 (Remote Services)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-rationale"></div>
 
 ## Rationale
-Connected Standby (Modern Standby) maintains active wireless and network interfaces while the operating system is suspended. This allows background applications to receive traffic and process incoming network packets, exposing devices to remote attacks and unauthorized network reconnaissance while unattended.
+
+Modern Standby (S0 Low Power Idle) replaced legacy ACPI S3 (Suspend-to-RAM) sleep states in modern enterprise laptops and convertibles. When "Connected Standby" is permitted, the operating system maintains active Wi-Fi, cellular, and Ethernet network adapters while the display is powered off and the system is suspended. This architecture enables background applications to process incoming push notifications, sync mailboxes, and maintain persistent cloud sockets while unattended.
+
+<div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-technical-threat-vectors-sleep-state-exposure"></div>
+
+### Technical Threat Vectors & Sleep-State Exposure
+1. **Unattended Attack Surface & Remote Exploitation**: When network interfaces remain energized during sleep states, the Windows TCP/IP stack, SMB client/server, and RPC services continue to process incoming network frames. An attacker on the local network segment can launch port scans, exploit remote code execution vulnerabilities in network services, or attempt network-based credential coercion (e.g., PetitPotam or ShadowCoerce) against a machine whose user is absent and cannot observe malicious activity on the screen.
+2. **Untrusted Wi-Fi Association During Transit**: Mobile workers frequently close laptop lids and place systems into transit bags. If connected standby is active, the Wi-Fi adapter remains powered, continuously broadcasting probe requests for remembered enterprise and home SSIDs. In transit hubs (airports, trains, hotels), adversaries operating rogue access points (Evil Twin attacks) or Wi-Fi pineapple devices can force associations, capturing NTLM authentication attempts or injecting unencrypted payloads into background sync streams.
+3. **Adversary-in-the-Middle (AiTM) and Session Exposure**: Systems connected to untrusted networks while suspended cannot prompt users for 802.1X certificate validation warnings or captive portal alerts, creating silent opportunities for traffic interception, DNS spoofing, and rogue gateway redirection.
+4. **Thermal Throttling and Battery Depletion**: Background network processing in laptop bags frequently causes battery depletion, unexpected wake events, and thermal throttling, degrading hardware lifespan and leaving users without operational battery power in the field.
+
+Disabling network connectivity during connected standby guarantees that the moment the system enters Modern Standby or the display turns off, all network adapters enter a low-power disconnected state (Disconnected Standby), severing all network pathways until the user interactively unlocks the console.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Applications cannot receive real-time notifications or synchronize background data while the laptop lid is closed or during sleep states.
+
+* **Operational Impact**: Applications (such as Microsoft Teams, Outlook, and web browsers) will not receive incoming notifications or sync background data while the laptop lid is closed or the device is sleeping. Full synchronization resumes within 1 to 2 seconds upon system wake and user authentication.
+* **User Experience**: Substantially improves laptop battery life during sleep and eliminates unwanted fan noise or overheating while carrying devices in bags.
+* **Network Impact**: Shuts down sleep-state Wi-Fi probing and eliminates unwanted background telemetry during off-hours.
+* **Rollout Recommendations**: Safe for immediate enterprise-wide deployment across all mobile endpoints and laptops.
 
 ---
 
@@ -94337,14 +95920,16 @@ Connected Standby (Modern Standby) maintains active wireless and network interfa
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings`
-  * **Allow network connectivity during connected-standby (on battery)**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings`
-  * **Allow network connectivity during connected-standby (plugged in)**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Power Management\Sleep Settings
+   ```
+4. Double-click **Allow network connectivity during connected-standby (on battery)**:
+   * Set to **Disabled**.
+5. Double-click **Allow network connectivity during connected-standby (plugged in)**:
+   * Set to **Disabled**.
+6. Click **Apply**, then click **OK** for both policies.
+7. Link the GPO to the appropriate Organizational Unit (OU) and verify policy replication across all domain controllers.
 
 ---
 
@@ -94437,12 +96022,30 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9" /s
+```
+Expected output:
+```text
+DCSettingIndex    REG_DWORD    0x0
+ACSettingIndex    REG_DWORD    0x0
+```
+
+---
+
 <div id="08-endpoints-admin-templates-configure-end-at-power-connected-standby-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.33.6.1, Section 18.9.33.6.2
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Power Management
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1200: Hardware Additions](https://attack.mitre.org/techniques/T1200/), [T1040: Network Sniffing](https://attack.mitre.org/techniques/T1040/), [T1557: Adversary-in-the-Middle](https://attack.mitre.org/techniques/T1557/), [T1021: Remote Services](https://attack.mitre.org/techniques/T1021/)
+* **Related Controls**: [REQ-END-186: Administrative Templates: Restrict Internet Communication](#08-endpoints-admin-templates-configure-end-at-internet-communication-md), [REQ-END-182: Administrative Templates: MSS System and Session Security Protections](#08-endpoints-admin-templates-configure-end-at-mss-system-protections-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -94465,22 +96068,43 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\fAllowUnsolicited` = `0`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Remote Assistance
+* **Policy Name**: Configure Offer Remote Assistance
+* **Supported On**: Windows Vista / Windows Server 2008 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services`
+* **Registry Value**: `fAllowUnsolicited`
+* **Value Type**: `REG_DWORD`
+* **Value Data**: `0` (0x00000000 = Suppress unsolicited Offer Remote Assistance)
+* **Vulnerability References**: MITRE ATT&CK: T1021.001 (Remote Services: Remote Desktop Protocol), T1113 (Screen Capture), T1219 (Remote Access Software), T1078 (Valid Accounts)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-rationale"></div>
 
 ## Rationale
-Unsolicited Remote Assistance permits an administrator or support technician to initiate remote session connections to client endpoints without an explicit user invitation. If compromised, this capability allows adversaries with elevated domain privileges to silently observe or control interactive user desktop sessions.
+
+Windows Remote Assistance (`msra.exe`) allows support personnel to view or remotely control an active user's desktop session across a network. Remote Assistance supports two primary connection modes: solicited (where an end user creates an encrypted invitation ticket) and unsolicited (where an external operator or administrator initiates an uninvited connection to the target workstation via "Offer Remote Assistance").
+
+<div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-technical-threat-vectors-session-shadowing-risks"></div>
+
+### Technical Threat Vectors & Session Shadowing Risks
+1. **Unauthorized Session Shadowing & Screen Spying**: Unsolicited Remote Assistance allows members of designated helper security groups to initiate remote desktop viewing sessions without the user actively requesting assistance. If an adversary compromises a helpdesk account, workstation local administrator credential, or support service account, the attacker can leverage unsolicited Remote Assistance to silently view active user desktop sessions, intercept confidential business information, and capture plaintext passwords as users type them into corporate applications.
+2. **Interactive Session Seizure & Living-off-the-Land Exploitation**: Remote Assistance provides full interactive keyboard and mouse control options. Attackers can seize control of authenticated enterprise sessions, using the legitimate user's active Kerberos tickets and application permissions to execute unauthorized transactions, access protected shares, or deploy malware under the guise of the logged-on user.
+3. **Legacy DCOM & RPC Attack Surface**: Offering Remote Assistance relies on DCOM interfaces (`HNetCfg.FwAuthorizedApplication`, `RasServer.RasServer`) and dynamic high-port RPC endpoints. Exposing these legacy DCOM interfaces across enterprise subnets increases vulnerability to RPC coercion, relay attacks, and lateral movement.
+4. **Bypassing Centralized Access Auditing**: Native Windows Remote Assistance lacks granular multi-factor challenge mechanisms, recording, and modern session auditing typically required by enterprise compliance frameworks. Corporate IT support must rely on approved enterprise remote support solutions (with centralized session recording, MFA, and ticketing integration) rather than legacy unsolicited Windows Remote Assistance.
+
+Disabling unsolicited Remote Assistance closes the DCOM listening interfaces and completely blocks inbound uninvited support sessions.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Helpdesk staff cannot offer unsolicited remote assistance. User-initiated assistance or approved enterprise remote support solutions (with session auditing) must be utilized.
+
+* **Operational Impact**: Helpdesk and support technicians cannot use the legacy Windows "Offer Remote Assistance" snap-in. Remote troubleshooting must be performed using approved modern enterprise remote support tooling (e.g., Microsoft Intune Remote Help, Quick Assist with cloud authentication, or centralized privileged access management solutions). Solicited user-initiated Remote Assistance tickets can still be configured if explicitly allowed by policy.
+* **User Experience**: Users are protected from unexpected or uninvited remote desktop takeovers and screen monitoring attempts.
+* **Network Impact**: Reduces open DCOM/RPC listening ports on client endpoints.
+* **Rollout Recommendations**: High security value; deploy across all Tier 2 endpoints in coordination with helpdesk operations.
 
 ---
 
@@ -94494,12 +96118,14 @@ Unsolicited Remote Assistance permits an administrator or support technician to 
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Assistance`
-  * **Configure Offer Remote Assistance**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Remote Assistance
+   ```
+4. Double-click **Configure Offer Remote Assistance**.
+5. Select **Disabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the appropriate Organizational Unit (OU) and verify policy replication across all domain controllers.
 
 ---
 
@@ -94569,12 +96195,29 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy setting via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v fAllowUnsolicited
+```
+Expected output:
+```text
+fAllowUnsolicited    REG_DWORD    0x0
+```
+
+---
+
 <div id="08-endpoints-admin-templates-configure-end-at-remote-assistance-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.35.1
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Remote Assistance
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1021.001: Remote Services: Remote Desktop Protocol](https://attack.mitre.org/techniques/T1021/001/), [T1113: Screen Capture](https://attack.mitre.org/techniques/T1113/), [T1219: Remote Access Software](https://attack.mitre.org/techniques/T1219/), [T1078: Valid Accounts](https://attack.mitre.org/techniques/T1078/)
+* **Related Controls**: [REQ-END-182: Administrative Templates: MSS System and Session Security Protections](#08-endpoints-admin-templates-configure-end-at-mss-system-protections-md), [REQ-END-188: Administrative Templates: Interactive Logon and Credential Display Options](#08-endpoints-admin-templates-configure-end-at-logon-display-options-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -94588,8 +96231,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-180](#07-paws-admin-templates-configure-paw-at-rpc-endpoint-mapper-auth-md); for Domain Controllers, refer to [REQ-DC-018](#02-domain-controllers-harden-network-parameters-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -94598,21 +96241,50 @@ if ($script:Vulnerable) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc\EnableAuthEpResolution` = `1`
+  * **Enable RPC Endpoint Mapper Client Authentication**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call\Enable RPC Endpoint Mapper Client Authentication` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc`
+    * Value Name: `EnableAuthEpResolution`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Authenticate to Endpoint Mapper)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-rationale"></div>
 
 ## Rationale
-The RPC Endpoint Mapper listens on TCP port 135 to resolve dynamic server endpoints for RPC interfaces. Enabling client authentication forces clients to authenticate to the Endpoint Mapper before obtaining endpoint addresses, preventing unauthenticated network adversaries from performing RPC reconnaissance and MITM endpoint redirection.
+The Remote Procedure Call (RPC) subsystem is fundamental to Windows inter-process communication and remote management. The RPC Endpoint Mapper service (`epmapper`, listening on TCP port 135) maintains a dynamic database of RPC servers and maps interface UUIDs to dynamic high-range TCP listening ports (ports 49152–65535).
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-1-threat-vectors-and-unauthenticated-rpc-reconnaissance"></div>
+
+### 1. Threat Vectors and Unauthenticated RPC Reconnaissance
+In default legacy Windows configurations, queries to the RPC Endpoint Mapper occur without authentication:
+* **Anonymous Interface Enumeration**: An unauthenticated attacker on the local network can query TCP port 135 using tools such as `rpcdump.py`, `impacket`, or `rpcclient` to enumerate every registered RPC interface, exposed service handler, and dynamic port on the system. This reveals software versions, active administrative services (such as Task Scheduler, Event Log, or Volume Shadow Copy), and potential exploit targets.
+* **Adversary-in-the-Middle (AiTM) Port Redirection**: When an RPC client queries an unauthenticated Endpoint Mapper across an untrusted network, an adversary positioned on the network path can forge the response packet. The attacker can return an arbitrary IP address or listening port, steering the client's subsequent high-privilege RPC call (carrying Kerberos or NTLM authentication credentials) to an attacker-controlled listener.
+* **Coercion Vector Prerequisite**: Authentication coercion attacks (such as PetitPotam / MS-EFSR, DFSCoerce, or ShadowCoerce) rely on unauthenticated or weakly validated RPC interface binding before issuing unauthenticated method invocations that trigger outbound authentication handshakes.
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-2-cryptographic-and-authentication-enforcement"></div>
+
+### 2. Cryptographic and Authentication Enforcement
+Enabling `EnableAuthEpResolution = 1` enforces strict client-side verification:
+* The Windows RPC client runtime (`rpcrt4.dll`) is mandated to authenticate against the RPC Endpoint Mapper before resolving dynamic server endpoints.
+* Mutual authentication is negotiated using Kerberos or NTLM, and cryptographic integrity signing is applied to the resolution response.
+* If the target endpoint mapper cannot be authenticated or fails validation, the client aborts the connection attempt rather than falling back to unauthenticated resolution, neutralizing AiTM tampering and dynamic port redirection.
+
+<div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1046 - Network Service Discovery**: Anonymous enumeration of RPC interfaces and active services via TCP 135.
+* **T1557 - Adversary-in-the-Middle**: Tampering with unauthenticated RPC endpoint mapper responses to hijack subsequent service sessions.
+* **T1021.002 - Remote Services: SMB/Windows Admin Shares**: Lateral movement through RPC-based management interfaces.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Legacy pre-Windows Server 2003 or third-party UNIX RPC clients incapable of authenticating to the Endpoint Mapper will fail to resolve RPC endpoints.
+* **Active Directory Domain Compatibility**: All supported Windows operating systems (Windows 10, Windows 11, Windows Server 2016 through 2025) fully support authenticated RPC endpoint resolution. Active Directory domain-joined machines use Kerberos tickets to seamlessly authenticate against the Endpoint Mapper of other domain members.
+* **Third-Party UNIX/Linux DCE-RPC Clients**: Non-Windows legacy clients or custom appliances utilizing bare DCE/RPC implementations that lack SPNEGO/Kerberos authentication extensions may fail to resolve dynamic RPC endpoints on hardened systems. Such legacy applications must be modernized to support standard GSS-API / Kerberos authentication.
 
 ---
 
@@ -94631,7 +96303,7 @@ The RPC Endpoint Mapper listens on TCP port 135 to resolve dynamic server endpoi
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call`
   * **Enable RPC Endpoint Mapper Client Authentication**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -94704,9 +96376,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-rpc-endpoint-mapper-auth-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.36.1; ANSSI R34
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.36.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.36.1; CIS Windows Server Benchmark: Section 18.9.36.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000300, Windows 11 STIG Rule WN11-CC-000300
+* **ANSSI Active Directory Hardening Guide**: Recommendation R34 (Securing RPC endpoint mapping and remote procedure calls)
+* **Microsoft Security Baseline**: Recommended RPC Component Hardening Guidelines
 
 
 <div style="page-break-before: always;"></div>
@@ -94720,8 +96393,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-181](#07-paws-admin-templates-configure-paw-at-w32time-ntp-client-md); for Domain Controllers, refer to [REQ-DC-020](#02-domain-controllers-configure-pdc-time-sync-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -94729,23 +96402,64 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient\Enabled` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer\Enabled` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Enable Windows NTP Client**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers\Enable Windows NTP Client` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient`
+    * Value Name: `Enabled`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Disable Windows NTP Server**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers\Enable Windows NTP Server` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer`
+    * Value Name: `Enabled`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-rationale"></div>
 
 ## Rationale
-Accurate time synchronization is critical for Kerberos authentication (which rejects ticket timestamps skewed by more than 5 minutes) and forensic log correlation. Enabling the NTP Client guarantees synchronization with domain hierarchy time sources, while disabling the NTP Server prevents client workstations from broadcasting unauthenticated time data to other local hosts.
+The Windows Time Service (`W32Time`) is a core architectural component of Windows security, providing synchronization across domain members, member servers, and directory nodes. Precise timekeeping is mandatory for protocol operation, cryptographic authentication, and forensic integrity.
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-1-kerberos-ticket-validation-and-replay-protection"></div>
+
+### 1. Kerberos Ticket Validation and Replay Protection
+The Kerberos v5 authentication protocol (RFC 4120) incorporates timestamps into Authenticator tokens exchanged between clients, Key Distribution Centers (KDCs), and target services:
+* **Enforcing Kerberos Clock Skew Limits**: Domain Controllers strictly enforce a maximum tolerance of 5 minutes (300 seconds) for computer clock synchronization. If a client workstation's time drifts beyond this threshold, all authentication requests (TGT acquisition, service ticket requests, and mutual session setups) fail immediately with `KRB_AP_ERR_SKEW` (Event ID 4768 / 4769).
+* **Forced Fallback to Legacy Protocols**: When Kerberos authentication fails due to clock skew, client applications frequently downgrade authentication to NTLM, exposing the environment to NTLM relay attacks and credential harvesting.
+* **Tampering and Ticket Replay**: Adversaries who manipulate client system clocks can attempt to replay captured tickets or invalidate certificate validity checks (e.g., CRL/OCSP expiration validation). Enforcing `NtpClient\Enabled = 1` guarantees that the endpoint continually synchronizes its local clock against authoritative domain time sources.
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-2-forensic-log-integrity-and-siem-event-correlation"></div>
+
+### 2. Forensic Log Integrity and SIEM Event Correlation
+Enterprise detection and response depends entirely on chronologically accurate logging:
+* When an endpoint generates Security audit events (e.g., Event ID 4624 logon, Event ID 4688 process execution, Event ID 4672 privilege assignment), inaccurate timestamps disrupt event correlation across SIEM, SOC, and EDR platforms.
+* Threat actors deliberately manipulate local system time to obscure the sequence of malicious activities or backdate attacker-created files (timestomping). Maintaining continuous NTP synchronization ensures forensic timeline veracity.
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-3-closing-the-ntp-server-listener-attack-surface"></div>
+
+### 3. Closing the NTP Server Listener Attack Surface
+Workstations and member servers should never serve time to other network hosts:
+* Enabling the NTP server listener on client machines opens UDP port 123 to incoming network traffic.
+* Threat actors can exploit unauthenticated UDP 123 listeners for NTP amplification and reflection denial-of-service (DDoS) attacks, or attempt to poison downstream peer clocks.
+* Setting `NtpServer\Enabled = 0` closes the UDP 123 listening port, ensuring the system operates purely as a secure consumer of domain time.
+
+<div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-4-mitre-attck-mapping"></div>
+
+### 4. MITRE ATT&CK Mapping
+* **T1558 - Steal or Forge Kerberos Tickets**: Disrupting or manipulating system time to interfere with ticket validation and induce legacy fallback.
+* **T1070.006 - Indicator Removal: Timestomp**: Modifying process or system time attributes to conceal attacker dwell time.
+* **T1498.002 - Network Denial of Service: Reflection Amplification**: Weaponizing open UDP time services for network reflection.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Client workstations will not serve time to other network devices.
+* **Active Directory Hierarchy Synchronization**: Domain-joined workstations and member servers automatically query the Active Directory domain hierarchy (synchronizing with authenticating Domain Controllers, which in turn sync with the PDC Emulator holding the external stratum-1 time source). No external internet NTP connectivity is required for domain members.
+* **Isolated or Air-Gapped Networks**: On networks without direct internet access, the root domain PDC Emulator must be synchronized with a local hardware GPS or atomic clock source. All domain endpoints will inherit this synchronized time automatically through the domain time provider.
 
 ---
 
@@ -94766,7 +96480,7 @@ Accurate time synchronization is critical for Kerberos authentication (which rej
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers`
   * **Enable Windows NTP Server**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -94866,9 +96580,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-w32time-ntp-client-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.51.1.1, Section 18.9.51.1.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.102.1, Section 18.9.102.2; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.102.1, Section 18.9.102.2; CIS Windows Server Benchmark: Section 18.9.102.1, Section 18.9.102.2
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000310, Windows 11 STIG Rule WN11-CC-000310
+* **ANSSI Active Directory Hardening Guide**: Recommendation R35 (Time synchronization and Kerberos integrity)
+* **Microsoft Security Baseline**: Windows Time Service Policy Configuration Reference
 
 
 <div style="page-break-before: always;"></div>
@@ -94882,8 +96597,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-182](#07-paws-admin-templates-configure-paw-at-appx-deployment-restrictions-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -94891,23 +96606,57 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx\DisablePerUserUnsignedPackagesByDefault` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx\BlockNonAdminUserInstall` = `1`
+* **GPO Paths / Registry Locations**:
+  * **Not allow per-user unsigned packages to install by default**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment\Not allow per-user unsigned packages to install by default (requires explicitly allow per install)` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx`
+    * Value Name: `DisablePerUserUnsignedPackagesByDefault`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Prohibit unsigned packages)
+  * **Prevent non-admin users from installing packaged Windows apps**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment\Prevent non-admin users from installing packaged Windows apps` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Appx`
+    * Value Name: `BlockNonAdminUserInstall`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Restrict to administrators)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-rationale"></div>
 
 ## Rationale
-Standard user accounts can bypass traditional software restriction policies by deploying modern packaged Windows applications (.appx / .msix) directly into user profile directories. Disallowing per-user unsigned packages and prohibiting non-administrators from installing packaged apps ensures that all installed software is audited, signed, and managed by IT administrators.
+Modern Windows application packaging architectures (AppX and MSIX) allow software components to be registered and executed within user profile spaces. In unhardened environments, default deployment behaviors allow standard unprivileged users to install modern packaged applications without administrative oversight or UAC elevation.
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-1-appx-package-abuse-and-defense-evasion"></div>
+
+### 1. AppX Package Abuse and Defense Evasion
+Standard enterprise access controls often assume that software installation requires local administrative credentials:
+* **Bypassing Traditional Application Control**: When standard users are permitted to install AppX/MSIX packages, they can deploy applications into per-user directories located under `%LocalAppData%\Packages`. If AppLocker or software restriction policies rely on standard path-based rules (such as permitting execution under `%ProgramFiles%` and restricting `%LocalAppData%`), packaged applications can circumvent these controls by executing inside AppContainer runtime sandboxes or leveraging Centennial desktop bridges.
+* **Malicious Sideloading and Shadow IT**: Adversaries distribute malicious packaged applications carrying living-off-the-land binaries, script runners, or backdoors. When non-administrative users can register packages at will, adversaries can achieve execution without needing privilege escalation.
+* **Unsigned Package Vulnerabilities**: Unsigned or self-signed AppX packages can be installed if developer or testing options are unmanaged, allowing tampered binaries to be loaded into user profiles.
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-2-restricting-installation-to-administrative-contexts"></div>
+
+### 2. Restricting Installation to Administrative Contexts
+Enforcing AppX deployment restrictions establishes critical baseline governance:
+* Setting `BlockNonAdminUserInstall = 1` ensures that standard users cannot invoke `Add-AppxPackage` or click modern application bundles to register software on the system. All package provisioning must be executed by local administrators, automated software deployment agents (such as Intune Management Extension or SCCM), or provisioned for all users via `DISM` / `Add-AppxProvisionedPackage`.
+* Setting `DisablePerUserUnsignedPackagesByDefault = 1` guarantees that even if a per-user installation is initiated, unsigned packages are blocked by default, requiring explicit, audited administrative consent.
+
+<div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1059 - Command and Scripting Interpreter**: Sideloading malicious scripts or bridge executables via packaged AppX bundles.
+* **T1546 - Event Triggered Execution**: Utilizing modern package registration triggers for user-level persistence.
+* **T1204.002 - User Execution: Malicious File**: Unprivileged execution of rogue packaged applications.
+* **T1553.002 - Subvert Trust Controls: Code Signing**: Enforcing package signature integrity.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Non-administrative users will be blocked from installing modern Store or sideloaded applications on their own profile without administrator approval.
+* **Centrally Managed Enterprise Deployments**: Applications deployed via enterprise tools (such as Microsoft Intune, MECM, or automated deployment scripts running under `SYSTEM` or administrative context) operate normally.
+* **Non-Administrative User Experience**: Standard enterprise users will receive an access-denied notification if they attempt to install AppX, MSIX, or Windows Store application packages independently. Users requiring business software must request application deployment through official enterprise service catalogs.
 
 ---
 
@@ -94928,7 +96677,7 @@ Standard user accounts can bypass traditional software restriction policies by d
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Package Deployment`
   * **Prevent non-admin users from installing packaged Windows apps**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -95024,9 +96773,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-appx-deployment-restrictions-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.4.2, Section 18.10.4.3
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.14.1, Section 18.10.14.2; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.14.1, Section 18.10.14.2
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000330, Windows 11 STIG Rule WN11-CC-000330
+* **ANSSI Active Directory Hardening Guide**: Section 3.3 (Application Whitelisting and Code Signing Enforcement)
+* **Microsoft Security Baseline**: Windows App Package Deployment Policy Baseline
 
 
 <div style="page-break-before: always;"></div>
@@ -95040,8 +96790,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-183](#07-paws-admin-templates-configure-paw-at-biometrics-anti-spoofing-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro.
 
 ---
 
@@ -95050,21 +96800,50 @@ if ($script:Vulnerable) {
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures\EnhancedAntiSpoofing` = `1`
+  * **Configure enhanced anti-spoofing**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Biometrics\Facial Features\Configure enhanced anti-spoofing` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures`
+    * Value Name: `EnhancedAntiSpoofing`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Enforce hardware depth and IR liveness)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-rationale"></div>
 
 ## Rationale
-Standard facial recognition can potentially be spoofed using high-resolution photographs, video playback, or realistic masks. Enhanced anti-spoofing requires facial recognition algorithms to verify depth and infrared illumination data from compatible biometric hardware sensors before granting access.
+Windows Hello facial recognition provides convenient, passwordless authentication using biometric verification. However, basic facial recognition systems that analyze only two-dimensional visible spectrum images are vulnerable to presentation attacks and physical spoofing.
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-1-presentation-attacks-and-biometric-spoofing-threats"></div>
+
+### 1. Presentation Attacks and Biometric Spoofing Threats
+Without enhanced anti-spoofing, standard facial recognition algorithms can be deceived by adversaries presenting artificial facial artifacts:
+* **High-Resolution Photographs and Printouts**: Attackers can hold high-quality printed color photographs of an authorized user in front of the camera to unlock unattended workstations.
+* **Digital Video and Mobile Screen Playback**: Adversaries can replay video clips or animated facial recordings from smartphones or tablets positioned directly before the webcam.
+* **3D Masks and Synthetic Replays**: Advanced threat actors utilize silicone masks or synthetic deepfake video feeds to match biometric templates.
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-2-mandatory-hardware-liveness-and-infrared-depth-verification"></div>
+
+### 2. Mandatory Hardware Liveness and Infrared Depth Verification
+Setting `EnhancedAntiSpoofing = 1` (by configuring the GPO "Configure enhanced anti-spoofing" to **Enabled**) mandates strict algorithmic and hardware liveness checks:
+* The Windows Biometric Framework (WBF) enforces the use of dedicated near-infrared (near-IR) imaging sensors and structured light or time-of-flight (ToF) depth mapping.
+* The biometric algorithm measures passive and active infrared reflection characteristics, which differ dramatically between living human skin, photographic paper, and backlit LCD/OLED screens.
+* 3D facial geometry is analyzed to confirm volumetric depth, completely rejecting flat 2D photographs or video screens.
+* Any camera hardware that does not meet Microsoft's certified Enhanced Anti-Spoofing security specifications is prevented from providing facial logon capabilities.
+
+<div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1110 - Brute Force / Biometric Spoofing**: Presentation attacks utilizing photographs or digital screens to bypass interactive workstation locks.
+* **T1078 - Valid Accounts**: Unauthorized physical logon to enterprise endpoints using forged biometric credentials.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Devices with standard RGB-only webcams will not support facial recognition logon and must use smartcards or TPM-backed PINs.
+* **Enterprise Hardware Requirements**: Workstations equipped with Windows Hello certified IR sensors (standard on modern enterprise business laptops including Lenovo ThinkPad, Dell Latitude, HP EliteBook, and Microsoft Surface devices) operate seamlessly with heightened anti-spoofing defenses.
+* **Incompatible Hardware Behavior**: Endpoints equipped only with standard RGB webcams will disable facial recognition options in Windows Settings. Users on such devices must authenticate using enterprise smart cards, FIDO2 security keys, or passwords.
 
 ---
 
@@ -95083,7 +96862,7 @@ Standard facial recognition can potentially be spoofed using high-resolution pho
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Biometrics\Facial Features`
   * **Configure enhanced anti-spoofing**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -95156,9 +96935,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-biometrics-anti-spoofing-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.9.1.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.11.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.11.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000315, Windows 11 STIG Rule WN11-CC-000315
+* **ANSSI Active Directory Hardening Guide**: Section 3.1 (Biometric authentication security requirements)
+* **Microsoft Security Guidance**: Windows Hello Enhanced Anti-Spoofing Architecture and Requirements
 
 
 <div style="page-break-before: always;"></div>
@@ -95181,22 +96961,41 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Low
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent\DisableConsumerAccountStateContent` = `1`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Cloud Content
+* **Policy Name**: Turn off cloud consumer account state content
+* **Supported On**: Windows 10 (Version 1703) or Windows Server 2016 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent`
+* **Registry Value**: `DisableConsumerAccountStateContent`
+* **Value Type**: `REG_DWORD`
+* **Value Data**: `1` (0x00000001 = Consumer account state content suppressed)
+* **Vulnerability References**: MITRE ATT&CK: T1566 (Phishing), T1078 (Valid Accounts), T1020 (Automated Exfiltration)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-rationale"></div>
 
 ## Rationale
-Windows features consumer account state content cards and promotional recommendations in system menus. Disabling this content stops background queries to consumer cloud services, eliminates targeted promotional telemetry, and maintains a clean enterprise desktop interface.
+
+Modern editions of Windows integrate consumer-focused features into the desktop shell and operating system menus. These features display dynamic promotional cards, suggestions for Microsoft consumer cloud services (such as personal OneDrive, Microsoft 365 consumer subscriptions, and personal Microsoft Accounts), and personalized application recommendations directly within core UI components like the Start Menu, Settings app, File Explorer, and Lock Screen.
+
+<div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-technical-threat-vector-telemetry-leakage"></div>
+
+### Technical Threat Vector & Telemetry Leakage
+1. **Unwanted Outbound Traffic**: Generating dynamic consumer content requires the Windows desktop shell to make recurring unauthenticated and semi-authenticated HTTP/HTTPS requests to Microsoft Content Delivery Networks (CDNs) and consumer cloud endpoints. In isolated or segmented enterprise environments, these background requests generate noise in perimeter proxy logs and network monitoring systems.
+2. **Account Boundary Confusion**: Presenting consumer cloud prompts on enterprise-managed assets encourages end users to associate their personal Microsoft Accounts (MSAs) with corporate domain-joined workstations. This creates an unmanaged data path where corporate information can be inadvertently synchronized to personal OneDrive storage or personal cloud vaults.
+3. **Phishing & Social Engineering Vectors**: Dynamic suggestions and third-party promotional banners inside operating system settings can confuse users, conditioning them to accept unexpected prompts or advertisements disguised as official system notifications.
+4. **Attack Surface Reduction**: Disabling consumer account state content strips unneeded dynamic web content rendering components from the local shell session, reducing memory footprint and minimizing potential vulnerabilities in web-driven desktop UI modules.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Consumer account recommendation banners will be removed from system menus.
+
+* **Operational Impact**: Consumer account recommendation banners, promotional cards, and subscription alerts are completely eliminated from the Settings app and Start menu. Standard domain-joined enterprise operations, Group Policy processing, and corporate Microsoft 365 enterprise sync capabilities remain fully unaffected.
+* **User Experience**: Users encounter a cleaner, distraction-free desktop interface focused strictly on corporate applications and local system settings.
+* **Network Impact**: Eliminates background HTTPS connections to consumer-facing Microsoft endpoints (such as `*.wns.windows.com` and consumer cloud content servers).
+* **Rollout Recommendations**: This policy carries zero risk of breaking enterprise line-of-business (LOB) applications and can be safely deployed fleet-wide without pilot phasing.
 
 ---
 
@@ -95210,12 +97009,14 @@ Windows features consumer account state content cards and promotional recommenda
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Cloud Content`
-  * **Turn off cloud consumer account state content**: Set to `Enabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\Windows Components\Cloud Content
+   ```
+4. Double-click **Turn off cloud consumer account state content**.
+5. Select **Enabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the appropriate Organizational Unit (OU) and initiate policy replication across all Domain Controllers.
 
 ---
 
@@ -95285,12 +97086,29 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy setting via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableConsumerAccountStateContent
+```
+Expected output:
+```text
+DisableConsumerAccountStateContent    REG_DWORD    0x1
+```
+
+---
+
 <div id="08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.13.1
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Cloud Content Recommendations
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1566: Phishing](https://attack.mitre.org/techniques/T1566/), [T1078: Valid Accounts](https://attack.mitre.org/techniques/T1078/), [T1020: Automated Exfiltration](https://attack.mitre.org/techniques/T1020/)
+* **Related Controls**: [REQ-END-205: Administrative Templates: Restrict Windows Store and Appx Execution](#08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md), [REQ-END-186: Administrative Templates: Restrict Internet Communication](#08-endpoints-admin-templates-configure-end-at-internet-communication-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -95304,8 +97122,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-185](#07-paws-admin-templates-configure-paw-at-connect-pin-pairing-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro.
 
 ---
 
@@ -95314,21 +97132,50 @@ if ($script:Vulnerable) {
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Connect\RequirePinForPairing` = `1`
+  * **Require pin for pairing**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Connect\Require pin for pairing` -> **Enabled** (Select: `First Time` or `Always`)
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Connect`
+    * Value Name: `RequirePinForPairing`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Require PIN on first pairing)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-rationale"></div>
 
 ## Rationale
-The Windows Connect app allows nearby wireless devices to project their screens to the machine over Wi-Fi Direct (Miracast). Requiring a PIN for pairing prevents unauthorized external devices from projecting content or attempting connection hijack attacks without local physical verification.
+The Windows Connect application enables endpoints to function as wireless display receivers using the Miracast standard over Wi-Fi Direct (IEEE 802.11 P2P). While useful for collaborative screen projection in meeting rooms, unauthenticated wireless display pairing introduces severe physical perimeter attack vectors.
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-1-wi-fi-direct-wireless-hijacking-threat-vectors"></div>
+
+### 1. Wi-Fi Direct Wireless Hijacking Threat Vectors
+Without mandatory PIN pairing, Wi-Fi Direct connections can be established with minimal or zero physical verification:
+* **Over-the-Air Screen Hijacking**: Threat actors equipped with Wi-Fi antennas in adjacent offices, public areas, or parking lots can discover listening Miracast receivers. The attacker can project arbitrary video content, deceptive phishing prompts, or disruptive imagery directly onto corporate workstations or executive display screens.
+* **Input Injection via User Input Back Channel (UIBC)**: Miracast supports the User Input Back Channel (UIBC), which allows the connecting device to transmit mouse and keyboard events back to the receiver host. An attacker connecting without authentication could potentially inject keystrokes or mouse clicks to execute commands on the victim workstation.
+* **Rogue Peer-to-Peer Network Bridging**: Establishing an unverified Wi-Fi Direct connection creates a temporary peer-to-peer IP link between the endpoint and the connecting device. This link can bridge the internal corporate network onto an unmonitored wireless link, bypassing network perimeter firewalls.
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-2-mandating-out-of-band-physical-verification"></div>
+
+### 2. Mandating Out-of-Band Physical Verification
+Enforcing `RequirePinForPairing = 1` mandates out-of-band PIN verification before any wireless projection session is accepted:
+* When a remote device requests projection, the Windows host generates a dynamic, cryptographically random numeric PIN displayed on the physical monitor.
+* The operator of the transmitting device must physically view the screen and enter the PIN into their device to complete pairing.
+* This guarantees that only individuals with physical visibility and authorization in the immediate physical space can establish a wireless projection link, completely thwarting blind remote pairing and wireless hijacking.
+
+<div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1200 - Direct Network / Hardware Access / Wireless Compromise**: Establishing unauthorized wireless peer-to-peer links via Miracast / Wi-Fi Direct.
+* **T1557 - Adversary-in-the-Middle**: Intercepting or hijacking wireless display sessions.
+* **T1056.001 - Input Capture: Keylogging / Input Injection**: Malicious input injection through unauthenticated UIBC channels.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users initiating wireless projection must enter the displayed numeric PIN.
+* **User Experience during Wireless Projection**: When users project their laptop or tablet screen to a hardened Windows display receiver for the first time, they must enter the 4-to-8 digit PIN displayed on the receiving monitor. Subsequent connections can be cached if `First Time` pairing is selected.
+* **Network Infrastructure**: The Wi-Fi Direct protocol operates independently of the enterprise corporate Wi-Fi infrastructure; standard corporate LAN connectivity is not impacted.
 
 ---
 
@@ -95345,9 +97192,10 @@ The Windows Connect app allows nearby wireless devices to project their screens 
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Connect`
-  * **Require pin for pairing**: Set to `Enabled` (First Time or Always)
+  * **Require pin for pairing**: Set to `Enabled`
+  * Select drop-down value: `First Time` (or `Always` for high-security areas)
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -95420,9 +97268,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-connect-pin-pairing-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.14.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.15.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.15.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000318, Windows 11 STIG Rule WN11-CC-000318
+* **ANSSI Active Directory Hardening Guide**: Section 3.2 (Restricting unauthenticated wireless protocols and P2P communication)
+* **Wi-Fi Alliance**: Wi-Fi Direct and Miracast Security Architecture Standards
 
 
 <div style="page-break-before: always;"></div>
@@ -95436,8 +97285,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-186](#07-paws-admin-templates-configure-paw-at-credui-protections-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -95445,23 +97294,57 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\CredUI\DisablePasswordReveal` = `1`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI\EnumerateAdministrators` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Do not display the password reveal button**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface\Do not display the password reveal button` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\CredUI`
+    * Value Name: `DisablePasswordReveal`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Disable password reveal button)
+  * **Enumerate administrator accounts on elevation**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface\Enumerate administrator accounts on elevation` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI`
+    * Value Name: `EnumerateAdministrators`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Require username and password)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-rationale"></div>
 
 ## Rationale
-The password reveal ('eye') button exposes cleartext passwords on screen, creating shoulder-surfing and screen recording vulnerabilities. Enumerating administrator accounts on UAC elevation displays valid privileged usernames to standard users, facilitating targeted administrative reconnaissance and brute-force attacks.
+The Windows Credential User Interface (CredUI) handles password collection dialogs and User Account Control (UAC) elevation prompts. In default configurations, CredUI exposes cleartext credentials on screen and leaks local administrative usernames to unprivileged operators.
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-1-eliminating-cleartext-password-exposure-via-the-reveal-button"></div>
+
+### 1. Eliminating Cleartext Password Exposure via the Reveal Button
+Modern Windows password fields include a password reveal ("eye") button that displays cleartext password characters while pressed:
+* **Shoulder Surfing in Enterprise Environments**: In open-plan offices, conference facilities, or remote work locations, bystanders, unauthorized personnel, or cameras can visually record cleartext passwords when the reveal button is engaged.
+* **Screen Capture and Collaboration Tools**: Screen sharing during video conferences (Teams, Zoom, Webex), remote desktop sessions, or background malware capturing screen frames can record passwords exposed in plaintext on the display.
+* Setting `DisablePasswordReveal = 1` permanently strips the reveal glyph from all CredUI password boxes and system logon prompts, ensuring passwords remain masked under all circumstances.
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-2-preventing-local-administrator-account-enumeration-on-elevation"></div>
+
+### 2. Preventing Local Administrator Account Enumeration on Elevation
+When a standard user triggers an action requiring administrative elevation, the default UAC prompt enumerates and displays tiles for every member of the local Administrators group:
+* **Unauthenticated Account Discovery**: Standard users or malware executing in unprivileged user contexts can trigger a harmless UAC prompt to instantly discover the exact usernames of all local administrator accounts, custom break-glass accounts, and administrative naming conventions.
+* **Facilitating Targeted Brute-Force and Spraying**: Armed with validated administrative usernames, attackers can focus credential stuffing, password spraying, or offline Kerberoasting attacks directly on identified targets.
+* Setting `EnumerateAdministrators = 0` suppresses the enumeration of administrative accounts. The UAC prompt displays blank username and password fields, forcing the user to know and manually provide both a valid administrative account name and its credentials.
+
+<div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1087.001 - Account Discovery: Local Account**: Harvesting administrative usernames displayed in UAC elevation dialogs.
+* **T1056.002 - Input Capture: GUI Input Capture**: Visual capture or screen recording of unmasked passwords.
+* **T1548.002 - Abuse Elevation Control Mechanism: Bypass User Account Control**: Exploiting UAC information disclosure during privilege escalation workflows.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: The password reveal button is disabled across all system credential prompts. Users elevating privileges must manually enter both the administrative username and password.
+* **User Experience during Elevation**: When standard users or technicians elevate applications on an endpoint, they must type both the administrative username (e.g., `.\admin_local` or `DOMAIN\Tier2Admin`) and the password, rather than selecting an account tile from a list.
+* **Password Entry Accuracy**: Users cannot view typed passwords in plaintext; complex passwords must be entered carefully.
 
 ---
 
@@ -95482,7 +97365,7 @@ The password reveal ('eye') button exposes cleartext passwords on screen, creati
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface`
   * **Enumerate administrator accounts on elevation**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -95582,9 +97465,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-credui-protections-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.15.1, Section 18.10.15.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.22.1, Section 18.10.22.2; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.22.1, Section 18.10.22.2; CIS Windows Server Benchmark: Section 18.10.22.1, Section 18.10.22.2
+* **DISA STIG**: Windows 10 STIG Rules WN10-CC-000320, WN10-CC-000325; Windows 11 STIG Rules WN11-CC-000320, WN11-CC-000325
+* **ANSSI Active Directory Hardening Guide**: Section 3.1 (Securing interactive authentication interfaces and credential prompts)
+* **Microsoft Security Baseline**: Credential User Interface Security Baseline
 
 
 <div style="page-break-before: always;"></div>
@@ -95607,27 +97491,51 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\DisableOneSettingsDownloads` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\DoNotShowFeedbackNotifications` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\EnableOneSettingsAuditing` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\LimitDiagnosticLogCollection` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\LimitDumpCollection` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds\AllowBuildPreview` = `0`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Data Collection and Preview Builds
+* **Policy Settings**:
+  * Disable OneSettings Downloads
+  * Do not show feedback notifications
+  * Enable OneSettings Auditing
+  * Limit Diagnostic Log Collection
+  * Limit Dump Collection
+  * Toggle user control over Insider builds (Preview Builds)
+* **Supported On**: Windows 10 (Version 1703) or Windows Server 2016 and above
+* **Registry Keys & Values**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\DisableOneSettingsDownloads` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\DoNotShowFeedbackNotifications` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\EnableOneSettingsAuditing` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\LimitDiagnosticLogCollection` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection\LimitDumpCollection` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds\AllowBuildPreview` = `0` (REG_DWORD)
+* **Vulnerability References**: MITRE ATT&CK: T1003 (OS Credential Dumping), T1020 (Automated Exfiltration), T1082 (System Information Discovery), T1499 (Endpoint Denial of Service)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-rationale"></div>
 
 ## Rationale
-OneSettings downloads allow Microsoft to dynamically modify diagnostic configurations over the cloud. Limiting diagnostic and crash dump collection prevents in-memory sensitive data (such as passwords, tokens, or encryption keys) from being captured in automated crash reports and transmitted externally. Disabling Insider builds guarantees production systems only run fully vetted, stable OS builds.
+
+The Windows Diagnostic Data Collection infrastructure collects system health, performance metrics, crash dumps, and telemetry data for transmission to Microsoft cloud services. Concurrently, the Windows Insider Program allows systems to receive pre-release operating system builds. In managed enterprise environments, unrestricted diagnostic data collection and preview builds introduce serious data leakage and operational stability risks.
+
+<div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-technical-threat-vectors-credential-exposure"></div>
+
+### Technical Threat Vectors & Credential Exposure
+1. **Credential Exposure via Memory Crash Dumps & Diagnostic Logs**: When an application or system component encounters an unhandled exception, Windows can generate memory dumps and verbose Event Tracing for Windows (ETW) logs. Process memory dumps capture the exact RAM contents of the failing process, which frequently contain unencrypted authentication secrets, session tokens, Kerberos ticket-granting tickets (TGTs), private TLS keys, database connection strings, and sensitive customer data. Permitting unconstrained crash dump collection (`LimitDumpCollection = 0`) risks uploading memory dumps containing plain-text credentials to external telemetry endpoints.
+2. **Dynamic Cloud Reconfiguration via OneSettings**: Microsoft OneSettings is a cloud-driven targeted configuration service. It allows Microsoft cloud endpoints to dynamically modify diagnostic configurations, sample rates, and experimental telemetry features on endpoints without requiring Group Policy updates or operating system patches. Disabling OneSettings downloads (`DisableOneSettingsDownloads = 1`) guarantees that local Group Policy remains the authoritative source of configuration, preventing third-party dynamic overrides.
+3. **Auditing OneSettings Configuration Attempts**: Enabling OneSettings auditing (`EnableOneSettingsAuditing = 1`) logs all attempts by Windows to query or apply cloud configuration updates to the `Microsoft-Windows-DataCollection/Operational` event channel, providing security visibility into telemetry behaviors.
+4. **Pre-Release Code & Instability via Preview Builds**: Permitting users to enroll enterprise endpoints into Windows Insider Preview builds (`AllowBuildPreview = 1`) deploys unvetted, pre-release kernel drivers and operating system updates. Untested preview builds frequently introduce security regressions, cause incompatibilities with Endpoint Detection and Response (EDR) sensors or antivirus agents, and violate enterprise change management frameworks.
+5. **Suppression of Distracting Feedback Prompts**: Windows feedback prompts ("How likely are you to recommend Windows?") interrupt user workflows and encourage employees to submit subjective feedback, diagnostic notes, or desktop screenshots that may inadvertently contain proprietary enterprise information.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users cannot enroll in the Windows Insider program. Diagnostic feedback prompts are suppressed.
+
+* **Operational Impact**: Users cannot enroll endpoints in Windows Insider preview builds. Feedback prompts are completely suppressed. Crash reporting is restricted to minimal, sanitized crash headers rather than full memory dumps. Enterprise line-of-business software, standard monthly quality updates (B-release patches), and corporate software distributions remain fully unaffected.
+* **Security & Privacy Assurance**: Significantly reduces the risk of corporate credentials or memory contents being transmitted to external telemetry cloud services.
+* **Network Impact**: Lowers outbound bandwidth consumption and reduces HTTP/HTTPS connections to Microsoft telemetry endpoints (`v10.events.data.microsoft.com`, `watson.telemetry.microsoft.com`).
+* **Rollout Recommendations**: High security priority. Apply across all workstations, servers, and VDI pools immediately.
 
 ---
 
@@ -95641,22 +97549,19 @@ OneSettings downloads allow Microsoft to dynamically modify diagnostic configura
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Disable OneSettings Downloads**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Do not show feedback notifications**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Enable OneSettings Auditing**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Limit Diagnostic Log Collection**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Limit Dump Collection**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds`
-  * **Toggle user control over Insider builds**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\Windows Components\Data Collection and Preview Builds
+   ```
+4. Configure the following policies:
+   * **Disable OneSettings Downloads**: Set to `Enabled`
+   * **Do not show feedback notifications**: Set to `Enabled`
+   * **Enable OneSettings Auditing**: Set to `Enabled`
+   * **Limit Diagnostic Log Collection**: Set to `Enabled`
+   * **Limit Dump Collection**: Set to `Enabled`
+   * **Toggle user control over Insider builds**: Set to `Disabled`
+5. Click **Apply**, then click **OK** for each policy.
+6. Link the GPO to the appropriate Organizational Unit (OU) and verify policy replication across all domain controllers.
 
 ---
 
@@ -95845,12 +97750,35 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /s
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\PreviewBuilds" /v AllowBuildPreview
+```
+Verify the expected DWORD values:
+```text
+DisableOneSettingsDownloads     REG_DWORD    0x1
+DoNotShowFeedbackNotifications  REG_DWORD    0x1
+EnableOneSettingsAuditing       REG_DWORD    0x1
+LimitDiagnosticLogCollection    REG_DWORD    0x1
+LimitDumpCollection             REG_DWORD    0x1
+AllowBuildPreview               REG_DWORD    0x0
+```
+
+---
+
 <div id="08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.16.3, 18.10.16.4, 18.10.16.5, 18.10.16.6, 18.10.16.7, 18.10.16.8
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Sections 18.10.16.3, 18.10.16.4, 18.10.16.5, 18.10.16.6, 18.10.16.7, 18.10.16.8
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Data Collection and Preview Builds
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1003: OS Credential Dumping](https://attack.mitre.org/techniques/T1003/), [T1020: Automated Exfiltration](https://attack.mitre.org/techniques/T1020/), [T1082: System Information Discovery](https://attack.mitre.org/techniques/T1082/), [T1499: Endpoint Denial of Service](https://attack.mitre.org/techniques/T1499/)
+* **Related Controls**: [REQ-END-186: Administrative Templates: Restrict Internet Communication](#08-endpoints-admin-templates-configure-end-at-internet-communication-md), [REQ-END-209: Administrative Templates: Windows Update Enterprise Delivery and Deferral Policies](#08-endpoints-admin-templates-configure-end-at-windows-update-policies-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -95864,8 +97792,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-188](#07-paws-admin-templates-configure-paw-at-app-installer-controls-md)).*
+* **Operating Systems**: Windows 10 (1709 and above) Enterprise/Professional, Windows 11 Enterprise/Pro, Windows Server 2019, 2022, and 2025.
 
 ---
 
@@ -95873,26 +97801,77 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableExperimentalFeatures` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableHashOverride` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableLocalArchiveMalwareScanOverride` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableBypassCertificatePinningForMicrosoftStore` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableMSAppInstallerProtocol` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Disable App Installer ms-appinstaller Protocol**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer\Enable App Installer ms-appinstaller protocol` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller`
+    * Value Name: `EnableMSAppInstallerProtocol`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Disable App Installer Experimental Features**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer\Enable App Installer Experimental Features` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller`
+    * Value Name: `EnableExperimentalFeatures`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Disable App Installer Hash Override**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer\Enable App Installer Hash Override` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller`
+    * Value Name: `EnableHashOverride`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Disable Local Archive Malware Scan Override**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer\Enable App Installer Local Archive Malware Scan Override` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller`
+    * Value Name: `EnableLocalArchiveMalwareScanOverride`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Enforce Microsoft Store Certificate Pinning**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer\Enable App Installer Microsoft Store Source Certificate Validation Bypass` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\AppInstaller`
+    * Value Name: `EnableBypassCertificatePinningForMicrosoftStore`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Bypass disallowed)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-rationale"></div>
 
 ## Rationale
-The App Installer URI protocol (ms-appinstaller://) has been repeatedly abused in active malware campaigns to trigger zero-click or drive-by package installations directly from web browsers. Disabling this protocol and prohibiting security overrides (hash bypass, malware scan bypass, certificate bypass) completely closes this critical initial infection vector.
+The Windows App Installer (`AppInstaller.exe`) provides deployment capabilities for MSIX, AppX, and `.appinstaller` manifest packages. In default client configurations, App Installer registers the `ms-appinstaller://` uniform resource identifier (URI) scheme, allowing web pages to directly trigger package installation.
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-1-the-ms-appinstaller-drive-by-exploitation-vector"></div>
+
+### 1. The `ms-appinstaller://` Drive-By Exploitation Vector
+Sophisticated cybercrime groups (including FIN7, Storm-0569, Sangria Tempest, and BlackCat/ALPHV ransomware affiliates) have extensively abused the App Installer URI protocol in malvertising campaigns:
+* **One-Click Drive-By Execution**: Attackers purchase search engine advertisements impersonating legitimate enterprise utilities (such as Zoom, Microsoft Teams, AnyDesk, VLC, or KeePass). When an unsuspecting user clicks the sponsored result, the website invokes `ms-appinstaller:?source=https://malicious.example/payload.appinstaller`.
+* **Mark of the Web (MotW) and SmartScreen Evasion**: The App Installer executable handles the package download out-of-process, historically bypassing browser download warnings, Mark of the Web (Zone.Identifier) stream assignment, and perimeter inspection engines. The user is presented with a deceptive Microsoft-branded installation dialog that conceals malicious script execution.
+* **Disabling the Protocol Handler**: Setting `EnableMSAppInstallerProtocol = 0` completely unbinds the URI handler. Web browsers cannot launch App Installer directly, shutting down this prominent initial compromise conduit (referenced in Microsoft Security Advisories for CVE-2021-43890).
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-2-eliminating-security-overrides-and-tampering-conduits"></div>
+
+### 2. Eliminating Security Overrides and Tampering Conduits
+App Installer features administrative override switches intended for developer debugging that must be prohibited in enterprise production:
+* **Hash Integrity Enforcement (`EnableHashOverride = 0`)**: Prevents the execution of package bundles whose cryptographic hashes do not match manifest declarations, neutralizing transit tampering and rogue package substitutions.
+* **Mandatory Antimalware Inspection (`EnableLocalArchiveMalwareScanOverride = 0`)**: Forces App Installer to route all local archives through the Antimalware Scan Interface (AMSI) and Microsoft Defender Antivirus before extraction.
+* **Certificate Pinning Validation (`EnableBypassCertificatePinningForMicrosoftStore = 0`)**: Enforces strict certificate pinning for Microsoft Store package endpoints, thwarting adversary-in-the-middle decryption proxies and rogue root CA installations.
+* **Disabling Experimental Features (`EnableExperimentalFeatures = 0`)**: Closes unvetted experimental code paths within the installer binary.
+
+<div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1218 - System Binary Proxy Execution**: Weaponizing `AppInstaller.exe` to bypass application control and proxy payload delivery.
+* **T1566.002 - Phishing: Spearphishing Link**: Enticing users to invoke `ms-appinstaller://` URIs from phishing messages or malvertising.
+* **T1204.001 - User Execution: Malicious Link**: Coercing users into initiating single-click package installations.
+* **T1553.005 - Subvert Trust Controls: Treat As Untrusted**: Enforcing cryptographic signature, hash integrity, and certificate pinning validation.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Web links utilizing ms-appinstaller will not launch automatically. Software must be deployed through enterprise deployment mechanisms or local signed packages.
+* **Enterprise Software Distribution**: Centrally managed application deployment frameworks (such as Microsoft Intune, Microsoft Endpoint Configuration Manager / MECM, winget CLI, and enterprise Group Policy Software Installation) do not depend on the `ms-appinstaller://` browser URI handler. Enterprise packages deployed via command line or system agents install without impediment.
+* **Web-Based Package Links**: End users will no longer be able to install MSIX applications directly from internet hyperlinks in Chrome, Edge, or Firefox. Software packages must be downloaded locally and verified through approved organizational distribution channels.
 
 ---
 
@@ -95909,17 +97888,13 @@ The App Installer URI protocol (ms-appinstaller://) has been repeatedly abused i
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
-  * **Enable App Installer Experimental Features**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
-  * **Enable App Installer Hash Override**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
-  * **Enable App Installer Local Archive Malware Scan Override**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
-  * **Enable App Installer Microsoft Store Source Certificate Validation Bypass**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\App Installer`
   * **Enable App Installer ms-appinstaller protocol**: Set to `Disabled`
+  * **Enable App Installer Experimental Features**: Set to `Disabled`
+  * **Enable App Installer Hash Override**: Set to `Disabled`
+  * **Enable App Installer Local Archive Malware Scan Override**: Set to `Disabled`
+  * **Enable App Installer Microsoft Store Source Certificate Validation Bypass**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -96084,9 +98059,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-app-installer-controls-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.18.2, 18.10.18.3, 18.10.18.4, 18.10.18.5, 18.10.18.6
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.18.2, 18.10.18.3, 18.10.18.4, 18.10.18.5, 18.10.18.6; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.18.2, 18.10.18.3, 18.10.18.4, 18.10.18.5, 18.10.18.6
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000340, Windows 11 STIG Rule WN11-CC-000340
+* **Microsoft Security Advisory**: Disabling the MSIX ms-appinstaller protocol scheme (CVE-2021-43890 / Microsoft Security Response Center)
+* **ANSSI Active Directory Hardening Guide**: Section 3.3 (Application execution and untrusted binary restrictions)
 
 
 <div style="page-break-before: always;"></div>
@@ -96109,38 +98085,54 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\MaxSize` = `131072`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\MaxSize` = `1048576`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\MaxSize` = `32768`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\Retention` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\MaxSize` = `131072`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Event Log Service
+* **Policy Settings**:
+  * Application: Specify the maximum log file size (KB) & Control Event Log behavior when the log file reaches its maximum size
+  * Security: Specify the maximum log file size (KB) & Control Event Log behavior when the log file reaches its maximum size
+  * Setup: Specify the maximum log file size (KB) & Control Event Log behavior when the log file reaches its maximum size
+  * System: Specify the maximum log file size (KB) & Control Event Log behavior when the log file reaches its maximum size
+* **Supported On**: Windows 10 / Windows Server 2016 and above
+* **Registry Keys & Values**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\MaxSize` = `131072` (REG_DWORD, 128 MB)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Application\Retention` = `"0"` (REG_SZ, Overwrite as needed)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\MaxSize` = `1048576` (REG_DWORD, 1 GB)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Security\Retention` = `"0"` (REG_SZ, Overwrite as needed)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\MaxSize` = `32768` (REG_DWORD, 32 MB)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\Retention` = `"0"` (REG_SZ, Overwrite as needed)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\MaxSize` = `131072` (REG_DWORD, 128 MB)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\EventLog\System\Retention` = `"0"` (REG_SZ, Overwrite as needed)
+* **Vulnerability References**: MITRE ATT&CK: T1070.001 (Indicator Removal on Host: Clear Windows Event Logs), T1562.002 (Impair Defenses: Disable Windows Event Logging)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-rationale"></div>
 
 ## Rationale
+
 Default Windows event log capacities (typically 20 MB) rollover within hours during normal workstation activity, and can be completely overwritten within minutes during active security incidents, brute-force attempts, or high-volume administrative operations. 
 
-In hardened environments enforcing comprehensive audit policies (such as Process Creation with command-line arguments [Event ID 4688], PowerShell Script Block Logging [Event ID 4104], and detailed logon/logoff auditing), workstations typically generate between 100 MB and 300+ MB of security telemetry daily. A legacy 192 MB Security log preserves only 12 to 48 hours of telemetry, creating severe risks for endpoints operating off-network (remote users, field devices) where real-time SIEM shipping may be delayed.
+In hardened environments enforcing comprehensive audit policies (such as Process Creation with command-line arguments [Event ID 4688], PowerShell Script Block Logging [Event ID 4104], and detailed logon/logoff auditing), workstations typically generate between 100 MB and 300+ MB of security telemetry daily. A legacy 192 MB Security log preserves only 12 to 48 hours of telemetry, creating severe risks for endpoints operating off-network (remote users, field devices) where real-time Windows Event Forwarding (WEF) or SIEM shipping may be delayed.
 
 Expanding the **Security** log to **1 GB** (`1,048,576 KB`), **System** and **Application** logs to **128 MB** (`131,072 KB`), and **Setup** log to **32 MB** (`32,768 KB`) provides a resilient 7-to-14-day on-box forensic retention buffer.
 
-Key engineering considerations:
+<div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-technical-engineering-considerations"></div>
+
+### Technical Engineering Considerations
 1. **64 KB Boundary Alignment**: The Windows Event Log service allocates and writes event records in 64 KB memory blocks. All configured sizes in KB must be integer multiples of 64 (`SizeKB % 64 == 0`). Sizes that do not align with 64 KB boundaries are rounded down by the operating system (`1,048,576 / 64 = 16,384`; `131,072 / 64 = 2,048`; `32,768 / 64 = 512`).
-2. **Retention Policy**: Configuring retention behavior to "Overwrite events as needed" (GPO: `Disabled`, registry value `0`) prevents the Event Log service from refusing new events when capacity is reached, guaranteeing continuous logging of recent attacker activity.
+2. **Retention Policy**: Configuring retention behavior to "Overwrite events as needed" (GPO: `Disabled`, registry value `0`) prevents the Event Log service from refusing new events or crashing when capacity is reached, guaranteeing continuous logging of recent attacker activity.
 3. **Memory and I/O Impact**: Windows utilizes memory-mapped files (`.evtx`) for the Event Log service. Only actively accessed pages are mapped into virtual memory; larger file limits do not consume active physical RAM.
+4. **Log Flooding & Anti-Forensics Defense**: Adversaries frequently flood event logs with benign telemetry to force rapid rollover and overwrite forensic traces of lateral movement, privilege escalation, or persistence. A 1 GB Security log buffer severely raises the bar for log flooding attacks, preserving critical evidence for digital forensics and incident response (DFIR).
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
+
 * **Operational Impact**: Allocates approximately 1.32 GB of maximum disk space in `%SystemRoot%\System32\Winevt\Logs`. Modern enterprise workstations with 256 GB to 1 TB SSDs easily absorb this footprint (representing less than 0.3% of total storage).
+* **System Performance**: Memory-mapped architecture ensures zero perceptible impact on system responsiveness or CPU overhead during logging events.
+* **WEF & SIEM Integration**: Provides robust offline buffering when roaming laptops or remote endpoints disconnect from enterprise VPNs or local collectors.
+* **Rollout Recommendations**: High priority; deploy immediately across all Tier 2 workstations and member servers.
 
 ---
 
@@ -96158,22 +98150,18 @@ Key engineering considerations:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
   * **Specify the maximum log file size (KB)**: Set to `Enabled` (`131072` KB)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Application`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
   * **Specify the maximum log file size (KB)**: Set to `Enabled` (`1048576` KB)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Security`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
   * **Specify the maximum log file size (KB)**: Set to `Enabled` (`32768` KB)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\Setup`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
   * **Specify the maximum log file size (KB)**: Set to `Enabled` (`131072` KB)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Event Log Service\System`
   * **Control Event Log behavior when the log file reaches its maximum size**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit (OU) and verify replication across all domain controllers.
 
 ---
 
@@ -96258,14 +98246,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ([int64]$Actual -ge [int64]$ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -96302,14 +98290,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ([int64]$Actual -ge [int64]$ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -96346,14 +98334,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ([int64]$Actual -ge [int64]$ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -96390,14 +98378,14 @@ if (Test-Path -Path $TargetKey) {
     $Prop = Get-ItemProperty -Path $TargetKey -Name $ValueName -ErrorAction SilentlyContinue
     if ($null -ne $Prop) {
         $Actual = $Prop.$ValueName
-        if ([int64]$Actual -ge [int64]$ExpectedValue) {
-            Write-Host "  [+] $ValueName = $($Actual) (Secure - Meets or exceeds threshold $($ExpectedValue))" -ForegroundColor Green
+        if ($Actual -eq $ExpectedValue) {
+            Write-Host "  [+] $ValueName = $($Actual) (Secure)" -ForegroundColor Green
         } else {
-            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+            Write-Host "  [!] MISMATCH: $ValueName = $($Actual) (Expected: $($ExpectedValue))" -ForegroundColor Red
             $script:Vulnerable = $true
         }
     } else {
-        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: >= $($ExpectedValue))" -ForegroundColor Red
+        Write-Host "  [!] MISSING VALUE: $ValueName (Expected: $($ExpectedValue))" -ForegroundColor Red
         $script:Vulnerable = $true
     }
 } else {
@@ -96416,6 +98404,21 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied log configurations via command line using `wevtutil`:
+```cmd
+wevtutil gl Application
+wevtutil gl Security
+wevtutil gl Setup
+wevtutil gl System
+```
+Verify that `maxSize` reflects the configured byte values (`1073741824` bytes for Security, `134217728` bytes for System/Application, `33554432` bytes for Setup) and `retention` is set to `false`.
+
+---
+
 <div id="08-endpoints-admin-templates-configure-end-at-event-log-sizes-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
@@ -96423,7 +98426,8 @@ if ($script:Vulnerable) {
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.26.1.1, 18.10.26.1.2 (Application >= 32,768 KB), 18.10.26.2.1, 18.10.26.2.2 (Security >= 196,608 KB), 18.10.26.3.1, 18.10.26.3.2 (Setup >= 32,768 KB), 18.10.26.4.1, 18.10.26.4.2 (System >= 32,768 KB)
 * **Microsoft Security Baseline**: Recommended administrative template and component restrictions for Windows client platforms
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters and forensic preservation recommendations for managed Windows environments
-
+* **MITRE ATT&CK**: [T1070.001: Indicator Removal on Host: Clear Windows Event Logs](https://attack.mitre.org/techniques/T1070/001/), [T1562.002: Impair Defenses: Disable Windows Event Logging](https://attack.mitre.org/techniques/T1562/002/)
+* **Related Controls**: [REQ-DC-121: Domain Controller Event Log Maximum File Sizes and Retention Policies](#02-domain-controllers-configure-event-log-sizes-md), [REQ-END-182: Administrative Templates: MSS System and Session Security Protections](#08-endpoints-admin-templates-configure-end-at-mss-system-protections-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -96437,8 +98441,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-190](#07-paws-admin-templates-configure-paw-at-file-explorer-motw-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -96446,23 +98450,59 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer\DisableMotWOnInsecurePathCopy` = `0`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\PreXPSP2ShellProtocolBehavior` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Do not apply the Mark of the Web tag to files copied from insecure sources**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer\Do not apply the Mark of the Web tag to files copied from insecure sources` -> **Disabled** (Enforces MotW tagging)
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer`
+    * Value Name: `DisableMotWOnInsecurePathCopy`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / MotW preserved)
+  * **Turn off shell protocol protected mode**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer\Turn off shell protocol protected mode` -> **Disabled** (Enforces shell protocol protected mode)
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer`
+    * Value Name: `PreXPSP2ShellProtocolBehavior`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Protected mode enforced)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-rationale"></div>
 
 ## Rationale
-The Mark of the Web (Zone.Identifier alternate data stream) is the foundation of Windows download security, triggering SmartScreen, Defender reputation checks, and Office Protected View. Disabling MotW suppression ensures downloaded files maintain security tags even when transferred across insecure network shares. Shell protocol protected mode restricts rogue URL protocol invocations.
+The Windows Attachment Manager and File Explorer utilize the Mark of the Web (MotW) as a core security boundary. MotW is implemented as an NTFS Alternate Data Stream (ADS) named `Zone.Identifier` appended to files downloaded from the internet or untrusted network zones. Maintaining strict MotW integrity and enforcing shell protocol protected mode are essential defenses against initial-access malware campaigns.
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-1-mark-of-the-web-zoneidentifier-defense-mechanisms"></div>
+
+### 1. Mark of the Web (Zone.Identifier) Defense Mechanisms
+The `Zone.Identifier` stream identifies the origin security zone of downloaded content (typically `ZoneId=3` for the Internet zone):
+* **Triggering Critical Security Defenses**: The presence of the MotW tag automatically activates multiple defense-in-depth controls:
+  * **Microsoft Defender SmartScreen**: Initiates cloud-based reputation checks and blocks unknown or malicious executables.
+  * **Microsoft 365 / Office Protected View**: Opens downloaded documents in read-only sandbox mode, preventing automated VBA macro execution and Dynamic Data Exchange (DDE) exploits.
+  * **Windows PowerShell Execution Policies**: Blocks execution of downloaded `.ps1` scripts unless explicitly unblocked.
+* **The MotW Stripping Threat Vector**: Threat actors routinely attempt to bypass MotW by packaging malware inside containers (ISO, VHD, ZIP) or coercing users to copy files across network shares (SMB or WebDAV). If `DisableMotWOnInsecurePathCopy` is misconfigured or set to `1`, File Explorer removes the `Zone.Identifier` stream during file copy operations, effectively laundering the untrusted file into a trusted local asset.
+* Setting `DisableMotWOnInsecurePathCopy = 0` (GPO: **Disabled**) guarantees that File Explorer preserves and applies MotW tags even when files are copied from insecure network paths.
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-2-shell-protocol-protected-mode-enforcement"></div>
+
+### 2. Shell Protocol Protected Mode Enforcement
+The Windows shell supports URI protocols (such as `file:`, `shell:`, `mailto:`, and third-party application protocols) executed via `ShellExecute`:
+* **Legacy Shell Protocol Risks**: In obsolete Windows releases, shell protocols executed arbitrary command parameters and external URLs without parameter sanitization or security prompt verification. Adversaries exploit legacy shell protocol behaviors (as demonstrated in CVE-2023-36025 and CVE-2024-21412) to bypass SmartScreen and trigger indirect code execution.
+* Setting `PreXPSP2ShellProtocolBehavior = 0` (GPO: **Disabled**) forces File Explorer to operate in modern Protected Mode. The shell sanitizes protocol parameters, restricts nested command invocation, and prompts users before launching external protocol handlers.
+
+<div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1553.005 - Subvert Trust Controls: Mark-of-the-Web Bypass**: Circumventing SmartScreen, Application Control, and Office Protected View by stripping MotW streams.
+* **T1204.002 - User Execution: Malicious File**: Opening untrusted documents or executable packages lacking security origin tags.
+* **T1218 - System Binary Proxy Execution**: Abusing shell protocol handlers to launch payloads via trusted Windows binaries.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Downloaded files copied across local shares will correctly retain Internet security prompts when executed.
+* **User Experience**: Users executing files downloaded from external networks will continue to receive standard Windows security confirmation prompts and SmartScreen validation dialogs.
+* **Internal Network Shares**: Enterprise files transferred between fully trusted internal intranet file servers (configured under the Local Intranet zone via GPO) will not receive intrusive prompts.
 
 ---
 
@@ -96479,11 +98519,11 @@ The Mark of the Web (Zone.Identifier alternate data stream) is the foundation of
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
-  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled`
+  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled` (Ensures MotW is applied)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
-  * **Turn off shell protocol protected mode**: Set to `Disabled`
+  * **Turn off shell protocol protected mode**: Set to `Disabled` (Ensures Protected Mode is enforced)
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -96583,9 +98623,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-file-explorer-motw-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.29.3, Section 18.10.29.5
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.43.3, Section 18.10.43.14; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.43.3, Section 18.10.43.14
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000370, Windows 11 STIG Rule WN11-CC-000370
+* **Microsoft Security Guidance**: Mark of the Web Architecture and Attachment Manager Defense Specifications
+* **ANSSI Active Directory Hardening Guide**: Section 3.3 (Protection against untrusted file execution and web downloads)
 
 
 <div style="page-break-before: always;"></div>
@@ -96599,8 +98640,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-191](#07-paws-admin-templates-configure-paw-at-internet-explorer-retirement-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -96608,24 +98649,63 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main\NotifyDisableIEOptions` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\DisableEnclosureDownload` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\AllowBasicAuthInClear` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Disable Internet Explorer 11 as a Standalone Browser**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Disable Internet Explorer 11 as a standalone browser` -> **Enabled** (Select: `Always`)
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main`
+    * Value Name: `NotifyDisableIEOptions`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Always disabled / Never prompt user)
+  * **Prevent Downloading of Enclosures in Web Feeds**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds\Prevent downloading of enclosures` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds`
+    * Value Name: `DisableEnclosureDownload`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Block enclosure downloads)
+  * **Disable Cleartext Basic Feed Authentication over HTTP**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds\Turn on Basic feed authentication over HTTP` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds`
+    * Value Name: `AllowBasicAuthInClear`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Prohibit cleartext basic auth)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-rationale"></div>
 
 ## Rationale
-Internet Explorer 11 is retired and out of support, presenting severe unpatched memory corruption attack surfaces. Disabling IE11 as a standalone browser automatically redirects browser requests to Microsoft Edge. Prohibiting RSS enclosure downloads prevents automated malware payload staging, and blocking cleartext HTTP feed authentication prevents credential interception.
+Internet Explorer 11 reached official end-of-life and retirement on modern Windows platforms. The standalone browser executable (`iexplore.exe`) lacks contemporary exploit mitigations, process sandboxing, and memory safety defenses, making it a persistent vector for zero-day exploitation and drive-by malware execution.
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-1-standalone-ie11-retirement-and-mandatory-redirection-to-microsoft-edge"></div>
+
+### 1. Standalone IE11 Retirement and Mandatory Redirection to Microsoft Edge
+The standalone Internet Explorer architecture is fundamentally obsolete:
+* **Exploitation of Obsolete Rendering Engines**: The MSHTML (`mshtml.dll`) and legacy scripting engines (JScript/VBScript) contain historical memory corruption vulnerabilities (such as use-after-free, out-of-bounds read/write, and type confusion). Threat actors frequently utilize crafted web pages, HTML attachments, or Microsoft Office documents embedding MSHTML objects (e.g., CVE-2021-40444, CVE-2024-38112) to force the launch of `iexplore.exe` and execute arbitrary shellcode outside modern browser sandboxes.
+* **Lack of Modern Isolation**: Unlike Chromium-based Microsoft Edge, standalone IE11 does not feature per-tab site isolation, Arbitrary Code Guard (ACG), or modern Control Flow Guard (CFG) enhancements.
+* Setting `NotifyDisableIEOptions = 0` (GPO: **Enabled: Always**) permanently disables `iexplore.exe`. Any attempt to launch Internet Explorer by users, protocol links, or background scripts is silently intercepted and redirected into Microsoft Edge.
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-2-eliminating-rssatom-web-feed-exploitation-vectors"></div>
+
+### 2. Eliminating RSS/Atom Web Feed Exploitation Vectors
+The Windows Web Feeds subsystem (`msfeeds.dll`) operates background synchronization for syndicated content:
+* **Automated Payload Staging via Enclosures**: RSS feeds support "enclosures" (multimedia or binary attachments). In unhardened configurations, the feed engine can automatically download attached files in the background without user interaction, providing an automated ingress vector for malicious payloads. Setting `DisableEnclosureDownload = 1` forbids the downloading of file enclosures.
+* **Credential Sniffing over Cleartext HTTP**: Transmitting HTTP Basic authentication headers over unencrypted HTTP channels allows network adversaries on the same LAN segment to capture cleartext usernames and passwords. Setting `AllowBasicAuthInClear = 0` strictly prohibits cleartext credential transmission in feed synchronization requests.
+
+<div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1189 - Drive-by Compromise**: Exploiting legacy browser engine vulnerabilities through web visits.
+* **T1204.001 - User Execution: Malicious Link**: Directing users to malicious URLs that target retired browser components.
+* **T1105 - Ingress Tool Transfer**: Automated background staging of malicious binaries via RSS feed enclosures.
+* **T1557 - Adversary-in-the-Middle**: Intercepting cleartext HTTP Basic credentials transmitted by the feeds subsystem.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: iexplore.exe redirects to Microsoft Edge. Legacy enterprise applications requiring MSHTML must be configured via Enterprise Mode Site List in Edge IE Mode.
+* **Enterprise Mode Site List (IE Mode)**: Legacy intranet websites, legacy Java/ActiveX applications, and internal portals that strictly require the MSHTML rendering engine must be configured via **Microsoft Edge Enterprise Mode Site List**. In IE Mode, legacy pages render within a secure, multi-process Edge container, ensuring backward compatibility while keeping standalone `iexplore.exe` disabled.
+* **Browser Redirection**: When users attempt to launch Internet Explorer from the Start menu or desktop shortcuts, Microsoft Edge will automatically launch with a banner explaining the transition.
 
 ---
 
@@ -96642,13 +98722,14 @@ Internet Explorer 11 is retired and out of support, presenting severe unpatched 
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer`
-  * **Disable Internet Explorer 11 as a standalone browser**: Set to `Enabled: Always`
+  * **Disable Internet Explorer 11 as a standalone browser**: Set to `Enabled`
+  * Select drop-down value: `Always`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
   * **Prevent downloading of enclosures**: Set to `Enabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
   * **Turn on Basic feed authentication over HTTP**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -96771,9 +98852,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-internet-explorer-retirement-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.35.1, Section 18.10.58.1, Section 18.10.58.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.45.1, Section 18.10.45.2, Section 18.10.45.3; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.45.1, Section 18.10.45.2, Section 18.10.45.3
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000380, Windows 11 STIG Rule WN11-CC-000380
+* **Microsoft Lifecycle Guidance**: Internet Explorer 11 Desktop Application Retirement FAQ
+* **ANSSI Active Directory Hardening Guide**: Section 3.3 (Web browser hardening and decommissioning obsolete runtimes)
 
 
 <div style="page-break-before: always;"></div>
@@ -96796,25 +98878,49 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowCortana` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowCortanaAboveLock` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowIndexingEncryptedStoresOrItems` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowSearchToUseLocation` = `0`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Search
+* **Policy Settings**:
+  * Allow Cortana
+  * Allow Cortana above lock screen
+  * Allow indexing of encrypted files
+  * Allow search and Cortana to use location
+* **Supported On**: Windows 10 (Version 1511) or Windows Server 2016 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search`
+* **Registry Values**:
+  * `AllowCortana` = `0` (REG_DWORD, Suppress Cortana voice assistance)
+  * `AllowCortanaAboveLock` = `0` (REG_DWORD, Block Cortana execution when device is locked)
+  * `AllowIndexingEncryptedStoresOrItems` = `0` (REG_DWORD, Prevent indexing of EFS/encrypted files)
+  * `AllowSearchToUseLocation` = `0` (REG_DWORD, Block search features from accessing device location)
+* **Vulnerability References**: MITRE ATT&CK: T1005 (Data from Local System), T1083 (File and Directory Discovery), T1056 (Input Capture), T1200 (Hardware Additions / Physical Access), T1020 (Automated Exfiltration)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-rationale"></div>
 
 ## Rationale
-Cortana voice integration introduces microphone listening risks, voice command execution from locked workstations, and external telemetry transmission. Indexing encrypted files in the Windows Search index creates unencrypted index cache entries, leaking sensitive plaintext data across file security boundaries.
+
+The Windows Search and Cortana infrastructure provides desktop indexing, voice recognition, and location-aware query capabilities. In enterprise environments, unconstrained search and voice assistant features introduce severe data leakage, physical authentication bypass, and cryptographic exposure risks.
+
+<div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-technical-threat-vectors-cryptographic-vulnerabilities"></div>
+
+### Technical Threat Vectors & Cryptographic Vulnerabilities
+1. **Cryptographic Bypass via Encrypted File Indexing**: The Encrypting File System (EFS) protects sensitive files using per-user public key certificates and symmetric file encryption keys (FEK). When the Windows Search indexer (`SearchIndexer.exe`) is allowed to index encrypted stores, it decrypts file contents using the active user's credentials and writes plain-text content, tokens, and metadata into the centralized search database (`C:\ProgramData\Microsoft\Search\Data\Applications\Windows\Windows.edb`). Because `Windows.edb` is a shared database with separate access controls, an attacker gaining local administrative privileges or exploiting local service vulnerabilities can extract plaintext strings and sensitive documents directly from the database, completely bypassing file-level EFS encryption.
+2. **Above-Lock Physical Authentication Bypass**: When Cortana is permitted to operate above the lock screen, physical passersby or unauthenticated attackers in physical proximity to a locked workstation can issue voice queries. This allows unauthorized actors to inspect user calendar appointments, read message previews, query contact lists, and potentially execute authorized voice commands without providing PIN, password, or biometric authentication.
+3. **Voice Audio Ingestion & Telemetry Transmission**: Active voice assistants maintain continuous ambient audio listening queues to detect wake words ("Hey Cortana"). Detected speech samples, query strings, and environmental audio telemetry are transmitted to Microsoft Bing cloud endpoints for natural language processing, creating compliance and eavesdropping concerns in sensitive corporate offices.
+4. **Endpoint Geolocation Disclosure**: Allowing the search subsystem to access device location services attaches Wi-Fi BSSID triangulation and GPS coordinates to telemetry logs and web search queries, disclosing the physical location of corporate mobile assets and remote personnel.
+
+Enforcing these four policies eliminates voice-based interactions, ensures encrypted files remain strictly unindexed, and prevents unauthorized geolocation tracking.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Cortana voice assistance is deactivated. Encrypted files will not appear in instant search results.
+
+* **Operational Impact**: Cortana voice interaction is completely disabled. Encrypted files (EFS) will not appear in rapid full-text search results; users must navigate to them directly via File Explorer. Standard local indexing of unencrypted corporate documents, emails in Outlook, and local file searches continue to function with full speed and fidelity.
+* **User Experience**: Voice search prompts are removed. The search bar functions as a standard, local/text-only search interface.
+* **Cryptographic Integrity**: EFS encrypted stores are guaranteed against plaintext leakage into `Windows.edb`.
+* **Rollout Recommendations**: Completely safe to deploy across all enterprise endpoints; no negative impact on line-of-business software.
 
 ---
 
@@ -96828,18 +98934,17 @@ Cortana voice integration introduces microphone listening risks, voice command e
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow Cortana**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow Cortana above lock screen**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow indexing of encrypted files**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow search and Cortana to use location**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\Windows Components\Search
+   ```
+4. Configure the following policies:
+   * **Allow Cortana**: Set to `Disabled`
+   * **Allow Cortana above lock screen**: Set to `Disabled`
+   * **Allow indexing of encrypted files**: Set to `Disabled`
+   * **Allow search and Cortana to use location**: Set to `Disabled`
+5. Click **Apply**, then click **OK** for each policy.
+6. Link the GPO to the target Organizational Unit (OU) and verify replication across all domain controllers.
 
 ---
 
@@ -96978,12 +99083,32 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /s
+```
+Ensure all four values are present and set to `0x0`:
+```text
+AllowCortana                          REG_DWORD    0x0
+AllowCortanaAboveLock                 REG_DWORD    0x0
+AllowIndexingEncryptedStoresOrItems   REG_DWORD    0x0
+AllowSearchToUseLocation              REG_DWORD    0x0
+```
+
+---
+
 <div id="08-endpoints-admin-templates-configure-end-at-search-cortana-restrictions-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.59.3, 18.10.59.4, 18.10.59.5, 18.10.59.6
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Sections 18.10.59.3, 18.10.59.4, 18.10.59.5, 18.10.59.6
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Windows Search
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1005: Data from Local System](https://attack.mitre.org/techniques/T1005/), [T1083: File and Directory Discovery](https://attack.mitre.org/techniques/T1083/), [T1056: Input Capture](https://attack.mitre.org/techniques/T1056/), [T1200: Hardware Additions](https://attack.mitre.org/techniques/T1200/), [T1020: Automated Exfiltration](https://attack.mitre.org/techniques/T1020/)
+* **Related Controls**: [REQ-END-186: Administrative Templates: Restrict Internet Communication](#08-endpoints-admin-templates-configure-end-at-internet-communication-md), [REQ-END-188: Administrative Templates: Interactive Logon and Credential Display Options](#08-endpoints-admin-templates-configure-end-at-logon-display-options-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -96997,8 +99122,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-194](#07-paws-admin-templates-configure-paw-at-windows-store-restrictions-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -97006,23 +99131,55 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore\AutoDownload` = `4`
-  * `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore\DisableOSUpgrade` = `1`
+* **GPO Paths / Registry Locations**:
+  * **Allow Automatic Download and Installation of Store App Updates**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store\Turn off Automatic Download and Install of updates` -> **Disabled** (Enforces automatic updates)
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore`
+    * Value Name: `AutoDownload`
+    * Value Type: `REG_DWORD`
+    * Value Data: `4` (Automatic update installation enabled)
+  * **Turn off the offer to update to the latest version of Windows**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store\Turn off the offer to update to the latest version of Windows` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\WindowsStore`
+    * Value Name: `DisableOSUpgrade`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Block consumer OS upgrade offers)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-rationale"></div>
 
 ## Rationale
-Permitting automatic Store app updates ensures packaged applications and system appx dependencies stay continuously patched against published vulnerabilities. Suppressing consumer Windows upgrade offers prevents unauthorized major OS feature version upgrades that circumvent IT change management and testing.
+Modern Windows installations incorporate numerous built-in packaged applications, runtime frameworks, and system extensions (such as Windows Terminal, App Installer, HEVC/VP9 codecs, and Edge WebView2 components) that are serviced through the Microsoft Store infrastructure. Managing store update behaviors is essential to ensure critical vulnerability patching while preventing unmanaged operating system upgrades.
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-1-continuous-security-patching-of-packaged-system-components"></div>
+
+### 1. Continuous Security Patching of Packaged System Components
+Disabling automatic updates for Microsoft Store applications leaves endpoints severely exposed:
+* **Vulnerabilities in Modern Core Components**: Core Windows utilities and third-party media codecs distributed via the Store frequently suffer from memory corruption and remote code execution vulnerabilities (such as CVE-2023-4863 in WebP processing, and multiple remote execution flaws in Windows Codecs Library).
+* **Automated Patch Delivery**: If automatic Store updates are blocked, pre-installed apps and system libraries remain frozen at their build-time versions. Threat actors can exploit these unpatched dependencies to execute arbitrary code or bypass security sandboxes.
+* Setting `AutoDownload = 4` (by configuring the GPO "Turn off Automatic Download and Install of updates" to **Disabled**) ensures that the Windows Store service automatically downloads and applies security patches for all installed packaged applications in the background.
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-2-preventing-unsanctioned-major-operating-system-upgrades"></div>
+
+### 2. Preventing Unsanctioned Major Operating System Upgrades
+Consumer-oriented Windows features frequently present prompts encouraging end users to upgrade to the latest major operating system release (such as moving from Windows 10 to Windows 11):
+* **Bypassing Enterprise Change Management**: Uncontrolled operating system upgrades can disrupt critical business operations, introduce software incompatibilities with enterprise line-of-business applications, or break endpoint security software (EDR, antivirus filters, and smart card middleware).
+* **Controlled Lifecycle Management**: Setting `DisableOSUpgrade = 1` suppresses all consumer-facing operating system upgrade notifications and offers delivered via the Microsoft Store channel, ensuring that operating system version migrations remain under the strict governance of enterprise patch management systems (such as WSUS, Intune, or MECM).
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1195.002 - Supply Chain Compromise: Compromised Software Dependencies**: Maintaining updated dependencies and system packages to close published CVEs.
+* **T1489 - Service Stop / System Disruption**: Preventing uncoordinated OS upgrades that disrupt endpoint security agents and administrative operations.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Store apps receive automated updates; consumer version upgrade prompts are suppressed.
+* **Bandwidth and Network Usage**: Packaged app updates are downloaded from Microsoft CDN infrastructure. Organizations utilizing Delivery Optimization or internal WSUS/Connected Cache servers will experience optimized network bandwidth distribution.
+* **Administrative Governance**: Enterprise administrators retain authoritative control over OS feature version lifecycles through Windows Update for Business policies or internal deployment task sequences.
 
 ---
 
@@ -97039,11 +99196,11 @@ Permitting automatic Store app updates ensures packaged applications and system 
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store`
-  * **Turn off Automatic Download and Install of updates**: Set to `Disabled` (Allow auto updates)
+  * **Turn off Automatic Download and Install of updates**: Set to `Disabled` (Ensures updates are downloaded automatically)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Store`
   * **Turn off the offer to update to the latest version of Windows**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -97139,9 +99296,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-windows-store-restrictions-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.66.2, Section 18.10.66.3
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.87.1, Section 18.10.87.2; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.87.1, Section 18.10.87.2
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000350, Windows 11 STIG Rule WN11-CC-000350
+* **Microsoft Security Baseline**: Windows Store Policy Recommendations
+* **ANSSI Active Directory Hardening Guide**: Section 3.3 (Managing system components and software update lifecycles)
 
 
 <div style="page-break-before: always;"></div>
@@ -97164,22 +99322,43 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: Low
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Dsh\AllowNewsAndInterests` = `0`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Widgets
+* **Policy Name**: Allow widgets
+* **Supported On**: Windows 11 (all versions), Windows 10 (version 21H1 and above with News and Interests)
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Dsh`
+* **Registry Value**: `AllowNewsAndInterests`
+* **Value Type**: `REG_DWORD`
+* **Value Data**: `0` (0x00000000 = Suppress widgets and taskbar news feed)
+* **Vulnerability References**: MITRE ATT&CK: T1189 (Drive-by Compromise), T1071 (Application Layer Protocol), T1204 (User Execution), T1059 (Command and Scripting Interpreter)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-rationale"></div>
 
 ## Rationale
-Windows Widgets and News and Interests dynamically fetch unauthenticated internet news, weather, and third-party content onto the taskbar, generating continuous telemetry and background web requests. Disabling widgets eliminates this attack surface and eliminates unwanted distractions.
+
+Windows Widgets (in Windows 11) and the earlier News and Interests feature (in Windows 10) integrate dynamic cloud-delivered content directly into the Windows desktop taskbar. The feature relies on the Desktop Shell Host (`widgets.exe`) and the Microsoft Edge WebView2 runtime to continuously retrieve and display news feeds, weather reports, sports scores, stock tickers, and third-party sponsored advertisements.
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-technical-threat-vectors-corporate-risks"></div>
+
+### Technical Threat Vectors & Corporate Risks
+1. **Dynamic Web Content Ingestion on the Desktop**: The Widgets infrastructure embeds a full-featured web rendering engine (WebView2/Chromium) directly within the interactive desktop shell. This runtime continuously fetches and renders dynamic HTML, JavaScript, and media assets from public consumer endpoints (`*.msn.com`, `*.bing.com`). Any vulnerability in web content rendering, supply-chain content manipulation on third-party ad networks, or content spoofing exposes the interactive desktop session to malicious drive-by execution.
+2. **Persistent Telemetry & Egress Polling**: The widget background service polls Microsoft cloud services continuously to refresh content feeds and transmit interaction metrics. In enterprise environments, this generates substantial telemetry traffic, consumes network bandwidth, and leaks client IP addresses, geo-location data, and user interaction histories to public cloud providers.
+3. **Phishing & Social Engineering Vector**: Consumer news feeds prominently display sensationalist headlines, celebrity news, and sponsored partner links directly within the operating system taskbar. Employees clicking these headlines are redirected to external third-party websites, increasing exposure to phishing campaigns, malicious ad redirects (malvertising), and untrusted web domains.
+4. **Endpoint Performance & Resource Contention**: The Desktop Shell Host process runs continuously in the background, consuming CPU cycles and substantial RAM to maintain cached web views and feed updates. On virtual desktop infrastructure (VDI) or resource-constrained endpoints, this creates unnecessary overhead.
+
+Disabling widgets eliminates the taskbar icon, suppresses the background rendering processes, and completely halts all associated outbound HTTP/HTTPS feed requests.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: The Widgets and News and Interests icon is removed from the taskbar.
+
+* **Operational Impact**: The Widgets icon (Windows 11) and News and Interests feed (Windows 10) are permanently removed from the taskbar. Core productivity applications, corporate notifications, Action Center alerts, and enterprise communication tools remain completely unaffected.
+* **User Experience**: Users encounter a cleaner taskbar without accidental hover flyouts or distracting news popups during working hours.
+* **Network Impact**: Eliminates constant background HTTP/HTTPS polling traffic to MSN and Bing content delivery endpoints.
+* **Rollout Recommendations**: Can be deployed across all corporate endpoints immediately; highly recommended across standard desktop fleets and VDI environments.
 
 ---
 
@@ -97193,12 +99372,14 @@ Windows Widgets and News and Interests dynamically fetch unauthenticated interne
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Widgets`
-  * **Allow widgets**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\Windows Components\Widgets
+   ```
+4. Double-click **Allow widgets**.
+5. Select **Disabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the appropriate Organizational Unit (OU) and verify policy replication across all domain controllers.
 
 ---
 
@@ -97268,12 +99449,29 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy setting via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Dsh" /v AllowNewsAndInterests
+```
+Expected output:
+```text
+AllowNewsAndInterests    REG_DWORD    0x0
+```
+
+---
+
 <div id="08-endpoints-admin-templates-configure-end-at-windows-widgets-dsh-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.72.1
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Widgets
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1189: Drive-by Compromise](https://attack.mitre.org/techniques/T1189/), [T1071: Application Layer Protocol](https://attack.mitre.org/techniques/T1071/), [T1204: User Execution](https://attack.mitre.org/techniques/T1204/)
+* **Related Controls**: [REQ-END-195: Administrative Templates: Disable Cloud Consumer Account State Content](#08-endpoints-admin-templates-configure-end-at-cloud-consumer-content-md), [REQ-END-186: Administrative Templates: Restrict Internet Communication](#08-endpoints-admin-templates-configure-end-at-internet-communication-md)
 
 
 <div style="page-break-before: always;"></div>
@@ -97287,8 +99485,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-196](#07-paws-admin-templates-configure-paw-at-automatic-restart-signon-md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
@@ -97297,21 +99495,50 @@ if ($script:Vulnerable) {
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableAutomaticRestartSignOn` = `1`
+  * **Sign-in and lock last interactive user automatically after a restart**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Logon Options\Sign-in and lock last interactive user automatically after a restart` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
+    * Value Name: `DisableAutomaticRestartSignOn`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Disabled / ARSO blocked)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-rationale"></div>
 
 ## Rationale
-Automatic Restart Sign-On (ARSO) caches user credentials in memory to automatically log in and lock the desktop after Windows Update reboots. This credential staging mechanism creates exposure to physical memory extraction and DMA attacks. Disabling ARSO prevents credentials from persisting across automated reboots.
+Automatic Restart Sign-On (ARSO) is a Windows convenience feature designed to streamline post-update maintenance. When an automated Windows Update requires a reboot, ARSO captures the interactive user's credentials, encrypts them via the Local Security Authority (LSA) and Data Protection API (DPAPI), and stages them across the reboot sequence. Upon restart, Winlogon automatically decrypts the credentials, logs the user on in the background, instantiates the user profile, and locks the console.
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-1-in-memory-credential-exposure-and-dma-vulnerabilities"></div>
+
+### 1. In-Memory Credential Exposure and DMA Vulnerabilities
+While convenient for consumer devices, ARSO introduces critical vulnerabilities in enterprise environments:
+* **Pre-Staged Credential Loading into RAM**: Once ARSO automatically logs the user in, the user's primary Kerberos Ticket Granting Tickets (TGTs), NTLM hashes, DPAPI master keys, and authentication tokens are loaded into physical DRAM and the Local Security Authority Subsystem Service (`lsass.exe`).
+* **Unattended Physical Exploitation**: Because the machine sits in an empty office or unattended workstation area while ostensibly locked, an adversary with physical access can exploit Direct Memory Access (DMA) attack vectors (via Thunderbolt, PCIe, or USB4 interfaces using tools like PCILeech) to extract secrets from memory without possessing the user's password.
+* **Cold-Boot and Memory Remanence Attacks**: If the host is powered down immediately following an ARSO reboot, sensitive directory keys and cached credentials persist in physical memory modules for several minutes, allowing offline memory extraction.
+* **Credential Staging Risks in LSA**: Staging decrypted credential material across a reboot relies on cryptographic keys stored in the registry and TPM. Any vulnerability in the staging implementation exposes stored credentials to offline extraction.
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-2-enforcing-clean-authentication-boundaries"></div>
+
+### 2. Enforcing Clean Authentication Boundaries
+Setting `DisableAutomaticRestartSignOn = 1` (by configuring the GPO "Sign-in and lock last interactive user automatically after a restart" to **Disabled**) completely eliminates credential staging:
+* Post-reboot, the system boots strictly into a clean, unauthenticated Winlogon state.
+* No user tokens, Kerberos tickets, or DPAPI keys are instantiated in memory until the user physically presents themselves at the console and completes interactive authentication.
+
+<div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1003.001 - OS Credential Dumping: LSASS Memory**: Scraping credentials instantiated in memory by automated background sign-on.
+* **T1200 - Direct Network / Hardware Access**: Physical extraction of volatile memory from unattended machines.
+* **T1078 - Valid Accounts**: Misusing persisted session tokens.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Following a restart, the computer remains at the initial Windows login screen until the user manually authenticates.
+* **User Experience Post-Update**: Following scheduled overnight patch cycles or automated reboots, client workstations will remain at the standard Windows logon screen. User desktop sessions and background applications (e.g., mail clients, cloud sync engines) will not launch until the user logs on.
+* **Patch Verification**: Enterprise management agents (Intune, MECM) continue to receive reboot confirmation and compliance signals from the Windows Update Agent regardless of whether a user session is active.
 
 ---
 
@@ -97330,7 +99557,7 @@ Automatic Restart Sign-On (ARSO) caches user credentials in memory to automatica
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Logon Options`
   * **Sign-in and lock last interactive user automatically after a restart**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -97403,9 +99630,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-automatic-restart-signon-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.82.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.99.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.99.1; CIS Windows Server Benchmark: Section 18.10.99.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000390, Windows 11 STIG Rule WN11-CC-000390
+* **ANSSI Active Directory Hardening Guide**: Section 3.1 (Securing local authentication processes and credential lifecycle)
+* **Microsoft Security Baseline**: Windows Logon Security Recommendations
 
 
 <div style="page-break-before: always;"></div>
@@ -97419,8 +99647,8 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-target-scope"></div>
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-197](#07-paws-admin-templates-configure-paw-at-windows-sandbox-isolation-md)).*
+* **Operating Systems**: Windows 10 (1903 and above) Enterprise/Professional, Windows 11 Enterprise/Pro.
 
 ---
 
@@ -97428,23 +99656,58 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox\AllowClipboardRedirection` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox\AllowNetworking` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Disable Clipboard Sharing with Windows Sandbox**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox\Allow clipboard sharing with Windows Sandbox` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox`
+    * Value Name: `AllowClipboardRedirection`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Disable Networking in Windows Sandbox**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox\Allow networking in Windows Sandbox` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Sandbox`
+    * Value Name: `AllowNetworking`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-rationale"></div>
 
 ## Rationale
-Windows Sandbox provides a lightweight virtualized environment for untrusted binary execution. If malware is detonated inside the sandbox, clipboard sharing allows potential escape or clipboard data harvesting, and network access permits external C2 communication and lateral scanning. Disabling clipboard redirection and networking enforces strict host and network isolation.
+Windows Sandbox provides a disposable, containerized desktop environment based on Hyper-V virtualization technology. While designed for the isolated execution of untrusted applications and triage of suspicious documents, default sandbox configurations permit bidirectional clipboard synchronization and shared network access, introducing significant breach risks.
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-1-clipboard-interception-and-cross-boundary-tampering"></div>
+
+### 1. Clipboard Interception and Cross-Boundary Tampering
+By default, Windows Sandbox links the host and guest clipboards through an internal Remote Desktop Protocol (RDP) virtual channel:
+* **Clipboard Data Harvesting**: Untrusted binaries detonated inside the sandbox can monitor clipboard activity. If an analyst or user copies passwords, Kerberos credentials, API secrets, or sensitive corporate intellectual property on the host operating system, malware in the container can intercept the clipboard buffer via standard Windows API calls.
+* **Clipboard Injection and Host Execution**: Sophisticated malware within the sandbox can overwrite the host clipboard with malicious payloads (such as obfuscated PowerShell commands). If the user subsequently pastes into a host administrative console (PowerShell, CMD, or Run prompt), the injected payload executes directly in the host security context, breaking the container boundary.
+* Setting `AllowClipboardRedirection = 0` severs the clipboard virtual channel, ensuring zero bidirectional data transfer.
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-2-eliminating-command-and-control-and-lateral-network-movement"></div>
+
+### 2. Eliminating Command-and-Control and Lateral Network Movement
+Default sandbox configurations create an internal virtual network switch (NAT) that bridges the container to the host's physical network adapters:
+* **Command-and-Control (C2) Communication**: Malicious software executed inside the sandbox can establish outbound connections to external adversary infrastructure, exfiltrating host environment data, receiving secondary-stage payloads, or participating in DDoS attacks.
+* **Internal Network Scanning and Lateral Movement**: The sandbox guest shares layer-3 reachability with the local enterprise network. Malicious code running inside the sandbox can scan corporate subnets, enumerate Active Directory Domain Controllers, exploit unpatched internal services, or launch pass-the-hash attacks against adjacent member servers.
+* Setting `AllowNetworking = 0` instructs the Hyper-V container manager to instantiate the sandbox without a virtual network adapter, isolating the environment in a strict offline sandbox.
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-3-mitre-attck-mapping"></div>
+
+### 3. MITRE ATT&CK Mapping
+* **T1115 - Clipboard Data**: Adversary monitoring and extraction of sensitive clipboard data across virtualization boundaries.
+* **T1071 - Application Layer Protocol**: Outbound communication to external adversary command and control nodes.
+* **T1046 - Network Service Discovery**: Scanning internal corporate networks and directory services from within the container.
+* **T1204.002 - User Execution: Malicious File**: Detonating untrusted binaries within isolated testing environments.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users cannot copy/paste between host and sandbox, and Sandbox cannot connect to local or internet networks.
+* **Malware Analysis and Triage**: Analysts can safely detonate and inspect suspicious files, scripts, and applications without risk of network egress or host credential theft.
+* **Network-Dependent Software**: Packaged applications requiring active internet or intranet network connectivity will fail to communicate. Files and dependencies required for offline analysis must be mapped into the container via custom XML `.wsb` sandbox configuration files with read-only host folder mounts.
 
 ---
 
@@ -97465,7 +99728,7 @@ Windows Sandbox provides a lightweight virtualized environment for untrusted bin
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Sandbox`
   * **Allow networking in Windows Sandbox**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -97561,9 +99824,10 @@ if ($script:Vulnerable) {
 <div id="08-endpoints-admin-templates-configure-end-at-windows-sandbox-isolation-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.91.1, Section 18.10.91.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.106.1, Section 18.10.106.2; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.106.1, Section 18.10.106.2
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000360, Windows 11 STIG Rule WN11-CC-000360
+* **Microsoft Security Baseline**: Windows Sandbox Component Security Recommendations
+* **ANSSI Active Directory Hardening Guide**: Section 3.3 (Isolation of untrusted code execution environments)
 
 
 <div style="page-break-before: always;"></div>
@@ -97586,29 +99850,53 @@ if ($script:Vulnerable) {
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\SetDisablePauseUXAccess` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\ManagePreviewBuildsPolicyValue` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdates` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdatesPeriodInDays` = `180`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdates` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdatesPeriodInDays` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\NoAutoRebootWithLoggedOnUsers` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\ScheduledInstallDay` = `0`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Windows Update
+* **Policy Settings**:
+  * Remove access to 'Pause updates' feature
+  * Manage preview builds
+  * Select when Preview Builds and Feature Updates are received
+  * Select when Quality Updates are received
+  * Configure Automatic Updates
+  * No auto-restart with logged on users for scheduled automatic updates installations
+* **Supported On**: Windows 10 (Version 1607) or Windows Server 2016 and above
+* **Registry Keys & Values**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\SetDisablePauseUXAccess` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\ManagePreviewBuildsPolicyValue` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdates` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdatesPeriodInDays` = `180` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdates` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdatesPeriodInDays` = `0` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\NoAutoRebootWithLoggedOnUsers` = `0` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\ScheduledInstallDay` = `0` (REG_DWORD, Every day)
+* **Vulnerability References**: MITRE ATT&CK: T1190 (Exploit Public-Facing Application), T1068 (Exploitation for Privilege Escalation), T1210 (Exploitation of Remote Services), T1562.001 (Impair Defenses: Disable or Modify Tools)
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-rationale"></div>
 
 ## Rationale
-Removing the ability to pause updates prevents users from indefinitely deferring critical security patches. Deferring quality updates by 0 days ensures critical security patches are installed immediately upon release, while daily scheduled installation and permitting automated reboots ensures systems stay continuously remediated against known exploits.
+
+Windows Update is the primary defense mechanism against known Common Vulnerabilities and Exposures (CVEs), remote code execution exploits, and privilege escalation vulnerabilities. In unhardened environments, default update policies allow users to pause updates, postpone reboots, or enroll in experimental preview builds, directly exposing the enterprise network to preventable exploitation.
+
+<div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-technical-threat-vectors-vulnerability-remediation"></div>
+
+### Technical Threat Vectors & Vulnerability Remediation
+1. **Closing the Vulnerability Exposure Window (`DeferQualityUpdatesPeriodInDays = 0`)**: Quality updates represent monthly cumulative security patches addressing actively exploited zero-day vulnerabilities and critical security flaws. Setting the quality update deferral period to 0 days ensures that client systems and member servers retrieve and stage security patches immediately upon approval or public release, minimizing the window of vulnerability against automated exploit kits and network worms.
+2. **Preventing User Deferral of Critical Security Fixes (`SetDisablePauseUXAccess = 1`)**: Standard Windows installations permit interactive users to pause updates for up to 35 days with a single click. In corporate environments, users routinely pause updates to avoid reboots or temporary performance overhead, leaving machines unpatched against high-severity exploits. Removing access to the 'Pause updates' control guarantees that corporate patching schedules cannot be overridden by end users.
+3. **Ensuring Kernel Patch Completion via Automated Restarts (`NoAutoRebootWithLoggedOnUsers = 0`)**: Many critical Windows vulnerabilities (such as kernel memory corruptions, LSASS vulnerabilities, and RPC/SMB flaws) require an operating system restart to replace locked system binaries and apply kernel-mode drivers. If `NoAutoRebootWithLoggedOnUsers` is enabled (`1`), any user who leaves a disconnected or locked session indefinitely halts the reboot process, leaving the system in a vulnerable half-patched state. Setting this policy to `0` (Disabled in GPO) allows the Windows Update client to perform scheduled reboots during maintenance hours, ensuring patch application completes.
+4. **Balancing Stability and Compatibility for Feature Updates (`DeferFeatureUpdatesPeriodInDays = 180`)**: Feature updates deliver major operating system version upgrades. Unlike monthly security fixes, feature updates introduce substantial architectural and UI changes that may disrupt line-of-business (LOB) software, third-party security agents, and VPN clients. Deferring feature updates by 180 days provides IT and security teams adequate time to pilot, validate, and certify compatibility before enterprise-wide distribution.
+5. **Prohibiting Unstable Preview Builds (`ManagePreviewBuildsPolicyValue = 1`)**: Disabling preview builds guarantees that endpoints only execute production-grade, cryptographically validated Windows binaries, preventing operational instability and untested security configurations.
 
 ---
 
 <div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-legacy-impact-compatibility"></div>
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users will not be able to pause updates. The system may reboot during designated maintenance windows to complete patch application.
+
+* **Operational Impact**: Users cannot pause updates in the Windows Settings UI. Machines will automatically restart during scheduled maintenance windows (e.g., 03:00 AM) if pending updates require a reboot.
+* **Compatibility**: 180-day feature update deferral shields line-of-business applications from unexpected operating system version changes while 0-day quality update deferral ensures zero delay in receiving critical security patches.
+* **Network Impact**: Bandwidth consumption is controlled via corporate WSUS, Microsoft Endpoint Configuration Manager (MECM), or Delivery Optimization.
+* **Rollout Recommendations**: High priority; deploy across all Tier 2 workstations and member servers with clear communication regarding scheduled reboot windows.
 
 ---
 
@@ -97626,18 +99914,14 @@ Removing the ability to pause updates prevents users from indefinitely deferring
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
   * **Remove access to 'Pause updates' feature**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
   * **Manage preview builds**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
-  * **Select when Preview Builds and Feature Updates are received**: Set to `Enabled: Defer 180 days`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
-  * **Select when Quality Updates are received**: Set to `Enabled: Defer 0 days`
+  * **Select when Preview Builds and Feature Updates are received**: Set to `Enabled`, select **Semi-Annual Channel**, and set deferral to `180` days
+  * **Select when Quality Updates are received**: Set to `Enabled`, set deferral to `0` days
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience`
-  * **Configure Automatic Updates**: Set to `Enabled: Scheduled install day 0 - Every day`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience`
+  * **Configure Automatic Updates**: Set to `Enabled`, select option **4 - Auto download and schedule the install**, set scheduled install day to `0 - Every day`, and configure a suitable maintenance hour (e.g., `03:00`)
   * **No auto-restart with logged on users for scheduled automatic updates installations**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit (OU) and verify policy replication across all domain controllers.
 
 ---
 
@@ -97872,12 +100156,27 @@ if ($script:Vulnerable) {
 
 ---
 
+<div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-option-c-manual-verification"></div>
+
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /s
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /s
+```
+Verify that all configured values match the defined baseline.
+
+---
+
 <div id="08-endpoints-admin-templates-configure-end-at-windows-update-policies-md-sources-compliance-references"></div>
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.93.1.1, 18.10.93.2.2, 18.10.93.2.3, 18.10.93.4.1, 18.10.93.4.2, 18.10.93.4.3
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.93.1, 18.10.93.2, 18.10.93.3, 18.10.93.4
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Windows Update
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1190: Exploit Public-Facing Application](https://attack.mitre.org/techniques/T1190/), [T1068: Exploitation for Privilege Escalation](https://attack.mitre.org/techniques/T1068/), [T1210: Exploitation of Remote Services](https://attack.mitre.org/techniques/T1210/), [T1562.001: Impair Defenses: Disable or Modify Tools](https://attack.mitre.org/techniques/T1562/001/)
+* **Related Controls**: [REQ-END-198: Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions](#08-endpoints-admin-templates-configure-end-at-data-collection-preview-builds-md), [REQ-END-186: Administrative Templates: Restrict Internet Communication](#08-endpoints-admin-templates-configure-end-at-internet-communication-md)
 
 
 <div style="page-break-before: always;"></div>

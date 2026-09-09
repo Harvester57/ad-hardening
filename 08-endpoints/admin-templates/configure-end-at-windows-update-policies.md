@@ -8,25 +8,47 @@
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\SetDisablePauseUXAccess` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\ManagePreviewBuildsPolicyValue` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdates` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdatesPeriodInDays` = `180`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdates` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdatesPeriodInDays` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\NoAutoRebootWithLoggedOnUsers` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\ScheduledInstallDay` = `0`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Windows Update
+* **Policy Settings**:
+  * Remove access to 'Pause updates' feature
+  * Manage preview builds
+  * Select when Preview Builds and Feature Updates are received
+  * Select when Quality Updates are received
+  * Configure Automatic Updates
+  * No auto-restart with logged on users for scheduled automatic updates installations
+* **Supported On**: Windows 10 (Version 1607) or Windows Server 2016 and above
+* **Registry Keys & Values**:
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\SetDisablePauseUXAccess` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\ManagePreviewBuildsPolicyValue` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdates` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferFeatureUpdatesPeriodInDays` = `180` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdates` = `1` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\DeferQualityUpdatesPeriodInDays` = `0` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\NoAutoRebootWithLoggedOnUsers` = `0` (REG_DWORD)
+  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU\ScheduledInstallDay` = `0` (REG_DWORD, Every day)
+* **Vulnerability References**: MITRE ATT&CK: T1190 (Exploit Public-Facing Application), T1068 (Exploitation for Privilege Escalation), T1210 (Exploitation of Remote Services), T1562.001 (Impair Defenses: Disable or Modify Tools)
 
 ---
 
 ## Rationale
-Removing the ability to pause updates prevents users from indefinitely deferring critical security patches. Deferring quality updates by 0 days ensures critical security patches are installed immediately upon release, while daily scheduled installation and permitting automated reboots ensures systems stay continuously remediated against known exploits.
+
+Windows Update is the primary defense mechanism against known Common Vulnerabilities and Exposures (CVEs), remote code execution exploits, and privilege escalation vulnerabilities. In unhardened environments, default update policies allow users to pause updates, postpone reboots, or enroll in experimental preview builds, directly exposing the enterprise network to preventable exploitation.
+
+### Technical Threat Vectors & Vulnerability Remediation
+1. **Closing the Vulnerability Exposure Window (`DeferQualityUpdatesPeriodInDays = 0`)**: Quality updates represent monthly cumulative security patches addressing actively exploited zero-day vulnerabilities and critical security flaws. Setting the quality update deferral period to 0 days ensures that client systems and member servers retrieve and stage security patches immediately upon approval or public release, minimizing the window of vulnerability against automated exploit kits and network worms.
+2. **Preventing User Deferral of Critical Security Fixes (`SetDisablePauseUXAccess = 1`)**: Standard Windows installations permit interactive users to pause updates for up to 35 days with a single click. In corporate environments, users routinely pause updates to avoid reboots or temporary performance overhead, leaving machines unpatched against high-severity exploits. Removing access to the 'Pause updates' control guarantees that corporate patching schedules cannot be overridden by end users.
+3. **Ensuring Kernel Patch Completion via Automated Restarts (`NoAutoRebootWithLoggedOnUsers = 0`)**: Many critical Windows vulnerabilities (such as kernel memory corruptions, LSASS vulnerabilities, and RPC/SMB flaws) require an operating system restart to replace locked system binaries and apply kernel-mode drivers. If `NoAutoRebootWithLoggedOnUsers` is enabled (`1`), any user who leaves a disconnected or locked session indefinitely halts the reboot process, leaving the system in a vulnerable half-patched state. Setting this policy to `0` (Disabled in GPO) allows the Windows Update client to perform scheduled reboots during maintenance hours, ensuring patch application completes.
+4. **Balancing Stability and Compatibility for Feature Updates (`DeferFeatureUpdatesPeriodInDays = 180`)**: Feature updates deliver major operating system version upgrades. Unlike monthly security fixes, feature updates introduce substantial architectural and UI changes that may disrupt line-of-business (LOB) software, third-party security agents, and VPN clients. Deferring feature updates by 180 days provides IT and security teams adequate time to pilot, validate, and certify compatibility before enterprise-wide distribution.
+5. **Prohibiting Unstable Preview Builds (`ManagePreviewBuildsPolicyValue = 1`)**: Disabling preview builds guarantees that endpoints only execute production-grade, cryptographically validated Windows binaries, preventing operational instability and untested security configurations.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users will not be able to pause updates. The system may reboot during designated maintenance windows to complete patch application.
+
+* **Operational Impact**: Users cannot pause updates in the Windows Settings UI. Machines will automatically restart during scheduled maintenance windows (e.g., 03:00 AM) if pending updates require a reboot.
+* **Compatibility**: 180-day feature update deferral shields line-of-business applications from unexpected operating system version changes while 0-day quality update deferral ensures zero delay in receiving critical security patches.
+* **Network Impact**: Bandwidth consumption is controlled via corporate WSUS, Microsoft Endpoint Configuration Manager (MECM), or Delivery Optimization.
+* **Rollout Recommendations**: High priority; deploy across all Tier 2 workstations and member servers with clear communication regarding scheduled reboot windows.
 
 ---
 
@@ -40,18 +62,14 @@ Removing the ability to pause updates prevents users from indefinitely deferring
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
   * **Remove access to 'Pause updates' feature**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
   * **Manage preview builds**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
-  * **Select when Preview Builds and Feature Updates are received**: Set to `Enabled: Defer 180 days`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update`
-  * **Select when Quality Updates are received**: Set to `Enabled: Defer 0 days`
+  * **Select when Preview Builds and Feature Updates are received**: Set to `Enabled`, select **Semi-Annual Channel**, and set deferral to `180` days
+  * **Select when Quality Updates are received**: Set to `Enabled`, set deferral to `0` days
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience`
-  * **Configure Automatic Updates**: Set to `Enabled: Scheduled install day 0 - Every day`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Update\Manage end user experience`
+  * **Configure Automatic Updates**: Set to `Enabled`, select option **4 - Auto download and schedule the install**, set scheduled install day to `0 - Every day`, and configure a suitable maintenance hour (e.g., `03:00`)
   * **No auto-restart with logged on users for scheduled automatic updates installations**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit (OU) and verify policy replication across all domain controllers.
 
 ---
 
@@ -284,7 +302,20 @@ if ($script:Vulnerable) {
 
 ---
 
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /s
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /s
+```
+Verify that all configured values match the defined baseline.
+
+---
+
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.93.1.1, 18.10.93.2.2, 18.10.93.2.3, 18.10.93.4.1, 18.10.93.4.2, 18.10.93.4.3
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.93.1, 18.10.93.2, 18.10.93.3, 18.10.93.4
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Windows Update
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1190: Exploit Public-Facing Application](https://attack.mitre.org/techniques/T1190/), [T1068: Exploitation for Privilege Escalation](https://attack.mitre.org/techniques/T1068/), [T1210: Exploitation of Remote Services](https://attack.mitre.org/techniques/T1210/), [T1562.001: Impair Defenses: Disable or Modify Tools](https://attack.mitre.org/techniques/T1562/001/)
+* **Related Controls**: [REQ-END-198: Administrative Templates: Diagnostic Data Collection and Preview Builds Restrictions](configure-end-at-data-collection-preview-builds.md), [REQ-END-186: Administrative Templates: Restrict Internet Communication](configure-end-at-internet-communication.md)

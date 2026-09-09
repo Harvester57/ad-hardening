@@ -1,26 +1,54 @@
 # [REQ-PAW-190] Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-201](../../08-endpoints/admin-templates/configure-end-at-file-explorer-motw.md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer\DisableMotWOnInsecurePathCopy` = `0`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\PreXPSP2ShellProtocolBehavior` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Do not apply the Mark of the Web tag to files copied from insecure sources**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer\Do not apply the Mark of the Web tag to files copied from insecure sources` -> **Disabled** (Enforces MotW tagging)
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer`
+    * Value Name: `DisableMotWOnInsecurePathCopy`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / MotW preserved)
+  * **Turn off shell protocol protected mode**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer\Turn off shell protocol protected mode` -> **Disabled** (Enforces shell protocol protected mode)
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer`
+    * Value Name: `PreXPSP2ShellProtocolBehavior`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Protected mode enforced)
 
 ---
 
 ## Rationale
-The Mark of the Web (Zone.Identifier alternate data stream) is the foundation of Windows download security, triggering SmartScreen, Defender reputation checks, and Office Protected View. Disabling MotW suppression ensures downloaded files maintain security tags even when transferred across insecure network shares. Shell protocol protected mode restricts rogue URL protocol invocations.
+Privileged Access Workstations (PAWs) represent Tier 0 administrative boundaries. Protecting these high-value machines against unauthorized code execution requires enforcing all layers of Windows execution policy and download origin tracking.
+
+### 1. Preserving Origin Metadata for Administrative Assets
+When administrative scripts, tools, or update archives are staged onto a PAW across network paths:
+* The Mark of the Web (`Zone.Identifier` alternate data stream) serves as the primary metadata indicator alerting the operating system that a file originated from outside the trusted local security zone.
+* The presence of this tag triggers Windows Defender SmartScreen, PowerShell Execution Policy restrictions (`AllSigned` or `RemoteSigned`), and attachment inspection handlers.
+* If MotW tags are stripped during file copy operations across network shares, untrusted scripts could execute with unvetted administrative authority.
+* Disabling `DisableMotWOnInsecurePathCopy` ensures that the `Zone.Identifier` ADS is strictly preserved during file transfers, preventing the accidental laundering of untrusted binaries into trusted local assets.
+
+### 2. Guarding Against Shell Protocol Parameter Injection
+Privileged administrative shells must never execute unsanitized protocol parameters:
+* Disabling Protected Mode (`PreXPSP2ShellProtocolBehavior = 1`) exposes the operating system to legacy shell vulnerabilities where malicious URLs or shortcut files (`.lnk`, `.url`) invoke external binaries with arbitrary command arguments.
+* Enforcing `PreXPSP2ShellProtocolBehavior = 0` guarantees that File Explorer validates and sanitizes all shell protocol parameters, prompting the operator and preventing argument injection exploits.
+
+### 3. MITRE ATT&CK Mapping
+* **T1553.005 - Subvert Trust Controls: Mark-of-the-Web Bypass**: Circumventing execution controls by stripping MotW metadata.
+* **T1204.002 - User Execution: Malicious File**: Inadvertent execution of untrusted scripts or tools on a PAW.
+* **T1218 - System Binary Proxy Execution**: Proxying execution via vulnerable shell protocol handlers.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Downloaded files copied across local shares will correctly retain Internet security prompts when executed.
+* **Operational Impact**: None on legitimate administration. Administrative scripts and binaries officially approved for Tier 0 deployment are digitally signed by an internal enterprise code-signing certificate and trusted by AppLocker / WDAC policies.
+* **Administrative Tooling**: Unsigned or untrusted third-party utilities copied onto a PAW will trigger standard security warnings, requiring administrators to review and verify the tool before execution.
 
 ---
 
@@ -29,15 +57,15 @@ The Mark of the Web (Zone.Identifier alternate data stream) is the foundation of
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
-  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled`
+  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled` (Ensures MotW is applied)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
-  * **Turn off shell protocol protected mode**: Set to `Disabled`
+  * **Turn off shell protocol protected mode**: Set to `Disabled` (Ensures Protected Mode is enforced)
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -133,6 +161,6 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.29.3, Section 18.10.29.5
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.43.3, Section 18.10.43.14; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.43.3, Section 18.10.43.14
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000370, Windows 11 STIG Rule WN11-CC-000370
+* **Microsoft Privileged Access Workstation Guidance**: Tier 0 File System Integrity and Host Execution Policy

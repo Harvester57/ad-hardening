@@ -7,22 +7,40 @@
 ---
 
 ## Implementation Details
-* **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}\NoBackgroundPolicy` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}\NoGPOListChanges` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\NoBackgroundPolicy` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\NoGPOListChanges` = `0`
+* **Priority**: High
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Group Policy
+* **Policy Settings**:
+  * Configure registry policy processing
+  * Configure security policy processing
+* **Supported On**: Windows 2000 or Windows Server 2003 and above
+* **Registry Keys & Client-Side Extension (CSE) GUIDs**:
+  * Registry Extension: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}`
+  * Security Extension: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}`
+* **Registry Values**:
+  * `NoBackgroundPolicy` = `0` (REG_DWORD, Process policies during periodic background refresh)
+  * `NoGPOListChanges` = `0` (REG_DWORD, Process and reapply policies even if GPOs have not changed)
+* **Vulnerability References**: MITRE ATT&CK: T1562.001 (Impair Defenses: Disable or Modify Tools), T1112 (Modify Registry), T1484.001 (Group Policy Modification)
 
 ---
 
 ## Rationale
-By default, Group Policy client side extensions skip reapplication of policies during background refreshes if the central GPO version has not incremented. Forcing background reapplication guarantees that any local registry tampering or administrative drift is continuously corrected and overwritten by enterprise security baselines.
+
+Privileged Access Workstations (PAWs) are high-security administrative bastion hosts dedicated exclusively to Tier 0 directory services management. Maintaining a deterministic, tamper-resistant system state on PAWs is a foundational requirement of the Microsoft Clean Source and tiering security models.
+
+### Technical Threat Vectors & PAW State Integrity
+1. **Automated Remediation of Defense Impairment (`NoGPOListChanges = 0`)**: Attackers gaining localized access to an administrative workstation often attempt to impair defenses by silently modifying security registry keys (e.g., turning off Credential Guard, weakening LSA RunAsPPL protections, disabling AppLocker enforcement, or clearing audit policies). Under default Windows Group Policy behavior, Client-Side Extensions (CSEs) for Registry and Security settings skip background execution if the central GPO version in Active Directory SYSVOL has not changed. This leaves compromised or weakened registry settings active indefinitely. Enforcing `NoGPOListChanges = 0` forces the operating system to overwrite local registry settings with the approved Tier 0 baseline during every background refresh cycle, providing an automated self-healing mechanism against administrative tampering.
+2. **Deterministic Baseline Enforcement without Reboots (`NoBackgroundPolicy = 0`)**: Tier 0 administrators frequently keep long-running administrative sessions open across multiple days or weeks. Forcing background processing guarantees that critical security policies and registry restrictions are continuously reapplied throughout active sessions, rather than waiting for a system restart or user logoff.
+3. **Elimination of Administrative Configuration Drift**: When performing ad-hoc diagnostics or deploying specialized management packages, administrators might temporarily adjust security settings. Continuous background enforcement ensures that all PAW systems deterministically revert back to the authoritative enterprise baseline within 90 minutes.
+4. **Guaranteed Consistency for Registry & Security CSEs**: Applying this policy to both the Registry CSE (`{35378EAC-683F-11D2-A89A-00C04FBBCFA2}`) and the Security Settings CSE (`{827D319E-6EAC-11D2-A4EA-00C04F79F83A}`) ensures comprehensive coverage over administrative templates, local rights assignments, system access permissions, and registry keys.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Slight, negligible CPU overhead during background Group Policy refresh cycles.
+
+* **Operational Impact**: Negligible CPU and disk I/O impact during background refresh cycles. The Group Policy engine evaluates cached local policies, ensuring that administrative operations (RSAT, PowerShell scripting, Active Directory Administrative Center) experience zero disruption.
+* **Administrative Impact**: Temporary manual adjustments made to hardened registry parameters will be automatically reverted during the next 90-minute background cycle.
+* **Network Impact**: Zero additional bandwidth utilization on the administrative management network.
+* **Rollout Recommendations**: Mandatory baseline setting for all PAW deployment rings; apply immediately.
 
 ---
 
@@ -31,15 +49,21 @@ By default, Group Policy client side extensions skip reapplication of policies d
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
-  * **Configure registry policy processing**: Set to `Enabled` (Process even if GPO has not changed; do not skip during background processing)
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Group Policy`
-  * **Configure security policy processing**: Set to `Enabled` (Process even if GPO has not changed; do not skip during background processing)
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Group Policy
+   ```
+4. Double-click **Configure registry policy processing**:
+   * Set to **Enabled**.
+   * Check **Process even if the Group Policy objects have not changed**.
+   * Uncheck **Do not apply during periodic background processing**.
+5. Double-click **Configure security policy processing**:
+   * Set to **Enabled**.
+   * Check **Process even if the Group Policy objects have not changed**.
+   * Uncheck **Do not apply during periodic background processing**.
+6. Click **Apply**, then click **OK** for both policies.
+7. Link the GPO to the dedicated PAW Organizational Unit and verify policy replication across all Domain Controllers.
 
 ---
 
@@ -180,7 +204,20 @@ if ($script:Vulnerable) {
 
 ---
 
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}" /s
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}" /s
+```
+Verify that `NoBackgroundPolicy` and `NoGPOListChanges` are present and set to `0x0`.
+
+---
+
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.19.2, Section 18.9.19.3, Section 18.9.19.4, Section 18.9.19.5
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.31.2, Section 18.9.31.3
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Group Policy Client-Side Extension Processing
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Administrative Endpoint Hardening
+* **MITRE ATT&CK**: [T1562.001: Impair Defenses: Disable or Modify Tools](https://attack.mitre.org/techniques/T1562/001/), [T1112: Modify Registry](https://attack.mitre.org/techniques/T1112/), [T1484.001: Group Policy Modification](https://attack.mitre.org/techniques/T1484/001/)
+* **Related Controls**: [REQ-PAW-171: Administrative Templates: MSS System and Session Security Protections for PAWs](configure-paw-at-mss-system-protections.md), [REQ-PAW-177: Administrative Templates: Interactive Logon and Credential Display Options for PAWs](configure-paw-at-logon-display-options.md)

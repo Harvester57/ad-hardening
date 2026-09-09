@@ -1,26 +1,54 @@
 # [REQ-PAW-175] Administrative Templates: Restrict Internet Communication and Web Downloads for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-186](../../08-endpoints/admin-templates/configure-end-at-internet-communication.md); for Domain Controllers, refer to [REQ-DC-027](../../02-domain-controllers/configure-telemetry-privacy.md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers\DisableWebPnPDownload` = `1`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoWebServices` = `1`
+* **GPO Paths / Registry Locations**:
+  * **Turn off downloading of print drivers over HTTP**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings\Turn off downloading of print drivers over HTTP` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Printers`
+    * Value Name: `DisableWebPnPDownload`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Disabled / Block HTTP print driver downloads)
+  * **Turn off Internet download for Web publishing and online ordering wizards**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings\Turn off Internet download for Web publishing and online ordering wizards` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer`
+    * Value Name: `NoWebServices`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Disabled / Block web wizard downloads)
 
 ---
 
 ## Rationale
-Downloading print drivers via HTTP exposes systems to cleartext traffic tampering and Point-and-Print driver replacement attacks. Web publishing wizards provide legacy, unauthenticated internet upload channels that can be abused for unauthorized data egress.
+Privileged Access Workstations (PAWs) reside in isolated administrative zones dedicated to the management of Active Directory Domain Controllers and enterprise tier-0 identity infrastructure. Automated internet communication channels, web wizard downloads, and dynamic HTTP driver retrieval represent intolerable attack surfaces on privileged hosts.
+
+### 1. Eliminating Web Point and Print Exploitation Vectors
+Dynamic printer driver acquisition over unencrypted HTTP (Web Point and Print) introduces severe privilege escalation vectors:
+* **Privilege Escalation inside Print Spooler**: Print drivers execute with full administrative privileges within `spoolsv.exe` (`NT AUTHORITY\SYSTEM`). Vulnerabilities such as PrintNightmare (CVE-2021-1675 / CVE-2021-34527) demonstrated that malicious print drivers can achieve immediate, unconstrained code execution on the local system.
+* **Adversary-in-the-Middle (AiTM) Poisoning**: If a PAW is connected to a local subnet or transit network where web printer discovery occurs, an adversary could forge HTTP driver download responses, injecting malicious binaries directly into the driver repository.
+* Setting `DisableWebPnPDownload = 1` completely forbids the PAW from fetching print drivers over HTTP. PAWs should ideally have the Print Spooler service disabled entirely ([REQ-PAW-012](../disable-unnecessary-system-services.md)), but enforcing this policy provides essential defense-in-depth against accidental service activation.
+
+### 2. Suppression of Unauthenticated Web Wizards and Outbound Telemetry
+Windows Explorer includes legacy wizards for publishing media to the web or placing online print orders:
+* **Outbound Traffic Egress**: These wizards attempt to connect to external Microsoft and third-party web endpoints, generating unauthenticated HTTP outbound requests that can leak workstation hostnames, network topologies, and metadata.
+* **Data Exfiltration Vectors**: Legacy web wizards provide unmonitored file upload conduits that could be misused for unauthorized file egress.
+* Setting `NoWebServices = 1` disables web wizard download functions, keeping Windows Explorer strictly offline and focused on local administrative tasks.
+
+### 3. MITRE ATT&CK Mapping
+* **T1574.002 - Hijack Execution Flow: DLL Side-Loading / Driver Sideloading**: Sideloading rogue drivers through unauthenticated HTTP driver acquisition.
+* **T1068 - Exploitation for Privilege Escalation**: Escalating to SYSTEM privileges via printer driver installation mechanisms.
+* **T1048 - Exfiltration Over Alternative Protocol**: Unsanctioned data egress utilizing built-in web publishing wizards.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Print drivers must be distributed via trusted internal print servers or enterprise deployment mechanisms. The web publishing wizard option in Windows Explorer will be suppressed.
+* **Operational Impact**: None. PAWs are dedicated to directory administration and have zero legitimate requirement to connect to web-based printers or utilize consumer web publishing wizards.
+* **Administrative Operations**: All administrative tooling is installed via approved enterprise software repositories or Microsoft-signed RSAT packages.
 
 ---
 
@@ -29,7 +57,7 @@ Downloading print drivers via HTTP exposes systems to cleartext traffic tamperin
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
@@ -37,7 +65,7 @@ Downloading print drivers via HTTP exposes systems to cleartext traffic tamperin
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Internet Communication Management\Internet Communication settings`
   * **Turn off Internet download for Web publishing and online ordering wizards**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -133,6 +161,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.20.1.2, Section 18.9.20.1.6
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.30.2, Section 18.9.30.3; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.30.2, Section 18.9.30.3
+* **DISA STIG**: Windows 10 STIG Rules WN10-CC-000280, WN10-CC-000285; Windows 11 STIG Rules WN11-CC-000280, WN11-CC-000285
+* **ANSSI Active Directory Hardening Guide**: Section 3.2 (Restricting unnecessary internet-facing services and protocols)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Network and Service Exposure Rules

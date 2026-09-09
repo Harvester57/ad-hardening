@@ -1,27 +1,61 @@
 # [REQ-END-181] Administrative Templates: MSS IP Source Routing and ICMP Redirects
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-170](../../07-paws/admin-templates/configure-paw-at-mss-ip-source-routing.md); for Domain Controllers, refer to [REQ-DC-018](../../02-domain-controllers/harden-network-parameters.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters\DisableIPSourceRouting` = `2`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\DisableIPSourceRouting` = `2`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\EnableICMPRedirect` = `0`
+* **GPO Paths / Registry Locations**:
+  * **IPv6 IP Source Routing Protection**:
+    * GPO Path: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\MSS: (DisableIPSourceRouting IPv6) IP source routing protection level` -> **Enabled** (Value: `Highest protection, source routing is completely disabled`)
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters`
+    * Value Name: `DisableIPSourceRouting`
+    * Value Type: `REG_DWORD`
+    * Value Data: `2` (Highest protection)
+  * **IPv4 IP Source Routing Protection**:
+    * GPO Path: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\MSS: (DisableIPSourceRouting) IP source routing protection level` -> **Enabled** (Value: `Highest protection, source routing is completely disabled`)
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
+    * Value Name: `DisableIPSourceRouting`
+    * Value Type: `REG_DWORD`
+    * Value Data: `2` (Highest protection)
+  * **Disable ICMP Redirect Processing**:
+    * GPO Path: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes` -> **Disabled**
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters`
+    * Value Name: `EnableICMPRedirect`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Ignore ICMP redirects)
 
 ---
 
 ## Rationale
-IP source routing allows sending devices to dictate the exact network routing path rather than allowing routers to determine the path. Attackers can leverage source routing to bypass boundary firewalls and packet filters. Furthermore, ICMP redirects allow adjacent nodes to inject arbitrary routes into the local routing table, enabling man-in-the-middle packet interception.
+The Internet Protocol suite (IPv4 RFC 791 and IPv6 RFC 2460/8200) contains legacy diagnostic and routing mechanisms that allow packet senders and adjacent network nodes to manipulate routing decisions. In hostile or untrusted network environments, these capabilities introduce critical exposure to packet spoofing, firewall evasion, and adversary-in-the-middle attacks.
+
+### 1. IP Source Routing Exploitation Vectors
+IP Source Routing (both Strict and Loose Source and Record Route options in IPv4, and Routing Header Type 0 in IPv6) permits the originating sender to embed a sequence of intermediate IP hops directly within the packet header, overriding standard autonomous system and router path decisions:
+* **Perimeter Firewall and Boundary Filter Bypasses**: Attackers can specify trusted intermediate transit routers to guide unauthorized packets across network boundaries or through packet-filtering gateways that would normally drop external traffic.
+* **Blind TCP Spoofing and Session Injection**: When source routing is enabled, an external attacker who cannot see legitimate two-way traffic can forge the source IP of a trusted internal machine and designate an attacker-controlled intermediary router as a return hop. The victim endpoint obeys the reverse source route, returning SYN-ACK and payload responses directly to the attacker, completing the TCP handshake and enabling unauthorized command injection.
+* **IPv6 Routing Header Type 0 Amplification Attacks**: In IPv6, maliciously constructed RH0 headers allow packets to loop between nodes repeatedly, causing network bandwidth exhaustion and CPU denial of service (CVE-2007-2242 / RFC 5095).
+* Setting `DisableIPSourceRouting = 2` enforces the highest protection level on both IPv4 and IPv6 stacks, instructing the Windows kernel to unconditionally drop all packets containing source route options.
+
+### 2. ICMP Redirect (Type 5) Route Hijacking
+ICMP Redirect messages are designed to notify hosts when an alternate local gateway provides a shorter path to a specific destination network. However, ICMP redirect packets lack cryptographic authentication:
+* **Route Table Poisoning**: An unauthenticated attacker situated on the same local subnet can transmit spoofed ICMP Type 5 Redirect frames claiming to be the default gateway.
+* **Adversary-in-the-Middle (AiTM) Positioning**: The victim endpoint's IP stack dynamically inserts the attacker's chosen gateway into its route table cache. Outbound connections destined for critical resources (such as Domain Controllers, authentication proxies, or intranet servers) are redirected through the attacker's host.
+* Setting `EnableICMPRedirect = 0` completely disables the processing of ICMP Redirect messages, guaranteeing that the endpoint's routing table cannot be altered by unauthenticated network packets.
+
+### 3. MITRE ATT&CK Mapping
+* **T1557 - Adversary-in-the-Middle**: Route hijacking via forged ICMP redirect messages to inspect or alter transit traffic.
+* **T1565.002 - Data Manipulation: Transmitted Data Manipulation**: Manipulating packet delivery paths to intercept sensitive communications.
+* **T1498 - Network Denial of Service**: Generating artificial routing loops or blackholing network traffic via forged routing headers.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: None on standard enterprise networks. Legacy diagnostic testing relying on manually routed packet paths will be rejected.
+* **Production Enterprise Networks**: Standard corporate networks manage routing exclusively at the layer-3 switch and router tier using dynamic protocols (OSPF, BGP) or First Hop Redundancy Protocols (HSRP, VRRP). Client endpoints and member servers have no legitimate requirement to process ICMP redirects or execute source-routed packets.
+* **Network Diagnostics**: Specialized legacy diagnostic tools that explicitly craft source-routed probe packets will fail to elicit responses from hardened endpoints. Standard diagnostics (`ping`, `traceroute`, `pathping`) function normally without issue.
 
 ---
 
@@ -34,13 +68,15 @@ IP source routing allows sending devices to dictate the exact network routing pa
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (DisableIPSourceRouting IPv6) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled`
+  * **MSS: (DisableIPSourceRouting IPv6) IP source routing protection level**: Set to `Enabled`
+  * Select drop-down value: `Highest protection, source routing is completely disabled`
 * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
-  * **MSS: (DisableIPSourceRouting) IP source routing protection level**: Set to `Enabled: Highest protection, source routing is completely disabled`
+  * **MSS: (DisableIPSourceRouting) IP source routing protection level**: Set to `Enabled`
+  * Select drop-down value: `Highest protection, source routing is completely disabled`
 * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
   * **MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify replication using `gpupdate /force`.
 
 ---
 
@@ -159,6 +195,8 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.5.2, Section 18.5.3, Section 18.5.5
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.5.8, Section 18.5.9, Section 18.5.10; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.5.8, Section 18.5.9, Section 18.5.10
+* **DISA STIG**: Windows 10 STIG Rules WN10-SO-000185, WN10-SO-000190, WN10-SO-000195
+* **ANSSI Active Directory Hardening Guide**: Section 3.2.4 (TCP/IP Stack Hardening on Managed Nodes)
+* **Microsoft Security Baseline**: MSS (Microsoft Security Compliance Toolkit) Parameter Baseline
+* **IETF RFCs**: RFC 791 (Internet Protocol), RFC 5095 (Deprecation of Type 0 Routing Headers in IPv6)

@@ -8,4 +8,4 @@ if (-not (Test-Path -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Meta
 }
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Name "PreventDeviceMetadataFromNetwork" -Value 1 -Type DWord -Force
 
-Write-Host "[+] Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs applied successfully." -ForegroundColor Green
+Write-Host "[+] Administrative Templates: Prevent Device Metadata Retrieval from Network applied successfully." -ForegroundColor Green

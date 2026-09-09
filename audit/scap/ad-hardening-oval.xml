@@ -2,7 +2,7 @@
 <oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:windows="http://oval.mitre.org/XMLSchema/oval-definitions-5#windows" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd http://oval.mitre.org/XMLSchema/oval-definitions-5#windows windows-definitions-schema.xsd">
   <generator>
     <oval:schema_version>5.11.2</oval:schema_version>
-    <oval:timestamp>2026-09-09T09:38:24Z</oval:timestamp>
+    <oval:timestamp>2026-09-09T13:48:23Z</oval:timestamp>
   </generator>
   <definitions>
     <definition id="oval:org.adhardening:def:1001" version="1" class="compliance">
@@ -6248,7 +6248,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Legacy Server Message Block version 1 (SMBv1) protocol possesses fundamental architectural security weaknesses, lacks integrity and encryption controls, and was the primary exploitation vector in catastrophic automated malware outbreaks (e.g., WannaCry, NotPetya). Disabling both the client driver (mrxsmb10) and server service parameter completely eliminates this attack surface.</description>
+        <description>Server Message Block version 1 (SMBv1) is a legacy file and print sharing protocol designed in the early 1980s that suffers from severe architectural design flaws, obsolete cryptographic mechanisms, and extensive vulnerabilities exploited in widespread cyberattacks.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-179 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8179" />
@@ -6264,7 +6264,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Configuring NetBT NodeType to P-node (Point-to-Point) forces name resolution via unicast WINS rather than broadcast, preventing unauthenticated network adversaries from responding to NetBIOS broadcasts or poisoning name resolution caches. Forcing the system to ignore unauthenticated NetBIOS name release requests prevents denial-of-service attacks that force the computer to relinquish its registered network identity.</description>
+        <description>NetBIOS over TCP/IP (NetBT, defined in RFC 1001/1002) is a legacy name resolution and session transport protocol that relies heavily on unauthenticated IP broadcasts over UDP port 137. In modern enterprise environments, NetBT introduces significant attack vectors that can be weaponized for credential theft and denial of service.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-180 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8180" />
@@ -6280,7 +6280,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>IP source routing allows sending devices to dictate the exact network routing path rather than allowing routers to determine the path. Attackers can leverage source routing to bypass boundary firewalls and packet filters. Furthermore, ICMP redirects allow adjacent nodes to inject arbitrary routes into the local routing table, enabling man-in-the-middle packet interception.</description>
+        <description>The Internet Protocol suite (IPv4 RFC 791 and IPv6 RFC 2460/8200) contains legacy diagnostic and routing mechanisms that allow packet senders and adjacent network nodes to manipulate routing decisions. In hostile or untrusted network environments, these capabilities introduce critical exposure to packet spoofing, firewall evasion, and adversary-in-the-middle attacks.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-181 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8181" />
@@ -6296,7 +6296,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Disabling AutoAdminLogon ensures unattended machines boot into an interactive credential prompt rather than logging into an active session. Safe DLL search mode prevents search-order hijacking by ensuring system directories are evaluated prior to the current working directory. The screensaver grace period minimizes the physical access window after screensaver lock, and the WarningLevel parameter issues administrative alerts before the security event log is exhausted.</description>
+        <description>The Microsoft Solutions for Security (MSS) baseline settings provide low-level kernel, session manager, and authentication subsystem protections. These settings address fundamental Windows operating system security behaviors, including DLL search-order resolution, automatic logon credential storage, physical console lockout latency, and security event log capacity alerting.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-182 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8182" />
@@ -6312,7 +6312,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Prevents the operating system from searching Windows Update and Microsoft public servers for device metadata, icons, and manufacturer information when new peripheral hardware is connected. This reduces unnecessary external telemetry and prevents information disclosure about attached hardware assets.</description>
+        <description>When physical or virtual peripherals—such as USB security tokens, smart card readers, external storage media, printers, or network adapters—are connected to a Windows system, the Device Setup Manager (DSM) initiates automated queries to Microsoft Windows Metadata and Internet Services (WMIS). These services deliver OEM-branded device icons, detailed model descriptions, and companion application links displayed in the "Devices and Printers" interface.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-183 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8183" />
@@ -6328,10 +6328,11 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>By default, Group Policy client side extensions skip reapplication of policies during background refreshes if the central GPO version has not incremented. Forcing background reapplication guarantees that any local registry tampering or administrative drift is continuously corrected and overwritten by enterprise security baselines.</description>
+        <description>The Windows Group Policy service (`gpsvc`) manages operating system and security configurations through Client-Side Extensions (CSEs). To minimize network overhead and processing latency, the default Windows Group Policy engine implements an optimization check: during periodic background refresh cycles (every 90 minutes with a randomized 30-minute delta), CSEs compare the local GPO version with the Active Directory SYSVOL version. If the GPO version has not incremented, the CSE skips applying settings.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-END-184 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8184" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Group Policy Value NoBackgroundPolicy" test_ref="oval:org.adhardening:tst:8184001" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Group Policy Value NoGPOListChanges" test_ref="oval:org.adhardening:tst:8184002" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8185" version="1" class="compliance">
@@ -6344,7 +6345,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The Connected Devices Platform (CDP) coordinates cross-device application states and task handoffs over cloud synchronization and Bluetooth beacons. In enterprise environments, this introduces unmanaged synchronization pathways between managed corporate systems and external personal consumer devices.</description>
+        <description>The Windows Connected Devices Platform (CDP, also known internally as Project Rome) facilitates device-to-device communication, application activity roaming, session continuation ("Continue on PC"), and cross-device clipboard sharing across Windows, iOS, and Android devices. While convenient for consumer multi-device environments, CDP introduces severe security and data-governance vulnerabilities within corporate enterprise networks.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-185 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8185" />
@@ -6360,7 +6361,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Downloading print drivers via HTTP exposes systems to cleartext traffic tampering and Point-and-Print driver replacement attacks. Web publishing wizards provide legacy, unauthenticated internet upload channels that can be abused for unauthorized data egress.</description>
+        <description>The Windows operating system includes several legacy features designed to download supplemental drivers, wizard components, and third-party web provider templates over unauthenticated internet connections. In enterprise environments, these automated internet interactions expose endpoints to remote code execution and data exfiltration.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-186 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8186" />
@@ -6376,7 +6377,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Security Support Providers (SSPs) and Authentication Packages (APs) execute inside the Local Security Authority Subsystem Service (lsass.exe). Threat actors frequently register malicious SSP DLLs in the registry to achieve persistent credential harvesting and memory dumping. Disabling custom SSP loading blocks third-party DLLs from injecting into LSASS.</description>
+        <description>The Local Security Authority Subsystem Service (`lsass.exe`) is the central authentication authority in the Windows operating system, responsible for credential validation, token creation, and interactive logons. Security Support Providers (SSPs) and Authentication Packages (APs) execute as dynamic link libraries (DLLs) directly inside the `lsass.exe` memory space.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-187 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8187" />
@@ -6392,7 +6393,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Exposing account names, pictures, or network selection controls on lock screens provides reconnaissance information to physical attackers. Convenience PINs and picture passwords offer poor entropy compared to domain Kerberos credentials or smartcards. Local account security questions introduce easily guessable bypasses, and Multiple Provider Router (MPR) password transmission exposes cleartext credentials during authentication notifications.</description>
+        <description>The Windows logon desktop and lock screen represent the physical perimeter of the operating system. In unhardened configurations, the logon interface exposes critical internal network information, leaks corporate usernames, presents weak authentication alternatives, and permits unauthorized network reconfigurations without authentication.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-188 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8188" />
@@ -6408,10 +6409,11 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Connected Standby (Modern Standby) maintains active wireless and network interfaces while the operating system is suspended. This allows background applications to receive traffic and process incoming network packets, exposing devices to remote attacks and unauthorized network reconnaissance while unattended.</description>
+        <description>Modern Standby (S0 Low Power Idle) replaced legacy ACPI S3 (Suspend-to-RAM) sleep states in modern enterprise laptops and convertibles. When "Connected Standby" is permitted, the operating system maintains active Wi-Fi, cellular, and Ethernet network adapters while the display is powered off and the system is suspended. This architecture enables background applications to process incoming push notifications, sync mailboxes, and maintain persistent cloud sockets while unattended.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-END-189 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8189" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9 Value DCSettingIndex" test_ref="oval:org.adhardening:tst:8189001" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9 Value ACSettingIndex" test_ref="oval:org.adhardening:tst:8189002" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8190" version="1" class="compliance">
@@ -6424,7 +6426,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Unsolicited Remote Assistance permits an administrator or support technician to initiate remote session connections to client endpoints without an explicit user invitation. If compromised, this capability allows adversaries with elevated domain privileges to silently observe or control interactive user desktop sessions.</description>
+        <description>Windows Remote Assistance (`msra.exe`) allows support personnel to view or remotely control an active user's desktop session across a network. Remote Assistance supports two primary connection modes: solicited (where an end user creates an encrypted invitation ticket) and unsolicited (where an external operator or administrator initiates an uninvited connection to the target workstation via "Offer Remote Assistance").</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-190 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8190" />
@@ -6440,7 +6442,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The RPC Endpoint Mapper listens on TCP port 135 to resolve dynamic server endpoints for RPC interfaces. Enabling client authentication forces clients to authenticate to the Endpoint Mapper before obtaining endpoint addresses, preventing unauthenticated network adversaries from performing RPC reconnaissance and MITM endpoint redirection.</description>
+        <description>The Remote Procedure Call (RPC) subsystem is fundamental to Windows inter-process communication and remote management. The RPC Endpoint Mapper service (`epmapper`, listening on TCP port 135) maintains a dynamic database of RPC servers and maps interface UUIDs to dynamic high-range TCP listening ports (ports 49152–65535).</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-191 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8191" />
@@ -6456,7 +6458,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Accurate time synchronization is critical for Kerberos authentication (which rejects ticket timestamps skewed by more than 5 minutes) and forensic log correlation. Enabling the NTP Client guarantees synchronization with domain hierarchy time sources, while disabling the NTP Server prevents client workstations from broadcasting unauthenticated time data to other local hosts.</description>
+        <description>The Windows Time Service (`W32Time`) is a core architectural component of Windows security, providing synchronization across domain members, member servers, and directory nodes. Precise timekeeping is mandatory for protocol operation, cryptographic authentication, and forensic integrity.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-192 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8192" />
@@ -6472,7 +6474,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Standard user accounts can bypass traditional software restriction policies by deploying modern packaged Windows applications (.appx / .msix) directly into user profile directories. Disallowing per-user unsigned packages and prohibiting non-administrators from installing packaged apps ensures that all installed software is audited, signed, and managed by IT administrators.</description>
+        <description>Modern Windows application packaging architectures (AppX and MSIX) allow software components to be registered and executed within user profile spaces. In unhardened environments, default deployment behaviors allow standard unprivileged users to install modern packaged applications without administrative oversight or UAC elevation.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-193 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8193" />
@@ -6488,7 +6490,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Standard facial recognition can potentially be spoofed using high-resolution photographs, video playback, or realistic masks. Enhanced anti-spoofing requires facial recognition algorithms to verify depth and infrared illumination data from compatible biometric hardware sensors before granting access.</description>
+        <description>Windows Hello facial recognition provides convenient, passwordless authentication using biometric verification. However, basic facial recognition systems that analyze only two-dimensional visible spectrum images are vulnerable to presentation attacks and physical spoofing.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-194 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8194" />
@@ -6504,7 +6506,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Windows features consumer account state content cards and promotional recommendations in system menus. Disabling this content stops background queries to consumer cloud services, eliminates targeted promotional telemetry, and maintains a clean enterprise desktop interface.</description>
+        <description>Modern editions of Windows integrate consumer-focused features into the desktop shell and operating system menus. These features display dynamic promotional cards, suggestions for Microsoft consumer cloud services (such as personal OneDrive, Microsoft 365 consumer subscriptions, and personal Microsoft Accounts), and personalized application recommendations directly within core UI components like the Start Menu, Settings app, File Explorer, and Lock Screen.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-195 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8195" />
@@ -6520,7 +6522,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The Windows Connect app allows nearby wireless devices to project their screens to the machine over Wi-Fi Direct (Miracast). Requiring a PIN for pairing prevents unauthorized external devices from projecting content or attempting connection hijack attacks without local physical verification.</description>
+        <description>The Windows Connect application enables endpoints to function as wireless display receivers using the Miracast standard over Wi-Fi Direct (IEEE 802.11 P2P). While useful for collaborative screen projection in meeting rooms, unauthenticated wireless display pairing introduces severe physical perimeter attack vectors.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-196 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8196" />
@@ -6536,7 +6538,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The password reveal ('eye') button exposes cleartext passwords on screen, creating shoulder-surfing and screen recording vulnerabilities. Enumerating administrator accounts on UAC elevation displays valid privileged usernames to standard users, facilitating targeted administrative reconnaissance and brute-force attacks.</description>
+        <description>The Windows Credential User Interface (CredUI) handles password collection dialogs and User Account Control (UAC) elevation prompts. In default configurations, CredUI exposes cleartext credentials on screen and leaks local administrative usernames to unprivileged operators.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-197 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8197" />
@@ -6552,7 +6554,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>OneSettings downloads allow Microsoft to dynamically modify diagnostic configurations over the cloud. Limiting diagnostic and crash dump collection prevents in-memory sensitive data (such as passwords, tokens, or encryption keys) from being captured in automated crash reports and transmitted externally. Disabling Insider builds guarantees production systems only run fully vetted, stable OS builds.</description>
+        <description>The Windows Diagnostic Data Collection infrastructure collects system health, performance metrics, crash dumps, and telemetry data for transmission to Microsoft cloud services. Concurrently, the Windows Insider Program allows systems to receive pre-release operating system builds. In managed enterprise environments, unrestricted diagnostic data collection and preview builds introduce serious data leakage and operational stability risks.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-198 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8198" />
@@ -6568,7 +6570,7 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The App Installer URI protocol (ms-appinstaller://) has been repeatedly abused in active malware campaigns to trigger zero-click or drive-by package installations directly from web browsers. Disabling this protocol and prohibiting security overrides (hash bypass, malware scan bypass, certificate bypass) completely closes this critical initial infection vector.</description>
+        <description>The Windows App Installer (`AppInstaller.exe`) provides deployment capabilities for MSIX, AppX, and `.appinstaller` manifest packages. In default client configurations, App Installer registers the `ms-appinstaller://` uniform resource identifier (URI) scheme, allowing web pages to directly trigger package installation.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-199 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8199" />
@@ -6586,14 +6588,9 @@ On standard Tier 2 client workstations, Kerberos Armoring is configured for oppo
         </affected>
         <description>Default Windows event log capacities (typically 20 MB) rollover within hours during normal workstation activity, and can be completely overwritten within minutes during active security incidents, brute-force attempts, or high-volume administrative operations. 
 
-In hardened environments enforcing comprehensive audit policies (such as Process Creation with command-line arguments [Event ID 4688], PowerShell Script Block Logging [Event ID 4104], and detailed logon/logoff auditing), workstations typically generate between 100 MB and 300+ MB of security telemetry daily. A legacy 192 MB Security log preserves only 12 to 48 hours of telemetry, creating severe risks for endpoints operating off-network (remote users, field devices) where real-time SIEM shipping may be delayed.
+In hardened environments enforcing comprehensive audit policies (such as Process Creation with command-line arguments [Event ID 4688], PowerShell Script Block Logging [Event ID 4104], and detailed logon/logoff auditing), workstations typically generate between 100 MB and 300+ MB of security telemetry daily. A legacy 192 MB Security log preserves only 12 to 48 hours of telemetry, creating severe risks for endpoints operating off-network (remote users, field devices) where real-time Windows Event Forwarding (WEF) or SIEM shipping may be delayed.
 
-Expanding the **Security** log to **1 GB** (`1,048,576 KB`), **System** and **Application** logs to **128 MB** (`131,072 KB`), and **Setup** log to **32 MB** (`32,768 KB`) provides a resilient 7-to-14-day on-box forensic retention buffer.
-
-Key engineering considerations:
-1. **64 KB Boundary Alignment**: The Windows Event Log service allocates and writes event records in 64 KB memory blocks. All configured sizes in KB must be integer multiples of 64 (`SizeKB % 64 == 0`). Sizes that do not align with 64 KB boundaries are rounded down by the operating system (`1,048,576 / 64 = 16,384`; `131,072 / 64 = 2,048`; `32,768 / 64 = 512`).
-2. **Retention Policy**: Configuring retention behavior to "Overwrite events as needed" (GPO: `Disabled`, registry value `0`) prevents the Event Log service from refusing new events when capacity is reached, guaranteeing continuous logging of recent attacker activity.
-3. **Memory and I/O Impact**: Windows utilizes memory-mapped files (`.evtx`) for the Event Log service. Only actively accessed pages are mapped into virtual memory; larger file limits do not consume active physical RAM.</description>
+Expanding the **Security** log to **1 GB** (`1,048,576 KB`), **System** and **Application** logs to **128 MB** (`131,072 KB`), and **Setup** log to **32 MB** (`32,768 KB`) provides a resilient 7-to-14-day on-box forensic retention buffer.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-200 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8200" />
@@ -6609,7 +6606,7 @@ Key engineering considerations:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The Mark of the Web (Zone.Identifier alternate data stream) is the foundation of Windows download security, triggering SmartScreen, Defender reputation checks, and Office Protected View. Disabling MotW suppression ensures downloaded files maintain security tags even when transferred across insecure network shares. Shell protocol protected mode restricts rogue URL protocol invocations.</description>
+        <description>The Windows Attachment Manager and File Explorer utilize the Mark of the Web (MotW) as a core security boundary. MotW is implemented as an NTFS Alternate Data Stream (ADS) named `Zone.Identifier` appended to files downloaded from the internet or untrusted network zones. Maintaining strict MotW integrity and enforcing shell protocol protected mode are essential defenses against initial-access malware campaigns.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-201 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8201" />
@@ -6625,7 +6622,7 @@ Key engineering considerations:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Internet Explorer 11 is retired and out of support, presenting severe unpatched memory corruption attack surfaces. Disabling IE11 as a standalone browser automatically redirects browser requests to Microsoft Edge. Prohibiting RSS enclosure downloads prevents automated malware payload staging, and blocking cleartext HTTP feed authentication prevents credential interception.</description>
+        <description>Internet Explorer 11 reached official end-of-life and retirement on modern Windows platforms. The standalone browser executable (`iexplore.exe`) lacks contemporary exploit mitigations, process sandboxing, and memory safety defenses, making it a persistent vector for zero-day exploitation and drive-by malware execution.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-202 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8202" />
@@ -6657,10 +6654,13 @@ Key engineering considerations:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Cortana voice integration introduces microphone listening risks, voice command execution from locked workstations, and external telemetry transmission. Indexing encrypted files in the Windows Search index creates unencrypted index cache entries, leaking sensitive plaintext data across file security boundaries.</description>
+        <description>The Windows Search and Cortana infrastructure provides desktop indexing, voice recognition, and location-aware query capabilities. In enterprise environments, unconstrained search and voice assistant features introduce severe data leakage, physical authentication bypass, and cryptographic exposure risks.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-END-204 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8204" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowCortana" test_ref="oval:org.adhardening:tst:8204001" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowCortanaAboveLock" test_ref="oval:org.adhardening:tst:8204002" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowIndexingEncryptedStoresOrItems" test_ref="oval:org.adhardening:tst:8204003" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowSearchToUseLocation" test_ref="oval:org.adhardening:tst:8204004" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:8205" version="1" class="compliance">
@@ -6673,7 +6673,7 @@ Key engineering considerations:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Permitting automatic Store app updates ensures packaged applications and system appx dependencies stay continuously patched against published vulnerabilities. Suppressing consumer Windows upgrade offers prevents unauthorized major OS feature version upgrades that circumvent IT change management and testing.</description>
+        <description>Modern Windows installations incorporate numerous built-in packaged applications, runtime frameworks, and system extensions (such as Windows Terminal, App Installer, HEVC/VP9 codecs, and Edge WebView2 components) that are serviced through the Microsoft Store infrastructure. Managing store update behaviors is essential to ensure critical vulnerability patching while preventing unmanaged operating system upgrades.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-205 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8205" />
@@ -6689,7 +6689,7 @@ Key engineering considerations:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Windows Widgets and News and Interests dynamically fetch unauthenticated internet news, weather, and third-party content onto the taskbar, generating continuous telemetry and background web requests. Disabling widgets eliminates this attack surface and eliminates unwanted distractions.</description>
+        <description>Windows Widgets (in Windows 11) and the earlier News and Interests feature (in Windows 10) integrate dynamic cloud-delivered content directly into the Windows desktop taskbar. The feature relies on the Desktop Shell Host (`widgets.exe`) and the Microsoft Edge WebView2 runtime to continuously retrieve and display news feeds, weather reports, sports scores, stock tickers, and third-party sponsored advertisements.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-206 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8206" />
@@ -6705,7 +6705,7 @@ Key engineering considerations:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Automatic Restart Sign-On (ARSO) caches user credentials in memory to automatically log in and lock the desktop after Windows Update reboots. This credential staging mechanism creates exposure to physical memory extraction and DMA attacks. Disabling ARSO prevents credentials from persisting across automated reboots.</description>
+        <description>Automatic Restart Sign-On (ARSO) is a Windows convenience feature designed to streamline post-update maintenance. When an automated Windows Update requires a reboot, ARSO captures the interactive user's credentials, encrypts them via the Local Security Authority (LSA) and Data Protection API (DPAPI), and stages them across the reboot sequence. Upon restart, Winlogon automatically decrypts the credentials, logs the user on in the background, instantiates the user profile, and locks the console.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-207 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8207" />
@@ -6721,7 +6721,7 @@ Key engineering considerations:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Windows Sandbox provides a lightweight virtualized environment for untrusted binary execution. If malware is detonated inside the sandbox, clipboard sharing allows potential escape or clipboard data harvesting, and network access permits external C2 communication and lateral scanning. Disabling clipboard redirection and networking enforces strict host and network isolation.</description>
+        <description>Windows Sandbox provides a disposable, containerized desktop environment based on Hyper-V virtualization technology. While designed for the isolated execution of untrusted applications and triage of suspicious documents, default sandbox configurations permit bidirectional clipboard synchronization and shared network access, introducing significant breach risks.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-208 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8208" />
@@ -6737,7 +6737,7 @@ Key engineering considerations:
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Removing the ability to pause updates prevents users from indefinitely deferring critical security patches. Deferring quality updates by 0 days ensures critical security patches are installed immediately upon release, while daily scheduled installation and permitting automated reboots ensures systems stay continuously remediated against known exploits.</description>
+        <description>Windows Update is the primary defense mechanism against known Common Vulnerabilities and Exposures (CVEs), remote code execution exploits, and privilege escalation vulnerabilities. In unhardened environments, default update policies allow users to pause updates, postpone reboots, or enroll in experimental preview builds, directly exposing the enterprise network to preventable exploitation.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-END-209 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:8209" />
@@ -10864,7 +10864,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Legacy Server Message Block version 1 (SMBv1) protocol possesses fundamental architectural security weaknesses, lacks integrity and encryption controls, and was the primary exploitation vector in catastrophic automated malware outbreaks (e.g., WannaCry, NotPetya). Disabling both the client driver (mrxsmb10) and server service parameter completely eliminates this attack surface.</description>
+        <description>Privileged Access Workstations (PAWs) serve as the sensitive administrative bridge between Tier 0 operators and Tier 0 Active Directory Domain Controllers. Any security compromise of a PAW results in complete loss of forest integrity. Legacy Server Message Block version 1 (SMBv1) introduces catastrophic architectural vulnerabilities that cannot be permitted on privileged hardware.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-168 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7168" />
@@ -10880,7 +10880,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Configuring NetBT NodeType to P-node (Point-to-Point) forces name resolution via unicast WINS rather than broadcast, preventing unauthenticated network adversaries from responding to NetBIOS broadcasts or poisoning name resolution caches. Forcing the system to ignore unauthenticated NetBIOS name release requests prevents denial-of-service attacks that force the computer to relinquish its registered network identity.</description>
+        <description>Privileged Access Workstations (PAWs) are high-value targets operating within dedicated administrative management zones. Permitting unauthenticated broadcast resolution protocols on a PAW introduces critical risks of credential relay and network-level denial of service.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-169 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7169" />
@@ -10896,7 +10896,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>IP source routing allows sending devices to dictate the exact network routing path rather than allowing routers to determine the path. Attackers can leverage source routing to bypass boundary firewalls and packet filters. Furthermore, ICMP redirects allow adjacent nodes to inject arbitrary routes into the local routing table, enabling man-in-the-middle packet interception.</description>
+        <description>Privileged Access Workstations (PAWs) establish highly privileged administrative sessions (including Kerberos-authenticated WinRM, Remote Desktop with Restricted Admin mode, and LDAP over TLS) to Tier 0 infrastructure. Preserving absolute network routing integrity is critical to prevent traffic interception or session manipulation.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-170 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7170" />
@@ -10912,7 +10912,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Disabling AutoAdminLogon ensures unattended machines boot into an interactive credential prompt rather than logging into an active session. Safe DLL search mode prevents search-order hijacking by ensuring system directories are evaluated prior to the current working directory. The screensaver grace period minimizes the physical access window after screensaver lock, and the WarningLevel parameter issues administrative alerts before the security event log is exhausted.</description>
+        <description>Privileged Access Workstations (PAWs) are hardened bastion hosts utilized by directory administrators to manage Active Directory domain controllers, Kerberos policies, and enterprise identity databases. Because PAWs operate under maximum privilege conditions, fundamental session security, DLL loading mechanisms, physical console timeouts, and security audit log thresholds must be enforced with zero tolerance for compromise.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-171 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7171" />
@@ -10928,7 +10928,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Prevents the operating system from searching Windows Update and Microsoft public servers for device metadata, icons, and manufacturer information when new peripheral hardware is connected. This reduces unnecessary external telemetry and prevents information disclosure about attached hardware assets.</description>
+        <description>Privileged Access Workstations (PAWs) host high-privilege administrative sessions where access to Active Directory domain controllers, PKI certificate authorities, and Tier 0 identity assets is executed. Hardware peripherals utilized on PAWs are strictly constrained to high-assurance authentication devices, such as smart card readers, cryptographic hardware security keys (FIDO2/YubiKeys), and dedicated administrative input hardware.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-172 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7172" />
@@ -10944,10 +10944,11 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>By default, Group Policy client side extensions skip reapplication of policies during background refreshes if the central GPO version has not incremented. Forcing background reapplication guarantees that any local registry tampering or administrative drift is continuously corrected and overwritten by enterprise security baselines.</description>
+        <description>Privileged Access Workstations (PAWs) are high-security administrative bastion hosts dedicated exclusively to Tier 0 directory services management. Maintaining a deterministic, tamper-resistant system state on PAWs is a foundational requirement of the Microsoft Clean Source and tiering security models.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-173 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7173" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Group Policy Value NoBackgroundPolicy" test_ref="oval:org.adhardening:tst:7173001" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Group Policy Value NoGPOListChanges" test_ref="oval:org.adhardening:tst:7173002" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7174" version="1" class="compliance">
@@ -10960,7 +10961,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The Connected Devices Platform (CDP) coordinates cross-device application states and task handoffs over cloud synchronization and Bluetooth beacons. In enterprise environments, this introduces unmanaged synchronization pathways between managed corporate systems and external personal consumer devices.</description>
+        <description>Privileged Access Workstations (PAWs) provide a dedicated, isolated execution environment for managing Tier 0 Active Directory Domain Services, Public Key Infrastructure (PKI), and critical identity systems. The Windows Connected Devices Platform (CDP / Project Rome) introduces capabilities—such as cross-device task roaming, shared activity feeds, and cloud-synchronized clipboard buffers—that are fundamentally incompatible with the strict tiering and isolation guarantees required on a PAW.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-174 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7174" />
@@ -10976,7 +10977,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Downloading print drivers via HTTP exposes systems to cleartext traffic tampering and Point-and-Print driver replacement attacks. Web publishing wizards provide legacy, unauthenticated internet upload channels that can be abused for unauthorized data egress.</description>
+        <description>Privileged Access Workstations (PAWs) reside in isolated administrative zones dedicated to the management of Active Directory Domain Controllers and enterprise tier-0 identity infrastructure. Automated internet communication channels, web wizard downloads, and dynamic HTTP driver retrieval represent intolerable attack surfaces on privileged hosts.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-175 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7175" />
@@ -10992,10 +10993,10 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Security Support Providers (SSPs) and Authentication Packages (APs) execute inside the Local Security Authority Subsystem Service (lsass.exe). Threat actors frequently register malicious SSP DLLs in the registry to achieve persistent credential harvesting and memory dumping. Disabling custom SSP loading blocks third-party DLLs from injecting into LSASS.</description>
+        <description>Privileged Access Workstations (PAWs) operate in the Tier 0 administrative plane, handling Kerberos Ticket Granting Tickets (TGTs), Smart Card PINs, and administrative authentication tokens for Active Directory Domain Controllers. Protecting the Local Security Authority Subsystem Service (`lsass.exe`) against DLL injection and persistence is a vital baseline defense.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-176 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7176" />
+        <criterion comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Lsa Value AllowCustomSSPsAPs" test_ref="oval:org.adhardening:tst:7176001" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7177" version="1" class="compliance">
@@ -11008,7 +11009,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Exposing account names, pictures, or network selection controls on lock screens provides reconnaissance information to physical attackers. Convenience PINs and picture passwords offer poor entropy compared to domain Kerberos credentials or smartcards. Local account security questions introduce easily guessable bypasses, and Multiple Provider Router (MPR) password transmission exposes cleartext credentials during authentication notifications.</description>
+        <description>Privileged Access Workstations (PAWs) serve as the dedicated management perimeter for Active Directory Domain Controllers and enterprise tier-0 administrative roles. Visual information disclosure, network re-association controls at lock screen, and consumer authentication features introduce critical exposure to administrative credential theft and physical exploitation.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-177 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7177" />
@@ -11024,10 +11025,11 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Connected Standby (Modern Standby) maintains active wireless and network interfaces while the operating system is suspended. This allows background applications to receive traffic and process incoming network packets, exposing devices to remote attacks and unauthorized network reconnaissance while unattended.</description>
+        <description>Privileged Access Workstations (PAWs) are high-assurance hardware platforms dedicated exclusively to Tier 0 directory administration. Modern laptop hardware supporting Modern Standby (S0 Low Power Idle) allows network adapters (Wi-Fi, Ethernet, cellular) to maintain active IP stacks and receive incoming network frames while the machine is sleeping or the lid is closed. Allowing unattended network activity on a PAW directly violates Tier 0 physical and network isolation standards.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-178 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7178" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9 Value DCSettingIndex" test_ref="oval:org.adhardening:tst:7178001" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9 Value ACSettingIndex" test_ref="oval:org.adhardening:tst:7178002" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7179" version="1" class="compliance">
@@ -11040,7 +11042,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Unsolicited Remote Assistance permits an administrator or support technician to initiate remote session connections to client endpoints without an explicit user invitation. If compromised, this capability allows adversaries with elevated domain privileges to silently observe or control interactive user desktop sessions.</description>
+        <description>Privileged Access Workstations (PAWs) are dedicated exclusively to managing Tier 0 Active Directory Domain Services, root certificate authorities, and core directory security infrastructure. Permitting any form of Remote Assistance on a PAW constitutes an intolerable security architecture violation that shatters Active Directory administrative tiering.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-179 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7179" />
@@ -11056,7 +11058,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The RPC Endpoint Mapper listens on TCP port 135 to resolve dynamic server endpoints for RPC interfaces. Enabling client authentication forces clients to authenticate to the Endpoint Mapper before obtaining endpoint addresses, preventing unauthenticated network adversaries from performing RPC reconnaissance and MITM endpoint redirection.</description>
+        <description>Privileged Access Workstations (PAWs) execute high-privilege Remote Procedure Call (RPC) routines when administering Domain Controllers, certificate authorities, and directory services. Hardening the RPC resolution mechanism is essential to protect administrative credentials and prevent malicious traffic redirection.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-180 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7180" />
@@ -11072,7 +11074,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Accurate time synchronization is critical for Kerberos authentication (which rejects ticket timestamps skewed by more than 5 minutes) and forensic log correlation. Enabling the NTP Client guarantees synchronization with domain hierarchy time sources, while disabling the NTP Server prevents client workstations from broadcasting unauthenticated time data to other local hosts.</description>
+        <description>Privileged Access Workstations (PAWs) perform high-consequence administrative operations across Tier 0 infrastructure. Precise timekeeping is a non-negotiable prerequisite for Kerberos ticket validation, security event audit sequencing, and cryptographic certificate verification.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-181 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7181" />
@@ -11088,7 +11090,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Standard user accounts can bypass traditional software restriction policies by deploying modern packaged Windows applications (.appx / .msix) directly into user profile directories. Disallowing per-user unsigned packages and prohibiting non-administrators from installing packaged apps ensures that all installed software is audited, signed, and managed by IT administrators.</description>
+        <description>Privileged Access Workstations (PAWs) are dedicated exclusively to directory administration and Tier 0 infrastructure management. Application installation on a PAW must adhere to the strictest change management, code signing, and administrative boundaries.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-182 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7182" />
@@ -11104,7 +11106,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Standard facial recognition can potentially be spoofed using high-resolution photographs, video playback, or realistic masks. Enhanced anti-spoofing requires facial recognition algorithms to verify depth and infrared illumination data from compatible biometric hardware sensors before granting access.</description>
+        <description>Privileged Access Workstations (PAWs) serve as the highest-trust endpoints within an Active Directory enterprise architecture. Physical access to an unlocked PAW grants direct compromise capability over Tier 0 directory services. If biometric facial verification is utilized for PAW operator logon, it must enforce the highest cryptographic and hardware liveness guarantees.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-183 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7183" />
@@ -11120,7 +11122,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Windows features consumer account state content cards and promotional recommendations in system menus. Disabling this content stops background queries to consumer cloud services, eliminates targeted promotional telemetry, and maintains a clean enterprise desktop interface.</description>
+        <description>Privileged Access Workstations (PAWs) are dedicated, single-purpose endpoints reserved exclusively for Tier 0 Active Directory and infrastructure administration. Windows consumer-oriented shell enhancements—such as promotional subscription cards, consumer OneDrive prompts, and personal Microsoft Account (MSA) suggestions—introduce severe architectural and operational risks to high-assurance administrative hosts.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-184 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7184" />
@@ -11136,7 +11138,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The Windows Connect app allows nearby wireless devices to project their screens to the machine over Wi-Fi Direct (Miracast). Requiring a PIN for pairing prevents unauthorized external devices from projecting content or attempting connection hijack attacks without local physical verification.</description>
+        <description>Privileged Access Workstations (PAWs) operate within dedicated administrative perimeters for Tier 0 Active Directory management. Wireless projection capabilities (Miracast over Wi-Fi Direct) introduce serious risks of over-the-air hijacking and unauthenticated input injection if not strictly hardened.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-185 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7185" />
@@ -11152,7 +11154,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The password reveal ('eye') button exposes cleartext passwords on screen, creating shoulder-surfing and screen recording vulnerabilities. Enumerating administrator accounts on UAC elevation displays valid privileged usernames to standard users, facilitating targeted administrative reconnaissance and brute-force attacks.</description>
+        <description>Privileged Access Workstations (PAWs) are dedicated exclusively to high-privilege Tier 0 Active Directory management tasks. Credential collection interfaces must maintain maximum visual confidentiality and prevent information disclosure regarding administrative identities.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-186 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7186" />
@@ -11168,7 +11170,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>OneSettings downloads allow Microsoft to dynamically modify diagnostic configurations over the cloud. Limiting diagnostic and crash dump collection prevents in-memory sensitive data (such as passwords, tokens, or encryption keys) from being captured in automated crash reports and transmitted externally. Disabling Insider builds guarantees production systems only run fully vetted, stable OS builds.</description>
+        <description>Privileged Access Workstations (PAWs) are the dedicated administrative bastion hosts for Tier 0 Active Directory Domain Services, enterprise root certification authorities, and identity synchronization infrastructure. Workstations in this tier manage unconstrained directory objects, Kerberos Ticket Granting Service (TGS) sessions, and domain administrator secrets. The default Windows diagnostic telemetry, crash reporting, and preview build mechanisms pose catastrophic security risks to high-assurance Tier 0 environments.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-187 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7187" />
@@ -11184,7 +11186,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The App Installer URI protocol (ms-appinstaller://) has been repeatedly abused in active malware campaigns to trigger zero-click or drive-by package installations directly from web browsers. Disabling this protocol and prohibiting security overrides (hash bypass, malware scan bypass, certificate bypass) completely closes this critical initial infection vector.</description>
+        <description>Privileged Access Workstations (PAWs) serve as the dedicated platform for Tier 0 Active Directory operations. Protecting the workstation from remote initial access vectors is paramount. The Windows App Installer protocol and package execution mechanisms present a severe vector for untrusted payload delivery that must be comprehensively disabled.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-188 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7188" />
@@ -11202,12 +11204,7 @@ In accordance with Tier 0 hardening baselines, the PAW configuration is strictly
         </affected>
         <description>Privileged Access Workstations (PAWs) serve as the dedicated management plane for Active Directory Domain Controllers, Tier 0 directory services, and critical identity infrastructure. Every interactive logon, administrative command execution, PowerShell script block, and remote management session initiated from a PAW carries severe security sensitivity.
 
-Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidly during heavy administrative activity or forensic investigations, destroying vital attribution evidence. Expanding the **Security** log to **1 GB** (`1,048,576 KB`), **System** and **Application** logs to **128 MB** (`131,072 KB`), and **Setup** log to **32 MB** (`32,768 KB`) establishes a robust local forensic buffer that preserves audit trails across extended operational periods:
-
-1. **High-Privilege Forensic Attribution**: Detailed auditing of administrative tooling (e.g., Active Directory Administrative Center, RSAT, PowerShell remoting, Mimikatz defense telemetry) generates voluminous Security event records. A 1 GB Security log ensures high-fidelity evidence preservation even if centralized log forwarding encounters temporary network partitions.
-2. **64 KB Boundary Alignment**: The Windows Event Log service allocates and writes event records in 64 KB memory chunks. All configured sizes in KB must be integer multiples of 64 (`SizeKB % 64 == 0`). Non-aligned values will be automatically truncated or rounded by the operating system (`1,048,576 / 64 = 16,384`; `131,072 / 64 = 2,048`; `32,768 / 64 = 512`).
-3. **Retention Policy**: Configuring retention behavior to "Overwrite events as needed" (GPO: `Disabled`, registry value `0`) ensures that new audit entries are never rejected or dropped when capacity is reached.
-4. **Memory and I/O Impact**: Windows utilizes memory-mapped files (`.evtx`) for the Event Log service. Only actively accessed pages are mapped into virtual memory; larger file limits do not consume active physical RAM.</description>
+Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidly during heavy administrative activity or forensic investigations, destroying vital attribution evidence. Expanding the **Security** log to **1 GB** (`1,048,576 KB`), **System** and **Application** logs to **128 MB** (`131,072 KB`), and **Setup** log to **32 MB** (`32,768 KB`) establishes a robust local forensic buffer that preserves audit trails across extended operational periods:</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-189 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7189" />
@@ -11223,7 +11220,7 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>The Mark of the Web (Zone.Identifier alternate data stream) is the foundation of Windows download security, triggering SmartScreen, Defender reputation checks, and Office Protected View. Disabling MotW suppression ensures downloaded files maintain security tags even when transferred across insecure network shares. Shell protocol protected mode restricts rogue URL protocol invocations.</description>
+        <description>Privileged Access Workstations (PAWs) represent Tier 0 administrative boundaries. Protecting these high-value machines against unauthorized code execution requires enforcing all layers of Windows execution policy and download origin tracking.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-190 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7190" />
@@ -11239,7 +11236,7 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Internet Explorer 11 is retired and out of support, presenting severe unpatched memory corruption attack surfaces. Disabling IE11 as a standalone browser automatically redirects browser requests to Microsoft Edge. Prohibiting RSS enclosure downloads prevents automated malware payload staging, and blocking cleartext HTTP feed authentication prevents credential interception.</description>
+        <description>Privileged Access Workstations (PAWs) are hardened environments dedicated to Tier 0 infrastructure management. General web browsing on a PAW is strictly prohibited by design. However, legacy operating system binaries and background feed engines remain embedded in the Windows platform, requiring absolute administrative disabling to prevent exploitation.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-191 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7191" />
@@ -11271,10 +11268,13 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Cortana voice integration introduces microphone listening risks, voice command execution from locked workstations, and external telemetry transmission. Indexing encrypted files in the Windows Search index creates unencrypted index cache entries, leaking sensitive plaintext data across file security boundaries.</description>
+        <description>Privileged Access Workstations (PAWs) are dedicated exclusively to Tier 0 Active Directory and core infrastructure administration. Because administrative consoles are used to generate disaster-recovery scripts, inspect Active Directory objects, and manage domain secrets, the operating system search subsystem must be strictly constrained against cryptographic degradation and side-channel leakage.</description>
       </metadata>
       <criteria operator="AND">
-        <criterion comment="Placeholder check for REQ-PAW-193 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7193" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowCortana" test_ref="oval:org.adhardening:tst:7193001" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowCortanaAboveLock" test_ref="oval:org.adhardening:tst:7193002" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowIndexingEncryptedStoresOrItems" test_ref="oval:org.adhardening:tst:7193003" />
+        <criterion comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowSearchToUseLocation" test_ref="oval:org.adhardening:tst:7193004" />
       </criteria>
     </definition>
     <definition id="oval:org.adhardening:def:7194" version="1" class="compliance">
@@ -11287,7 +11287,7 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Permitting automatic Store app updates ensures packaged applications and system appx dependencies stay continuously patched against published vulnerabilities. Suppressing consumer Windows upgrade offers prevents unauthorized major OS feature version upgrades that circumvent IT change management and testing.</description>
+        <description>Privileged Access Workstations (PAWs) execute mission-critical directory administration tools. Essential system management utilities (such as Windows Terminal and system runtime dependencies) are maintained through modern packaging pipelines, requiring rigorous patch hygiene without exposing the privileged environment to uncoordinated operating system upgrades.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-194 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7194" />
@@ -11303,7 +11303,7 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Windows Widgets and News and Interests dynamically fetch unauthenticated internet news, weather, and third-party content onto the taskbar, generating continuous telemetry and background web requests. Disabling widgets eliminates this attack surface and eliminates unwanted distractions.</description>
+        <description>Privileged Access Workstations (PAWs) provide the highest level of security isolation for Tier 0 Active Directory administration. They operate under a strict "clean source" principle where only vetted administrative binaries and management consoles are permitted to execute. Windows Widgets and News and Interests dynamically embed web rendering runtimes (Microsoft Edge WebView2) into the taskbar shell, directly violating core PAW security architecture.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-195 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7195" />
@@ -11319,7 +11319,7 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Automatic Restart Sign-On (ARSO) caches user credentials in memory to automatically log in and lock the desktop after Windows Update reboots. This credential staging mechanism creates exposure to physical memory extraction and DMA attacks. Disabling ARSO prevents credentials from persisting across automated reboots.</description>
+        <description>Privileged Access Workstations (PAWs) process the enterprise's most sensitive credentials, including Active Directory Domain Admin tokens, Kerberos krbtgt keys, and enterprise root CA certificates. Permitting any automated, unattended credential persistence across reboots is fundamentally incompatible with Tier 0 security architectures.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-196 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7196" />
@@ -11335,7 +11335,7 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Windows Sandbox provides a lightweight virtualized environment for untrusted binary execution. If malware is detonated inside the sandbox, clipboard sharing allows potential escape or clipboard data harvesting, and network access permits external C2 communication and lateral scanning. Disabling clipboard redirection and networking enforces strict host and network isolation.</description>
+        <description>Privileged Access Workstations (PAWs) manage the enterprise's most sensitive Tier 0 identity boundaries. While Windows Sandbox allows isolated testing of administrative scripts or packages, running any virtualized container on a PAW without absolute host-isolation controls introduces severe risks to directory security.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-197 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7197" />
@@ -11351,7 +11351,7 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
           <platform>Microsoft Windows 10</platform>
           <platform>Microsoft Windows 11</platform>
         </affected>
-        <description>Removing the ability to pause updates prevents users from indefinitely deferring critical security patches. Deferring quality updates by 0 days ensures critical security patches are installed immediately upon release, while daily scheduled installation and permitting automated reboots ensures systems stay continuously remediated against known exploits.</description>
+        <description>Privileged Access Workstations (PAWs) host the most sensitive interactive sessions and management credentials across the entire enterprise directory structure. Because PAWs are high-value targets for sophisticated adversaries seeking lateral movement into Active Directory Domain Controllers, applying cumulative security patches without latency is vital to system survival.</description>
       </metadata>
       <criteria operator="AND">
         <criterion comment="Placeholder check for REQ-PAW-198 (requires PowerShell audit script)" test_ref="oval:org.adhardening:tst:7198" />
@@ -13819,9 +13819,13 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:object object_ref="oval:org.adhardening:obj:8183" />
       <windows:state state_ref="oval:org.adhardening:ste:8183" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8184" version="1" comment="Placeholder check for REQ-END-184 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8184" />
-      <windows:state state_ref="oval:org.adhardening:ste:8184" />
+    <windows:registry_test id="oval:org.adhardening:tst:8184001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Group Policy Value NoBackgroundPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8184001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8184001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8184002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Group Policy Value NoGPOListChanges" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8184002" />
+      <windows:state state_ref="oval:org.adhardening:ste:8184002" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8185" version="1" comment="Placeholder check for REQ-END-185 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8185" />
@@ -13839,9 +13843,13 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:object object_ref="oval:org.adhardening:obj:8188" />
       <windows:state state_ref="oval:org.adhardening:ste:8188" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8189" version="1" comment="Placeholder check for REQ-END-189 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8189" />
-      <windows:state state_ref="oval:org.adhardening:ste:8189" />
+    <windows:registry_test id="oval:org.adhardening:tst:8189001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9 Value DCSettingIndex" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8189001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8189001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8189002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9 Value ACSettingIndex" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8189002" />
+      <windows:state state_ref="oval:org.adhardening:ste:8189002" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8190" version="1" comment="Placeholder check for REQ-END-190 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8190" />
@@ -13899,9 +13907,21 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:object object_ref="oval:org.adhardening:obj:8203001" />
       <windows:state state_ref="oval:org.adhardening:ste:8203001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:8204" version="1" comment="Placeholder check for REQ-END-204 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:8204" />
-      <windows:state state_ref="oval:org.adhardening:ste:8204" />
+    <windows:registry_test id="oval:org.adhardening:tst:8204001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowCortana" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8204001" />
+      <windows:state state_ref="oval:org.adhardening:ste:8204001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8204002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowCortanaAboveLock" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8204002" />
+      <windows:state state_ref="oval:org.adhardening:ste:8204002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8204003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowIndexingEncryptedStoresOrItems" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8204003" />
+      <windows:state state_ref="oval:org.adhardening:ste:8204003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:8204004" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowSearchToUseLocation" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:8204004" />
+      <windows:state state_ref="oval:org.adhardening:ste:8204004" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:8205" version="1" comment="Placeholder check for REQ-END-205 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:8205" />
@@ -15434,9 +15454,13 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:object object_ref="oval:org.adhardening:obj:7172" />
       <windows:state state_ref="oval:org.adhardening:ste:7172" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7173" version="1" comment="Placeholder check for REQ-PAW-173 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7173" />
-      <windows:state state_ref="oval:org.adhardening:ste:7173" />
+    <windows:registry_test id="oval:org.adhardening:tst:7173001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Group Policy Value NoBackgroundPolicy" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7173001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7173001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7173002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Group Policy Value NoGPOListChanges" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7173002" />
+      <windows:state state_ref="oval:org.adhardening:ste:7173002" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7174" version="1" comment="Placeholder check for REQ-PAW-174 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7174" />
@@ -15446,17 +15470,21 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:object object_ref="oval:org.adhardening:obj:7175" />
       <windows:state state_ref="oval:org.adhardening:ste:7175" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7176" version="1" comment="Placeholder check for REQ-PAW-176 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7176" />
-      <windows:state state_ref="oval:org.adhardening:ste:7176" />
+    <windows:registry_test id="oval:org.adhardening:tst:7176001" version="1" comment="Check Registry Key SYSTEM\CurrentControlSet\Control\Lsa Value AllowCustomSSPsAPs" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7176001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7176001" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7177" version="1" comment="Placeholder check for REQ-PAW-177 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7177" />
       <windows:state state_ref="oval:org.adhardening:ste:7177" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7178" version="1" comment="Placeholder check for REQ-PAW-178 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7178" />
-      <windows:state state_ref="oval:org.adhardening:ste:7178" />
+    <windows:registry_test id="oval:org.adhardening:tst:7178001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9 Value DCSettingIndex" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7178001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7178001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7178002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9 Value ACSettingIndex" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7178002" />
+      <windows:state state_ref="oval:org.adhardening:ste:7178002" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7179" version="1" comment="Placeholder check for REQ-PAW-179 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7179" />
@@ -15514,9 +15542,21 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:object object_ref="oval:org.adhardening:obj:7192001" />
       <windows:state state_ref="oval:org.adhardening:ste:7192001" />
     </windows:registry_test>
-    <windows:registry_test id="oval:org.adhardening:tst:7193" version="1" comment="Placeholder check for REQ-PAW-193 (requires PowerShell audit script)" check="all">
-      <windows:object object_ref="oval:org.adhardening:obj:7193" />
-      <windows:state state_ref="oval:org.adhardening:ste:7193" />
+    <windows:registry_test id="oval:org.adhardening:tst:7193001" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowCortana" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7193001" />
+      <windows:state state_ref="oval:org.adhardening:ste:7193001" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7193002" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowCortanaAboveLock" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7193002" />
+      <windows:state state_ref="oval:org.adhardening:ste:7193002" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7193003" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowIndexingEncryptedStoresOrItems" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7193003" />
+      <windows:state state_ref="oval:org.adhardening:ste:7193003" />
+    </windows:registry_test>
+    <windows:registry_test id="oval:org.adhardening:tst:7193004" version="1" comment="Check Registry Key SOFTWARE\Policies\Microsoft\Windows\Windows Search Value AllowSearchToUseLocation" check="all">
+      <windows:object object_ref="oval:org.adhardening:obj:7193004" />
+      <windows:state state_ref="oval:org.adhardening:ste:7193004" />
     </windows:registry_test>
     <windows:registry_test id="oval:org.adhardening:tst:7194" version="1" comment="Placeholder check for REQ-PAW-194 (requires PowerShell audit script)" check="all">
       <windows:object object_ref="oval:org.adhardening:obj:7194" />
@@ -18941,11 +18981,17 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8184" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8184001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Group Policy</windows:key>
+      <windows:name>NoBackgroundPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8184002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Group Policy</windows:key>
+      <windows:name>NoGPOListChanges</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8185" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -18971,11 +19017,17 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8189" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8189001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
+      <windows:key>SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9</windows:key>
+      <windows:name>DCSettingIndex</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8189002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9</windows:key>
+      <windows:name>ACSettingIndex</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8190" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -19061,11 +19113,29 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection</windows:key>
       <windows:name>BruteForceProtectionConfiguredState</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:8204" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:8204001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Windows Search</windows:key>
+      <windows:name>AllowCortana</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8204002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Windows Search</windows:key>
+      <windows:name>AllowCortanaAboveLock</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8204003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Windows Search</windows:key>
+      <windows:name>AllowIndexingEncryptedStoresOrItems</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:8204004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Windows Search</windows:key>
+      <windows:name>AllowSearchToUseLocation</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:8205" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -21230,11 +21300,17 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7173" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7173001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Group Policy</windows:key>
+      <windows:name>NoBackgroundPolicy</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7173002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Group Policy</windows:key>
+      <windows:name>NoGPOListChanges</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7174" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -21248,11 +21324,11 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7176" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7176001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
+      <windows:key>SYSTEM\CurrentControlSet\Control\Lsa</windows:key>
+      <windows:name>AllowCustomSSPsAPs</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7177" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -21260,11 +21336,17 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
       <windows:name>SystemRoot</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7178" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7178001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
+      <windows:key>SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9</windows:key>
+      <windows:name>DCSettingIndex</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7178002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Power\PowerSettings\f15576e8-98b7-4186-b944-eafa664402d9</windows:key>
+      <windows:name>ACSettingIndex</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7179" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -21350,11 +21432,29 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:key>SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection</windows:key>
       <windows:name>BruteForceProtectionConfiguredState</windows:name>
     </windows:registry_object>
-    <windows:registry_object id="oval:org.adhardening:obj:7193" version="1">
+    <windows:registry_object id="oval:org.adhardening:obj:7193001" version="1">
       <windows:behaviors windows_view="64_bit" />
       <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
-      <windows:key>SOFTWARE\Microsoft\Windows NT\CurrentVersion</windows:key>
-      <windows:name>SystemRoot</windows:name>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Windows Search</windows:key>
+      <windows:name>AllowCortana</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7193002" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Windows Search</windows:key>
+      <windows:name>AllowCortanaAboveLock</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7193003" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Windows Search</windows:key>
+      <windows:name>AllowIndexingEncryptedStoresOrItems</windows:name>
+    </windows:registry_object>
+    <windows:registry_object id="oval:org.adhardening:obj:7193004" version="1">
+      <windows:behaviors windows_view="64_bit" />
+      <windows:hive>HKEY_LOCAL_MACHINE</windows:hive>
+      <windows:key>SOFTWARE\Policies\Microsoft\Windows\Windows Search</windows:key>
+      <windows:name>AllowSearchToUseLocation</windows:name>
     </windows:registry_object>
     <windows:registry_object id="oval:org.adhardening:obj:7194" version="1">
       <windows:behaviors windows_view="64_bit" />
@@ -23762,9 +23862,13 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8184" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    <windows:registry_state id="oval:org.adhardening:ste:8184001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8184002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8185" version="1">
       <windows:type>reg_sz</windows:type>
@@ -23782,9 +23886,13 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8189" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    <windows:registry_state id="oval:org.adhardening:ste:8189001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8189002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8190" version="1">
       <windows:type>reg_sz</windows:type>
@@ -23842,9 +23950,21 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">2</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:8204" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    <windows:registry_state id="oval:org.adhardening:ste:8204001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8204002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8204003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:8204004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:8205" version="1">
       <windows:type>reg_sz</windows:type>
@@ -25351,9 +25471,13 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7173" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    <windows:registry_state id="oval:org.adhardening:ste:7173001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7173002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7174" version="1">
       <windows:type>reg_sz</windows:type>
@@ -25363,17 +25487,21 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7176" version="1">
+    <windows:registry_state id="oval:org.adhardening:ste:7176001" version="1">
       <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+      <windows:value datatype="string">0` guarantees that the operating system kernel and LSA subsystem unconditionally refuse to load third-party SSP and AP DLLs, closing the registry-based persistence vector.</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7177" version="1">
       <windows:type>reg_sz</windows:type>
       <windows:value datatype="string" operation="pattern match">.*</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7178" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    <windows:registry_state id="oval:org.adhardening:ste:7178001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7178002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7179" version="1">
       <windows:type>reg_sz</windows:type>
@@ -25431,9 +25559,21 @@ Default event log capacities (20 MB) or legacy 192 MB baselines roll over rapidl
       <windows:type>reg_dword</windows:type>
       <windows:value datatype="int">2</windows:value>
     </windows:registry_state>
-    <windows:registry_state id="oval:org.adhardening:ste:7193" version="1">
-      <windows:type>reg_sz</windows:type>
-      <windows:value datatype="string" operation="pattern match">.*</windows:value>
+    <windows:registry_state id="oval:org.adhardening:ste:7193001" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7193002" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7193003" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
+    </windows:registry_state>
+    <windows:registry_state id="oval:org.adhardening:ste:7193004" version="1">
+      <windows:type>reg_dword</windows:type>
+      <windows:value datatype="int">0</windows:value>
     </windows:registry_state>
     <windows:registry_state id="oval:org.adhardening:ste:7194" version="1">
       <windows:type>reg_sz</windows:type>

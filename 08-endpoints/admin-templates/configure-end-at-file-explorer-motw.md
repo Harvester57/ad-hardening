@@ -1,26 +1,56 @@
 # [REQ-END-201] Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-190](../../07-paws/admin-templates/configure-paw-at-file-explorer-motw.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer\DisableMotWOnInsecurePathCopy` = `0`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\PreXPSP2ShellProtocolBehavior` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Do not apply the Mark of the Web tag to files copied from insecure sources**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer\Do not apply the Mark of the Web tag to files copied from insecure sources` -> **Disabled** (Enforces MotW tagging)
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer`
+    * Value Name: `DisableMotWOnInsecurePathCopy`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / MotW preserved)
+  * **Turn off shell protocol protected mode**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer\Turn off shell protocol protected mode` -> **Disabled** (Enforces shell protocol protected mode)
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer`
+    * Value Name: `PreXPSP2ShellProtocolBehavior`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Protected mode enforced)
 
 ---
 
 ## Rationale
-The Mark of the Web (Zone.Identifier alternate data stream) is the foundation of Windows download security, triggering SmartScreen, Defender reputation checks, and Office Protected View. Disabling MotW suppression ensures downloaded files maintain security tags even when transferred across insecure network shares. Shell protocol protected mode restricts rogue URL protocol invocations.
+The Windows Attachment Manager and File Explorer utilize the Mark of the Web (MotW) as a core security boundary. MotW is implemented as an NTFS Alternate Data Stream (ADS) named `Zone.Identifier` appended to files downloaded from the internet or untrusted network zones. Maintaining strict MotW integrity and enforcing shell protocol protected mode are essential defenses against initial-access malware campaigns.
+
+### 1. Mark of the Web (Zone.Identifier) Defense Mechanisms
+The `Zone.Identifier` stream identifies the origin security zone of downloaded content (typically `ZoneId=3` for the Internet zone):
+* **Triggering Critical Security Defenses**: The presence of the MotW tag automatically activates multiple defense-in-depth controls:
+  * **Microsoft Defender SmartScreen**: Initiates cloud-based reputation checks and blocks unknown or malicious executables.
+  * **Microsoft 365 / Office Protected View**: Opens downloaded documents in read-only sandbox mode, preventing automated VBA macro execution and Dynamic Data Exchange (DDE) exploits.
+  * **Windows PowerShell Execution Policies**: Blocks execution of downloaded `.ps1` scripts unless explicitly unblocked.
+* **The MotW Stripping Threat Vector**: Threat actors routinely attempt to bypass MotW by packaging malware inside containers (ISO, VHD, ZIP) or coercing users to copy files across network shares (SMB or WebDAV). If `DisableMotWOnInsecurePathCopy` is misconfigured or set to `1`, File Explorer removes the `Zone.Identifier` stream during file copy operations, effectively laundering the untrusted file into a trusted local asset.
+* Setting `DisableMotWOnInsecurePathCopy = 0` (GPO: **Disabled**) guarantees that File Explorer preserves and applies MotW tags even when files are copied from insecure network paths.
+
+### 2. Shell Protocol Protected Mode Enforcement
+The Windows shell supports URI protocols (such as `file:`, `shell:`, `mailto:`, and third-party application protocols) executed via `ShellExecute`:
+* **Legacy Shell Protocol Risks**: In obsolete Windows releases, shell protocols executed arbitrary command parameters and external URLs without parameter sanitization or security prompt verification. Adversaries exploit legacy shell protocol behaviors (as demonstrated in CVE-2023-36025 and CVE-2024-21412) to bypass SmartScreen and trigger indirect code execution.
+* Setting `PreXPSP2ShellProtocolBehavior = 0` (GPO: **Disabled**) forces File Explorer to operate in modern Protected Mode. The shell sanitizes protocol parameters, restricts nested command invocation, and prompts users before launching external protocol handlers.
+
+### 3. MITRE ATT&CK Mapping
+* **T1553.005 - Subvert Trust Controls: Mark-of-the-Web Bypass**: Circumventing SmartScreen, Application Control, and Office Protected View by stripping MotW streams.
+* **T1204.002 - User Execution: Malicious File**: Opening untrusted documents or executable packages lacking security origin tags.
+* **T1218 - System Binary Proxy Execution**: Abusing shell protocol handlers to launch payloads via trusted Windows binaries.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Downloaded files copied across local shares will correctly retain Internet security prompts when executed.
+* **User Experience**: Users executing files downloaded from external networks will continue to receive standard Windows security confirmation prompts and SmartScreen validation dialogs.
+* **Internal Network Shares**: Enterprise files transferred between fully trusted internal intranet file servers (configured under the Local Intranet zone via GPO) will not receive intrusive prompts.
 
 ---
 
@@ -33,11 +63,11 @@ The Mark of the Web (Zone.Identifier alternate data stream) is the foundation of
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
-  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled`
+  * **Do not apply the Mark of the Web tag to files copied from insecure sources**: Set to `Disabled` (Ensures MotW is applied)
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\File Explorer`
-  * **Turn off shell protocol protected mode**: Set to `Disabled`
+  * **Turn off shell protocol protected mode**: Set to `Disabled` (Ensures Protected Mode is enforced)
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -133,6 +163,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.29.3, Section 18.10.29.5
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.43.3, Section 18.10.43.14; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.43.3, Section 18.10.43.14
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000370, Windows 11 STIG Rule WN11-CC-000370
+* **Microsoft Security Guidance**: Mark of the Web Architecture and Attachment Manager Defense Specifications
+* **ANSSI Active Directory Hardening Guide**: Section 3.3 (Protection against untrusted file execution and web downloads)

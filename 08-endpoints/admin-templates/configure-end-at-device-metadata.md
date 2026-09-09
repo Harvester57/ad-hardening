@@ -8,18 +8,37 @@
 
 ## Implementation Details
 * **Priority**: Low
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata\PreventDeviceMetadataFromNetwork` = `1`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Device Installation
+* **Policy Name**: Prevent device metadata retrieval from the Internet
+* **Supported On**: Windows 7 / Windows Server 2008 R2 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata`
+* **Registry Value**: `PreventDeviceMetadataFromNetwork`
+* **Value Type**: `REG_DWORD`
+* **Value Data**: `1` (0x00000001 = Suppress device metadata retrieval from external network)
+* **Vulnerability References**: MITRE ATT&CK: T1082 (System Information Discovery), T1120 (Peripheral Device Discovery), T1041 (Exfiltration Over C2 Channel)
 
 ---
 
 ## Rationale
-Prevents the operating system from searching Windows Update and Microsoft public servers for device metadata, icons, and manufacturer information when new peripheral hardware is connected. This reduces unnecessary external telemetry and prevents information disclosure about attached hardware assets.
+
+When physical or virtual peripherals—such as USB security tokens, smart card readers, external storage media, printers, or network adapters—are connected to a Windows system, the Device Setup Manager (DSM) initiates automated queries to Microsoft Windows Metadata and Internet Services (WMIS). These services deliver OEM-branded device icons, detailed model descriptions, and companion application links displayed in the "Devices and Printers" interface.
+
+### Technical Threat Vectors & Telemetry Exposure
+1. **Peripheral Hardware Fingerprinting & Information Disclosure**: Outbound WMIS requests transmit specific hardware identifiers, including Vendor IDs (VID), Product IDs (PID), revision codes, and subsystem identifiers over network channels. Upstream network eavesdroppers, compromised intermediate proxies, or external telemetry monitors can passively inspect these requests to catalogue connected peripheral assets, identify high-assurance hardware tokens (such as FIDO2 authenticators or PKI smart cards), and map internal system hardware architectures.
+2. **Uncontrolled Egress Connections**: In regulated or segmented enterprise environments, workstations should not initiate automated outbound connections to public Internet CDNs whenever a user connects peripheral equipment. These spontaneous lookups create noise in proxy logs and firewall egress inspection consoles.
+3. **Attack Surface Reduction**: Device metadata packages contain XML manifests, icon binaries, and software staging links. Ingesting and parsing remote metadata packages from public CDNs within the operating system device installer infrastructure creates an unnecessary attack surface against parser vulnerabilities.
+4. **Deterministic Device Management**: Corporate device configuration should remain fully deterministic and managed through approved enterprise driver repositories (such as WSUS, SCCM/MECM, or Intune) rather than opportunistic public CDN queries.
+
+Enabling this control forces Windows to rely solely on locally cached driver metadata and generic operating system device classes, eliminating external metadata network requests.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Custom peripheral icons and detailed hardware descriptions in the 'Devices and Printers' folder will revert to generic device symbols.
+
+* **Operational Impact**: Connected peripherals will display standard generic device icons (e.g., standard generic smart card, printer, or keyboard icon) instead of vendor-branded photorealistic artwork in the Windows shell. Functional device driver installation and hardware operations are completely unaffected; drivers included in the local Driver Store or distributed via corporate management channels install normally.
+* **User Experience**: Minimal to zero impact. Users see generic hardware icons in legacy Control Panel applets.
+* **Network Impact**: Eliminates outbound HTTP/HTTPS connections targeting `dmd.metaservices.microsoft.com` and related metadata distribution endpoints.
+* **Rollout Recommendations**: Can be deployed immediately across all enterprise client workstations and servers with no operational disruption.
 
 ---
 
@@ -29,12 +48,14 @@ Prevents the operating system from searching Windows Update and Microsoft public
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Device Installation`
-  * **Prevent device metadata retrieval from the Internet**: Set to `Enabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Device Installation
+   ```
+4. Double-click **Prevent device metadata retrieval from the Internet**.
+5. Select **Enabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the appropriate Organizational Unit (OU) and verify policy replication across domain controllers.
 
 ---
 
@@ -102,7 +123,22 @@ if ($script:Vulnerable) {
 
 ---
 
+### Option C: Manual Verification
+
+Verify the applied policy setting via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" /v PreventDeviceMetadataFromNetwork
+```
+Expected output:
+```text
+PreventDeviceMetadataFromNetwork    REG_DWORD    0x1
+```
+
+---
+
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.7.2
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Device Installation
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1082: System Information Discovery](https://attack.mitre.org/techniques/T1082/), [T1120: Peripheral Device Discovery](https://attack.mitre.org/techniques/T1120/), [T1041: Exfiltration Over C2 Channel](https://attack.mitre.org/techniques/T1041/)
+* **Related Controls**: [REQ-END-186: Administrative Templates: Restrict Internet Communication](configure-end-at-internet-communication.md), [REQ-END-196: Administrative Templates: Require PIN Pairing for Connect](configure-end-at-connect-pin-pairing.md)

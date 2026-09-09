@@ -1,27 +1,59 @@
 # [REQ-PAW-191] Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-202](../../08-endpoints/admin-templates/configure-end-at-internet-explorer-retirement.md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main\NotifyDisableIEOptions` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\DisableEnclosureDownload` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\AllowBasicAuthInClear` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Disable Internet Explorer 11 as a Standalone Browser**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Disable Internet Explorer 11 as a standalone browser` -> **Enabled** (Select: `Always`)
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Main`
+    * Value Name: `NotifyDisableIEOptions`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Always disabled / Never prompt user)
+  * **Prevent Downloading of Enclosures in Web Feeds**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds\Prevent downloading of enclosures` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds`
+    * Value Name: `DisableEnclosureDownload`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Block enclosure downloads)
+  * **Disable Cleartext Basic Feed Authentication over HTTP**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds\Turn on Basic feed authentication over HTTP` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds`
+    * Value Name: `AllowBasicAuthInClear`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Prohibit cleartext basic auth)
 
 ---
 
 ## Rationale
-Internet Explorer 11 is retired and out of support, presenting severe unpatched memory corruption attack surfaces. Disabling IE11 as a standalone browser automatically redirects browser requests to Microsoft Edge. Prohibiting RSS enclosure downloads prevents automated malware payload staging, and blocking cleartext HTTP feed authentication prevents credential interception.
+Privileged Access Workstations (PAWs) are hardened environments dedicated to Tier 0 infrastructure management. General web browsing on a PAW is strictly prohibited by design. However, legacy operating system binaries and background feed engines remain embedded in the Windows platform, requiring absolute administrative disabling to prevent exploitation.
+
+### 1. Eliminating Standalone IE11 and MSHTML Exploitation Surfaces
+Internet Explorer 11 is retired and contains obsolete memory management logic:
+* Standalone `iexplore.exe` lacks modern sandbox isolation and exploit mitigations. Adversaries targeting privileged administrators with targeted malicious documents or URI links can invoke legacy MSHTML rendering routines to achieve code execution on the management host.
+* Setting `NotifyDisableIEOptions = 0` (GPO: **Enabled: Always**) permanently shuts down the standalone IE11 executable, automatically redirecting any accidental or programmatic invocation to modern Microsoft Edge.
+
+### 2. Disabling Web Feed Staging and Cleartext Authentication
+The Windows Feeds subsystem provides background content aggregation services that must be restricted:
+* **Background Attachment Ingress**: Web feeds supporting enclosure downloads can be abused by adversaries to silently stage malicious binaries onto disk without triggering browser download warnings. Disabling `DisableEnclosureDownload` prevents the feeds engine from downloading binary attachments.
+* **Prohibiting Unencrypted Feed Credentials**: Transmitting HTTP Basic credentials in cleartext exposes administrative accounts to network interception. Disabling `AllowBasicAuthInClear` ensures cleartext authentication is strictly rejected.
+
+### 3. MITRE ATT&CK Mapping
+* **T1189 - Drive-by Compromise**: Exploitation of legacy browser engine vulnerabilities.
+* **T1204.001 - User Execution: Malicious Link**: Directing users to malicious URLs targeting retired browser components.
+* **T1105 - Ingress Tool Transfer**: Automated staging of malicious binaries via RSS feed enclosures.
+* **T1557 - Adversary-in-the-Middle**: Intercepting cleartext credentials transmitted across management segments.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: iexplore.exe redirects to Microsoft Edge. Legacy enterprise applications requiring MSHTML must be configured via Enterprise Mode Site List in Edge IE Mode.
+* **Operational Impact**: None. PAWs are dedicated to directory administration and never require standalone Internet Explorer or web feed subscriptions.
+* **Administrative Management**: Administrative consoles requiring web-based interfaces (such as Azure Portal, Microsoft Entra ID admin center, or modern management appliances) are accessed via hardened modern browsers (Microsoft Edge with AppLocker/WDAC restrictions).
 
 ---
 
@@ -30,17 +62,18 @@ Internet Explorer 11 is retired and out of support, presenting severe unpatched 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer`
-  * **Disable Internet Explorer 11 as a standalone browser**: Set to `Enabled: Always`
+  * **Disable Internet Explorer 11 as a standalone browser**: Set to `Enabled`
+  * Select drop-down value: `Always`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
   * **Prevent downloading of enclosures**: Set to `Enabled`
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Internet Explorer\Feeds`
   * **Turn on Basic feed authentication over HTTP**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -159,6 +192,6 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.35.1, Section 18.10.58.1, Section 18.10.58.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.45.1, Section 18.10.45.2, Section 18.10.45.3; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.45.1, Section 18.10.45.2, Section 18.10.45.3
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000380, Windows 11 STIG Rule WN11-CC-000380
+* **Microsoft Privileged Access Workstation Guidance**: PAW Software and Browser Attack Surface Reduction Rules

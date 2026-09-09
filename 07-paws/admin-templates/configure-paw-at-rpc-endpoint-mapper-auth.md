@@ -1,7 +1,7 @@
 # [REQ-PAW-180] Administrative Templates: Enable RPC Endpoint Mapper Client Authentication for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-191](../../08-endpoints/admin-templates/configure-end-at-rpc-endpoint-mapper-auth.md); for Domain Controllers, refer to [REQ-DC-018](../../02-domain-controllers/harden-network-parameters.md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -9,17 +9,40 @@
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc\EnableAuthEpResolution` = `1`
+  * **Enable RPC Endpoint Mapper Client Authentication**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call\Enable RPC Endpoint Mapper Client Authentication` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc`
+    * Value Name: `EnableAuthEpResolution`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Authenticate to Endpoint Mapper)
 
 ---
 
 ## Rationale
-The RPC Endpoint Mapper listens on TCP port 135 to resolve dynamic server endpoints for RPC interfaces. Enabling client authentication forces clients to authenticate to the Endpoint Mapper before obtaining endpoint addresses, preventing unauthenticated network adversaries from performing RPC reconnaissance and MITM endpoint redirection.
+Privileged Access Workstations (PAWs) execute high-privilege Remote Procedure Call (RPC) routines when administering Domain Controllers, certificate authorities, and directory services. Hardening the RPC resolution mechanism is essential to protect administrative credentials and prevent malicious traffic redirection.
+
+### 1. Guarding Privileged Management RPC Channels
+Tier 0 administrative tools (such as Active Directory Users and Computers, Group Policy Management, and remote PowerShell remoting over WinRM/DCOM) interact with Domain Controllers across several RPC protocols:
+* When a PAW initiates an RPC binding to a Domain Controller interface (such as MS-DRSR, MS-SAMR, or MS-LSAD), it queries the target's RPC Endpoint Mapper (`epmapper`) on TCP port 135 to discover the dynamic TCP port assigned to that interface.
+* In unhardened environments, this initial query is unauthenticated. An attacker with network access to the management VLAN could spoof the response packet, redirecting the PAW's subsequent RPC call to a rogue endpoint.
+* If redirected, the PAW could inadvertently transmit Tier 0 administrative Kerberos service tickets or NTLM authentications to the rogue host, exposing administrative credentials to relaying or offline cracking.
+
+### 2. Enforcing Cryptographic Resolution Verification
+Setting `EnableAuthEpResolution = 1` forces the PAW's RPC runtime (`rpcrt4.dll`) to mutually authenticate with the target endpoint mapper before requesting interface bindings:
+* The lookup requires Kerberos mutual authentication against the target Domain Controller's computer account SPN.
+* Integrity signing is enforced on the returned port mapping, guaranteeing that network adversaries cannot alter the dynamic port assignment.
+* The PAW unconditionally drops connections to unauthenticated endpoint mappers, eliminating exposure to AiTM redirection.
+
+### 3. MITRE ATT&CK Mapping
+* **T1046 - Network Service Discovery**: Anonymous enumeration of RPC interfaces on management workstations.
+* **T1557 - Adversary-in-the-Middle**: Spoofing RPC endpoint mappings to intercept administrative sessions.
+* **T1021.002 - Remote Services: SMB/Windows Admin Shares**: Abuse of RPC services for lateral movement.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Legacy pre-Windows Server 2003 or third-party UNIX RPC clients incapable of authenticating to the Endpoint Mapper will fail to resolve RPC endpoints.
+* **Tier 0 Operational Compatibility**: All supported Windows Server releases (2016 through 2025) running as Domain Controllers natively support authenticated RPC endpoint resolution. PAW administrative tools function seamlessly using Kerberos authentication.
+* **Workgroup and Non-Domain Systems**: Because PAWs are strictly restricted to managing Tier 0 Active Directory domain assets and never connect to untrusted non-domain nodes, no compatibility issues arise.
 
 ---
 
@@ -28,13 +51,13 @@ The RPC Endpoint Mapper listens on TCP port 135 to resolve dynamic server endpoi
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Procedure Call`
   * **Enable RPC Endpoint Mapper Client Authentication**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -103,6 +126,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.36.1; ANSSI R34
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.36.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.36.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000300, Windows 11 STIG Rule WN11-CC-000300
+* **ANSSI Active Directory Hardening Guide**: Recommendation R34 (Securing RPC endpoint mapping and remote procedure calls)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Component and Management Network Protection Rules

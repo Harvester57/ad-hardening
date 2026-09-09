@@ -8,21 +8,43 @@
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowCortana` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowCortanaAboveLock` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowIndexingEncryptedStoresOrItems` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search\AllowSearchToUseLocation` = `0`
+* **Policy Category**: Computer Configuration -> Administrative Templates -> Windows Components -> Search
+* **Policy Settings**:
+  * Allow Cortana
+  * Allow Cortana above lock screen
+  * Allow indexing of encrypted files
+  * Allow search and Cortana to use location
+* **Supported On**: Windows 10 (Version 1511) or Windows Server 2016 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search`
+* **Registry Values**:
+  * `AllowCortana` = `0` (REG_DWORD, Suppress Cortana voice assistance)
+  * `AllowCortanaAboveLock` = `0` (REG_DWORD, Block Cortana execution when device is locked)
+  * `AllowIndexingEncryptedStoresOrItems` = `0` (REG_DWORD, Prevent indexing of EFS/encrypted files)
+  * `AllowSearchToUseLocation` = `0` (REG_DWORD, Block search features from accessing device location)
+* **Vulnerability References**: MITRE ATT&CK: T1005 (Data from Local System), T1083 (File and Directory Discovery), T1056 (Input Capture), T1200 (Hardware Additions / Physical Access), T1020 (Automated Exfiltration)
 
 ---
 
 ## Rationale
-Cortana voice integration introduces microphone listening risks, voice command execution from locked workstations, and external telemetry transmission. Indexing encrypted files in the Windows Search index creates unencrypted index cache entries, leaking sensitive plaintext data across file security boundaries.
+
+The Windows Search and Cortana infrastructure provides desktop indexing, voice recognition, and location-aware query capabilities. In enterprise environments, unconstrained search and voice assistant features introduce severe data leakage, physical authentication bypass, and cryptographic exposure risks.
+
+### Technical Threat Vectors & Cryptographic Vulnerabilities
+1. **Cryptographic Bypass via Encrypted File Indexing**: The Encrypting File System (EFS) protects sensitive files using per-user public key certificates and symmetric file encryption keys (FEK). When the Windows Search indexer (`SearchIndexer.exe`) is allowed to index encrypted stores, it decrypts file contents using the active user's credentials and writes plain-text content, tokens, and metadata into the centralized search database (`C:\ProgramData\Microsoft\Search\Data\Applications\Windows\Windows.edb`). Because `Windows.edb` is a shared database with separate access controls, an attacker gaining local administrative privileges or exploiting local service vulnerabilities can extract plaintext strings and sensitive documents directly from the database, completely bypassing file-level EFS encryption.
+2. **Above-Lock Physical Authentication Bypass**: When Cortana is permitted to operate above the lock screen, physical passersby or unauthenticated attackers in physical proximity to a locked workstation can issue voice queries. This allows unauthorized actors to inspect user calendar appointments, read message previews, query contact lists, and potentially execute authorized voice commands without providing PIN, password, or biometric authentication.
+3. **Voice Audio Ingestion & Telemetry Transmission**: Active voice assistants maintain continuous ambient audio listening queues to detect wake words ("Hey Cortana"). Detected speech samples, query strings, and environmental audio telemetry are transmitted to Microsoft Bing cloud endpoints for natural language processing, creating compliance and eavesdropping concerns in sensitive corporate offices.
+4. **Endpoint Geolocation Disclosure**: Allowing the search subsystem to access device location services attaches Wi-Fi BSSID triangulation and GPS coordinates to telemetry logs and web search queries, disclosing the physical location of corporate mobile assets and remote personnel.
+
+Enforcing these four policies eliminates voice-based interactions, ensures encrypted files remain strictly unindexed, and prevents unauthorized geolocation tracking.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Cortana voice assistance is deactivated. Encrypted files will not appear in instant search results.
+
+* **Operational Impact**: Cortana voice interaction is completely disabled. Encrypted files (EFS) will not appear in rapid full-text search results; users must navigate to them directly via File Explorer. Standard local indexing of unencrypted corporate documents, emails in Outlook, and local file searches continue to function with full speed and fidelity.
+* **User Experience**: Voice search prompts are removed. The search bar functions as a standard, local/text-only search interface.
+* **Cryptographic Integrity**: EFS encrypted stores are guaranteed against plaintext leakage into `Windows.edb`.
+* **Rollout Recommendations**: Completely safe to deploy across all enterprise endpoints; no negative impact on line-of-business software.
 
 ---
 
@@ -32,18 +54,17 @@ Cortana voice integration introduces microphone listening risks, voice command e
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
 2. Edit or create the target GPO linked to workstations and member servers (e.g., `GPO_Hardening_Endpoints`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow Cortana**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow Cortana above lock screen**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow indexing of encrypted files**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Search`
-  * **Allow search and Cortana to use location**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\Windows Components\Search
+   ```
+4. Configure the following policies:
+   * **Allow Cortana**: Set to `Disabled`
+   * **Allow Cortana above lock screen**: Set to `Disabled`
+   * **Allow indexing of encrypted files**: Set to `Disabled`
+   * **Allow search and Cortana to use location**: Set to `Disabled`
+5. Click **Apply**, then click **OK** for each policy.
+6. Link the GPO to the target Organizational Unit (OU) and verify replication across all domain controllers.
 
 ---
 
@@ -180,7 +201,25 @@ if ($script:Vulnerable) {
 
 ---
 
+### Option C: Manual Verification
+
+Verify the applied policy settings via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /s
+```
+Ensure all four values are present and set to `0x0`:
+```text
+AllowCortana                          REG_DWORD    0x0
+AllowCortanaAboveLock                 REG_DWORD    0x0
+AllowIndexingEncryptedStoresOrItems   REG_DWORD    0x0
+AllowSearchToUseLocation              REG_DWORD    0x0
+```
+
+---
+
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.59.3, 18.10.59.4, 18.10.59.5, 18.10.59.6
+* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Sections 18.10.59.3, 18.10.59.4, 18.10.59.5, 18.10.59.6
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Windows Search
 * **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **MITRE ATT&CK**: [T1005: Data from Local System](https://attack.mitre.org/techniques/T1005/), [T1083: File and Directory Discovery](https://attack.mitre.org/techniques/T1083/), [T1056: Input Capture](https://attack.mitre.org/techniques/T1056/), [T1200: Hardware Additions](https://attack.mitre.org/techniques/T1200/), [T1020: Automated Exfiltration](https://attack.mitre.org/techniques/T1020/)
+* **Related Controls**: [REQ-END-186: Administrative Templates: Restrict Internet Communication](configure-end-at-internet-communication.md), [REQ-END-188: Administrative Templates: Interactive Logon and Credential Display Options](configure-end-at-logon-display-options.md)

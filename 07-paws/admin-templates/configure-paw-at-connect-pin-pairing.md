@@ -1,7 +1,7 @@
 # [REQ-PAW-185] Administrative Templates: Require PIN for Connect Wireless Pairing for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-196](../../08-endpoints/admin-templates/configure-end-at-connect-pin-pairing.md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -9,17 +9,38 @@
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\Connect\RequirePinForPairing` = `1`
+  * **Require pin for pairing**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Connect\Require pin for pairing` -> **Enabled** (Select: `Always`)
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\Connect`
+    * Value Name: `RequirePinForPairing`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Require PIN for pairing)
 
 ---
 
 ## Rationale
-The Windows Connect app allows nearby wireless devices to project their screens to the machine over Wi-Fi Direct (Miracast). Requiring a PIN for pairing prevents unauthorized external devices from projecting content or attempting connection hijack attacks without local physical verification.
+Privileged Access Workstations (PAWs) operate within dedicated administrative perimeters for Tier 0 Active Directory management. Wireless projection capabilities (Miracast over Wi-Fi Direct) introduce serious risks of over-the-air hijacking and unauthenticated input injection if not strictly hardened.
+
+### 1. Eliminating Over-the-Air Hijacking on Administrative Consoles
+Unauthenticated Miracast pairing allows nearby wireless devices to project to a host:
+* An attacker within Wi-Fi range of a PAW could attempt to initiate a wireless projection session, displaying fraudulent login screens or intercepting operator display output.
+* If User Input Back Channel (UIBC) is enabled, the connecting device could inject simulated keystrokes and mouse events directly into the PAW operating system, attempting to execute commands in the administrator's active session.
+* Enforcing `RequirePinForPairing = 1` requires the connecting device to submit a dynamic numeric PIN displayed on the PAW's physical display before any pairing is accepted.
+
+### 2. Tightened Tier 0 Wireless Boundary
+In high-security administrative environments, unmanaged wireless peer-to-peer protocols represent an unacceptable bypass of physical security:
+* PAW hardware should operate over dedicated wired management links. If wireless capabilities are enabled on portable PAWs, mandatory PIN entry prevents blind pairing attempts and ensures complete physical visibility of all connection requests.
+
+### 3. MITRE ATT&CK Mapping
+* **T1200 - Direct Network / Hardware Access / Wireless Compromise**: Establishing rogue wireless peer-to-peer tunnels.
+* **T1557 - Adversary-in-the-Middle**: Interception of wireless management displays.
+* **T1056.001 - Input Capture: Keylogging / Input Injection**: Keystroke and input injection via unauthenticated wireless input back channels.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users initiating wireless projection must enter the displayed numeric PIN.
+* **Operational Impact**: None. PAWs are dedicated to directory administration and are not used as wireless conference room display targets.
+* **Administrative Operations**: No impact on directory management or remote administrative tools.
 
 ---
 
@@ -28,13 +49,14 @@ The Windows Connect app allows nearby wireless devices to project their screens 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Connect`
-  * **Require pin for pairing**: Set to `Enabled` (First Time or Always)
+  * **Require pin for pairing**: Set to `Enabled`
+  * Select drop-down value: `Always` (or `First Time`)
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -103,6 +125,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.14.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.15.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.15.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000318, Windows 11 STIG Rule WN11-CC-000318
+* **ANSSI Active Directory Hardening Guide**: Section 3.2 (Restricting unauthenticated wireless protocols and P2P communication)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Physical and Wireless Interface Restrictions

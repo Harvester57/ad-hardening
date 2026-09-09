@@ -1,25 +1,47 @@
 # [REQ-PAW-176] Administrative Templates: Block Custom SSPs and APs from Loading into LSASS for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-187](../../08-endpoints/admin-templates/configure-end-at-lsa-custom-ssps.md); for complementary LSA Protection, refer to [REQ-PAW-007](../../07-paws/enable-lsa-protection.md)).*
+* **Operating Systems**: Windows 10 Enterprise (1903+) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\AllowCustomSSPsAPs` = `0`
+  * **Allow Custom SSPs and APs to be loaded into LSASS**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Local Security Authority\Allow Custom SSPs and APs to be loaded into LSASS` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `AllowCustomSSPsAPs`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Prohibit custom SSP and AP loading)
 
 ---
 
 ## Rationale
-Security Support Providers (SSPs) and Authentication Packages (APs) execute inside the Local Security Authority Subsystem Service (lsass.exe). Threat actors frequently register malicious SSP DLLs in the registry to achieve persistent credential harvesting and memory dumping. Disabling custom SSP loading blocks third-party DLLs from injecting into LSASS.
+Privileged Access Workstations (PAWs) operate in the Tier 0 administrative plane, handling Kerberos Ticket Granting Tickets (TGTs), Smart Card PINs, and administrative authentication tokens for Active Directory Domain Controllers. Protecting the Local Security Authority Subsystem Service (`lsass.exe`) against DLL injection and persistence is a vital baseline defense.
+
+### 1. Guarding Tier 0 Credentials in LSASS Memory
+Adversaries who achieve local access on an administrative host routinely seek to intercept high-privilege credentials:
+* **The Custom SSP Persistence Technique**: By registering a custom Security Support Provider (SSP) or Authentication Package (AP) in `HKLM\SYSTEM\CurrentControlSet\Control\Lsa`, adversaries ensure that `lsass.exe` loads their malicious DLL at boot.
+* **Harvesting Domain Administrator Credentials**: Because SSPs sit directly inside the authentication pipeline, a malicious SSP intercepts administrative passwords and Kerberos authentications in plaintext, recording them to covert staging directories or transmitting them off-host.
+* **Neutralizing In-Memory Injection**: Setting `AllowCustomSSPsAPs = 0` guarantees that the operating system kernel and LSA subsystem unconditionally refuse to load third-party SSP and AP DLLs, closing the registry-based persistence vector.
+
+### 2. Reinforcing LSA Protected Process Light (RunAsPPL)
+In conjunction with LSA Protection / RunAsPPL ([REQ-PAW-007](../../07-paws/enable-lsa-protection.md)):
+* Disallowing custom SSPs ensures that even if an attacker tampers with registry configuration, `lsass.exe` maintains strict adherence to inbox Microsoft-signed security providers.
+* Tier 0 credential operations remain entirely confined to verified, native Windows security components.
+
+### 3. MITRE ATT&CK Mapping
+* **T1547.005 - Boot or Logon Autostart Execution: Security Support Provider**: Adversaries registering malicious SSP/AP DLLs in the LSA registry.
+* **T1003.001 - OS Credential Dumping: LSASS Memory**: In-memory harvesting of administrative credentials.
+* **T1556.002 - Modify Authentication Process: Password Filter DLL**: Tampering with LSA authentication handlers.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Third-party authentication software or legacy smartcard drivers that inject custom SSP DLLs into LSASS will be blocked from loading. Modern providers must support Microsoft Credential Provider architecture.
+* **Operational Impact**: None. PAWs utilize native Windows Kerberos, FIDO2/WebAuthn, and Smart Card Credential Providers that operate through standard Windows APIs without loading third-party SSP DLLs into LSASS.
+* **Administrative Operations**: Domain administration consoles, RSAT tools, and privileged logon workflows operate seamlessly.
 
 ---
 
@@ -28,13 +50,13 @@ Security Support Providers (SSPs) and Authentication Packages (APs) execute insi
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Local Security Authority`
   * **Allow Custom SSPs and APs to be loaded into LSASS**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -103,6 +125,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.26.1; ANSSI R38
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.35.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.35.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000290, Windows 11 STIG Rule WN11-CC-000290
+* **ANSSI Active Directory Hardening Guide**: Recommendation R30 (Protection of the Local Security Authority subsystem)
+* **Microsoft Privileged Access Workstation Guidance**: PAW LSASS Protection and Memory Hardening Rules

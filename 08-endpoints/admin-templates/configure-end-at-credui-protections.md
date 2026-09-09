@@ -1,26 +1,54 @@
 # [REQ-END-197] Administrative Templates: Credential User Interface Security Protections
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-186](../../07-paws/admin-templates/configure-paw-at-credui-protections.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\CredUI\DisablePasswordReveal` = `1`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI\EnumerateAdministrators` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Do not display the password reveal button**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface\Do not display the password reveal button` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\CredUI`
+    * Value Name: `DisablePasswordReveal`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Disable password reveal button)
+  * **Enumerate administrator accounts on elevation**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface\Enumerate administrator accounts on elevation` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI`
+    * Value Name: `EnumerateAdministrators`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled / Require username and password)
 
 ---
 
 ## Rationale
-The password reveal ('eye') button exposes cleartext passwords on screen, creating shoulder-surfing and screen recording vulnerabilities. Enumerating administrator accounts on UAC elevation displays valid privileged usernames to standard users, facilitating targeted administrative reconnaissance and brute-force attacks.
+The Windows Credential User Interface (CredUI) handles password collection dialogs and User Account Control (UAC) elevation prompts. In default configurations, CredUI exposes cleartext credentials on screen and leaks local administrative usernames to unprivileged operators.
+
+### 1. Eliminating Cleartext Password Exposure via the Reveal Button
+Modern Windows password fields include a password reveal ("eye") button that displays cleartext password characters while pressed:
+* **Shoulder Surfing in Enterprise Environments**: In open-plan offices, conference facilities, or remote work locations, bystanders, unauthorized personnel, or cameras can visually record cleartext passwords when the reveal button is engaged.
+* **Screen Capture and Collaboration Tools**: Screen sharing during video conferences (Teams, Zoom, Webex), remote desktop sessions, or background malware capturing screen frames can record passwords exposed in plaintext on the display.
+* Setting `DisablePasswordReveal = 1` permanently strips the reveal glyph from all CredUI password boxes and system logon prompts, ensuring passwords remain masked under all circumstances.
+
+### 2. Preventing Local Administrator Account Enumeration on Elevation
+When a standard user triggers an action requiring administrative elevation, the default UAC prompt enumerates and displays tiles for every member of the local Administrators group:
+* **Unauthenticated Account Discovery**: Standard users or malware executing in unprivileged user contexts can trigger a harmless UAC prompt to instantly discover the exact usernames of all local administrator accounts, custom break-glass accounts, and administrative naming conventions.
+* **Facilitating Targeted Brute-Force and Spraying**: Armed with validated administrative usernames, attackers can focus credential stuffing, password spraying, or offline Kerberoasting attacks directly on identified targets.
+* Setting `EnumerateAdministrators = 0` suppresses the enumeration of administrative accounts. The UAC prompt displays blank username and password fields, forcing the user to know and manually provide both a valid administrative account name and its credentials.
+
+### 3. MITRE ATT&CK Mapping
+* **T1087.001 - Account Discovery: Local Account**: Harvesting administrative usernames displayed in UAC elevation dialogs.
+* **T1056.002 - Input Capture: GUI Input Capture**: Visual capture or screen recording of unmasked passwords.
+* **T1548.002 - Abuse Elevation Control Mechanism: Bypass User Account Control**: Exploiting UAC information disclosure during privilege escalation workflows.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: The password reveal button is disabled across all system credential prompts. Users elevating privileges must manually enter both the administrative username and password.
+* **User Experience during Elevation**: When standard users or technicians elevate applications on an endpoint, they must type both the administrative username (e.g., `.\admin_local` or `DOMAIN\Tier2Admin`) and the password, rather than selecting an account tile from a list.
+* **Password Entry Accuracy**: Users cannot view typed passwords in plaintext; complex passwords must be entered carefully.
 
 ---
 
@@ -37,7 +65,7 @@ The password reveal ('eye') button exposes cleartext passwords on screen, creati
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Credential User Interface`
   * **Enumerate administrator accounts on elevation**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -133,6 +161,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.15.1, Section 18.10.15.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.22.1, Section 18.10.22.2; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.22.1, Section 18.10.22.2; CIS Windows Server Benchmark: Section 18.10.22.1, Section 18.10.22.2
+* **DISA STIG**: Windows 10 STIG Rules WN10-CC-000320, WN10-CC-000325; Windows 11 STIG Rules WN11-CC-000320, WN11-CC-000325
+* **ANSSI Active Directory Hardening Guide**: Section 3.1 (Securing interactive authentication interfaces and credential prompts)
+* **Microsoft Security Baseline**: Credential User Interface Security Baseline

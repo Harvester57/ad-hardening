@@ -1,7 +1,7 @@
 #Get-PawAtDeviceMetadataStatus.ps1
 # Description: Audits Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs.
 
-Write-Host "--- Auditing Administrative Templates: Prevent Device Metadata Retrieval from Network for PAWs ---" -ForegroundColor Cyan
+Write-Host "--- Auditing Administrative Templates: Prevent Device Metadata Retrieval from Network ---" -ForegroundColor Cyan
 $script:Vulnerable = $false
 
 $TargetKey = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata"

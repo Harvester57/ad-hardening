@@ -1,32 +1,101 @@
 # [REQ-PAW-177] Administrative Templates: Logon Display and Credential Restrictions for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-188](../../08-endpoints/admin-templates/configure-end-at-logon-display-options.md); for Domain Controllers, refer to [REQ-DC-024](../../02-domain-controllers/configure-security-options.md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\BlockUserFromShowingAccountDetailsOnSignin` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DontDisplayNetworkSelectionUI` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DontEnumerateConnectedUsers` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\DisableLockScreenAppNotifications` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\BlockDomainPicturePassword` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\AllowDomainPINLogon` = `0`
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows\System\NoLocalPasswordResetQuestions` = `1`
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableMPR` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Block user from showing account details on sign-in**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Block user from showing account details on sign-in` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `BlockUserFromShowingAccountDetailsOnSignin`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Do not display network selection UI**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Do not display network selection UI` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `DontDisplayNetworkSelectionUI`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Do not enumerate connected users on domain-joined computers**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Do not enumerate connected users on domain-joined computers` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `DontEnumerateConnectedUsers`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Turn off app notifications on the lock screen**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Turn off app notifications on the lock screen` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `DisableLockScreenAppNotifications`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Turn off picture password sign-in**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Turn off picture password sign-in` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `BlockDomainPicturePassword`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Turn on convenience PIN sign-in**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Turn on convenience PIN sign-in` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `AllowDomainPINLogon`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
+  * **Prevent the use of security questions for local accounts**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Prevent the use of security questions for local accounts` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Windows\System`
+    * Value Name: `NoLocalPasswordResetQuestions`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Configure transmission of user password in MPR notifications**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Logon\Configure the transmission of the user's password in the content of MPR notifications sent by winlogon` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
+    * Value Name: `EnableMPR`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
 
 ---
 
 ## Rationale
-Exposing account names, pictures, or network selection controls on lock screens provides reconnaissance information to physical attackers. Convenience PINs and picture passwords offer poor entropy compared to domain Kerberos credentials or smartcards. Local account security questions introduce easily guessable bypasses, and Multiple Provider Router (MPR) password transmission exposes cleartext credentials during authentication notifications.
+Privileged Access Workstations (PAWs) serve as the dedicated management perimeter for Active Directory Domain Controllers and enterprise tier-0 administrative roles. Visual information disclosure, network re-association controls at lock screen, and consumer authentication features introduce critical exposure to administrative credential theft and physical exploitation.
+
+### 1. Absolute Lock Screen Visual Confidentiality on Tier 0 Hosts
+Exposing administrative account identifiers creates severe physical intelligence leakage:
+* Displaying usernames, email addresses, or avatars of Tier 0 administrators (such as members of Domain Admins or Enterprise Admins) allows observers to map administrative accounts and target them with social engineering or spear-phishing.
+* Fast User Switching tiles reveal active administrative sessions.
+* Enforcing `BlockUserFromShowingAccountDetailsOnSignin = 1` and `DontEnumerateConnectedUsers = 1` strips all personal identifiers from the logon screen. Administrators must explicitly type their full administrative credentials.
+
+### 2. Guarding the PAW Management Network Boundary
+The lock screen network selection flyout allows physical interaction with the host's network state:
+* An attacker with temporary physical proximity could disconnect the PAW from the secure management VLAN and connect it to a rogue access point or malicious cellular hotspot.
+* Once diverted, the attacker could poison local DNS or capture administrative NTLM handshakes initiated by background services.
+* Enforcing `DontDisplayNetworkSelectionUI = 1` removes the network selection interface entirely from the lock screen.
+
+### 3. Preventing Data Leakage via Notifications
+Administrative alerts, security operational notifications, or multi-factor authentication (MFA) verification codes displayed on the lock screen can be viewed by unauthorized observers:
+* Enforcing `DisableLockScreenAppNotifications = 1` guarantees that all notification content is suppressed until the operator successfully authenticates.
+
+### 4. Prohibiting Substandard Authentication Mechanisms
+Tier 0 administrative access requires cryptographic authentication:
+* **Picture Passwords & Convenience PINs**: Picture passwords and non-TPM convenience PINs lack hardware attestation and brute-force resistance. They are strictly prohibited on PAWs. (Hardware-backed Smart Cards and TPM 2.0-bound Windows Hello for Business remain fully supported).
+* **Security Questions**: Local account security questions provide trivial password bypasses and must be eliminated via `NoLocalPasswordResetQuestions = 1`.
+* **MPR Notifications**: Passing cleartext passwords in Multiple Provider Router notifications exposes credentials in memory and must be disabled (`EnableMPR = 0`).
+
+### 5. MITRE ATT&CK Mapping
+* **T1087.001 - Account Discovery: Local Account**: Harvesting Tier 0 administrator accounts displayed on the lock screen.
+* **T1040 - Network Sniffing**: Diverting locked PAWs to rogue Wi-Fi networks to intercept management traffic.
+* **T1110.001 - Brute Force: Password Guessing**: Bypassing strong authentication via convenience PINs or security questions.
+* **T1552.001 - Unsecured Credentials: Credentials In Files / Memory**: Intercepting cleartext MPR notifications.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Users must input their full username and password/smartcard PIN at logon. Convenience PINs are blocked (Windows Hello for Business with TPM hardware binding must be used instead if PINs are required).
+* **Operational Impact**: Operators must type their full username and password or authenticate using their hardware smartcard.
+* **Network Management**: PAW hardware connects exclusively to authorized wired management switchports or dedicated, certificate-authenticated enterprise Wi-Fi networks. Unauthenticated wireless switching is blocked.
 
 ---
 
@@ -35,27 +104,20 @@ Exposing account names, pictures, or network selection controls on lock screens 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Block user from showing account details on sign-in**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Do not display network selection UI**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Do not enumerate connected users on domain-joined computers**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Turn off app notifications on the lock screen**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Turn off picture password sign-in**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Turn on convenience PIN sign-in**: Set to `Disabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Prevent the use of security questions for local accounts**: Set to `Enabled`
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Logon`
   * **Configure the transmission of the user's password in the content of MPR notifications sent by winlogon**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -289,6 +351,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.28.1, 18.9.28.2, 18.9.28.3, 18.9.28.5, 18.9.28.6, 18.9.28.7, 18.10.15.3, 18.10.82.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.28.1, 18.9.28.2, 18.9.28.3, 18.9.28.5, 18.9.28.6, 18.9.28.7, 18.10.15.3, 18.10.82.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.28.1, 18.9.28.2, 18.9.28.3, 18.9.28.5, 18.9.28.6, 18.9.28.7, 18.10.15.3, 18.10.82.1
+* **DISA STIG**: Windows 10 STIG Rules WN10-CC-000075, WN10-CC-000080, WN10-CC-000085, WN10-CC-000090
+* **ANSSI Active Directory Hardening Guide**: Section 3.1 (Securing interactive logon prompts and disabling unauthenticated lock screen features)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Visual Confidentiality and Physical Host Hardening

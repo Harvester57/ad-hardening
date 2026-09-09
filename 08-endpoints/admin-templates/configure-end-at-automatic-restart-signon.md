@@ -1,25 +1,48 @@
 # [REQ-END-207] Administrative Templates: Disable Windows Automatic Restart Sign-On (ARSO)
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-196](../../07-paws/admin-templates/configure-paw-at-automatic-restart-signon.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\DisableAutomaticRestartSignOn` = `1`
+  * **Sign-in and lock last interactive user automatically after a restart**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Logon Options\Sign-in and lock last interactive user automatically after a restart` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`
+    * Value Name: `DisableAutomaticRestartSignOn`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Disabled / ARSO blocked)
 
 ---
 
 ## Rationale
-Automatic Restart Sign-On (ARSO) caches user credentials in memory to automatically log in and lock the desktop after Windows Update reboots. This credential staging mechanism creates exposure to physical memory extraction and DMA attacks. Disabling ARSO prevents credentials from persisting across automated reboots.
+Automatic Restart Sign-On (ARSO) is a Windows convenience feature designed to streamline post-update maintenance. When an automated Windows Update requires a reboot, ARSO captures the interactive user's credentials, encrypts them via the Local Security Authority (LSA) and Data Protection API (DPAPI), and stages them across the reboot sequence. Upon restart, Winlogon automatically decrypts the credentials, logs the user on in the background, instantiates the user profile, and locks the console.
+
+### 1. In-Memory Credential Exposure and DMA Vulnerabilities
+While convenient for consumer devices, ARSO introduces critical vulnerabilities in enterprise environments:
+* **Pre-Staged Credential Loading into RAM**: Once ARSO automatically logs the user in, the user's primary Kerberos Ticket Granting Tickets (TGTs), NTLM hashes, DPAPI master keys, and authentication tokens are loaded into physical DRAM and the Local Security Authority Subsystem Service (`lsass.exe`).
+* **Unattended Physical Exploitation**: Because the machine sits in an empty office or unattended workstation area while ostensibly locked, an adversary with physical access can exploit Direct Memory Access (DMA) attack vectors (via Thunderbolt, PCIe, or USB4 interfaces using tools like PCILeech) to extract secrets from memory without possessing the user's password.
+* **Cold-Boot and Memory Remanence Attacks**: If the host is powered down immediately following an ARSO reboot, sensitive directory keys and cached credentials persist in physical memory modules for several minutes, allowing offline memory extraction.
+* **Credential Staging Risks in LSA**: Staging decrypted credential material across a reboot relies on cryptographic keys stored in the registry and TPM. Any vulnerability in the staging implementation exposes stored credentials to offline extraction.
+
+### 2. Enforcing Clean Authentication Boundaries
+Setting `DisableAutomaticRestartSignOn = 1` (by configuring the GPO "Sign-in and lock last interactive user automatically after a restart" to **Disabled**) completely eliminates credential staging:
+* Post-reboot, the system boots strictly into a clean, unauthenticated Winlogon state.
+* No user tokens, Kerberos tickets, or DPAPI keys are instantiated in memory until the user physically presents themselves at the console and completes interactive authentication.
+
+### 3. MITRE ATT&CK Mapping
+* **T1003.001 - OS Credential Dumping: LSASS Memory**: Scraping credentials instantiated in memory by automated background sign-on.
+* **T1200 - Direct Network / Hardware Access**: Physical extraction of volatile memory from unattended machines.
+* **T1078 - Valid Accounts**: Misusing persisted session tokens.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Following a restart, the computer remains at the initial Windows login screen until the user manually authenticates.
+* **User Experience Post-Update**: Following scheduled overnight patch cycles or automated reboots, client workstations will remain at the standard Windows logon screen. User desktop sessions and background applications (e.g., mail clients, cloud sync engines) will not launch until the user logs on.
+* **Patch Verification**: Enterprise management agents (Intune, MECM) continue to receive reboot confirmation and compliance signals from the Windows Update Agent regardless of whether a user session is active.
 
 ---
 
@@ -34,7 +57,7 @@ Automatic Restart Sign-On (ARSO) caches user credentials in memory to automatica
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Windows Logon Options`
   * **Sign-in and lock last interactive user automatically after a restart**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -103,6 +126,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.82.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.99.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.99.1; CIS Windows Server Benchmark: Section 18.10.99.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000390, Windows 11 STIG Rule WN11-CC-000390
+* **ANSSI Active Directory Hardening Guide**: Section 3.1 (Securing local authentication processes and credential lifecycle)
+* **Microsoft Security Baseline**: Windows Logon Security Recommendations

@@ -1,7 +1,7 @@
 # [REQ-PAW-183] Administrative Templates: Configure Biometrics Enhanced Anti-Spoofing for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-194](../../08-endpoints/admin-templates/configure-end-at-biometrics-anti-spoofing.md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -9,17 +9,38 @@
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures\EnhancedAntiSpoofing` = `1`
+  * **Configure enhanced anti-spoofing**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Windows Components\Biometrics\Facial Features\Configure enhanced anti-spoofing` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\Biometrics\FacialFeatures`
+    * Value Name: `EnhancedAntiSpoofing`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Enforce hardware depth and IR liveness)
 
 ---
 
 ## Rationale
-Standard facial recognition can potentially be spoofed using high-resolution photographs, video playback, or realistic masks. Enhanced anti-spoofing requires facial recognition algorithms to verify depth and infrared illumination data from compatible biometric hardware sensors before granting access.
+Privileged Access Workstations (PAWs) serve as the highest-trust endpoints within an Active Directory enterprise architecture. Physical access to an unlocked PAW grants direct compromise capability over Tier 0 directory services. If biometric facial verification is utilized for PAW operator logon, it must enforce the highest cryptographic and hardware liveness guarantees.
+
+### 1. Guarding Tier 0 Console Access Against Presentation Attacks
+Standard 2D optical facial recognition can be deceived by visual replicas:
+* An adversary obtaining physical proximity to an unattended PAW could attempt presentation attacks using high-resolution photographs, video playback on portable screens, or 3D synthetic masks.
+* On a PAW, any successful spoof immediately exposes Domain Admin sessions, active RSAT consoles, and Kerberos Ticket Granting Service keys to unauthorized operators.
+* Enforcing `EnhancedAntiSpoofing = 1` requires the biometric subsystem to perform rigorous infrared spectral analysis and 3D depth mesh confirmation. Flat images, video screens, and non-living models are unconditionally rejected.
+
+### 2. Ensuring Strict Biometric Sensor Certification
+Enforcing enhanced anti-spoofing mandates compliant hardware:
+* The Windows Biometric Framework strictly blocks facial logon on devices lacking dedicated near-IR depth sensors certified for enterprise anti-spoofing.
+* This guarantees that PAW operators only utilize secure biometric hardware backed by TPM 2.0 key sealing.
+
+### 3. MITRE ATT&CK Mapping
+* **T1110 - Brute Force / Biometric Spoofing**: Presentation attacks against Tier 0 administrative workstation locks.
+* **T1078 - Valid Accounts**: Unauthorized console access to administrative sessions.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Devices with standard RGB-only webcams will not support facial recognition logon and must use smartcards or TPM-backed PINs.
+* **Operational Impact**: PAWs lacking certified Windows Hello IR cameras will disallow facial recognition configuration. Operators on these machines authenticate using dedicated hardware Smart Cards (PIV/CAC) or FIDO2 hardware keys.
+* **Administrative Operations**: No disruption to Tier 0 directory management workflows.
 
 ---
 
@@ -28,13 +49,13 @@ Standard facial recognition can potentially be spoofed using high-resolution pho
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Windows Components\Biometrics\Facial Features`
   * **Configure enhanced anti-spoofing**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the PAW Organizational Unit and enforce policy replication using `gpupdate /force`.
 
 ---
 
@@ -103,6 +124,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.10.9.1.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.10.11.1; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.10.11.1
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000315, Windows 11 STIG Rule WN11-CC-000315
+* **ANSSI Active Directory Hardening Guide**: Section 3.1 (Biometric authentication security requirements)
+* **Microsoft Privileged Access Workstation Guidance**: PAW Biometric and Strong Authentication Baseline

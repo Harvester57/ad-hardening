@@ -1,26 +1,59 @@
 # [REQ-END-192] Administrative Templates: Configure Windows Time Service NTP Client and Server
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-181](../../07-paws/admin-templates/configure-paw-at-w32time-ntp-client.md); for Domain Controllers, refer to [REQ-DC-020](../../02-domain-controllers/configure-pdc-time-sync.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient\Enabled` = `1`
-  * `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer\Enabled` = `0`
+* **GPO Paths / Registry Locations**:
+  * **Enable Windows NTP Client**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers\Enable Windows NTP Client` -> **Enabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient`
+    * Value Name: `Enabled`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled)
+  * **Disable Windows NTP Server**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers\Enable Windows NTP Server` -> **Disabled**
+    * Registry Path: `HKLM\SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpServer`
+    * Value Name: `Enabled`
+    * Value Type: `REG_DWORD`
+    * Value Data: `0` (Disabled)
 
 ---
 
 ## Rationale
-Accurate time synchronization is critical for Kerberos authentication (which rejects ticket timestamps skewed by more than 5 minutes) and forensic log correlation. Enabling the NTP Client guarantees synchronization with domain hierarchy time sources, while disabling the NTP Server prevents client workstations from broadcasting unauthenticated time data to other local hosts.
+The Windows Time Service (`W32Time`) is a core architectural component of Windows security, providing synchronization across domain members, member servers, and directory nodes. Precise timekeeping is mandatory for protocol operation, cryptographic authentication, and forensic integrity.
+
+### 1. Kerberos Ticket Validation and Replay Protection
+The Kerberos v5 authentication protocol (RFC 4120) incorporates timestamps into Authenticator tokens exchanged between clients, Key Distribution Centers (KDCs), and target services:
+* **Enforcing Kerberos Clock Skew Limits**: Domain Controllers strictly enforce a maximum tolerance of 5 minutes (300 seconds) for computer clock synchronization. If a client workstation's time drifts beyond this threshold, all authentication requests (TGT acquisition, service ticket requests, and mutual session setups) fail immediately with `KRB_AP_ERR_SKEW` (Event ID 4768 / 4769).
+* **Forced Fallback to Legacy Protocols**: When Kerberos authentication fails due to clock skew, client applications frequently downgrade authentication to NTLM, exposing the environment to NTLM relay attacks and credential harvesting.
+* **Tampering and Ticket Replay**: Adversaries who manipulate client system clocks can attempt to replay captured tickets or invalidate certificate validity checks (e.g., CRL/OCSP expiration validation). Enforcing `NtpClient\Enabled = 1` guarantees that the endpoint continually synchronizes its local clock against authoritative domain time sources.
+
+### 2. Forensic Log Integrity and SIEM Event Correlation
+Enterprise detection and response depends entirely on chronologically accurate logging:
+* When an endpoint generates Security audit events (e.g., Event ID 4624 logon, Event ID 4688 process execution, Event ID 4672 privilege assignment), inaccurate timestamps disrupt event correlation across SIEM, SOC, and EDR platforms.
+* Threat actors deliberately manipulate local system time to obscure the sequence of malicious activities or backdate attacker-created files (timestomping). Maintaining continuous NTP synchronization ensures forensic timeline veracity.
+
+### 3. Closing the NTP Server Listener Attack Surface
+Workstations and member servers should never serve time to other network hosts:
+* Enabling the NTP server listener on client machines opens UDP port 123 to incoming network traffic.
+* Threat actors can exploit unauthenticated UDP 123 listeners for NTP amplification and reflection denial-of-service (DDoS) attacks, or attempt to poison downstream peer clocks.
+* Setting `NtpServer\Enabled = 0` closes the UDP 123 listening port, ensuring the system operates purely as a secure consumer of domain time.
+
+### 4. MITRE ATT&CK Mapping
+* **T1558 - Steal or Forge Kerberos Tickets**: Disrupting or manipulating system time to interfere with ticket validation and induce legacy fallback.
+* **T1070.006 - Indicator Removal: Timestomp**: Modifying process or system time attributes to conceal attacker dwell time.
+* **T1498.002 - Network Denial of Service: Reflection Amplification**: Weaponizing open UDP time services for network reflection.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Client workstations will not serve time to other network devices.
+* **Active Directory Hierarchy Synchronization**: Domain-joined workstations and member servers automatically query the Active Directory domain hierarchy (synchronizing with authenticating Domain Controllers, which in turn sync with the PDC Emulator holding the external stratum-1 time source). No external internet NTP connectivity is required for domain members.
+* **Isolated or Air-Gapped Networks**: On networks without direct internet access, the root domain PDC Emulator must be synchronized with a local hardware GPS or atomic clock source. All domain endpoints will inherit this synchronized time automatically through the domain time provider.
 
 ---
 
@@ -37,7 +70,7 @@ Accurate time synchronization is critical for Kerberos authentication (which rej
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Windows Time Service\Time Providers`
   * **Enable Windows NTP Server**: Set to `Disabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -133,6 +166,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.51.1.1, Section 18.9.51.1.2
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.102.1, Section 18.9.102.2; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.102.1, Section 18.9.102.2; CIS Windows Server Benchmark: Section 18.9.102.1, Section 18.9.102.2
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000310, Windows 11 STIG Rule WN11-CC-000310
+* **ANSSI Active Directory Hardening Guide**: Recommendation R35 (Time synchronization and Kerberos integrity)
+* **Microsoft Security Baseline**: Windows Time Service Policy Configuration Reference

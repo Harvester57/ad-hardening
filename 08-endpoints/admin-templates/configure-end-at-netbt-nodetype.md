@@ -1,26 +1,58 @@
 # [REQ-END-180] Administrative Templates: Configure NetBT Node Type and Name Release
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-169](../../07-paws/admin-templates/configure-paw-at-netbt-nodetype.md); for Domain Controllers, refer to [REQ-DC-017](../../02-domain-controllers/harden-network-parameters.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (all supported builds), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\NodeType` = `2`
-  * `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\NoNameReleaseOnDemand` = `1`
+* **GPO Paths / Registry Locations**:
+  * **NetBT Node Type (P-Node)**:
+    * GPO Path: `Computer Configuration\Policies\Administrative Templates\Network\TCPIP Settings\Parameters\NetBT NodeType configuration` -> **Enabled** (Value: `P-node (recommended)`)
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters`
+    * Value Name: `NodeType`
+    * Value Type: `REG_DWORD`
+    * Value Data: `2` (P-node / Point-to-Point)
+  * **NetBIOS Name Release Protection**:
+    * GPO Path: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options\MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers` -> **Enabled**
+    * Registry Path: `HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters`
+    * Value Name: `NoNameReleaseOnDemand`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Ignore unauthenticated release requests)
 
 ---
 
 ## Rationale
-Configuring NetBT NodeType to P-node (Point-to-Point) forces name resolution via unicast WINS rather than broadcast, preventing unauthenticated network adversaries from responding to NetBIOS broadcasts or poisoning name resolution caches. Forcing the system to ignore unauthenticated NetBIOS name release requests prevents denial-of-service attacks that force the computer to relinquish its registered network identity.
+NetBIOS over TCP/IP (NetBT, defined in RFC 1001/1002) is a legacy name resolution and session transport protocol that relies heavily on unauthenticated IP broadcasts over UDP port 137. In modern enterprise environments, NetBT introduces significant attack vectors that can be weaponized for credential theft and denial of service.
+
+### 1. Suppression of Broadcast Name Poisoning (P-Node Enforcement)
+The Windows TCP/IP stack supports four NetBIOS node types:
+* **1 (B-node / Broadcast)**: Performs name resolution exclusively via IP subnet broadcasts.
+* **2 (P-node / Peer-to-Peer)**: Resolves names strictly via directed unicast queries to designated WINS servers. Broadcast queries are entirely prohibited.
+* **4 (M-node / Mixed)**: Broadcasts first, then queries WINS if broadcast fails.
+* **8 (H-node / Hybrid)**: Queries WINS first, then falls back to subnet broadcast if WINS fails to resolve the name.
+
+In default configurations, Windows systems frequently operate as B-node or H-node. When a client attempts to resolve an unavailable or misspelled network resource, it transmits unauthenticated NetBIOS Name Service (NBNS) broadcast frames across the local collision domain. Threat actors running tools such as Responder or Inveigh capture these broadcasts and reply with forged IP mappings, coercing the victim into initiating NTLM authentication against the adversary's machine. Enforcing **P-node (`NodeType = 2`)** completely eliminates NBNS broadcast generation, neutralizing broadcast poisoning at the transport layer.
+
+### 2. Denial of Service via Spoofed Name Release Requests
+NetBT includes an unauthenticated "Name Release" packet type intended to resolve IP address conflicts. If `NoNameReleaseOnDemand` is not explicitly enforced (`0`), any network node can send a spoofed UDP port 137 packet claiming that the victim's NetBIOS computer name conflicts with an existing machine:
+* The receiving Windows system immediately relinquishes its registered NetBIOS identity and ceases responding to inbound network requests under that name.
+* Attackers can systematically de-register file servers, print servers, or administrative management endpoints, causing targeted network denial of service.
+* Setting `NoNameReleaseOnDemand = 1` instructs the Windows network subsystem to ignore all unsolicited Name Release demands unless they originate from an authoritative, trusted WINS server.
+
+### 3. MITRE ATT&CK Mapping
+* **T1557.001 - Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay**: Intercepting broadcast name requests to capture or relay NTLM credentials.
+* **T1040 - Network Sniffing**: Sniffing broadcast name resolution traffic across the local LAN segment.
+* **T1498 - Network Denial of Service**: Forcing victim endpoints to surrender their network identities via spoofed name release frames.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Environments relying purely on unrouted broadcast-based NetBIOS name resolution without DNS or WINS will experience resolution failures.
+* **Active Directory DNS Compatibility**: Production Active Directory networks utilize DNS as the primary locator mechanism for Kerberos, LDAP, and SMB communications. Enforcing P-node does not impact DNS name resolution.
+* **WINS Server Requirements**: If legacy enterprise line-of-business applications require NetBIOS name resolution, designated WINS servers must be deployed and assigned via DHCP option 44/46. If no WINS servers are configured, NetBT resolution fails silently and queries fall through directly to DNS, which is the desired secure behavior.
+* **Peer-to-Peer Workgroups**: Isolated workgroups lacking a local DNS server or WINS infrastructure will experience name resolution failures between local workstations if NetBT is restricted to P-node. Such unmanaged configurations are unsupported in hardened corporate Active Directory architectures.
 
 ---
 
@@ -33,11 +65,12 @@ Configuring NetBT NodeType to P-node (Point-to-Point) forces name resolution via
 3. Configure the following policies:
 
 * Navigate to: `Computer Configuration\Policies\Administrative Templates\Network\TCPIP Settings\Parameters`
-  * **NetBT NodeType configuration**: Set to `Enabled` (P-node (recommended))
+  * **NetBT NodeType configuration**: Set to `Enabled`
+  * Set **NetBT NodeType** drop-down to: `P-node (recommended)`
 * Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\Security Options`
   * **MSS: (NoNameReleaseOnDemand) Allow the computer to ignore NetBIOS name release requests except from WINS servers**: Set to `Enabled`
 
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+4. Link the GPO to the appropriate Organizational Unit and verify policy enforcement using `gpupdate /force`.
 
 ---
 
@@ -129,6 +162,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.4.7, Section 18.5.7
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.4.7; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.4.7; CIS Windows Server Benchmark: Section 18.4.7
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000215, Windows 11 STIG Rule WN11-CC-000215
+* **ANSSI Active Directory Hardening Guide**: Recommendation R42 (Suppression of obsolete name resolution protocols)
+* **Microsoft Security Guidance**: NetBIOS over TCP/IP Implementation Specifications (RFC 1001, RFC 1002)

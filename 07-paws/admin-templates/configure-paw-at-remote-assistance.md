@@ -7,19 +7,38 @@
 ---
 
 ## Implementation Details
-* **Priority**: Medium
-* **GPO Path / Registry Location**:
-  * `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\fAllowUnsolicited` = `0`
+* **Priority**: Critical
+* **Policy Category**: Computer Configuration -> Administrative Templates -> System -> Remote Assistance
+* **Policy Name**: Configure Offer Remote Assistance
+* **Supported On**: Windows Vista / Windows Server 2008 and above
+* **Registry Key**: `HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services`
+* **Registry Value**: `fAllowUnsolicited`
+* **Value Type**: `REG_DWORD`
+* **Value Data**: `0` (0x00000000 = Suppress unsolicited Offer Remote Assistance)
+* **Vulnerability References**: MITRE ATT&CK: T1021.001 (Remote Services: Remote Desktop Protocol), T1113 (Screen Capture), T1219 (Remote Access Software), T1078 (Valid Accounts)
 
 ---
 
 ## Rationale
-Unsolicited Remote Assistance permits an administrator or support technician to initiate remote session connections to client endpoints without an explicit user invitation. If compromised, this capability allows adversaries with elevated domain privileges to silently observe or control interactive user desktop sessions.
+
+Privileged Access Workstations (PAWs) are dedicated exclusively to managing Tier 0 Active Directory Domain Services, root certificate authorities, and core directory security infrastructure. Permitting any form of Remote Assistance on a PAW constitutes an intolerable security architecture violation that shatters Active Directory administrative tiering.
+
+### Technical Threat Vectors & Tiering Violation Risks
+1. **Catastrophic Tiering Breach via Session Shadowing**: In an Active Directory enterprise, helpdesk and IT support technicians operate at Tier 1 or Tier 2. If unsolicited Remote Assistance ("Offer Remote Assistance") is active on a PAW, a compromised Tier 1 helpdesk account or service credential could connect to an active PAW session while a Domain Admin is performing directory tasks. The adversary could shadow the session, harvest Tier 0 credentials from memory or screen display, and seize keyboard control to execute arbitrary code across Domain Controllers.
+2. **Elimination of Administrative Session Hijacking**: Tier 0 administrative workflows routinely involve highly privileged PowerShell consoles, Active Directory Administrative Center snap-ins, and disaster recovery procedures. Remote Assistance allows full interactive control over the console, enabling an attacker to manipulate administrative tools in real time under the authenticated context of the Tier 0 operator.
+3. **Closing Legacy DCOM and Dynamic RPC Listeners**: Offering Remote Assistance requires endpoints to listen on DCOM interfaces and dynamically assigned RPC high ports. On a hardened PAW, host-based firewalls must enforce strict default-deny rules on all inbound ports. Disabling Remote Assistance eliminates unnecessary DCOM endpoints and prevents RPC coercion and relay attacks.
+4. **Enforcing Physical and Clean Source Principles**: PAW troubleshooting and hardware maintenance must occur in person or through dedicated, out-of-band management channels with hardware-enforced isolation. General remote support tooling must never be permitted on administrative bastion hosts.
+
+Disabling unsolicited Remote Assistance ensures that inbound remote assistance requests are unconditionally rejected by the operating system.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Helpdesk staff cannot offer unsolicited remote assistance. User-initiated assistance or approved enterprise remote support solutions (with session auditing) must be utilized.
+
+* **Operational Impact**: Unsolicited Remote Assistance is completely blocked on all PAWs. Standard outbound administrative management connections (such as initiating RDP or PowerShell Remoting from the PAW to Domain Controllers) are completely unaffected.
+* **Administrative Impact**: Zero impact on day-to-day Active Directory management.
+* **Network Impact**: Eliminates inbound DCOM/RPC listening ports on administrative subnets.
+* **Rollout Recommendations**: Mandatory baseline requirement across all PAW systems; deploy immediately.
 
 ---
 
@@ -28,13 +47,15 @@ Unsolicited Remote Assistance permits an administrator or support technician to 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
 
 1. Open the **Group Policy Management Console** (`gpmc.msc`).
-2. Edit or create the target GPO linked to PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
-3. Configure the following policies:
-
-* Navigate to: `Computer Configuration\Policies\Administrative Templates\System\Remote Assistance`
-  * **Configure Offer Remote Assistance**: Set to `Disabled`
-
-4. Link the GPO to the appropriate Organizational Unit and verify replication.
+2. Edit or create the target GPO linked to the PAWs Organizational Unit (e.g., `GPO_Hardening_PAW`).
+3. Navigate to:
+   ```text
+   Computer Configuration\Policies\Administrative Templates\System\Remote Assistance
+   ```
+4. Double-click **Configure Offer Remote Assistance**.
+5. Select **Disabled**.
+6. Click **Apply**, then click **OK**.
+7. Link the GPO to the dedicated PAW Organizational Unit and verify policy replication across all Domain Controllers.
 
 ---
 
@@ -102,7 +123,22 @@ if ($script:Vulnerable) {
 
 ---
 
+### Option C: Manual Verification
+
+Verify the applied policy setting via administrative command prompt:
+```cmd
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v fAllowUnsolicited
+```
+Expected output:
+```text
+fAllowUnsolicited    REG_DWORD    0x0
+```
+
+---
+
 ## Sources & Compliance References
 * **CIS Benchmark**: CIS Microsoft Windows Client Benchmark: Section 18.9.35.1
-* **ANSSI Active Directory Hardening Guide**: Baseline security parameters for managed Windows environments
-* **Microsoft Security Baseline**: Recommended administrative template and component restrictions
+* **Microsoft Security Baseline**: Windows 10 and Windows 11 Security Baseline - Remote Assistance
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 - PAW Isolation and Tiering Enforcement
+* **MITRE ATT&CK**: [T1021.001: Remote Services: Remote Desktop Protocol](https://attack.mitre.org/techniques/T1021/001/), [T1113: Screen Capture](https://attack.mitre.org/techniques/T1113/), [T1219: Remote Access Software](https://attack.mitre.org/techniques/T1219/), [T1078: Valid Accounts](https://attack.mitre.org/techniques/T1078/)
+* **Related Controls**: [REQ-PAW-171: Administrative Templates: MSS System and Session Security Protections for PAWs](configure-paw-at-mss-system-protections.md), [REQ-PAW-177: Administrative Templates: Interactive Logon and Credential Display Options for PAWs](configure-paw-at-logon-display-options.md)
