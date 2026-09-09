@@ -50,6 +50,7 @@ The following Defender Antivirus configurations must be enforced on PAWs:
 17. **[REQ-PAW-073 - Configure Tamper Protection for PAWs](defender/configure-tamper-protection.md)**
 18. **[REQ-PAW-074 - Configure Sandbox Execution Environment for PAWs](defender/configure-sandbox-execution-environment.md)**
 19. **[REQ-PAW-075 - Configure AMSI Authenticode Signature Verification for PAWs](defender/configure-amsi-authenticode-signature-verification.md)**
+20. **[REQ-PAW-192 - Configure Remote Encryption Protection Mode for PAWs](defender/configure-remote-encryption-protection.md)**
 
 ---
 

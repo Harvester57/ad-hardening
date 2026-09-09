@@ -65,6 +65,7 @@ To prevent initial access and lateral movement, the following unitary technical 
    * **[REQ-END-077 - Configure File Explorer SmartScreen](defender/configure-file-explorer-smartscreen.md)**
    * **[REQ-END-078 - Disable OneDrive File Sync](defender/disable-onedrive-file-sync.md)**
    * **[REQ-END-079 - Enforce Antivirus Scan on Opening Attachments](defender/enforce-antivirus-scan-on-opening-attachments.md)**
+   * **[REQ-END-203 - Configure Remote Encryption Protection Mode](defender/configure-remote-encryption-protection.md)**
 
 8. **[REQ-END-008 - WSUS Client Configuration](wsus-client-config.md)**
    Enforces update client registry baselines to ensure workstations pull OS patches and security signatures exclusively from the local, offline WSUS server.
@@ -237,7 +238,6 @@ To prevent initial access and lateral movement, the following unitary technical 
     * **[REQ-END-200 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies](admin-templates/configure-end-at-event-log-sizes.md)**
     * **[REQ-END-201 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security](admin-templates/configure-end-at-file-explorer-motw.md)**
     * **[REQ-END-202 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls](admin-templates/configure-end-at-internet-explorer-retirement.md)**
-    * **[REQ-END-203 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides](admin-templates/configure-end-at-defender-protection-options.md)**
     * **[REQ-END-204 - Administrative Templates: Windows Search and Cortana Privacy Restrictions](admin-templates/configure-end-at-search-cortana-restrictions.md)**
     * **[REQ-END-205 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions](admin-templates/configure-end-at-windows-store-restrictions.md)**
     * **[REQ-END-206 - Administrative Templates: Disable Windows Widgets and News Feed](admin-templates/configure-end-at-windows-widgets-dsh.md)**

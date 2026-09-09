@@ -62,6 +62,7 @@ This directory contains the physical isolation policies and operating system sec
    * **[REQ-PAW-073 - Configure Tamper Protection for PAWs](defender/configure-tamper-protection.md)**
    * **[REQ-PAW-074 - Configure Sandbox Execution Environment for PAWs](defender/configure-sandbox-execution-environment.md)**
    * **[REQ-PAW-075 - Configure AMSI Authenticode Signature Verification for PAWs](defender/configure-amsi-authenticode-signature-verification.md)**
+   * **[REQ-PAW-192 - Configure Remote Encryption Protection Mode for PAWs](defender/configure-remote-encryption-protection.md)**
 
 9. **[REQ-PAW-009 - Configure User Rights Assignments for PAWs](configure-user-rights-assignments.md)**
    Restricts critical user rights assignments (URAs) such as debugging programs, token impersonation, and denying network/interactive logon permissions for standard accounts on PAWs.
@@ -233,7 +234,6 @@ This directory contains the physical isolation policies and operating system sec
     * **[REQ-PAW-189 - Administrative Templates: Event Log Maximum File Sizes and Retention Policies for PAWs](admin-templates/configure-paw-at-event-log-sizes.md)**
     * **[REQ-PAW-190 - Administrative Templates: File Explorer Mark of the Web and Shell Protocol Security for PAWs](admin-templates/configure-paw-at-file-explorer-motw.md)**
     * **[REQ-PAW-191 - Administrative Templates: Internet Explorer 11 and Web Feeds Retirement Controls for PAWs](admin-templates/configure-paw-at-internet-explorer-retirement.md)**
-    * **[REQ-PAW-192 - Administrative Templates: Windows Defender Scan and Exploit Protection Overrides for PAWs](admin-templates/configure-paw-at-defender-protection-options.md)**
     * **[REQ-PAW-193 - Administrative Templates: Windows Search and Cortana Privacy Restrictions for PAWs](admin-templates/configure-paw-at-search-cortana-restrictions.md)**
     * **[REQ-PAW-194 - Administrative Templates: Windows Store Updates and OS Upgrade Restrictions for PAWs](admin-templates/configure-paw-at-windows-store-restrictions.md)**
     * **[REQ-PAW-195 - Administrative Templates: Disable Windows Widgets and News Feed for PAWs](admin-templates/configure-paw-at-windows-widgets-dsh.md)**

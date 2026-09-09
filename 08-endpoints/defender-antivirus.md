@@ -56,6 +56,7 @@ The following Defender Antivirus configurations must be enforced:
 21. **[REQ-END-077 - Configure File Explorer SmartScreen](defender/configure-file-explorer-smartscreen.md)**
 22. **[REQ-END-078 - Disable OneDrive File Sync](defender/disable-onedrive-file-sync.md)**
 23. **[REQ-END-079 - Enforce Antivirus Scan on Opening Attachments](defender/enforce-antivirus-scan-on-opening-attachments.md)**
+24. **[REQ-END-203 - Configure Remote Encryption Protection Mode](defender/configure-remote-encryption-protection.md)**
 
 ---
 
