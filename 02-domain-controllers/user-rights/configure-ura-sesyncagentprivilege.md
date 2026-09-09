@@ -1,35 +1,56 @@
 # [REQ-DC-134] Configure User Rights: Synchronize directory service data on Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers.
-* **Operating Systems**: Windows Server 2016 (and above).
+* **Applicable Systems**: Domain Controllers (Tier 0 Active Directory infrastructure).
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, and Windows Server 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Synchronize directory service data`
+  * **Privilege Constant**: `SeSyncAgentPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Synchronize directory service data`
   * **Registry Location**: Stored inside local security database under privilege `SeSyncAgentPrivilege` set to `No one (Empty)`.
 
 ---
 
 ## Rationale
-Allows replication of directory changes. This should be empty on Domain Controllers (only AD replication engine uses it natively, no separate account should hold it).
+The `SeSyncAgentPrivilege` grants the caller the authority to initiate directory synchronization operations against Active Directory domain partitions. This privilege is the underlying Windows user right associated with the directory service replication extended rights: `DS-Replication-Get-Changes`, `DS-Replication-Get-Changes-All`, and `DS-Replication-Get-Changes-In-Filtered-Set`.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+This user right is the foundation of the catastrophic DCSync attack: (1) DCSync Attack Execution: An adversary who compromises an account possessing `SeSyncAgentPrivilege` can use Mimikatz (`lsadump::dcsync`) to masquerade as a Domain Controller. Using the Directory Replication Service Remote Protocol (MS-DRSR), the attacker requests password hashes directly from a Domain Controller without executing any code on the DC itself; (2) Full Domain Compromise: The attacker extracts the password hash of `KRBTGT` (enabling Golden Ticket creation) and all Domain Administrator accounts; (3) Persistence: Rogue replication grants provide enduring stealthy persistence across forest domains.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Domain Controllers are the root of trust for the entire Active Directory forest, storing the directory database (`ntds.dit`), Kerberos master keys (`krbtgt`), and password hashes for all enterprise identities. Unrestricted allocation of user rights on Domain Controllers introduces devastating forest-compromise risks. Enforcing strict assignment of this privilege ensures that directory synchronization, authentication packages, and system execution remain strictly bounded to authorized directory components and Domain Administrators.
+
+This privilege must be strictly configured to `No one` (Empty) in Group Policy. Legitimate Domain Controllers participate in replication via their computer account memberships in `Enterprise Domain Controllers` and `Domain Controllers` groups through explicit directory schema permissions. No human user account or third-party service account should ever be granted `SeSyncAgentPrivilege`.
+
+### 3. MITRE ATT&CK Mapping
+* **T1003.006 - OS Credential Dumping: DCSync**
+* **T1558 - Steal or Forge Kerberos Tickets**
+* **T1078.002 - Valid Accounts: Domain Accounts**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSyncAgentPrivilege` to `No one (Empty)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Setting `SeSyncAgentPrivilege` to `No one` in GPO prevents unauthorized replication grants while preserving legitimate Domain Controller-to-Domain Controller replication. Azure AD Connect (Entra Connect) synchronization accounts require specific replication permissions; these must be delegated specifically at the domain root object rather than granting broad user rights. DCSync attempts generate Directory Service Event ID 4662.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Synchronize directory service data`.
-3. Configure the security principal allocation to: `No one (Empty)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 Domain Controller systems (e.g., `Default Domain Controllers Policy`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Synchronize directory service data`**.
+5. Select the **Define these policy settings** check box.
+6. Click **Add User or Group...** and ensure the principal list is empty (or remove all assigned accounts/groups so that no principals are configured).
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Domain Controllers
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.38 (L1) Ensure 'Synchronize directory service data' is set to 'No One'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

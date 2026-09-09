@@ -1,35 +1,56 @@
 # [REQ-PAW-108] Configure User Rights: Modify firmware environment values for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) dedicated to Tier 0 and critical administrative functions. *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-116](../../08-endpoints/user-rights/configure-ura-sesystemenvironmentprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-130](../../02-domain-controllers/user-rights/configure-ura-sesystemenvironmentprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809 and above) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Modify firmware environment values`
+  * **Privilege Constant**: `SeSystemEnvironmentPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Modify firmware environment values`
   * **Registry Location**: Stored inside local security database under privilege `SeSystemEnvironmentPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to configure firmware (UEFI) variables. Restricting this prevents attackers from disabling Secure Boot or modifying boot sector configurations.
+The `SeSystemEnvironmentPrivilege` allows a process to query and modify Non-Volatile RAM (NVRAM) firmware environment variables via Win32 APIs `GetFirmwareEnvironmentVariable` and `SetFirmwareEnvironmentVariable`. NVRAM variables govern UEFI boot sequences, Secure Boot policies, boot configuration data (BCD) handoffs, and hardware configuration flags.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries exploit `SeSystemEnvironmentPrivilege` to install firmware bootkits and undermine OS integrity: (1) Secure Boot Bypasses: Attackers alter UEFI NVRAM variables to invalidate Secure Boot validation, allowing unsigned bootloaders or malicious early-launch payloads (e.g., BlackLotus UEFI bootkit) to execute before the Windows kernel loads; (2) Hypervisor Tampering: Modifying virtualization parameters in NVRAM can weaken Virtualization-Based Security (VBS) and Credential Guard; (3) Persistence: Firmware modifications persist across complete OS re-installations and drive replacements.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Privileged Access Workstations (PAWs) serve as the clean-source platform for managing Tier 0 Active Directory and cloud infrastructure. Because administrative credentials exist in memory on these devices, strict isolation must be maintained at the operating system level. Restricting this user right strictly prevents lower-tier sessions, third-party software, or interactive users from interfering with administrative operations, upholding the Clean Source Principle and preventing token kidnapping or session hijacking.
+
+This privilege must be restricted strictly to `Administrators` (S-1-5-32-544). Standard users, interactive accounts, and standard applications must never be permitted to modify firmware environment variables.
+
+### 3. MITRE ATT&CK Mapping
+* **T1542.001 - Pre-OS Boot: System Firmware**
+* **T1562.001 - Impair Defenses: Disable or Modify Tools**
+* **T1068 - Exploitation for Privilege Escalation**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSystemEnvironmentPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeSystemEnvironmentPrivilege` to `Administrators` protects UEFI firmware integrity. Firmware update tools (e.g., OEM BIOS flashers) running under administrative credentials operate normally. Auditing is captured under Security Event ID 4672.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Modify firmware environment values`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 PAW systems (e.g., `GPO_Hardening_PAW`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Modify firmware environment values`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.39 (L1) Ensure 'Modify firmware environment values' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

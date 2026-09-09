@@ -1,35 +1,55 @@
 # [REQ-END-110] Configure User Rights: Force shutdown from a remote system
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-103](../../07-paws/user-rights/configure-ura-seremoteshutdownprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-123](../../02-domain-controllers/user-rights/configure-ura-seremoteshutdownprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Force shutdown from a remote system`
+  * **Privilege Constant**: `SeRemoteShutdownPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Force shutdown from a remote system`
   * **Registry Location**: Stored inside local security database under privilege `SeRemoteShutdownPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to shut down computers from a remote network location. Restricting this prevents denial-of-service shutdowns by compromised standard accounts.
+The `SeRemoteShutdownPrivilege` allows a user authenticating over the network to invoke remote system shutdown and reboot APIs (such as `InitiateSystemShutdownEx` or `shutdown.exe /m \\computer`). This function is exposed over named pipe `\PIPE\InitShutdown` and RPC interface `winreg`/`shutdown`.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries who obtain credentials possessing `SeRemoteShutdownPrivilege` can cause widespread operational destruction: (1) Distributed Denial of Service (DDoS): An attacker can trigger mass reboots across workstations, servers, and Domain Controllers, shutting down enterprise business operations; (2) Triggering Malicious Payloads: Forcing an immediate reboot can activate installed kernel drivers, execute pending bootkit configurations, or force users to re-authenticate, exposing plaintext credentials to keystroke loggers; (3) Disrupting Incident Response: Attackers reboot systems to disrupt active volatile memory analysis and terminate forensic collection agents.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544). Standard domain users, guest accounts, and service accounts must never possess remote shutdown authority.
+
+### 3. MITRE ATT&CK Mapping
+* **T1529 - System Shutdown/Reboot**
+* **T1499 - Endpoint Denial of Service**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeRemoteShutdownPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeRemoteShutdownPrivilege` to `Administrators` prevents unauthorized remote reboot attacks. Centralized systems management platforms (e.g., MECM, Intune, Tanium) running under administrative service contexts continue to manage reboot schedules without issue. Remote shutdown events are logged under System Event ID 1074 and Security Event ID 4672.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Force shutdown from a remote system`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Force shutdown from a remote system`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +145,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.23 (L1) Ensure 'Force shutdown from a remote system' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

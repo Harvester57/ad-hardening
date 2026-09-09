@@ -1,35 +1,56 @@
 # [REQ-END-106] Configure User Rights: Create permanent shared objects
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-100](../../07-paws/user-rights/configure-ura-secreatepermanentprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-115](../../02-domain-controllers/user-rights/configure-ura-secreatepermanentprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Create permanent shared objects`
+  * **Privilege Constant**: `SeCreatePermanentPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Create permanent shared objects`
   * **Registry Location**: Stored inside local security database under privilege `SeCreatePermanentPrivilege` set to `No one (Empty)`.
 
 ---
 
 ## Rationale
-Allows a process to create directory objects in the object manager. It should be empty to prevent attackers from using it to hide processes or files.
+The `SeCreatePermanentPrivilege` allows a process to create permanent object directory objects in the Windows Object Manager namespace (`\DirectoryObject`) via APIs like `NtCreateDirectoryObject`. Unlike standard kernel objects which are automatically destroyed when their last handle is closed, permanent objects persist in the object manager namespace across process terminations until explicitly unlinked or until system reboot.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries can exploit `SeCreatePermanentPrivilege` to achieve stealthy persistence, object squatting, and driver manipulation. By inserting permanent directory entries into system namespaces (such as `\KnownDlls`, `\Device`, or `\Driver`), an attacker can divert DLL resolution paths, hijack device object handles, or trick kernel components into interacting with rogue objects. This privilege provides ring-3 processes with an avenue to tamper with kernel-level object lifecycle management.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+Under rigorous security baselines, `SeCreatePermanentPrivilege` must be set to `No one` (Empty). No user account, administrative identity, or standard service principal requires this privilege in modern Windows environments. Ensuring this privilege is unassigned eliminates permanent object creation risks across the entire fleet.
+
+### 3. MITRE ATT&CK Mapping
+* **T1574.001 - Hijack Execution Flow: DLL Search Order Hijacking**
+* **T1543 - Create or Modify System Process**
+* **T1068 - Exploitation for Privilege Escalation**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeCreatePermanentPrivilege` to `No one (Empty)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Setting `SeCreatePermanentPrivilege` to `No one` aligns with Microsoft Security Baseline and CIS Benchmarks and introduces no operational degradation. Operating system components that manage permanent objects operate at kernel level and do not depend on user-level privilege assignments. Any attempt to assign or use this privilege triggers Security Event ID 4704 and Event ID 4673.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Create permanent shared objects`.
-3. Configure the security principal allocation to: `No one (Empty)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Create permanent shared objects`**.
+5. Select the **Define these policy settings** check box.
+6. Click **Add User or Group...** and ensure the principal list is empty (or remove all assigned accounts/groups so that no principals are configured).
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +146,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.9 (L1) Ensure 'Create permanent shared objects' is set to 'No One'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

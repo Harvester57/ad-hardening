@@ -1,35 +1,56 @@
 # [REQ-DC-127] Configure User Rights: Log on as a batch job on Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers.
-* **Operating Systems**: Windows Server 2016 (and above).
+* **Applicable Systems**: Domain Controllers (Tier 0 Active Directory infrastructure).
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, and Windows Server 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Log on as a batch job`
+  * **Privilege Constant**: `SeBatchLogonRight`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Log on as a batch job`
   * **Registry Location**: Stored inside local security database under privilege `SeBatchLogonRight` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Restricting batch logons to Administrators prevents unauthorized automated task runs on Domain Controllers.
+The `SeBatchLogonRight` determines which security principals can authenticate and establish non-interactive batch logon sessions (Logon Type 4). Batch logons are utilized by the Task Scheduler (`taskschd.msc`) and batch queuing subsystems to execute scheduled tasks, maintenance scripts, and background workloads without requiring an interactive desktop session or terminal connection.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries who obtain account credentials exploit `SeBatchLogonRight` to establish persistence and execute command-and-control scripts via scheduled tasks. If standard domain users or unprivileged service accounts possess this right on sensitive servers or Domain Controllers, an attacker with compromised low-level credentials can schedule recurring malicious tasks that execute silently in the background. Furthermore, batch logons create logon sessions that may cache credentials or Kerberos tickets in LSASS memory, exposing them to credential dumping.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Domain Controllers are the root of trust for the entire Active Directory forest, storing the directory database (`ntds.dit`), Kerberos master keys (`krbtgt`), and password hashes for all enterprise identities. Unrestricted allocation of user rights on Domain Controllers introduces devastating forest-compromise risks. Enforcing strict assignment of this privilege ensures that directory synchronization, authentication packages, and system execution remain strictly bounded to authorized directory components and Domain Administrators.
+
+On Domain Controllers and Tier 0 systems, `SeBatchLogonRight` must be restricted exclusively to `Administrators` (S-1-5-32-544). Standard domain users, guest accounts, and unprivileged identities must be strictly excluded to prevent unauthorized scheduled task creation and non-interactive script execution.
+
+### 3. MITRE ATT&CK Mapping
+* **T1053.005 - Scheduled Task/Job: Scheduled Task**
+* **T1078.002 - Valid Accounts: Domain Accounts**
+* **T1078.003 - Valid Accounts: Local Accounts**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeBatchLogonRight` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting batch logon rights prevents non-administrators from executing unattended scheduled tasks. Administrative scripts, enterprise maintenance tasks, and backup schedules that run under dedicated service accounts will require explicit authorization or migration to execute under the `Administrators` group or managed service identities. Monitor Security Event ID 4624 (Logon Type 4) to audit batch logon activity across mission-critical systems.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Log on as a batch job`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 Domain Controller systems (e.g., `Default Domain Controllers Policy`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Log on as a batch job`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Domain Controllers
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R29 (Logon Rights Assignment)
+* **CIS Benchmark**: 2.2.29 (L1) Ensure 'Log on as a batch job' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

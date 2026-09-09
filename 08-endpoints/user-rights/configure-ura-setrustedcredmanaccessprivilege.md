@@ -1,35 +1,55 @@
 # [REQ-END-096] Configure User Rights: Access Credential Manager as a trusted caller
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-092](../../07-paws/user-rights/configure-ura-setrustedcredmanaccessprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Low
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Access Credential Manager as a trusted caller`
+  * **Privilege Constant**: `SeTrustedCredManAccessPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Access Credential Manager as a trusted caller`
   * **Registry Location**: Stored inside local security database under privilege `SeTrustedCredManAccessPrivilege` set to `No one (Empty)`.
 
 ---
 
 ## Rationale
-No security principals should hold this privilege on endpoints. It prevents attackers from using compromised components to access stored credentials in the Credential Manager.
+The `SeTrustedCredManAccessPrivilege` allows a process to access the Windows Credential Manager as a trusted caller via internal Credential Manager APIs. The Credential Manager securely stores user domain credentials, web passwords, and certificate secrets used for network authentication.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+This privilege is reserved exclusively for specialized internal operating system components: (1) Credential Harvesting: If granted to a user account or unprivileged process, an attacker can directly query the Credential Manager to harvest stored domain credentials, smart card PINs, and single sign-on (SSO) tokens; (2) Credential Injection: An attacker could inject fraudulent credentials into Credential Manager to intercept authentication workflows or redirect network requests.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+This user right must be strictly set to `No one` (Empty). Microsoft operating system components interact with Credential Manager using internal system mechanisms and do not require user-level assignment of this privilege. Ensuring this privilege is unassigned guarantees that Credential Manager secrets cannot be queried via user-level trusted caller semantics.
+
+### 3. MITRE ATT&CK Mapping
+* **T1555.004 - Credentials from Password Stores: Windows Credential Manager**
+* **T1003 - OS Credential Dumping**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeTrustedCredManAccessPrivilege` to `No one (Empty)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Setting `SeTrustedCredManAccessPrivilege` to `No one` introduces zero operational impact. Standard Credential Manager storage and retrieval by users and web browsers continues to operate through normal user-level APIs without requiring trusted caller status. Audited via Security Event ID 4704.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Access Credential Manager as a trusted caller`.
-3. Configure the security principal allocation to: `No one (Empty)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Access Credential Manager as a trusted caller`**.
+5. Select the **Define these policy settings** check box.
+6. Click **Add User or Group...** and ensure the principal list is empty (or remove all assigned accounts/groups so that no principals are configured).
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +145,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.1 (L1) Ensure 'Access Credential Manager as a trusted caller' is set to 'No One'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

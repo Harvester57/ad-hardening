@@ -1,35 +1,57 @@
 # [REQ-END-124] Configure User Rights: Deny access to this computer from the network
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-113](../../07-paws/user-rights/configure-ura-sedenynetworklogonright.md)).* *(For Domain Controllers, refer to [REQ-DC-117](../../02-domain-controllers/user-rights/configure-ura-sedenynetworklogonright.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Deny access to this computer from the network`
+  * **Privilege Constant**: `SeDenyNetworkLogonRight`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny access to this computer from the network`
   * **Registry Location**: Stored inside local security database under privilege `SeDenyNetworkLogonRight` set to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 
 ## Rationale
-Explicitly blocks network logon for Local Accounts (S-1-5-113) and Local Administrators (S-1-5-114). This prevents attackers from performing remote lateral movement using compromised local account credentials.
+The `SeDenyNetworkLogonRight` explicitly prevents specified security principals from authenticating over network protocols (SMB, RPC, WMI, WinRM, LDAP, etc. - Logon Type 3). Network logons represent the primary highway for lateral movement and remote compromise in Active Directory environments. Enforcing an explicit deny stops network authentication regardless of share-level or NTFS-level permissions.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries extensively leverage Pass-the-Hash (PtH) and credential reuse attacks across workstations and member servers using local account credentials (e.g., the built-in Administrator account). If local accounts are permitted to authenticate over the network, an attacker who extracts the local administrator hash from one workstation can authenticate over SMB/RPC to every other workstation in the fleet that shares the same password. On PAWs and Endpoints, denying network logon to `Local Account` (S-1-5-113) and `Local account and member of Administrators group` (S-1-5-114) completely destroys this lateral movement vector, confining local account credentials strictly to the physical machine.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+On Endpoints and PAWs, configure `SeDenyNetworkLogonRight` to include `Local Account` (S-1-5-113), `Local account and member of Administrators group` (S-1-5-114), and `Guests` (S-1-5-32-546). On Domain Controllers, configure to include `Guests` (S-1-5-32-546). This configuration neutralizes lateral movement using local credentials while preserving domain-based administrative management.
+
+### 3. MITRE ATT&CK Mapping
+* **T1021.002 - Remote Services: SMB/Windows Admin Shares**
+* **T1021.006 - Remote Services: Windows Remote Management**
+* **T1550.002 - Use Alternate Authentication Material: Pass the Hash**
+* **T1078.003 - Valid Accounts: Local Accounts**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyNetworkLogonRight` to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Denying network logon to local accounts prevents remote administrative tools (such as remote PsExec or remote script blocks) from authenticating using local credentials. Remote administration must be performed using domain-joined administrative accounts or centralized management solutions (e.g., LAPS, Microsoft Intune, SCCM). Blocked network connection attempts are logged under Security Event ID 4625.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Deny access to this computer from the network`.
-3. Configure the security principal allocation to: `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Deny access to this computer from the network`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +147,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R29 (Logon Rights Assignment)
+* **CIS Benchmark**: 2.2.18 (L1) Ensure 'Deny access to this computer from the network' includes 'Guests, Local account and member of Administrators group'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

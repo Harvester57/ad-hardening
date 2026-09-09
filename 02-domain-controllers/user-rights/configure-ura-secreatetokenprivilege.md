@@ -1,35 +1,56 @@
 # [REQ-DC-114] Configure User Rights: Create a token object on Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers.
-* **Operating Systems**: Windows Server 2016 (and above).
+* **Applicable Systems**: Domain Controllers (Tier 0 Active Directory infrastructure). *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-098](../../07-paws/user-rights/configure-ura-secreatetokenprivilege.md)).* *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-104](../../08-endpoints/user-rights/configure-ura-secreatetokenprivilege.md)).*
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, and Windows Server 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Create a token object`
+  * **Privilege Constant**: `SeCreateTokenPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Create a token object`
   * **Registry Location**: Stored inside local security database under privilege `SeCreateTokenPrivilege` set to `No one (Empty)`.
 
 ---
 
 ## Rationale
-Allows creation of arbitrary access tokens. Must be completely empty on Domain Controllers to prevent credential forge attacks.
+The `SeCreateTokenPrivilege` allows a process to invoke the native API `NtCreateToken` to forge an arbitrary Windows primary or impersonation access token from scratch. An access token defines an entity's complete security context, including User SID, Group SIDs, Privileges, Default DACL, Token Type, and Mandatory Integrity Level. Normally, tokens are manufactured exclusively by the Local Security Authority Subsystem Service (`lsass.exe`) following successful authentication.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+A process possessing `SeCreateTokenPrivilege` holds absolute, god-mode authority over the local operating system and potentially the entire Active Directory domain. By calling `NtCreateToken`, an attacker can synthesize an access token containing: (1) The `NT AUTHORITY\SYSTEM` SID (S-1-5-18) or `Administrators` SID (S-1-5-32-544); (2) The `Domain Admins` (S-1-5-21-...-512) or `Enterprise Admins` (S-1-5-21-...-519) SIDs; (3) Every single privilege enabled (`SeDebugPrivilege`, `SeTcbPrivilege`, `SeLoadDriverPrivilege`, etc.); (4) System integrity level (S-1-16-16384). The attacker can then impersonate this forged token via `SetThreadToken` or spawn processes via `CreateProcessAsUser`, instantly bypassing all security controls.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Domain Controllers are the root of trust for the entire Active Directory forest, storing the directory database (`ntds.dit`), Kerberos master keys (`krbtgt`), and password hashes for all enterprise identities. Unrestricted allocation of user rights on Domain Controllers introduces devastating forest-compromise risks. Enforcing strict assignment of this privilege ensures that directory synchronization, authentication packages, and system execution remain strictly bounded to authorized directory components and Domain Administrators.
+
+This user right must be strictly set to `No one` (Empty). No user account, administrative identity, or third-party service account should ever be granted `SeCreateTokenPrivilege`. LSASS operates as a trusted operating system component and does not require this privilege to be granted via user rights assignment.
+
+### 3. MITRE ATT&CK Mapping
+* **T1134.001 - Access Token Manipulation: Token Impersonation/Theft**
+* **T1078 - Valid Accounts**
+* **T1068 - Exploitation for Privilege Escalation**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeCreateTokenPrivilege` to `No one (Empty)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Setting `SeCreateTokenPrivilege` to `No one` introduces no operational disruptions. No standard Windows service or commercial enterprise software requires user-level allocation of this privilege. Any appearance of `SeCreateTokenPrivilege` in audit reports indicates extreme misconfiguration or active malicious compromise (Security Event ID 4704).
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Create a token object`.
-3. Configure the security principal allocation to: `No one (Empty)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 Domain Controller systems (e.g., `Default Domain Controllers Policy`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Create a token object`**.
+5. Select the **Define these policy settings** check box.
+6. Click **Add User or Group...** and ensure the principal list is empty (or remove all assigned accounts/groups so that no principals are configured).
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Domain Controllers
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.10 (L1) Ensure 'Create a token object' is set to 'No One'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

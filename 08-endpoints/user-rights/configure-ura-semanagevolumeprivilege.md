@@ -1,35 +1,56 @@
 # [REQ-END-117] Configure User Rights: Perform volume maintenance tasks
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-109](../../07-paws/user-rights/configure-ura-semanagevolumeprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Perform volume maintenance tasks`
+  * **Privilege Constant**: `SeManageVolumePrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Perform volume maintenance tasks`
   * **Registry Location**: Stored inside local security database under privilege `SeManageVolumePrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows non-administrative users to run disk utilities. Restricting this to Administrators prevents unauthorized read/write access to raw volume sectors.
+The `SeManageVolumePrivilege` allows a process to perform low-level disk and volume maintenance tasks, including running defragmentation tools, modifying volume quotas, and invoking the `SetFileValidData` Win32 API. The `SetFileValidData` function allows a caller to extend the valid data length of an allocated file without zeroing out the intervening disk clusters.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+The capability to bypass cluster zeroing via `SetFileValidData` represents a severe information disclosure vulnerability: (1) Uninitialized Disk Sector Harvesting: Operating systems typically write zeros to newly allocated disk clusters to prevent users from seeing remnants of previously stored data. When an attacker with `SeManageVolumePrivilege` invokes `SetFileValidData`, the file length is extended across physical clusters containing remnants of deleted files, memory crash dumps, pagefile fragments, or BitLocker keys; (2) Direct Credential Theft: The attacker can immediately read the raw cluster data, harvesting cleartext passwords, encryption certificates, and sensitive documents without possessing read permissions on the original deleted objects.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544). Standard users, interactive accounts, and third-party software must not hold volume maintenance rights. Restricting this right ensures that NTFS cluster zero-initialization cannot be bypassed.
+
+### 3. MITRE ATT&CK Mapping
+* **T1005 - Data from Local System**
+* **T1006 - Direct Volume Access**
+* **T1083 - File and Directory Discovery**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeManageVolumePrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeManageVolumePrivilege` to `Administrators` prevents unauthorized disk cluster inspection. Enterprise database engines (such as Microsoft SQL Server utilizing Instant File Initialization) require this privilege to pre-allocate database data files quickly; on dedicated database servers, the database service account should be granted this right in a targeted server policy. Auditing is captured via Security Event ID 4672.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Perform volume maintenance tasks`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Perform volume maintenance tasks`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +146,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.33 (L1) Ensure 'Perform volume maintenance tasks' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

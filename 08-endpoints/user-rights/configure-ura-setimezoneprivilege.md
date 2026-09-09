@@ -1,35 +1,55 @@
 # [REQ-END-102] Configure User Rights: Change the time zone
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Low
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Change the time zone`
+  * **Privilege Constant**: `SeTimeZonePrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Change the time zone`
   * **Registry Location**: Stored inside local security database under privilege `SeTimeZonePrivilege` set to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService), *S-1-5-32-545 (Users)`.
 
 ---
 
 ## Rationale
-Allows users to change the local time zone. Restricting this prevents users from generating misleading event log timestamps.
+The `SeTimeZonePrivilege` controls the capability to change the system local time zone setting via `SetTimeZoneInformation`. While changing the time zone does not alter the underlying UTC hardware clock, it alters the local display time and timestamp calculations across the operating system.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries manipulate time zones to create forensic confusion and obfuscate event timelines: (1) Forensic Timeline Distortion: Tampering with local time zones confounds manual log analysis, incident response triage, and SIEM correlation engines that parse local timestamps rather than UTC; (2) Scheduled Task Disruption: Shifting time zones can alter the execution timing of scheduled maintenance tasks or backup windows; (3) User Confusion: Altering the time zone changes the desktop clock presentation, potentially causing user distraction.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+Under hardened baselines, `SeTimeZonePrivilege` must be restricted to `Administrators` (S-1-5-32-544), `LocalService` (S-1-5-19), and `Users` (S-1-5-32-545) where travel mobility is required, or strictly `Administrators` and `LocalService` on hardened corporate endpoints. Restricting time zone adjustments prevents unauthorized temporal disruption.
+
+### 3. MITRE ATT&CK Mapping
+* **T1070.006 - Indicator Removal: Timestomp**
+* **T1562 - Impair Defenses**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeTimeZonePrivilege` to `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService), *S-1-5-32-545 (Users)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting time zone modifications ensures enterprise log consistency. Mobile laptop users who travel across time zones may require automated time zone detection via Location Services rather than manual configuration. Auditing is captured under Security Event ID 4672.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Change the time zone`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService), *S-1-5-32-545 (Users)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Change the time zone`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-19 (LocalService), *S-1-5-32-545 (Users)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +145,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.14 (L1) Ensure 'Change the time zone' is properly restricted per baseline
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

@@ -1,35 +1,56 @@
 # [REQ-DC-106] Configure User Rights: Add workstations to domain on Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers.
-* **Operating Systems**: Windows Server 2016 (and above).
+* **Applicable Systems**: Domain Controllers (Tier 0 Active Directory infrastructure).
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, and Windows Server 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Add workstations to domain`
+  * **Privilege Constant**: `SeMachineAccountPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Add workstations to domain`
   * **Registry Location**: Stored inside local security database under privilege `SeMachineAccountPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to add computer accounts to the domain. Restricting this to Administrators prevents standard users from creating unlimited computer accounts, mitigating AD object exhaustion and domain spoofing.
+The `SeMachineAccountPrivilege` allows an authenticated domain user to join computer accounts to the Active Directory domain, creating new computer objects in the default `CN=Computers` container up to the limit defined by `ms-DS-MachineAccountQuota` (default: 10). This privilege is governed by the Domain Controllers policy and domain-level schema.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+The ability for standard authenticated users to create computer accounts is one of the most exploited misconfigurations in Active Directory: (1) Resource-Based Constrained Delegation (RBCD): An attacker who creates a computer account controls its `msDS-AllowedToActOnBehalfOfOtherIdentity` attribute and SPNs, enabling RBCD exploitation to compromise computer accounts across the domain; (2) Shadow Credentials (sAMAccountName Spoofing): Attackers create computer accounts to exploit vulnerabilities such as CVE-2021-42287 and CVE-2021-42278 (noPac), renaming machine accounts to match Domain Controllers and requesting elevated TGTs; (3) AD Database Pollution: Rogue computer accounts clutter the directory and provide footholds for Kerberoasting and certificate abuse.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Domain Controllers are the root of trust for the entire Active Directory forest, storing the directory database (`ntds.dit`), Kerberos master keys (`krbtgt`), and password hashes for all enterprise identities. Unrestricted allocation of user rights on Domain Controllers introduces devastating forest-compromise risks. Enforcing strict assignment of this privilege ensures that directory synchronization, authentication packages, and system execution remain strictly bounded to authorized directory components and Domain Administrators.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544) on Domain Controllers. Additionally, organizations should set the domain-level attribute `ms-DS-MachineAccountQuota` to `0`. Domain joins must be performed exclusively by authorized Tier 1/2 deployment administrators using pre-staged computer objects or automated provisioning workflows.
+
+### 3. MITRE ATT&CK Mapping
+* **T1078.002 - Valid Accounts: Domain Accounts**
+* **T1558 - Steal or Forge Kerberos Tickets**
+* **T1134 - Access Token Manipulation**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeMachineAccountPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting domain join rights prevents unprivileged domain users from joining unauthorized devices or creating rogue computer objects. IT deployment teams must utilize pre-staged computer accounts in dedicated OUs or deploy workstations using automated imaging systems (e.g., MECM, Autopilot, MDT) configured with service accounts delegated specific OU join permissions. Computer account creation generates Directory Service Event ID 4741.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Add workstations to domain`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 Domain Controller systems (e.g., `Default Domain Controllers Policy`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Add workstations to domain`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Domain Controllers
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.1 (L1) Ensure 'Add workstations to domain' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

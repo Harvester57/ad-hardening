@@ -1,35 +1,57 @@
 # [REQ-PAW-111] Configure User Rights: Restore files and directories for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) dedicated to Tier 0 and critical administrative functions. *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-121](../../08-endpoints/user-rights/configure-ura-serestoreprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-132](../../02-domain-controllers/user-rights/configure-ura-serestoreprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809 and above) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Restore files and directories`
+  * **Privilege Constant**: `SeRestorePrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Restore files and directories`
   * **Registry Location**: Stored inside local security database under privilege `SeRestorePrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to bypass file permissions when restoring files. Restricting this prevents attackers from overwriting critical system files to establish persistent access.
+The `SeRestorePrivilege` grants the caller the capability to bypass all write-access security controls (DACLs) across the entire NTFS filesystem and Windows Registry. When a process opens a file or registry key handle specifying `FILE_FLAG_BACKUP_SEMANTICS` in Win32 APIs, the kernel explicitly bypasses standard security descriptor DACL checks, allowing the process to write to, overwrite, or delete any file or key on the system. In addition, this privilege grants the ability to set any valid user or group SID as the owner of an object.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+An adversary who obtains `SeRestorePrivilege` has immediate, trivial local privilege escalation to `NT AUTHORITY\SYSTEM`: (1) System File Replacement: The attacker can overwrite core operating system binaries or DLLs (e.g., `C:\Windows\System32\utilman.exe`, `osk.exe`, or service DLLs) with malicious payloads, which execute automatically as SYSTEM upon reboot or logon; (2) Registry Service Hijacking: The attacker can overwrite protected registry keys under `HKLM\SYSTEM\CurrentControlSet\Services` to change service binary paths (`ImagePath`) to point to malicious executables; (3) SAM/SECURITY Hive Overwriting: The attacker can overwrite local account password hashes or security settings directly.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Privileged Access Workstations (PAWs) serve as the clean-source platform for managing Tier 0 Active Directory and cloud infrastructure. Because administrative credentials exist in memory on these devices, strict isolation must be maintained at the operating system level. Restricting this user right strictly prevents lower-tier sessions, third-party software, or interactive users from interfering with administrative operations, upholding the Clean Source Principle and preventing token kidnapping or session hijacking.
+
+This privilege must be restricted strictly to `Administrators` (S-1-5-32-544). Broad groups such as `Backup Operators` should be stripped of this privilege on Tier 0 systems (Domain Controllers and PAWs). Automated enterprise restore agents should operate under tightly controlled, dedicated service identities.
+
+### 3. MITRE ATT&CK Mapping
+* **T1068 - Exploitation for Privilege Escalation**
+* **T1574 - Hijack Execution Flow**
+* **T1543.003 - Create or Modify System Process: Windows Service**
+* **T1222.001 - File and Directory Permissions Modification: Windows DACL**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeRestorePrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeRestorePrivilege` prevents write-bypass exploitation while preserving standard file access controls. Enterprise disaster recovery tools running under non-administrative accounts will require explicit delegation or membership in a dedicated restore management role. Monitor Security Event ID 4672 and Event ID 4673 for invocations of `SeRestorePrivilege`.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Restore files and directories`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 PAW systems (e.g., `GPO_Hardening_PAW`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Restore files and directories`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +149,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.35 (L1) Ensure 'Restore files and directories' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

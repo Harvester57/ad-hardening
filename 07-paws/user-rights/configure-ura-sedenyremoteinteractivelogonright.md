@@ -1,35 +1,56 @@
 # [REQ-PAW-114] Configure User Rights: Deny log on through Remote Desktop Services for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) dedicated to Tier 0 and critical administrative functions. *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-125](../../08-endpoints/user-rights/configure-ura-sedenyremoteinteractivelogonright.md)).* *(For Domain Controllers, refer to [REQ-DC-121](../../02-domain-controllers/user-rights/configure-ura-sedenyremoteinteractivelogonright.md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809 and above) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Deny log on through Remote Desktop Services`
+  * **Privilege Constant**: `SeDenyRemoteInteractiveLogonRight`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny log on through Remote Desktop Services`
   * **Registry Location**: Stored inside local security database under privilege `SeDenyRemoteInteractiveLogonRight` set to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 
 ## Rationale
-Explicitly blocks Remote Desktop logons for Local Accounts (S-1-5-113) and Local Administrators (S-1-5-114), forcing administrators to connect using domain credentials over secure paths.
+The `SeDenyRemoteInteractiveLogonRight` explicitly denies designated accounts the ability to establish Remote Desktop Protocol (RDP) sessions (Logon Type 10) on the target system. RDP exposes a full graphical interactive session over TCP port 3389, providing an attacker with interactive desktop capabilities and loading user credentials into memory.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries who compromise local credentials routinely use RDP to pivot interactively across systems. If local administrative accounts or guest accounts are allowed RDP access, attackers can remotely access workstations and servers without leaving network-only traces, hijacking existing sessions or dumping cached credentials. On PAWs and Endpoints, denying remote desktop logon to `Local Account` (S-1-5-113) and `Local account and member of Administrators group` (S-1-5-114) prevents adversaries from using local credentials to log on interactively over RDP.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Privileged Access Workstations (PAWs) serve as the clean-source platform for managing Tier 0 Active Directory and cloud infrastructure. Because administrative credentials exist in memory on these devices, strict isolation must be maintained at the operating system level. Restricting this user right strictly prevents lower-tier sessions, third-party software, or interactive users from interfering with administrative operations, upholding the Clean Source Principle and preventing token kidnapping or session hijacking.
+
+On Endpoints and PAWs, configure `SeDenyRemoteInteractiveLogonRight` to include `Local Account` (S-1-5-113), `Local account and member of Administrators group` (S-1-5-114), and `Guests` (S-1-5-32-546). On Domain Controllers, configure to include `Guests` (S-1-5-32-546). This configuration enforces strict administrative tiering and prevents RDP credential abuse.
+
+### 3. MITRE ATT&CK Mapping
+* **T1021.001 - Remote Services: Remote Desktop Protocol**
+* **T1078.003 - Valid Accounts: Local Accounts**
+* **T1550.002 - Use Alternate Authentication Material: Pass the Hash**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyRemoteInteractiveLogonRight` to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Denying RDP access to local accounts requires system administrators to use domain-joined administrative accounts with multifactor authentication or dedicated jump boxes for remote assistance. Local console access via physical keyboard or virtual hypervisor console remains unaffected. Unauthorized RDP connection attempts generate Security Event ID 4625 with Status code `0xC000006E`.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Deny log on through Remote Desktop Services`.
-3. Configure the security principal allocation to: `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 PAW systems (e.g., `GPO_Hardening_PAW`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Deny log on through Remote Desktop Services`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R29 (Logon Rights Assignment)
+* **CIS Benchmark**: 2.2.19 (L1) Ensure 'Deny log on through Remote Desktop Services' includes 'Guests, Local account and member of Administrators group'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

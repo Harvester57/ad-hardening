@@ -1,35 +1,56 @@
 # [REQ-END-098] Configure User Rights: Act as part of the operating system
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-094](../../07-paws/user-rights/configure-ura-setcbprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-105](../../02-domain-controllers/user-rights/configure-ura-setcbprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Act as part of the operating system`
+  * **Privilege Constant**: `SeTcbPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Act as part of the operating system`
   * **Registry Location**: Stored inside local security database under privilege `SeTcbPrivilege` set to `No one (Empty)`.
 
 ---
 
 ## Rationale
-Allows a process to impersonate any user without credentials. This privilege is equivalent to local SYSTEM and should be completely empty to prevent privilege escalation.
+The `SeTcbPrivilege` identifies its holder as part of the Trusted Computer Base (TCB)—the core inner ring of the operating system. A process possessing this privilege can register as a trusted logon process with the Local Security Authority via `LsaRegisterLogonProcess` and invoke `LsaLogonUser` to create an arbitrary, fully authenticated access token for any user without knowing the user's password or requiring credentials.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Possession of `SeTcbPrivilege` by any user or third-party process represents an immediate, complete compromise of the operating system: (1) Universal Token Forgery: An attacker can call `LsaLogonUser` to request an elevated token for `NT AUTHORITY\SYSTEM` or any Domain Administrator account, bypassing all authentication safeguards; (2) LSA Impersonation: The attacker can interact directly with LSA authentication packages, intercepting plain-text credentials and injecting rogue security support providers (SSPs); (3) Bypassing Security Auditing: TCB processes can suppress audit logging and bypass Mandatory Integrity Control checks.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+This privilege must be strictly configured to `No one` (Empty). Operating system components that require TCB authority (such as `lsass.exe`) run under internal system contexts and do not require user-level assignment of `SeTcbPrivilege`. No human user account, administrative identity, or third-party service account should ever hold this right.
+
+### 3. MITRE ATT&CK Mapping
+* **T1134.001 - Access Token Manipulation: Token Impersonation/Theft**
+* **T1078 - Valid Accounts**
+* **T1068 - Exploitation for Privilege Escalation**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeTcbPrivilege` to `No one (Empty)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Configuring `SeTcbPrivilege` to `No one` aligns with Microsoft Security Baselines and CIS Benchmarks and introduces zero operational disruption. No legitimate modern enterprise application requires assignment of this privilege. Any assignment or use of `SeTcbPrivilege` triggers immediate high-severity security alerts (Security Event ID 4704).
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Act as part of the operating system`.
-3. Configure the security principal allocation to: `No one (Empty)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Act as part of the operating system`**.
+5. Select the **Define these policy settings** check box.
+6. Click **Add User or Group...** and ensure the principal list is empty (or remove all assigned accounts/groups so that no principals are configured).
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +146,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.5 (L1) Ensure 'Act as part of the operating system' is set to 'No One'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

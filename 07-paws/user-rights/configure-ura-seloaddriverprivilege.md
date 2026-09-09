@@ -1,35 +1,56 @@
 # [REQ-PAW-105] Configure User Rights: Load and unload device drivers for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) dedicated to Tier 0 and critical administrative functions. *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-113](../../08-endpoints/user-rights/configure-ura-seloaddriverprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-125](../../02-domain-controllers/user-rights/configure-ura-seloaddriverprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809 and above) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Load and unload device drivers`
+  * **Privilege Constant**: `SeLoadDriverPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Load and unload device drivers`
   * **Registry Location**: Stored inside local security database under privilege `SeLoadDriverPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to load device drivers in kernel mode. Restricting this prevents attackers from loading unsigned or vulnerable drivers (BYOVD) to execute kernel shellcode.
+The `SeLoadDriverPrivilege` allows a process to dynamically load and unload kernel-mode device drivers (`.sys` files) via `NtLoadDriver` or the Service Control Manager (`CreateService` with `SERVICE_KERNEL_DRIVER`). Kernel-mode drivers execute in Ring 0 with unrestricted hardware access, full kernel memory read/write permissions, and the ability to execute any CPU instruction.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries extensively abuse `SeLoadDriverPrivilege` in Bring Your Own Vulnerable Driver (BYOVD) attacks. Modern Windows enforces Driver Signature Enforcement (DSE), preventing the loading of unsigned code into kernel space. However, an attacker with `SeLoadDriverPrivilege` can drop an authentic, cryptographically signed, legitimate driver that contains known security vulnerabilities (e.g., `gdrv.sys`, `mhyprot2.sys`, `RTCore64.sys`, or `procexp.sys`). Once loaded, the attacker exploits the driver's kernel read/write IOCTLs to: (1) Bludgeon and terminate Endpoint Detection and Response (EDR) processes; (2) Direct Kernel Object Manipulation (DKOM) to hide processes and alter process tokens; (3) Disable ETW-TI (Threat Intelligence) telemetry hooks.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Privileged Access Workstations (PAWs) serve as the clean-source platform for managing Tier 0 Active Directory and cloud infrastructure. Because administrative credentials exist in memory on these devices, strict isolation must be maintained at the operating system level. Restricting this user right strictly prevents lower-tier sessions, third-party software, or interactive users from interfering with administrative operations, upholding the Clean Source Principle and preventing token kidnapping or session hijacking.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544). No standard users, service accounts, or automated operators must be granted driver loading rights. Driver loading should be further constrained using Windows Defender Application Control (WDAC) and the Microsoft Recommended Driver Blocklist.
+
+### 3. MITRE ATT&CK Mapping
+* **T1068 - Exploitation for Privilege Escalation**
+* **T1543.003 - Create or Modify System Process: Windows Service**
+* **T1562.001 - Impair Defenses: Disable or Modify Tools**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeLoadDriverPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeLoadDriverPrivilege` to `Administrators` ensures only authorized administrative processes can install kernel drivers. Standard hardware plug-and-play driver installations for pre-approved devices function normally through the Windows Driver Store without requiring user-level driver loading privileges. Driver load operations are logged under System Event ID 7045 and Security Event ID 4672/4673.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Load and unload device drivers`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 PAW systems (e.g., `GPO_Hardening_PAW`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Load and unload device drivers`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.27 (L1) Ensure 'Load and unload device drivers' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

@@ -1,35 +1,55 @@
 # [REQ-DC-119] Configure User Rights: Deny log on as a service on Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers.
-* **Operating Systems**: Windows Server 2016 (and above).
+* **Applicable Systems**: Domain Controllers (Tier 0 Active Directory infrastructure).
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, and Windows Server 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Deny log on as a service`
+  * **Privilege Constant**: `SeDenyServiceLogonRight`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny log on as a service`
   * **Registry Location**: Stored inside local security database under privilege `SeDenyServiceLogonRight` set to `*S-1-5-32-546 (Guests)`.
 
 ---
 
 ## Rationale
-Prevents Guests from running system services on Domain Controllers.
+The `SeDenyServiceLogonRight` explicitly prevents designated accounts from registering and executing as a Windows service process (Logon Type 5). Windows services run unattended in the background under designated security contexts, typically with persistent execution privileges across reboots.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries who compromise guest accounts or low-privilege service accounts can attempt to install malicious Windows services or alter existing service binaries to run under compromised accounts to establish persistence. Denying service logon rights to untrusted accounts ensures that compromised identities cannot be utilized as service execution vehicles.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Domain Controllers are the root of trust for the entire Active Directory forest, storing the directory database (`ntds.dit`), Kerberos master keys (`krbtgt`), and password hashes for all enterprise identities. Unrestricted allocation of user rights on Domain Controllers introduces devastating forest-compromise risks. Enforcing strict assignment of this privilege ensures that directory synchronization, authentication packages, and system execution remain strictly bounded to authorized directory components and Domain Administrators.
+
+Hardening standards require configuring `SeDenyServiceLogonRight` to include `Guests` (S-1-5-32-546). This ensures guest accounts can never be registered as service logon accounts under any circumstances.
+
+### 3. MITRE ATT&CK Mapping
+* **T1543.003 - Create or Modify System Process: Windows Service**
+* **T1078.001 - Valid Accounts: Default Accounts**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyServiceLogonRight` to `*S-1-5-32-546 (Guests)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Denying service logon to `Guests` does not affect standard Windows services or enterprise service accounts. Legitimate services running under `LocalSystem`, `LocalService`, `NetworkService`, or dedicated gMSAs continue to function normally. Failed service initialization attempts are logged under System Event ID 7000 and Security Event ID 4625.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Deny log on as a service`.
-3. Configure the security principal allocation to: `*S-1-5-32-546 (Guests)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 Domain Controller systems (e.g., `Default Domain Controllers Policy`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Deny log on as a service`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-546 (Guests)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +147,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Domain Controllers
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R29 (Logon Rights Assignment)
+* **CIS Benchmark**: 2.2.20 (L1) Ensure 'Deny log on as a service' includes 'Guests'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

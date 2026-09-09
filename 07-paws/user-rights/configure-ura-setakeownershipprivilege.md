@@ -1,35 +1,56 @@
 # [REQ-PAW-112] Configure User Rights: Take ownership of files or other objects for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) dedicated to Tier 0 and critical administrative functions. *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-122](../../08-endpoints/user-rights/configure-ura-setakeownershipprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-135](../../02-domain-controllers/user-rights/configure-ura-setakeownershipprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809 and above) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Take ownership of files or other objects`
+  * **Privilege Constant**: `SeTakeOwnershipPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Take ownership of files or other objects`
   * **Registry Location**: Stored inside local security database under privilege `SeTakeOwnershipPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to take ownership of any system object. Restricting this prevents attackers from seizing control of critical files, services, or registry keys.
+The `SeTakeOwnershipPrivilege` allows a user to take ownership of any securable object in the operating system (files, directories, registry keys, Active Directory objects, printers, services) by writing the caller's SID into the object security descriptor owner field via `SetNamedSecurityInfo` or `SetSecurityInfo`. The Windows security model grants the owner of an object implicit `WRITE_DAC` authority.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+An adversary possessing `SeTakeOwnershipPrivilege` can bypass all Discretionary Access Control Lists (DACLs) on the system: (1) Access Modification: Regardless of whether the current DACL denies access to the attacker, taking ownership grants the attacker implicit authority to rewrite the object's DACL; (2) System Hijacking: The attacker grants themselves `Full Control` over protected system files (e.g., `svchost.exe`, `ntoskrnl.exe`), service executables, or registry keys under `HKLM\SYSTEM`, enabling immediate payload insertion and privilege escalation; (3) Active Directory Abuse: Taking ownership of sensitive directory objects allows an attacker to reset administrative passwords or inject malicious ACEs.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Privileged Access Workstations (PAWs) serve as the clean-source platform for managing Tier 0 Active Directory and cloud infrastructure. Because administrative credentials exist in memory on these devices, strict isolation must be maintained at the operating system level. Restricting this user right strictly prevents lower-tier sessions, third-party software, or interactive users from interfering with administrative operations, upholding the Clean Source Principle and preventing token kidnapping or session hijacking.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544). No standard users, guest accounts, or service accounts must be granted ownership takeover authority.
+
+### 3. MITRE ATT&CK Mapping
+* **T1068 - Exploitation for Privilege Escalation**
+* **T1222.001 - File and Directory Permissions Modification: Windows DACL**
+* **T1574 - Hijack Execution Flow**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeTakeOwnershipPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeTakeOwnershipPrivilege` to `Administrators` ensures objects remain protected by their established security descriptors. Administrative personnel retain the capability to take ownership of orphaned resources when managing file systems. Ownership changes generate Security Event ID 4674 and Event ID 4672.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Take ownership of files or other objects`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 PAW systems (e.g., `GPO_Hardening_PAW`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Take ownership of files or other objects`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.41 (L1) Ensure 'Take ownership of files or other objects' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

@@ -1,35 +1,56 @@
 # [REQ-DC-109] Configure User Rights: Allow log on through Remote Desktop Services on Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers.
-* **Operating Systems**: Windows Server 2016 (and above).
+* **Applicable Systems**: Domain Controllers (Tier 0 Active Directory infrastructure).
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, and Windows Server 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Allow log on through Remote Desktop Services`
+  * **Privilege Constant**: `SeRemoteInteractiveLogonRight`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Allow log on through Remote Desktop Services`
   * **Registry Location**: Stored inside local security database under privilege `SeRemoteInteractiveLogonRight` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows RDP access to Domain Controllers. Enforcing restriction to Administrators prevents lateral RDP access by non-tier-0 accounts.
+The `SeRemoteInteractiveLogonRight` determines which security principals are permitted to establish interactive Remote Desktop Protocol (RDP) sessions (Logon Type 10) on the target host. RDP provides full remote graphical desktop access, loading interactive user credentials into LSASS memory.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Unrestricted RDP logon permissions create severe credential exposure and remote management risks: (1) On Domain Controllers: Permitting non-administrators or Tier 1/2 operators to establish RDP sessions to Domain Controllers exposes sensitive administrative sessions to interception, session hijacking (`tscon`), and credential harvesting; (2) Ransomware Lateral Movement: Attackers who compromise user credentials routinely use RDP to spread across the network, manually deploying payloads and altering configurations; (3) Console Hijacking: RDP sessions remain active or disconnected in memory, providing opportunities for session riding.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Domain Controllers are the root of trust for the entire Active Directory forest, storing the directory database (`ntds.dit`), Kerberos master keys (`krbtgt`), and password hashes for all enterprise identities. Unrestricted allocation of user rights on Domain Controllers introduces devastating forest-compromise risks. Enforcing strict assignment of this privilege ensures that directory synchronization, authentication packages, and system execution remain strictly bounded to authorized directory components and Domain Administrators.
+
+On Domain Controllers, configure strictly to `Administrators` (S-1-5-32-544). On PAWs and Endpoints, RDP access should be strictly governed, with local accounts denied via `SeDenyRemoteInteractiveLogonRight`. Non-administrative domain accounts must never be permitted RDP access to Domain Controllers.
+
+### 3. MITRE ATT&CK Mapping
+* **T1021.001 - Remote Services: Remote Desktop Protocol**
+* **T1078.002 - Valid Accounts: Domain Accounts**
+* **T1078.003 - Valid Accounts: Local Accounts**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeRemoteInteractiveLogonRight` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting RDP access on Domain Controllers ensures only authorized Domain Administrators can initiate remote desktop management sessions. Helpdesk staff and non-Tier 0 administrators must use RSAT tools installed on dedicated PAWs rather than logging directly into DC desktops. Remote desktop logons generate Security Event ID 4624 (Logon Type 10).
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Allow log on through Remote Desktop Services`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 Domain Controller systems (e.g., `Default Domain Controllers Policy`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Allow log on through Remote Desktop Services`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Domain Controllers
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R29 (Logon Rights Assignment)
+* **CIS Benchmark**: 2.2.3 (L1) Ensure 'Allow log on through Remote Desktop Services' is set to 'Administrators' (DCs)
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

@@ -1,35 +1,56 @@
 # [REQ-DC-129] Configure User Rights: Manage auditing and security log on Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers.
-* **Operating Systems**: Windows Server 2016 (and above).
+* **Applicable Systems**: Domain Controllers (Tier 0 Active Directory infrastructure). *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-107](../../07-paws/user-rights/configure-ura-sesecurityprivilege.md)).* *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-115](../../08-endpoints/user-rights/configure-ura-sesecurityprivilege.md)).*
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, and Windows Server 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Manage auditing and security log`
+  * **Privilege Constant**: `SeSecurityPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Manage auditing and security log`
   * **Registry Location**: Stored inside local security database under privilege `SeSecurityPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Restricting security log management to Administrators ensures audit trails cannot be altered on DCs.
+The `SeSecurityPrivilege` controls access to the Windows Security Event Log (`Security.evtx`) and governs the ability to view, configure, and clear the security log, as well as specify object auditing options (System Access Control Lists - SACLs) on files, registry keys, and directory objects via `ACCESS_SYSTEM_SECURITY`.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+An adversary holding `SeSecurityPrivilege` can blind security operations and erase digital forensic evidence: (1) Log Cleansing: The attacker can invoke `ClearEventLog` or run `wevtutil cl Security` to erase all audit records, destroying evidence of privilege escalation, lateral movement, credential dumping, and payload execution; (2) SACL Manipulation: The attacker can strip SACLs from critical files, registry keys, or Active Directory objects, preventing the generation of security event logs when sensitive resources are accessed or modified; (3) Evasion: Bypassing object auditing allows stealthy tampering with protected directory service objects.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Domain Controllers are the root of trust for the entire Active Directory forest, storing the directory database (`ntds.dit`), Kerberos master keys (`krbtgt`), and password hashes for all enterprise identities. Unrestricted allocation of user rights on Domain Controllers introduces devastating forest-compromise risks. Enforcing strict assignment of this privilege ensures that directory synchronization, authentication packages, and system execution remain strictly bounded to authorized directory components and Domain Administrators.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544). Standard domain users, helpdesk operators, and third-party monitoring agents must not hold `SeSecurityPrivilege`. Security event log forwarding should be configured using Windows Event Forwarding (WEF) running under dedicated network service accounts without granting log management rights.
+
+### 3. MITRE ATT&CK Mapping
+* **T1070.001 - Indicator Removal: Clear Windows Event Logs**
+* **T1562.002 - Impair Defenses: Disable Windows Event Logging**
+* **T1222.001 - File and Directory Permissions Modification: Windows DACL**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSecurityPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeSecurityPrivilege` to `Administrators` protects the integrity of security audit logs. Centralized SIEM forwarders (e.g., Splunk, Microsoft Sentinel, Elastic Agent) that run as dedicated service accounts should be configured to read event logs via membership in the `Event Log Readers` built-in group rather than holding `SeSecurityPrivilege`. Log clearing events generate critical Security Event ID 1102 ('The audit log was cleared').
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Manage auditing and security log`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 Domain Controller systems (e.g., `Default Domain Controllers Policy`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Manage auditing and security log`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Domain Controllers
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.31 (L1) Ensure 'Manage auditing and security log' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

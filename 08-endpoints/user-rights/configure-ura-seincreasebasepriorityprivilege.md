@@ -1,35 +1,55 @@
 # [REQ-END-112] Configure User Rights: Increase scheduling priority
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers.
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Low
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Increase scheduling priority`
+  * **Privilege Constant**: `SeIncreaseBasePriorityPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Increase scheduling priority`
   * **Registry Location**: Stored inside local security database under privilege `SeIncreaseBasePriorityPrivilege` set to `*S-1-5-32-544 (Administrators), *S-1-5-90-0 (Window Manager Group)`.
 
 ---
 
 ## Rationale
-Allows processes to increase scheduling execution priority. Restricting this prevents process priority manipulation resulting in system resource starvation.
+The `SeIncreaseBasePriorityPrivilege` allows a process to raise the execution priority class of a process or thread via `SetPriorityClass` to `REALTIME_PRIORITY_CLASS`. The Windows kernel thread scheduler gives realtime priority threads preemption authority over virtually all other system threads, including device driver deferred procedure calls (DPCs) and operating system subsystem threads.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+An adversary holding `SeIncreaseBasePriorityPrivilege` can execute resource starvation, timing manipulation, and denial-of-service attacks: (1) System Lockup: A malicious realtime priority process consuming 100% CPU cycles starves critical system threads (including mouse/keyboard input handling, network processing, and watchdog timers), completely freezing the computer and requiring a hard reboot; (2) Anti-Malware Evasion: By boosting thread priority, an attacker can outpace asynchronous endpoint detection and response (EDR) inspection routines or induce timing race conditions.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544) and `Window Manager\Window Manager Group` (S-1-5-90-0) if required for DWM rendering. Standard users and background utilities must not have the ability to elevate processes to realtime priority.
+
+### 3. MITRE ATT&CK Mapping
+* **T1499 - Endpoint Denial of Service**
+* **T1562.001 - Impair Defenses: Disable or Modify Tools**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeIncreaseBasePriorityPrivilege` to `*S-1-5-32-544 (Administrators), *S-1-5-90-0 (Window Manager Group)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeIncreaseBasePriorityPrivilege` prevents user-mode processes from inducing thread starvation and kernel lockups. Multimedia software or audio processing suites that request elevated scheduling priority operate effectively within high-priority classes without requiring realtime rights. Auditing is captured via Security Event ID 4672.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Increase scheduling priority`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-90-0 (Window Manager Group)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Increase scheduling priority`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators), *S-1-5-90-0 (Window Manager Group)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +145,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.25 (L1) Ensure 'Increase scheduling priority' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

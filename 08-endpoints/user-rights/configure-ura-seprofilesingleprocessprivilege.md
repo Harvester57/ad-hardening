@@ -1,35 +1,56 @@
 # [REQ-END-118] Configure User Rights: Profile single process
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-110](../../07-paws/user-rights/configure-ura-seprofilesingleprocessprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-131](../../02-domain-controllers/user-rights/configure-ura-seprofilesingleprocessprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Low
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Profile single process`
+  * **Privilege Constant**: `SeProfileSingleProcessPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Profile single process`
   * **Registry Location**: Stored inside local security database under privilege `SeProfileSingleProcessPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to profile non-system processes. Restricting this prevents attackers from profiling critical application components to locate vulnerability endpoints.
+The `SeProfileSingleProcessPrivilege` allows a process to monitor and profile the performance and execution metrics of non-system processes using Windows performance sampling APIs. Profiling tools monitor instruction execution rates, thread context switches, memory cache behavior, and execution sampling.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+An adversary who obtains profiling privileges can perform sophisticated reverse engineering, side-channel analysis, and exploit development: (1) Memory Layout De-randomization: By profiling process memory and execution timings, an attacker can deduce memory layouts and defeat Address Space Layout Randomization (ASLR); (2) Side-Channel Cryptographic Attacks: Profiling cache hits/misses and instruction timings can expose cryptographic key material processed in co-located processes; (3) Security Software Tampering: Attackers analyze EDR sensor thread behavior to identify blind spots or execution hooks.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544). Standard users, interactive workstation operators, and general service accounts must not have process profiling capabilities.
+
+### 3. MITRE ATT&CK Mapping
+* **T1057 - Process Discovery**
+* **T1055 - Process Injection**
+* **T1562 - Impair Defenses**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `Administrators` prevents unauthorized thread profiling without impacting standard application performance. Developers using standalone profiling tools (such as Visual Studio Profiler) must elevate to administrative context. Auditing is captured under Security Event ID 4672.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Profile single process`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Profile single process`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +146,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.34 (L1) Ensure 'Profile single process' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

@@ -1,35 +1,56 @@
 # [REQ-END-105] Configure User Rights: Create global objects
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-099](../../07-paws/user-rights/configure-ura-secreateglobalprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Create global objects`
+  * **Privilege Constant**: `SeCreateGlobalPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Create global objects`
   * **Registry Location**: Stored inside local security database under privilege `SeCreateGlobalPrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
 
 ---
 
 ## Rationale
-Allows processes to create global objects available to all sessions. Restricting this to system services and Administrators prevents local privilege escalation via object name collisions.
+The `SeCreateGlobalPrivilege` allows a process to create named kernel and user objects (such as named pipes, shared memory sections, mutexes, and events) in the `\BaseNamedObjects` global namespace accessible across all terminal services sessions and interactive logon sessions. In terminal services and multi-user Windows environments, each interactive session is isolated into a private namespace (`\Sessions\X\BaseNamedObjects`). The global namespace is reserved for system services that must communicate across session boundaries.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+If an unprivileged user or low-integrity process obtains `SeCreateGlobalPrivilege`, an adversary can perform object squatting, race-condition hijacking, and cross-session privilege escalation. By pre-creating a named pipe, mutex, or shared memory section with a predictable name in the global namespace before a privileged service initializes, an attacker can intercept communication, inject malicious data into inter-process communication (IPC) streams, or trick a high-integrity service into executing arbitrary shellcode. This privilege is a key prerequisite for session-crossing named pipe impersonation attacks.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544), `LocalService` (S-1-5-19), `NetworkService` (S-1-5-20), and `Service` (S-1-5-6). Standard interactive users, unprivileged domain accounts, and non-administrative applications must never be granted `SeCreateGlobalPrivilege`. Restricting this privilege enforces session isolation and eliminates object collision vulnerabilities.
+
+### 3. MITRE ATT&CK Mapping
+* **T1055 - Process Injection**
+* **T1068 - Exploitation for Privilege Escalation**
+* **T1574 - Hijack Execution Flow**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeCreateGlobalPrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeCreateGlobalPrivilege` prevents unprivileged processes from colliding with system objects. Legacy client-server desktop applications or multi-user software that utilizes global named pipes for inter-process communication may fail if run by standard users; such applications must be modernized to use session-relative namespaces or secure RPC endpoints. Monitor Security Event ID 4672 and Event ID 4673 for unauthorized global object creation attempts.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Create global objects`.
-3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Create global objects`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +146,12 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.7 (L1) Ensure 'Create global objects' is set to 'Administrators, LOCAL SERVICE, NETWORK SERVICE, SERVICE'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

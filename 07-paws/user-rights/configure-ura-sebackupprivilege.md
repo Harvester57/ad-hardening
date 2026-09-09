@@ -1,35 +1,57 @@
 # [REQ-PAW-096] Configure User Rights: Back up files and directories for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) dedicated to Tier 0 and critical administrative functions. *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-100](../../08-endpoints/user-rights/configure-ura-sebackupprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-110](../../02-domain-controllers/user-rights/configure-ura-sebackupprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809 and above) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Back up files and directories`
+  * **Privilege Constant**: `SeBackupPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Back up files and directories`
   * **Registry Location**: Stored inside local security database under privilege `SeBackupPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to bypass file permissions to read all files on the system. Restricting it to Administrators prevents data exfiltration by unauthorized users.
+The `SeBackupPrivilege` grants the caller the capability to bypass all read-access security controls (Discretionary Access Control Lists - DACLs) across the entire NTFS filesystem and Windows Registry. When an application opens a file handle specifying the `FILE_FLAG_BACKUP_SEMANTICS` flag in Win32 `CreateFile` calls, the Windows kernel I/O manager and Object Manager explicitly bypass standard security descriptor evaluation. This design allows legitimate backup utilities to archive files without requiring explicit read permissions on every individual object.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries routinely target accounts holding `SeBackupPrivilege` for rapid credential harvesting and full domain escalation. Possession of this privilege allows an attacker to directly copy protected credential stores that are otherwise locked and ACL-protected by the operating system, including: (1) The Active Directory database file `ntds.dit` on Domain Controllers; (2) The local Security Account Manager (`SAM`) and `SYSTEM` registry hives on workstations and servers; (3) Sensitive configuration files, BitLocker recovery keys, and private certificates. Using standard tools such as `reg.exe save`, `wbadmin.exe`, Volume Shadow Copy Service (`vssadmin`), or PowerShell robocopy with `/b`, an attacker with `SeBackupPrivilege` can dump all password hashes and Kerberos keys across the entire domain.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Privileged Access Workstations (PAWs) serve as the clean-source platform for managing Tier 0 Active Directory and cloud infrastructure. Because administrative credentials exist in memory on these devices, strict isolation must be maintained at the operating system level. Restricting this user right strictly prevents lower-tier sessions, third-party software, or interactive users from interfering with administrative operations, upholding the Clean Source Principle and preventing token kidnapping or session hijacking.
+
+Restricting `SeBackupPrivilege` strictly to `Administrators` (S-1-5-32-544) prevents non-administrative users and compromised service accounts from abusing backup semantics to exfiltrate critical operating system secrets. On Tier 0 systems (Domain Controllers and PAWs), broad groups such as `Backup Operators` should be stripped of this right, and dedicated Group Managed Service Accounts (gMSAs) with tightly scoped time-limited access should be utilized for automated backup routines.
+
+### 3. MITRE ATT&CK Mapping
+* **T1003.002 - OS Credential Dumping: Security Account Manager**
+* **T1003.003 - OS Credential Dumping: NTDS**
+* **T1005 - Data from Local System**
+* **T1083 - File and Directory Discovery**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeBackupPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeBackupPrivilege` prevents unauthorized read-bypass across system drives. Enterprise backup agents (e.g., Commvault, Veeam, NetBackup) that run under non-administrative service accounts may fail if they rely on `SeBackupPrivilege`; organizations must configure dedicated service identities or run backup software under managed accounts with explicit backup rights. Monitor Security Event ID 4672 and Event ID 4673 for invocations of `SeBackupPrivilege` outside of scheduled backup maintenance windows.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Back up files and directories`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 PAW systems (e.g., `GPO_Hardening_PAW`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Back up files and directories`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +149,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.4 (L1) Ensure 'Back up files and directories' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

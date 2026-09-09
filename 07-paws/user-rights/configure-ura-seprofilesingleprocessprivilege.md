@@ -1,35 +1,56 @@
 # [REQ-PAW-110] Configure User Rights: Profile single process for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) dedicated to Tier 0 and critical administrative functions. *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-118](../../08-endpoints/user-rights/configure-ura-seprofilesingleprocessprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-131](../../02-domain-controllers/user-rights/configure-ura-seprofilesingleprocessprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809 and above) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Low
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Profile single process`
+  * **Privilege Constant**: `SeProfileSingleProcessPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Profile single process`
   * **Registry Location**: Stored inside local security database under privilege `SeProfileSingleProcessPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to profile non-system processes. Restricting this prevents attackers from profiling critical application components to locate vulnerability PAWs.
+The `SeProfileSingleProcessPrivilege` allows a process to monitor and profile the performance and execution metrics of non-system processes using Windows performance sampling APIs. Profiling tools monitor instruction execution rates, thread context switches, memory cache behavior, and execution sampling.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+An adversary who obtains profiling privileges can perform sophisticated reverse engineering, side-channel analysis, and exploit development: (1) Memory Layout De-randomization: By profiling process memory and execution timings, an attacker can deduce memory layouts and defeat Address Space Layout Randomization (ASLR); (2) Side-Channel Cryptographic Attacks: Profiling cache hits/misses and instruction timings can expose cryptographic key material processed in co-located processes; (3) Security Software Tampering: Attackers analyze EDR sensor thread behavior to identify blind spots or execution hooks.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Privileged Access Workstations (PAWs) serve as the clean-source platform for managing Tier 0 Active Directory and cloud infrastructure. Because administrative credentials exist in memory on these devices, strict isolation must be maintained at the operating system level. Restricting this user right strictly prevents lower-tier sessions, third-party software, or interactive users from interfering with administrative operations, upholding the Clean Source Principle and preventing token kidnapping or session hijacking.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544). Standard users, interactive workstation operators, and general service accounts must not have process profiling capabilities.
+
+### 3. MITRE ATT&CK Mapping
+* **T1057 - Process Discovery**
+* **T1055 - Process Injection**
+* **T1562 - Impair Defenses**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `Administrators` prevents unauthorized thread profiling without impacting standard application performance. Developers using standalone profiling tools (such as Visual Studio Profiler) must elevate to administrative context. Auditing is captured under Security Event ID 4672.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Profile single process`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 PAW systems (e.g., `GPO_Hardening_PAW`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Profile single process`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.34 (L1) Ensure 'Profile single process' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

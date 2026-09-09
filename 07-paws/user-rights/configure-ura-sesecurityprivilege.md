@@ -1,35 +1,56 @@
 # [REQ-PAW-107] Configure User Rights: Manage auditing and security log for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) dedicated to Tier 0 and critical administrative functions. *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-115](../../08-endpoints/user-rights/configure-ura-sesecurityprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-129](../../02-domain-controllers/user-rights/configure-ura-sesecurityprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809 and above) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Manage auditing and security log`
+  * **Privilege Constant**: `SeSecurityPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Manage auditing and security log`
   * **Registry Location**: Stored inside local security database under privilege `SeSecurityPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to view, manage, and clear the Windows Security Event Log. Restricting this prevents attackers from clearing evidence of post-compromise activities.
+The `SeSecurityPrivilege` controls access to the Windows Security Event Log (`Security.evtx`) and governs the ability to view, configure, and clear the security log, as well as specify object auditing options (System Access Control Lists - SACLs) on files, registry keys, and directory objects via `ACCESS_SYSTEM_SECURITY`.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+An adversary holding `SeSecurityPrivilege` can blind security operations and erase digital forensic evidence: (1) Log Cleansing: The attacker can invoke `ClearEventLog` or run `wevtutil cl Security` to erase all audit records, destroying evidence of privilege escalation, lateral movement, credential dumping, and payload execution; (2) SACL Manipulation: The attacker can strip SACLs from critical files, registry keys, or Active Directory objects, preventing the generation of security event logs when sensitive resources are accessed or modified; (3) Evasion: Bypassing object auditing allows stealthy tampering with protected directory service objects.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Privileged Access Workstations (PAWs) serve as the clean-source platform for managing Tier 0 Active Directory and cloud infrastructure. Because administrative credentials exist in memory on these devices, strict isolation must be maintained at the operating system level. Restricting this user right strictly prevents lower-tier sessions, third-party software, or interactive users from interfering with administrative operations, upholding the Clean Source Principle and preventing token kidnapping or session hijacking.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544). Standard domain users, helpdesk operators, and third-party monitoring agents must not hold `SeSecurityPrivilege`. Security event log forwarding should be configured using Windows Event Forwarding (WEF) running under dedicated network service accounts without granting log management rights.
+
+### 3. MITRE ATT&CK Mapping
+* **T1070.001 - Indicator Removal: Clear Windows Event Logs**
+* **T1562.002 - Impair Defenses: Disable Windows Event Logging**
+* **T1222.001 - File and Directory Permissions Modification: Windows DACL**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeSecurityPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeSecurityPrivilege` to `Administrators` protects the integrity of security audit logs. Centralized SIEM forwarders (e.g., Splunk, Microsoft Sentinel, Elastic Agent) that run as dedicated service accounts should be configured to read event logs via membership in the `Event Log Readers` built-in group rather than holding `SeSecurityPrivilege`. Log clearing events generate critical Security Event ID 1102 ('The audit log was cleared').
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Manage auditing and security log`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 PAW systems (e.g., `GPO_Hardening_PAW`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Manage auditing and security log`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.31 (L1) Ensure 'Manage auditing and security log' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

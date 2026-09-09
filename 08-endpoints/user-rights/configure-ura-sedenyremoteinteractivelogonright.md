@@ -1,35 +1,56 @@
 # [REQ-END-125] Configure User Rights: Deny log on through Remote Desktop Services
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-114](../../07-paws/user-rights/configure-ura-sedenyremoteinteractivelogonright.md)).* *(For Domain Controllers, refer to [REQ-DC-121](../../02-domain-controllers/user-rights/configure-ura-sedenyremoteinteractivelogonright.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Deny log on through Remote Desktop Services`
+  * **Privilege Constant**: `SeDenyRemoteInteractiveLogonRight`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny log on through Remote Desktop Services`
   * **Registry Location**: Stored inside local security database under privilege `SeDenyRemoteInteractiveLogonRight` set to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
 
 ---
 
 ## Rationale
-Explicitly blocks Remote Desktop logons for Local Accounts (S-1-5-113) and Local Administrators (S-1-5-114), forcing administrators to connect using domain credentials over secure paths.
+The `SeDenyRemoteInteractiveLogonRight` explicitly denies designated accounts the ability to establish Remote Desktop Protocol (RDP) sessions (Logon Type 10) on the target system. RDP exposes a full graphical interactive session over TCP port 3389, providing an attacker with interactive desktop capabilities and loading user credentials into memory.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries who compromise local credentials routinely use RDP to pivot interactively across systems. If local administrative accounts or guest accounts are allowed RDP access, attackers can remotely access workstations and servers without leaving network-only traces, hijacking existing sessions or dumping cached credentials. On PAWs and Endpoints, denying remote desktop logon to `Local Account` (S-1-5-113) and `Local account and member of Administrators group` (S-1-5-114) prevents adversaries from using local credentials to log on interactively over RDP.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+On Endpoints and PAWs, configure `SeDenyRemoteInteractiveLogonRight` to include `Local Account` (S-1-5-113), `Local account and member of Administrators group` (S-1-5-114), and `Guests` (S-1-5-32-546). On Domain Controllers, configure to include `Guests` (S-1-5-32-546). This configuration enforces strict administrative tiering and prevents RDP credential abuse.
+
+### 3. MITRE ATT&CK Mapping
+* **T1021.001 - Remote Services: Remote Desktop Protocol**
+* **T1078.003 - Valid Accounts: Local Accounts**
+* **T1550.002 - Use Alternate Authentication Material: Pass the Hash**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyRemoteInteractiveLogonRight` to `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Denying RDP access to local accounts requires system administrators to use domain-joined administrative accounts with multifactor authentication or dedicated jump boxes for remote assistance. Local console access via physical keyboard or virtual hypervisor console remains unaffected. Unauthorized RDP connection attempts generate Security Event ID 4625 with Status code `0xC000006E`.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Deny log on through Remote Desktop Services`.
-3. Configure the security principal allocation to: `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Deny log on through Remote Desktop Services`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-113 (Local Account), *S-1-5-114 (Local Account and member of Administrators group)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +146,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R29 (Logon Rights Assignment)
+* **CIS Benchmark**: 2.2.19 (L1) Ensure 'Deny log on through Remote Desktop Services' includes 'Guests, Local account and member of Administrators group'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

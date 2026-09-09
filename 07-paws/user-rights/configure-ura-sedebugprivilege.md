@@ -1,35 +1,56 @@
 # [REQ-PAW-101] Configure User Rights: Debug programs for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) dedicated to Tier 0 and critical administrative functions. *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-108](../../08-endpoints/user-rights/configure-ura-sedebugprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-116](../../02-domain-controllers/user-rights/configure-ura-sedebugprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809 and above) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Debug programs`
+  * **Privilege Constant**: `SeDebugPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Debug programs`
   * **Registry Location**: Stored inside local security database under privilege `SeDebugPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows processes to attach to and debug any system process (including lsass.exe). Disallowing it for standard accounts prevents credential dumping tools (Mimikatz) from reading LSASS memory.
+The `SeDebugPrivilege` allows a process to attach a debugger to any running process on the system, completely overriding the target process security descriptor and Discretionary Access Control List (DACL). When enabled, calls to `OpenProcess` with permissions such as `PROCESS_ALL_ACCESS` or `PROCESS_VM_READ` succeed even against processes owned by other users or `NT AUTHORITY\SYSTEM`. This privilege is intended strictly for kernel/application developers debugging live processes.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries and post-exploitation frameworks (e.g., Mimikatz, Cobalt Strike, Meterpreter, ProcDump) rely on `SeDebugPrivilege` as the primary mechanism for OS credential theft. By enabling `SeDebugPrivilege`, an attacker can open an unrestricted handle to the Local Security Authority Subsystem Service (`lsass.exe`) and dump process memory to extract: (1) Cleartext passwords cached in WDigest; (2) NTLM password hashes for local and domain accounts; (3) Kerberos Ticket Granting Tickets (TGTs) and session keys; (4) DPAPI master keys. Furthermore, `SeDebugPrivilege` enables process injection into high-integrity services (`svchost.exe`, `csrss.exe`) via `VirtualAllocEx` and `CreateRemoteThread`.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Privileged Access Workstations (PAWs) serve as the clean-source platform for managing Tier 0 Active Directory and cloud infrastructure. Because administrative credentials exist in memory on these devices, strict isolation must be maintained at the operating system level. Restricting this user right strictly prevents lower-tier sessions, third-party software, or interactive users from interfering with administrative operations, upholding the Clean Source Principle and preventing token kidnapping or session hijacking.
+
+This privilege must be strictly confined to `Administrators` (S-1-5-32-544) on standard endpoints, Domain Controllers, and PAWs. On PAWs and Tier 0 systems, administrative accounts should only enable this privilege when actively performing emergency system troubleshooting. Standard users, developers (on non-developer workstations), and automated service accounts must never hold `SeDebugPrivilege`.
+
+### 3. MITRE ATT&CK Mapping
+* **T1003.001 - OS Credential Dumping: LSASS Memory**
+* **T1055 - Process Injection**
+* **T1068 - Exploitation for Privilege Escalation**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDebugPrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeDebugPrivilege` to `Administrators` protects system process memory and prevents unprivileged credential theft. Software developers or diagnostic monitoring agents running as non-administrators may require elevation to debug processes. Security Operations Center (SOC) teams should configure high-severity alerts for Security Event ID 4672 and Event ID 4673 whenever `SeDebugPrivilege` is invoked outside of designated maintenance windows.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Debug programs`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 PAW systems (e.g., `GPO_Hardening_PAW`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Debug programs`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.13 (L1) Ensure 'Debug programs' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

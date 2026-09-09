@@ -1,35 +1,55 @@
 # [REQ-END-114] Configure User Rights: Lock pages in memory
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-106](../../07-paws/user-rights/configure-ura-selockmemoryprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-126](../../02-domain-controllers/user-rights/configure-ura-selockmemoryprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Lock pages in memory`
+  * **Privilege Constant**: `SeLockMemoryPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Lock pages in memory`
   * **Registry Location**: Stored inside local security database under privilege `SeLockMemoryPrivilege` set to `No one (Empty)`.
 
 ---
 
 ## Rationale
-Allows processes to lock physical pages in memory, preventing the OS from swapping them to pagefile. It should be empty to prevent memory exhaustion DoS attacks.
+The `SeLockMemoryPrivilege` allows a process to lock physical memory pages in RAM using APIs such as `VirtualLock` and Address Windowing Extensions (AWE) via `AllocateUserPhysicalPages`. Locking pages prevents the Windows virtual memory manager from paging data out to disk in `pagefile.sys`, ensuring high-performance memory retention.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+If granted to untrusted users or processes, `SeLockMemoryPrivilege` enables significant denial-of-service and kernel degradation attacks: (1) Memory Starvation: A malicious program can lock large swathes of physical RAM, preventing the OS memory manager from trimming working sets or servicing other processes. This leads to severe thrashing, unresponsiveness, and kernel exhaustion; (2) Security Telemetry Blind Spots: An attacker can pin memory structures containing malware artifacts, complicating memory forensics and page-table inspection.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+Under standard security baselines, `SeLockMemoryPrivilege` must be set to `No one` (Empty). Neither interactive users nor standard system accounts should possess this right on general workstations, PAWs, or Domain Controllers. Specialized database engines (such as Microsoft SQL Server) that utilize AWE memory locking should be configured with dedicated service accounts granted this privilege explicitly only on dedicated database servers.
+
+### 3. MITRE ATT&CK Mapping
+* **T1499 - Endpoint Denial of Service**
+* **T1055 - Process Injection**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeLockMemoryPrivilege` to `No one (Empty)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Configuring `SeLockMemoryPrivilege` to `No one` has zero impact on desktop endpoints, PAWs, or Domain Controllers. Enterprise database hosts requiring Large Page allocations should receive tailored GPO exceptions on their dedicated Organizational Unit. Auditing is captured under Security Event ID 4704.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Lock pages in memory`.
-3. Configure the security principal allocation to: `No one (Empty)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Lock pages in memory`**.
+5. Select the **Define these policy settings** check box.
+6. Click **Add User or Group...** and ensure the principal list is empty (or remove all assigned accounts/groups so that no principals are configured).
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +145,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.28 (L1) Ensure 'Lock pages in memory' is set to 'No One'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

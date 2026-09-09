@@ -1,35 +1,56 @@
 # [REQ-DC-121] Configure User Rights: Deny log on through Remote Desktop Services on Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers.
-* **Operating Systems**: Windows Server 2016 (and above).
+* **Applicable Systems**: Domain Controllers (Tier 0 Active Directory infrastructure). *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-114](../../07-paws/user-rights/configure-ura-sedenyremoteinteractivelogonright.md)).* *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-125](../../08-endpoints/user-rights/configure-ura-sedenyremoteinteractivelogonright.md)).*
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, and Windows Server 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Deny log on through Remote Desktop Services`
+  * **Privilege Constant**: `SeDenyRemoteInteractiveLogonRight`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Deny log on through Remote Desktop Services`
   * **Registry Location**: Stored inside local security database under privilege `SeDenyRemoteInteractiveLogonRight` set to `*S-1-5-32-546 (Guests)`.
 
 ---
 
 ## Rationale
-Explicitly blocks Remote Desktop logons for Guests on Domain Controllers.
+The `SeDenyRemoteInteractiveLogonRight` explicitly denies designated accounts the ability to establish Remote Desktop Protocol (RDP) sessions (Logon Type 10) on the target system. RDP exposes a full graphical interactive session over TCP port 3389, providing an attacker with interactive desktop capabilities and loading user credentials into memory.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries who compromise local credentials routinely use RDP to pivot interactively across systems. If local administrative accounts or guest accounts are allowed RDP access, attackers can remotely access workstations and servers without leaving network-only traces, hijacking existing sessions or dumping cached credentials. On PAWs and Endpoints, denying remote desktop logon to `Local Account` (S-1-5-113) and `Local account and member of Administrators group` (S-1-5-114) prevents adversaries from using local credentials to log on interactively over RDP.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Domain Controllers are the root of trust for the entire Active Directory forest, storing the directory database (`ntds.dit`), Kerberos master keys (`krbtgt`), and password hashes for all enterprise identities. Unrestricted allocation of user rights on Domain Controllers introduces devastating forest-compromise risks. Enforcing strict assignment of this privilege ensures that directory synchronization, authentication packages, and system execution remain strictly bounded to authorized directory components and Domain Administrators.
+
+On Endpoints and PAWs, configure `SeDenyRemoteInteractiveLogonRight` to include `Local Account` (S-1-5-113), `Local account and member of Administrators group` (S-1-5-114), and `Guests` (S-1-5-32-546). On Domain Controllers, configure to include `Guests` (S-1-5-32-546). This configuration enforces strict administrative tiering and prevents RDP credential abuse.
+
+### 3. MITRE ATT&CK Mapping
+* **T1021.001 - Remote Services: Remote Desktop Protocol**
+* **T1078.003 - Valid Accounts: Local Accounts**
+* **T1550.002 - Use Alternate Authentication Material: Pass the Hash**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDenyRemoteInteractiveLogonRight` to `*S-1-5-32-546 (Guests)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Denying RDP access to local accounts requires system administrators to use domain-joined administrative accounts with multifactor authentication or dedicated jump boxes for remote assistance. Local console access via physical keyboard or virtual hypervisor console remains unaffected. Unauthorized RDP connection attempts generate Security Event ID 4625 with Status code `0xC000006E`.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Deny log on through Remote Desktop Services`.
-3. Configure the security principal allocation to: `*S-1-5-32-546 (Guests)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 Domain Controller systems (e.g., `Default Domain Controllers Policy`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Deny log on through Remote Desktop Services`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-546 (Guests)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Domain Controllers
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R29 (Logon Rights Assignment)
+* **CIS Benchmark**: 2.2.19 (L1) Ensure 'Deny log on through Remote Desktop Services' includes 'Guests, Local account and member of Administrators group'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

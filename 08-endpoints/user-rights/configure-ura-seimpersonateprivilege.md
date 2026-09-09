@@ -1,35 +1,56 @@
 # [REQ-END-111] Configure User Rights: Impersonate a client after authentication
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-104](../../07-paws/user-rights/configure-ura-seimpersonateprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Impersonate a client after authentication`
+  * **Privilege Constant**: `SeImpersonatePrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Impersonate a client after authentication`
   * **Registry Location**: Stored inside local security database under privilege `SeImpersonatePrivilege` set to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
 
 ---
 
 ## Rationale
-Allows programs to impersonate clients. Restricting this to system service accounts and Administrators prevents local privilege escalation via print spooler or potato exploits.
+The `SeImpersonatePrivilege` grants a program the ability to impersonate a client that has connected to its local RPC interfaces, named pipes, or COM servers via `ImpersonateNamedPipeClient`, `CoImpersonateClient`, or `RpcImpersonateClient`. Impersonation allows a server process to temporarily run in the security context of the calling client to verify access permissions.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+This privilege is the critical execution prerequisite for the entire class of 'Potato' local privilege escalation exploits (RottenPotato, JuicyPotato, PrintSpoofer, RoguePotato, SweetPotato, GodPotato). When an attacker gains code execution under a service account (such as `IIS APPPOOL\DefaultAppPool`, `MSSQLSERVER`, or custom services holding this privilege), the attacker forces a high-privilege service (running as `NT AUTHORITY\SYSTEM`) to authenticate to an attacker-controlled named pipe or RPC endpoint (e.g., via the Print Spooler `RpcRemoteFindFirstPrinterChangeNotificationEx` or COM DCOM activations). The attacker's process then calls `ImpersonateNamedPipeClient`, captures the SYSTEM token, and spawns a command shell as `SYSTEM`.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+This privilege must be strictly confined to `Administrators` (S-1-5-32-544), `LocalService` (S-1-5-19), `NetworkService` (S-1-5-20), and `Service` (S-1-5-6). Standard users, interactive accounts, and unprivileged domain identities must never hold `SeImpersonatePrivilege`. Confining this privilege blocks potato privilege escalation from low-privileged user contexts.
+
+### 3. MITRE ATT&CK Mapping
+* **T1134.001 - Access Token Manipulation: Token Impersonation/Theft**
+* **T1068 - Exploitation for Privilege Escalation**
+* **T1574 - Hijack Execution Flow**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeImpersonatePrivilege` to `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeImpersonatePrivilege` preserves normal functionality for legitimate Windows services and IIS application pools while stopping unprivileged token kidnapping. Third-party server applications running under standard user accounts that require client impersonation should be transitioned to virtual service accounts or dedicated gMSAs. Monitor Security Event ID 4672 and Event ID 4673 for sensitive impersonation calls.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Impersonate a client after authentication`.
-3. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Impersonate a client after authentication`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-19 (LocalService), *S-1-5-20 (NetworkService), *S-1-5-32-544 (Administrators), *S-1-5-6 (Service)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +146,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.24 (L1) Ensure 'Impersonate a client after authentication' is set to 'Administrators, LOCAL SERVICE, NETWORK SERVICE, SERVICE'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

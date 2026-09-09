@@ -1,35 +1,55 @@
 # [REQ-PAW-106] Configure User Rights: Lock pages in memory for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) dedicated to Tier 0 and critical administrative functions. *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-114](../../08-endpoints/user-rights/configure-ura-selockmemoryprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-126](../../02-domain-controllers/user-rights/configure-ura-selockmemoryprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809 and above) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Lock pages in memory`
+  * **Privilege Constant**: `SeLockMemoryPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Lock pages in memory`
   * **Registry Location**: Stored inside local security database under privilege `SeLockMemoryPrivilege` set to `No one (Empty)`.
 
 ---
 
 ## Rationale
-Allows processes to lock physical pages in memory, preventing the OS from swapping them to pagefile. It should be empty to prevent memory exhaustion DoS attacks.
+The `SeLockMemoryPrivilege` allows a process to lock physical memory pages in RAM using APIs such as `VirtualLock` and Address Windowing Extensions (AWE) via `AllocateUserPhysicalPages`. Locking pages prevents the Windows virtual memory manager from paging data out to disk in `pagefile.sys`, ensuring high-performance memory retention.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+If granted to untrusted users or processes, `SeLockMemoryPrivilege` enables significant denial-of-service and kernel degradation attacks: (1) Memory Starvation: A malicious program can lock large swathes of physical RAM, preventing the OS memory manager from trimming working sets or servicing other processes. This leads to severe thrashing, unresponsiveness, and kernel exhaustion; (2) Security Telemetry Blind Spots: An attacker can pin memory structures containing malware artifacts, complicating memory forensics and page-table inspection.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Privileged Access Workstations (PAWs) serve as the clean-source platform for managing Tier 0 Active Directory and cloud infrastructure. Because administrative credentials exist in memory on these devices, strict isolation must be maintained at the operating system level. Restricting this user right strictly prevents lower-tier sessions, third-party software, or interactive users from interfering with administrative operations, upholding the Clean Source Principle and preventing token kidnapping or session hijacking.
+
+Under standard security baselines, `SeLockMemoryPrivilege` must be set to `No one` (Empty). Neither interactive users nor standard system accounts should possess this right on general workstations, PAWs, or Domain Controllers. Specialized database engines (such as Microsoft SQL Server) that utilize AWE memory locking should be configured with dedicated service accounts granted this privilege explicitly only on dedicated database servers.
+
+### 3. MITRE ATT&CK Mapping
+* **T1499 - Endpoint Denial of Service**
+* **T1055 - Process Injection**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeLockMemoryPrivilege` to `No one (Empty)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Configuring `SeLockMemoryPrivilege` to `No one` has zero impact on desktop endpoints, PAWs, or Domain Controllers. Enterprise database hosts requiring Large Page allocations should receive tailored GPO exceptions on their dedicated Organizational Unit. Auditing is captured under Security Event ID 4704.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Lock pages in memory`.
-3. Configure the security principal allocation to: `No one (Empty)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 PAW systems (e.g., `GPO_Hardening_PAW`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Lock pages in memory`**.
+5. Select the **Define these policy settings** check box.
+6. Click **Add User or Group...** and ensure the principal list is empty (or remove all assigned accounts/groups so that no principals are configured).
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +147,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.28 (L1) Ensure 'Lock pages in memory' is set to 'No One'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

@@ -1,35 +1,56 @@
 # [REQ-DC-108] Configure User Rights: Allow log on locally on Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers.
-* **Operating Systems**: Windows Server 2016 (and above).
+* **Applicable Systems**: Domain Controllers (Tier 0 Active Directory infrastructure). *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-095](../../07-paws/user-rights/configure-ura-seinteractivelogonright.md)).* *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-099](../../08-endpoints/user-rights/configure-ura-seinteractivelogonright.md)).*
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, and Windows Server 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Allow log on locally`
+  * **Privilege Constant**: `SeInteractiveLogonRight`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Allow log on locally`
   * **Registry Location**: Stored inside local security database under privilege `SeInteractiveLogonRight` set to `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to sign in locally at the Domain Controller console. Restricting this to Administrators and Enterprise Domain Controllers protects directory database physical access.
+The `SeInteractiveLogonRight` determines which security principals are permitted to start an interactive logon session (Logon Type 2) at the physical keyboard, display, or virtual machine console. An interactive logon spawns a graphical user shell (`explorer.exe`) and interactive desktop session.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+On Tier 0 systems (Domain Controllers and PAWs), interactive console access must be locked down with extreme rigor: (1) Credential Exposure: When a user logs on interactively, their credentials, Kerberos tickets, and DPAPI keys are loaded into LSASS memory on that machine. If non-administrative users or Tier 1/2 operators log on to a Domain Controller, their credentials are exposed to any compromised service; (2) Attack Surface Expansion: Interactive sessions allow users to launch local tools, browse files, stage exploit payloads, and trigger local kernel vulnerabilities. Standard domain users must never be permitted interactive access to Domain Controllers or PAWs.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Domain Controllers are the root of trust for the entire Active Directory forest, storing the directory database (`ntds.dit`), Kerberos master keys (`krbtgt`), and password hashes for all enterprise identities. Unrestricted allocation of user rights on Domain Controllers introduces devastating forest-compromise risks. Enforcing strict assignment of this privilege ensures that directory synchronization, authentication packages, and system execution remain strictly bounded to authorized directory components and Domain Administrators.
+
+On Domain Controllers, configure strictly to `Administrators` (S-1-5-32-544) and `Enterprise Domain Controllers` (S-1-5-9). On PAWs, configure strictly to `Administrators` (S-1-5-32-544). On Endpoints, configure to `Administrators` (S-1-5-32-544) and `Users` (S-1-5-32-545) to permit authorized workstation users to log on.
+
+### 3. MITRE ATT&CK Mapping
+* **T1078.002 - Valid Accounts: Domain Accounts**
+* **T1078.003 - Valid Accounts: Local Accounts**
+* **T1003.001 - OS Credential Dumping: LSASS Memory**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeInteractiveLogonRight` to `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting interactive logon on Domain Controllers and PAWs enforces clean-source administrative isolation and prevents credential theft. Operators who previously logged on directly to DC consoles to manage users must use Remote Server Administration Tools (RSAT) from dedicated PAWs. Interactive logons generate Security Event ID 4624 (Logon Type 2).
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Allow log on locally`.
-3. Configure the security principal allocation to: `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 Domain Controller systems (e.g., `Default Domain Controllers Policy`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Allow log on locally`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Domain Controllers
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R29 (Logon Rights Assignment)
+* **CIS Benchmark**: 2.2.26 (L1) Ensure 'Allow log on locally' is properly restricted per profile
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

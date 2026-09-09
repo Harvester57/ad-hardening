@@ -1,35 +1,57 @@
 # [REQ-END-109] Configure User Rights: Enable computer and user accounts to be trusted for delegation
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-102](../../07-paws/user-rights/configure-ura-seenabledelegationprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-122](../../02-domain-controllers/user-rights/configure-ura-seenabledelegationprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Enable computer and user accounts to be trusted for delegation`
+  * **Privilege Constant**: `SeEnableDelegationPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Enable computer and user accounts to be trusted for delegation`
   * **Registry Location**: Stored inside local security database under privilege `SeEnableDelegationPrivilege` set to `No one (Empty)`.
 
 ---
 
 ## Rationale
-Allows users to change the delegation setting on a user or computer object in AD. This must be completely empty to prevent Kerberos delegation exploits (such as unconstrained delegation or coercion attacks).
+The `SeEnableDelegationPrivilege` allows a security principal to modify the `userAccountControl` attribute on Active Directory user and computer objects to enable Kerberos Delegation flags: (1) `TRUSTED_FOR_DELEGATION` (Unconstrained Delegation); (2) `TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION` (Constrained Delegation with Protocol Transition / S4U2Self). Kerberos delegation permits a service to impersonate an authenticated user to access back-end resources on their behalf.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Misused or abused delegation is one of the most devastating privilege escalation and persistence vectors in Active Directory: (1) Unconstrained Delegation: When a user authenticates to a server with unconstrained delegation, the Domain Controller embeds a copy of the user's Ticket Granting Ticket (TGT) in the service ticket. An attacker who controls a machine or service with unconstrained delegation can harvest TGTs of visiting Domain Admins from memory and achieve immediate, full domain compromise; (2) Protocol Transition Abuse: An attacker with rights to configure constrained delegation can configure an account to impersonate any domain user to target services without requiring the user's password; (3) Computer Account Hijacking: Granting this privilege allows an attacker to create rogue delegation pathways across the forest.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+On Endpoints and PAWs, `SeEnableDelegationPrivilege` must be strictly set to `No one` (Empty). Workstations and member servers must never have the authority to configure Kerberos delegation. On Domain Controllers, this right must be strictly restricted to `Administrators` (S-1-5-32-544), and delegation changes must be subject to strict change management.
+
+### 3. MITRE ATT&CK Mapping
+* **T1558 - Steal or Forge Kerberos Tickets**
+* **T1558.003 - Steal or Forge Kerberos Tickets: Kerberoasting**
+* **T1134.005 - Access Token Manipulation: SID History Injection**
+* **T1078.002 - Valid Accounts: Domain Accounts**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeEnableDelegationPrivilege` to `No one (Empty)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeEnableDelegationPrivilege` prevents unauthorized configuration of Kerberos delegation. Standard administrative workflows are unaffected, as delegation configuration is performed centrally on Domain Controllers by Domain Administrators. Audit Security Event ID 4738 (A user account was modified) and Event ID 4742 (A computer account was modified) for delegation flag updates.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Enable computer and user accounts to be trusted for delegation`.
-3. Configure the security principal allocation to: `No one (Empty)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Enable computer and user accounts to be trusted for delegation`**.
+5. Select the **Define these policy settings** check box.
+6. Click **Add User or Group...** and ensure the principal list is empty (or remove all assigned accounts/groups so that no principals are configured).
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +147,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.21 (L1) Ensure 'Enable computer and user accounts to be trusted for delegation' is set to 'No One' (Workstations/PAWs) / 'Administrators' (DCs)
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

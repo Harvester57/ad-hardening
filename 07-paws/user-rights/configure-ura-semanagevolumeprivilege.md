@@ -1,35 +1,56 @@
 # [REQ-PAW-109] Configure User Rights: Perform volume maintenance tasks for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) dedicated to Tier 0 and critical administrative functions. *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-117](../../08-endpoints/user-rights/configure-ura-semanagevolumeprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise (1809 and above) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Perform volume maintenance tasks`
+  * **Privilege Constant**: `SeManageVolumePrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Perform volume maintenance tasks`
   * **Registry Location**: Stored inside local security database under privilege `SeManageVolumePrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows non-administrative users to run disk utilities. Restricting this to Administrators prevents unauthorized read/write access to raw volume sectors.
+The `SeManageVolumePrivilege` allows a process to perform low-level disk and volume maintenance tasks, including running defragmentation tools, modifying volume quotas, and invoking the `SetFileValidData` Win32 API. The `SetFileValidData` function allows a caller to extend the valid data length of an allocated file without zeroing out the intervening disk clusters.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+The capability to bypass cluster zeroing via `SetFileValidData` represents a severe information disclosure vulnerability: (1) Uninitialized Disk Sector Harvesting: Operating systems typically write zeros to newly allocated disk clusters to prevent users from seeing remnants of previously stored data. When an attacker with `SeManageVolumePrivilege` invokes `SetFileValidData`, the file length is extended across physical clusters containing remnants of deleted files, memory crash dumps, pagefile fragments, or BitLocker keys; (2) Direct Credential Theft: The attacker can immediately read the raw cluster data, harvesting cleartext passwords, encryption certificates, and sensitive documents without possessing read permissions on the original deleted objects.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Privileged Access Workstations (PAWs) serve as the clean-source platform for managing Tier 0 Active Directory and cloud infrastructure. Because administrative credentials exist in memory on these devices, strict isolation must be maintained at the operating system level. Restricting this user right strictly prevents lower-tier sessions, third-party software, or interactive users from interfering with administrative operations, upholding the Clean Source Principle and preventing token kidnapping or session hijacking.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544). Standard users, interactive accounts, and third-party software must not hold volume maintenance rights. Restricting this right ensures that NTFS cluster zero-initialization cannot be bypassed.
+
+### 3. MITRE ATT&CK Mapping
+* **T1005 - Data from Local System**
+* **T1006 - Direct Volume Access**
+* **T1083 - File and Directory Discovery**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeManageVolumePrivilege` to `*S-1-5-32-544 (Administrators)` enforces maximum console and credential isolation. No productivity tools or standard non-administrative domain sessions should exist on PAW consoles.
+* **Operational Impact**: Restricting `SeManageVolumePrivilege` to `Administrators` prevents unauthorized disk cluster inspection. Enterprise database engines (such as Microsoft SQL Server utilizing Instant File Initialization) require this privilege to pre-allocate database data files quickly; on dedicated database servers, the database service account should be granted this right in a targeted server policy. Auditing is captured via Security Event ID 4672.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Perform volume maintenance tasks`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 PAW systems (e.g., `GPO_Hardening_PAW`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Perform volume maintenance tasks`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Privileged Access Workstations
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.33 (L1) Ensure 'Perform volume maintenance tasks' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

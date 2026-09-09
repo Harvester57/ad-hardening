@@ -1,35 +1,57 @@
 # [REQ-DC-104] Configure User Rights: Access this computer from the network on Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers.
-* **Operating Systems**: Windows Server 2016 (and above).
+* **Applicable Systems**: Domain Controllers (Tier 0 Active Directory infrastructure). *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-093](../../07-paws/user-rights/configure-ura-senetworklogonright.md)).* *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-097](../../08-endpoints/user-rights/configure-ura-senetworklogonright.md)).*
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, and Windows Server 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Access this computer from the network`
+  * **Privilege Constant**: `SeNetworkLogonRight`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Access this computer from the network`
   * **Registry Location**: Stored inside local security database under privilege `SeNetworkLogonRight` set to `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to connect to the Domain Controller over the network. Restricting this to Enterprise Domain Controllers, authenticated users, and Administrators protects Tier 0 interfaces.
+The `SeNetworkLogonRight` determines which security principals are permitted to authenticate and establish network logon sessions (Logon Type 3) across the network over protocols like SMB, RPC, WMI, WinRM, and LDAP. Network logons authenticate users without creating an interactive desktop shell, enabling file share access, remote management, and inter-system synchronization.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Allowing broad network logon rights opens the system to unauthorized remote inspection, password spraying, and lateral movement: (1) On PAWs: Privileged Access Workstations must be isolated clean sources. Allowing incoming network connections permits an attacker to connect to a PAW over SMB or RPC, scan for listening services, and attempt credential relaying. PAWs must restrict network logon strictly to `Administrators` (S-1-5-32-544); (2) On Domain Controllers: Network logons must allow domain communication for `Enterprise Domain Controllers` (S-1-5-9) and `Authenticated Users` (S-1-5-11), while excluding untrusted and anonymous callers; (3) On Endpoints: Workstations should permit network logons to `Administrators` and `Authenticated Users` while denying local accounts via deny rules.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Domain Controllers are the root of trust for the entire Active Directory forest, storing the directory database (`ntds.dit`), Kerberos master keys (`krbtgt`), and password hashes for all enterprise identities. Unrestricted allocation of user rights on Domain Controllers introduces devastating forest-compromise risks. Enforcing strict assignment of this privilege ensures that directory synchronization, authentication packages, and system execution remain strictly bounded to authorized directory components and Domain Administrators.
+
+On PAWs, configure strictly to `Administrators` (S-1-5-32-544). On Domain Controllers, configure to `Administrators` (S-1-5-32-544), `Authenticated Users` (S-1-5-11), and `Enterprise Domain Controllers` (S-1-5-9). On Endpoints, configure to `Administrators` (S-1-5-32-544) and `Authenticated Users` (S-1-5-11). Untrusted groups like `Everyone` or `Guests` must never be granted network access.
+
+### 3. MITRE ATT&CK Mapping
+* **T1021.002 - Remote Services: SMB/Windows Admin Shares**
+* **T1021.006 - Remote Services: Windows Remote Management**
+* **T1078.002 - Valid Accounts: Domain Accounts**
+* **T1078.003 - Valid Accounts: Local Accounts**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeNetworkLogonRight` to `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Enforcing proper network logon boundaries isolates administrative workstations while enabling essential domain authentication. Restricting PAWs to Administrators blocks unauthenticated or non-admin network probes. Network logons are audited under Security Event ID 4624 (Logon Type 3).
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Access this computer from the network`.
-3. Configure the security principal allocation to: `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 Domain Controller systems (e.g., `Default Domain Controllers Policy`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Access this computer from the network`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-9 (Enterprise Domain Controllers), *S-1-5-11 (Authenticated Users), *S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +149,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Domain Controllers
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R29 (Logon Rights Assignment)
+* **CIS Benchmark**: 2.2.2 (L1) Ensure 'Access this computer from the network' is restricted per baseline
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

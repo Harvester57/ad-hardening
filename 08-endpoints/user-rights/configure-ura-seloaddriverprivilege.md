@@ -1,35 +1,56 @@
 # [REQ-END-113] Configure User Rights: Load and unload device drivers
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-105](../../07-paws/user-rights/configure-ura-seloaddriverprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-125](../../02-domain-controllers/user-rights/configure-ura-seloaddriverprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Load and unload device drivers`
+  * **Privilege Constant**: `SeLoadDriverPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Load and unload device drivers`
   * **Registry Location**: Stored inside local security database under privilege `SeLoadDriverPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows users to load device drivers in kernel mode. Restricting this prevents attackers from loading unsigned or vulnerable drivers (BYOVD) to execute kernel shellcode.
+The `SeLoadDriverPrivilege` allows a process to dynamically load and unload kernel-mode device drivers (`.sys` files) via `NtLoadDriver` or the Service Control Manager (`CreateService` with `SERVICE_KERNEL_DRIVER`). Kernel-mode drivers execute in Ring 0 with unrestricted hardware access, full kernel memory read/write permissions, and the ability to execute any CPU instruction.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries extensively abuse `SeLoadDriverPrivilege` in Bring Your Own Vulnerable Driver (BYOVD) attacks. Modern Windows enforces Driver Signature Enforcement (DSE), preventing the loading of unsigned code into kernel space. However, an attacker with `SeLoadDriverPrivilege` can drop an authentic, cryptographically signed, legitimate driver that contains known security vulnerabilities (e.g., `gdrv.sys`, `mhyprot2.sys`, `RTCore64.sys`, or `procexp.sys`). Once loaded, the attacker exploits the driver's kernel read/write IOCTLs to: (1) Bludgeon and terminate Endpoint Detection and Response (EDR) processes; (2) Direct Kernel Object Manipulation (DKOM) to hide processes and alter process tokens; (3) Disable ETW-TI (Threat Intelligence) telemetry hooks.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544). No standard users, service accounts, or automated operators must be granted driver loading rights. Driver loading should be further constrained using Windows Defender Application Control (WDAC) and the Microsoft Recommended Driver Blocklist.
+
+### 3. MITRE ATT&CK Mapping
+* **T1068 - Exploitation for Privilege Escalation**
+* **T1543.003 - Create or Modify System Process: Windows Service**
+* **T1562.001 - Impair Defenses: Disable or Modify Tools**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeLoadDriverPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeLoadDriverPrivilege` to `Administrators` ensures only authorized administrative processes can install kernel drivers. Standard hardware plug-and-play driver installations for pre-approved devices function normally through the Windows Driver Store without requiring user-level driver loading privileges. Driver load operations are logged under System Event ID 7045 and Security Event ID 4672/4673.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Load and unload device drivers`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Load and unload device drivers`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +146,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.27 (L1) Ensure 'Load and unload device drivers' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

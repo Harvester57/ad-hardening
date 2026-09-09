@@ -1,35 +1,56 @@
 # [REQ-END-108] Configure User Rights: Debug programs
 
 ## Target Scope
-* **Applicable Systems**: Member Servers, Tier 2 Clients (Windows 10/11)
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-101](../../07-paws/user-rights/configure-ura-sedebugprivilege.md)).* *(For Domain Controllers, refer to [REQ-DC-116](../../02-domain-controllers/user-rights/configure-ura-sedebugprivilege.md)).*
+* **Operating Systems**: Windows 10 Enterprise/Professional (1809 and above), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Debug programs`
+  * **Privilege Constant**: `SeDebugPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Debug programs`
   * **Registry Location**: Stored inside local security database under privilege `SeDebugPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Allows processes to attach to and debug any system process (including lsass.exe). Disallowing it for standard accounts prevents credential dumping tools (Mimikatz) from reading LSASS memory.
+The `SeDebugPrivilege` allows a process to attach a debugger to any running process on the system, completely overriding the target process security descriptor and Discretionary Access Control List (DACL). When enabled, calls to `OpenProcess` with permissions such as `PROCESS_ALL_ACCESS` or `PROCESS_VM_READ` succeed even against processes owned by other users or `NT AUTHORITY\SYSTEM`. This privilege is intended strictly for kernel/application developers debugging live processes.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+Adversaries and post-exploitation frameworks (e.g., Mimikatz, Cobalt Strike, Meterpreter, ProcDump) rely on `SeDebugPrivilege` as the primary mechanism for OS credential theft. By enabling `SeDebugPrivilege`, an attacker can open an unrestricted handle to the Local Security Authority Subsystem Service (`lsass.exe`) and dump process memory to extract: (1) Cleartext passwords cached in WDigest; (2) NTLM password hashes for local and domain accounts; (3) Kerberos Ticket Granting Tickets (TGTs) and session keys; (4) DPAPI master keys. Furthermore, `SeDebugPrivilege` enables process injection into high-integrity services (`svchost.exe`, `csrss.exe`) via `VirtualAllocEx` and `CreateRemoteThread`.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+On general workstations and member servers, enforcing least privilege for this user right is critical for host isolation. Preventing unprivileged users or rogue applications from exercising this right stops local privilege escalation (LPE) and blocks adversaries from leveraging co-located user sessions to harvest credentials or pivot across the corporate subnet.
+
+This privilege must be strictly confined to `Administrators` (S-1-5-32-544) on standard endpoints, Domain Controllers, and PAWs. On PAWs and Tier 0 systems, administrative accounts should only enable this privilege when actively performing emergency system troubleshooting. Standard users, developers (on non-developer workstations), and automated service accounts must never hold `SeDebugPrivilege`.
+
+### 3. MITRE ATT&CK Mapping
+* **T1003.001 - OS Credential Dumping: LSASS Memory**
+* **T1055 - Process Injection**
+* **T1068 - Exploitation for Privilege Escalation**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeDebugPrivilege` to `*S-1-5-32-544 (Administrators)` prevents unauthorized local or network actions. Verify if custom service accounts require this privilege before deploying.
+* **Operational Impact**: Restricting `SeDebugPrivilege` to `Administrators` protects system process memory and prevents unprivileged credential theft. Software developers or diagnostic monitoring agents running as non-administrators may require elevation to debug processes. Security Operations Center (SOC) teams should configure high-severity alerts for Security Event ID 4672 and Event ID 4673 whenever `SeDebugPrivilege` is invoked outside of designated maintenance windows.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Debug programs`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 2 systems (e.g., `GPO_Hardening_Endpoints`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Debug programs`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -125,6 +146,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: User Rights Assignment protective controls
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.13 (L1) Ensure 'Debug programs' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference

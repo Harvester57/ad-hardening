@@ -1,35 +1,56 @@
 # [REQ-DC-131] Configure User Rights: Profile single process on Domain Controllers
 
 ## Target Scope
-* **Applicable Systems**: Domain Controllers.
-* **Operating Systems**: Windows Server 2016 (and above).
+* **Applicable Systems**: Domain Controllers (Tier 0 Active Directory infrastructure). *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-110](../../07-paws/user-rights/configure-ura-seprofilesingleprocessprivilege.md)).* *(For Tier 2 Client Workstations and Member Servers, refer to standard baseline [REQ-END-118](../../08-endpoints/user-rights/configure-ura-seprofilesingleprocessprivilege.md)).*
+* **Operating Systems**: Windows Server 2016, Windows Server 2019, Windows Server 2022, and Windows Server 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Low
 * **GPO Path / Registry Location**:
+  * **Policy Display Name**: `Profile single process`
+  * **Privilege Constant**: `SeProfileSingleProcessPrivilege`
   * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment\Profile single process`
   * **Registry Location**: Stored inside local security database under privilege `SeProfileSingleProcessPrivilege` set to `*S-1-5-32-544 (Administrators)`.
 
 ---
 
 ## Rationale
-Restricting profiling to Administrators prevents profiling sensitive processes on DCs.
+The `SeProfileSingleProcessPrivilege` allows a process to monitor and profile the performance and execution metrics of non-system processes using Windows performance sampling APIs. Profiling tools monitor instruction execution rates, thread context switches, memory cache behavior, and execution sampling.
+
+### 1. Technical Threat Vector & Abuse Mechanics
+An adversary who obtains profiling privileges can perform sophisticated reverse engineering, side-channel analysis, and exploit development: (1) Memory Layout De-randomization: By profiling process memory and execution timings, an attacker can deduce memory layouts and defeat Address Space Layout Randomization (ASLR); (2) Side-Channel Cryptographic Attacks: Profiling cache hits/misses and instruction timings can expose cryptographic key material processed in co-located processes; (3) Security Software Tampering: Attackers analyze EDR sensor thread behavior to identify blind spots or execution hooks.
+
+### 2. Architectural Defense & Least Privilege Enforcement
+Domain Controllers are the root of trust for the entire Active Directory forest, storing the directory database (`ntds.dit`), Kerberos master keys (`krbtgt`), and password hashes for all enterprise identities. Unrestricted allocation of user rights on Domain Controllers introduces devastating forest-compromise risks. Enforcing strict assignment of this privilege ensures that directory synchronization, authentication packages, and system execution remain strictly bounded to authorized directory components and Domain Administrators.
+
+This privilege must be restricted exclusively to `Administrators` (S-1-5-32-544). Standard users, interactive workstation operators, and general service accounts must not have process profiling capabilities.
+
+### 3. MITRE ATT&CK Mapping
+* **T1057 - Process Discovery**
+* **T1055 - Process Injection**
+* **T1562 - Impair Defenses**
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `*S-1-5-32-544 (Administrators)` protects Domain Controllers filesystem and service execution interfaces. Ensure core directory sync or backup agents do not lose validation access.
+* **Operational Impact**: Restricting `SeProfileSingleProcessPrivilege` to `Administrators` prevents unauthorized thread profiling without impacting standard application performance. Developers using standalone profiling tools (such as Visual Studio Profiler) must elevate to administrative context. Auditing is captured under Security Event ID 4672.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Navigate to: `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
-2. Open the policy `Profile single process`.
-3. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Navigate to the targeted GPO linked to Tier 0 Domain Controller systems (e.g., `Default Domain Controllers Policy`).
+3. In the console tree, browse to:
+   `Computer Configuration\Policies\Windows Settings\Security Settings\Local Policies\User Rights Assignment`
+4. Open the policy **`Profile single process`**.
+5. Select the **Define these policy settings** check box.
+6. Configure the security principal allocation to: `*S-1-5-32-544 (Administrators)`.
+7. Click **Apply** and **OK**.
+8. Apply and verify policy enforcement across target hosts using `gpupdate /force` and inspect with `secedit /export /cfg C:\Windows\Temp\sec_audit.cfg`.
 
 ---
 
@@ -127,6 +148,10 @@ if ($CurrentValue -eq $Expected) {
 
 ---
 
+---
+
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Protective controls baselines on Domain Controllers
+* **ANSSI Active Directory Hardening Guide**: ANSSI Active Directory Hardening Guide: R28 (User Rights Assignment)
+* **CIS Benchmark**: 2.2.34 (L1) Ensure 'Profile single process' is set to 'Administrators'
 * **Microsoft Security Baseline**: User Rights Configuration specifications
+* **Microsoft Learn**: User Rights Assignment Reference
