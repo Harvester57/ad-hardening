@@ -1,8 +1,8 @@
 # Configure Account and Password Policies
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 Client Workstations, Member Servers, Domain Controllers
-* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional
+* **Applicable Systems**: Tier 2 Client Workstations and Member Servers.
+* **Operating Systems**: Windows Server 2016 (and above), Windows 10/11 Enterprise/Professional.
 
 ---
 
@@ -14,22 +14,33 @@
   * `Computer Configuration\Administrative Templates\System\PIN Complexity`
   * `Computer Configuration\Administrative Templates\Windows Components\Microsoft Account`
   * `Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
+  * `Computer Configuration\Preferences\Windows Settings\Registry`
+* **Supported On**: Windows 10 / Windows 11 / Windows Server 2016 and above
 
 ---
 
 ## Rationale
-Securing authentication parameters, credential caching thresholds, account lockout windows, and interactive logon behaviors establishes a fundamental defense against password spraying, offline cracking, and unauthorized lateral movement.
 
-This submodule contains individual requirement controls for each specific account policy, lockout setting, authentication restriction, and interactive logon control across enterprise client workstations and member servers.
+Securing authentication parameters, credential caching thresholds, account lockout observation windows, and interactive logon behaviors establishes a fundamental defense against password spraying, offline cracking, and unauthorized lateral movement across the enterprise fleet.
+
+While individual workstations may operate in standard user environments, a compromise on any single endpoint can serve as a beachhead for domain reconnaissance and credential harvesting. Enforcing consistent, hardened account policies across all client systems neutralizes classic post-exploitation vectors:
+
+### Architectural Threat Vectors & Security Objectives
+1. **Elevating Password Entropy**: A 14-character minimum password length expands the keyspace to over `4.6 x 10^27` combinations, defeating offline dictionary attacks while aligning with NIST SP 800-63B guidelines (eliminating forced periodic expirations).
+2. **Defeating Automated Brute Force**: Enforcing a 10-attempt lockout threshold with a 15-minute lockout window (and extending lockout enforcement to the built-in Administrator) stops automated attack scripts.
+3. **Fortifying Credential Caching**: Disabling cached logons (`CachedLogonsCount = 0`) on fixed workstations and setting `NL$IterationCount = 1954` (~2M rounds) on roaming field laptops prevents offline GPU-accelerated cracking of DCC2 hashes.
+4. **Purging Weak Authentication**: Enforcing NTLMv2 with 128-bit session security, disabling WDigest in-memory plaintext caching, and blocking null sessions protects authentication traffic from interception and relay attacks.
+5. **Physical & Interactive Security**: Mandating the hardware Secure Attention Sequence (`CTRL+ALT+DEL`), hiding the last signed-in username, and locking on smart card removal eliminates casual physical snooping and rogue logon prompts.
+6. **Protecting Secure Channel Communication**: Enforcing cryptographic sealing, signing, and 30-day machine password rotation ensures the integrity of domain communication and thwarts ZeroLogon-style vulnerabilities.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Account Lockouts**: Legitimate users who forget their passwords may lock themselves out. Standard procedures must exist for administrative reset of locked accounts.
-* **Smart Card Removal**: Users must be trained to carry their smart cards with them, which automatically locks the session. Re-authenticating requires inserting the card and entering the PIN.
-* **Minimum Password Length (14 characters)**: Users with short passwords will be forced to choose a longer password (at least 14 characters) during their next password change.
-* **No Password Expiration (MaxPasswordAge = 0)**: Users will no longer be prompted to periodically change their passwords, reducing helpdesk calls related to expired password lockouts and discouraging the use of weak incremental password schemes.
-* **Logon Caching (CachedLogonsCount = 0)**: Workstations must have active, real-time connectivity to a Domain Controller to allow users to log on.
+
+* **Password Passphrase Adoption**: Users with passwords shorter than 14 characters must update their credentials to meet the length requirement. User education should focus on memorable passphrases.
+* **Lockout Behavior**: Users who mistype their password 10 times will experience a 15-minute temporary lockout, after which the account will automatically unlock without IT intervention.
+* **Roaming Laptops vs Fixed Desktops**: Desktops enforce `CachedLogonsCount = 0` requiring live domain connectivity. Roaming laptops without pre-logon VPN must be placed in a dedicated OU allowing a limited cache (e.g., 2 logons) fortified with `NL$IterationCount = 1954` and BitLocker TPM+PIN.
+* **Modernized Web Applications**: Intranet applications requiring HTTP Digest authentication must be updated to modern Kerberos, SAML, or OAuth 2.0 federation.
 
 ---
 
@@ -55,6 +66,8 @@ The following individual account and authentication policies must be enforced:
 ---
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10/11 Client Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 1.3 (Kerberos Policy), Section 2.3 (Security Options), Section 18 (Administrative Templates)
-* **ANSSI AD Hardening Guide**: Recommendations on password complexity, reversible encryption blocks, lockout management, and domain member secure channels
-* **DoD Windows 11 Computer STIG v2r6**: Account policies, PIN complexity, Windows Hello for Business, and Netlogon secure channel parameters
+* **CIS Microsoft Windows 10/11 Enterprise Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 1.3 (Kerberos Policy), Section 2.3 (Security Options), Section 18 (Administrative Templates)
+* **CIS Microsoft Windows Server 2022 Benchmark**: Section 1.1, Section 1.2, Section 1.3, Section 2.3, Section 18
+* **DoD Windows 11 Computer STIG**: Account policies, PIN complexity, Windows Hello for Business, and Netlogon secure channel parameters
+* **ANSSI Active Directory Hardening Guide**: Recommendations on password entropy, lockout management, and domain member secure channels
+* **Microsoft Security Baseline Focus**: Windows Client Security Baseline - Account Policies & Local Policies Security Options

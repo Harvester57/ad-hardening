@@ -1,14 +1,27 @@
 # Get-EndAccountHelloPinStatus.ps1
+# Description: Audits Windows Hello for Business, PIN complexity, and TPM enforcement status on Endpoints.
+
 Write-Host "--- Auditing Endpoint Windows Hello and PIN Policies ---" -ForegroundColor Cyan
 $script:Vulnerable = $false
 
 function Test-RegVal ($Path, $Name, $Expected) {
-    $Val = (Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue).$Name
+    if (-not (Test-Path -Path $Path)) {
+        Write-Host "    [!] MISSING KEY: $Path" -ForegroundColor Red
+        $script:Vulnerable = $true
+        return
+    }
+    $Prop = Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue
+    if ($null -eq $Prop -or $null -eq $Prop.$Name) {
+        Write-Host "    [!] MISSING VALUE: $Name under $Path (Expected: $Expected)" -ForegroundColor Red
+        $script:Vulnerable = $true
+        return
+    }
+    $Val = $Prop.$Name
     if ($Val -ne $Expected) {
         Write-Host "    [!] VULNERABLE: $Name under $Path is '$Val' (Expected: $Expected)" -ForegroundColor Red
         $script:Vulnerable = $true
     } else {
-        Write-Host "    [+] $($Name): $Val" -ForegroundColor Green
+        Write-Host "    [+] $($Name): $Val (Secure)" -ForegroundColor Green
     }
 }
 

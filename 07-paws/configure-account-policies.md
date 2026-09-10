@@ -1,8 +1,8 @@
 # Configure Account and Password Policies for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) (Tier 0 Workstations)
-* **Operating Systems**: Windows 10/11 Enterprise
+* **Applicable Systems**: Privileged Access Workstations (PAWs) dedicated to Tier 0 directory administration.
+* **Operating Systems**: Windows 10 Enterprise (1809 and above), Windows 11 Enterprise (all builds).
 
 ---
 
@@ -14,21 +14,33 @@
   * `Computer Configuration\Administrative Templates\System\PIN Complexity`
   * `Computer Configuration\Administrative Templates\Windows Components\Microsoft Account`
   * `Computer Configuration\Administrative Templates\Windows Components\Windows Hello for Business`
+  * `Computer Configuration\Preferences\Windows Settings\Registry`
+* **Supported On**: Windows 10 Enterprise / Windows 11 Enterprise
 
 ---
 
 ## Rationale
-Privileged Access Workstations (PAWs) represent the highest security boundary on the endpoint layer, serving as isolated systems dedicated solely to Tier 0 directory administration. If a PAW is compromised, the entire AD forest is compromised. Therefore, authentication parameters, local password policies, account lockouts, secure channel settings, and interactive logon behaviors must be hardened to their absolute maximum threshold.
 
-This submodule contains individual requirement controls for each specific account policy, lockout setting, authentication restriction, and interactive logon control on PAWs.
+Privileged Access Workstations (PAWs) represent the highest security boundary in the client estate, serving as isolated consoles dedicated exclusively to Tier 0 directory administration (Active Directory Domain Controllers, PKI/AD CS, Identity Federation, and Directory Synchronization). If a PAW is compromised, the confidentiality and integrity of the entire Active Directory forest are compromised.
+
+Authentication parameters, local credential caching, account lockout thresholds, Netlogon secure channel parameters, and interactive logon behaviors must be hardened to their absolute maximum thresholds:
+
+### Architectural Threat Vectors & Security Objectives
+1. **Elimination of Cached Credentials**: Disabling logon caching (`CachedLogonsCount = 0`) guarantees that dumped local registry hives yield zero cached administrative passwords.
+2. **Offline Cracking Resistance**: Enforcing a 20-character minimum password length for local accounts expands the keyspace to over `10^39` combinations, rendering offline GPU cracking impossible.
+3. **Throttling Password Guessing & Spraying**: Enforcing a strict 5-attempt lockout threshold with 30-minute lockout windows (and extending lockout enforcement to the built-in Administrator) stops automated brute force.
+4. **Purging Legacy Authentication**: Mandating LAN Manager Level 5 (NTLMv2 only) with 128-bit session security and blocking WDigest in-memory cleartext caching eliminates classic relay and LSASS extraction exploits.
+5. **Physical Console Security**: Requiring hardware Secure Attention Sequence (`CTRL+ALT+DEL`), hiding usernames on the lock screen, and automatically locking the session upon smart card removal secures unattended consoles against walk-by physical compromise.
+6. **Secure Channel Integrity**: Enforcing cryptographic signing, sealing, 128-bit strong session keys, and 30-day machine password rotation on the Netlogon secure channel protects domain communication from spoofing and ZeroLogon-style attacks.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Account Lockouts**: Legitimate administrators who forget their passwords may lock themselves out. Standard procedures must exist for administrative reset of locked accounts by another Tier 0 administrator.
-* **Smart Card Removal**: Administrators must be trained to carry their smart cards with them, which automatically locks the session. Re-authenticating requires inserting the card and entering the PIN.
-* **Logon Caching (CachedLogonsCount = 0)**: PAWs must have active, real-time connectivity to a Domain Controller to allow users to log on. Off-domain logons without live DC contact will fail.
-* **No Password Expiration**: Removing periodic password changes minimizes helpdesk tickets and stops administrators from choosing predictable increments. Credential revocation and rotation protocols must remain active for suspected leaks.
+
+* **Continuous Domain Connectivity Required**: With cached logons disabled (`CachedLogonsCount = 0`), PAWs must have live network connectivity to an Active Directory Domain Controller to process user logons. Off-network logons will fail.
+* **Administrative Lockout Handling**: Repeatedly mistyping passwords on fallback local administrator accounts will trigger a 30-minute lockout. Documented procedures must exist for administrative unlocking via secondary Tier 0 consoles.
+* **Smart Card Lifecycle**: Administrators must carry their hardware tokens with them, as token removal instantly locks the desktop.
+* **No Periodic Expiration**: Eliminating arbitrary periodic password expirations minimizes weak incremental passwords, while immediate revocation protocols remain active for suspected compromise.
 
 ---
 
@@ -54,6 +66,7 @@ The following individual account and authentication policies must be enforced on
 ---
 
 ## Sources & Compliance References
-* **CIS Microsoft Windows 10/11 Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 2.3 (Security Options), Section 18 (Administrative Templates)
-* **ANSSI AD Hardening Guide**: Recommendations on password complexity, reversible encryption blocks, lockout management, and domain member secure channels
-* **DoD Windows 11 Computer STIG v2r6**: Account policies, PIN complexity, Windows Hello for Business, and Netlogon secure channel parameters
+* **CIS Microsoft Windows 10/11 Enterprise Benchmark**: Section 1.1 (Password Policy), Section 1.2 (Account Lockout Policy), Section 1.3 (Kerberos Policy), Section 2.3 (Security Options), Section 18 (Administrative Templates)
+* **DoD Windows 11 Computer STIG**: Account policies, PIN complexity, Windows Hello for Business, and Netlogon secure channel parameters
+* **ANSSI Active Directory Hardening Guide**: Section 3.4 (PAW Isolation, Authentication Constraints, and Credential Hardening)
+* **Microsoft Security Baseline Focus**: Windows Client Security Baseline - Account Policies & Local Policies Security Options

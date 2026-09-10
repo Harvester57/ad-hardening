@@ -1,20 +1,29 @@
 # Get-EndAccountPasswordPolicyStatus.ps1
+# Description: Audits Endpoint password policy parameters via SecEdit and registry queries.
+
 Write-Host "--- Auditing Endpoint Password Policy ---" -ForegroundColor Cyan
 $script:Vulnerable = $false
 
 # 1. Audit Registry Setting
 $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
-$WarnVal = (Get-ItemProperty -Path $WinlogonPath -Name "PasswordExpiryWarning" -ErrorAction SilentlyContinue).PasswordExpiryWarning
-if ($WarnVal -lt 5 -or $WarnVal -gt 14) {
-    Write-Host "    [!] VULNERABLE: PasswordExpiryWarning is set to '$WarnVal' (Expected: 5-14)" -ForegroundColor Red
+if (-not (Test-Path $WinlogonPath)) {
+    Write-Host "    [!] MISSING KEY: $WinlogonPath" -ForegroundColor Red
     $script:Vulnerable = $true
 } else {
-    Write-Host "    [+] PasswordExpiryWarning: $WarnVal" -ForegroundColor Green
+    $WarnVal = (Get-ItemProperty -Path $WinlogonPath -Name "PasswordExpiryWarning" -ErrorAction SilentlyContinue).PasswordExpiryWarning
+    if ($null -eq $WarnVal -or $WarnVal -lt 5 -or $WarnVal -gt 14) {
+        Write-Host "    [!] VULNERABLE: PasswordExpiryWarning is set to '$WarnVal' (Expected: 5-14)" -ForegroundColor Red
+        $script:Vulnerable = $true
+    } else {
+        Write-Host "    [+] PasswordExpiryWarning: $WarnVal (Secure)" -ForegroundColor Green
+    }
 }
 
 # 2. Audit SecEdit Settings
-$SecTempDir = Join-Path $env:TEMP "EndPasswordAuditTemplate"
-if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+$SecTempDir = Join-Path $env:TEMP "EndpointPasswordAuditTemplate"
+if (-not (Test-Path $SecTempDir)) {
+    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
+}
 $CfgFile = Join-Path $SecTempDir "end_password_audit.cfg"
 
 $Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
@@ -47,7 +56,7 @@ foreach ($Key in $ExpectedSettings.Keys) {
         Write-Host "    [!] VULNERABLE: $($Key) = '$Actual' (Expected: '$Expected')" -ForegroundColor Red
         $script:Vulnerable = $true
     } else {
-        Write-Host "    [+] $($Key): $Actual" -ForegroundColor Green
+        Write-Host "    [+] $($Key): $Actual (Secure)" -ForegroundColor Green
     }
 }
 

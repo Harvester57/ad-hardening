@@ -1,11 +1,20 @@
 # Get-EndAccountWdigestCredentialsStatus.ps1
+# Description: Audits WDigest plaintext credential caching status on Endpoints.
+
 Write-Host "--- Auditing Endpoint WDigest Credential Caching ---" -ForegroundColor Cyan
 
 $WDigestPath = "HKLM:\System\CurrentControlSet\Control\SecurityProviders\WDigest"
+
+if (-not (Test-Path $WDigestPath)) {
+    Write-Host "    [!] MISSING KEY: $WDigestPath" -ForegroundColor Red
+    Write-Output "Non-Compliant"
+    exit 1
+}
+
 $Val = (Get-ItemProperty -Path $WDigestPath -Name "UseLogonCredential" -ErrorAction SilentlyContinue).UseLogonCredential
 
 if ($null -ne $Val -and $Val -eq 0) {
-    Write-Host "    [+] UseLogonCredential is set to 0 (Disabled)." -ForegroundColor Green
+    Write-Host "    [+] UseLogonCredential is set to 0 (Disabled - Secure)." -ForegroundColor Green
     Write-Output "Compliant"
     exit 0
 } else {

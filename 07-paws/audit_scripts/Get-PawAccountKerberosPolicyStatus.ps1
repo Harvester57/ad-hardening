@@ -1,9 +1,13 @@
 # Get-PawAccountKerberosPolicyStatus.ps1
+# Description: Audits Kerberos ticket policy parameters on PAWs via SecEdit.
+
 Write-Host "--- Auditing PAW Kerberos Policy ---" -ForegroundColor Cyan
 $script:Vulnerable = $false
 
 $SecTempDir = Join-Path $env:TEMP "PAWKerberosAuditTemplate"
-if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+if (-not (Test-Path $SecTempDir)) {
+    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
+}
 $CfgFile = Join-Path $SecTempDir "paw_kerberos_audit.cfg"
 
 $Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
@@ -34,7 +38,7 @@ foreach ($Key in $ExpectedSettings.Keys) {
         Write-Host "    [!] VULNERABLE: $($Key) = '$Actual' (Expected: '$Expected')" -ForegroundColor Red
         $script:Vulnerable = $true
     } else {
-        Write-Host "    [+] $($Key): $Actual" -ForegroundColor Green
+        Write-Host "    [+] $($Key): $Actual (Secure)" -ForegroundColor Green
     }
 }
 

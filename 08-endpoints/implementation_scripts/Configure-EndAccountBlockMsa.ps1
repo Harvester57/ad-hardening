@@ -1,8 +1,12 @@
 # Configure-EndAccountBlockMsa.ps1
+# Description: Blocks consumer Microsoft account user authentication on Endpoints.
+
 Write-Host "Blocking consumer Microsoft account user authentication on Endpoints..." -ForegroundColor Cyan
 
 $MsaPath = "HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount"
-if (-not (Test-Path $MsaPath)) { New-Item -Path $MsaPath -Force | Out-Null }
+if (-not (Test-Path -Path $MsaPath)) {
+    New-Item -Path $MsaPath -Force | Out-Null
+}
 Set-ItemProperty -Path $MsaPath -Name "DisableUserAuth" -Value 1 -Type DWord -Force
 
-Write-Host "Consumer Microsoft account user authentication blocked." -ForegroundColor Green
+Write-Host "Consumer Microsoft account user authentication blocked successfully." -ForegroundColor Green

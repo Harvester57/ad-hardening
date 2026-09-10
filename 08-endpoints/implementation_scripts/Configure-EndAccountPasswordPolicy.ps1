@@ -1,21 +1,29 @@
 # Configure-EndAccountPasswordPolicy.ps1
+# Description: Configures Endpoint password policy (14 char minimum, relaxed limits, no expiration) via SecEdit.
+
 Write-Host "Configuring Endpoint password policy..." -ForegroundColor Cyan
 
 # 1. Configure PasswordExpiryWarning via Registry
 $WinlogonPath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon"
-if (-not (Test-Path $WinlogonPath)) { New-Item -Path $WinlogonPath -Force | Out-Null }
+if (-not (Test-Path $WinlogonPath)) {
+    New-Item -Path $WinlogonPath -Force | Out-Null
+}
 Set-ItemProperty -Path $WinlogonPath -Name "PasswordExpiryWarning" -Value 14 -Type DWord -Force
 
 # 2. Configure SecEdit System Access password parameters
-$SecTempDir = Join-Path $env:TEMP "EndPasswordSecTemplate"
-if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+$SecTempDir = Join-Path $env:TEMP "EndpointPasswordSecTemplate"
+if (-not (Test-Path $SecTempDir)) {
+    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
+}
 
 $CfgFile = Join-Path $SecTempDir "end_password.cfg"
 $DbFile = Join-Path $SecTempDir "end_password.sdb"
 $LogFile = Join-Path $SecTempDir "end_password.log"
 
 $Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
-if ($Process.ExitCode -ne 0) { Throw "Failed to export current security template." }
+if ($Process.ExitCode -ne 0) {
+    Throw "Failed to export current security template."
+}
 
 $ConfigText = Get-Content -Path $CfgFile -Raw
 if ($ConfigText -notmatch "\[System Access\]") {
@@ -38,14 +46,23 @@ $PwdSettings = @{
 
 foreach ($Line in $Lines) {
     if ($Line -match "^\[(.*)\]$") {
-        if ($Matches[1] -eq "System Access") { $InSystemAccess = $true } else { $InSystemAccess = $false }
+        if ($Matches[1] -eq "System Access") {
+            $InSystemAccess = $true
+        } else {
+            $InSystemAccess = $false
+        }
     }
     if ($InSystemAccess) {
         $IsManaged = $false
         foreach ($Key in $PwdSettings.Keys) {
-            if ($Line -match "^\s*$($Key)\s*=") { $IsManaged = $true; break }
+            if ($Line -match "^\s*$($Key)\s*=") {
+                $IsManaged = $true
+                break
+            }
         }
-        if (-not $IsManaged) { $NewLines += $Line }
+        if (-not $IsManaged) {
+            $NewLines += $Line
+        }
     } else {
         $NewLines += $Line
     }
@@ -64,7 +81,9 @@ foreach ($Line in $NewLines) {
 
 $FinalLines -join "`r`n" | Out-File -FilePath $CfgFile -Encoding ascii -Force
 $Proc = Start-Process secedit -ArgumentList "/configure /db `"$DbFile`" /cfg `"$CfgFile`" /areas SECURITYPOLICY /log `"$LogFile`"" -Wait -NoNewWindow -PassThru
-if ($Proc.ExitCode -ne 0) { Throw "Failed to apply SecEdit password policy." }
+if ($Proc.ExitCode -ne 0) {
+    Throw "Failed to apply SecEdit password policy."
+}
 
 Remove-Item -Path $SecTempDir -Recurse -Force -ErrorAction SilentlyContinue
 Write-Host "Endpoint password policy applied successfully." -ForegroundColor Green

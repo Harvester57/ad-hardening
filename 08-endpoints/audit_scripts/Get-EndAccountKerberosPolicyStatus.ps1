@@ -1,9 +1,13 @@
 # Get-EndAccountKerberosPolicyStatus.ps1
+# Description: Audits Kerberos ticket policy parameters on Endpoints via SecEdit.
+
 Write-Host "--- Auditing Endpoint Kerberos Policy ---" -ForegroundColor Cyan
 $script:Vulnerable = $false
 
-$SecTempDir = Join-Path $env:TEMP "EndKerberosAuditTemplate"
-if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+$SecTempDir = Join-Path $env:TEMP "EndpointKerberosAuditTemplate"
+if (-not (Test-Path $SecTempDir)) {
+    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
+}
 $CfgFile = Join-Path $SecTempDir "end_kerberos_audit.cfg"
 
 $Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
@@ -34,7 +38,7 @@ foreach ($Key in $ExpectedSettings.Keys) {
         Write-Host "    [!] VULNERABLE: $($Key) = '$Actual' (Expected: '$Expected')" -ForegroundColor Red
         $script:Vulnerable = $true
     } else {
-        Write-Host "    [+] $($Key): $Actual" -ForegroundColor Green
+        Write-Host "    [+] $($Key): $Actual (Secure)" -ForegroundColor Green
     }
 }
 

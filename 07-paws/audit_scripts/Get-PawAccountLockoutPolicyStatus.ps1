@@ -1,4 +1,6 @@
 # Get-PawAccountLockoutPolicyStatus.ps1
+# Description: Audits account lockout policy parameters on PAWs via SecEdit.
+
 Write-Host "--- Auditing PAW Account Lockout Policy ---" -ForegroundColor Cyan
 $script:Vulnerable = $false
 
@@ -9,12 +11,14 @@ if ($null -eq $MaxDeviceVal -or $MaxDeviceVal -gt 10 -or $MaxDeviceVal -eq 0) {
     Write-Host "    [!] VULNERABLE: MaxDevicePasswordFailedAttempts is set to '$MaxDeviceVal' (Expected: 10 or fewer, but not 0)" -ForegroundColor Red
     $script:Vulnerable = $true
 } else {
-    Write-Host "    [+] MaxDevicePasswordFailedAttempts: $MaxDeviceVal" -ForegroundColor Green
+    Write-Host "    [+] MaxDevicePasswordFailedAttempts: $MaxDeviceVal (Secure)" -ForegroundColor Green
 }
 
 # 2. Audit SecEdit Settings
 $SecTempDir = Join-Path $env:TEMP "PAWLockoutAuditTemplate"
-if (-not (Test-Path $SecTempDir)) { New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null }
+if (-not (Test-Path $SecTempDir)) {
+    New-Item -Path $SecTempDir -ItemType Directory -Force | Out-Null
+}
 $CfgFile = Join-Path $SecTempDir "paw_lockout_audit.cfg"
 
 $Process = Start-Process secedit -ArgumentList "/export /cfg `"$CfgFile`"" -Wait -NoNewWindow -PassThru
@@ -44,7 +48,7 @@ foreach ($Key in $ExpectedSettings.Keys) {
         Write-Host "    [!] VULNERABLE: $($Key) = '$Actual' (Expected: '$Expected')" -ForegroundColor Red
         $script:Vulnerable = $true
     } else {
-        Write-Host "    [+] $($Key): $Actual" -ForegroundColor Green
+        Write-Host "    [+] $($Key): $Actual (Secure)" -ForegroundColor Green
     }
 }
 
