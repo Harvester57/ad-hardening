@@ -1,5 +1,4 @@
 # Configure-PawUpiesecurity.ps1
-# Configure-PawUpiesecurity.ps1
 Write-Host "Applying User Profile restriction: ie-security..." -ForegroundColor Cyan
 
 function Set-RegValue {

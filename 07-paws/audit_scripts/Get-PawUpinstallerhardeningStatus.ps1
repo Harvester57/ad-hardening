@@ -1,5 +1,4 @@
 # Get-PawUpinstallerhardeningStatus.ps1
-# Get-PawUpinstallerhardeningStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

@@ -1,5 +1,4 @@
 # Configure-PawUpinplacesharing.ps1
-# Configure-PawUpinplacesharing.ps1
 Write-Host "Applying User Profile restriction: inplace-sharing..." -ForegroundColor Cyan
 
 function Set-RegValue {
@@ -20,6 +19,7 @@ function Set-RegValue {
     }
 }
 Set-RegValue "HKCU:" "Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" "NoInplaceSharing" "1" "DWord"
+Set-RegValue "HKLM:" "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" "NoInplaceSharing" "1" "DWord"
 
 # Apply to Default User profile for new sessions
 $DefaultHivePath = "C:\Users\Default\NTUSER.DAT"

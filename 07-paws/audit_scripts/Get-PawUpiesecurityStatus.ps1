@@ -1,5 +1,4 @@
 # Get-PawUpiesecurityStatus.ps1
-# Get-PawUpiesecurityStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

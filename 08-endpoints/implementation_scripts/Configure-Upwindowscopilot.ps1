@@ -19,6 +19,7 @@ function Set-RegValue {
     }
 }
 Set-RegValue "HKCU:" "Software\Policies\Microsoft\Windows\WindowsCopilot" "TurnOffWindowsCopilot" "1" "DWord"
+Set-RegValue "HKLM:" "SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" "TurnOffWindowsCopilot" "1" "DWord"
 
 # Apply to Default User profile for new sessions
 $DefaultHivePath = "C:\Users\Default\NTUSER.DAT"

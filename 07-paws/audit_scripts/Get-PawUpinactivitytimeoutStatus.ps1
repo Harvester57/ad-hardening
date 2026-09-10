@@ -1,5 +1,4 @@
 # Get-PawUpinactivitytimeoutStatus.ps1
-# Get-PawUpinactivitytimeoutStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

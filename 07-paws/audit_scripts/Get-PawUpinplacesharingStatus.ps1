@@ -1,5 +1,4 @@
 # Get-PawUpinplacesharingStatus.ps1
-# Get-PawUpinplacesharingStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

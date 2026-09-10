@@ -1,5 +1,4 @@
 # Configure-PawUpinstallerhardening.ps1
-# Configure-PawUpinstallerhardening.ps1
 Write-Host "Applying User Profile restriction: installer-hardening..." -ForegroundColor Cyan
 
 function Set-RegValue {

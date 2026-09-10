@@ -1,5 +1,4 @@
 # Configure-PawUprunassuppression.ps1
-# Configure-PawUprunassuppression.ps1
 Write-Host "Applying User Profile restriction: runas-suppression..." -ForegroundColor Cyan
 
 function Set-RegValue {

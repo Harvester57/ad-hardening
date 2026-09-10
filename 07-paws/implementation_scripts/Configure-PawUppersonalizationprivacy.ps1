@@ -1,5 +1,4 @@
 # Configure-PawUppersonalizationprivacy.ps1
-# Configure-PawUppersonalizationprivacy.ps1
 Write-Host "Applying User Profile restriction: personalization-privacy..." -ForegroundColor Cyan
 
 function Set-RegValue {

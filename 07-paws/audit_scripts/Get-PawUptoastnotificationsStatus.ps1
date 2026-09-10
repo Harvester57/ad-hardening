@@ -1,5 +1,4 @@
 # Get-PawUptoastnotificationsStatus.ps1
-# Get-PawUptoastnotificationsStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

@@ -1,5 +1,4 @@
 # Get-PawUpexplorersecurityStatus.ps1
-# Get-PawUpexplorersecurityStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

@@ -1,5 +1,4 @@
 # Configure-PawUpseclogonservice.ps1
-# Configure-PawUpseclogonservice.ps1
 Write-Host "Applying User Profile restriction: seclogon-service..." -ForegroundColor Cyan
 
 function Set-RegValue {

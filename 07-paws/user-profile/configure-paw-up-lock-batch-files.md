@@ -1,40 +1,74 @@
 # [REQ-PAW-145] User Profile: Command Processor Batch File Locking for PAWs
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs)
-* **Operating Systems**: Windows 10/11 Enterprise
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 Active Directory and identity infrastructure administration. *(For Tier 2 Client Workstations and Member Servers, refer to baseline [REQ-END-156](../../08-endpoints/user-profile/configure-end-up-lock-batch-files.md)).*
+* **Operating Systems**: Windows 10 Enterprise (version 1809 and above), Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: High
-* **GPO Path / Registry Location**:
-  * **Registry Settings**:
-  * Registry: `HKLM\SOFTWARE\Microsoft\Command Processor\LockBatchFilesWhenInUse` = `1` (DWord)
-
+* **GPO Paths / Registry Locations**:
+  * **Command Processor Batch File Locking**:
+    * GPO Path: `Computer Configuration\Administrative Templates\System\Mitigations` (or Group Policy Preferences Registry Policy)
+    * Registry Path: `HKLM\SOFTWARE\Microsoft\Command Processor`
+    * Value Name: `LockBatchFilesWhenInUse`
+    * Value Type: `REG_DWORD`
+    * Value Data: `1` (Enabled / Enforce mandatory file locking on active batch scripts)
 
 ---
 
 ## Rationale
-Locking batch scripts when executing prevents attackers or concurrent processes from rewriting script lines on-the-fly, neutralizing dynamic code modification hijacks.
+Privileged Access Workstations (PAWs) are dedicated exclusively to directory administration, identity synchronization, and domain-level maintenance. Administrative batch scripts running on PAWs often operate in high-integrity or `SYSTEM` contexts to orchestrate directory backups, certificate rollover tasks, or network diagnostics. Allowing concurrent processes to modify active scripts creates a critical privilege escalation vector.
+
+### 1. Command Processor Streaming Internals & TOCTOU Vulnerability
+The legacy Windows Command Processor (`cmd.exe`) does not load an entire script into memory upon execution:
+* It reads instructions iteratively from disk, processing lines sequentially and seeking file pointers dynamically.
+* By default, `cmd.exe` opens batch files with shared write access (`FILE_SHARE_WRITE`), enabling any process running under an authorized identity or low-integrity context to rewrite the file contents during execution.
+* An attacker with local access or malware executing concurrently can inject commands into the active batch file. When `cmd.exe` reads the next block from disk, it executes the injected commands within the administrative execution context.
+* On a PAW console, where administrative scripts handle sensitive directory objects and authentication tokens, dynamic script tampering directly compromises Tier 0 administrative credentials.
+
+### 2. File Locking Enforcement on PAW Consoles
+Setting `LockBatchFilesWhenInUse = 1` enforces strict file locking semantics across all instances of `cmd.exe`:
+* The Command Processor opens batch files with exclusive read sharing (`FILE_SHARE_READ`), completely disallowing write or delete access from other processes.
+* Any concurrent write attempt returns `ERROR_SHARING_VIOLATION` (`0x20`), preventing on-the-fly script tampering.
+* This setting complements PowerShell Constrained Language Mode and Windows Defender Application Control (WDAC) by closing an inherent file-locking loophole in the legacy command shell.
+
+### 3. MITRE ATT&CK Mapping
+* **T1059.003 - Command and Scripting Interpreter: Windows Command Shell**: Executing commands through cmd.exe batch scripts.
+* **T1565.001 - Data Manipulation: Stored Data Manipulation**: Modifying batch files on disk during execution to hijack program control flow.
+* **T1068 - Exploitation for Privilege Escalation**: Weaponizing race conditions in administrative scripts to achieve arbitrary code execution under elevated identities.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Operational Impact**: Restricts legacy application hooks or diagnostic modes. Ensure testing in a representative staging environment prior to wide deployment.
+* **PAW Dedicated Role**: Modern administrative workflows on PAWs rely almost exclusively on PowerShell rather than legacy batch files. Any existing batch utilities adhere to standard programming practices and do not modify themselves during execution.
+* **Zero Operational Disruption**: Enforcing `LockBatchFilesWhenInUse = 1` causes zero disruption to standard PAW management workflows.
 
 ---
 
 ## Implementation Steps
 
 ### Option A: Group Policy Object (GPO) Configuration (Preferred)
-1. Deploy the following Registry settings using Group Policy Preferences (Registry Extension):
-  * Registry: `HKLM\SOFTWARE\Microsoft\Command Processor\LockBatchFilesWhenInUse` = `1` (DWord)
 
+1. Open the **Group Policy Management Console** (`gpmc.msc`).
+2. Edit or create the target GPO linked to Tier 0 Privileged Access Workstations (e.g., `GPO_Hardening_PAW`).
+3. Navigate to: `Computer Configuration \ Preferences \ Windows Settings \ Registry`
+4. Right-click **Registry** -> **New** -> **Registry Item** and configure:
+   * **Action**: `Update`
+   * **Hive**: `HKEY_LOCAL_MACHINE`
+   * **Key Path**: `SOFTWARE\Microsoft\Command Processor`
+   * **Value Name**: `LockBatchFilesWhenInUse`
+   * **Value Type**: `REG_DWORD`
+   * **Value Data**: `1`
+5. Link the GPO to the dedicated PAW Organizational Unit and enforce replication using `gpupdate /force`.
 
 ---
 
 ### Option B: PowerShell & Registry Configuration (Remediation / Non-GPO)
+
+Run the following script locally to enforce Command Processor batch file locking on the PAW console:
+
 [Download Script: Configure-PawAuditLockbatchfiles.ps1](../implementation_scripts/Configure-PawAuditLockbatchfiles.ps1)
 
 ```powershell
@@ -50,6 +84,7 @@ Write-Host "    Enforced LockBatchFilesWhenInUse = 1" -ForegroundColor Green
 ```
 
 *To audit the hardening status:*
+
 [Download Script: Get-PawAuditLockbatchfilesStatus.ps1](../audit_scripts/Get-PawAuditLockbatchfilesStatus.ps1)
 
 ```powershell
@@ -74,5 +109,7 @@ if ($script:Vulnerable) {
 ---
 
 ## Sources & Compliance References
-* **ANSSI Active Directory Hardening Guide**: Client security baselines
-* **CIS Windows 10/11 Client Benchmark**: Section 18.9 (Administrative Templates: System \ Mitigations) and Registry restrictions
+* **CIS Benchmark**: CIS Microsoft Windows 10 Enterprise Benchmark: Section 18.9.x; CIS Microsoft Windows 11 Enterprise Benchmark: Section 18.9.x
+* **DISA STIG**: Windows 10 STIG Rule WN10-CC-000105, Windows 11 STIG Rule WN11-CC-000105
+* **ANSSI Active Directory Hardening Guide**: Recommendation R37 (Securing administrative workstations and script execution environments)
+* **Microsoft Privileged Access Guidance**: Securing Privileged Access: System-Level Hardening and Memory Protections

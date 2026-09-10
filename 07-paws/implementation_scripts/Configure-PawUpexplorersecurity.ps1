@@ -1,5 +1,4 @@
 # Configure-PawUpexplorersecurity.ps1
-# Configure-PawUpexplorersecurity.ps1
 Write-Host "Applying User Profile restriction: explorer-security..." -ForegroundColor Cyan
 
 function Set-RegValue {

@@ -1,5 +1,4 @@
 # Configure-PawUpgpprocessing.ps1
-# Configure-PawUpgpprocessing.ps1
 Write-Host "Applying User Profile restriction: gp-processing..." -ForegroundColor Cyan
 
 function Set-RegValue {

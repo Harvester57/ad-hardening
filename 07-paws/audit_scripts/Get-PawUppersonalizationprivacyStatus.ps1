@@ -1,5 +1,4 @@
 # Get-PawUppersonalizationprivacyStatus.ps1
-# Get-PawUppersonalizationprivacyStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

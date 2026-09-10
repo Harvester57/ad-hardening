@@ -1,5 +1,4 @@
 # Get-PawUprunassuppressionStatus.ps1
-# Get-PawUprunassuppressionStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

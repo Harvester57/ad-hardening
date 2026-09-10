@@ -1,5 +1,4 @@
 # Configure-PawUptoastnotifications.ps1
-# Configure-PawUptoastnotifications.ps1
 Write-Host "Applying User Profile restriction: toast-notifications..." -ForegroundColor Cyan
 
 function Set-RegValue {

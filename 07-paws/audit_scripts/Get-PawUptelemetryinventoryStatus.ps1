@@ -1,5 +1,4 @@
 # Get-PawUptelemetryinventoryStatus.ps1
-# Get-PawUptelemetryinventoryStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

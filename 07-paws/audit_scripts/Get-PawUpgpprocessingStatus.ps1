@@ -1,5 +1,4 @@
 # Get-PawUpgpprocessingStatus.ps1
-# Get-PawUpgpprocessingStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

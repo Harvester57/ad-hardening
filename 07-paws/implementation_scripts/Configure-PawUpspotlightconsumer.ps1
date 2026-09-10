@@ -1,5 +1,4 @@
 # Configure-PawUpspotlightconsumer.ps1
-# Configure-PawUpspotlightconsumer.ps1
 Write-Host "Applying User Profile restriction: spotlight-consumer..." -ForegroundColor Cyan
 
 function Set-RegValue {

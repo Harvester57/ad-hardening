@@ -1,5 +1,4 @@
 # Get-PawUpseclogonserviceStatus.ps1
-# Get-PawUpseclogonserviceStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

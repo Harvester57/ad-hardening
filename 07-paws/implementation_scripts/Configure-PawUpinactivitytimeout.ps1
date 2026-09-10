@@ -1,5 +1,4 @@
 # Configure-PawUpinactivitytimeout.ps1
-# Configure-PawUpinactivitytimeout.ps1
 Write-Host "Applying User Profile restriction: inactivity-timeout..." -ForegroundColor Cyan
 
 function Set-RegValue {

@@ -1,5 +1,4 @@
 # Get-PawUplogonbannersStatus.ps1
-# Get-PawUplogonbannersStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

@@ -1,5 +1,4 @@
 # Get-PawUpwindowscopilotStatus.ps1
-# Get-PawUpwindowscopilotStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {

@@ -1,5 +1,4 @@
 # Configure-PawUptelemetryinventory.ps1
-# Configure-PawUptelemetryinventory.ps1
 Write-Host "Applying User Profile restriction: telemetry-inventory..." -ForegroundColor Cyan
 
 function Set-RegValue {

@@ -1,5 +1,4 @@
 # Configure-PawUplogonbanners.ps1
-# Configure-PawUplogonbanners.ps1
 Write-Host "Applying User Profile restriction: logon-banners..." -ForegroundColor Cyan
 
 function Set-RegValue {

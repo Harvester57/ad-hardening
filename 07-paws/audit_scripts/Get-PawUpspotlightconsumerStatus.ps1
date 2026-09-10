@@ -1,5 +1,4 @@
 # Get-PawUpspotlightconsumerStatus.ps1
-# Get-PawUpspotlightconsumerStatus.ps1
 $script:Vulnerable = $false
 
 function Test-RegValue {
