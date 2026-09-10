@@ -1,30 +1,48 @@
 # [REQ-PAW-047] Disable SSDP Discovery Service for PAWs (SSDPSRV)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For standard client workstations and member servers, refer to baseline [REQ-END-047](../../08-endpoints/services/disable-ssdpsrv.md); for Domain Controllers, refer to [REQ-DC-060](../../02-domain-controllers/services/disable-ssdpsrv.md)).*
+* **Operating Systems**: Windows 10 Enterprise (all supported builds) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\SSDPSRV\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\SSDP Discovery` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\SSDPSRV`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the SSDP Discovery (SSDPSRV) service directly supports this on Privileged Access Workstations:
+The Simple Service Discovery Protocol (SSDP) Discovery service (`SSDPSRV`) listens on UDP port 1900 multicast (`239.255.255.250` for IPv4 and `[FF02::C]` / `[FF05::C]` for IPv6) to discover Universal Plug and Play (UPnP) networked devices such as consumer printers, media renderers, and smart appliances.
 
-1. Simple Service Discovery Protocol; listens for broadcast UDP name query advertisements, vulnerable to reflect DDOS and name spoofing.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Insecurity of Multicast Discovery and Malicious Redirection
+SSDP was designed for consumer plug-and-play environments and lacks security controls required for enterprise environments:
+* **Unauthenticated Subnet Multicast**: SSDP accepts unauthenticated UDP datagrams from any device on the local network segment. Adversaries can inject spoofed `NOTIFY` announcements advertising rogue network endpoints.
+* **Malicious Redirection and SSRF**: When processing SSDP advertisements, Windows parses the packet's `LOCATION` header and initiates an automated HTTP request to download the device's XML schema. An attacker on the local network can coerce the PAW into connecting to an attacker-controlled listener, exposing PAW network addresses and environment signatures.
+* **Denial of Service Amplification**: Unhardened SSDP listeners can be weaponized in reflection and amplification attacks across internal networks, consuming bandwidth and system resources.
+
+### 2. PAW Clean Source Integrity and Boundary Protection
+Privileged Access Workstations operate under the clean source principle, requiring that administrative systems are isolated from untrusted local network inputs:
+* **Strict Boundary Defense**: PAWs must never listen for or process unauthenticated multicast discovery datagrams from local subnets. Operating an open UDP listener on port 1900 on a Tier 0 workstation violates boundary isolation principles.
+* **Zero Dependence on Consumer Discovery**: Tier 0 directory administration relies entirely on direct, cryptographically authenticated protocols (WinRM, RPC over Kerberos, HTTPS) directed at managed domain controllers and servers. PAWs have no legitimate interaction with UPnP consumer devices.
+* **Attack Surface Reduction**: Disabling the service stops the SSDP parser from executing in the background, eliminating memory corruption vectors in network XML parsers.
+
+### 3. MITRE ATT&CK Mapping
+* **T1018 - Remote System Discovery**: Adversaries query SSDP multicast groups to map connected endpoints and administrative hosts.
+* **T1557 - Adversary-in-the-Middle**: Spoofing SSDP announcements to coerce outbound network connections.
+* **T1498.002 - Network Denial of Service: Reflection Amplification**: Weaponizing SSDP listeners in reflection attacks.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Tier 0 Administrative Management**: Disabling the SSDP service has zero impact on Active Directory administration, server management tools (RSAT), PowerShell remoting, or Hyper-V administration.
+* **Peripherals and Devices**: PAW systems should never connect to unmanaged local subnet consumer peripherals (e.g., smart TVs or wireless streaming dongles). Standard enterprise printers managed through secure print servers function normally.
+* **Network Isolation**: The PAW operating system ceases listening on UDP port 1900, reinforcing the workstation's clean source perimeter.
 
 ---
 

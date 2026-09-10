@@ -1,30 +1,47 @@
 # [REQ-PAW-042] Disable OpenSSH SSH Server Service for PAWs (sshd)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For standard client workstations and member servers, refer to baseline [REQ-END-042](../../08-endpoints/services/disable-sshd.md)).*
+* **Operating Systems**: Windows 10 Enterprise (all supported builds) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\sshd\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\OpenSSH SSH Server` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\sshd`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the OpenSSH SSH Server (sshd) service directly supports this on Privileged Access Workstations:
+The OpenSSH SSH Server service (`sshd`) provides inbound secure shell access, remote command-line session hosting, and secure file transfer (SFTP/SCP) over TCP port 22.
 
-1. OpenSSH server daemon; exposes command access ports to incoming connections.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Attack Vectors and Inbound Listening Risks on Administrative Stations
+Operating an inbound SSH daemon on a Privileged Access Workstation creates grave security vulnerabilities:
+* **Persistent Inbound Shell Listener**: Enabling `sshd` opens a listening socket on TCP port 22. Inbound network listeners expose the PAW to active network probing, automated credential spraying, and brute-force attacks from lower-trust network segments.
+* **Adversary Pivoting and Reverse Tunnels**: Attackers who obtain SSH credentials or install unauthorized authorized_keys files can establish reverse SSH tunnels (`ssh -R`) and dynamic SOCKS proxies. This allows adversaries to bypass firewall boundaries, route unauthorized traffic directly through the PAW, and establish covert persistence into Tier 0 management enclaves (MITRE ATT&CK T1572 - Protocol Tunneling).
+
+### 2. PAW Clean Source and Directional Isolation Requirements
+A fundamental architectural tenet of the Microsoft Privileged Access Workstation model is that **PAWs are strictly administrative origins, never destinations**:
+* **Directional Traffic Enforcement**: Administrative workflows must flow exclusively **outbound** from the PAW toward managed Tier 0 targets (Domain Controllers, PKI/CA servers, Tier 0 hypervisors). Inbound remote administration to a PAW from another host violates Tier 0 containment.
+* **Credential Protection**: If an adversary compromises a lower-tier workstation or network appliance and can connect inbound to a PAW via SSH, they could execute local privilege escalation exploits, dump LSASS process memory, and extract cached Tier 0 Domain Admin Kerberos tickets and NTLM hashes.
+* **Elimination of Listening Sockets**: Disabling `sshd` guarantees that TCP port 22 remains closed, ensuring the PAW maintains zero listening administrative services accessible over the network.
+
+### 3. MITRE ATT&CK Mapping
+* **T1021.004 - Remote Services: SSH**: Adversaries utilize inbound SSH listeners to pivot laterally into administrative hosts.
+* **T1572 - Protocol Tunneling**: Leveraging SSH reverse port forwarding to tunnel traffic across network boundaries.
+* **T1110 - Brute Force**: Credential spraying and brute-forcing against listening SSH daemons.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Outbound SSH Administration**: Disabling the server service does not restrict the OpenSSH client (`ssh.exe`). Tier 0 administrators can continue initiating outbound SSH connections to manage network switches, hardware security modules (HSMs), or appliance consoles.
+* **Inbound Access Prohibition**: Inbound remote desktop or shell access to a PAW is strictly prohibited under enterprise Tier 0 hardening baselines. PAW configuration and management are performed locally or enforced via Active Directory Group Policy.
+* **Remote Management Tools**: Native Windows management tools (RSAT, PowerShell Remoting, WMI) directed outward from the PAW operate normally.
 
 ---
 

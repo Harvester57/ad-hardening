@@ -1,30 +1,47 @@
 # [REQ-END-055] Disable Xbox Live Game Save Service (XblGameSave)
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-055](../../07-paws/services/disable-xblgamesave.md)).*
+* **Operating Systems**: Windows 10 (all supported editions), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\XblGameSave\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Xbox Live Game Save` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\XblGameSave`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Xbox Live Game Save (XblGameSave) service directly supports this:
+The Xbox Live Game Save Service (`XblGameSave`, hosted in `svchost.exe` via `XblGameSave.dll`) manages background synchronization of game state, telemetry, and save container files between the local workstation file system and Microsoft Xbox Live consumer cloud storage.
 
-1. Xbox Live game save synchronization; gaming components irrelevant to corporate environments.
-2. By ensuring this service is disabled, we remove a potentially vulnerable network listener or local subsystem, decreasing both the remote and local exposure.
+### 1. Unsanctioned Cloud Synchronization and Data Exfiltration Risks
+In an enterprise Active Directory environment, data synchronization to external cloud storage must be governed by corporate Data Loss Prevention (DLP) and Cloud Access Security Broker (CASB) policies:
+* **Covert File Synchronization Channel**: `XblGameSave` maintains background file watchers over local AppData directories (`%LOCALAPPDATA%\Packages\...\SystemAppData\wgs`) and periodically uploads modified container files to consumer Microsoft cloud endpoints over HTTPS.
+* **Potential for Data Staging and Exfiltration**: Attackers or unauthorized scripts operating in user space can potentially leverage unmonitored consumer synchronization mechanisms to stage files or synchronize unauthorized payloads, evading enterprise endpoint controls that inspect standard corporate egress channels.
+
+### 2. Resource Overhead and Inefficient Workstation Operations
+* The service runs background polling threads, monitors directory change notifications, and executes file verification routines.
+* On enterprise endpoints, running background synchronization for consumer gaming assets consumes CPU cycles, memory, disk I/O, and corporate network bandwidth without delivering any business value.
+
+### 3. Least Functionality in Corporate Workstations
+* Disabling consumer game synchronization services aligns with the principle of least functionality (NIST SP 800-53 CM-7) and DISA STIG requirements for enterprise workstation minimization.
+* Disabling `XblGameSave` ensures that unmonitored consumer cloud file transfers cannot take place.
+
+### 4. MITRE ATT&CK Mapping
+* **T1567 - Exfiltration Over Web Service**: Preventing the misuse of consumer cloud synchronization protocols for unauthorized external file transfer.
+* **T1071.001 - Application Layer Protocol: Web Protocols**: Eliminating unauthorized background HTTPS communication channels to consumer cloud endpoints.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for standard Active Directory domain operations unless specific business functionality requires the service.
-* **Verification**: Administrators must verify that client operations do not rely on local Xbox Live Game Save capabilities before domain-wide enforcement.
+* **Enterprise Operations**: Disabling `XblGameSave` is completely transparent to Active Directory operations, enterprise applications, OneDrive for Business, SharePoint synchronization, and approved backup software.
+* **Consumer Gaming Applications**: Games installed via the Microsoft Store that depend on Xbox Live cloud save synchronization will be unable to upload or download cloud saves, restricting progress strictly to local save files if supported by the game.
 
 ---
 

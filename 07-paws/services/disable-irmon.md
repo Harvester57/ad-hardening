@@ -1,7 +1,7 @@
-# [REQ-PAW-038] Disable Infrared monitor service Service for PAWs (irmon)
+# [REQ-PAW-038] Disable Infrared Monitor Service for PAWs (irmon)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 client workstations and member servers, refer to baseline [REQ-END-038](../../08-endpoints/services/disable-irmon.md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -9,22 +9,41 @@
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\irmon\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Infrared monitor service` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\irmon`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Infrared monitor service (irmon) service directly supports this on Privileged Access Workstations:
+The Infrared Monitor Service (`irmon`, hosted within `svchost.exe` via `irmon.dll`) provides management and discovery functions for the legacy Infrared Data Association (IrDA) optical protocol stack and Object Exchange (OBEX) protocol.
 
-1. Supports infrared device communications; obsolete and exposes unnecessary communication port.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Enforcement of Clean Source Isolation and RF/Optical Boundaries
+Under Microsoft Privileged Access Workstation guidelines, Tier 0 hosts must maintain strict, verifiable physical and logical isolation:
+* **Air-Gap and Boundary Integrity**: Privileged Access Workstations must connect only via dedicated, isolated, and inspected network links (typically wired 802.1X enterprise LANs). All unmanaged or ad-hoc wireless channels—including Wi-Fi, Bluetooth, cellular modems, and optical infrared—must be rigorously disabled.
+* **Mitigation of Physical Proximity Vectors**: In a physical office or data center environment, optical transceivers allow ad-hoc, unauthenticated communication with external devices within visual line of sight. Leaving `irmon` enabled allows an adversary with physical line-of-sight to attempt OBEX file drops or probe legacy protocol stacks on high-value Tier 0 administration machines.
+
+### 2. Strict Peripheral Control and Rogue Hardware Prevention
+* PAW baselines enforce rigorous peripheral whitelisting (permitting only approved wired keyboards, mice, and FIPS 201 compliant smart card readers).
+* If an unauthorized or compromised USB-to-IrDA optical dongle is inserted into a PAW (whether by insider action or physical tampering), an active `irmon` service would automatically initialize the transceiver and broadcast presence. Disabling `irmon` in the operating system configuration ensures that even if hardware restrictions fail, the optical communication service cannot execute.
+
+### 3. Absolute Least Functionality on Tier 0 Assets
+* Directory administration tasks (Active Directory Users and Computers, Group Policy Management Console, PowerShell remoting to Domain Controllers) have zero operational requirement for infrared communications.
+* Eliminating obsolete protocol daemons reduces the overall attack surface and prevents memory corruption vulnerabilities in legacy ring-3 DLLs or underlying ring-0 kernel drivers from being used for local privilege escalation against LSASS.
+
+### 4. MITRE ATT&CK Mapping
+* **T1011 - Other Network Medium**: Adversaries establishing covert optical wireless channels into isolated Tier 0 administrative enclaves.
+* **T1200 - Hardware Additions**: Introducing rogue USB IrDA optical transceivers to compromise workstation isolation.
+* **T1068 - Exploitation for Privilege Escalation**: Exploiting legacy protocol parsers to escalate privileges on administrative systems.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Administrative Operations**: Disabling `irmon` is completely transparent to all Tier 0 management roles, including RSAT, PowerShell Remoting, Active Directory Administrative Center, GPMC, and virtual machine management consoles.
+* **Hardware Compatibility**: Standard enterprise PAW hardware configurations (desktop workstations and hardened enterprise laptops) do not utilize infrared optical transceivers.
+* **Compatibility Exception**: There are zero legitimate enterprise or administrative dependencies on infrared communications on Privileged Access Workstations.
 
 ---
 

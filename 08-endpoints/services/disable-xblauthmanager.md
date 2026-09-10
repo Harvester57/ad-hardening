@@ -1,30 +1,48 @@
-# [REQ-END-054] Disable Xbox Live Auth Manager Service (XblAuthManager)
+# [REQ-END-054] Disable Xbox Live Auth Manager (XblAuthManager)
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-054](../../07-paws/services/disable-xblauthmanager.md)).*
+* **Operating Systems**: Windows 10 (all supported editions), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\XblAuthManager\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Xbox Live Auth Manager` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\XblAuthManager`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Xbox Live Auth Manager (XblAuthManager) service directly supports this:
+The Xbox Live Auth Manager (`XblAuthManager`, hosted in `svchost.exe` via `XblAuthManager.dll`) provides programmatic authentication and token brokering services for consumer Microsoft Accounts (MSA) and the Xbox Live cloud gaming platform.
 
-1. Xbox Live authentication; gaming components irrelevant to corporate environments.
-2. By ensuring this service is disabled, we remove a potentially vulnerable network listener or local subsystem, decreasing both the remote and local exposure.
+### 1. Infiltration of Consumer Identity into Enterprise Workstations
+Enterprise endpoints must authenticate strictly against authoritative enterprise identity providers—namely Active Directory Domain Services (Kerberos / NTLMv2) and Microsoft Entra ID (Azure AD):
+* **Consumer Token Brokering**: `XblAuthManager` interfaces with Windows Web Account Manager (WAM) to issue, renew, and cache OAuth 2.0 / Xbox Secure Token Service (XSTS) tokens associated with consumer Microsoft Accounts (`login.live.com`).
+* **Identity Confusion and Shadow IT**: Permitting personal gaming identity brokers on corporate systems blurs the boundary between corporate and personal assets. Users may inadvertently or deliberately link personal consumer accounts, leading to unvetted cloud synchronization and bypassing enterprise single sign-on (SSO) and Conditional Access policies.
+
+### 2. Unsanctioned Outbound Telemetry and Cloud Connections
+* When enabled, `XblAuthManager` regularly establishes outbound HTTPS connections to consumer Xbox endpoints (`*.auth.xboxlive.com`, `user.auth.xboxlive.com`).
+* These connections transmit device telemetry, network identifiers, and user metadata to consumer cloud endpoints. Uncontrolled outbound communication creates noise in enterprise SIEM telemetry, frustrates network proxy monitoring, and expands the external communication surface.
+
+### 3. Least Functionality in Corporate Workstations
+* Gaming authentication has zero legitimate utility on enterprise client workstations or member servers.
+* Disabling `XblAuthManager` aligns with CIS Microsoft Windows Client Benchmarks and the principle of least functionality (NIST SP 800-53 CM-7), ensuring consumer identity mechanisms are dormant.
+
+### 4. MITRE ATT&CK Mapping
+* **T1078 - Valid Accounts**: Mitigating credential confusion and unauthorized consumer cloud token caching on corporate workstations.
+* **T1071.001 - Application Layer Protocol: Web Protocols**: Preventing unauthorized outbound HTTPS traffic to consumer authentication endpoints.
+* **T1556 - Modify Authentication Process**: Restricting local authentication flows to approved enterprise identity brokers.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for standard Active Directory domain operations unless specific business functionality requires the service.
-* **Verification**: Administrators must verify that client operations do not rely on local Xbox Live Auth Manager capabilities before domain-wide enforcement.
+* **Enterprise Operations**: Disabling `XblAuthManager` is completely transparent to Active Directory domain authentication, Kerberos ticket granting, Entra ID hybrid join, Microsoft 365 apps (Office, Outlook, Teams), and corporate Line-of-Business (LOB) software.
+* **Consumer Gaming Applications**: Microsoft Store games, Xbox Game Bar, and consumer Xbox applications that require Xbox Live authentication will be unable to log in, fetch cloud gamertags, or retrieve achievements on hardened enterprise workstations.
 
 ---
 

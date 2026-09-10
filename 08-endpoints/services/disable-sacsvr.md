@@ -1,30 +1,46 @@
 # [REQ-END-046] Disable Special Administration Console Helper Service (sacsvr)
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-046](../../07-paws/services/disable-sacsvr.md)).*
+* **Operating Systems**: Windows 10 (all supported editions), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\sacsvr\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Special Administration Console Helper` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\sacsvr`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Special Administration Console Helper (sacsvr) service directly supports this:
+The Special Administration Console (SAC) Helper service (`sacsvr`) supports Emergency Management Services (EMS), an out-of-band management architecture developed for headless Windows Server hardware to allow remote diagnostic console access over physical or virtual serial (COM) ports.
 
-1. Enables out-of-band serial port administration; unnecessary on endpoints.
-2. By ensuring this service is disabled, we remove a potentially vulnerable network listener or local subsystem, decreasing both the remote and local exposure.
+### 1. Inapplicability to Client Endpoints and Local Attack Surface
+Maintaining an out-of-band serial console helper service on client endpoints presents distinct security and architectural liabilities:
+* **Elevated Local RPC Subsystem**: The `sacsvr` service executes under the `NT AUTHORITY\SYSTEM` context, hosting local Inter-Process Communication (IPC) mechanisms and RPC endpoints to bridge kernel-mode EMS drivers with userland administration tools. Running unnecessary privileged services on endpoints expands the local attack surface available for local privilege escalation (LPE) exploits (MITRE ATT&CK T1068 - Exploitation for Privilege Escalation).
+* **Absence of Serial Console Infrastructure**: Modern client laptops, desktops, and standard member servers are not connected to serial console terminal servers or out-of-band RS-232 serial networks. Leaving serial console services active provides zero administrative utility on physical or virtual client machines.
+* **Kernel Debugging Interfaces**: EMS and SAC integrate directly with low-level kernel debugging and emergency recovery interfaces. Permitting serial console handlers on general endpoints exposes debug-level functionality that should be restricted to isolated server environments.
+
+### 2. Principle of Least Functionality
+In enterprise Active Directory environments:
+* Workstations must execute only the minimal software footprint necessary for business productivity and standard domain management.
+* Disabling `sacsvr` eliminates an unnecessary `NT AUTHORITY\SYSTEM` background daemon and closes local RPC interfaces associated with serial console redirection.
+
+### 3. MITRE ATT&CK Mapping
+* **T1068 - Exploitation for Privilege Escalation**: Exploitation of elevated background services running with SYSTEM privileges.
+* **T1059 - Command and Scripting Interpreter**: Abuse of alternative administrative command execution conduits.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for standard Active Directory domain operations unless specific business functionality requires the service.
-* **Verification**: Administrators must verify that client operations do not rely on local Special Administration Console Helper capabilities before domain-wide enforcement.
+* **Standard Client Management**: Disabling `sacsvr` has zero impact on interactive graphical logons, Remote Desktop (RDP), PowerShell Remoting, WinRM, or Windows Admin Center.
+* **Serial Hardware Devices**: Peripheral serial devices (such as USB-to-serial adapters, laboratory instruments, or barcode scanners) use independent COM port driver stacks and are not affected by disabling `sacsvr`.
+* **Headless Server Environments**: Only specialized server racks in data centers intentionally configured with serial terminal concentrators require EMS/SAC. Standard corporate workstations and member servers must have this service disabled.
 
 ---
 

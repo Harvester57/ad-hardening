@@ -1,30 +1,48 @@
 # [REQ-PAW-037] Disable Computer Browser Service for PAWs (Browser)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For standard client workstations and member servers, refer to baseline [REQ-END-037](../../08-endpoints/services/disable-browser.md); for Domain Controllers, refer to [REQ-DC-016](../../02-domain-controllers/disable-smbv1.md)).*
+* **Operating Systems**: Windows 10 Enterprise (all supported builds) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\Browser\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Computer Browser` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\Browser`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Computer Browser (Browser) service directly supports this on Privileged Access Workstations:
+The Computer Browser service (`Browser`, driven by the kernel driver `bowser.sys`) maintains an inventory of network servers and domains across local network segments using unauthenticated NetBIOS over TCP/IP (NetBT) broadcast frames and legacy Server Message Block version 1 (SMBv1) protocol datagrams.
 
-1. Maintains list of computers on network; legacy, insecure, and cleartext name discovery.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Insecurity of NetBIOS Broadcasts and Browser Elections
+The Computer Browser architecture relies on legacy broadcast protocols that present serious security vulnerabilities:
+* **Unauthenticated Broadcast Traffic**: Master browser announcements (`HostAnnouncement`) and election requests (`RequestElection`) are transmitted as cleartext UDP datagrams across local broadcast domains (ports 137 and 138). Any host on the subnet can inject spoofed election frames to claim master browser status, force browser elections, or poison browse lists.
+* **Subnet Reconnaissance**: Attackers monitoring NetBIOS broadcast traffic can map internal hostnames, workgroups, and server roles without generating security alerts or establishing direct connections to endpoints.
+* **Kernel Attack Surface**: The underlying driver `bowser.sys` runs in kernel space (ring 0) to parse incoming broadcast datagrams. Historically, vulnerabilities in `bowser.sys` (including buffer overflows and memory corruption flaws) allowed remote attackers to execute arbitrary code with kernel privileges by transmitting crafted NetBIOS frames.
+
+### 2. PAW Clean Source and Strict Isolation Requirements
+Privileged Access Workstations represent the most sensitive endpoints in the enterprise, providing administrative access to Tier 0 directory infrastructure:
+* **Clean Source Principle**: PAWs must operate strictly under the clean source principle, eliminating all unauthenticated peer-to-peer listeners and broadcast protocols that could expose the workstation to untrusted subnet traffic.
+* **Direct Point-to-Point Management**: Tier 0 administrative operations (using RSAT, PowerShell remoting, and Active Directory management consoles) rely exclusively on DNS name resolution, Kerberos authentication, and secure point-to-point protocols (such as WinRM/HTTPS and RPC/Kerberos). PAWs have no legitimate requirement to participate in local NetBIOS network discovery or maintain legacy SMBv1-dependent browser services.
+* **Driver Minimization**: Disabling the service prevents `bowser.sys` from loading into kernel memory, closing a potential local privilege escalation and remote code execution vector.
+
+### 3. MITRE ATT&CK Mapping
+* **T1018 - Remote System Discovery**: Adversaries eavesdrop on NetBIOS broadcasts or query master browsers to identify enterprise assets and administrative endpoints.
+* **T1557.001 - Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and SMB Relay**: Exploiting broadcast and unauthenticated NetBIOS protocols for credential interception and relay attacks.
+* **T1210 - Exploitation of Remote Services**: Exploiting kernel drivers associated with legacy network subsystems.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Tier 0 Administrative Operations**: Disabling the Computer Browser service has zero impact on Active Directory administration, remote server management (RSAT), PowerShell remoting, or Hyper-V/cluster management.
+* **Network Isolation**: Windows Explorer on the PAW will not display workgroup browse lists. This is the desired security posture for administrative hosts, which should never interact with unmanaged local peer systems.
+* **Modern Name Resolution**: PAWs continue to resolve domain hosts and services via authoritative enterprise DNS servers over encrypted or authenticated channels.
 
 ---
 

@@ -1,7 +1,7 @@
-# [REQ-PAW-050] Disable Windows Media Player Network Sharing Service Service for PAWs (WMPNetworkSvc)
+# [REQ-PAW-050] Disable Windows Media Player Network Sharing Service for PAWs (WMPNetworkSvc)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 client workstations and member servers, refer to baseline [REQ-END-050](../../08-endpoints/services/disable-wmpnetworksvc.md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -9,22 +9,41 @@
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\WMPNetworkSvc\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Windows Media Player Network Sharing Service` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\WMPNetworkSvc`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Windows Media Player Network Sharing Service (WMPNetworkSvc) service directly supports this on Privileged Access Workstations:
+The Windows Media Player Network Sharing Service (`WMPNetworkSvc`, hosted by `wmpnetwk.exe` or `svchost.exe`) shares local Windows Media Player multimedia libraries across the network using Universal Plug and Play (UPnP) and Digital Living Network Alliance (DLNA) protocols.
 
-1. Shares Windows Media Player libraries over network; unnecessary port listening.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Enforcement of the Clean Source Principle and Zero Inbound Listeners
+Under Microsoft Privileged Access Workstation guidelines and the Clean Source Principle, Tier 0 administrative workstations must be hardened to the highest standard:
+* **Elimination of Inbound Listening Sockets**: A PAW must strictly avoid running unauthenticated inbound network listeners. When enabled, `WMPNetworkSvc` binds to TCP port 2869 (UPnP eventing/HTTP), TCP port 10243 (WMP HTTP streaming), and listens for SSDP multicast datagrams on UDP port 1900.
+* **Isolation from Lateral Movement**: Inbound network daemons on a PAW present a high-risk lateral traversal vector. An adversary who compromises a Tier 1 or Tier 2 asset on the same administrative subnet could target the UPnP/DLNA HTTP service on the PAW to achieve remote code execution or local privilege escalation, directly compromising Tier 0 administrative credentials held in LSASS memory.
+
+### 2. Elimination of Multimedia and XML Parsing Attack Surface
+* `WMPNetworkSvc` parses untrusted XML device descriptors, SOAP requests, and complex multimedia file container headers (MP3, WMA, MP4, ASF).
+* Multimedia parsers have a well-documented history of critical memory corruption and remote code execution vulnerabilities (e.g., CVE-2012-0003 / MS12-005). Executing multimedia parsing code within privileged administrative hosts introduces unnecessary exploit surface into the highest trust zone of the Active Directory forest.
+
+### 3. Absolute Least Functionality on Tier 0 Assets
+* Privileged Access Workstations exist exclusively to execute remote administration tools (such as RSAT, PowerShell Remoting, and Windows Admin Center) targeting Domain Controllers and Tier 0 identity infrastructure.
+* Multimedia streaming and consumer entertainment protocols serve no legitimate administrative purpose and violate the principle of least functionality.
+
+### 4. MITRE ATT&CK Mapping
+* **T1046 - Network Service Discovery**: Attackers scanning internal administrative subnets for listening UPnP/DLNA ports (TCP 2869, 10243) or SSDP beacons (UDP 1900).
+* **T1210 - Exploitation of Remote Services**: Leveraging memory corruption vulnerabilities in media streaming network daemons to execute code on Tier 0 workstations.
+* **T1082 - System Information Discovery**: Querying DLNA endpoints to enumerate administrative hostnames and profile paths.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Administrative Operations**: Disabling `WMPNetworkSvc` is completely transparent to all Tier 0 management activities, including RSAT, PowerShell Remoting, Active Directory Administrative Center, Group Policy Management, and Hyper-V/ESXi management consoles.
+* **Local Media Playback**: System sound effects and local playback of administrative audio/video recordings remain fully functional. Only unauthenticated network streaming to external DLNA devices is disabled.
+* **Compatibility Exception**: There are zero legitimate enterprise or administrative dependencies on Windows Media Player network sharing on Privileged Access Workstations.
 
 ---
 

@@ -1,30 +1,47 @@
 # [REQ-PAW-044] Disable Routing and Remote Access Service for PAWs (RemoteAccess)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For standard client workstations and member servers, refer to baseline [REQ-END-044](../../08-endpoints/services/disable-remoteaccess.md)).*
+* **Operating Systems**: Windows 10 Enterprise (all supported builds) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\RemoteAccess\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Routing and Remote Access` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\RemoteAccess`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Routing and Remote Access (RemoteAccess) service directly supports this on Privileged Access Workstations:
+The Routing and Remote Access Service (`RemoteAccess` / RRAS) provides software-based packet routing, Network Address Translation (NAT), and incoming VPN server termination capabilities.
 
-1. Routing, NAT, and VPN; provides network routing capabilities that could bypass domain firewalls.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Inherent Threat of Routing Services on Administrative Endpoints
+Enabling packet routing or VPN hosting capabilities on a dedicated administrative endpoint presents fatal security vulnerabilities:
+* **Multi-Interface Bridging**: An adversary compromising a PAW could configure RRAS to route network packets between network interfaces (e.g., bridging a dedicated Tier 0 VLAN with a secondary Wi-Fi or cellular interface). This would destroy Tier 0 boundary containment, allowing unauthorized traffic to flow between unmanaged subnets and mission-critical directory services (MITRE ATT&CK T1090 - Proxy, T1572 - Protocol Tunneling).
+* **Rogue Remote Access Gateway**: RRAS allows the host to act as an incoming VPN gateway or dial-in server. An adversary could leverage RRAS to establish an unauthorized ingress channel directly into the administrative enclave, circumventing boundary firewalls and perimeter monitoring.
+
+### 2. PAW Clean Source and Single-Homing Boundary Enforcement
+Privileged Access Workstations must comply with the clean source principle and strict network boundary restrictions:
+* **Single-Homing Principle**: PAWs must be strictly single-homed into dedicated, secured management VLANs. Multi-interface bridging, packet forwarding, and software-based routing are strictly forbidden on administrative workstations.
+* **Unidirectional Administrative Workflows**: PAW network communication is strictly outbound toward managed Tier 0 targets (Domain Controllers, PKI/CAs, Tier 0 hypervisors). PAWs must never accept inbound transit traffic, act as intermediate routers, or terminate incoming remote access tunnels.
+* **Subsystem Minimization**: Disabling RRAS ensures the operating system kernel cannot be instructed to forward IP datagrams between network interfaces, preventing lateral pivoting and network boundary bypasses.
+
+### 3. MITRE ATT&CK Mapping
+* **T1090 - Proxy**: Configuring routing services to proxy and route adversary traffic between segmented network enclaves.
+* **T1572 - Protocol Tunneling**: Abusing software routing and VPN encapsulation to bypass perimeter boundary controls.
+* **T1133 - External Remote Services**: Hosting unauthorized inbound remote access servers on administrative workstations.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Tier 0 Administrative Management**: Disabling RRAS has zero impact on Active Directory administration, server management tools (RSAT), PowerShell remoting, or Hyper-V administration.
+* **Outbound Management VPNs**: If PAWs utilize a dedicated, isolated administrative VPN to reach remote Tier 0 data centers, client-side VPN connectivity is handled by the Remote Access Connection Manager (`RasMan`), which functions independently of the `RemoteAccess` server service.
+* **Boundary Integrity**: Enforces strict single-network host isolation, ensuring the PAW can never be weaponized as an unauthorized bridge into Tier 0 infrastructure.
 
 ---
 

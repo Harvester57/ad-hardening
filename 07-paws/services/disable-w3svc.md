@@ -1,30 +1,47 @@
-# [REQ-PAW-052] Disable World Wide Web Publishing Service Service for PAWs (W3SVC)
+# [REQ-PAW-052] Disable World Wide Web Publishing Service for PAWs (W3SVC)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For standard client workstations and member servers, refer to baseline [REQ-END-052](../../08-endpoints/services/disable-w3svc.md)).*
+* **Operating Systems**: Windows 10 Enterprise (all supported builds) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\W3SVC\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\World Wide Web Publishing Service` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\W3SVC`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the World Wide Web Publishing Service (W3SVC) service directly supports this on Privileged Access Workstations:
+The World Wide Web Publishing Service (`W3SVC`) is the core engine for Internet Information Services (IIS), responsible for managing HTTP/HTTPS listeners, routing requests to `w3wp.exe` worker processes, and hosting web applications.
 
-1. IIS Web Server; web servers should never run on client workstations.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Inbound Web Services Attack Surface on Tier 0 Assets
+Operating an inbound HTTP web server on a Privileged Access Workstation represents an unacceptable vulnerability profile:
+* **Exposing Inbound Web Ports**: Binding TCP ports 80 and 443 on a PAW inverts the workstation's security model, opening listening sockets directly on the administrative network segment and exposing the machine to remote port scanners and automated vulnerability exploitation.
+* **Web Exploits and Shell Injection**: Running web services introduces severe attack vectors, including remote code execution, directory traversal, unauthenticated file uploads, and web shell implantation (MITRE ATT&CK T1505.003 - Server Software Component: Web Shell). An adversary achieving code execution in an IIS worker process can exploit local privilege escalation vulnerabilities to extract Tier 0 Domain Admin credentials from LSASS.
+* **Kernel Driver Vulnerabilities (`HTTP.sys`)**: IIS utilizes the kernel-mode driver `HTTP.sys` to process incoming packets. Unauthenticated remote vulnerabilities in `HTTP.sys` (such as buffer overflows and memory corruption flaws) allow remote adversaries to execute code with ring 0 kernel privileges without requiring valid authentication credentials.
+
+### 2. PAW Clean Source and Single-Purpose Principle
+Privileged Access Workstations are dedicated to the administration of Tier 0 directory and identity systems:
+* **Strict Directional Demarcation**: PAWs must operate strictly under the clean source principle, initiating outbound management connections (such as WinRM, RPC over Kerberos, and HTTPS) toward managed servers. PAWs must never function as web servers or process inbound client connections.
+* **Resource and Attack Surface Minimization**: Disabling `W3SVC` ensures that the IIS process stack, application pools, and listening network ports are completely removed from the workstation.
+
+### 3. MITRE ATT&CK Mapping
+* **T1190 - Exploit Public-Facing Application**: Exploiting vulnerabilities in web server components or the `HTTP.sys` kernel driver.
+* **T1505.003 - Server Software Component: Web Shell**: Planting web shells on endpoints to execute arbitrary commands and establish persistence.
+* **T1074 - Data Staged**: Staging tools and extracted administrative credentials within an unauthorized local web directory.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Tier 0 Administrative Management**: Disabling `W3SVC` has zero impact on Active Directory administration, server management tools (RSAT), PowerShell remoting, or Hyper-V administration.
+* **Web-Based Administrative Consoles**: Accessing web-based management consoles on remote servers (e.g., Active Directory Certificate Services web enrollment, out-of-band iLO/iDRAC consoles) requires only an outbound browser client and is completely unaffected.
+* **Zero Listening Ports**: Enforces the PAW security standard requiring zero inbound network listeners.
 
 ---
 

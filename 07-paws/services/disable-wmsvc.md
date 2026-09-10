@@ -1,30 +1,47 @@
-# [REQ-PAW-049] Disable Web Management Service Service for PAWs (WMSvc)
+# [REQ-PAW-049] Disable Web Management Service for PAWs (WMSvc)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For standard client workstations and member servers, refer to baseline [REQ-END-049](../../08-endpoints/services/disable-wmsvc.md)).*
+* **Operating Systems**: Windows 10 Enterprise (all supported builds) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\WMSvc\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Web Management Service` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\WMSvc`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Web Management Service (WMSvc) service directly supports this on Privileged Access Workstations:
+The Web Management Service (`WMSvc`) enables remote web server management for Internet Information Services (IIS), listening for incoming remote connections over HTTPS TCP port 8172.
 
-1. IIS Web Management; unnecessary web console access daemon on endpoint systems.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Inbound Management Listeners on Administrative Workstations
+Operating a remote web management daemon on a Tier 0 Privileged Access Workstation represents an unacceptable security risk:
+* **Inbound Management Socket Exposure**: Enabling `WMSvc` opens a listening socket on TCP port 8172. Inbound administrative listeners on a PAW expose the host to network enumeration, password spraying, and brute-force credential stuffing from lower-tier network zones (MITRE ATT&CK T1110 - Brute Force).
+* **Remote Management Handler Exploits**: Web management requests are processed by IIS management components. Flaws in handler parsing, request deserialization, or TLS processing could be exploited by an adversary to achieve remote code execution on the administrative endpoint (T1190 - Exploit Public-Facing Application).
+
+### 2. PAW Clean Source and Directional Isolation Requirements
+Under Microsoft's Privileged Access Workstation architecture:
+* **Administrative Flow Directionality**: PAWs are strictly administrative sources. Administrative management flows exclusively **outbound** from the PAW toward managed servers (using secure WinRM, HTTPS, and Kerberos-authenticated RPC). Inbound administrative access to a PAW from external systems is strictly prohibited.
+* **Credential Protection**: Opening an inbound administrative web listener creates an avenue for lateral movement into the PAW. If compromised, an adversary can access the LSASS process space and extract cached Tier 0 Domain Admin credentials.
+* **Socket and Surface Reduction**: Disabling `WMSvc` guarantees that TCP port 8172 remains closed and prevents any IIS management daemon from executing in the background.
+
+### 3. MITRE ATT&CK Mapping
+* **T1190 - Exploit Public-Facing Application**: Exploiting remote web management daemons to gain code execution.
+* **T1110 - Brute Force**: Automated credential attacks targeting listening administrative web interfaces.
+* **T1046 - Network Service Discovery**: Adversaries scanning management subnets to locate active administrative listeners.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Tier 0 Administrative Management**: Disabling `WMSvc` has zero impact on Active Directory administration, server management tools (RSAT), PowerShell remoting, or Hyper-V administration.
+* **Outbound Management Consoles**: Tier 0 administrators can continue launching client administration consoles (such as IIS Manager or Windows Admin Center) to remotely manage production servers over outbound secure connections.
+* **Perimeter Defense**: Confirms that no inbound management web ports remain open on the PAW.
 
 ---
 

@@ -1,30 +1,47 @@
 # [REQ-END-044] Disable Routing and Remote Access Service (RemoteAccess)
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-044](../../07-paws/services/disable-remoteaccess.md)).*
+* **Operating Systems**: Windows 10 (all supported editions), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\RemoteAccess\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Routing and Remote Access` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\RemoteAccess`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Routing and Remote Access (RemoteAccess) service directly supports this:
+The Routing and Remote Access Service (`RemoteAccess` / RRAS) provides multi-protocol LAN-to-LAN routing, Network Address Translation (NAT), dial-up networking, and VPN server capabilities (PPTP, L2TP, SSTP, IKEv2).
 
-1. Routing, NAT, and VPN; provides network routing capabilities that could bypass domain firewalls.
-2. By ensuring this service is disabled, we remove a potentially vulnerable network listener or local subsystem, decreasing both the remote and local exposure.
+### 1. Network Segmentation Bypasses and Unauthorized Pivoting
+Enabling routing capabilities on enterprise client endpoints presents critical architectural risks:
+* **Unauthorized Multi-Interface Routing**: If an endpoint is multi-homed (e.g., connected simultaneously to an enterprise corporate LAN and a secondary Wi-Fi, cellular, or VPN adapter), an adversary with local administrative access can enable RRAS to route IP packets between interfaces. This allows the adversary to bypass perimeter firewalls, bridge isolated network segments, and access internal enclaves without traversing monitored network gateways (MITRE ATT&CK T1090 - Proxy, T1572 - Protocol Tunneling).
+* **Rogue Remote Access Ingress**: RRAS allows the host to act as a VPN or dial-in server. Malicious actors or unauthorized users can configure RRAS to host an unauthorized inbound VPN endpoint, establishing persistent external backdoor access directly into the corporate LAN.
+* **Legacy Protocol Vulnerabilities**: RRAS includes support for obsolete and cryptographically insecure tunneling protocols, such as PPTP with MS-CHAPv2 authentication, which are vulnerable to credential cracking, spoofing, and man-in-the-middle attacks.
+
+### 2. Principle of Least Functionality and Role Demarcation
+In an enterprise network architecture:
+* Routing, NAT, and remote access termination are strictly the responsibility of enterprise perimeter firewalls, routers, and dedicated VPN concentrators.
+* Workstations and standard member servers must operate solely as endpoint nodes and must never route transit traffic. Disabling RRAS ensures that hosts cannot be repurposed as unauthorized network routers or covert transit hops.
+
+### 3. MITRE ATT&CK Mapping
+* **T1090 - Proxy**: Configuring routing services to proxy and relay traffic between segmented networks.
+* **T1572 - Protocol Tunneling**: Abusing VPN and routing protocols to circumvent boundary security controls.
+* **T1133 - External Remote Services**: Hosting unauthorized inbound remote access endpoints on enterprise hosts.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for standard Active Directory domain operations unless specific business functionality requires the service.
-* **Verification**: Administrators must verify that client operations do not rely on local Routing and Remote Access capabilities before domain-wide enforcement.
+* **Outbound Enterprise VPN Clients**: Disabling the `RemoteAccess` service does **not** prevent endpoints from connecting as clients to corporate VPN concentrators (e.g., Windows Always On VPN, Cisco AnyConnect, Palo Alto GlobalProtect). Outbound client VPN connections are managed by the Remote Access Connection Manager (`RasMan`), which functions independently.
+* **Network Operations**: Standard TCP/IP networking, DHCP lease acquisition, DNS resolution, and domain authentication operate normally.
+* **Dedicated Gateway Servers**: If a specialized Windows Server is intentionally deployed as an edge NAT router or DirectAccess server, that machine must be placed in a dedicated Organizational Unit (OU) with an explicit policy exception. All standard workstations and member servers must have RRAS disabled.
 
 ---
 

@@ -1,30 +1,47 @@
 # [REQ-END-043] Disable Remote Procedure Call (RPC) Locator Service (RpcLocator)
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-043](../../07-paws/services/disable-rpclocator.md)).*
+* **Operating Systems**: Windows 10 (all supported editions), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\RpcLocator\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Remote Procedure Call (RPC) Locator` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\RpcLocator`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Remote Procedure Call (RPC) Locator (RpcLocator) service directly supports this:
+The Remote Procedure Call (RPC) Locator service (`RpcLocator`) manages the legacy RPC name service database, originally designed in early Windows NT architectures to allow RPC server applications to publish interface bindings and RPC clients to discover those interfaces by name across network domains.
 
-1. Legacy RPC name locator; obsolete and exposes legacy RPC APIs.
-2. By ensuring this service is disabled, we remove a potentially vulnerable network listener or local subsystem, decreasing both the remote and local exposure.
+### 1. Architectural Obsolescence and Attack Surface Reduction
+The `RpcLocator` service represents deprecated legacy architecture with no place in modern enterprise environments:
+* **Obsolete Name Resolution Mechanism**: Beginning with Windows XP and Windows Server 2003, Microsoft superseded the RPC name service with the dynamic RPC Endpoint Mapper (`RpcSs` running over TCP port 135), Active Directory Domain Services (AD DS) LDAP queries, and Domain Name System (DNS) SRV records.
+* **Legacy Named Pipe Exposure**: When running, `RpcLocator` registers legacy RPC endpoints and listens on named pipes (such as `\pipe\locator`). These legacy communication channels were engineered prior to modern RPC security enhancements (e.g., mandatory packet privacy, mutual Kerberos authentication, and strict RPC interface flags), creating unnecessary local attack surface and potential targets for RPC fuzzing and privilege escalation.
+* **Zero Native Dependency**: No contemporary Windows operating system component, administrative console, or Active Directory directory service depends on the `RpcLocator` service. Microsoft formally deprecated the service and recommends maintaining it in a disabled state across all Windows versions.
+
+### 2. Least Functionality in Active Directory
+In hardened enterprise environments:
+* Systems should execute only those services strictly required for business operations and directory communication.
+* Disabling `RpcLocator` permanently closes legacy named pipes and deallocates legacy RPC stub libraries, reducing the memory and execution footprint of the endpoint.
+
+### 3. MITRE ATT&CK Mapping
+* **T1210 - Exploitation of Remote Services**: Exploiting vulnerabilities in legacy RPC interface parsers and handlers.
+* **T1021.002 - Remote Services: SMB/Windows Admin Shares**: Querying or manipulating legacy named pipe bindings.
+* **T1046 - Network Service Discovery**: Adversaries probing RPC endpoints to fingerprint legacy operating system versions.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for standard Active Directory domain operations unless specific business functionality requires the service.
-* **Verification**: Administrators must verify that client operations do not rely on local Remote Procedure Call (RPC) Locator capabilities before domain-wide enforcement.
+* **Active Directory Operations**: Zero impact. Active Directory Domain Services, replication, Group Policy processing, Kerberos ticket acquisition, and Netlogon communicate via the dynamic RPC Endpoint Mapper (`RpcSs`) and do not use `RpcLocator`.
+* **Administrative Tooling**: Modern remote administration (PowerShell Remoting, WinRM, WMI, Windows Admin Center, RSAT) is completely unaffected.
+* **Legacy Custom Applications**: Only obsolete, proprietary client-server software developed in the late 1990s specifically for Windows NT 4.0 that utilized RpcNs* APIs could be impacted. Such legacy applications should be modernized or retired.
 
 ---
 

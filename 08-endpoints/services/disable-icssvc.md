@@ -1,30 +1,47 @@
-# [REQ-END-051] Disable Windows Mobile Hotspot Service Service (icssvc)
+# [REQ-END-051] Disable Windows Mobile Hotspot Service (icssvc)
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-051](../../07-paws/services/disable-icssvc.md); for Domain Controllers, refer to [REQ-DC-072](../../02-domain-controllers/services/disable-icssvc.md)).*
+* **Operating Systems**: Windows 10 (all supported editions), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\icssvc\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Windows Mobile Hotspot Service` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\icssvc`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Windows Mobile Hotspot Service (icssvc) service directly supports this:
+The Windows Mobile Hotspot Service (`icssvc`) manages software-based wireless access points (SoftAP) and connection tethering features, allowing an endpoint to share its Ethernet, Wi-Fi, or cellular connection with external wireless devices.
 
-1. Allows sharing Wi-Fi/Cellular network connections; exposes bridging hazards.
-2. By ensuring this service is disabled, we remove a potentially vulnerable network listener or local subsystem, decreasing both the remote and local exposure.
+### 1. Shadow Wireless Networks and Perimeter Access Evasion
+Enabling mobile hotspot capabilities on enterprise endpoints introduces critical physical and logical security risks:
+* **Rogue Wireless Access Points (SoftAP)**: When activated, `icssvc` creates a local software access point, broadcasting an unmanaged Wi-Fi SSID. This shadow wireless network operates outside the visibility of enterprise Wireless Intrusion Prevention Systems (WIPS), security event logs, and centralized firewall monitoring.
+* **Bypassing 802.1X Network Access Control (NAC)**: External, unmanaged devices (such as personal smartphones, unauthorized tablets, or adversary machines within radio range) can associate with the mobile hotspot. Because the host laptop is already authenticated to the corporate LAN via 802.1X/EAP, the host routes and NATs packets from rogue devices directly into the corporate intranet, bypassing perimeter access controls (MITRE ATT&CK T1200 - Hardware Additions).
+* **Physical Proximity Exploitation**: Adversaries operating in physical proximity to the facility can target mobile hotspots configured with weak pre-shared keys, compromise the wireless stream, and leverage the connected laptop as an internal network pivot (T1049 - System Network Connections Discovery).
+
+### 2. Least Functionality in Enterprise Environments
+In a hardened corporate fleet:
+* Workstations must function strictly as clients connected to managed corporate access points or wired switch ports.
+* Disabling `icssvc` ensures that workstations cannot broadcast unauthorized Wi-Fi beacons, bridge foreign devices onto corporate subnets, or act as rogue wireless gateways.
+
+### 3. MITRE ATT&CK Mapping
+* **T1200 - Hardware Additions**: Creating rogue wireless SoftAP access points to connect unvetted hardware into enterprise networks.
+* **T1049 - System Network Connections Discovery**: Identifying and abusing multi-homed network connections to bridge disparate subnets.
+* **T1557 - Adversary-in-the-Middle**: Capturing or relaying network communications across ad-hoc wireless connections.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for standard Active Directory domain operations unless specific business functionality requires the service.
-* **Verification**: Administrators must verify that client operations do not rely on local Windows Mobile Hotspot Service capabilities before domain-wide enforcement.
+* **Corporate Wi-Fi Client Connections**: Disabling `icssvc` does **not** impact an endpoint's ability to connect as a client to corporate Wi-Fi networks. Client wireless connectivity is managed by WLAN AutoConfig (`WlanSvc`), which operates independently.
+* **Mobile Hotspot Restriction**: The "Mobile hotspot" toggle in Windows Settings will be disabled. Users cannot share corporate internet connections with personal devices.
+* **Enterprise Operations**: Standard domain services, Group Policy processing, VPN connections, and line-of-business applications operate without interruption.
 
 ---
 

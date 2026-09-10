@@ -1,30 +1,47 @@
-# [REQ-END-041] Disable Microsoft FTP Service Service (FTPSVC)
+# [REQ-END-041] Disable Microsoft FTP Service (FTPSVC)
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-041](../../07-paws/services/disable-ftpsvc.md)).*
+* **Operating Systems**: Windows 10 (all supported editions), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\FTPSVC\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Microsoft FTP Service` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\FTPSVC`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Microsoft FTP Service (FTPSVC) service directly supports this:
+The Microsoft FTP Service (`FTPSVC`) is an IIS server component that provides File Transfer Protocol (FTP) hosting services over TCP port 21.
 
-1. FTP service; insecure cleartext file transport protocol that should never run on client hosts.
-2. By ensuring this service is disabled, we remove a potentially vulnerable network listener or local subsystem, decreasing both the remote and local exposure.
+### 1. Inherent Insecurity of Cleartext FTP and Remote Staging
+Operating an FTP server daemon on general client workstations or standard member servers introduces critical security risks:
+* **Cleartext Authentication and Sniffing**: Standard FTP transmits user authentication commands (`USER` and `PASS`) and file payloads entirely in cleartext. Any adversary positioned on the local network segment or routing transit path can sniff plaintext credentials, compromising domain user or administrative accounts (MITRE ATT&CK T1557 - Adversary-in-the-Middle).
+* **Malicious Ingress and Tool Staging**: Adversaries who gain access to an endpoint frequently enable or abuse local FTP services to establish unauthorized file drop locations for staging secondary exploit tools, lateral movement binaries, and post-exploitation scripts without passing through web proxies or email security filters (T1074 - Data Staged).
+* **Data Exfiltration Channel**: An unmonitored FTP listener provides adversaries and rogue insiders with an unencrypted conduit to aggregate and exfiltrate confidential enterprise data, circumventing data loss prevention (DLP) and deep packet inspection systems (T1048.003 - Exfiltration Over Unencrypted Non-C2 Protocol).
+
+### 2. Enterprise Demarcation and Least Functionality
+In enterprise Active Directory environments:
+* File transfers and sharing must be conducted via authenticated and cryptographically protected protocols, such as SMB 3.1.1 (with mutual authentication and AES-GCM encryption), HTTPS REST endpoints, or enterprise SFTP infrastructure.
+* Workstations and standard servers must never host unencrypted FTP server daemons. Disabling `FTPSVC` closes TCP port 21 and eliminates an unauthenticated file hosting listener.
+
+### 3. MITRE ATT&CK Mapping
+* **T1048.003 - Exfiltration Over Unencrypted Non-C2 Protocol**: Exfiltrating sensitive corporate files over unencrypted FTP channels.
+* **T1074 - Data Staged**: Establishing unauthorized local staging repositories for malicious binaries and collected data.
+* **T1557 - Adversary-in-the-Middle**: Capturing plaintext credentials during unencrypted FTP authentication sessions.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for standard Active Directory domain operations unless specific business functionality requires the service.
-* **Verification**: Administrators must verify that client operations do not rely on local Microsoft FTP Service capabilities before domain-wide enforcement.
+* **Outbound FTP Client Connections**: Disabling `FTPSVC` does **not** restrict outbound FTP client connections (e.g., using command-line `ftp.exe`, WinSCP, or FileZilla to connect to external servers).
+* **Enterprise File Shares**: Access to Active Directory SMB file shares (`\\domain\share`), Distributed File System (DFS) namespaces, SharePoint, and OneDrive operates without interruption.
+* **Secure File Transfer Standards**: Organizations with legitimate file transfer requirements must deploy dedicated SFTP (SSH File Transfer Protocol) or HTTPS appliances with central auditing rather than enabling unencrypted FTP on endpoints.
 
 ---
 

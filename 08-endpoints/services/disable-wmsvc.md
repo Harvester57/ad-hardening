@@ -1,30 +1,47 @@
-# [REQ-END-049] Disable Web Management Service Service (WMSvc)
+# [REQ-END-049] Disable Web Management Service (WMSvc)
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-049](../../07-paws/services/disable-wmsvc.md)).*
+* **Operating Systems**: Windows 10 (all supported editions), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\WMSvc\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Web Management Service` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\WMSvc`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Web Management Service (WMSvc) service directly supports this:
+The Web Management Service (`WMSvc`) facilitates remote web server administration for Internet Information Services (IIS), listening for incoming remote management connections over HTTPS TCP port 8172.
 
-1. IIS Web Management; unnecessary web console access daemon on endpoint systems.
-2. By ensuring this service is disabled, we remove a potentially vulnerable network listener or local subsystem, decreasing both the remote and local exposure.
+### 1. Inbound Management Port Exposure and Exploitation
+Operating a remote web management daemon on standard client endpoints introduces critical security exposures:
+* **Persistent Inbound Management Listener (TCP 8172)**: Enabling `WMSvc` binds an unmanaged HTTPS listening socket on TCP port 8172. Exposing administrative web listeners across client subnets inverts the endpoint security model, subjecting workstations to automated network discovery, password spraying, and brute-force credential stuffing (MITRE ATT&CK T1110 - Brute Force).
+* **Remote Management Handler Exploits**: Remote management requests are handled by IIS management modules. Flaws in request deserialization, TLS handshake handling, or authentication delegation in `WMSvc` expose endpoints to denial of service or remote code execution vulnerabilities (T1190 - Exploit Public-Facing Application).
+* **Principle of Least Functionality**: Workstations and standard member servers should never host IIS web servers or expose remote web administration services. Maintaining an active management daemon on client machines provides zero enterprise value while creating an unnecessary attack surface.
+
+### 2. Enterprise Demarcation and Least Privilege
+In enterprise Active Directory architectures:
+* Remote web administration must be confined to dedicated web servers located in secured DMZ or server segments, protected by network access control lists and multifactor authentication.
+* Disabling `WMSvc` ensures that workstations cannot inadvertently expose remote web administration endpoints to the local network segment.
+
+### 3. MITRE ATT&CK Mapping
+* **T1190 - Exploit Public-Facing Application**: Exploiting vulnerabilities in remote web management services.
+* **T1110 - Brute Force**: Automated credential spraying against exposed remote administrative web listeners.
+* **T1046 - Network Service Discovery**: Adversary network scanning to locate active remote administrative ports on internal hosts.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for standard Active Directory domain operations unless specific business functionality requires the service.
-* **Verification**: Administrators must verify that client operations do not rely on local Web Management Service capabilities before domain-wide enforcement.
+* **Client IIS Management Tools**: Disabling the local `WMSvc` server service does **not** prevent administrators from launching the IIS Manager console (`inetmgr.exe`) on the workstation to remotely manage authorized production web servers via outbound HTTPS.
+* **Modern Windows Administration**: Native enterprise remote administration tools (Windows Admin Center, WinRM, PowerShell Remoting, WMI) operate independently and function without interruption.
+* **Zero Inbound Port Footprint**: Guarantees TCP port 8172 remains closed across the entire enterprise endpoint fleet.
 
 ---
 

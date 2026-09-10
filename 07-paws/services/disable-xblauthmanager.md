@@ -1,7 +1,7 @@
-# [REQ-PAW-054] Disable Xbox Live Auth Manager Service for PAWs (XblAuthManager)
+# [REQ-PAW-054] Disable Xbox Live Auth Manager for PAWs (XblAuthManager)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 client workstations and member servers, refer to baseline [REQ-END-054](../../08-endpoints/services/disable-xblauthmanager.md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -9,22 +9,40 @@
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\XblAuthManager\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Xbox Live Auth Manager` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\XblAuthManager`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Xbox Live Auth Manager (XblAuthManager) service directly supports this on Privileged Access Workstations:
+The Xbox Live Auth Manager (`XblAuthManager`, hosted in `svchost.exe` via `XblAuthManager.dll`) provides programmatic token brokering and identity authentication services for consumer Microsoft Accounts (MSA) and the Xbox Live ecosystem.
 
-1. Xbox Live authentication; gaming components irrelevant to corporate environments.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Enforcement of Clean Source Principle and Tier 0 Identity Isolation
+Under Microsoft Privileged Access Workstation guidelines, administrative workstations used for Tier 0 Active Directory administration must adhere to absolute identity separation:
+* **Strict Tier 0 Identity Boundaries**: PAWs must authenticate exclusively against authoritative internal Active Directory Domain Controllers and dedicated Tier 0 administrative interfaces. Introducing consumer identity brokers allows consumer Microsoft Accounts (MSA) to be cached, authenticated, or brokered on administrative systems.
+* **Credential Contamination and Side-Channel Leakage**: Consumer authentication brokers interface with the Windows Web Account Manager (WAM) and cache authentication tokens in user profile vaults. Mixing consumer identity tokens with Tier 0 administrative credentials on the same workstation introduces cross-boundary contamination and violates the Clean Source Principle.
+
+### 2. Elimination of Unsanctioned Outbound Cloud Telemetry
+* An active `XblAuthManager` attempts outbound HTTPS connections to consumer Xbox Live authentication endpoints (`*.auth.xboxlive.com`).
+* PAW network perimeters enforce strict, deterministic egress rules allowing outbound traffic only to specific Tier 0 assets (Domain Controllers, internal PKI, administrative jump hosts). Outbound connections to consumer cloud endpoints represent unauthorized egress and complicate network anomaly auditing.
+
+### 3. Absolute Least Functionality on Tier 0 Assets
+* Privileged administrative tasks (Active Directory management, DNS configuration, PKI administration) have zero requirement for consumer gaming identity services.
+* Disabling the service ensures that unnecessary authentication brokers remain completely inert, reducing the surface area for local token harvesting and privilege escalation.
+
+### 4. MITRE ATT&CK Mapping
+* **T1078 - Valid Accounts**: Preventing unauthorized consumer identity token caching and credential confusion on Tier 0 administrative systems.
+* **T1071.001 - Application Layer Protocol: Web Protocols**: Preventing unauthorized outbound web connections from administrative workstations to consumer cloud services.
+* **T1556 - Modify Authentication Process**: Enforcing strictly vetted, local Kerberos and smart card authentication pipelines.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Administrative Operations**: Disabling `XblAuthManager` is completely transparent to all Tier 0 management tasks, including RSAT, PowerShell Remoting, Active Directory Administrative Center, GPMC, and administrative smart card authentication.
+* **Compatibility Exception**: There are zero legitimate enterprise or administrative dependencies on Xbox Live authentication services on Privileged Access Workstations.
 
 ---
 

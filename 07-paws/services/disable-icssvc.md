@@ -1,30 +1,47 @@
-# [REQ-PAW-051] Disable Windows Mobile Hotspot Service Service for PAWs (icssvc)
+# [REQ-PAW-051] Disable Windows Mobile Hotspot Service for PAWs (icssvc)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For standard client workstations and member servers, refer to baseline [REQ-END-051](../../08-endpoints/services/disable-icssvc.md); for Domain Controllers, refer to [REQ-DC-072](../../02-domain-controllers/services/disable-icssvc.md)).*
+* **Operating Systems**: Windows 10 Enterprise (all supported builds) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\icssvc\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Windows Mobile Hotspot Service` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\icssvc`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Windows Mobile Hotspot Service (icssvc) service directly supports this on Privileged Access Workstations:
+The Windows Mobile Hotspot Service (`icssvc`) manages software-based wireless access point (SoftAP) hosting and network tethering features.
 
-1. Allows sharing Wi-Fi/Cellular network connections; exposes bridging hazards.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Catastrophic Boundary Violations via Rogue Wireless Access Points on PAWs
+Privileged Access Workstations are dedicated to the administration of Tier 0 directory and identity systems:
+* **Direct Enclave Penetration**: Enabling `icssvc` on a PAW allows the creation of an ad-hoc Wi-Fi software access point. An adversary or unauthorized wireless device within radio range can associate with the hotspot, establishing an unmonitored wireless bridge directly into the Tier 0 administrative network and bypassing 802.1X access controls, physical security boundaries, and network segregation (MITRE ATT&CK T1200 - Hardware Additions).
+* **Adversary Traffic Sniffing and Lateral Movement**: Running an unauthorized Wi-Fi access point on a PAW exposes administrative network packets to wireless interception, man-in-the-middle attacks, and wireless de-authentication or handshake capture exploits.
+
+### 2. PAW Clean Source and Radio Attack Surface Elimination
+Under the clean source principle and Microsoft PAW guidelines:
+* **Physical and Logical Boundary Integrity**: PAWs must be connected via dedicated, shielded wired Ethernet switch ports inside secure administrative enclaves. Over-the-air networking interfaces and software access points represent uncontrolled entry points into Tier 0 assets.
+* **Prohibition of SoftAP Capabilities**: PAWs must never act as wireless routers, repeaters, or connection sharing hubs.
+* **Driver Minimization**: Disabling `icssvc` shuts down the software access point stack and prevents Wi-Fi driver components from hosting wireless beacon frames, eliminating wireless exploit surface.
+
+### 3. MITRE ATT&CK Mapping
+* **T1200 - Hardware Additions**: Creating unauthorized wireless access points to bridge unauthenticated devices into Tier 0 networks.
+* **T1049 - System Network Connections Discovery**: Exploiting multi-homed wireless interfaces to bypass network isolation boundaries.
+* **T1557 - Adversary-in-the-Middle**: Intercepting or relaying administrative communications across ad-hoc wireless connections.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Tier 0 Administrative Management**: Disabling `icssvc` has zero impact on Active Directory administration, server management tools (RSAT), PowerShell remoting, or Hyper-V administration.
+* **Wireless Hotspot Disabled**: Mobile hotspot functionality is completely disabled. PAW administrators must not use administrative hardware for consumer device tethering.
+* **Wired Network Best Practice**: Aligns with enterprise PAW design requirements mandating dedicated, isolated wired network access for Tier 0 management tasks.
 
 ---
 

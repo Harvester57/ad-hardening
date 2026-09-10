@@ -1,30 +1,48 @@
 # [REQ-PAW-040] Disable LxssManager Service for PAWs (LxssManager)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For standard client workstations and member servers, refer to baseline [REQ-END-040](../../08-endpoints/services/disable-lxssmanager.md)).*
+* **Operating Systems**: Windows 10 Enterprise (all supported builds) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
-* **Priority**: Medium
+* **Priority**: High
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\LxssManager\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\LxssManager` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\LxssManager`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the LxssManager (LxssManager) service directly supports this on Privileged Access Workstations:
+The Windows Subsystem for Linux (WSL) service (`LxssManager`) manages the lifecycle, execution, and resource allocation of Linux distributions within Windows, utilizing syscall translation or lightweight Hyper-V micro-virtual machines.
 
-1. Windows Subsystem for Linux (WSL); disables hosting unvetted container instances / developer Linux kernels on sensitive systems.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Inherent Threat to Privileged Access Workstation Isolation
+Operating a Linux subsystem on a Tier 0 administrative workstation introduces unacceptable security vulnerabilities:
+* **Evasion of Application Control (WDAC & AppLocker)**: PAWs depend on strict application control policies (Windows Defender Application Control and AppLocker) to ensure that only cryptographically signed, vetted administrative binaries can execute. Linux ELF binaries running within WSL bypass standard Windows AppLocker PE-based execution rules. Adversaries or compromised accounts could spawn WSL to execute unmonitored ELF exploit payloads, memory dumpers, or reverse shells (MITRE ATT&CK T1202 - Indirect Command Execution, T1059.004 - Command and Scripting Interpreter: Unix Shell).
+* **Host Filesystem Access and Credential Exposure**: WSL automatically mounts the host Windows filesystem under `/mnt/c/`, granting Linux userland processes direct read/write access to host drives, administrative scripts, and local temporary directories. This cross-environment access creates a critical vector for exfiltrating sensitive Active Directory administrative data.
+* **Virtual Network Bridging**: WSL 2 introduces virtual Hyper-V network switches and virtual network adapters. This unmonitored networking layer creates opportunities for network evasion, unauthorized packet tunneling, and lateral movement from within the virtualized Linux environment.
+
+### 2. PAW Clean Source and Single-Purpose Architecture
+Under Microsoft's PAW security architecture:
+* **Single-Purpose Administrative Rigor**: PAWs are dedicated exclusively to directory and identity management (Domain Controllers, PKI, Tier 0 infrastructure). PAWs must never function as software engineering or development workstations.
+* **Kernel Attack Surface Reduction**: Permitting guest Linux kernels or complex container namespaces on a Tier 0 host unnecessarily inflates the kernel exploit surface.
+* **Disabling `LxssManager`**: Disabling this service ensures that WSL cannot be initialized or executed under any circumstances on administrative workstations, preserving the integrity of the clean source platform.
+
+### 3. MITRE ATT&CK Mapping
+* **T1202 - Indirect Command Execution**: Bypassing Windows host execution restrictions using WSL binaries.
+* **T1059.004 - Command and Scripting Interpreter: Unix Shell**: Executing malicious shell scripts outside Windows security monitoring.
+* **T1005 - Data from Local System**: Accessing Windows host drive mounts to extract sensitive administrative files.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Tier 0 Administrative Management**: Disabling `LxssManager` has zero impact on Active Directory administration, server management tools (RSAT), PowerShell remoting, or Hyper-V administration.
+* **Strict Prohibition on PAWs**: No exceptions should be granted for WSL on Tier 0 PAWs. Administrators requiring Linux administration capabilities must access dedicated, segregated Linux bastion hosts or administrative jump boxes rather than executing Linux userlands locally on Tier 0 hardware.
+* **Clean Source Perimeter**: Enforces strict execution containment on the administrative operating system.
 
 ---
 

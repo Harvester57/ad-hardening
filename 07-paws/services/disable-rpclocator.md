@@ -1,30 +1,47 @@
 # [REQ-PAW-043] Disable Remote Procedure Call (RPC) Locator Service for PAWs (RpcLocator)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For standard client workstations and member servers, refer to baseline [REQ-END-043](../../08-endpoints/services/disable-rpclocator.md)).*
+* **Operating Systems**: Windows 10 Enterprise (all supported builds) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\RpcLocator\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Remote Procedure Call (RPC) Locator` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\RpcLocator`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Remote Procedure Call (RPC) Locator (RpcLocator) service directly supports this on Privileged Access Workstations:
+The Remote Procedure Call (RPC) Locator service (`RpcLocator`) manages the legacy RPC name service database, historically used in pre-Windows 2000 architectures to locate RPC server interfaces.
 
-1. Legacy RPC name locator; obsolete and exposes legacy RPC APIs.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Legacy RPC Vulnerability Surface on Administrative Hosts
+Operating deprecated RPC subsystems on Tier 0 administrative workstations introduces unnecessary risks:
+* **Legacy Named Pipe Exposure**: When active, `RpcLocator` binds legacy RPC named pipe endpoints (such as `\pipe\locator`). These interfaces lack modern RPC authentication controls and packet integrity signing, providing potential avenues for local privilege escalation and unauthenticated inter-process manipulation.
+* **Deprecation and Lack of Maintenance**: Microsoft deprecated the RPC Locator service in Windows XP / Windows Server 2003, replacing it with the dynamic RPC Endpoint Mapper (`RpcSs`) and DNS/LDAP service records. Retaining deprecated service binaries in memory creates unneeded exploit surface.
+
+### 2. PAW Clean Source and Deprecated Subsystem Decommissioning
+Under the clean source principle and Microsoft PAW guidelines:
+* **Minimalist Software Architecture**: Privileged Access Workstations must run the absolute minimum set of operating system subsystems required for Tier 0 directory administration. Retaining non-functional legacy code from legacy Windows NT releases violates baseline minimization principles.
+* **Modern Directory Administration Standards**: Tier 0 administrative operations (Active Directory Users and Computers, Group Policy Management, Active Directory Administrative Center, PowerShell Remoting) rely exclusively on the modern RPC Endpoint Mapper (TCP port 135) with mandatory Kerberos mutual authentication. PAWs have zero reliance on legacy RPC name resolution.
+* **Driver and Endpoint Deallocation**: Disabling `RpcLocator` guarantees that no legacy RPC name service endpoints are registered on the system.
+
+### 3. MITRE ATT&CK Mapping
+* **T1210 - Exploitation of Remote Services**: Exploitation of legacy RPC interface parsers.
+* **T1021.002 - Remote Services: SMB/Windows Admin Shares**: Interaction with legacy named pipe interfaces.
+* **T1046 - Network Service Discovery**: Probing legacy RPC endpoints to map host vulnerabilities.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Tier 0 Administrative Management**: Disabling `RpcLocator` has zero impact on Active Directory administration, server management tools (RSAT), PowerShell remoting, or Hyper-V administration.
+* **Strict Modern Tooling Requirement**: PAWs are dedicated, freshly provisioned administrative platforms that run only modern, supported management utilities; legacy applications requiring Windows NT 4.0 RPC locator functions are strictly prohibited on PAWs.
+* **Clean Baseline Alignment**: Eliminates redundant legacy code paths from the administrative operating system.
 
 ---
 

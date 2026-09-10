@@ -1,30 +1,48 @@
 # [REQ-END-047] Disable SSDP Discovery Service (SSDPSRV)
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-047](../../07-paws/services/disable-ssdpsrv.md); for Domain Controllers, refer to [REQ-DC-060](../../02-domain-controllers/services/disable-ssdpsrv.md)).*
+* **Operating Systems**: Windows 10 (all supported editions), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\SSDPSRV\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\SSDP Discovery` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\SSDPSRV`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the SSDP Discovery (SSDPSRV) service directly supports this:
+The Simple Service Discovery Protocol (SSDP) Discovery service (`SSDPSRV`) listens on UDP port 1900 multicast (`239.255.255.250` for IPv4 and `[FF02::C]` / `[FF05::C]` for IPv6) to discover Universal Plug and Play (UPnP) networked devices such as consumer printers, residential gateways, smart displays, and media renderers.
 
-1. Simple Service Discovery Protocol; listens for broadcast UDP name query advertisements, vulnerable to reflect DDOS and name spoofing.
-2. By ensuring this service is disabled, we remove a potentially vulnerable network listener or local subsystem, decreasing both the remote and local exposure.
+### 1. Architectural Insecurity and Exploitation Vectors
+Operating an unauthenticated multicast discovery protocol on enterprise endpoints introduces several distinct attack vectors:
+* **Unauthenticated Multicast and Spoofing**: SSDP operates entirely without cryptographic authentication or message integrity validation. Any device on the local network segment can broadcast spoofed `NOTIFY` announcements advertising malicious network services, fake printers, or rogue gateways.
+* **Malicious Redirection and Credential Coercion**: When Windows receives an SSDP device announcement, it parses the packet's `LOCATION` header and initiates an outbound HTTP `GET` request to retrieve the device's XML description file. An adversary on the local subnet can broadcast crafted SSDP announcements directing endpoints to an attacker-controlled HTTP server. This enables attackers to map internal IP addresses, fingerprint host environments, execute Server-Side Request Forgery (SSRF), or attempt NTLM credential coercion and relay attacks.
+* **Reflection and Amplification Denial of Service**: SSDP `M-SEARCH` queries produce response packets with significant amplification factors (up to 30x). Attackers leverage unhardened SSDP listeners to participate in distributed reflection denial of service attacks across internal subnets.
+* **Parser Memory Corruption Vulnerabilities**: The SSDP service processes unvalidated XML documents and HTTP headers received over unencrypted network streams, historically exposing hosts to memory corruption and remote code execution vulnerabilities in system network components.
+
+### 2. Enterprise Baseline and Least Functionality
+Enterprise Active Directory environments manage network resources through centralized infrastructure:
+* Network printers, scanners, and file repositories are deployed via Group Policy, print servers, and authoritative enterprise DNS records, rendering UPnP device discovery redundant.
+* Disabling the SSDP Discovery service eliminates an unauthenticated UDP listener on port 1900, suppresses unnecessary multicast noise on corporate LANs, and blocks rogue device injection.
+
+### 3. MITRE ATT&CK Mapping
+* **T1018 - Remote System Discovery**: Adversaries leverage SSDP multicast queries to discover active endpoints, network appliances, and host configurations.
+* **T1557 - Adversary-in-the-Middle**: Spoofing SSDP `NOTIFY` announcements to redirect endpoint traffic or coerce outbound authentication.
+* **T1498.002 - Network Denial of Service: Reflection Amplification**: Exploiting UDP port 1900 SSDP listeners in reflection attacks.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for standard Active Directory domain operations unless specific business functionality requires the service.
-* **Verification**: Administrators must verify that client operations do not rely on local SSDP Discovery capabilities before domain-wide enforcement.
+* **Enterprise Printing & Scanning**: Corporate network printers managed via Windows Print Servers, direct IP printing (Standard TCP/IP Port), or modern Web Services on Devices (WSD) with Function Discovery operate normally without the SSDP service.
+* **Consumer Media Streaming**: Consumer DLNA media sharing, casting to consumer smart televisions, and UPnP home automation discovery will be disabled. These capabilities are inappropriate for enterprise endpoints.
+* **Remote Management**: Core enterprise remote administration protocols (WinRM, RPC/WMI, PowerShell Remoting, SSH) do not utilize SSDP and function without interruption.
 
 ---
 

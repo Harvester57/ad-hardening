@@ -1,30 +1,47 @@
 # [REQ-PAW-039] Disable Internet Connection Sharing (ICS) Service for PAWs (SharedAccess)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For standard client workstations and member servers, refer to baseline [REQ-END-039](../../08-endpoints/services/disable-sharedaccess.md); for Domain Controllers, refer to [REQ-DC-044](../../02-domain-controllers/services/disable-sharedaccess.md)).*
+* **Operating Systems**: Windows 10 Enterprise (all supported builds) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\SharedAccess\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Internet Connection Sharing (ICS)` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\SharedAccess`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Internet Connection Sharing (ICS) (SharedAccess) service directly supports this on Privileged Access Workstations:
+The Internet Connection Sharing service (`SharedAccess` / ICS) provides Network Address Translation (NAT), dynamic addressing (embedded DHCP server), and name resolution (DNS proxy) capabilities.
 
-1. Provides NAT, addressing, and name resolution; represents security bridging risk.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Severe Network Bridging and Boundary Breakdown on PAWs
+Activating ICS on a Privileged Access Workstation creates catastrophic security boundary breaches:
+* **Tier 0 Perimeter Destruction**: PAWs are dedicated endpoints reserved exclusively for Tier 0 directory and identity management. Enabling ICS allows the PAW to bridge a secondary network adapter (such as a tethered smartphone, cellular dongle, or wireless NIC) with the secured Tier 0 management subnet. This provides external, untrusted devices with unmonitored Layer 3 routing directly into the most sensitive directory assets (MITRE ATT&CK T1200 - Hardware Additions, T1090 - Proxy).
+* **Rogue Network Services Hazard**: The ICS embedded DHCP server binds to local interfaces and issues private IP leases while intercepting DNS requests. On an administrative subnet, unauthorized DHCP daemons disrupt domain controller communication and expose administrative sessions to Adversary-in-the-Middle (AiTM) manipulation (T1557.001).
+
+### 2. Clean Source Principle and Infrastructure Isolation
+Under Microsoft's Privileged Access Workstation architecture:
+* **Strict Single-Homing**: PAWs must be strictly single-homed into isolated management VLANs protected by 802.1X and strict access control lists (ACLs). Workstations must never execute network routing, NAT, or DHCP services.
+* **Credential Isolation**: Any mechanism that allows network transit across a PAW exposes the host to credential compromise. An adversary leveraging an ICS bridge could target the local LSASS process to harvest Tier 0 Domain Admin credentials.
+* **Disabling `SharedAccess`**: Disabling this service permanently removes the embedded NAT router, DHCP server, and DNS proxy from the operating system, guaranteeing network isolation.
+
+### 3. MITRE ATT&CK Mapping
+* **T1557.001 - Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning and Rogue DHCP**: Unauthorized DHCP services deployed to intercept administrative traffic.
+* **T1200 - Hardware Additions**: Bridging unauthorized peripheral network devices to bypass physical and network access controls.
+* **T1090 - Proxy**: Adversary routing of traffic across network enclaves via compromised multi-homed hosts.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Tier 0 Administrative Management**: Disabling ICS has zero impact on Active Directory administration, server management tools (RSAT), PowerShell remoting, or Hyper-V administration.
+* **Device Tethering Prohibition**: PAW policies strictly prohibit connecting unauthorized cellular devices or establishing ad-hoc network shares.
+* **Firewall Continuity**: The core Windows Defender Firewall operates independently under the `mpssvc` service and continues enforcing administrative boundary rules without interruption.
 
 ---
 

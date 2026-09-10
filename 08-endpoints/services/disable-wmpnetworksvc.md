@@ -1,30 +1,52 @@
-# [REQ-END-050] Disable Windows Media Player Network Sharing Service Service (WMPNetworkSvc)
+# [REQ-END-050] Disable Windows Media Player Network Sharing Service (WMPNetworkSvc)
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-050](../../07-paws/services/disable-wmpnetworksvc.md)).*
+* **Operating Systems**: Windows 10 (all supported editions), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\WMPNetworkSvc\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Windows Media Player Network Sharing Service` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\WMPNetworkSvc`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Windows Media Player Network Sharing Service (WMPNetworkSvc) service directly supports this:
+The Windows Media Player Network Sharing Service (`WMPNetworkSvc`, hosted by `wmpnetwk.exe` or `svchost.exe`) shares Windows Media Player multimedia libraries (audio, video, playlists) with other network media players and control devices over Universal Plug and Play (UPnP) and Digital Living Network Alliance (DLNA) protocols.
 
-1. Shares Windows Media Player libraries over network; unnecessary port listening.
-2. By ensuring this service is disabled, we remove a potentially vulnerable network listener or local subsystem, decreasing both the remote and local exposure.
+### 1. Unauthenticated Remote Media Streaming and Listening Sockets
+When active, `WMPNetworkSvc` binds to local network interfaces and exposes multiple unauthenticated listening sockets:
+* **HTTP and UPnP Eventing Listeners**: Listens on TCP port 2869 (UPnP eventing/HTTP) and TCP port 10243 (WMP media sharing HTTP listener) to serve media content and metadata via HTTP GET/POST requests.
+* **SSDP Multicast Announcements**: Sends and receives Simple Service Discovery Protocol (SSDP) datagrams over UDP port 1900 to announce media availability across the local broadcast domain.
+* **Passive Reconnaissance and Information Disclosure**: Any host on the local network segment can query the DLNA endpoints without authentication. This allows unauthorized actors to enumerate media file metadata, system hostnames, user profile paths, and directory names embedded in media index databases.
+
+### 2. Multimedia Parser Attack Surface and Remote Exploitation
+Handling media libraries involves parsing complex file formats and untrusted network XML descriptions:
+* **Complex Media Format Parsing**: The service indexes and streams formats such as MP3, WMA, WMV, and MP4. Complex multimedia container parsers have historically suffered from integer overflows, heap corruptions, and remote code execution vulnerabilities (e.g., CVE-2012-0003 / MS12-005).
+* **UPnP/SOAP XML Parsing**: The service processes untrusted XML and SOAP payloads sent by remote UPnP control points. Vulnerabilities in XML parsers can lead to denial-of-service, memory disclosure, or server-side request forgery (SSRF).
+
+### 3. Least Functionality in Enterprise Environments
+Enterprise client workstations and member servers have no legitimate operational need to function as DLNA media servers:
+* Operating multimedia streaming services violates the principle of least functionality (NIST SP 800-53 CM-7).
+* Disabling the service closes unnecessary inbound listening ports (TCP 2869, TCP 10243), suppresses SSDP multicast discovery traffic, and removes a persistent background process.
+
+### 4. MITRE ATT&CK Mapping
+* **T1046 - Network Service Discovery**: Adversaries scan for listening UPnP/DLNA ports (TCP 2869, 10243) or listen for SSDP announcements (UDP 1900) to identify active endpoints.
+* **T1210 - Exploitation of Remote Services**: Exploiting vulnerabilities in media streaming network daemons or XML parsers for remote code execution.
+* **T1082 - System Information Discovery**: Querying DLNA metadata endpoints to harvest host identifiers and user folder structures.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for standard Active Directory domain operations unless specific business functionality requires the service.
-* **Verification**: Administrators must verify that client operations do not rely on local Windows Media Player Network Sharing Service capabilities before domain-wide enforcement.
+* **Enterprise Operations**: Disabling `WMPNetworkSvc` is completely transparent to Active Directory domain operations, Kerberos authentication, SMB file shares, Group Policy processing, and enterprise collaboration applications.
+* **Local Media Playback**: Local playback of audio and video files using Windows Media Player, Movies & TV, or third-party enterprise media players is completely unaffected. Only network-based DLNA/UPnP streaming to remote devices is prevented.
+* **Network Media Renderers**: Consumer DLNA devices (such as smart TVs or game consoles on the local network) will not be able to discover or stream media libraries hosted on the Windows endpoint.
 
 ---
 

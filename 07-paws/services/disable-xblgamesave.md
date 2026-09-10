@@ -1,7 +1,7 @@
 # [REQ-PAW-055] Disable Xbox Live Game Save Service for PAWs (XblGameSave)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For Tier 2 client workstations and member servers, refer to baseline [REQ-END-055](../../08-endpoints/services/disable-xblgamesave.md)).*
 * **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
 
 ---
@@ -9,22 +9,39 @@
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\XblGameSave\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Xbox Live Game Save` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\XblGameSave`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Xbox Live Game Save (XblGameSave) service directly supports this on Privileged Access Workstations:
+The Xbox Live Game Save Service (`XblGameSave`, hosted in `svchost.exe` via `XblGameSave.dll`) performs background synchronization of game save containers and application state to Microsoft Xbox Live consumer cloud infrastructure.
 
-1. Xbox Live game save synchronization; gaming components irrelevant to corporate environments.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Enforcement of Clean Source Principle and Tier 0 Data Isolation
+Under Microsoft Privileged Access Workstation guidelines, administrative workstations used for Tier 0 Active Directory administration must enforce strict single-purpose operational boundaries:
+* **Zero Consumer Cloud Synchronization**: A Tier 0 PAW must never synchronize files or application data with consumer cloud storage platforms. Background synchronization daemons operating outside audited enterprise administrative logging introduce unauthorized egress paths.
+* **Prevention of Covert Data Exfiltration**: In the event of a targeted attack or insider threat, unmonitored cloud synchronization services could be exploited as covert exfiltration vectors or staging mechanisms to move sensitive directory configuration scripts and cryptographic material out of the Tier 0 perimeter.
+
+### 2. Elimination of Unsanctioned Background Processes and Egress Traffic
+* PAWs operate under deterministic firewall rules where all outbound connections are strictly restricted to internal Domain Controllers, enterprise PKI, and management jump hosts.
+* Background services attempting outbound connections to consumer cloud endpoints trigger continuous firewall denials, generate unnecessary network noise, and complicate operational monitoring.
+
+### 3. Absolute Least Functionality on Tier 0 Assets
+* Administration of Active Directory Domain Services, Group Policy, and Tier 0 identity infrastructure has zero dependency on game state synchronization.
+* Disabling `XblGameSave` permanently terminates the background synchronization threads, file watchers, and registry hooks associated with consumer gaming.
+
+### 4. MITRE ATT&CK Mapping
+* **T1567 - Exfiltration Over Web Service**: Preventing unauthorized file synchronization channels to external consumer cloud storage.
+* **T1071.001 - Application Layer Protocol: Web Protocols**: Enforcing strict outbound web traffic restrictions on administrative workstations.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Administrative Operations**: Disabling `XblGameSave` is completely transparent to all Tier 0 management tasks, including RSAT, PowerShell Remoting, Active Directory Administrative Center, GPMC, and administrative backup scripts.
+* **Compatibility Exception**: There are zero legitimate enterprise or administrative dependencies on Xbox Live game save services on Privileged Access Workstations.
 
 ---
 

@@ -1,30 +1,47 @@
 # [REQ-END-048] Disable UPnP Device Host Service (upnphost)
 
 ## Target Scope
-* **Applicable Systems**: Tier 2 client workstations and member servers.
-* **Operating Systems**: Windows 10 (and above) Enterprise/Professional, Windows Server 2016 (and above).
+* **Applicable Systems**: Tier 2 client workstations and member servers. *(For Tier 0 Privileged Access Workstations, refer to tightened baseline [REQ-PAW-048](../../07-paws/services/disable-upnphost.md); for Domain Controllers, refer to [REQ-DC-063](../../02-domain-controllers/services/disable-upnphost.md)).*
+* **Operating Systems**: Windows 10 (all supported editions), Windows 11 Enterprise/Pro, Windows Server 2016, 2019, 2022, and 2025.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\upnphost\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\UPnP Device Host` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\upnphost`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the UPnP Device Host (upnphost) service directly supports this:
+The UPnP Device Host service (`upnphost`) enables a Windows endpoint to announce, configure, and host dynamic Universal Plug and Play (UPnP) devices and control points. When software components or peripherals register with `upnphost`, the service publishes XML device descriptions and listens on local HTTP endpoints to process incoming UPnP SOAP control actions.
 
-1. Universal Plug and Play; allows local hosts to advertise and control UPnP devices, opening network exposure.
-2. By ensuring this service is disabled, we remove a potentially vulnerable network listener or local subsystem, decreasing both the remote and local exposure.
+### 1. Inherent Insecurity of UPnP Device Hosting
+The UPnP architecture was designed for zero-configuration residential networking and contains structural security flaws:
+* **Absence of Authentication**: Standard UPnP device control protocols lack authentication, integrity signing, or role-based access controls. Any network actor on the local subnet can issue SOAP requests to control published services, extract device configuration data, or trigger device actions.
+* **Firewall and Perimeter Bypassing (IGD Abuse)**: UPnP Internet Gateway Device (IGD) mechanisms enable local applications or malware running with standard user privileges to request automatic incoming port mappings on perimeter firewalls and routers. Attackers exploit UPnP to establish persistent inbound tunnels, bypass perimeter inspection, and expose internal services directly to external networks without administrative privileges or audit logging.
+* **Memory Corruption and Parser Vulnerabilities**: The `upnphost` service continuously processes XML device descriptions, SOAP payloads, and HTTP control requests from arbitrary network nodes. Historically, UPnP hosting components have been subject to buffer overflows and memory corruption vulnerabilities allowing remote code execution.
+
+### 2. Least Functionality in Enterprise Environments
+Enterprise environments require strict control over network services and listening ports:
+* Workstations and member servers must never function as UPnP device hosts or expose unauthenticated control interfaces to the local network.
+* Disabling the `upnphost` service eliminates listening HTTP endpoints, prevents rogue software from abusing UPnP port mapping, and reduces the endpoint's exposed attack surface.
+
+### 3. MITRE ATT&CK Mapping
+* **T1210 - Exploitation of Remote Services**: Exploitation of memory corruption and parser flaws in UPnP network listeners.
+* **T1562.004 - Impair Defenses: Disable or Modify System Firewall**: Abusing UPnP IGD to automatically create inbound firewall pinholes and bypass perimeter defenses.
+* **T1046 - Network Service Discovery**: Adversaries discover exposed UPnP services to enumerate local host capabilities.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for standard Active Directory domain operations unless specific business functionality requires the service.
-* **Verification**: Administrators must verify that client operations do not rely on local UPnP Device Host capabilities before domain-wide enforcement.
+* **Corporate Applications**: Standard Active Directory domain services, enterprise productivity suites, and line-of-business software do not rely on UPnP Device Host. Disabling this service is fully transparent.
+* **Consumer Media Devices**: Streaming media to UPnP/DLNA renderers (e.g., smart TVs, media players) is disabled. In enterprise environments, these capabilities should not be supported on managed workstations.
+* **Administrative Operations**: Remote management via WinRM, PowerShell Remoting, WMI, and Group Policy remains fully functional.
 
 ---
 

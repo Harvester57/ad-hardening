@@ -1,30 +1,48 @@
-# [REQ-PAW-041] Disable Microsoft FTP Service Service for PAWs (FTPSVC)
+# [REQ-PAW-041] Disable Microsoft FTP Service for PAWs (FTPSVC)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For standard client workstations and member servers, refer to baseline [REQ-END-041](../../08-endpoints/services/disable-ftpsvc.md)).*
+* **Operating Systems**: Windows 10 Enterprise (all supported builds) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\FTPSVC\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Microsoft FTP Service` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\FTPSVC`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Microsoft FTP Service (FTPSVC) service directly supports this on Privileged Access Workstations:
+The Microsoft FTP Service (`FTPSVC`) is an IIS server component that provides File Transfer Protocol (FTP) hosting services over TCP port 21.
 
-1. FTP service; insecure cleartext file transport protocol that should never run on client hosts.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Insecurity of Cleartext Protocols and Unauthenticated Ingress on PAWs
+Operating an FTP daemon on a Tier 0 Privileged Access Workstation represents an severe architectural security vulnerability:
+* **Cleartext Credential Exposure**: Standard FTP transmits credentials and session data across the network in plaintext. Any network actor on the administrative subnet could sniff credentials or inject traffic, compromising privileged administrative accounts (MITRE ATT&CK T1557 - Adversary-in-the-Middle).
+* **Malicious File Staging and Ingress**: Adversaries attempting to pivot into Tier 0 infrastructure target unhardened file hosting services to stage malicious payloads, DLL search order hijacking components, and memory dump utilities directly onto administrative machines (T1074 - Data Staged).
+* **Covert Exfiltration Conduit**: An active FTP listener provides a potential covert exfiltration path for sensitive directory data, including AD database snapshots (ntds.dit), Kerberos ticket caches, and cryptographic keys (T1048.003 - Exfiltration Over Unencrypted Non-C2 Protocol).
+
+### 2. PAW Clean Source and Strict Listening Socket Elimination
+Under Microsoft's PAW security model:
+* **Clean Source Integrity**: Administrative workstations must never run inbound server daemons that accept untrusted network files or process cleartext authentication exchanges.
+* **Unidirectional Administration**: All PAW interactions are outbound toward managed Tier 0 systems. Inbound file transfer listeners on a PAW completely violate network boundary separation.
+* **Socket Closure**: Disabling `FTPSVC` guarantees that TCP port 21 remains closed, ensuring that no unauthorized file ingress or cleartext transport mechanisms can be activated on the workstation.
+
+### 3. MITRE ATT&CK Mapping
+* **T1048.003 - Exfiltration Over Unencrypted Non-C2 Protocol**: Exfiltrating sensitive administrative artifacts via cleartext FTP.
+* **T1074 - Data Staged**: Staging offensive binaries and post-exploitation scripts on an administrative host.
+* **T1557 - Adversary-in-the-Middle**: Sniffing plaintext authentication credentials across local network segments.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Tier 0 Administrative Management**: Disabling `FTPSVC` has zero impact on Active Directory administration, server management tools (RSAT), PowerShell remoting, or Hyper-V administration.
+* **Administrative File Transfers**: Administrative scripts, tools, and updates should be deployed to PAWs through secure, cryptographically authenticated mechanisms (such as Group Policy Software Installation, Microsoft Endpoint Configuration Manager, or SMB 3.1.1 encrypted shares).
+* **Perimeter Hardening**: Eliminates legacy cleartext protocols from the Tier 0 management perimeter.
 
 ---
 

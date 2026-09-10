@@ -1,30 +1,48 @@
-# [REQ-PAW-045] Disable Simple TCP/IP Services Service for PAWs (simptcp)
+# [REQ-PAW-045] Disable Simple TCP/IP Services for PAWs (simptcp)
 
 ## Target Scope
-* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration.
-* **Operating Systems**: Windows 10 Enterprise (1607+) and Windows 11 Enterprise.
+* **Applicable Systems**: Privileged Access Workstations (PAWs) used for Tier 0 directory administration. *(For standard client workstations and member servers, refer to baseline [REQ-END-045](../../08-endpoints/services/disable-simptcp.md)).*
+* **Operating Systems**: Windows 10 Enterprise (all supported builds) and Windows 11 Enterprise.
 
 ---
 
 ## Implementation Details
 * **Priority**: Medium
 * **GPO Path / Registry Location**:
-  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services`
-  * **Registry Location**: `HKLM\SYSTEM\CurrentControlSet\Services\simptcp\Start`
+  * **GPO Path**: `Computer Configuration\Policies\Windows Settings\Security Settings\System Services\Simple TCP/IP Services` -> **Disabled**
+  * **Registry Path**: `HKLM\SYSTEM\CurrentControlSet\Services\simptcp`
+  * **Value Name**: `Start`
+  * **Value Type**: `REG_DWORD`
+  * **Value Data**: `4` (Disabled)
 
 ---
 
 ## Rationale
-To minimize the attack surface of standard client endpoints and member servers, all unnecessary system services must be disabled. Disabling the Simple TCP/IP Services (simptcp) service directly supports this on Privileged Access Workstations:
+The Simple TCP/IP Services (`simptcp`) implement a suite of legacy diagnostic protocols (Echo, Discard, Character Generator, Daytime, and Quote of the Day) operating across 10 distinct TCP and UDP network ports.
 
-1. Character Generator, Daytime, Discard, Echo, and Quote of the Day; legacy UDP/TCP test ports vulnerable to amplification DDoS.
-2. On highly critical Tier 0 PAW systems, any running background service represents potential exploit surface. Restricting local capabilities to the absolute bare minimum is a primary security requirement.
+### 1. Inbound Listening Sockets and Denial-of-Service Vulnerabilities on PAWs
+Operating legacy testing daemons on a dedicated administrative endpoint creates critical security liabilities:
+* **UDP Reflection and Amplification DDoS**: UDP-based protocols in `simptcp` (such as Chargen on port 19 and Echo on port 7) respond to unauthenticated datagrams with substantial data amplification. Attackers can forge packets from the PAW's IP address or weaponize the PAW's network stack to flood target systems or participate in internal denial-of-service floods (MITRE ATT&CK T1498.002 - Network Denial of Service: Reflection Amplification).
+* **Resource Starvation via Loop Conditions**: Faked packets bounced between Echo and Chargen ports can induce perpetual loop flooding, exhausting network bandwidth and kernel thread buffers on the PAW (T1499 - Endpoint Denial of Service).
+* **Unauthenticated Network Footprinting**: Active diagnostic listeners leak operating system state, host availability, and local clock readings without authentication or audit logging (T1046 - Network Service Discovery).
+
+### 2. PAW Clean Source and Strict Port Closure
+Under Microsoft's PAW security architecture:
+* **Zero Inbound Listening Ports**: Privileged Access Workstations must operate with zero unauthenticated inbound network listeners. Tier 0 administrative hosts initiate outbound management connections (WinRM, HTTPS, RPC) toward managed infrastructure and must never accept incoming diagnostic connections.
+* **Elimination of Obsolete Protocols**: Diagnostic protocols developed in the 1980s have no legitimate operational role on Tier 0 management assets.
+* **Socket and Memory Footprint Reduction**: Disabling `simptcp` permanently closes listening sockets on ports 7, 9, 13, 17, and 19 (both TCP and UDP), hardening the PAW network perimeter.
+
+### 3. MITRE ATT&CK Mapping
+* **T1498.002 - Network Denial of Service: Reflection Amplification**: Weaponizing UDP ports 7 and 19 in denial-of-service attacks.
+* **T1499 - Endpoint Denial of Service**: Inducing loop conditions that starve administrative system resources.
+* **T1046 - Network Service Discovery**: Probing legacy test ports to profile administrative assets.
 
 ---
 
 ## Legacy Impact & Compatibility
-* **Normal Operations**: Disabling this service is expected to be transparent for PAW administrative roles unless specific management software strictly relies on it.
-* **Engineering Exception**: In the case of services like LxssManager (WSL), disabling is the expected secure baseline to prevent running unvetted Linux container namespaces on administrative workstations.
+* **Tier 0 Administrative Management**: Disabling `simptcp` has zero impact on Active Directory administration, server management tools (RSAT), PowerShell remoting, or Hyper-V administration.
+* **Modern Diagnostic Tools**: Native network diagnostic commands (`Test-NetConnection`, `ping`) do not require Simple TCP/IP Services.
+* **Clean Baseline Alignment**: Eliminates unauthenticated legacy network listeners from the Tier 0 perimeter.
 
 ---
 
