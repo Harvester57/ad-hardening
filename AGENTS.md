@@ -124,11 +124,15 @@ oscap oval validate audit/scap/ad-hardening-oval.xml
 ```text
 py scripts/generate_summary.py
 ```
-4. **Compile Consolidated Guidebook**: Re-compile the single consolidated guidebook file `AD-Hardening-Guidebook.md`:
+4. **Regenerate Sitemap**: Rebuild `sitemap.xml` and `robots.txt` for the published GitBook site (`https://ad.harvester.fr`) directly from `SUMMARY.md`. This runs automatically after the HonKit build as part of `npm run gitbook:build`, and does not require manual maintenance when pages are added, renamed, or removed. To run it manually against an existing build output:
+```text
+npm run sitemap
+```
+5. **Compile Consolidated Guidebook**: Re-compile the single consolidated guidebook file `AD-Hardening-Guidebook.md`:
 ```text
 py scripts/compile_docs.py
 ```
-5. **Verify and Validate**: Run the unified pipeline check to verify markdown links, code blocks syntax, SUMMARY.md completeness, and compliance schema validity:
+6. **Verify and Validate**: Run the unified pipeline check to verify markdown links, code blocks syntax, SUMMARY.md completeness, and compliance schema validity:
 ```powershell
 .\Verify-ADHardeningDocs.ps1
 ```

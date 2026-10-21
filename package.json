@@ -9,8 +9,9 @@
     "verify": "powershell -File Verify-ADHardeningDocs.ps1 -ChangedOnly",
     "verify:all": "powershell -File Verify-ADHardeningDocs.ps1",
     "gitbook:summary": "python scripts/generate_summary.py",
-    "gitbook:build": "npm run gitbook:summary && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" honkit build",
+    "gitbook:build": "npm run gitbook:summary && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" honkit build && python scripts/generate_sitemap.py",
     "gitbook:serve": "npm run gitbook:summary && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" honkit serve",
+    "sitemap": "python scripts/generate_sitemap.py",
     "gitbook:stop": "powershell -Command \"Get-NetTCPConnection -LocalPort 4000,35729 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }; exit 0\"",
     "pdf:build": "python scripts/compile_docs.py && cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" node scripts/generate_pdf.js"
   },
