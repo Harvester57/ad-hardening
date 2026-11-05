@@ -57,10 +57,20 @@ def git_lastmod(repo_root, path):
     return lastmod if lastmod else None
 
 
+def html_output_path(page_path):
+    """Map a markdown source path to the HTML file HonKit generates for it.
+
+    HonKit renders a directory's README.md as index.html in that directory.
+    """
+    html_path = page_path[:-len(".md")] + ".html"
+    if html_path.replace("\\", "/").rsplit("/", 1)[-1] == "README.html":
+        html_path = html_path[: -len("README.html")] + "index.html"
+    return html_path
+
+
 def page_url(site_url, page_path):
     """Map a markdown source path to the generated HTML URL."""
-    html_path = page_path[:-len(".md")] + ".html"
-    return site_url.rstrip("/") + "/" + quote(html_path, safe="/")
+    return site_url.rstrip("/") + "/" + quote(html_output_path(page_path), safe="/")
 
 
 def generate_sitemap(pages, repo_root, site_url, build_dir):
@@ -71,7 +81,7 @@ def generate_sitemap(pages, repo_root, site_url, build_dir):
     for page_path in pages:
         loc = page_url(site_url, page_path)
 
-        html_path = os.path.join(build_dir, page_path[:-len(".md")] + ".html")
+        html_path = os.path.join(build_dir, html_output_path(page_path))
         if not os.path.exists(html_path):
             missing.append(page_path)
 
